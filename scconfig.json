@@ -1,0 +1,53 @@
+{
+  "env": "testnet",
+  "logo": "logo",
+  "main": "@page/main",
+  "assets": "@page/assets",
+  "moduleDir": "modules",
+  "modules": {
+    "@page/assets": {
+      "path": "assets"
+    },
+    "@page/wallet": {
+      "path": "wallet"
+    },
+    "@page/theme": {
+      "path": "theme"
+    },
+    "@page/const": {
+      "path": "const"
+    },
+    "@page/interface": {
+      "path": "interface"
+    },
+    "@page/dialogs": {
+      "path": "dialogs"
+    },
+    "@page/page": {
+      "path": "page"
+    },
+    "@page/editor": {
+      "path": "editor"
+    },
+    "@page/main": {
+      "path": "main"
+    },
+    "@page/utility": {
+      "path": "utility"
+    }
+  },
+  "routes": [
+    {
+      "url": "/edit",
+      "module": "@page/editor",
+      "default": true
+    }
+  ],
+  "dependencies": {
+  },
+  "networks": "*",
+  "wallets": [
+    "metamask"
+  ],
+  "copyright": "&#169; 2022 IJS Technologies. All rights reserved."
+}

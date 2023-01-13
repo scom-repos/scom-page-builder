@@ -1,0 +1,26 @@
+{
+    "name": "@scom/demo-dapp",
+    "version": "0.1.0",
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "dependencies": {
+        "@ijstech/components": "^0.1.36",
+        "@ijstech/eth-contract": "^0.1.13",
+        "@ijstech/eth-wallet": "^0.1.35"
+    },
+    "devDependencies": {
+        "@ijstech/cli": "^0.1.28",
+        "@ijstech/compiler": "^0.1.22"
+    },
+    "scripts": {
+        "build": "rm -rf dist && npx @ijstech/compiler",
+        "build:local": "npm run build && npm run cp:local-pageblock",
+        "build:dev": "rm -rf dist && npx @ijstech/compiler && npm run cp:pageblocksdev",
+        "cp:pageblocksdev": "cp -r modules/pageblocks dist/modules/pageblocks",
+        "cp:local-pageblock": "if [ -d pageblocks ] ; then cp -r pageblocks dist/modules/pageblocks ; fi",
+        "serve": "npx @ijstech/cli serve 8080",
+        "test": "npm run build && npm run serve",
+        "test:dev": "npm run build:dev && npm run serve"
+    }
+}
