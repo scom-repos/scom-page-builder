@@ -14,7 +14,7 @@ Theme.colors.primary.light = '#FF8533';
 Theme.colors.primary.dark = '#FF8533';
 Theme.colors.primary.contrastText = '#FFFFFF';
 Theme.colors.secondary.main = '#AAAAAA';
-// Theme.colors.secondary.light = '';
+// Theme.colors.secondary.light = '#5f6368';
 // Theme.colors.secondary.dark = '';
 // Theme.colors.secondary.contrastText = '';
 Theme.colors.success.main = '#77B24D';
@@ -35,7 +35,7 @@ Theme.colors.error.contrastText = '#FFFFFF';
 // Theme.colors.warning.contrastText = '';
 
 // Text
-Theme.text.primary = '#333333';
+Theme.text.primary = '#5f6368';
 // Theme.text.secondary = '';
 // Theme.text.third = '';
 // Theme.text.hint = '';

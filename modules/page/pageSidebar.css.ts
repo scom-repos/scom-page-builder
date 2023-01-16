@@ -29,6 +29,24 @@ Styles.cssRule('ide-sidebar', {
         '.pointer:hover': {
             background: Theme.action.hover
         },
+        '.insert-tabs': {
+            $nest: {
+                'i-tab:not(.disabled).active': {
+                    backgroundColor: 'transparent',
+                    color: Theme.colors.primary.main,
+                    borderBottomColor: Theme.colors.primary.main
+                },
+                '.tab-item': {
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    color: Theme.text.primary
+                },
+                'i-tab:not(.disabled):hover': {
+                    backgroundColor: Theme.action.hover,
+                    color: Theme.text.primary
+                }
+            }
+        }
         // '.block-image:hover::before': {
         //     content: '""',
         //     opacity: 0.04,

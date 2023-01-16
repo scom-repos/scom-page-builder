@@ -5,7 +5,8 @@ import {
     ControlElement,
     Styles,
     Control,
-    HStack
+    HStack,
+    VStack
 } from '@ijstech/components';
 import { PageSection } from './pageSection';
 import './pageRow.css';
@@ -17,7 +18,7 @@ import { IRowData, ISectionData, IRowSettings } from '@page/interface';
 declare global {
     namespace JSX {
         interface IntrinsicElements {
-            ['scpage-page-row']: PageRowElement;
+            ['ide-row']: PageRowElement;
         }
     }
 }
@@ -28,10 +29,11 @@ export interface PageRowElement extends ControlElement {
 
 const Theme = Styles.Theme.ThemeVars;
 
-@customElements('scpage-page-row')
+@customElements('ide-row')
 export class PageRow extends Module {
     private rowSettings: RowSettingsDialog;
     private pnlSections: HStack;
+    private actionsBar: VStack;
     private rowData: IRowData;
     private _readonly: boolean;
 
@@ -42,12 +44,6 @@ export class PageRow extends Module {
     init() {
         this._readonly = this.getAttribute('readonly', true, false);
         super.init();
-    }
-
-    onShow() {
-    }
-
-    onLoad() {
     }
 
     async setData(rowData: IRowData) {
@@ -77,21 +73,22 @@ export class PageRow extends Module {
             for (let i = 0; i < this.rowData.sections.length; i++) {
                 const colSettings = columnsSettings[i];
                 const sectionData = this.rowData.sections[i];
-                const pageSection = (<scpage-page-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></scpage-page-section>) as PageSection;
+                const pageSection = (<ide-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>) as PageSection;
                 this.pnlSections.append(pageSection);
                 await pageSection.setData(sectionData);
             }
         } else if (this.rowData.config.columns) {
             for (let i = 0; i < this.rowData.config.columns; i++) {
                 const colSettings = columnsSettings[i];
-                const pageSection = (<scpage-page-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></scpage-page-section>) as PageSection;
+                const pageSection = (<ide-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>) as PageSection;
                 this.pnlSections.append(pageSection);
             }
         }
+        this.actionsBar.refresh();
     }
 
     async getData() {
-        const sections = this.pnlSections.querySelectorAll('scpage-page-section');
+        const sections = this.pnlSections.querySelectorAll('ide-section');
         const sectionDataList: ISectionData[] = [];
         for (const section of sections) {
             const sectionData = (section as PageSection).data;
@@ -106,8 +103,6 @@ export class PageRow extends Module {
         this.rowSettings.setConfig(this.rowData.config);
         this.rowSettings.show();
     }
-
-    private onChangeColor() {}
 
     private onClone() {}
 
@@ -135,7 +130,7 @@ export class PageRow extends Module {
 
         const columnsSettings = config.columnsSettings || {};
         if(config.columns) {
-            const sections = this.pnlSections.querySelectorAll('scpage-page-section');
+            const sections = this.pnlSections.querySelectorAll('ide-section');
             if (sections) {
                 let pageSections = [];
                 for (let i = 0; i < config.columns; i++) {
@@ -147,13 +142,13 @@ export class PageRow extends Module {
                         pageSections.push(section);
                         continue;
                     };
-                    pageSections.push(<scpage-page-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></scpage-page-section>);
+                    pageSections.push(<ide-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>);
                 }
                 this.pnlSections.clearInnerHTML();
                 this.pnlSections.append(...pageSections);
             }
             else {
-                const sections = this.pnlSections.querySelectorAll('scpage-page-section');
+                const sections = this.pnlSections.querySelectorAll('ide-section');
                 const delNum = this.rowData.config.columns - config.columns;
                 let delCount = 0;
                 if (sections) {
@@ -168,7 +163,7 @@ export class PageRow extends Module {
                         }
                     }
                     if(delCount < delNum) {
-                        const sections2 = this.pnlSections.querySelectorAll('scpage-page-section');
+                        const sections2 = this.pnlSections.querySelectorAll('ide-section');
                         if(sections2) {
                             for (let i = 0; i < delNum - delCount; i++) {
                                 // sections2[sections2.length - 1].remove();
@@ -186,7 +181,7 @@ export class PageRow extends Module {
     }
 
     // async handleAddPageClick(after = false) {
-    //     const pageRow: PageRow = <scpage-page-row></scpage-page-row>;
+    //     const pageRow: PageRow = <ide-row></ide-row>;
     //     pageRow.setData({
     //         config: {
     //             width: '100%',
@@ -203,7 +198,7 @@ export class PageRow extends Module {
     // }
 
     async handleDeleteSectionClick(control: Control) {
-        if (document.querySelectorAll('scpage-page-section')?.length > 1) {
+        if (document.querySelectorAll('ide-section')?.length > 1) {
             this.remove();
             application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
         }
@@ -212,36 +207,24 @@ export class PageRow extends Module {
     async render() {
         return (
             <i-panel class={'page-row'}>
-                <i-panel class="section-wrapper">
-                    {/* <i-button
-                        id="btnAddBefore"
-                        class="btn-add"
-                        icon={{ name: 'plus', fill: Theme.colors.primary.contrastText }}
-                        caption="Add Row"
-                        onClick={() => this.handleAddPageClick()}></i-button> */}
-                    {/* <i-button
-                        id="btnAddAfter"
-                        class="btn-add"
-                        icon={{ name: 'plus', fill: Theme.colors.primary.contrastText }}
-                        caption="Add Row"
-                        onClick={() => this.handleAddPageClick(true)}></i-button> */}
-
-                    <i-panel id={'actionsBar'} class="row-actions-bar">
-                        <i-panel class="actions">
-                            <i-icon name="palette" onClick={this.onChangeColor}></i-icon>
+                <i-vstack id={'actionsBar'} class="row-actions-bar" verticalAlignment="center">
+                    <i-panel>
+                        <i-panel class="actions" tooltip={{content: 'Section section', placement: 'right'}}>
+                            <i-icon name="palette" onClick={this.onOpenRowSettingsDialog}></i-icon>
                         </i-panel>
-                        <i-panel class="actions">
+                        <i-panel class="actions" tooltip={{content: 'Duplicate section', placement: 'right'}}>
                             <i-icon name="clone" onClick={this.onClone}></i-icon>
                         </i-panel>
-                        <i-panel class="actions delete">
+                        <i-panel class="actions delete" tooltip={{content: 'Delete section', placement: 'right'}}>
                             <i-icon name="trash" onClick={this.handleDeleteSectionClick}></i-icon>
                         </i-panel>
                     </i-panel>
-                    <i-hstack id={'pnlSections'}></i-hstack>
-                    <scpage-row-settings-dialog
-                        id={'rowSettings'}
-                        onSave={this.handleSectionSettingSave}></scpage-row-settings-dialog>
-                </i-panel>
+                </i-vstack>
+                <i-hstack id={'pnlSections'}></i-hstack>
+                <scpage-row-settings-dialog
+                    id={'rowSettings'}
+                    onSave={this.handleSectionSettingSave}
+                ></scpage-row-settings-dialog>
             </i-panel>
         );
     }

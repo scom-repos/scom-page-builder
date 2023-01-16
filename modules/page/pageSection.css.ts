@@ -10,29 +10,27 @@ const spin = Styles.keyframes({
 
 Styles.cssRule('#editor ', {
     $nest: {
-        '.section-wrapper:hover .btn-add': {
-            display: 'block'
-        },
-        'scpage-page-section': {
+        'ide-section': {
             $nest: {
                 '&:hover': {
-                    borderColor: Theme.colors.warning.light
+                    borderColor: Theme.colors.warning.light,
+                    $nest: {
+                        '.actions-bar': {
+                            opacity: 1
+                        }
+                    }
                 },
-                '&.active': {
-                    border: `3px solid ${Theme.colors.primary.main}`
+                '.actions-bar': {
+                    opacity: 0
                 }
             }
-        },
-        'scpage-page-section.active .actions-bar': {
-            display: 'flex'
         }
     }
 })
 
 
-Styles.cssRule('scpage-page-section', {
+Styles.cssRule('ide-section', {
     display: 'block',
-    // border: '3px solid transparent',
     position: 'relative',
 
     $nest: {
@@ -54,20 +52,14 @@ Styles.cssRule('scpage-page-section', {
         '.section-toolbar': {
             visibility: 'hidden'
         },
-        // '&:hover': {
-        //     borderColor: Theme.colors.warning.light
-        // },
-        '&.active': {
-            // borderColor: Theme.colors.primary.main,
+        '&.active, &:focus': {
+            borderColor: Theme.colors.primary.main,
             $nest: {
-                // '&:hover': {
-                //     borderColor: Theme.colors.primary.main
-                // },
                 '.section-toolbar': {
                     visibility: 'initial'
                 },
                 'i-hstack.dragger': {
-                    borderRight: `2px dashed ${Theme.colors.secondary.main}`,
+                    // borderRight: `2px dashed ${Theme.colors.secondary.main}`,
                     $nest: {
                         'i-icon': {
                             display: 'block'

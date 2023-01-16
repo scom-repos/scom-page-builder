@@ -31,7 +31,7 @@ Styles.cssRule('body', {
                 '.page-content': {
                     minHeight: 'calc(100vh - 148px)', // 148px = height of the scpage-header
                 },
-                'scpage-page-row': {
+                'ide-row': {
                     height: '100% !important'
                 }
             }
@@ -42,6 +42,13 @@ Styles.cssRule('body', {
         },
         'i-upload': {
             marginTop: '0'
+        },
+        '.toolbar:hover': {
+            background: Theme.action.hover
+        },
+        '.toolbar': {
+            background: 'transparent',
+            boxShadow: 'none'
         }
     }
 });

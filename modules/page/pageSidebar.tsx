@@ -2,15 +2,16 @@ import {
     Module,
     customElements,
     ControlElement,
-    TreeView,
-    TreeNode,
     Styles,
     GridLayout,
     Control,
     Icon,
-    VStack
+    VStack,
+    application
 } from '@ijstech/components';
 import assets from '@page/assets';
+import { EVENT } from '@page/const';
+
 const Theme = Styles.Theme.ThemeVars;
 
 declare global {
@@ -27,7 +28,6 @@ export interface PageSidebarElement extends ControlElement {}
 
 @customElements('ide-sidebar')
 export class PageSidebar extends Module {
-    public tvMenu: TreeView;
     private blockStack: GridLayout;
     private componentsStack: VStack;
 
@@ -75,19 +75,12 @@ export class PageSidebar extends Module {
     private renderComponentsStack() {
         this._components = [
             {
-                name: 'Collapsible group'
+                name: 'Button',
+                onClick: () => this.onAddComponent('button')
             },
             {
-                name: 'Table of contents'
-            },
-            {
-                name: 'Image carousel'
-            },
-            {
-                name: 'Button'
-            },
-            {
-                name: 'Divider'
+                name: 'Divider',
+                onClick: () => this.onAddComponent('divider')
             }
         ]
         this.componentsStack.clearInnerHTML();
@@ -99,6 +92,7 @@ export class PageSidebar extends Module {
                     gap="1rem"
                     padding={{left: '1rem', right: '1rem'}}
                     class="pointer"
+                    onClick={() => component.onClick()}
                 >
                     <i-panel>
                         <i-icon name="circle" width={24} height={24}></i-icon>
@@ -120,6 +114,10 @@ export class PageSidebar extends Module {
         icon && (icon.name = this.blockStack.visible ? 'angle-up' : 'angle-down');
     }
 
+    private onAddComponent(name: string) {
+        application.EventBus.dispatch(EVENT.ON_ADD_COMPONENT, { name });
+    }
+
     render() {
         return (
             <i-panel class="navigator" height={'100%'} maxWidth="100%">
@@ -128,16 +126,25 @@ export class PageSidebar extends Module {
                 >
                     <i-tab
                         caption='Insert'
-                        font={{weight: '600', color: Theme.text.primary, size: '1rem'}}
                         background={{color: 'transparent'}}
                     >
                         <i-panel height="100%" overflow={{y: 'hidden'}}>
                             <i-grid-layout templateColumns={['repeat(2, 1fr)']} templateRows={['repeat(2, 5rem)']} margin={{top: 6}}>
-                                <i-vstack class="text-center pointer" verticalAlignment="center" horizontalAlignment='center' minWidth={88} gap="0.5rem">
+                                <i-vstack
+                                    class="text-center pointer"
+                                    verticalAlignment="center" horizontalAlignment='center'
+                                    minWidth={88} gap="0.5rem"
+                                    onClick={() => this.onAddComponent('textbox')}
+                                >
                                     <i-icon name="text-width" width={24} height={24}></i-icon>
                                     <i-label caption='Text box'></i-label>
                                 </i-vstack>
-                                <i-vstack class="text-center pointer" verticalAlignment="center" horizontalAlignment='center' minWidth={88} gap="0.5rem">
+                                <i-vstack
+                                    class="text-center pointer"
+                                    verticalAlignment="center" horizontalAlignment='center'
+                                    minWidth={88} gap="0.5rem"
+                                    onClick={() => this.onAddComponent('image')}
+                                >
                                     <i-icon name="image" width={24} height={24}></i-icon>
                                     <i-label caption='Image'></i-label>
                                 </i-vstack>
@@ -156,8 +163,7 @@ export class PageSidebar extends Module {
                                 <i-hstack
                                     horizontalAlignment="space-between"
                                     verticalAlignment="center"
-                                    padding={{left: '1rem'}}
-                                    margin={{top: 8, bottom: 8, left: 8, right: 0}}
+                                    padding={{top: 8, bottom: 8, left: '1.5rem', right: 0}}
                                     class="pointer"
                                     onClick={(source) => this.onToggleBlock(source)}
                                 >
@@ -179,7 +185,7 @@ export class PageSidebar extends Module {
                         </i-panel>
                     </i-tab>
                     <i-tab caption='Pages'>
-                        <i-panel>
+                        <i-panel padding={{left: '1rem', right: '1rem', top: '1rem'}}>
                             <i-label caption='Pages'></i-label>
                         </i-panel>
                     </i-tab>

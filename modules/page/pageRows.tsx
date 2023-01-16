@@ -1,10 +1,8 @@
 import {
     Module,
     customElements,
-    Panel,
     ControlElement,
     Styles,
-    application,
     VStack
 } from '@ijstech/components';
 import { SelectModuleDialog } from '@page/dialogs';
@@ -13,7 +11,6 @@ import { PageSection } from './pageSection';
 import { PageRow } from './pageRow';
 import { PageFooter } from './pageFooter';
 import { PagePaging } from './pagePaging';
-import './pageRows.css';
 
 declare global {
     namespace JSX {
@@ -52,7 +49,7 @@ export class PageRows extends Module {
     }
 
     async getRows(): Promise<IRowData[]> {
-        const rows = this.pnlRows.querySelectorAll('scpage-page-row');
+        const rows = this.pnlRows.querySelectorAll('ide-row');
         const rowDataList: IRowData[] = [];
         for (const row of rows) {
             const rowData = await (row as PageRow).getData();
@@ -79,7 +76,7 @@ export class PageRows extends Module {
             }]
         }
         for (const rowData of this.rows) {
-            const pageRow = (<scpage-page-row></scpage-page-row> as PageRow);
+            const pageRow = (<ide-row></ide-row> as PageRow);
             this.pnlRows.append(pageRow);
             await pageRow.setData(rowData);
         }

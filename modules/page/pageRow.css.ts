@@ -10,7 +10,7 @@ Styles.cssRule('#editor', {
             position: 'absolute',
             top: '50%',
             transform: 'translateY(-50%)',
-            left: '0',
+            left: '-3em',
             flexDirection: 'column',
             background: '#fff',
             width: '34px',
@@ -32,14 +32,12 @@ Styles.cssRule('#editor', {
                         }
                     }
                 },
-
-                '.actions-edit': {
-                    borderTop: `1px solid ${Theme.background.default}`,
-                    borderBottom: `1px solid ${Theme.background.default}`
+                '&:hover': {
+                    opacity: 1
                 }
             }
         },
-        'scpage-page-row:hover': {
+        'ide-row:hover': {
             $nest: {
                 '.row-actions-bar': {
                     opacity: 1,
@@ -51,11 +49,14 @@ Styles.cssRule('#editor', {
     }
 });
 
-Styles.cssRule('scpage-page-row', {
+Styles.cssRule('ide-row', {
     display: 'block',
     position: 'relative',
+    borderTop: `1px dashed ${Theme.divider}`,
+    borderBottom: `1px dashed ${Theme.divider}`,
+    background: '#fff',
     $nest: {
-        'scpage-page-section': {
+        'ide-section': {
             flexGrow: '1'
         },
         '.drag-overlay': {
