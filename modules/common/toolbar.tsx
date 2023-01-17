@@ -58,6 +58,7 @@ export class IDEToolbar extends Module {
         component.parent = this.contentStack;
         if (component instanceof Input)
             component.onFocus = this.showToolbars.bind(this);
+        component.onClick = this.showToolbars.bind(this);
         this.contentStack.appendChild(component);
     }
 
@@ -106,8 +107,10 @@ export class IDEToolbar extends Module {
     }
 
     showToolbars() {
-        this.toolsStack.visible = true;
-        this.contentStack.classList.add('active');
+        if (this.toolList.length) {
+            this.toolsStack.visible = true;
+            this.contentStack.classList.add('active');
+        }
     }
 
     hideToolbars() {
@@ -118,8 +121,16 @@ export class IDEToolbar extends Module {
     initEventListener() {
         document.addEventListener('click', async (e) => {
             e.stopPropagation();
-            const toolbar = (e.target as HTMLElement)?.closest('ide-toolbar');
-            if (!toolbar || toolbar && !toolbar.isEqualNode(this)) {
+            const currentToolbar = (e.target as HTMLElement)?.closest('ide-toolbar');
+            if (currentToolbar) {
+                const toolbars = document.querySelectorAll('ide-toolbar');
+                for (const toolbar of toolbars) {
+                    (toolbar as IDEToolbar).hideToolbars();
+                }
+                const parentSection = currentToolbar.closest('ide-section');
+                if (parentSection) parentSection.classList.remove('active');
+                (currentToolbar as IDEToolbar).showToolbars();
+            } else {
                 this.hideToolbars();
             }
         });
@@ -146,9 +157,9 @@ export class IDEToolbar extends Module {
                     </i-panel>
                     <i-panel
                         id="contentStack"
-                        minWidth={200}
+                        width="100%"
                         class="ide-component"
-                        onClick={() => this.showToolbars()}
+                        onClick={this.showToolbars.bind(this)}
                     ></i-panel>
                 </i-vstack>
             </i-panel>

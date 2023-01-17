@@ -40,7 +40,8 @@ export class PageSidebar extends Module {
         this.initEventBus();
     }
 
-    initEventBus() {}
+    initEventBus() {
+    }
 
     init() {
         super.init();

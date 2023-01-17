@@ -6,7 +6,7 @@ import {
     VStack
 } from '@ijstech/components';
 import { SelectModuleDialog } from '@page/dialogs';
-import { IRowData, IPageBlockData, IPageData } from '@page/interface';
+import { IRowData, IPageData } from '@page/interface';
 import { PageSection } from './pageSection';
 import { PageRow } from './pageRow';
 import { PageFooter } from './pageFooter';
@@ -121,4 +121,4 @@ export class PageRows extends Module {
     }
 }
 
-export { IPageBlockData, SelectModuleDialog, PageSection, PageFooter };
+export { SelectModuleDialog, PageSection, PageFooter };

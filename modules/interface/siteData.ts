@@ -1,5 +1,3 @@
-import { IPageBlockData } from './pageBlock';
-
 export type ISiteType = "secure-page" | "secure-book";
 
 export interface ISiteData {
@@ -22,10 +20,16 @@ export interface IRowData {
     sections: ISectionData[];
 }
 
+export interface IComponent {
+    type: string;
+    properties: any;
+}
+
 export interface ISectionData {
-    module: IPageBlockData | null;
-    data: any;
-    tag: any;
+    component: IComponent;
+    toolList?: any[];
+    data?: any;
+    tag?: any;
     visibleOn?: string;
     invisibleOn?: string;
     width?: string;

@@ -8,30 +8,10 @@ const spin = Styles.keyframes({
     }
 })
 
-Styles.cssRule('#editor ', {
-    $nest: {
-        'ide-section': {
-            $nest: {
-                '&:hover': {
-                    borderColor: Theme.colors.warning.light,
-                    $nest: {
-                        '.actions-bar': {
-                            opacity: 1
-                        }
-                    }
-                },
-                '.actions-bar': {
-                    opacity: 0
-                }
-            }
-        }
-    }
-})
-
-
 Styles.cssRule('ide-section', {
     display: 'block',
     position: 'relative',
+    border: '2px solid transparent',
 
     $nest: {
         '.drag-overlay': {
@@ -53,7 +33,8 @@ Styles.cssRule('ide-section', {
             visibility: 'hidden'
         },
         '&.active, &:focus': {
-            borderColor: Theme.colors.primary.main,
+            border: `2px solid ${Theme.colors.primary.main}`, // #4285f4
+            transition: 'border ease-in .2s',
             $nest: {
                 '.section-toolbar': {
                     visibility: 'initial'

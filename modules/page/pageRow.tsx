@@ -6,7 +6,9 @@ import {
     Styles,
     Control,
     HStack,
-    VStack
+    VStack,
+    Panel,
+    observable
 } from '@ijstech/components';
 import { PageSection } from './pageSection';
 import './pageRow.css';
@@ -34,8 +36,15 @@ export class PageRow extends Module {
     private rowSettings: RowSettingsDialog;
     private pnlSections: HStack;
     private actionsBar: VStack;
+    private btnSetting: Panel;
+    private btnClone: Panel;
+    private btnDelete: Panel;
+
     private rowData: IRowData;
     private _readonly: boolean;
+
+    @observable()
+    private _hasPermission: boolean = true;
 
     constructor(parent?: any) {
         super(parent);
@@ -73,6 +82,7 @@ export class PageRow extends Module {
             for (let i = 0; i < this.rowData.sections.length; i++) {
                 const colSettings = columnsSettings[i];
                 const sectionData = this.rowData.sections[i];
+                if (sectionData.component.type === 'Divider') this._hasPermission = false;
                 const pageSection = (<ide-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>) as PageSection;
                 this.pnlSections.append(pageSection);
                 await pageSection.setData(sectionData);
@@ -84,10 +94,15 @@ export class PageRow extends Module {
                 this.pnlSections.append(pageSection);
             }
         }
-        this.actionsBar.refresh();
+        this.actionsBar.top = '50%';
+        this.actionsBar.style.transform = 'translateY(-50%)';
     }
 
-    async getData() {
+    updateControl() {
+
+    }
+
+    getData() {
         const sections = this.pnlSections.querySelectorAll('ide-section');
         const sectionDataList: ISectionData[] = [];
         for (const section of sections) {
@@ -104,7 +119,19 @@ export class PageRow extends Module {
         this.rowSettings.show();
     }
 
-    private onClone() {}
+    private onClone() {
+        const data = this.getData();
+        if (!data) return;
+        const pageRow = (
+            <ide-row
+                border={{
+                    top: {width: '1px', style: 'dashed', color: Theme.divider}
+                }}
+            ></ide-row>
+        );
+        pageRow.setData(this.getData());
+        this.parentNode?.insertBefore(pageRow, this.nextSibling);
+    }
 
     async handleSectionSettingSave(config: IRowSettings) {
         if(config.width && config.width != this.rowData.config.width) {
@@ -136,7 +163,7 @@ export class PageRow extends Module {
                 for (let i = 0; i < config.columns; i++) {
                     const colSettings = columnsSettings[i];
                     const section = (sections[i] as PageSection);
-                    if (section && section.module) {
+                    if (section && section.component) {
                         section.maxWidth = colSettings?.width || '100%';
                         section.size = colSettings?.size || {};
                         pageSections.push(section);
@@ -156,7 +183,7 @@ export class PageRow extends Module {
                     // Clear empty section
                     for(let section of sections) {
                         if(delCount >= delNum) break;
-                        if (section && (section as PageSection).module) continue;
+                        if (section && (section as PageSection).component) continue;
                         else {
                             section.remove();
                             delCount++;
@@ -180,23 +207,6 @@ export class PageRow extends Module {
         application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS, null)
     }
 
-    // async handleAddPageClick(after = false) {
-    //     const pageRow: PageRow = <ide-row></ide-row>;
-    //     pageRow.setData({
-    //         config: {
-    //             width: '100%',
-    //             height: '100%',
-    //             columns: 1,
-    //         },
-    //         sections: []
-    //     });
-    //     if (after) {
-    //         this.parentNode?.insertBefore(pageRow, this.nextSibling);
-    //     } else {
-    //         this.parentNode?.insertBefore(pageRow, this);
-    //     }
-    // }
-
     async handleDeleteSectionClick(control: Control) {
         if (document.querySelectorAll('ide-section')?.length > 1) {
             this.remove();
@@ -209,14 +219,31 @@ export class PageRow extends Module {
             <i-panel class={'page-row'}>
                 <i-vstack id={'actionsBar'} class="row-actions-bar" verticalAlignment="center">
                     <i-panel>
-                        <i-panel class="actions" tooltip={{content: 'Section section', placement: 'right'}}>
-                            <i-icon name="palette" onClick={this.onOpenRowSettingsDialog}></i-icon>
+                        <i-panel
+                            id="btnSetting"
+                            class="actions"
+                            tooltip={{content: 'Section section', placement: 'right'}}
+                            visible={this._hasPermission}
+                            onClick={this.onOpenRowSettingsDialog}
+                        >
+                            <i-icon name="palette"></i-icon>
                         </i-panel>
-                        <i-panel class="actions" tooltip={{content: 'Duplicate section', placement: 'right'}}>
-                            <i-icon name="clone" onClick={this.onClone}></i-icon>
+                        <i-panel
+                            id="btnClone"
+                            class="actions"
+                            tooltip={{content: 'Duplicate section', placement: 'right'}}
+                            visible={this._hasPermission}
+                            onClick={this.onClone}
+                        >
+                            <i-icon name="clone"></i-icon>
                         </i-panel>
-                        <i-panel class="actions delete" tooltip={{content: 'Delete section', placement: 'right'}}>
-                            <i-icon name="trash" onClick={this.handleDeleteSectionClick}></i-icon>
+                        <i-panel
+                            id="btnDelete"
+                            class="actions delete"
+                            tooltip={{content: 'Delete section', placement: 'right'}}
+                            onClick={this.handleDeleteSectionClick}
+                        >
+                            <i-icon name="trash"></i-icon>
                         </i-panel>
                     </i-panel>
                 </i-vstack>

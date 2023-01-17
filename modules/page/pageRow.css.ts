@@ -6,6 +6,7 @@ Styles.cssRule('#editor', {
     $nest: {
         '.row-actions-bar': {
             opacity: 0,
+            visibility: 'hidden',
             zIndex: 1,
             position: 'absolute',
             top: '50%',
@@ -17,6 +18,7 @@ Styles.cssRule('#editor', {
             borderRadius: '20px',
             padding: 0,
             overflow: 'hidden',
+            transition: 'opacity .3s .3s cubic-bezier(0.4,0,0.2,1), visibility 0s .2s',
 
             $nest: {
                 '.actions': {
@@ -41,7 +43,8 @@ Styles.cssRule('#editor', {
             $nest: {
                 '.row-actions-bar': {
                     opacity: 1,
-                    transition: 'opacity .5s .5s cubic-bezier(0.4,0,0.2,1),visibility 0s .4s',
+                    visibility: 'visible',
+                    transition: 'opacity .3s .3s cubic-bezier(0.4,0,0.2,1), visibility 0s .2s',
                     boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)'
                 }
             }
@@ -52,8 +55,6 @@ Styles.cssRule('#editor', {
 Styles.cssRule('ide-row', {
     display: 'block',
     position: 'relative',
-    borderTop: `1px dashed ${Theme.divider}`,
-    borderBottom: `1px dashed ${Theme.divider}`,
     background: '#fff',
     $nest: {
         'ide-section': {
