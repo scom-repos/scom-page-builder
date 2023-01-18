@@ -3,7 +3,7 @@ import {
     customElements,
     Control,
     Panel,
-    application,
+    Image,
     ControlElement,
     Styles,
     VStack,
@@ -130,6 +130,9 @@ export class PageSection extends Module {
                 break;
             case 'Divider':
                 control = await HStack.create(config.properties)
+                break;
+            case 'Image':
+                control = await Image.create(config.properties)
                 break;
         }
         return control;

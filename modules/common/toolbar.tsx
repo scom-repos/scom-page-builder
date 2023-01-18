@@ -9,7 +9,8 @@ import {
     Menu,
     Control,
     Button,
-    Input
+    Input,
+    GridLayout
 } from '@ijstech/components';
 import './toolbar.css';
 
@@ -34,9 +35,10 @@ export class IDEToolbar extends Module {
     private contentStack: Panel;
     private toolsStack: Panel;
     private toolbar: HStack;
+    private wrapperStack: Panel;
 
     get toolList() {
-        return this._toolList;
+        return this._toolList || [];
     }
     set toolList(value: any[]) {
         this._toolList = value;
@@ -106,19 +108,21 @@ export class IDEToolbar extends Module {
         }
     }
 
-    showToolbars() {
+    private showToolbars() {
         if (this.toolList.length) {
             this.toolsStack.visible = true;
             this.contentStack.classList.add('active');
+            this.classList.add('active');
         }
     }
 
-    hideToolbars() {
+    private hideToolbars() {
         this.toolsStack.visible = false;
         this.contentStack.classList.remove('active');
+        this.classList.remove('active');
     }
 
-    initEventListener() {
+    private initEventListener() {
         document.addEventListener('click', async (e) => {
             e.stopPropagation();
             const currentToolbar = (e.target as HTMLElement)?.closest('ide-toolbar');
@@ -136,32 +140,64 @@ export class IDEToolbar extends Module {
         });
     }
 
+    private renderResizeStack() {
+        // this.wrapperStack.appendChild();
+    }
+
     init() {
         super.init();
-        this.contentStack.resizer = true;
         this.initEventListener();
+        this.renderResizeStack();
     }
 
     render() {
         return (
-            <i-panel>
-                <i-vstack position="relative">
-                    <i-panel
-                        id="toolsStack"
-                        visible={false}
-                        border={{ radius: 4 }}
-                        background={{ color: '#fff' }}
-                        class="ide-toolbar"
+            <i-panel id="mainWrapper"  width="100%" maxHeight="100%">
+                <i-panel
+                    id="toolsStack"
+                    visible={false}
+                    border={{ radius: 4 }}
+                    background={{ color: '#fff' }}
+                    class="ide-toolbar"
+                >
+                    <i-hstack id="toolbar" gap="0.5rem"></i-hstack>
+                </i-panel>
+                <i-hstack id="wrapperStack" width="100%" height="auto">
+                    <i-vstack
+                        verticalAlignment="center"
+                        resizer={true} dock="left" top={0} zIndex={20}
+                        minWidth="8px" height="100%"
+                        class="left"
                     >
-                        <i-hstack id="toolbar" gap="0.5rem"></i-hstack>
-                    </i-panel>
+                        <i-icon
+                            name="circle"
+                            fill={Theme.colors.primary.main}
+                            height={16} width={16}
+                            margin={{left: '-7px'}}
+                            class="resize-icon left-resize"
+                        ></i-icon>
+                    </i-vstack>
                     <i-panel
                         id="contentStack"
-                        width="100%"
+                        width="100%" height="100%"
                         class="ide-component"
                         onClick={this.showToolbars.bind(this)}
                     ></i-panel>
-                </i-vstack>
+                    <i-vstack
+                        verticalAlignment="center"
+                        resizer={true} dock="right" top={0} zIndex={20}
+                        minWidth="8px" height="100%"
+                        class="right"
+                    >
+                        <i-icon
+                            name="circle"
+                            fill={Theme.colors.primary.main}
+                            height={16} width={16}
+                            margin={{right: '-7px'}}
+                            class="resize-icon right-resize"
+                        ></i-icon>
+                    </i-vstack>
+                </i-hstack>
             </i-panel>
         );
     }

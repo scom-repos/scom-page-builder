@@ -45,14 +45,13 @@ export class PageRows extends Module {
         super.init();
     }
 
-    initEventBus() {
-    }
+    initEventBus() {}
 
     async getRows(): Promise<IRowData[]> {
         const rows = this.pnlRows.querySelectorAll('ide-row');
         const rowDataList: IRowData[] = [];
         for (const row of rows) {
-            const rowData = await (row as PageRow).getData();
+            const rowData = (row as PageRow).getData();
             rowDataList.push(rowData);
         }
         return rowDataList;
@@ -80,6 +79,17 @@ export class PageRows extends Module {
             this.pnlRows.append(pageRow);
             await pageRow.setData(rowData);
         }
+    }
+
+    async appendRow(rowData: IRowData) {
+        if(!this.rows) this.rows = [];
+        const pageRow = (<ide-row></ide-row> as PageRow);
+        if (!this._readonly)
+            pageRow.border = {top: {width: '1px', style: 'dashed', color: Theme.divider}};
+        this.pnlRows.append(pageRow);
+        this.rows.push(rowData);
+        await pageRow.setData(rowData);
+        return pageRow;
     }
 
     clearRows() {
@@ -112,7 +122,7 @@ export class PageRows extends Module {
 
     async render() {
         return (
-            <i-panel height={'100%'}>
+            <i-panel>
                 <i-vstack id={'pnlRows'} class={'container'} alignItems={'center'}></i-vstack>
                 <scpage-page-paging id={"pagePaging"} visible={false}></scpage-page-paging>
                 <scpage-page-footer id={'pageFooter'} class={'boxed-style'} visible={false}></scpage-page-footer>

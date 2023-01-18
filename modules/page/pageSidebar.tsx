@@ -7,10 +7,13 @@ import {
     Control,
     Icon,
     VStack,
-    application
+    application,
+    Modal,
+    Upload
 } from '@ijstech/components';
 import assets from '@page/assets';
-import { EVENT } from '@page/const';
+import { EVENT, textStyles } from '@page/const';
+import { IRowData } from '@page/interface';
 
 const Theme = Styles.Theme.ThemeVars;
 
@@ -25,14 +28,19 @@ declare global {
 import './pageSidebar.css';
 
 export interface PageSidebarElement extends ControlElement {}
+interface IContentBlock {
+    image: string;
+    columns: number;
+}
 
 @customElements('ide-sidebar')
 export class PageSidebar extends Module {
     private blockStack: GridLayout;
     private componentsStack: VStack;
+    private mdUpload: Modal;
+    private uploader: Upload;
 
-
-    private _contentBlocks: any[] = [];
+    private _contentBlocks: IContentBlock[] = [];
     private _components: any[] = [];
 
     constructor(parent?: any) {
@@ -51,22 +59,56 @@ export class PageSidebar extends Module {
     private renderBlockStack() {
         this._contentBlocks = [
             {
-                image: 'img/blocks/block1.svg' 
+                image: 'img/blocks/block1.svg',
+                columns: 2
             },
             {
-                image: 'img/blocks/block2.svg' 
+                image: 'img/blocks/block2.svg',
+                columns: 2
             },
             {
-                image: 'img/blocks/block3.svg' 
+                image: 'img/blocks/block3.svg',
+                columns: 2
             },
             {
-                image: 'img/blocks/block4.svg' 
+                image: 'img/blocks/block4.svg',
+                columns: 3
             }
         ]
         this.blockStack.clearInnerHTML();
         this._contentBlocks.forEach(block => {
+            let config = { width: '100%', columns: block.columns };
+            let sectionData: any = {};
+            sectionData.toolList = [
+                textStyles,
+                {
+                    caption: `<i-icon name="bold" width=${20} height=${20} fill="${Theme.text.primary}"></i-icon>`,
+                    onClick: () => {}
+                },
+                {
+                    caption: `<i-icon name="italic" width=${20} height=${20} fill="${Theme.text.primary}"></i-icon>`,
+                    onClick: () => {}
+                },
+                {
+                    caption: `<i-icon name="trash" width=${20} height=${20} fill="${Theme.text.primary}"></i-icon>`,
+                    onClick: async() => {}
+                }
+            ];
+            sectionData.component = {
+                type: 'Input',
+                properties: {
+                    minHeight: '2.5rem',
+                    width: '100%',
+                    minWidth: 200
+                }
+            };
             this.blockStack.appendChild(
-                <i-vstack class="block-image pointer" verticalAlignment="center" horizontalAlignment="center">
+                <i-vstack
+                    class="block-image pointer"
+                    verticalAlignment="center"
+                    horizontalAlignment="center"
+                    onClick={() => this.onAddRow({ config, sections: [sectionData, sectionData] })}
+                >
                     <i-image width="auto" height="100%" url={assets.fullPath(block.image)}></i-image>
                 </i-vstack>
             )
@@ -115,8 +157,32 @@ export class PageSidebar extends Module {
         icon && (icon.name = this.blockStack.visible ? 'angle-up' : 'angle-down');
     }
 
+    private onAddRow(rowData: IRowData) {
+        application.EventBus.dispatch(EVENT.ON_ADD_ROW, rowData);
+    }
+
     private onAddComponent(name: string) {
-        application.EventBus.dispatch(EVENT.ON_ADD_COMPONENT, { name });
+        if (name === 'image') {
+            this.mdUpload.visible = true;
+        } else {
+            application.EventBus.dispatch(EVENT.ON_ADD_COMPONENT, { name });
+        }
+    }
+
+    private async onUploadImge() {
+        const fileList = this.uploader.fileList || [];
+        const file = fileList[0];
+        if (!file) {
+            this.mdUpload.visible = false;
+            return;
+        }
+        const imgStr = await this.uploader.toBase64(file);
+        application.EventBus.dispatch(EVENT.ON_ADD_COMPONENT, { name: 'image', config: { url: imgStr } });
+        this.mdUpload.visible = false;
+    }
+
+    private onShowModal() {
+        this.mdUpload.visible = true;
     }
 
     render() {
@@ -144,7 +210,7 @@ export class PageSidebar extends Module {
                                     class="text-center pointer"
                                     verticalAlignment="center" horizontalAlignment='center'
                                     minWidth={88} gap="0.5rem"
-                                    onClick={() => this.onAddComponent('image')}
+                                    onClick={() => this.onShowModal()}
                                 >
                                     <i-icon name="image" width={24} height={24}></i-icon>
                                     <i-label caption='Image'></i-label>
@@ -191,6 +257,34 @@ export class PageSidebar extends Module {
                         </i-panel>
                     </i-tab>
                 </i-tabs>
+                <i-modal
+                    id='mdUpload'
+                    title='Select Image'
+                    closeIcon={{ name: 'times' }}
+                    width={400}
+                    closeOnBackdropClick={false}
+                >
+                    <i-vstack padding={{top: '1rem'}} gap="1rem">
+                        <i-upload
+                            id='uploader'
+                            draggable
+                            caption='Drag and Drop image'
+                            class="custom-uploader"
+                        ></i-upload>
+                        <i-hstack horizontalAlignment="end">
+                            <i-button
+                                id="btnAddImage"
+                                icon={{ name: 'plus-circle', fill: 'rgba(0,0,0,.54)' }}
+                                font={{color: 'rgba(0,0,0,.54)'}}
+                                background={{color: Theme.colors.secondary.light}}
+                                padding={{top: 10, left: 6, right: 6, bottom: 10}}
+                                border={{radius: 2}}
+                                caption="Add Image"
+                                onClick={this.onUploadImge.bind(this)}
+                            ></i-button>
+                        </i-hstack>
+                    </i-vstack>
+                </i-modal>
             </i-panel>
         );
     }

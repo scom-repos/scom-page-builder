@@ -49,6 +49,9 @@ export interface IRowSettings {
     }[];
     backgroundColor?: string;
     backgroundImageUrl?: string;
+    isCloned?: boolean | true;
+    isChanged?: boolean | true;
+    isDeleted?: boolean | true;
 }
 
 type StyleValues = "-moz-initial" | "inherit" | "initial" | "revert" | "unset";
