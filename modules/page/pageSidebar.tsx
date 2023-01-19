@@ -124,6 +124,14 @@ export class PageSidebar extends Module {
             {
                 name: 'Divider',
                 onClick: () => this.onAddComponent('divider')
+            },
+            {
+                name: 'Table',
+                onClick: () => this.onAddComponent('table')
+            },
+            {
+                name: 'Carousel',
+                onClick: () => this.onAddComponent('carousel')
             }
         ]
         this.componentsStack.clearInnerHTML();
@@ -169,7 +177,7 @@ export class PageSidebar extends Module {
         }
     }
 
-    private async onUploadImge() {
+    private async onUploadImage() {
         const fileList = this.uploader.fileList || [];
         const file = fileList[0];
         if (!file) {
@@ -280,7 +288,8 @@ export class PageSidebar extends Module {
                                 padding={{top: 10, left: 6, right: 6, bottom: 10}}
                                 border={{radius: 2}}
                                 caption="Add Image"
-                                onClick={this.onUploadImge.bind(this)}
+                                class="btn-add"
+                                onClick={this.onUploadImage.bind(this)}
                             ></i-button>
                         </i-hstack>
                     </i-vstack>

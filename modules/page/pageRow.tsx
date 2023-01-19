@@ -7,8 +7,8 @@ import {
     Control,
     HStack,
     VStack,
-    Panel,
-    observable
+    observable,
+    Panel
 } from '@ijstech/components';
 import { PageSection } from './pageSection';
 import './pageRow.css';
@@ -36,6 +36,7 @@ export class PageRow extends Module {
     private rowSettings: RowSettingsDialog;
     private pnlSections: HStack;
     private actionsBar: VStack;
+    private dragStack: Panel;
 
     private rowData: IRowData;
     private _readonly: boolean;
@@ -94,8 +95,7 @@ export class PageRow extends Module {
                 this.pnlSections.append(pageSection);
             }
         }
-        this.actionsBar.top = '50%';
-        this.actionsBar.style.transform = 'translateY(-50%)';
+        this.actionsBar.minHeight = this.rowData?.config?.height || '100%';
     }
 
     getData() {
@@ -187,7 +187,6 @@ export class PageRow extends Module {
                         const sections2 = this.pnlSections.querySelectorAll('ide-section');
                         if(sections2) {
                             for (let i = 0; i < delNum - delCount; i++) {
-                                // sections2[sections2.length - 1].remove();
                                 if(sections2[sections2.length - 1])
                                     sections2[sections2.length - 1].remove();
                             }
@@ -201,16 +200,29 @@ export class PageRow extends Module {
         application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS, null)
     }
 
-    async handleDeleteSectionClick(control: Control) {
+    async onDeleteRow(control: Control) {
         this.remove();
         application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
+    }
+
+    updateControl() {
+        this.actionsBar.opacity = 0;
     }
 
     async render() {
         return (
             <i-panel class={'page-row'}  width="100%" height="100%">
-                <i-vstack id={'actionsBar'} class="row-actions-bar" verticalAlignment="center">
-                    <i-panel>
+                <i-vstack
+                    id={'actionsBar'}
+                    class="row-actions-bar"
+                    verticalAlignment="center"
+                >
+                    <i-panel
+                        background={{color: '#fff'}}
+                        border={{radius: '20px'}}
+                        maxWidth="100%"
+                        maxHeight="100%"
+                    >
                         <i-panel
                             id="btnSetting"
                             class="actions"
@@ -233,7 +245,7 @@ export class PageRow extends Module {
                             id="btnDelete"
                             class="actions delete"
                             tooltip={{content: 'Delete section', placement: 'right'}}
-                            onClick={this.handleDeleteSectionClick}
+                            onClick={this.onDeleteRow}
                         >
                             <i-icon name="trash"></i-icon>
                         </i-panel>
@@ -263,7 +275,19 @@ export class PageRow extends Module {
                         <i-icon name="circle" width={3} height={3}></i-icon>
                     </i-grid-layout>
                 </i-vstack>
-                <i-hstack id={'pnlSections'} width="100%" height="100%"></i-hstack>
+                <i-panel width="100%" height="100%">
+                    <i-panel
+                        position={'absolute'}
+                        top={0}
+                        bottom={0}
+                        left={0}
+                        right={0}
+                        width="100%" height="100%"
+                        background={{color: '#ddd'}}
+                        class={'drag-overlay'}
+                    ></i-panel>
+                    <i-hstack id={'pnlSections'} width="100%" height="100%"></i-hstack>
+                </i-panel>
                 <scpage-row-settings-dialog
                     id={'rowSettings'}
                     onSave={this.handleSectionSettingSave}

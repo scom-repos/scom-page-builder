@@ -7,17 +7,12 @@ Styles.cssRule('#editor', {
         '.row-actions-bar': {
             opacity: 0,
             visibility: 'hidden',
-            zIndex: 1,
+            zIndex: 10,
             position: 'absolute',
-            top: '50%',
-            transform: 'translateY(-50%)',
+            top: '0',
             left: '-3em',
-            flexDirection: 'column',
-            background: '#fff',
             width: '34px',
-            borderRadius: '20px',
             padding: 0,
-            overflow: 'hidden',
             transition: 'opacity .3s .3s cubic-bezier(0.4,0,0.2,1), visibility 0s .2s',
 
             $nest: {
@@ -35,17 +30,27 @@ Styles.cssRule('#editor', {
                     }
                 },
                 '&:hover': {
-                    opacity: 1
+                    opacity: '1 !important',
+                    visibility: 'initial',
+                    $nest: {
+                        '> i-panel': {
+                            boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)'
+                        }
+                    }
                 }
             }
         },
         'ide-row:hover': {
             $nest: {
                 '.row-actions-bar': {
-                    opacity: 1,
-                    visibility: 'visible',
+                    opacity: '1 !important',
+                    visibility: 'initial',
                     transition: 'opacity .3s .3s cubic-bezier(0.4,0,0.2,1), visibility 0s .2s',
-                    boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)'
+                    $nest: {
+                        '> i-panel': {
+                            boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)'
+                        }
+                    }
                 }
             }
         }
@@ -55,7 +60,6 @@ Styles.cssRule('#editor', {
 Styles.cssRule('ide-row', {
     display: 'block',
     position: 'relative',
-    background: '#fff',
     $nest: {
         'ide-section': {
             flexGrow: '1'
@@ -73,7 +77,10 @@ Styles.cssRule('ide-row', {
             }
         },
         '&.dragenter': {
-            borderTop: '3px solid #1976D2'
+            border: '2px solid #1976D2'
+        },
+        '&.dropzone': {
+            boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)'
         },
         '.drag-stack': {
             visibility: 'hidden',
@@ -89,15 +96,12 @@ Styles.cssRule('ide-row', {
                 }
             }
         },
-        '&:hover': {
+        '&:hover[draggable="true"]': {
             $nest: {
                 '.drag-stack': {
                     visibility: 'initial',
                     opacity: 0.48,
                     transition: 'opacity .3s .3s cubic-bezier(0.4,0,0.2,1),visibility 0s .2s'
-                },
-                'i-hstack.dragger': {
-                    borderRight: `2px dashed ${Theme.colors.secondary.main}`
                 }
             }
         },

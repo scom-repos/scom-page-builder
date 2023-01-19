@@ -149,6 +149,10 @@ export class PageSection extends Module {
         if (mainControl)
             this.currentComponent.appendItem(mainControl);
         this.pnlMain.appendChild(this.currentComponent);
+        if (value.height)
+            this.height = value.height;
+        if (value.width)
+            this.width = value.width;
     }
 
     async render() {
@@ -156,12 +160,13 @@ export class PageSection extends Module {
             <i-panel id={'pnlPageSection'} padding={{top: '1.5rem', bottom: '1.5rem'}}>
                 <i-panel id="pageSectionWrapper" width={'100%'} height="100%">
                     <i-panel
-                        id={'pnlOverlay'}
                         position={'absolute'}
                         top={0}
                         bottom={0}
                         left={0}
                         right={0}
+                        width="100%" height="100%"
+                        background={{color: '#ddd'}}
                         class={'drag-overlay'}
                     ></i-panel>
                     <i-panel id="pnlMain"></i-panel>
