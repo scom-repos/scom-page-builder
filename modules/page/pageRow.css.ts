@@ -53,6 +53,9 @@ Styles.cssRule('#editor', {
                     }
                 }
             }
+        },
+        '.hidden': {
+            display: 'none'
         }
     }
 });
@@ -60,27 +63,13 @@ Styles.cssRule('#editor', {
 Styles.cssRule('ide-row', {
     display: 'block',
     position: 'relative',
+    transition: 'translate .3s ease-in',
     $nest: {
         'ide-section': {
             flexGrow: '1'
         },
-        '.drag-overlay': {
-            zIndex: '-1',
-            display: 'none'
-        },
-        '&.dragging': {
-            $nest: {
-                '.drag-overlay': {
-                    zIndex: '9999',
-                    display: 'block'
-                }
-            }
-        },
         '&.dragenter': {
             border: '2px solid #1976D2'
-        },
-        '&.dropzone': {
-            boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)'
         },
         '.drag-stack': {
             visibility: 'hidden',
@@ -96,7 +85,7 @@ Styles.cssRule('ide-row', {
                 }
             }
         },
-        '&:hover[draggable="true"]': {
+        '&.dropzone:hover': {
             $nest: {
                 '.drag-stack': {
                     visibility: 'initial',

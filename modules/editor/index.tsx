@@ -71,7 +71,8 @@ export class Editor extends Module {
                     properties: {
                         minHeight: '2.5rem',
                         width: '100%',
-                        minWidth: 200
+                        minWidth: 200,
+                        placeholder: 'Click to edit text'
                     }
                 };
                 break;
@@ -247,6 +248,7 @@ export class Editor extends Module {
                             id="pageContent"
                             maxWidth={1400}
                             width="100%"
+                            overflow={{x: 'hidden', y: 'auto'}}
                             margin={{ left: 'auto', right: 'auto', bottom: '1rem' }}
                         >
                             <ide-rows
@@ -316,7 +318,7 @@ export class Editor extends Module {
                             </ide-rows>
                         </i-panel>
                     </i-panel>
-                    <i-panel class="main-sidebar" height="100%" overflow={{ y: 'hidden' }}>
+                    <i-panel class="main-sidebar" height="100%" overflow={{ y: 'auto' }}>
                         <ide-sidebar id={'pageSidebar'} width="100%"></ide-sidebar>
                     </i-panel>
                 </i-grid-layout>

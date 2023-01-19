@@ -7,8 +7,7 @@ import {
     Control,
     HStack,
     VStack,
-    observable,
-    Panel
+    observable
 } from '@ijstech/components';
 import { PageSection } from './pageSection';
 import './pageRow.css';
@@ -36,7 +35,7 @@ export class PageRow extends Module {
     private rowSettings: RowSettingsDialog;
     private pnlSections: HStack;
     private actionsBar: VStack;
-    private dragStack: Panel;
+    private dragStack: VStack;
 
     private rowData: IRowData;
     private _readonly: boolean;
@@ -116,17 +115,18 @@ export class PageRow extends Module {
     }
 
     private onClone() {
-        const data = this.getData();
-        if (!data) return;
-        const pageRow = (
-            <ide-row
-                border={{
-                    top: {width: '1px', style: 'dashed', color: Theme.divider}
-                }}
-            ></ide-row>
-        );
-        pageRow.setData(this.getData());
-        this.parentNode?.insertBefore(pageRow, this.nextSibling);
+        const rowData = this.getData();
+        if (!rowData) return;
+        // const pageRow = (
+        //     <ide-row
+        //         border={{
+        //             top: {width: '1px', style: 'dashed', color: Theme.divider}
+        //         }}
+        //     ></ide-row>
+        // );
+        // pageRow.setData(this.getData());
+        // this.parentNode?.insertBefore(pageRow, this.nextSibling);
+        application.EventBus.dispatch(EVENT.ON_CLONE, { rowData, id: this.id });
     }
 
     async handleSectionSettingSave(config: IRowSettings) {
@@ -205,8 +205,19 @@ export class PageRow extends Module {
         application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
     }
 
-    updateControl() {
-        this.actionsBar.opacity = 0;
+    onMove() {
+        this.actionsBar.classList.add('hidden');
+        this.dragStack.classList.add('hidden');
+        this.background = {color: '#f2f2f2'};
+        this.position = 'relative';
+        this.zIndex = '101';
+    }
+    onMoveDown() {
+        this.actionsBar.classList.remove('hidden');
+        this.dragStack.classList.remove('hidden');
+        this.background = {color: 'initial'};
+        this.position = 'initial';
+        this.zIndex = 'initial';
     }
 
     async render() {
@@ -276,16 +287,6 @@ export class PageRow extends Module {
                     </i-grid-layout>
                 </i-vstack>
                 <i-panel width="100%" height="100%">
-                    <i-panel
-                        position={'absolute'}
-                        top={0}
-                        bottom={0}
-                        left={0}
-                        right={0}
-                        width="100%" height="100%"
-                        background={{color: '#ddd'}}
-                        class={'drag-overlay'}
-                    ></i-panel>
                     <i-hstack id={'pnlSections'} width="100%" height="100%"></i-hstack>
                 </i-panel>
                 <scpage-row-settings-dialog
