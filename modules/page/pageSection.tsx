@@ -157,20 +157,20 @@ export class PageSection extends Module {
 
     async render() {
         return (
-            <i-panel id={'pnlPageSection'} padding={{top: '1.5rem', bottom: '1.5rem'}}>
-                <i-panel id="pageSectionWrapper" width={'100%'} height="100%">
-                    <i-panel
-                        position={'absolute'}
-                        top={0}
-                        bottom={0}
-                        left={0}
-                        right={0}
-                        width="100%" height="100%"
-                        background={{color: '#ddd'}}
-                        class={'drag-overlay'}
-                    ></i-panel>
+            <i-panel id={'pnlPageSection'}>
+                <i-panel id="pageSectionWrapper" width={'100%'} height="100%" padding={{top: '1.5rem', bottom: '1.5rem'}}>
                     <i-panel id="pnlMain"></i-panel>
                 </i-panel>
+                <i-panel
+                    position={'absolute'}
+                    top={0}
+                    bottom={0}
+                    left={0}
+                    right={0}
+                    width="100%" height="100%"
+                    background={{color: '#ddd'}}
+                    class={'drag-overlay'}
+                ></i-panel>
             </i-panel>
         );
     }

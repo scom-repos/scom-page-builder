@@ -3,7 +3,9 @@ import {
     customElements,
     ControlElement,
     Styles,
-    GridLayout
+    GridLayout,
+    Panel,
+    application
 } from '@ijstech/components';
 import { SelectModuleDialog } from '@page/dialogs';
 import { IRowData, IPageData } from '@page/interface';
@@ -12,6 +14,7 @@ import { PageRow } from './pageRow';
 import { PageFooter } from './pageFooter';
 import { PagePaging } from './pagePaging';
 import './pageRows.css';
+import { EVENT } from '@page/const';
 
 declare global {
     namespace JSX {
@@ -35,25 +38,29 @@ export class PageRows extends Module {
     private pagePaging: PagePaging;
     private pageFooter: PageFooter;
     private currentRow: PageRow;
+    private pnlRowOverlay: Panel;
 
+    private currentPosition: any;
     private _readonly: boolean;
     private _draggable: boolean;
 
     constructor(parent?: any) {
         super(parent);
-        this.dragStartHandler = this.dragStartHandler.bind(this);
-        this.dragEndHandler = this.dragEndHandler.bind(this);
+        this.mouseDownHandler = this.mouseDownHandler.bind(this);
+        this.mouseUpHandler = this.mouseUpHandler.bind(this);
+        this.onMoveHandler = this.onMoveHandler.bind(this);
+        this.initEventBus();
+    }
 
-        this.dragOverHandler = this.dragOverHandler.bind(this);
-        this.dragEnterHandler = this.dragEnterHandler.bind(this);
-        this.dragLeaveHandler = this.dragLeaveHandler.bind(this);
-        this.dropHandler = this.dropHandler.bind(this);
+    initEventBus() {
+        application.EventBus.register(this, EVENT.ON_CLONE, this.onClone);
     }
 
     init() {
         this._readonly = this.getAttribute('readonly', true, false);
         super.init();
         this.draggable = this.getAttribute('draggable', true, false);
+        window.addEventListener('mouseup', this.mouseUpHandler, false);
     }
 
     get draggable(): boolean {
@@ -62,82 +69,64 @@ export class PageRows extends Module {
     set draggable(value: boolean) {
         if (this._draggable === value) return;
         this._draggable = value;
-        // if (this.draggable) {
-        //     this.pnlRows.ondragover = this.dragOverHandler;
-        //     this.pnlRows.ondrop = this.dropHandler;
-        //   } else {
-        //     this.pnlRows.ondragover = null;
-        //     this.pnlRows.ondrop = null;
-        //   }
-        // this.handleDrag();
+        this.handleDrag();
     }
 
-    // private handleDrag() {
-    //     const rows = Array.from(this.pnlRows.querySelectorAll('ide-row'));
-    //     if (!rows?.length) return;
-    //     rows.forEach((row: PageRow, rowid: number) => {
-    //         row.id = `row-${rowid}`;
-    //         this.initDragEvent(row);
-    //     });
-    // }
-
-    private dragStartHandler(event: DragEvent) {
-        const target = event.target as any;
-        const pageRow = target.closest('ide-row');
-        if (!pageRow) return;
-        this.currentRow = pageRow;
-        pageRow.updateControl();
-        pageRow.classList.add('dragging');
-        const rows = this.pnlRows.querySelectorAll('ide-row');
-        rows.forEach(row => {
-            if (!row.isEqualNode(pageRow))
-                row.classList.add('dropzone');
-        })
+    private handleDrag() {
+        const rows = Array.from(this.pnlRows.querySelectorAll('ide-row'));
+        if (!rows?.length) return;
+        rows.forEach((row: PageRow, rowid: number) => {
+            row.id = `row-${rowid}`;
+            this.initDragEvent(row);
+        });
     }
 
-    private dragEndHandler(event: DragEvent) {
-        const pageRow = (event.target as any).closest('ide-row');
-        pageRow.classList.remove("dragging");
-        const rows = this.pnlRows.querySelectorAll('ide-row');
-        rows.forEach(row => {
-            row.classList.remove("dropzone", "dragenter");
-        })
-    }
-
-    private dragEnterHandler(event: DragEvent) {
+    private mouseDownHandler(event: MouseEvent) {
         const target = event.target as HTMLElement;
-        const pageRow = target.closest('ide-row');
-        if (!pageRow.isEqualNode(this.currentRow))
-            pageRow.classList.add("dragenter");
+        const currentDragEl = target instanceof PageRow ? target : target.closest('ide-row') as PageRow;
+        if (currentDragEl) {
+            this.currentRow = currentDragEl;
+            const data = this.currentRow.getBoundingClientRect();
+            this.currentPosition = data;
+            this.pnlRowOverlay.width = this.currentPosition.width;
+            this.pnlRowOverlay.height = this.currentPosition.height;
+            this.pnlRowOverlay.style.zIndex = '100';
+            this.pnlRowOverlay.style.left = this.currentPosition.left;
+            this.pnlRowOverlay.style.top = this.currentPosition.top;
+        }
+        window.addEventListener('mousemove', this.onMoveHandler, true);
+        this.click();
     }
 
-    private dragLeaveHandler(event: DragEvent) {
-        const target = event.target as HTMLElement;
-        const pageRow = target.closest('ide-row');
-        pageRow.classList.remove("dragenter");
-    }
-
-    private dragOverHandler(event: DragEvent) {
-        event.preventDefault();
-    }
-
-    private dropHandler(event: DragEvent) {
-        event.preventDefault();
-        if (!this.currentRow) return;
+    private mouseUpHandler(event: MouseEvent) {
+        window.removeEventListener('mousemove', this.onMoveHandler, true);
         const target = event.target as HTMLElement;
         const dropElm = target instanceof PageRow ? target : target.closest('ide-row') as PageRow;
+        if (!dropElm || !dropElm.classList.contains('dropzone')) {
+            event.preventDefault();
+            this.pnlRowOverlay.visible = false;
+            this.pnlRowOverlay.zIndex = '-1';
+            return;
+        }
         dropElm.classList.remove("dragenter");
+        if (!this.currentRow) {
+            event.preventDefault();
+            this.pnlRowOverlay.visible = false;
+            this.pnlRowOverlay.zIndex = '-1';
+            return;
+        }
+        this.resetCurrentRow();
         if (dropElm && !this.currentRow.isSameNode(dropElm)) {
             let dragIndex = 0;
             let dropIndex = 0;
             const rows = this.pnlRows.querySelectorAll('ide-row');
             for (let i = 0; i < rows.length; i++) {
-            if (this.currentRow.isEqualNode(rows[i])) { dragIndex = i; }
-            if (dropElm.isEqualNode(rows[i])) { dropIndex = i; }
+                if (this.currentRow.isEqualNode(rows[i])) { dragIndex = i; }
+                if (dropElm.isEqualNode(rows[i])) { dropIndex = i; }
             }
             const [dragRowData] = this.rows.splice(dragIndex, 1);
             this.rows.splice(dropIndex, 0, dragRowData);
-
+            
             if (dragIndex < dropIndex) {
                 this.pnlRows.insertBefore(this.currentRow, dropElm.nextSibling);
             } else {
@@ -145,6 +134,39 @@ export class PageRows extends Module {
             }
         }
         this.currentRow = null;
+        this.currentPosition = null;
+    }
+
+    private resetCurrentRow() {
+        this.currentRow.style.transform = 'none';
+        this.currentRow.classList.remove('dragging');
+        this.currentRow.onMoveDown();
+        this.pnlRowOverlay.visible = false;
+        this.pnlRowOverlay.zIndex = '-1';
+    }
+
+    private updateCurrentRow(x: number, y: number) {
+        this.currentRow.classList.add('dragging');
+        this.currentRow.style.transform = `translate(${x}px, ${y}px)`;
+        this.currentRow.style.width = this.currentPosition.width;
+        this.currentRow.style.height = this.currentPosition.height;
+        this.currentRow.onMove();
+    }
+
+    private onMoveHandler(event: MouseEvent) {
+        let x = event.clientX;
+        let y = event.clientY;
+        const target = event.target as HTMLElement;
+        const dropZone = target instanceof PageRow ? target : target.closest('ide-row') as PageRow;
+        const rows = this.pnlRows.querySelectorAll('ide-row');
+        rows.forEach(row => {
+            row.classList.remove("dragenter");
+        })
+        if (dropZone && !dropZone.isEqualNode(this.currentRow) && dropZone.classList.contains('dropzone'))
+            dropZone.classList.add('dragenter')
+        this.pnlRowOverlay.visible = true;
+        this.pnlRowOverlay.zIndex = '100';
+        this.updateCurrentRow(x - this.currentPosition.x, y - this.currentPosition.y);
     }
 
     async getRows(): Promise<IRowData[]> {
@@ -192,24 +214,13 @@ export class PageRows extends Module {
     }
 
     private initDragEvent(row: PageRow) {
+        const dragStack = row.querySelector('#dragStack');
+        if (!dragStack) return;
         if (this.draggable) {
-            row.ondragstart = this.dragStartHandler;
-            row.ondragend = this.dragEndHandler;
-
-            row.ondragover = this.dragOverHandler;
-            row.ondrop = this.dropHandler;
-            row.ondragenter = this.dragEnterHandler;
-            row.ondragleave = this.dragLeaveHandler;
-            row.setAttribute('draggable', 'true');
+            row.classList.add('dropzone');
+            dragStack.addEventListener('mousedown', this.mouseDownHandler, false);
         } else {
-            row.ondragstart = null;
-            row.ondragend = null;
-
-            row.ondragover = null;
-            row.ondrop = null;
-            row.ondragenter = null;
-            row.ondragleave = null;
-            row.setAttribute('draggable', 'false');
+            dragStack.removeEventListener('mousedown', this.mouseDownHandler, false);
         }
     }
 
@@ -224,6 +235,14 @@ export class PageRows extends Module {
         this.initDragEvent(pageRow);
         await pageRow.setData(rowData);
         return pageRow;
+    }
+
+    async onClone(data: { rowData: IRowData, id: string }) {
+        const { rowData, id } = data;
+        const row = this.pnlRows.querySelector(`#${id}`)
+        if (!row) return;
+        let newRow = await this.appendRow(rowData)
+        this.pnlRows.insertBefore(row, newRow);
     }
 
     clearRows() {
@@ -254,10 +273,27 @@ export class PageRows extends Module {
         this.pagePaging.renderUI();
     }
 
-    async render() {
+    render() {
         return (
             <i-panel>
-                <i-grid-layout id={'pnlRows'} class={'container'} verticalAlignment="center" columnsPerRow={1}></i-grid-layout>
+                <i-grid-layout
+                    id={'pnlRows'}
+                    class={'container'}
+                    verticalAlignment="center"
+                    columnsPerRow={1}
+                ></i-grid-layout>
+                <i-panel
+                    id="pnlRowOverlay"
+                    position={'absolute'}
+                    top={0}
+                    bottom={0}
+                    left={0}
+                    right={0}
+                    zIndex={-1}
+                    visible={false}
+                    background={{color: '#ddd'}}
+                    class={'drag-overlay'}
+                ></i-panel>
                 <scpage-page-paging id={'pagePaging'} visible={false}></scpage-page-paging>
                 <scpage-page-footer
                     id={'pageFooter'}

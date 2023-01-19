@@ -76,6 +76,7 @@ export class IDEToolbar extends Module {
                         showBackdrop={false}
                         minWidth={200}
                         popupPlacement='bottom'
+                        zIndex={100}
                     >
                         {menu}
                     </i-modal>
