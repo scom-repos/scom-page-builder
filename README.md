@@ -1,1 +1,0 @@
-# scom-ide
