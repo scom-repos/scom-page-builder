@@ -10,32 +10,103 @@ import {
     Control,
     Button,
     Input,
-    GridLayout
+    Image
 } from '@ijstech/components';
 import './toolbar.css';
 
 declare global {
     namespace JSX {
         interface IntrinsicElements {
-            ['ide-toolbar']: PageRowsElement;
+            ['ide-toolbar']: ToolbarElement;
         }
     }
 }
 
-export interface PageRowsElement extends ControlElement {
+export interface ToolbarElement extends ControlElement {
     readonly?: boolean;
 }
-
+type IPosition = 'left'|'right'|'bottomLeft'|'bottomRight'|'bottom';
 const Theme = Styles.Theme.ThemeVars;
 
 @customElements('ide-toolbar')
 export class IDEToolbar extends Module {
     private _toolList: any[] = [];
+    private _readonly: boolean;
+    private _isResizing: boolean = false;
+    private _origWidth: number;
+    private _origHeight: number;
+    private _mouseDownPos: any;
 
     private contentStack: Panel;
     private toolsStack: Panel;
     private toolbar: HStack;
     private wrapperStack: Panel;
+    private _eResizer: Panel;
+    private _wResizer: Panel;
+    private _nResizer: Panel;
+    private _neResizer: Panel;
+    private _nwResizer: Panel;
+    private _currentResizer: Panel;
+    private _currentPosition: IPosition;
+    private _component: any;
+
+    private _mouseDownHandler: any;
+    private _mouseUpHandler: any;
+    private _mouseMoveHandler: any;
+
+    constructor(parent?: any) {
+        super(parent);
+        this._mouseDownHandler = this.handleMouseDown.bind(this);
+        this._mouseUpHandler = this.handleMouseUp.bind(this);
+        this._mouseMoveHandler = this.handleMouseMove.bind(this);
+    }
+
+    private handleMouseDown(e: MouseEvent) {
+        const target = e.target as HTMLElement;
+        const resizer = target.closest('.resize-stack') as Panel;
+        this._origHeight = this._component.offsetHeight;
+        this._origWidth = this._component.offsetWidth;
+        if (resizer) {
+            resizer.classList.add('resizing');
+            this._mouseDownPos = {
+                x: e.clientX,
+                y: e.clientY
+            };
+            this._currentResizer = resizer;
+            this._currentPosition = resizer.getAttribute('direction') as IPosition;
+            document.addEventListener('mousemove', this._mouseMoveHandler);
+            document.addEventListener('mouseup', this._mouseUpHandler);
+        }
+    };
+    private handleMouseMove(e: MouseEvent) {
+        e.preventDefault();
+        e.stopPropagation();
+        let offsetX = e.clientX - this._mouseDownPos.x;
+        let offsetY = e.clientY - this._mouseDownPos.y;
+        switch (this._currentPosition) {
+            case 'left':
+                this._component.style.width = (this._origWidth - offsetX) + 'px';
+                break;
+            case 'right':
+                this._component.style.width = (this._origWidth + offsetX) + 'px';
+                break;
+            case 'bottom':
+                this._component.style.height = (this._origHeight - offsetY) + 'px';
+                break;
+        }
+        this.wrapperStack.refresh();
+    };
+    private handleMouseUp(e: MouseEvent) {
+        document.removeEventListener('mousemove', this._mouseMoveHandler);
+        document.removeEventListener('mouseup', this._mouseUpHandler);
+        const target = e.target as HTMLElement;
+        const resizer = target.closest('.resize-stack');
+        if (resizer) {
+            resizer.classList.remove('resizing');
+            this._currentResizer = null;
+            this._currentPosition = 'left';
+        }
+    };
 
     get toolList() {
         return this._toolList || [];
@@ -43,6 +114,13 @@ export class IDEToolbar extends Module {
     set toolList(value: any[]) {
         this._toolList = value;
         this.renderToolbars();
+    }
+
+    get readonly() {
+        return this._readonly;
+    }
+    set readonly(value: boolean) {
+        this._readonly = value;
     }
 
     private async createMenu(items: IMenuItem[]) {
@@ -58,9 +136,21 @@ export class IDEToolbar extends Module {
         if (!this.contentStack) this.contentStack = new Panel();
         this.contentStack.clearInnerHTML();
         component.parent = this.contentStack;
-        if (component instanceof Input)
-            component.onFocus = this.showToolbars.bind(this);
-        component.onClick = this.showToolbars.bind(this);
+        if (!this.readonly) {
+            if (component instanceof Input)
+                component.onFocus = this.showToolbars.bind(this);
+            component.onClick = this.showToolbars.bind(this);
+        }
+
+        if (component instanceof Button || component instanceof Image) {
+            this.contentStack.padding = {top: 5, left: 5, right: 5, bottom: 5};
+            this.contentStack.width = 'fit-content';
+            this.wrapperStack.width = 'fit-content';
+        } else {
+            this.contentStack.width = '100%';
+        }
+        this.showResizer(component instanceof Image);
+        this._component = component;
         this.contentStack.appendChild(component);
     }
 
@@ -142,18 +232,89 @@ export class IDEToolbar extends Module {
     }
 
     private renderResizeStack() {
-        // this.wrapperStack.appendChild();
+        this._eResizer = this.renderResizer('left');
+        this._wResizer = this.renderResizer('right');
+        this._nResizer = this.renderResizer('bottom');
+        this._neResizer = this.renderResizer('bottomLeft');
+        this._nwResizer = this.renderResizer('bottomRight');
+    }
+
+    private renderResizer(position: IPosition) {
+        const stack = <i-vstack
+            minWidth={8}
+            verticalAlignment="center" horizontalAlignment="center"
+            zIndex={20}
+            position="absolute"
+            class="resize-stack"
+        ></i-vstack>
+        const iconEl = <i-icon
+            name="circle"
+            fill={Theme.colors.primary.main}
+            height={16} width={16}
+            class="resize-icon"
+        ></i-icon>
+        switch (position) {
+            case 'left':
+                stack.top = 0;
+                stack.height = '100%';
+                iconEl.margin = {left: -7};
+                break;
+            case 'right':
+                stack.top = 0;
+                stack.right = 0;
+                stack.height = '100%';
+                iconEl.margin = {right: -7};
+                break;
+            case 'bottom':
+                stack.bottom = -7;
+                stack.left = '50%';
+                stack.style.transform = 'translateX(-50%)'
+                stack.height = 'auto';
+                iconEl.classList.add('n-resize');
+                stack.visible = false;
+                break;
+            case 'bottomLeft':
+                stack.bottom = -7;
+                stack.left = 0;
+                stack.height = 'auto';
+                iconEl.margin = {left: -7};
+                iconEl.classList.add('ne-resize');
+                stack.visible = false;
+                break;
+            case 'bottomRight':
+                stack.bottom = -7;
+                stack.right = 0;
+                stack.height = 'auto';
+                iconEl.margin = {right: -7};
+                iconEl.classList.add('nw-resize');
+                stack.visible = false;
+                break;
+        }
+        stack.appendChild(iconEl);
+        stack.setAttribute('direction', position);
+        stack.addEventListener('mousedown', this._mouseDownHandler);
+        this.wrapperStack.appendChild(stack);
+        return stack;
+    }
+
+    private showResizer(value: boolean) {
+        if (this._nResizer) this._nResizer.visible = value;
+        if (this._neResizer) this._neResizer.visible = value;
+        if (this._nwResizer) this._nwResizer.visible = value;
     }
 
     init() {
         super.init();
-        this.initEventListener();
-        this.renderResizeStack();
+        this.readonly = this.getAttribute('readonly', true, false);
+        if (!this.readonly) {
+            this.initEventListener();
+            this.renderResizeStack();
+        }
     }
 
     render() {
         return (
-            <i-panel id="mainWrapper"  width="100%" maxHeight="100%">
+            <i-vstack id="mainWrapper" width="auto" maxWidth="100%" maxHeight="100%">
                 <i-panel
                     id="toolsStack"
                     visible={false}
@@ -163,43 +324,20 @@ export class IDEToolbar extends Module {
                 >
                     <i-hstack id="toolbar" gap="0.5rem"></i-hstack>
                 </i-panel>
-                <i-hstack id="wrapperStack" width="100%" height="auto">
-                    <i-vstack
-                        verticalAlignment="center"
-                        resizer={true} dock="left" top={0} zIndex={20}
-                        minWidth="8px" height="100%"
-                        class="left"
-                    >
-                        <i-icon
-                            name="circle"
-                            fill={Theme.colors.primary.main}
-                            height={16} width={16}
-                            margin={{left: '-7px'}}
-                            class="resize-icon left-resize"
-                        ></i-icon>
-                    </i-vstack>
+                <i-vstack
+                    id="wrapperStack"
+                    position='relative'
+                    height="auto"
+                    maxWidth="100%" maxHeight="100%"
+                >
                     <i-panel
                         id="contentStack"
-                        width="100%" height="100%"
+                        height="100%"
                         class="ide-component"
                         onClick={this.showToolbars.bind(this)}
                     ></i-panel>
-                    <i-vstack
-                        verticalAlignment="center"
-                        resizer={true} dock="right" top={0} zIndex={20}
-                        minWidth="8px" height="100%"
-                        class="right"
-                    >
-                        <i-icon
-                            name="circle"
-                            fill={Theme.colors.primary.main}
-                            height={16} width={16}
-                            margin={{right: '-7px'}}
-                            class="resize-icon right-resize"
-                        ></i-icon>
-                    </i-vstack>
-                </i-hstack>
-            </i-panel>
+                </i-vstack>
+            </i-vstack>
         );
     }
 }

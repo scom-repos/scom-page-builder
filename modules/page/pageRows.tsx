@@ -5,7 +5,8 @@ import {
     Styles,
     GridLayout,
     Panel,
-    application
+    application,
+    Control
 } from '@ijstech/components';
 import { SelectModuleDialog } from '@page/dialogs';
 import { IRowData, IPageData } from '@page/interface';
@@ -43,6 +44,7 @@ export class PageRows extends Module {
     private currentPosition: any;
     private _readonly: boolean;
     private _draggable: boolean;
+    private isDragging: boolean = false;
 
     constructor(parent?: any) {
         super(parent);
@@ -58,9 +60,8 @@ export class PageRows extends Module {
 
     init() {
         this._readonly = this.getAttribute('readonly', true, false);
-        super.init();
         this.draggable = this.getAttribute('draggable', true, false);
-        window.addEventListener('mouseup', this.mouseUpHandler, false);
+        super.init();
     }
 
     get draggable(): boolean {
@@ -73,6 +74,7 @@ export class PageRows extends Module {
     }
 
     private handleDrag() {
+        if (!this.pnlRows) return;
         const rows = Array.from(this.pnlRows.querySelectorAll('ide-row'));
         if (!rows?.length) return;
         rows.forEach((row: PageRow, rowid: number) => {
@@ -82,24 +84,29 @@ export class PageRows extends Module {
     }
 
     private mouseDownHandler(event: MouseEvent) {
+        event.stopPropagation();
         const target = event.target as HTMLElement;
         const currentDragEl = target instanceof PageRow ? target : target.closest('ide-row') as PageRow;
-        if (currentDragEl) {
+        if (currentDragEl && !this.isDragging) {
+            this.isDragging = true;
             this.currentRow = currentDragEl;
             const data = this.currentRow.getBoundingClientRect();
             this.currentPosition = data;
             this.pnlRowOverlay.width = this.currentPosition.width;
             this.pnlRowOverlay.height = this.currentPosition.height;
-            this.pnlRowOverlay.style.zIndex = '100';
-            this.pnlRowOverlay.style.left = this.currentPosition.left;
-            this.pnlRowOverlay.style.top = this.currentPosition.top;
+            this.pnlRowOverlay.zIndex = '1';
+            this.pnlRowOverlay.left = this.currentPosition.left;
+            this.pnlRowOverlay.top = this.currentPosition.top;
+            document.addEventListener('mousemove', this.onMoveHandler);
+            document.addEventListener('mouseup', this.mouseUpHandler);
+            this.click();
         }
-        window.addEventListener('mousemove', this.onMoveHandler, true);
-        this.click();
     }
 
     private mouseUpHandler(event: MouseEvent) {
-        window.removeEventListener('mousemove', this.onMoveHandler, true);
+        document.removeEventListener('mousemove', this.onMoveHandler);
+        document.removeEventListener('mouseup', this.mouseUpHandler);
+        this.resetCurrentRow();
         const target = event.target as HTMLElement;
         const dropElm = target instanceof PageRow ? target : target.closest('ide-row') as PageRow;
         if (!dropElm || !dropElm.classList.contains('dropzone')) {
@@ -115,7 +122,6 @@ export class PageRows extends Module {
             this.pnlRowOverlay.zIndex = '-1';
             return;
         }
-        this.resetCurrentRow();
         if (dropElm && !this.currentRow.isSameNode(dropElm)) {
             let dragIndex = 0;
             let dropIndex = 0;
@@ -135,14 +141,16 @@ export class PageRows extends Module {
         }
         this.currentRow = null;
         this.currentPosition = null;
+        this.isDragging = false;
     }
 
     private resetCurrentRow() {
+        if (!this.currentRow) return;
         this.currentRow.style.transform = 'none';
         this.currentRow.classList.remove('dragging');
-        this.currentRow.onMoveDown();
         this.pnlRowOverlay.visible = false;
         this.pnlRowOverlay.zIndex = '-1';
+        this.currentRow.onMoveDown();
     }
 
     private updateCurrentRow(x: number, y: number) {
@@ -150,7 +158,7 @@ export class PageRows extends Module {
         this.currentRow.style.transform = `translate(${x}px, ${y}px)`;
         this.currentRow.style.width = this.currentPosition.width;
         this.currentRow.style.height = this.currentPosition.height;
-        this.currentRow.onMove();
+        this.currentRow.onMoveUp();
     }
 
     private onMoveHandler(event: MouseEvent) {
@@ -165,7 +173,7 @@ export class PageRows extends Module {
         if (dropZone && !dropZone.isEqualNode(this.currentRow) && dropZone.classList.contains('dropzone'))
             dropZone.classList.add('dragenter')
         this.pnlRowOverlay.visible = true;
-        this.pnlRowOverlay.zIndex = '100';
+        this.pnlRowOverlay.zIndex = '1';
         this.updateCurrentRow(x - this.currentPosition.x, y - this.currentPosition.y);
     }
 
@@ -214,7 +222,7 @@ export class PageRows extends Module {
     }
 
     private initDragEvent(row: PageRow) {
-        const dragStack = row.querySelector('#dragStack');
+        const dragStack = row.querySelector('#dragStack') as Control;
         if (!dragStack) return;
         if (this.draggable) {
             row.classList.add('dropzone');
@@ -222,17 +230,21 @@ export class PageRows extends Module {
         } else {
             dragStack.removeEventListener('mousedown', this.mouseDownHandler, false);
         }
+        dragStack.ondragstart = function() {
+            return false;
+        };
     }
 
     async appendRow(rowData: IRowData) {
         if (!this.rows) this.rows = [];
         const pageRow = (<ide-row></ide-row>) as PageRow;
-        if (!this._readonly)
-            pageRow.border = { top: { width: '1px', style: 'dashed', color: Theme.divider } };
         this.pnlRows.append(pageRow);
         this.rows.push(rowData);
         pageRow.id = `row-${this.rows.length - 1}`;
-        this.initDragEvent(pageRow);
+        if (!this._readonly) {
+            pageRow.border = { top: { width: '1px', style: 'dashed', color: Theme.divider } };
+            this.initDragEvent(pageRow);
+        }
         await pageRow.setData(rowData);
         return pageRow;
     }
@@ -284,13 +296,10 @@ export class PageRows extends Module {
                 ></i-grid-layout>
                 <i-panel
                     id="pnlRowOverlay"
-                    position={'absolute'}
-                    top={0}
-                    bottom={0}
-                    left={0}
-                    right={0}
+                    position={'fixed'}
                     zIndex={-1}
                     visible={false}
+                    opacity={0.4}
                     background={{color: '#ddd'}}
                     class={'drag-overlay'}
                 ></i-panel>

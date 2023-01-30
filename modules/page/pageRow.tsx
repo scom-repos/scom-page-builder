@@ -205,19 +205,15 @@ export class PageRow extends Module {
         application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
     }
 
-    onMove() {
+    onMoveUp() {
         this.actionsBar.classList.add('hidden');
         this.dragStack.classList.add('hidden');
         this.background = {color: '#f2f2f2'};
-        this.position = 'relative';
-        this.zIndex = '101';
     }
     onMoveDown() {
         this.actionsBar.classList.remove('hidden');
         this.dragStack.classList.remove('hidden');
         this.background = {color: 'initial'};
-        this.position = 'initial';
-        this.zIndex = 'initial';
     }
 
     async render() {
