@@ -7,7 +7,8 @@ import {
     Control,
     HStack,
     VStack,
-    observable
+    observable,
+    GridLayout
 } from '@ijstech/components';
 import { PageSection } from './pageSection';
 import './pageRow.css';
@@ -33,7 +34,7 @@ const Theme = Styles.Theme.ThemeVars;
 @customElements('ide-row')
 export class PageRow extends Module {
     private rowSettings: RowSettingsDialog;
-    private pnlSections: HStack;
+    private pnlSections: GridLayout;
     private actionsBar: VStack;
     private dragStack: VStack;
 
@@ -80,18 +81,57 @@ export class PageRow extends Module {
 
         const columnsSettings = this.rowData.config.columnsSettings || {};
         if (this.rowData.sections && this.rowData.sections.length > 0) {
-            for (let i = 0; i < this.rowData.sections.length; i++) {
-                const colSettings = columnsSettings[i];
-                const sectionData = this.rowData.sections[i];
+            if (this.rowData.sections.length === 1 && this.rowData.sections[0]?.width === '100%') {
+                const colSettings = columnsSettings[0];
+                const sectionData = this.rowData.sections[0];
                 const pageSection = (<ide-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>) as PageSection;
                 this.pnlSections.append(pageSection);
                 await pageSection.setData(sectionData);
+                this.pnlSections.templateColumns = ['repeat(1, 1fr)'];
+            } else {
+                const columns = this.rowData.sections.length;
+                const configColumns = columns > 12 ? 12 : columns;
+                let missingCols = 12 - configColumns;
+                const unitWidth = Number(this.width) / 12;
+                let minWidth = 0;
+                for (let i = 0; i < this.rowData.sections.length; i++) {
+                    const colSettings = columnsSettings[i];
+                    const sectionData = this.rowData.sections[i];
+                    const pageSection = (<ide-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>) as PageSection;
+                    this.pnlSections.append(pageSection);
+                    await pageSection.setData(sectionData);
+                    const ratio = Math.ceil(Number(pageSection.width) / unitWidth);
+                    missingCols -= (ratio - 1);
+                }
+                for (let i = 0; i < missingCols; i++) {
+                    const el = <i-vstack opacity={0}></i-vstack>;
+                    this.pnlSections.append(el);
+                    minWidth = el.width;
+                }
+                this.pnlSections.templateColumns = ['auto', `repeat(${missingCols + configColumns - 1}, ${minWidth}px)`];
             }
         } else if (this.rowData.config.columns) {
-            for (let i = 0; i < this.rowData.config.columns; i++) {
-                const colSettings = columnsSettings[i];
-                const pageSection = (<ide-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>) as PageSection;
+            const columns = this.rowData.config.columns;
+            const configColumns = columns > 12 ? 12 : columns < 0 ? 1 : columns;
+            let minWidth = 0;
+            if (columns === 1 && columnsSettings[0]?.width === '100%') {
+                const colSettings = columnsSettings[0];
+                const pageSection = (<ide-section width="100%" containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>) as PageSection;
                 this.pnlSections.append(pageSection);
+                this.pnlSections.templateColumns = ['repeat(1, 1fr)'];
+            } else {
+                const missingCols = 12 - configColumns - 1;
+                for (let i = 0; i < configColumns; i++) {
+                    const colSettings = columnsSettings[i];
+                    const pageSection = (<ide-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>) as PageSection;
+                    this.pnlSections.append(pageSection);
+                }
+                for (let i = 0; i < missingCols; i++) {
+                    const el = <i-vstack opacity={0}></i-vstack>;
+                    this.pnlSections.append(el);
+                    minWidth = el.width;
+                }
+                this.pnlSections.templateColumns = ['auto', `repeat(11, ${minWidth}px)`];
             }
         }
         this.actionsBar.minHeight = this.rowData?.config?.height || '100%';
@@ -117,15 +157,6 @@ export class PageRow extends Module {
     private onClone() {
         const rowData = this.getData();
         if (!rowData) return;
-        // const pageRow = (
-        //     <ide-row
-        //         border={{
-        //             top: {width: '1px', style: 'dashed', color: Theme.divider}
-        //         }}
-        //     ></ide-row>
-        // );
-        // pageRow.setData(this.getData());
-        // this.parentNode?.insertBefore(pageRow, this.nextSibling);
         application.EventBus.dispatch(EVENT.ON_CLONE, { rowData, id: this.id });
     }
 
@@ -205,19 +236,15 @@ export class PageRow extends Module {
         application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
     }
 
-    onMove() {
+    onMoveUp() {
         this.actionsBar.classList.add('hidden');
         this.dragStack.classList.add('hidden');
         this.background = {color: '#f2f2f2'};
-        this.position = 'relative';
-        this.zIndex = '101';
     }
     onMoveDown() {
         this.actionsBar.classList.remove('hidden');
         this.dragStack.classList.remove('hidden');
         this.background = {color: 'initial'};
-        this.position = 'initial';
-        this.zIndex = 'initial';
     }
 
     async render() {
@@ -286,8 +313,13 @@ export class PageRow extends Module {
                         <i-icon name="circle" width={3} height={3}></i-icon>
                     </i-grid-layout>
                 </i-vstack>
-                <i-panel width="100%" height="100%">
-                    <i-hstack id={'pnlSections'} width="100%" height="100%"></i-hstack>
+                <i-panel width="100%" height="100%" maxWidth="100%" padding={{left: '3rem', right: '3rem'}}>
+                    <i-grid-layout
+                        id={'pnlSections'}
+                        maxWidth="100%" height="100%"
+                        gap={{column: 15}}
+                        templateColumns={['repeat(12, 1fr)']}
+                    ></i-grid-layout>
                 </i-panel>
                 <scpage-row-settings-dialog
                     id={'rowSettings'}

@@ -14,21 +14,6 @@ Styles.cssRule('ide-section', {
     border: '2px solid transparent',
 
     $nest: {
-        // '.drag-overlay': {
-        //     zIndex: '-1',
-        //     display: 'none'
-        // },
-        // '&.dragging': {
-        //     $nest: {
-        //         '.drag-overlay': {
-        //             zIndex: '9999',
-        //             display: 'block'
-        //         }
-        //     }
-        // },
-        // '&.dragenter': {
-        //     borderTop: '3px solid #1976D2'
-        // },
         '&.active, &:focus': {
             border: `2px solid ${Theme.colors.primary.main}`, // #4285f4
             transition: 'border ease-in .2s',

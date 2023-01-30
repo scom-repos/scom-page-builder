@@ -13,10 +13,10 @@ import {
 } from '@ijstech/components';
 import './pageSection.css';
 import { IComponent, ISectionData } from '@page/interface';
-import { EVENT } from '@page/const';
 import { RowSettingsDialog } from '@page/dialogs';
 import { IDEToolbar } from '@page/common';
 
+const Theme = Styles.Theme.ThemeVars;
 declare global {
     namespace JSX {
         interface IntrinsicElements {
@@ -33,8 +33,6 @@ export interface PageSectionElement extends ControlElement {
     }
 }
 
-const Theme = Styles.Theme.ThemeVars;
-
 @customElements('ide-section')
 export class PageSection extends Module {
     private _data: ISectionData = { data: null, component: null, visibleOn: '', invisibleOn: ''};
@@ -42,6 +40,8 @@ export class PageSection extends Module {
     private pnlMain: Panel;
     private currentComponent: any = null;
     private pageSectionWrapper: Panel;
+    private pnlSectionOverlay: Panel;
+
     private _readonly: boolean;
     private _size: {
         width?: string;
@@ -66,19 +66,18 @@ export class PageSection extends Module {
     }
 
     setActive() {
-        const pageSections = document.querySelectorAll('ide-section');
-        if(pageSections) {
-            for(const pageSection of pageSections) {
-                pageSection.classList.remove('active');
+        const pageRows= document.querySelectorAll('ide-row');
+        if (pageRows) {
+            for (const row of pageRows) {
+                row.classList.remove('active');
             }
         }
-        this.classList.add('active');
+        const row = this.closest('ide-row');
+        row && row.classList.add('active');
     }
 
     initEventListener() {
-        this.onClick = (target, event) => {
-            this.setActive();
-        }
+        this.onClick = (target, event) => this.setActive();
     }
 
     updateContainerSize() {
@@ -119,11 +118,6 @@ export class PageSection extends Module {
         switch (config.type) {
             case 'Button':
                 control = await Button.create(config.properties)
-                const contentStack = this.currentComponent.querySelector('.ide-component');
-                if (contentStack) {
-                    contentStack.padding = {top: 5, left: 5, right: 5, bottom: 5};
-                    contentStack.width = 'min-content';
-                }
                 break;
             case 'Input':
                 control = await Input.create(config.properties)
@@ -140,11 +134,9 @@ export class PageSection extends Module {
 
     async setData(value: ISectionData) {
         this._data = value;
-        this.currentComponent = await IDEToolbar.create({
-            padding: {left: '3rem', right: '3rem'},
-            display: 'block'
-        }) as IDEToolbar;
+        this.currentComponent = await IDEToolbar.create({}) as IDEToolbar;
         this.currentComponent.toolList = value.toolList;
+        this.currentComponent.readonly = this._readonly;
         const mainControl = await this.createComponent(value.component);
         if (mainControl)
             this.currentComponent.appendItem(mainControl);
@@ -162,13 +154,12 @@ export class PageSection extends Module {
                     <i-panel id="pnlMain"></i-panel>
                 </i-panel>
                 <i-panel
+                    id="pnlSectionOverlay"
                     position={'absolute'}
-                    top={0}
-                    bottom={0}
-                    left={0}
-                    right={0}
-                    width="100%" height="100%"
-                    background={{color: '#ddd'}}
+                    zIndex={-1}
+                    visible={false}
+                    opacity={0.4}
+                    background={{color: Theme.colors.primary.light}}
                     class={'drag-overlay'}
                 ></i-panel>
             </i-panel>

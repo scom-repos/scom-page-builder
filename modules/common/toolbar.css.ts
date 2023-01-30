@@ -9,12 +9,14 @@ const tileToolbarFadeIn = Styles.keyframes({
 
 
 Styles.cssRule('ide-toolbar', {
+  display: 'block',
   $nest: {
     '.ide-component.active, .ide-component:hover': {
       border: `2px solid ${Theme.colors.primary.main}`
     },
     '.ide-component': {
-      border: `2px solid transparent`
+      border: `2px solid transparent`,
+      boxSizing: 'content-box'
     },
     'i-button': {
       boxShadow: 'none'
@@ -43,8 +45,17 @@ Styles.cssRule('ide-toolbar', {
     '&.active .resize-icon': {
       opacity: 1
     },
-    '.right': {
-      left: 'calc(100% - 8px) !important'
+    '.nw-resize': {
+      cursor: 'nw-resize !important'
+    },
+    '.ne-resize': {
+      cursor: 'ne-resize !important'
+    },
+    '.n-resize': {
+      cursor: 'n-resize !important'
+    },
+    '.move': {
+      cursor: 'move'
     }
   }
 })
