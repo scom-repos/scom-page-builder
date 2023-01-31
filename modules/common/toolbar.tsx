@@ -12,6 +12,7 @@ import {
     Input,
     Image
 } from '@ijstech/components';
+import { commandHistory, ResizeElementCommand } from '@page/utility';
 import './toolbar.css';
 
 declare global {
@@ -82,28 +83,33 @@ export class IDEToolbar extends Module {
         e.stopPropagation();
         let offsetX = e.clientX - this._mouseDownPos.x;
         let offsetY = e.clientY - this._mouseDownPos.y;
+        let newWidth = '';
+        let newHeight = '';
         switch (this._currentPosition) {
             case 'left':
-                this._component.style.width = (this._origWidth - offsetX) + 'px';
+                newWidth = (this._origWidth - offsetX) + 'px';
                 break;
             case 'right':
-                this._component.style.width = (this._origWidth + offsetX) + 'px';
+                newWidth = (this._origWidth + offsetX) + 'px';
                 break;
             case 'bottom':
-                this._component.style.height = (this._origHeight - offsetY) + 'px';
+                newHeight = (this._origHeight - offsetY) + 'px';
                 break;
             case 'bottomLeft':
-                this._component.style.width = (this._origWidth - offsetX) + 'px';
-                this._component.style.height = (this._origHeight - offsetY) + 'px';
+                newWidth = (this._origWidth - offsetX) + 'px';
+                newHeight = (this._origHeight - offsetY) + 'px';
                 this.contentStack.style.left = `${Number(this._mouseDownPos.x) - offsetX}`;
                 break;
             case 'bottomRight':
-                this._component.style.width = (this._origWidth + offsetX) + 'px';
-                this._component.style.height = (this._origHeight - offsetY) + 'px';
+                newWidth = (this._origWidth + offsetX) + 'px';
+                newHeight = (this._origHeight - offsetY) + 'px';
                 this.contentStack.style.left = `${Number(this._mouseDownPos.x) - offsetX}`;
                 this.contentStack.style.top = `${Number(this._mouseDownPos.y) - offsetY}`;
                 break;
         }
+        this.contentStack.width = 'fit-content';
+        const resizeCmd = new ResizeElementCommand(this._component, newWidth, newHeight);
+        commandHistory.execute(resizeCmd);
         this.contentStack.refresh();
     };
     private handleMouseUp(e: MouseEvent) {

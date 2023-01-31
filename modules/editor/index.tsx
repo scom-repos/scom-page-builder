@@ -135,7 +135,7 @@ export class Editor extends Module {
     }
 
     private async onAddRow(rowData: IRowData) {
-        let row = await this.pageRows.appendRow(rowData);
+        await this.pageRows.appendRow(rowData);
     }
 
     private onShowModal() {

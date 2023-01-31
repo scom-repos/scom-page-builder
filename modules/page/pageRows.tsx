@@ -16,6 +16,7 @@ import { PageFooter } from './pageFooter';
 import { PagePaging } from './pagePaging';
 import './pageRows.css';
 import { EVENT } from '@page/const';
+import { AddElementCommand, commandHistory, MoveElementCommand } from '@page/utility';
 
 declare global {
     namespace JSX {
@@ -123,21 +124,23 @@ export class PageRows extends Module {
             return;
         }
         if (dropElm && !this.currentRow.isSameNode(dropElm)) {
-            let dragIndex = 0;
-            let dropIndex = 0;
-            const rows = this.pnlRows.querySelectorAll('ide-row');
-            for (let i = 0; i < rows.length; i++) {
-                if (this.currentRow.isEqualNode(rows[i])) { dragIndex = i; }
-                if (dropElm.isEqualNode(rows[i])) { dropIndex = i; }
-            }
-            const [dragRowData] = this.rows.splice(dragIndex, 1);
-            this.rows.splice(dropIndex, 0, dragRowData);
+            // let dragIndex = 0;
+            // let dropIndex = 0;
+            // const rows = this.pnlRows.querySelectorAll('ide-row');
+            // for (let i = 0; i < rows.length; i++) {
+            //     if (this.currentRow.isEqualNode(rows[i])) { dragIndex = i; }
+            //     if (dropElm.isEqualNode(rows[i])) { dropIndex = i; }
+            // }
+            // const [dragRowData] = this.rows.splice(dragIndex, 1);
+            // this.rows.splice(dropIndex, 0, dragRowData);
             
-            if (dragIndex < dropIndex) {
-                this.pnlRows.insertBefore(this.currentRow, dropElm.nextSibling);
-            } else {
-                this.pnlRows.insertBefore(this.currentRow, dropElm);
-            }
+            // if (dragIndex < dropIndex) {
+            //     this.pnlRows.insertBefore(this.currentRow, dropElm.nextSibling);
+            // } else {
+            //     this.pnlRows.insertBefore(this.currentRow, dropElm);
+            // }
+            const moveRowCmd = new MoveElementCommand(this.currentRow, dropElm, this.pnlRows, this.rows);
+            commandHistory.execute(moveRowCmd);
         }
         this.currentRow = null;
         this.currentPosition = null;
@@ -238,7 +241,6 @@ export class PageRows extends Module {
     async appendRow(rowData: IRowData) {
         if (!this.rows) this.rows = [];
         const pageRow = (<ide-row maxWidth="100%"></ide-row>) as PageRow;
-        this.pnlRows.append(pageRow);
         this.rows.push(rowData);
         pageRow.id = `row-${this.rows.length - 1}`;
         if (!this._readonly) {
@@ -246,6 +248,8 @@ export class PageRows extends Module {
             this.initDragEvent(pageRow);
         }
         await pageRow.setData(rowData);
+        const addRowCmd = new AddElementCommand(pageRow, this.pnlRows);
+        commandHistory.execute(addRowCmd);
         return pageRow;
     }
 

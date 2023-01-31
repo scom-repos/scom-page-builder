@@ -108,7 +108,7 @@ export class PageRow extends Module {
                     this.pnlSections.append(el);
                     minWidth = el.width;
                 }
-                this.pnlSections.templateColumns = ['auto', `repeat(${missingCols + configColumns - 1}, ${minWidth}px)`];
+                this.pnlSections.templateColumns = ['minmax(auto, 100%)', `repeat(${missingCols + configColumns - 1}, ${minWidth}px)`];
             }
         } else if (this.rowData.config.columns) {
             const columns = this.rowData.config.columns;
@@ -131,7 +131,7 @@ export class PageRow extends Module {
                     this.pnlSections.append(el);
                     minWidth = el.width;
                 }
-                this.pnlSections.templateColumns = ['auto', `repeat(11, ${minWidth}px)`];
+                this.pnlSections.templateColumns = ['minmax(auto, 100%)', `repeat(11, ${minWidth}px)`];
             }
         }
         this.actionsBar.minHeight = this.rowData?.config?.height || '100%';
@@ -316,7 +316,8 @@ export class PageRow extends Module {
                 <i-panel width="100%" height="100%" maxWidth="100%" padding={{left: '3rem', right: '3rem'}}>
                     <i-grid-layout
                         id={'pnlSections'}
-                        maxWidth="100%" height="100%"
+                        maxWidth="100%"
+                        width="100%" height="100%"
                         gap={{column: 15}}
                         templateColumns={['repeat(12, 1fr)']}
                     ></i-grid-layout>
