@@ -75,6 +75,7 @@ export class Editor extends Module {
                         placeholder: 'Click to edit text'
                     }
                 };
+                sectionData.width = '100%';
                 break;
             case 'button':
                 sectionData.toolList = [
@@ -101,6 +102,7 @@ export class Editor extends Module {
                         width: '100%'
                     }
                 };
+                sectionData.width = '100%';
                 break;
             case 'image':
                 sectionData.toolList = [
@@ -114,6 +116,7 @@ export class Editor extends Module {
                     properties: {
                         height: 'auto',
                         minWidth: 100,
+                        display: 'block',
                         ...config.config
                     }
                 };
@@ -132,7 +135,7 @@ export class Editor extends Module {
     }
 
     private async onAddRow(rowData: IRowData) {
-        let row = await this.pageRows.appendRow(rowData);
+        await this.pageRows.appendRow(rowData);
     }
 
     private onShowModal() {

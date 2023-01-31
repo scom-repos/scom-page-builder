@@ -142,6 +142,8 @@ export {
     updatePagePath
 };
 
+export * from './command/index';
+
 
 
 

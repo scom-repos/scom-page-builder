@@ -7,6 +7,7 @@ import {
     HStack,
     Panel
   } from '@ijstech/components';
+import { commandHistory } from '@page/utility';
   import './pageHeader.css';
   
   declare global {
@@ -60,7 +61,9 @@ import {
             border={{radius: '50%'}}
             caption={`<i-icon name="${icon.name}" width=${20} height=${20} fill="${Theme.text.primary}"></i-icon>`}
             background={{color: 'transparent'}}
+            tooltip={icon.tooltip}
             class="toolbar"
+            onClick={icon.onClick}
           ></i-button>
         );
       })
@@ -106,30 +109,37 @@ import {
       this.iconList = [
         {
           name: 'undo',
-          onClick: () => {}
+          tooltip: {content: 'Undo last action', placement: 'bottom'},
+          onClick: () => commandHistory.undo()
         },
         {
           name: 'redo',
-          onClick: () => {}
+          tooltip: {content: 'Redo last action', placement: 'bottom'},
+          onClick: () => commandHistory.redo()
         },
         {
           name: 'tablet',
+          tooltip: {content: 'Preview', placement: 'bottom'},
           onClick: () => {}
         },
         {
           name: 'link',
+          tooltip: {content: 'Can`t copy link for unpublish site', placement: 'bottom'},
           onClick: () => {}
         },
         {
           name: 'user-plus',
+          tooltip: {content: 'Share with others', placement: 'bottom'},
           onClick: () => {}
         },
         {
           name: 'cog',
+          tooltip: {content: 'Settings', placement: 'bottom'},
           onClick: () => {}
         },
         {
           name: 'ellipsis-v',
+          tooltip: {content: 'More', placement: 'bottom'},
           onClick: () => {}
         }
       ];

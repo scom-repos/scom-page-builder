@@ -99,6 +99,10 @@ Styles.cssRule('ide-row', {
         },
         textarea: {
             resize: 'none'
+        },
+        '&.active, &:focus': {
+            border: `2px solid ${Theme.colors.primary.main}`,
+            transition: 'border ease-in .2s'
         }
     }
 });
