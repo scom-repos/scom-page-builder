@@ -11,7 +11,7 @@ import {
 } from '@ijstech/components';
 import { assignAttr } from '@page/utility';
 import './rowSettingsDialog.css';
-import { IConfigData, IRowSettings } from '@page/interface';
+import { IRowSettings } from '@page/interface';
 
 export interface RowSettingsDialogElement extends ControlElement {
     onSave: (config: IRowSettings) => Promise<void>;

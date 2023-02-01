@@ -9,7 +9,7 @@ import {
     VStack
 } from '@ijstech/components';
 import { SelectModuleDialog } from '@page/dialogs';
-import { IRowData, IPageData } from '@page/interface';
+import { IPageData, IPageSection } from '@page/interface';
 import { PageSection } from './pageSection';
 import { PageRow } from './pageRow';
 import { PageFooter } from './pageFooter';
@@ -35,7 +35,7 @@ const Theme = Styles.Theme.ThemeVars;
 
 @customElements('ide-rows')
 export class PageRows extends Module {
-    private rows: IRowData[] = [];
+    private rows: IPageSection[] = [];
     private pnlRows: VStack;
     private pagePaging: PagePaging;
     private pageFooter: PageFooter;
@@ -79,9 +79,22 @@ export class PageRows extends Module {
         const rows = Array.from(this.pnlRows.querySelectorAll('ide-row'));
         if (!rows?.length) return;
         rows.forEach((row: PageRow, rowid: number) => {
-            row.id = `row-${rowid}`;
             this.initDragEvent(row);
         });
+    }
+
+    private initDragEvent(row: PageRow) {
+        const dragStack = row.querySelector('#dragStack') as Control;
+        if (!dragStack) return;
+        if (this.draggable) {
+            row.classList.add('dropzone');
+            dragStack.addEventListener('mousedown', this.mouseDownHandler, false);
+        } else {
+            dragStack.removeEventListener('mousedown', this.mouseDownHandler, false);
+        }
+        dragStack.ondragstart = function() {
+            return false;
+        };
     }
 
     private mouseDownHandler(event: MouseEvent) {
@@ -180,9 +193,9 @@ export class PageRows extends Module {
         this.updateCurrentRow(x - this.currentPosition.x, y - this.currentPosition.y);
     }
 
-    async getRows(): Promise<IRowData[]> {
+    async getRows(): Promise<IPageSection[]> {
         const rows = this.pnlRows.querySelectorAll('ide-row');
-        const rowDataList: IRowData[] = [];
+        const rowDataList: IPageSection[] = [];
         for (const row of rows) {
             const rowData = (row as PageRow).getData();
             rowDataList.push(rowData);
@@ -190,7 +203,7 @@ export class PageRows extends Module {
         return rowDataList;
     }
 
-    async setRows(rows: IRowData[]) {
+    async setRows(rows: IPageSection[]) {
         this.rows = rows;
         await this.renderRows();
     }
@@ -201,21 +214,11 @@ export class PageRows extends Module {
             (!this.rows || (this.rows && this.rows.length == 0)) &&
             window.location.hash.indexOf('/edit') >= 0
         ) {
-            this.rows = [
-                {
-                    config: {
-                        width: '100%',
-                        height: '100%',
-                        columns: 1,
-                    },
-                    sections: []
-                }
-            ];
+            this.rows = [];
         }
         for (let i = 0; i < this.rows.length; i++) {
             const rowData = this.rows[i];
             const pageRow = (<ide-row maxWidth="100%"></ide-row>) as PageRow;
-            pageRow.id = `row-${i}`;
             this.initDragEvent(pageRow);
             if (!this._readonly)
                 pageRow.border = { top: { width: '1px', style: 'dashed', color: Theme.divider } };
@@ -224,25 +227,11 @@ export class PageRows extends Module {
         }
     }
 
-    private initDragEvent(row: PageRow) {
-        const dragStack = row.querySelector('#dragStack') as Control;
-        if (!dragStack) return;
-        if (this.draggable) {
-            row.classList.add('dropzone');
-            dragStack.addEventListener('mousedown', this.mouseDownHandler, false);
-        } else {
-            dragStack.removeEventListener('mousedown', this.mouseDownHandler, false);
-        }
-        dragStack.ondragstart = function() {
-            return false;
-        };
-    }
-
-    async appendRow(rowData: IRowData) {
+    async appendRow(rowData: IPageSection) {
         if (!this.rows) this.rows = [];
+        rowData.row = this.rows.length;
         const pageRow = (<ide-row maxWidth="100%"></ide-row>) as PageRow;
         this.rows.push(rowData);
-        pageRow.id = `row-${this.rows.length - 1}`;
         if (!this._readonly) {
             pageRow.border = { top: { width: '1px', style: 'dashed', color: Theme.divider } };
             this.initDragEvent(pageRow);
@@ -253,7 +242,7 @@ export class PageRows extends Module {
         return pageRow;
     }
 
-    async onClone(data: { rowData: IRowData, id: string }) {
+    async onClone(data: { rowData: IPageSection, id: string }) {
         const { rowData, id } = data;
         const row = this.pnlRows.querySelector(`#${id}`)
         if (!row) return;

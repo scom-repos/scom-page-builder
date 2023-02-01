@@ -8,12 +8,12 @@ export class ResizeElementCommand implements ICommand {
   private finalWidth: string;
   private finalHeight: string;
 
-  constructor(element: Control, finalWidth: number|string, finalHeight: number|string) {
+  constructor(element: Control, initialWidth: number|string, initialHeight: number|string) {
     this.element = element;
-    this.initialWidth = typeof element.width === 'number' ? `${element.width}px` : element.width;
-    this.initialHeight = typeof element.height === 'number' ? `${element.height}px` : element.height;
-    this.finalWidth = typeof finalWidth === 'number' ? `${finalWidth}px` : finalWidth;
-    this.finalHeight = typeof finalHeight === 'number' ? `${finalHeight}px` : finalHeight;
+    this.finalWidth = typeof element.width === 'number' ? `${element.width}px` : element.width;
+    this.finalHeight = typeof element.height === 'number' ? `${element.height}px` : element.height;
+    this.initialWidth = typeof initialWidth === 'number' ? `${initialWidth}px` : initialWidth;
+    this.initialHeight = typeof initialHeight === 'number' ? `${initialHeight}px` : initialHeight;
   }
 
   execute(): void {
@@ -25,4 +25,6 @@ export class ResizeElementCommand implements ICommand {
     this.element.style.width = this.initialWidth;
     this.element.style.height = this.initialHeight;
   }
+
+  redo(): void {}
 }

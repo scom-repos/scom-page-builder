@@ -5,7 +5,6 @@ import {
     ControlElement,
     Styles,
     Control,
-    HStack,
     VStack,
     observable,
     GridLayout
@@ -15,7 +14,7 @@ import './pageRow.css';
 
 import { RowSettingsDialog } from '@page/dialogs';
 import { EVENT } from '@page/const';
-import { IRowData, ISectionData, IRowSettings } from '@page/interface';
+import { IPageElement, IPageSection, IRowSettings } from '@page/interface';
 
 declare global {
     namespace JSX {
@@ -29,16 +28,14 @@ export interface PageRowElement extends ControlElement {
     readonly?: boolean;
 }
 
-const Theme = Styles.Theme.ThemeVars;
-
 @customElements('ide-row')
 export class PageRow extends Module {
-    private rowSettings: RowSettingsDialog;
-    private pnlSections: GridLayout;
+    // private rowSettings: RowSettingsDialog;
+    private pnlElements: GridLayout;
     private actionsBar: VStack;
     private dragStack: VStack;
 
-    private rowData: IRowData;
+    private rowData: IPageSection;
     private _readonly: boolean;
 
     @observable()
@@ -50,108 +47,99 @@ export class PageRow extends Module {
         super(parent);
     }
 
+    private initEventBus() {
+        application.EventBus.register(this, EVENT.ON_RESIZE, this.onResized);
+    }
+
     init() {
         this._readonly = this.getAttribute('readonly', true, false);
         super.init();
+        this.initEventBus();
     }
 
-    async setData(rowData: IRowData) {
-        console.log('rowData config', rowData.config);
-        this.pnlSections.clearInnerHTML();
+    private async createNewElement(i: number) {
+        const sectionData = this.rowData.elements[i];
+        const pageSection = (
+            <ide-section
+                readonly={this._readonly}
+            ></ide-section>
+        ) as PageSection;
+        this.pnlElements.appendChild(pageSection);
+        await pageSection.setData(sectionData);
+        return pageSection;
+    }
+
+    private appendColumnsLayout(col: number) {
+        const length = this.pnlElements.children.length;
+        for (let i = 0; i < col; i++) {
+            const el = <i-vstack id={`dropzone-tmp-${length + i}`} opacity={0} class="dropzone"></i-vstack>;
+            this.pnlElements.appendChild(el);
+        }
+    }
+
+    async setData(rowData: IPageSection) {
+        console.log('rowData: ', rowData);
+        this.pnlElements.clearInnerHTML();
         this.rowData = rowData;
-        if (this.rowData.config.width) {
-            this.width = this.rowData.config.width;
-        }
-        if (this.rowData.config.height) {
-            // use minHeight instead of height to avoid the overflow of inner containers
-            // when the markdown editor is in edit mode
-            this.minHeight = this.rowData.config.height;
-        }
+        const { id, row, image, elements, backgroundColor } = this.rowData;
+        // if (this.rowData.config.width)
+        //     this.width = this.rowData.config.width;
 
+        // if (this.rowData.config.height)
+        //     this.minHeight = this.rowData.config.height;
+
+        this.id = `row-${id}`;
+        this.setAttribute('row', `${row}`);
         // Background
-        if(this.rowData.config.backgroundImageUrl) {
-            this.background.image = this.rowData.config.backgroundImageUrl;
+        if(image) {
+            this.background.image = image;
         }
-        else if(this.rowData.config.backgroundColor) {
-            this.background.color = this.rowData.config.backgroundColor;
+        else if(backgroundColor) {
+            this.background.color = backgroundColor;
         }
 
-        this.isCloned = typeof this.rowData.config.isCloned === 'boolean' ? this.rowData.config.isCloned : true;
-        this.isChanged = typeof this.rowData.config.isChanged === 'boolean' ? this.rowData.config.isChanged : true;
+        // this.isCloned = typeof this.rowData.config.isCloned === 'boolean' ? this.rowData.config.isCloned : true;
+        // this.isChanged = typeof this.rowData.config.isChanged === 'boolean' ? this.rowData.config.isChanged : true;
 
-        const columnsSettings = this.rowData.config.columnsSettings || {};
-        if (this.rowData.sections && this.rowData.sections.length > 0) {
-            if (this.rowData.sections.length === 1 && this.rowData.sections[0]?.width === '100%') {
-                const colSettings = columnsSettings[0];
-                const sectionData = this.rowData.sections[0];
-                const pageSection = (<ide-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>) as PageSection;
-                this.pnlSections.append(pageSection);
-                await pageSection.setData(sectionData);
-                this.pnlSections.templateColumns = ['repeat(1, 1fr)'];
+        const unitWidth = Number(this.pnlElements.offsetWidth) / 12;
+        if (elements && elements.length > 0) {
+            if (elements.length === 1 && elements[0]?.properties.width === '100%') {
+                await this.createNewElement(0);
+                this.pnlElements.templateColumns = ['repeat(1, 1fr)'];
             } else {
-                const columns = this.rowData.sections.length;
+                const columns = elements.length;
                 const configColumns = columns > 12 ? 12 : columns;
                 let missingCols = 12 - configColumns;
-                const unitWidth = Number(this.width) / 12;
-                let minWidth = 0;
-                for (let i = 0; i < this.rowData.sections.length; i++) {
-                    const colSettings = columnsSettings[i];
-                    const sectionData = this.rowData.sections[i];
-                    const pageSection = (<ide-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>) as PageSection;
-                    this.pnlSections.append(pageSection);
-                    await pageSection.setData(sectionData);
+                for (let i = 0; i < elements.length; i++) {
+                    const pageSection = await this.createNewElement(i);
                     const ratio = Math.ceil(Number(pageSection.width) / unitWidth);
                     missingCols -= (ratio - 1);
                 }
                 for (let i = 0; i < missingCols; i++) {
-                    const el = <i-vstack opacity={0}></i-vstack>;
-                    this.pnlSections.append(el);
-                    minWidth = el.width;
+                    const el = <i-vstack id={`dropzone${i}`} opacity={0} class="dropzone"></i-vstack>;
+                    this.pnlElements.appendChild(el);
                 }
-                this.pnlSections.templateColumns = ['minmax(auto, 100%)', `repeat(${missingCols + configColumns - 1}, ${minWidth}px)`];
-            }
-        } else if (this.rowData.config.columns) {
-            const columns = this.rowData.config.columns;
-            const configColumns = columns > 12 ? 12 : columns < 0 ? 1 : columns;
-            let minWidth = 0;
-            if (columns === 1 && columnsSettings[0]?.width === '100%') {
-                const colSettings = columnsSettings[0];
-                const pageSection = (<ide-section width="100%" containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>) as PageSection;
-                this.pnlSections.append(pageSection);
-                this.pnlSections.templateColumns = ['repeat(1, 1fr)'];
-            } else {
-                const missingCols = 12 - configColumns - 1;
-                for (let i = 0; i < configColumns; i++) {
-                    const colSettings = columnsSettings[i];
-                    const pageSection = (<ide-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>) as PageSection;
-                    this.pnlSections.append(pageSection);
-                }
-                for (let i = 0; i < missingCols; i++) {
-                    const el = <i-vstack opacity={0}></i-vstack>;
-                    this.pnlSections.append(el);
-                    minWidth = el.width;
-                }
-                this.pnlSections.templateColumns = ['minmax(auto, 100%)', `repeat(11, ${minWidth}px)`];
+                this.pnlElements.templateColumns = ['minmax(auto, 100%)', `repeat(${missingCols + configColumns - 1}, ${unitWidth}px)`];
             }
         }
-        this.actionsBar.minHeight = this.rowData?.config?.height || '100%';
+        this.actionsBar.minHeight = '100%';
     }
 
     getData() {
-        const sections = this.pnlSections.querySelectorAll('ide-section');
-        const sectionDataList: ISectionData[] = [];
+        const sections = this.pnlElements.querySelectorAll('ide-section');
+        const sectionDataList: IPageElement[] = [];
         for (const section of sections) {
             const sectionData = (section as PageSection).data;
             if (!sectionData) continue;
             sectionDataList.push(sectionData);
         }
-        this.rowData.sections = sectionDataList;
+        this.rowData.elements = sectionDataList;
         return this.rowData;
     }
 
     onOpenRowSettingsDialog() {
-        this.rowSettings.setConfig(this.rowData.config);
-        this.rowSettings.show();
+        // this.rowSettings.setConfig(this.rowData.config);
+        // this.rowSettings.show();
     }
 
     private onClone() {
@@ -160,75 +148,101 @@ export class PageRow extends Module {
         application.EventBus.dispatch(EVENT.ON_CLONE, { rowData, id: this.id });
     }
 
+    private onResized(data: any) {
+        const unitWidth = Number(this.pnlElements.offsetWidth) / 12;
+        const { newWidth, oldWidth } = data;
+        let list = Array.from(this.pnlElements.children);
+        if (newWidth > oldWidth) {
+            let ratio = Math.ceil(newWidth / unitWidth);
+            for (let i = list.length - 1; i >= 0 && ratio !== 1; i--) {
+                const node = list[i] as Control;
+                if (node.nodeName !== 'IDE-SECTION') {
+                    this.pnlElements.removeChild(node);
+                    ratio--;
+                }
+            }
+        } else {
+            let ratio = Math.ceil((oldWidth - newWidth) / unitWidth);
+            this.appendColumnsLayout(ratio - 1);
+        }
+        let templateColumns = [];
+        list = Array.from(this.pnlElements.children);
+        for (let i = 0; i < list.length; i++) {
+            const node = list[i] as Control;
+            templateColumns.push(node.nodeName === 'IDE-SECTION' ? 'minmax(auto, 100%)' : `${unitWidth}px`);
+        }
+        this.pnlElements.templateColumns = templateColumns;
+    }
+
     async handleSectionSettingSave(config: IRowSettings) {
-        if(config.width && config.width != this.rowData.config.width) {
-            this.rowData.config.width = config.width;
-            this.width = config.width;
-        }
-        if(config.height && config.height != this.rowData.config.height) {
-            this.rowData.config.height = config.height;
-            this.height = config.height;
-        }
-        if (config.columnsSettings) {
-            this.rowData.config.columnsSettings = config.columnsSettings;
-        }
-        // Background
-        if(config.backgroundImageUrl) {
-            this.background.image = config.backgroundImageUrl;
-        }
-        else if(config.backgroundColor) {
-            this.background.color = config.backgroundColor;
-        }
-        this.rowData.config.backgroundImageUrl = config.backgroundImageUrl;
-        this.rowData.config.backgroundColor = config.backgroundColor;
+        // if(config.width && config.width != this.rowData.config.width) {
+        //     this.rowData.config.width = config.width;
+        //     this.width = config.width;
+        // }
+        // if(config.height && config.height != this.rowData.config.height) {
+        //     this.rowData.config.height = config.height;
+        //     this.height = config.height;
+        // }
+        // if (config.columnsSettings) {
+        //     this.rowData.config.columnsSettings = config.columnsSettings;
+        // }
+        // // Background
+        // if(config.backgroundImageUrl) {
+        //     this.background.image = config.backgroundImageUrl;
+        // }
+        // else if(config.backgroundColor) {
+        //     this.background.color = config.backgroundColor;
+        // }
+        // this.rowData.config.backgroundImageUrl = config.backgroundImageUrl;
+        // this.rowData.config.backgroundColor = config.backgroundColor;
 
-        const columnsSettings = config.columnsSettings || {};
-        if(config.columns) {
-            const sections = this.pnlSections.querySelectorAll('ide-section');
-            if (sections) {
-                let pageSections = [];
-                for (let i = 0; i < config.columns; i++) {
-                    const colSettings = columnsSettings[i];
-                    const section = (sections[i] as PageSection);
-                    if (section && section.component) {
-                        section.maxWidth = colSettings?.width || '100%';
-                        section.size = colSettings?.size || {};
-                        pageSections.push(section);
-                        continue;
-                    };
-                    pageSections.push(<ide-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>);
-                }
-                this.pnlSections.clearInnerHTML();
-                this.pnlSections.append(...pageSections);
-            }
-            else {
-                const sections = this.pnlSections.querySelectorAll('ide-section');
-                const delNum = this.rowData.config.columns - config.columns;
-                let delCount = 0;
-                if (sections) {
-                    for(let section of sections) {
-                        if(delCount >= delNum) break;
-                        if (section && (section as PageSection).component) continue;
-                        else {
-                            section.remove();
-                            delCount++;
-                        }
-                    }
-                    if(delCount < delNum) {
-                        const sections2 = this.pnlSections.querySelectorAll('ide-section');
-                        if(sections2) {
-                            for (let i = 0; i < delNum - delCount; i++) {
-                                if(sections2[sections2.length - 1])
-                                    sections2[sections2.length - 1].remove();
-                            }
-                        }
-                    }
-                }
-            }
-            this.rowData.config.columns = config.columns;
-        }
+        // const columnsSettings = config.columnsSettings || {};
+        // if(config.columns) {
+        //     const sections = this.pnlElements.querySelectorAll('ide-section');
+        //     if (sections) {
+        //         let pageSections = [];
+        //         for (let i = 0; i < config.columns; i++) {
+        //             const colSettings = columnsSettings[i];
+        //             const section = (sections[i] as PageSection);
+        //             if (section && section.component) {
+        //                 section.maxWidth = colSettings?.width || '100%';
+        //                 section.size = colSettings?.size || {};
+        //                 pageSections.push(section);
+        //                 continue;
+        //             };
+        //             pageSections.push(<ide-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>);
+        //         }
+        //         this.pnlElements.clearInnerHTML();
+        //         this.pnlElements.append(...pageSections);
+        //     }
+        //     else {
+        //         const sections = this.pnlElements.querySelectorAll('ide-section');
+        //         const delNum = this.rowData.config.columns - config.columns;
+        //         let delCount = 0;
+        //         if (sections) {
+        //             for(let section of sections) {
+        //                 if(delCount >= delNum) break;
+        //                 if (section && (section as PageSection).component) continue;
+        //                 else {
+        //                     section.remove();
+        //                     delCount++;
+        //                 }
+        //             }
+        //             if(delCount < delNum) {
+        //                 const sections2 = this.pnlElements.querySelectorAll('ide-section');
+        //                 if(sections2) {
+        //                     for (let i = 0; i < delNum - delCount; i++) {
+        //                         if(sections2[sections2.length - 1])
+        //                             sections2[sections2.length - 1].remove();
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     this.rowData.config.columns = config.columns;
+        // }
 
-        application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS, null)
+        // application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS, null)
     }
 
     async onDeleteRow(control: Control) {
@@ -315,7 +329,7 @@ export class PageRow extends Module {
                 </i-vstack>
                 <i-panel width="100%" height="100%" maxWidth="100%" padding={{left: '3rem', right: '3rem'}}>
                     <i-grid-layout
-                        id={'pnlSections'}
+                        id={'pnlElements'}
                         maxWidth="100%"
                         width="100%" height="100%"
                         gap={{column: 15}}

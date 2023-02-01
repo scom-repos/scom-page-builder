@@ -6,7 +6,6 @@ Styles.cssRule('#editor', {
     $nest: {
         '.row-actions-bar': {
             opacity: 0,
-            visibility: 'hidden',
             zIndex: 10,
             position: 'absolute',
             top: '0',
@@ -44,7 +43,6 @@ Styles.cssRule('#editor', {
             $nest: {
                 '.row-actions-bar': {
                     opacity: '1 !important',
-                    visibility: 'initial',
                     transition: 'opacity .3s .3s cubic-bezier(0.4,0,0.2,1), visibility 0s .2s',
                     $nest: {
                         '> i-panel': {
@@ -64,6 +62,7 @@ Styles.cssRule('ide-row', {
     display: 'block',
     position: 'relative',
     transition: 'translate .3s ease-in',
+    border: '2px solid transparent',
     $nest: {
         'ide-section': {
             flexGrow: '1'
@@ -94,6 +93,10 @@ Styles.cssRule('ide-row', {
                 }
             }
         },
+        '&.disabled:hover': {
+            cursor: 'default',
+            backgroundColor: 'inherit'
+        },
         'h1, h2, h3, h4, h5, h6': {
             margin: 0
         },
@@ -103,6 +106,12 @@ Styles.cssRule('ide-row', {
         '&.active, &:focus': {
             border: `2px solid ${Theme.colors.primary.main}`,
             transition: 'border ease-in .2s'
+        },
+        '.is-dragenter': {
+            background: '#cae5fbc4',
+            border: `1px solid ${Theme.colors.primary.main}`,
+            height: '100%',
+            opacity: 1
         }
     }
 });
