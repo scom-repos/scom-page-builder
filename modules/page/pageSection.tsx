@@ -14,7 +14,7 @@ import {
 import './pageSection.css';
 import { IComponent, ISectionData } from '@page/interface';
 import { RowSettingsDialog } from '@page/dialogs';
-import { IDEToolbar } from '@page/common';
+import { ContainerDragger, IDEToolbar } from '@page/common';
 
 const Theme = Styles.Theme.ThemeVars;
 declare global {
@@ -40,7 +40,7 @@ export class PageSection extends Module {
     private pnlMain: Panel;
     private currentComponent: any = null;
     private pageSectionWrapper: Panel;
-    private pnlSectionOverlay: Panel;
+    private _dragger: ContainerDragger<PageSection>;
 
     private _readonly: boolean;
     private _size: {
@@ -48,18 +48,31 @@ export class PageSection extends Module {
         height?: string;
     }
 
+    constructor(parent?: any) {
+        super(parent);
+    }
+
     get size() {
         return this._size || {};
     }
-
     set size(value: { width?: string; height?: string }) {
         this._size = value;
         this.updateContainerSize();
     }
 
-    async init() {
+    get readonly() {
+        return this._readonly;
+    }
+    set readonly(value: boolean) {
+        this._readonly = value;
+    }
+
+    init() {
         super.init();
-        this._readonly = this.getAttribute('readonly', true, false);
+        this.readonly = this.getAttribute('readonly', true, false);
+        const parent = this.parentElement.querySelector('#pnlSections') as Control;
+        if (!this.readonly && parent)
+            this._dragger = new ContainerDragger(this, parent, this);
         this._size = this.getAttribute('containerSize', true, {});
         this.updateContainerSize();
         this.initEventListener();
@@ -153,15 +166,6 @@ export class PageSection extends Module {
                 <i-panel id="pageSectionWrapper" width={'100%'} height="100%" padding={{top: '1.5rem', bottom: '1.5rem'}}>
                     <i-panel id="pnlMain"></i-panel>
                 </i-panel>
-                <i-panel
-                    id="pnlSectionOverlay"
-                    position={'absolute'}
-                    zIndex={-1}
-                    visible={false}
-                    opacity={0.4}
-                    background={{color: Theme.colors.primary.light}}
-                    class={'drag-overlay'}
-                ></i-panel>
             </i-panel>
         );
     }

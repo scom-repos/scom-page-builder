@@ -5,7 +5,6 @@ import {
     ControlElement,
     Styles,
     Control,
-    HStack,
     VStack,
     observable,
     GridLayout
@@ -50,23 +49,51 @@ export class PageRow extends Module {
         super(parent);
     }
 
+    private initEventBus() {
+        application.EventBus.register(this, EVENT.ON_RESIZE, this.onResized);
+    }
+
     init() {
         this._readonly = this.getAttribute('readonly', true, false);
         super.init();
+        this.initEventBus();
+    }
+
+    private async createSection(i: number) {
+        const columnsSettings = this.rowData.config.columnsSettings || {};
+        const colSettings = columnsSettings[i];
+        const sectionData = this.rowData.sections[i];
+        const pageSection = (
+            <ide-section
+                maxWidth={colSettings?.width || ''}
+                containerSize={colSettings?.size || {}}
+                readonly={this._readonly}
+            ></ide-section>
+        ) as PageSection;
+        this.pnlSections.appendChild(pageSection);
+        await pageSection.setData(sectionData);
+        return pageSection;
+    }
+
+    private appendColumnsLayout(col: number) {
+        const length = this.pnlSections.children.length;
+        for (let i = 0; i < col; i++) {
+            const el = <i-vstack id={`dropzone-tmp-${length + i}`} opacity={0} class="dropzone"></i-vstack>;
+            this.pnlSections.appendChild(el);
+        }
     }
 
     async setData(rowData: IRowData) {
         console.log('rowData config', rowData.config);
         this.pnlSections.clearInnerHTML();
         this.rowData = rowData;
-        if (this.rowData.config.width) {
+        if (this.rowData.config.width)
             this.width = this.rowData.config.width;
-        }
-        if (this.rowData.config.height) {
+
+        if (this.rowData.config.height)
             // use minHeight instead of height to avoid the overflow of inner containers
             // when the markdown editor is in edit mode
             this.minHeight = this.rowData.config.height;
-        }
 
         // Background
         if(this.rowData.config.backgroundImageUrl) {
@@ -80,58 +107,42 @@ export class PageRow extends Module {
         this.isChanged = typeof this.rowData.config.isChanged === 'boolean' ? this.rowData.config.isChanged : true;
 
         const columnsSettings = this.rowData.config.columnsSettings || {};
+        const unitWidth = Number(this.pnlSections.offsetWidth) / 12;
         if (this.rowData.sections && this.rowData.sections.length > 0) {
             if (this.rowData.sections.length === 1 && this.rowData.sections[0]?.width === '100%') {
-                const colSettings = columnsSettings[0];
-                const sectionData = this.rowData.sections[0];
-                const pageSection = (<ide-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>) as PageSection;
-                this.pnlSections.append(pageSection);
-                await pageSection.setData(sectionData);
+                await this.createSection(0)
                 this.pnlSections.templateColumns = ['repeat(1, 1fr)'];
             } else {
                 const columns = this.rowData.sections.length;
                 const configColumns = columns > 12 ? 12 : columns;
                 let missingCols = 12 - configColumns;
-                const unitWidth = Number(this.width) / 12;
-                let minWidth = 0;
                 for (let i = 0; i < this.rowData.sections.length; i++) {
-                    const colSettings = columnsSettings[i];
-                    const sectionData = this.rowData.sections[i];
-                    const pageSection = (<ide-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>) as PageSection;
-                    this.pnlSections.append(pageSection);
-                    await pageSection.setData(sectionData);
+                    const pageSection = await this.createSection(i);
                     const ratio = Math.ceil(Number(pageSection.width) / unitWidth);
                     missingCols -= (ratio - 1);
                 }
                 for (let i = 0; i < missingCols; i++) {
-                    const el = <i-vstack opacity={0}></i-vstack>;
-                    this.pnlSections.append(el);
-                    minWidth = el.width;
+                    const el = <i-vstack id={`dropzone${i}`} opacity={0} class="dropzone"></i-vstack>;
+                    this.pnlSections.appendChild(el);
                 }
-                this.pnlSections.templateColumns = ['minmax(auto, 100%)', `repeat(${missingCols + configColumns - 1}, ${minWidth}px)`];
+                this.pnlSections.templateColumns = ['minmax(auto, 100%)', `repeat(${missingCols + configColumns - 1}, ${unitWidth}px)`];
             }
         } else if (this.rowData.config.columns) {
             const columns = this.rowData.config.columns;
             const configColumns = columns > 12 ? 12 : columns < 0 ? 1 : columns;
-            let minWidth = 0;
             if (columns === 1 && columnsSettings[0]?.width === '100%') {
-                const colSettings = columnsSettings[0];
-                const pageSection = (<ide-section width="100%" containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>) as PageSection;
-                this.pnlSections.append(pageSection);
+                await this.createSection(0);
                 this.pnlSections.templateColumns = ['repeat(1, 1fr)'];
             } else {
                 const missingCols = 12 - configColumns - 1;
                 for (let i = 0; i < configColumns; i++) {
-                    const colSettings = columnsSettings[i];
-                    const pageSection = (<ide-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>) as PageSection;
-                    this.pnlSections.append(pageSection);
+                    await this.createSection(i);
                 }
                 for (let i = 0; i < missingCols; i++) {
-                    const el = <i-vstack opacity={0}></i-vstack>;
-                    this.pnlSections.append(el);
-                    minWidth = el.width;
+                    const el = <i-vstack id={`dropzone${i}`} opacity={0} class="dropzone"></i-vstack>;
+                    this.pnlSections.appendChild(el);
                 }
-                this.pnlSections.templateColumns = ['minmax(auto, 100%)', `repeat(11, ${minWidth}px)`];
+                this.pnlSections.templateColumns = ['minmax(auto, 100%)', `repeat(11, ${unitWidth}px)`];
             }
         }
         this.actionsBar.minHeight = this.rowData?.config?.height || '100%';
@@ -158,6 +169,33 @@ export class PageRow extends Module {
         const rowData = this.getData();
         if (!rowData) return;
         application.EventBus.dispatch(EVENT.ON_CLONE, { rowData, id: this.id });
+    }
+
+    private onResized(data: any) {
+        const unitWidth = Number(this.pnlSections.offsetWidth) / 12;
+        const { newWidth, oldWidth } = data;
+        let list = Array.from(this.pnlSections.children);
+        if (newWidth > oldWidth) {
+            // let ratio = Math.ceil(newWidth / unitWidth);
+            let ratio = Math.ceil((newWidth - oldWidth) / unitWidth);
+            for (let i = list.length - 1; i >= 0 && ratio !== 1; i--) {
+                const node = list[i] as Control;
+                if (node.nodeName !== 'IDE-SECTION') {
+                    this.pnlSections.removeChild(node);
+                    ratio--;
+                }
+            }
+        } else {
+            let ratio = Math.ceil((oldWidth - newWidth) / unitWidth);
+            this.appendColumnsLayout(ratio - 1);
+        }
+        let templateColumns = [];
+        list = Array.from(this.pnlSections.children);
+        for (let i = 0; i < list.length; i++) {
+            const node = list[i] as Control;
+            templateColumns.push(node.nodeName === 'IDE-SECTION' ? 'minmax(auto, 100%)' : `${unitWidth}px`);
+        }
+        this.pnlSections.templateColumns = templateColumns;
     }
 
     async handleSectionSettingSave(config: IRowSettings) {
