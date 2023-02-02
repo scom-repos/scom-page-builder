@@ -1,7 +1,6 @@
 import { Styles } from '@ijstech/components';
 const Theme = Styles.Theme.ThemeVars;
 
-
 const tileToolbarFadeIn = Styles.keyframes({
   '0%': { opacity: 0 },
   '100%':  { opacity: 1 }
@@ -58,6 +57,22 @@ Styles.cssRule('ide-toolbar', {
     },
     '.move': {
       cursor: 'move'
+    },
+    '.dragger': {
+      cursor: 'move',
+      opacity: 0,
+      visibility: 'hidden',
+      transform: 'translateX(-50%)',
+      zIndex: 10
+    },
+    '&:hover': {
+      $nest: {
+        '.dragger': {
+          visibility: 'initial',
+          opacity: 0.48,
+          transition: 'opacity .3s .3s cubic-bezier(0.4,0,0.2,1), visibility 0s .2s'
+        }
+      }
     }
   }
 })

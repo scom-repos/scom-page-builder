@@ -16,6 +16,7 @@ export const EVENT = {
     ON_ADD_COMPONENT: 'ON_ADD_COMPONENT',
     ON_ADD_ROW: 'ON_ADD_ROW',
     ON_CLONE: 'ON_CLONE',
+    ON_RESIZE: 'ON_RESIZE'
 };
 
 export const DEFAULT_BOXED_LAYOUT_WIDTH = '1200px';

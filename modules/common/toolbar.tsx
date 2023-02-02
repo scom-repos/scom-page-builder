@@ -10,8 +10,10 @@ import {
     Control,
     Button,
     Input,
-    Image
+    Image,
+    application
 } from '@ijstech/components';
+import { EVENT } from '@page/const';
 import { commandHistory, ResizeElementCommand } from '@page/utility';
 import './toolbar.css';
 
@@ -49,6 +51,7 @@ export class IDEToolbar extends Module {
     private _currentResizer: Panel;
     private _currentPosition: IPosition;
     private _component: any;
+    private dragStack: Panel;
 
     private _mouseDownHandler: any;
     private _mouseUpHandler: any;
@@ -62,6 +65,7 @@ export class IDEToolbar extends Module {
     }
 
     private handleMouseDown(e: MouseEvent) {
+        e.stopPropagation();
         const target = e.target as HTMLElement;
         const resizer = target.closest('.resize-stack') as Panel;
         this._origHeight = this._component.offsetHeight;
@@ -108,20 +112,22 @@ export class IDEToolbar extends Module {
                 break;
         }
         this.contentStack.width = 'fit-content';
-        const resizeCmd = new ResizeElementCommand(this._component, newWidth, newHeight);
-        commandHistory.execute(resizeCmd);
+        this._component.width = newWidth;
+        this._component.height = newHeight;
         this.contentStack.refresh();
     };
     private handleMouseUp(e: MouseEvent) {
+        e.stopPropagation();
         document.removeEventListener('mousemove', this._mouseMoveHandler);
         document.removeEventListener('mouseup', this._mouseUpHandler);
         const target = e.target as HTMLElement;
         const resizer = target.closest('.resize-stack');
-        if (resizer) {
-            resizer.classList.remove('resizing');
-            this._currentResizer = null;
-            this._currentPosition = 'left';
-        }
+        resizer && resizer.classList.remove('resizing');
+        this._currentResizer = null;
+        this._currentPosition = 'left';
+        const resizeCmd = new ResizeElementCommand(this._component, this._origWidth, this._origHeight);
+        commandHistory.execute(resizeCmd);
+        application.EventBus.dispatch(EVENT.ON_RESIZE, { newWidth: Number(this._component.width), oldWidth: this._origWidth });
     };
 
     get toolList() {
@@ -150,18 +156,19 @@ export class IDEToolbar extends Module {
 
     appendItem(component: Control) {
         if (!this.contentStack) this.contentStack = new Panel();
-        this.contentStack.clearInnerHTML();
         component.parent = this.contentStack;
         if (!this.readonly) {
             if (component instanceof Input)
                 component.onFocus = this.showToolbars.bind(this);
             component.onClick = this.showToolbars.bind(this);
+            this.contentStack.classList.add('move');
+            this.renderResizeStack(component instanceof Image);
         }
 
         if (component instanceof Button || component instanceof Image) {
             this.contentStack.padding = {top: 5, left: 5, right: 5, bottom: 5};
             this.contentStack.width = 'fit-content';
-            this.contentStack.classList.add('move');
+            this.dragStack.visible = false;
         } else {
             this.contentStack.width = '100%';
         }
@@ -170,7 +177,6 @@ export class IDEToolbar extends Module {
         this._component = component;
         this.contentStack.appendChild(component);
         this.contentStack.refresh();
-        if (!this.readonly) this.renderResizeStack(component instanceof Image);
     }
 
     private async renderToolbars() {
@@ -280,16 +286,16 @@ export class IDEToolbar extends Module {
                 stack.top = 0;
                 stack.left = 0;
                 stack.height = '100%';
-                iconEl.margin = {left: -7};
+                iconEl.margin = {left: -8};
                 break;
             case 'right':
                 stack.top = 0;
                 stack.right = 0;
                 stack.height = '100%';
-                iconEl.margin = {right: -7};
+                iconEl.margin = {right: -8};
                 break;
             case 'bottom':
-                stack.bottom = -7;
+                stack.bottom = -8;
                 stack.left = '50%';
                 stack.style.transform = 'translateX(-50%)'
                 stack.height = 'auto';
@@ -297,18 +303,18 @@ export class IDEToolbar extends Module {
                 stack.visible = false;
                 break;
             case 'bottomLeft':
-                stack.bottom = -7;
+                stack.bottom = -8;
                 stack.left = 0;
                 stack.height = 'auto';
-                iconEl.margin = {left: -7};
+                iconEl.margin = {left: -8};
                 iconEl.classList.add('ne-resize');
                 stack.visible = false;
                 break;
             case 'bottomRight':
-                stack.bottom = -7;
+                stack.bottom = -8;
                 stack.right = 0;
                 stack.height = 'auto';
-                iconEl.margin = {right: -7};
+                iconEl.margin = {right: -8};
                 iconEl.classList.add('nw-resize');
                 stack.visible = false;
                 break;
@@ -346,7 +352,33 @@ export class IDEToolbar extends Module {
                     maxHeight="100%"
                     class="ide-component"
                     onClick={this.showToolbars.bind(this)}
-                ></i-panel>
+                >
+                    <i-vstack
+                        id="dragStack"
+                        verticalAlignment="center"
+                        position="absolute"
+                        left="50%" top="0px"
+                        width="auto" height="auto"
+                        class="dragger"
+                    >
+                        <i-grid-layout
+                            verticalAlignment="center"
+                            autoFillInHoles={true}
+                            columnsPerRow={4}
+                            gap={{column: '2px', row: '2px'}}
+                            class="main-drag"
+                        >
+                            <i-icon name="circle" width={3} height={3}></i-icon>
+                            <i-icon name="circle" width={3} height={3}></i-icon>
+                            <i-icon name="circle" width={3} height={3}></i-icon>
+                            <i-icon name="circle" width={3} height={3}></i-icon>
+                            <i-icon name="circle" width={3} height={3}></i-icon>
+                            <i-icon name="circle" width={3} height={3}></i-icon>
+                            <i-icon name="circle" width={3} height={3}></i-icon>
+                            <i-icon name="circle" width={3} height={3}></i-icon>
+                        </i-grid-layout>
+                    </i-vstack>
+                </i-panel>
             </i-vstack>
         );
     }

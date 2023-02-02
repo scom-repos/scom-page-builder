@@ -84,6 +84,20 @@ export class PageRows extends Module {
         });
     }
 
+    private initDragEvent(row: PageRow) {
+        const dragStack = row.querySelector('#dragStack') as Control;
+        if (!dragStack) return;
+        if (this.draggable) {
+            row.classList.add('dropzone');
+            dragStack.addEventListener('mousedown', this.mouseDownHandler, false);
+        } else {
+            dragStack.removeEventListener('mousedown', this.mouseDownHandler, false);
+        }
+        dragStack.ondragstart = function() {
+            return false;
+        };
+    }
+
     private mouseDownHandler(event: MouseEvent) {
         event.stopPropagation();
         const target = event.target as HTMLElement;
@@ -222,20 +236,6 @@ export class PageRows extends Module {
             this.pnlRows.append(pageRow);
             await pageRow.setData(rowData);
         }
-    }
-
-    private initDragEvent(row: PageRow) {
-        const dragStack = row.querySelector('#dragStack') as Control;
-        if (!dragStack) return;
-        if (this.draggable) {
-            row.classList.add('dropzone');
-            dragStack.addEventListener('mousedown', this.mouseDownHandler, false);
-        } else {
-            dragStack.removeEventListener('mousedown', this.mouseDownHandler, false);
-        }
-        dragStack.ondragstart = function() {
-            return false;
-        };
     }
 
     async appendRow(rowData: IRowData) {
