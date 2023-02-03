@@ -10,7 +10,6 @@ import './pageSection.css';
 import { IPageElement } from '@page/interface';
 import { RowSettingsDialog } from '@page/dialogs';
 import { ContainerDragger, IDEToolbar } from '@page/common';
-import { isEmpty } from '@page/utility';
 
 declare global {
     namespace JSX {
@@ -49,6 +48,10 @@ export class PageSection extends Module {
     }
     private currentToolbar: IDEToolbar;
     private toolbarList: IDEToolbar[];
+
+    constructor(parent?: any) {
+        super(parent);
+    }
 
     constructor(parent?: any) {
         super(parent);
