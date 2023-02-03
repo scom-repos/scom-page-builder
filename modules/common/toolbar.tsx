@@ -245,36 +245,18 @@ export class IDEToolbar extends Module {
         }
     }
 
-    private showToolbars() {
+    showToolbars() {
         if (this.toolList.length) {
-            this.toolsStack.classList.remove('hidden');
+            this.toolsStack.visible = true;
             this.contentStack.classList.add('active');
             this.classList.add('active');
         }
     }
 
-    private hideToolbars() {
-        this.toolsStack.classList.add('hidden');
+    hideToolbars() {
+        this.toolsStack.visible = false;
         this.contentStack.classList.remove('active');
         this.classList.remove('active');
-    }
-
-    private initEventListener() {
-        document.addEventListener('click', async (e) => {
-            e.stopImmediatePropagation();
-            const currentToolbar = (e.target as HTMLElement)?.closest('ide-toolbar');
-            if (currentToolbar) {
-                const toolbars = document.querySelectorAll('ide-toolbar');
-                for (const toolbar of toolbars) {
-                    (toolbar as IDEToolbar).hideToolbars();
-                }
-                const parentSection = currentToolbar.closest('ide-section');
-                if (parentSection) parentSection.classList.remove('active');
-                (currentToolbar as IDEToolbar).showToolbars();
-            } else {
-                this.hideToolbars();
-            }
-        });
     }
 
     private renderResizeStack() {
@@ -355,7 +337,10 @@ export class IDEToolbar extends Module {
         else await this.setModule(ipfscid);
         if (this._component) {
             this._component.style.display = 'block';
-            this._component.onClick = this.showToolbars.bind(this);
+            this._component.onClick = () => {
+                this.checkToolbar();
+                this.showToolbars();
+            }
             if (this.data.module?.name === 'Text box') {
                 this.dragStack.visible = true;
                 this.contentStack.classList.remove('move');
@@ -428,10 +413,24 @@ export class IDEToolbar extends Module {
         if (this._component) this._component.setTag(tag)
     }
 
+    private checkToolbar() {
+        const isShowing = this.toolsStack.visible;
+        const toolbars = document.querySelectorAll('ide-toolbar');
+        for (const toolbar of toolbars) {
+            (toolbar as IDEToolbar).hideToolbars();
+        }
+        isShowing && this.showToolbars();
+    }
+
+    _handleClick(event: Event): boolean {
+        if (this._readonly) return super._handleClick(event, true);
+        this.checkToolbar();
+        return super._handleClick(event, true);
+    }
+
     init() {
         super.init();
         this.readonly = this.getAttribute('readonly', true, false);
-        if (!this.readonly)  this.initEventListener();
     }
 
     render() {
@@ -441,7 +440,7 @@ export class IDEToolbar extends Module {
                     id="toolsStack"
                     border={{ radius: 4 }}
                     background={{ color: '#fff' }}
-                    class="ide-toolbar hidden"
+                    class="ide-toolbar"
                 >
                     <i-hstack id="toolbar" gap="0.5rem"></i-hstack>
                 </i-panel>

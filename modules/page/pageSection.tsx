@@ -53,10 +53,6 @@ export class PageSection extends Module {
         super(parent);
     }
 
-    constructor(parent?: any) {
-        super(parent);
-    }
-
     get size() {
         return this._size || {};
     }
