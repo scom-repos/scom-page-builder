@@ -62,6 +62,7 @@ Styles.cssRule('ide-row', {
     display: 'block',
     position: 'relative',
     transition: 'translate .3s ease-in',
+    border: '2px solid transparent',
     $nest: {
         'ide-section': {
             flexGrow: '1'

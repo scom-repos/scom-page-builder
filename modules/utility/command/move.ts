@@ -63,4 +63,6 @@ export class MoveElementCommand implements ICommand {
     }
     (this.parent as any).templateColumns = templateColumns;
   }
+
+  redo(): void {}
 }

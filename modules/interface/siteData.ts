@@ -1,3 +1,5 @@
+import { IPageBlockData } from "./pageBlock";
+
 export type ISiteType = "secure-page" | "secure-book";
 
 export interface ISiteData {
@@ -12,28 +14,43 @@ export interface IPageData {
     path: string;
     url: string;
     visible: boolean;
-    rows: IRowData[];
+
+    header: IPageHeader;
+	sections: IPageSection[];
+	footer: IPageFooter;
 }
 
-export interface IRowData {
-    config: IRowSettings;
-    sections: ISectionData[];
+export interface IPageHeader {
+	headerType: 'cover' | 'largeBanner' | 'banner' | 'titleOnly';
+	image: string;
+	elements: IPageElement[];
 }
 
-export interface IComponent {
-    type: string;
+export interface IPageSection {
+	id: string; // uuid
+	row: number;
+	image?: string;
+    backgroundColor?: string;
+	elements: IPageElement[];
+}
+
+export interface IPageFooter {
+	image: string;
+	elements: IPageElement[];
+}
+
+export type ElementType = 'primitive' | 'composite';
+
+export interface IPageElement {
+    id: string; // uuid
+	column: number;
+	columnSpan: number;
+	type: 'primitive' | 'composite',
     properties: any;
-}
-
-export interface ISectionData {
-    component: IComponent;
-    toolList?: any[];
-    data?: any;
-    tag?: any;
+	module?: IPageBlockData; // follow the standard defined in secure page, if type === 'primitive'
+	elements?: IPageElement[]; // type === 'composite'
     visibleOn?: string;
     invisibleOn?: string;
-    width?: string;
-    height?: string;
 }
 
 export interface IRowSettings {
@@ -55,6 +72,7 @@ export interface IRowSettings {
 }
 
 type StyleValues = "-moz-initial" | "inherit" | "initial" | "revert" | "unset";
+
 export interface IContainerSettings {
     width?: string;
     maxWidth?: string;
@@ -101,3 +119,5 @@ export interface IAddPageArgs {
 export interface IUpdatePageArgs {
     pageId: number;
 }
+
+

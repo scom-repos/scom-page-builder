@@ -3,20 +3,14 @@ import {
     customElements,
     Control,
     Panel,
-    Image,
     ControlElement,
-    Styles,
-    VStack,
-    Button,
-    Input,
-    HStack
+    VStack
 } from '@ijstech/components';
 import './pageSection.css';
-import { IComponent, ISectionData } from '@page/interface';
+import { IPageElement } from '@page/interface';
 import { RowSettingsDialog } from '@page/dialogs';
 import { ContainerDragger, IDEToolbar } from '@page/common';
 
-const Theme = Styles.Theme.ThemeVars;
 declare global {
     namespace JSX {
         interface IntrinsicElements {
@@ -35,17 +29,28 @@ export interface PageSectionElement extends ControlElement {
 
 @customElements('ide-section')
 export class PageSection extends Module {
-    private _data: ISectionData = { data: null, component: null, visibleOn: '', invisibleOn: ''};
     private pnlLoading: VStack;
     private pnlMain: Panel;
-    private currentComponent: any = null;
     private pageSectionWrapper: Panel;
     private _dragger: ContainerDragger<PageSection>;
 
+    private _data: IPageElement = {
+        column: 0,
+        columnSpan: 0,
+        type: 'primitive',
+        properties: undefined,
+        id: ''
+    };
     private _readonly: boolean;
     private _size: {
         width?: string;
         height?: string;
+    }
+    private currentToolbar: IDEToolbar;
+    private toolbarList: IDEToolbar[];
+
+    constructor(parent?: any) {
+        super(parent);
     }
 
     constructor(parent?: any) {
@@ -70,7 +75,7 @@ export class PageSection extends Module {
     init() {
         super.init();
         this.readonly = this.getAttribute('readonly', true, false);
-        const parent = this.parentElement.querySelector('#pnlSections') as Control;
+        const parent = this.parentElement.querySelector('#pnlElements') as Control;
         if (!this.readonly && parent)
             this._dragger = new ContainerDragger(this, parent, this);
         this._size = this.getAttribute('containerSize', true, {});
@@ -112,55 +117,78 @@ export class PageSection extends Module {
     }
 
     clear() {
-        this.currentComponent = null;
-        this._data = { toolList: [], component: null };
+        this.currentToolbar = null;
+        this.toolbarList = null;
+        this._data = {
+            id: '',
+            column: 0,
+            columnSpan: 0,
+            type: 'primitive',
+            properties: undefined
+        };
         this.pnlMain.clearInnerHTML();
     }
 
     get data() {
-        if (!this._data.toolList?.length && !this._data.component) return null;
+        if (!this._data.type && !this._data.properties) return null;
         return this._data;
     }
 
-    get component() {
-        return this.currentComponent;
+    get module() {
+        return this.currentToolbar;
     }
 
-    private async createComponent(config: IComponent) {
-        let control: Control;
-        switch (config.type) {
-            case 'Button':
-                control = await Button.create(config.properties)
-                break;
-            case 'Input':
-                control = await Input.create(config.properties)
-                break;
-            case 'Divider':
-                control = await HStack.create(config.properties)
-                break;
-            case 'Image':
-                control = await Image.create(config.properties)
-                break;
-        }
-        return control;
+    private async createToolbar(value: IPageElement) {
+        let toolbar = await IDEToolbar.create({}) as IDEToolbar;
+        toolbar.readonly = this._readonly;
+        toolbar.data = value;
+        await toolbar.fetchModule();
+        return toolbar;
     }
 
-    async setData(value: ISectionData) {
+    // TODO
+    async setData(value: IPageElement) {
+        // id: string; // uuid
+        // column: number;
+        // columnSpan: number;
+
         this._data = value;
-        this.currentComponent = await IDEToolbar.create({}) as IDEToolbar;
-        this.currentComponent.toolList = value.toolList;
-        this.currentComponent.readonly = this._readonly;
-        const mainControl = await this.createComponent(value.component);
-        if (mainControl)
-            this.currentComponent.appendItem(mainControl);
-        this.pnlMain.appendChild(this.currentComponent);
-        if (value.height)
-            this.height = value.height;
-        if (value.width)
-            this.width = value.width;
+        this.id = value.id;
+        if (value.type === 'primitive') {
+            if (this.currentToolbar) {
+                this.currentToolbar.setData(value.properties);
+                this.currentToolbar.setTag(value.properties);
+            } else {
+                this.currentToolbar = await this.createToolbar(value);
+                this.currentToolbar.parent = this.pnlMain;
+                this.pnlMain.appendChild(this.currentToolbar);
+            }
+        } else if (value.elements?.length) {
+            if (this.toolbarList.length) {
+                for (let i = 0; i < value.elements.length; i++) {
+                    const element = value.elements[i];
+                    const toolbar = this.toolbarList[i];
+                    if (toolbar) {
+                        toolbar.setData(element.properties);
+                        toolbar.setTag(element.properties);
+                    }
+                }
+            } else {
+                const stack = <i-vstack></i-vstack>
+                for (let i = 0; i < value.elements.length; i++) {
+                    const element = value.elements[i];
+                    const toolbar = await this.createToolbar(element);
+                    toolbar.parent = stack;
+                    stack.appendChild(toolbar);
+                    this.toolbarList.push(toolbar);
+                }
+                stack.parent = this.pnlMain;
+                this.pnlMain.appendChild(stack);
+            }
+        }
     }
 
-    async render() {
+    render() {
         return (
             <i-panel id={'pnlPageSection'}>
                 <i-panel id="pageSectionWrapper" width={'100%'} height="100%" padding={{top: '1.5rem', bottom: '1.5rem'}}>

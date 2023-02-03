@@ -1,15 +1,15 @@
-import { application, Button, customModule, Modal, Module, Panel, Image, Upload, Input } from '@ijstech/components';
+import { application, Button, customModule, Modal, Module, Panel, Upload, Input } from '@ijstech/components';
 import { EVENT, textStyles } from '@page/const';
-import { IRowData } from '@page/interface';
+import { ElementType, IPageBlockData } from '@page/interface';
 import { PageRow, PageRows } from '@page/page';
 import { LightTheme  } from '@page/theme';
+import { generateUUID } from '@page/utility';
 import './index.css';
 
 const Theme = LightTheme;
-
-interface IComponentConfig {
-    name: string;
-    config?: any
+interface IElementConfig {
+    module: IPageBlockData;
+    type: ElementType;
 }
 
 @customModule
@@ -29,13 +29,9 @@ export class Editor extends Module {
     }
 
     initEventBus() {
-        application.EventBus.register(this, EVENT.ON_ADD_COMPONENT, (componentConfig: IComponentConfig) => {
-            if (!componentConfig) return;
-            this.onAddComponent(componentConfig);
-        });
-        application.EventBus.register(this, EVENT.ON_ADD_ROW, (data: IRowData) => {
+        application.EventBus.register(this, EVENT.ON_ADD_ELEMENT, (data: IElementConfig) => {
             if (!data) return;
-            this.onAddRow(data);
+            this.onAddElement(data);
         });
         application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => {
             const headerRow = this.querySelector('#headerRow');
@@ -44,98 +40,29 @@ export class Editor extends Module {
         })
     }
 
-    private async onAddComponent(config: IComponentConfig) {
-        let sectionData: any = {};
+    private async onAddElement(data: IElementConfig) {
+        const { type, module } = data;
         let row: PageRow;
-        switch(config.name) {
-            case 'textbox':
-                sectionData.toolList = [
-                    textStyles,
-                    {
-                        caption: `<i-icon name="bold" width=${20} height=${20} fill="${Theme.text.primary}"></i-icon>`,
-                        onClick: () => {}
-                    },
-                    {
-                        caption: `<i-icon name="italic" width=${20} height=${20} fill="${Theme.text.primary}"></i-icon>`,
-                        onClick: () => {}
-                    },
-                    {
-                        caption: `<i-icon name="trash" width=${20} height=${20} fill="${Theme.text.primary}"></i-icon>`,
-                        onClick: async() => {
-                            row.remove();
-                        }
-                    }
-                ];
-                sectionData.component = {
-                    type: 'Input',
-                    properties: {
-                        minHeight: '2.5rem',
-                        width: '100%',
-                        minWidth: 200,
-                        placeholder: 'Click to edit text'
-                    }
-                };
-                sectionData.width = '100%';
-                break;
-            case 'button':
-                sectionData.toolList = [
-                    {
-                        caption: `<i-icon name="trash" width=${20} height=${20} fill="${Theme.text.primary}"></i-icon>`,
-                        onClick: () => {}
-                    }
-                ];
-                sectionData.component = {
-                    type: 'Button',
-                    properties: {
-                        minHeight: '2.5rem',
-                        minWidth: 100,
-                        padding: {left: '1.5rem', right: '1.5rem'}
-                    }
-                };
-                break;
-            case 'divider':
-                sectionData.component = {
-                    type: 'Divider',
-                    properties: {
-                        border: {bottom: {width: '1px', style: 'solid', color: Theme.divider}},
-                        height: 1,
-                        width: '100%'
-                    }
-                };
-                sectionData.width = '100%';
-                break;
-            case 'image':
-                sectionData.toolList = [
-                    {
-                        caption: `<i-icon name="trash" width=${20} height=${20} fill="${Theme.text.primary}"></i-icon>`,
-                        onClick: () => {}
-                    }
-                ];
-                sectionData.component = {
-                    type: 'Image',
-                    properties: {
-                        height: 'auto',
-                        minWidth: 100,
-                        display: 'block',
-                        ...config.config
-                    }
-                };
-                break;
+        let element = {
+            id: generateUUID(),
+            column: 1,
+            columnSpan: 1,
+            type,
+            module,
+            properties: {}
         }
         let rowData = {
-            config: {
-                width: '100%',
-                columns: 1,
-                isCloned: config.name !== 'divider',
-                isChanged: config.name !== 'divider'
-            },
-            sections: [sectionData]
+            id: generateUUID(),
+            // config: {
+            //     width: '100%',
+            //     columns: 1,
+            //     isCloned: true,
+            //     isChanged: true
+            // },
+            row: 0,
+            elements: [element]
         };
         row = await this.pageRows.appendRow(rowData);
-    }
-
-    private async onAddRow(rowData: IRowData) {
-        await this.pageRows.appendRow(rowData);
     }
 
     private onShowModal() {
@@ -173,46 +100,49 @@ export class Editor extends Module {
         );
         row.classList.add('text-center');
         row.setData({
-            config: {
-                width: '100%',
-                height: '340px',
-                columns: 1,
-                isCloned: false,
-                isChanged: false
-            },
-            sections: [
-                {
-                    toolList: [
-                        textStyles,
-                        {
-                            caption: `<i-icon name="bold" width=${20} height=${20} fill="${Theme.text.primary}"></i-icon>`,
-                            onClick: () => {}
-                        },
-                        {
-                            caption: `<i-icon name="italic" width=${20} height=${20} fill="${Theme.text.primary}"></i-icon>`,
-                            onClick: () => {}
-                        },
-                        {
-                            caption: `<i-icon name="trash" width=${20} height=${20} fill="${Theme.text.primary}"></i-icon>`,
-                            onClick: () => {
-                                row.remove();
-                            }
-                        }
-                    ],
-                    component: {
-                        type: 'Input',
-                        properties: {
-                            minHeight: '6.25rem',
-                            width: '60%',
-                            margin: { left: 'auto', right: 'auto'},
-                            font: {color: '#fff', size: '2rem'},
-                            value: 'Home'
-                        }
-                    },
-                    height: '340px',
-                    width: '100%'
-                }
-            ]
+            id: generateUUID(),
+            row: 0,
+            // config: {
+            //     width: '100%',
+            //     height: '340px',
+            //     columns: 1,
+            //     isCloned: false,
+            //     isChanged: false
+            // },
+            elements: []
+            // sections: [
+            //     {
+            //         toolList: [
+            //             textStyles,
+            //             {
+            //                 caption: `<i-icon name="bold" width=${20} height=${20} fill="${Theme.text.primary}"></i-icon>`,
+            //                 onClick: () => {}
+            //             },
+            //             {
+            //                 caption: `<i-icon name="italic" width=${20} height=${20} fill="${Theme.text.primary}"></i-icon>`,
+            //                 onClick: () => {}
+            //             },
+            //             {
+            //                 caption: `<i-icon name="trash" width=${20} height=${20} fill="${Theme.text.primary}"></i-icon>`,
+            //                 onClick: () => {
+            //                     row.remove();
+            //                 }
+            //             }
+            //         ],
+            //         component: {
+            //             type: 'Input',
+            //             properties: {
+            //                 minHeight: '6.25rem',
+            //                 width: '60%',
+            //                 margin: { left: 'auto', right: 'auto'},
+            //                 font: {color: '#fff', size: '2rem'},
+            //                 value: 'Home'
+            //             }
+            //         },
+            //         height: '340px',
+            //         width: '100%'
+            //     }
+            // ]
         })
         row.click();
         this.btnAddHeader.visible = false;
@@ -322,7 +252,10 @@ export class Editor extends Module {
                         </i-panel>
                     </i-panel>
                     <i-panel class="main-sidebar" height="100%" overflow={{ y: 'auto' }}>
-                        <ide-sidebar id={'pageSidebar'} width="100%"></ide-sidebar>
+                        <ide-sidebar
+                            id={'pageSidebar'}
+                            width="100%"
+                        ></ide-sidebar>
                     </i-panel>
                 </i-grid-layout>
                 <i-modal

@@ -9,11 +9,11 @@ import {
     Menu,
     Control,
     Button,
-    Input,
     Image,
     application
 } from '@ijstech/components';
 import { EVENT } from '@page/const';
+import { IPageBlockData } from '@page/interface';
 import { commandHistory, ResizeElementCommand } from '@page/utility';
 import './toolbar.css';
 
@@ -30,6 +30,42 @@ export interface ToolbarElement extends ControlElement {
 }
 type IPosition = 'left'|'right'|'bottomLeft'|'bottomRight'|'bottom';
 const Theme = Styles.Theme.ThemeVars;
+interface ICodeInfoFileContent {
+    version: ISemanticVersion;
+    codeCID: string;
+    source: string;
+}
+
+interface ISemanticVersion {
+    major: number;
+    minor: number;
+    patch: number;
+}
+
+const fetchFileContentByCID = async (ipfsCid: string) => {
+    let result: any;
+    try {
+        result = await fetch(`https://ipfs.scom.dev/ipfs/${ipfsCid}`);
+    } catch (err) {
+        const IPFS_Gateway = 'https://ipfs.io/ipfs/{CID}';
+        result = await fetch(IPFS_Gateway.replace('{CID}', ipfsCid));
+    }
+    return result;
+};
+
+const getSCConfigByCid = async (cid: string) => {
+    let scConfig: any;
+    let result = await fetchFileContentByCID(cid);
+    let codeInfoFileContent = (await result.json()) as ICodeInfoFileContent;
+    let ipfsCid = codeInfoFileContent.codeCID;
+    if (ipfsCid) {
+        try {
+            let scConfigRes = await fetchFileContentByCID(`${ipfsCid}/dist/scconfig.json`);
+            scConfig = await scConfigRes.json();
+        } catch (err) {}
+    }
+    return scConfig;
+};
 
 @customElements('ide-toolbar')
 export class IDEToolbar extends Module {
@@ -50,12 +86,14 @@ export class IDEToolbar extends Module {
     private _nwResizer: Panel;
     private _currentResizer: Panel;
     private _currentPosition: IPosition;
-    private _component: any;
+    private _component: any = null;
     private dragStack: Panel;
 
     private _mouseDownHandler: any;
     private _mouseUpHandler: any;
     private _mouseMoveHandler: any;
+
+    data: any;
 
     constructor(parent?: any) {
         super(parent);
@@ -97,16 +135,17 @@ export class IDEToolbar extends Module {
                 newWidth = (this._origWidth + offsetX) + 'px';
                 break;
             case 'bottom':
-                newHeight = (this._origHeight - offsetY) + 'px';
+                newHeight = (this._origHeight + offsetY) + 'px';
                 break;
             case 'bottomLeft':
                 newWidth = (this._origWidth - offsetX) + 'px';
-                newHeight = (this._origHeight - offsetY) + 'px';
+                newHeight = (this._origHeight + offsetY) + 'px';
                 this.contentStack.style.left = `${Number(this._mouseDownPos.x) - offsetX}`;
+                this.contentStack.style.top = `${Number(this._mouseDownPos.y) - offsetY}`;
                 break;
             case 'bottomRight':
                 newWidth = (this._origWidth + offsetX) + 'px';
-                newHeight = (this._origHeight - offsetY) + 'px';
+                newHeight = (this._origHeight + offsetY) + 'px';
                 this.contentStack.style.left = `${Number(this._mouseDownPos.x) - offsetX}`;
                 this.contentStack.style.top = `${Number(this._mouseDownPos.y) - offsetY}`;
                 break;
@@ -125,6 +164,7 @@ export class IDEToolbar extends Module {
         resizer && resizer.classList.remove('resizing');
         this._currentResizer = null;
         this._currentPosition = 'left';
+        // TODO: check resize other component
         const resizeCmd = new ResizeElementCommand(this._component, this._origWidth, this._origHeight);
         commandHistory.execute(resizeCmd);
         application.EventBus.dispatch(EVENT.ON_RESIZE, { newWidth: Number(this._component.width), oldWidth: this._origWidth });
@@ -154,31 +194,6 @@ export class IDEToolbar extends Module {
         return menu;
     }
 
-    appendItem(component: Control) {
-        if (!this.contentStack) this.contentStack = new Panel();
-        component.parent = this.contentStack;
-        if (!this.readonly) {
-            if (component instanceof Input)
-                component.onFocus = this.showToolbars.bind(this);
-            component.onClick = this.showToolbars.bind(this);
-            this.contentStack.classList.add('move');
-            this.renderResizeStack(component instanceof Image);
-        }
-
-        if (component instanceof Button || component instanceof Image) {
-            this.contentStack.padding = {top: 5, left: 5, right: 5, bottom: 5};
-            this.contentStack.width = 'fit-content';
-            this.dragStack.visible = false;
-        } else {
-            this.contentStack.width = '100%';
-        }
-        component.maxWidth = '100%';
-        component.maxHeight = '100%';
-        this._component = component;
-        this.contentStack.appendChild(component);
-        this.contentStack.refresh();
-    }
-
     private async renderToolbars() {
         this.toolbar.clearInnerHTML();
         for (let i = 0; i < this.toolList.length; i++) {
@@ -201,7 +216,7 @@ export class IDEToolbar extends Module {
                         <i-button
                             padding={{ left: '1rem', right: '1rem' }}
                             height={52}
-                            caption={tool[0].title}
+                            caption={tool[0].name}
                             background={{color: 'transparent'}}
                             rightIcon={{name: 'caret-down', fill: Theme.text.primary, width: 20, height: 20}}
                             onClick={() => modal.visible = !modal.visible}
@@ -216,7 +231,13 @@ export class IDEToolbar extends Module {
                     height: 48,
                     border: {radius: '50%'},
                     background: {color: 'transparent'},
-                    ...tool
+                    caption: `<i-icon name="${tool.icon}" width=${20} height=${20} display="block" fill="${Theme.text.primary}"></i-icon>`,
+                    onClick: () => {
+                        console.log('button click: ', tool.name)
+                        // const commandIns = tool.command(this, null);
+                        // commandHistory.execute(commandIns);
+                        this.hideToolbars();
+                    }
                 });
                 elm.classList.add('toolbar');
             }
@@ -226,21 +247,21 @@ export class IDEToolbar extends Module {
 
     private showToolbars() {
         if (this.toolList.length) {
-            this.toolsStack.visible = true;
+            this.toolsStack.classList.remove('hidden');
             this.contentStack.classList.add('active');
             this.classList.add('active');
         }
     }
 
     private hideToolbars() {
-        this.toolsStack.visible = false;
+        this.toolsStack.classList.add('hidden');
         this.contentStack.classList.remove('active');
         this.classList.remove('active');
     }
 
     private initEventListener() {
         document.addEventListener('click', async (e) => {
-            e.stopPropagation();
+            e.stopImmediatePropagation();
             const currentToolbar = (e.target as HTMLElement)?.closest('ide-toolbar');
             if (currentToolbar) {
                 const toolbars = document.querySelectorAll('ide-toolbar');
@@ -256,15 +277,16 @@ export class IDEToolbar extends Module {
         });
     }
 
-    private renderResizeStack(value: boolean) {
+    private renderResizeStack() {
         this._eResizer = this.renderResizer('left');
         this._wResizer = this.renderResizer('right');
         this._nResizer = this.renderResizer('bottom');
         this._neResizer = this.renderResizer('bottomLeft');
         this._nwResizer = this.renderResizer('bottomRight');
-        if (this._nResizer) this._nResizer.visible = value;
-        if (this._neResizer) this._neResizer.visible = value;
-        if (this._nwResizer) this._nwResizer.visible = value;
+        const isImage = this.data.module?.name === 'Image';
+        if (this._nResizer) this._nResizer.visible = isImage;
+        if (this._neResizer) this._neResizer.visible = isImage;
+        if (this._nwResizer) this._nwResizer.visible = isImage;
     }
 
     private renderResizer(position: IPosition) {
@@ -295,7 +317,7 @@ export class IDEToolbar extends Module {
                 iconEl.margin = {right: -8};
                 break;
             case 'bottom':
-                stack.bottom = -8;
+                stack.bottom = -10;
                 stack.left = '50%';
                 stack.style.transform = 'translateX(-50%)'
                 stack.height = 'auto';
@@ -326,6 +348,86 @@ export class IDEToolbar extends Module {
         return stack;
     }
 
+    async fetchModule() {
+        if (this._readonly) return;
+        const ipfscid = this.data.module.ipfscid;
+        if (this.data.module.local) await this.setLocalModule(this.data.module);
+        else await this.setModule(ipfscid);
+        if (this._component) {
+            this._component.style.display = 'block';
+            this._component.onClick = this.showToolbars.bind(this);
+            if (this.data.module?.name === 'Text box') {
+                this.dragStack.visible = true;
+                this.contentStack.classList.remove('move');
+            } else {
+                this.dragStack.visible = false;
+                this.contentStack.classList.add('move');
+            }
+            this.renderResizeStack();
+            const actions = this._component.getActions();
+            this.toolList = actions;
+        }
+    }
+
+    async setModule(ipfscid: string) {
+        const scconfig = await getSCConfigByCid(ipfscid);
+        const main: string = scconfig.main;
+        const response = await fetchFileContentByCID(ipfscid);
+        const result = await response.json();
+        const codeCID = result.codeCID;
+        let module: any;
+        if (main.startsWith("@")) {
+            scconfig.rootDir = `https://ipfs.scom.dev/ipfs/${codeCID}/dist`;
+            module = await (application as any).newModule(main, scconfig, true);
+        } else {
+            const mainScriptPath = `https://ipfs.scom.dev/ipfs/${main.replace(
+                '{root}',
+
+                codeCID + '/dist'
+            )}`;
+            const dependencies = scconfig.dependencies;
+            for (let key in dependencies) {
+                dependencies[key] = dependencies[key].replace(
+                    '{root}',
+                    'https://ipfs.scom.dev/ipfs/' + codeCID + '/dist'
+                );
+            }
+            module = (await application.newModule(mainScriptPath, { dependencies })) as any;
+        }
+        if (module) {
+            module.parent = this.contentStack;
+            module.maxWidth = '100%';
+            module.maxHeight = '100%';
+            module.overflow = {x: 'hidden', y: 'hidden'};
+            this.contentStack.append(module);
+            this._component = module;
+        }
+    }
+
+    async setLocalModule(pageBlockData: IPageBlockData) {
+        if(!pageBlockData.localPath) return;
+        const scconfigRes = await fetch(`${pageBlockData.localPath}/scconfig.json`);
+        const scconfig = await scconfigRes.json();
+        scconfig.rootDir = pageBlockData.localPath;
+        const module = (await application.newModule(scconfig.main, scconfig, true)) as any;
+        if (module) {
+            module.parent = this.contentStack;
+            module.maxWidth = '100%';
+            module.maxHeight = '100%';
+            module.overflow = {x: 'hidden', y: 'hidden'};
+            this.contentStack.append(module);
+            this._component = module;
+        }
+    }
+
+    setData(data: any) {
+        if (this._component) this._component.setData(data)
+    }
+
+    setTag(tag: any) {
+        if (this._component) this._component.setTag(tag)
+    }
+
     init() {
         super.init();
         this.readonly = this.getAttribute('readonly', true, false);
@@ -337,10 +439,9 @@ export class IDEToolbar extends Module {
             <i-vstack id="mainWrapper" width="auto" maxWidth="100%" maxHeight="100%">
                 <i-panel
                     id="toolsStack"
-                    visible={false}
                     border={{ radius: 4 }}
                     background={{ color: '#fff' }}
-                    class="ide-toolbar"
+                    class="ide-toolbar hidden"
                 >
                     <i-hstack id="toolbar" gap="0.5rem"></i-hstack>
                 </i-panel>

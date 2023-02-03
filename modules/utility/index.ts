@@ -127,6 +127,24 @@ const updatePagePath = (pagePath: string) => {
     location.hash = `#/${isEdit ? 'edit/' : ''}${cid ? `${cid}/` : ''}${pagePath}`;
 }
 
+const generateUUID = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+}
+
+const isEmpty = (value: any) => {
+    if (value === null || value === undefined || value === false || (typeof value === 'string' && !value)) return false;
+    let result = true;
+    if (value && typeof value === 'object') {
+        for (let prop in value) {
+            if (!prop) result = false;
+        }
+    }
+    return result;
+}
+
 export {
     assignAttr,
     uploadToIPFS,
@@ -139,7 +157,9 @@ export {
     isCID,
     getCID,
     getPagePath,
-    updatePagePath
+    updatePagePath,
+    generateUUID,
+    isEmpty
 };
 
 export * from './command/index';

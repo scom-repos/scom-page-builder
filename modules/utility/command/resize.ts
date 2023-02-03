@@ -25,4 +25,6 @@ export class ResizeElementCommand implements ICommand {
     this.element.style.width = this.initialWidth;
     this.element.style.height = this.initialHeight;
   }
+
+  redo(): void {}
 }
