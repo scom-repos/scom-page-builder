@@ -1,5 +1,7 @@
+import { application, Module } from '@ijstech/components';
 import { BigNumber } from '@ijstech/eth-wallet';
 import { IPFS_UPLOAD_END_POINT, IPFS_GATEWAY_IJS, IPFS_GATEWAY } from '@page/const';
+import { IGetModuleOptions } from '@page/interface';
 import { match, MatchFunction, compile } from './pathToRegexp';
 
 const assignAttr = (module: any) => {
@@ -145,6 +147,55 @@ const isEmpty = (value: any) => {
     return result;
 }
 
+const getSCConfigByCid = async (cid: string) => {
+    let scConfig;
+    let result = await fetchFromIPFS(cid);
+    let codeInfoFileContent = await result.json();
+    let ipfsCid = codeInfoFileContent.codeCID;
+    if (ipfsCid) {
+        try {
+            let scConfigRes = await fetchFromIPFS(`${ipfsCid}/dist/scconfig.json`);
+            scConfig = await scConfigRes.json();
+        } catch (err) {}
+    }
+    return scConfig;
+};
+
+const getModule = async (options: IGetModuleOptions) => {
+    let module: Module;
+    if (options.localPath) {
+        const scconfigRes = await fetch(`${options.localPath}/scconfig.json`);
+        const scconfig = await scconfigRes.json();
+        scconfig.rootDir = options.localPath;
+        module = await application.newModule(scconfig.main, scconfig, true);
+    }
+    else {
+        const scconfig = await getSCConfigByCid(options.ipfscid);
+        const main: string = scconfig.main;
+        const response = await fetchFromIPFS(options.ipfscid);
+        const result = await response.json();
+        const codeCID = result.codeCID;
+        if (main.startsWith("@")) {
+            scconfig.rootDir = `${IPFS_GATEWAY_IJS}${codeCID}/dist`;
+            module = await application.newModule(main, scconfig, true);
+        } else {
+            const mainScriptPath = `${IPFS_GATEWAY_IJS}${main.replace(
+                '{root}',
+                codeCID + '/dist'
+            )}`;
+            const dependencies = scconfig.dependencies;
+            for (let key in dependencies) {
+                dependencies[key] = dependencies[key].replace(
+                    '{root}',
+                    `${IPFS_GATEWAY_IJS}${codeCID}/dist`
+                );
+            }
+            module = await application.newModule(mainScriptPath, { dependencies });
+        }
+    }
+    return module;
+}
+
 export {
     assignAttr,
     uploadToIPFS,
@@ -159,7 +210,8 @@ export {
     getPagePath,
     updatePagePath,
     generateUUID,
-    isEmpty
+    isEmpty,
+    getModule
 };
 
 export * from './command/index';
