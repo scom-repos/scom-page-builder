@@ -46,3 +46,7 @@ export interface IConfigSchema {
     };
 }
 
+export interface IGetModuleOptions {
+    ipfscid?: string;
+    localPath?: string;
+}
