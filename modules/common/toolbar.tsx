@@ -9,12 +9,10 @@ import {
     Menu,
     Control,
     Button,
-    Image,
     application
 } from '@ijstech/components';
 import { EVENT } from '@page/const';
-import { IPageBlockData } from '@page/interface';
-import { commandHistory, ResizeElementCommand } from '@page/utility';
+import { commandHistory, getModule, ResizeElementCommand } from '@page/utility';
 import './toolbar.css';
 
 declare global {
@@ -332,10 +330,16 @@ export class IDEToolbar extends Module {
 
     async fetchModule() {
         if (this._readonly) return;
-        const ipfscid = this.data.module.ipfscid;
-        if (this.data.module.local) await this.setLocalModule(this.data.module);
-        else await this.setModule(ipfscid);
-        if (this._component) {
+        const ipfscid = this.data.module?.ipfscid || '';
+        const localPath = this.data.module?.localPath || '';
+        const module = await getModule({ipfscid, localPath});
+        if (module) {
+            module.parent = this.contentStack;
+            this.contentStack.append(module);
+            this._component = module;
+            this._component.maxWidth = '100%';
+            this._component.maxHeight = '100%';
+            this._component.overflow = {x: 'hidden', y: 'hidden'};
             this._component.style.display = 'block';
             this._component.onClick = () => {
                 this.checkToolbar();
@@ -354,57 +358,6 @@ export class IDEToolbar extends Module {
         }
     }
 
-    async setModule(ipfscid: string) {
-        const scconfig = await getSCConfigByCid(ipfscid);
-        const main: string = scconfig.main;
-        const response = await fetchFileContentByCID(ipfscid);
-        const result = await response.json();
-        const codeCID = result.codeCID;
-        let module: any;
-        if (main.startsWith("@")) {
-            scconfig.rootDir = `https://ipfs.scom.dev/ipfs/${codeCID}/dist`;
-            module = await (application as any).newModule(main, scconfig, true);
-        } else {
-            const mainScriptPath = `https://ipfs.scom.dev/ipfs/${main.replace(
-                '{root}',
-
-                codeCID + '/dist'
-            )}`;
-            const dependencies = scconfig.dependencies;
-            for (let key in dependencies) {
-                dependencies[key] = dependencies[key].replace(
-                    '{root}',
-                    'https://ipfs.scom.dev/ipfs/' + codeCID + '/dist'
-                );
-            }
-            module = (await application.newModule(mainScriptPath, { dependencies })) as any;
-        }
-        if (module) {
-            module.parent = this.contentStack;
-            module.maxWidth = '100%';
-            module.maxHeight = '100%';
-            module.overflow = {x: 'hidden', y: 'hidden'};
-            this.contentStack.append(module);
-            this._component = module;
-        }
-    }
-
-    async setLocalModule(pageBlockData: IPageBlockData) {
-        if(!pageBlockData.localPath) return;
-        const scconfigRes = await fetch(`${pageBlockData.localPath}/scconfig.json`);
-        const scconfig = await scconfigRes.json();
-        scconfig.rootDir = pageBlockData.localPath;
-        const module = (await application.newModule(scconfig.main, scconfig, true)) as any;
-        if (module) {
-            module.parent = this.contentStack;
-            module.maxWidth = '100%';
-            module.maxHeight = '100%';
-            module.overflow = {x: 'hidden', y: 'hidden'};
-            this.contentStack.append(module);
-            this._component = module;
-        }
-    }
-
     setData(data: any) {
         if (this._component) this._component.setData(data)
     }
@@ -419,7 +372,7 @@ export class IDEToolbar extends Module {
         for (const toolbar of toolbars) {
             (toolbar as IDEToolbar).hideToolbars();
         }
-        isShowing && this.showToolbars();
+        this._component && this.showToolbars();
     }
 
     _handleClick(event: Event): boolean {
