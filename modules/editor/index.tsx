@@ -1,4 +1,5 @@
 import { application, Button, customModule, Modal, Module, Panel, Upload, Input } from '@ijstech/components';
+import { IDEToolbar } from '@page/common';
 import { EVENT, textStyles } from '@page/const';
 import { ElementType, IPageBlockData } from '@page/interface';
 import { PageRow, PageRows } from '@page/page';
@@ -110,39 +111,6 @@ export class Editor extends Module {
             //     isChanged: false
             // },
             elements: []
-            // sections: [
-            //     {
-            //         toolList: [
-            //             textStyles,
-            //             {
-            //                 caption: `<i-icon name="bold" width=${20} height=${20} fill="${Theme.text.primary}"></i-icon>`,
-            //                 onClick: () => {}
-            //             },
-            //             {
-            //                 caption: `<i-icon name="italic" width=${20} height=${20} fill="${Theme.text.primary}"></i-icon>`,
-            //                 onClick: () => {}
-            //             },
-            //             {
-            //                 caption: `<i-icon name="trash" width=${20} height=${20} fill="${Theme.text.primary}"></i-icon>`,
-            //                 onClick: () => {
-            //                     row.remove();
-            //                 }
-            //             }
-            //         ],
-            //         component: {
-            //             type: 'Input',
-            //             properties: {
-            //                 minHeight: '6.25rem',
-            //                 width: '60%',
-            //                 margin: { left: 'auto', right: 'auto'},
-            //                 font: {color: '#fff', size: '2rem'},
-            //                 value: 'Home'
-            //             }
-            //         },
-            //         height: '340px',
-            //         width: '100%'
-            //     }
-            // ]
         })
         row.click();
         this.btnAddHeader.visible = false;

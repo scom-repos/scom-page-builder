@@ -17,6 +17,7 @@ import { PagePaging } from './pagePaging';
 import './pageRows.css';
 import { EVENT } from '@page/const';
 import { AddElementCommand, commandHistory, MoveElementCommand } from '@page/utility';
+import { IDEToolbar } from '@page/common';
 
 declare global {
     namespace JSX {
@@ -57,6 +58,15 @@ export class PageRows extends Module {
 
     initEventBus() {
         application.EventBus.register(this, EVENT.ON_CLONE, this.onClone);
+    }
+
+    _handleClick(event: Event): boolean {
+        if (this._readonly) return super._handleClick(event, true);
+        const toolbars = document.querySelectorAll('ide-toolbar');
+        for (const toolbar of toolbars) {
+            (toolbar as IDEToolbar).hideToolbars();
+        }
+        return super._handleClick(event, true);
     }
 
     init() {

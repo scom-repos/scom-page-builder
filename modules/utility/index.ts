@@ -1,8 +1,12 @@
 import { application, Module } from '@ijstech/components';
 import { BigNumber } from '@ijstech/eth-wallet';
 import { IPFS_UPLOAD_END_POINT, IPFS_GATEWAY_IJS, IPFS_GATEWAY } from '@page/const';
-import { IGetModuleOptions } from '@page/interface';
 import { match, MatchFunction, compile } from './pathToRegexp';
+
+interface IGetModuleOptions {
+    ipfscid?: string;
+    localPath?: string;
+}
 
 const assignAttr = (module: any) => {
     const attrs = module.attrs;
