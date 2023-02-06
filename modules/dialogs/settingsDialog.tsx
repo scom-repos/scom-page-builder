@@ -13,7 +13,7 @@ import {
 } from '@ijstech/components';
 import { assignAttr } from '@page/utility';
 import './settingsDialog.css';
-import { IConfigData, ISiteData } from '@page/interface';
+import { IConfigData } from '@page/interface';
 import { DEFAULT_BOXED_LAYOUT_WIDTH, EVENT } from '@page/const';
 
 const Theme = Styles.Theme.ThemeVars;
@@ -113,16 +113,8 @@ export class SettingsDialog extends Module {
             this.inputBoxedWidth.value = DEFAULT_BOXED_LAYOUT_WIDTH;
             return;
         };
-        switch(config.type) {
-            case 'secure-page':
-                this.btnWebsiteType.caption = "Secure Page";
-                this.onSiteTypeChanged("Secure Page")
-                break;
-            case 'secure-book':
-                this.btnWebsiteType.caption = "Secure Book";
-                this.onSiteTypeChanged("Secure Book")
-                break;
-        }
+        this.btnWebsiteType.caption = "Secure Page";
+        this.onSiteTypeChanged("Secure Page")
         this.switchShowHeader.checked = config.header?.showHeader || false;
         this.switchBoxedLayout.checked = config.body?.boxedLayout || false;
         this.inputBoxedWidth.value = config.body?.boxedWidth || DEFAULT_BOXED_LAYOUT_WIDTH;
@@ -190,7 +182,6 @@ export class SettingsDialog extends Module {
         const urlSuffix = '';
 
         return {
-            type,
             header: {
                 showHeader,
                 showWalletAuthentication,

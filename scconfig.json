@@ -37,6 +37,9 @@
     },
     "@page/common": {
       "path": "common"
+    },
+    "@page/builder": {
+      "path": "builder"
     }
   },
   "routes": [

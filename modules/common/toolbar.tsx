@@ -28,42 +28,11 @@ export interface ToolbarElement extends ControlElement {
 }
 type IPosition = 'left'|'right'|'bottomLeft'|'bottomRight'|'bottom';
 const Theme = Styles.Theme.ThemeVars;
-interface ICodeInfoFileContent {
-    version: ISemanticVersion;
-    codeCID: string;
-    source: string;
-}
-
 interface ISemanticVersion {
     major: number;
     minor: number;
     patch: number;
 }
-
-const fetchFileContentByCID = async (ipfsCid: string) => {
-    let result: any;
-    try {
-        result = await fetch(`https://ipfs.scom.dev/ipfs/${ipfsCid}`);
-    } catch (err) {
-        const IPFS_Gateway = 'https://ipfs.io/ipfs/{CID}';
-        result = await fetch(IPFS_Gateway.replace('{CID}', ipfsCid));
-    }
-    return result;
-};
-
-const getSCConfigByCid = async (cid: string) => {
-    let scConfig: any;
-    let result = await fetchFileContentByCID(cid);
-    let codeInfoFileContent = (await result.json()) as ICodeInfoFileContent;
-    let ipfsCid = codeInfoFileContent.codeCID;
-    if (ipfsCid) {
-        try {
-            let scConfigRes = await fetchFileContentByCID(`${ipfsCid}/dist/scconfig.json`);
-            scConfig = await scConfigRes.json();
-        } catch (err) {}
-    }
-    return scConfig;
-};
 
 @customElements('ide-toolbar')
 export class IDEToolbar extends Module {
@@ -353,8 +322,7 @@ export class IDEToolbar extends Module {
                 this.contentStack.classList.add('move');
             }
             this.renderResizeStack();
-            const actions = this._component.getActions();
-            this.toolList = actions;
+            this.toolList = this._component.getActions ? this._component.getActions() : [];
         }
     }
 
@@ -372,7 +340,7 @@ export class IDEToolbar extends Module {
         for (const toolbar of toolbars) {
             (toolbar as IDEToolbar).hideToolbars();
         }
-        this._component && this.showToolbars();
+        isShowing && this.showToolbars();
     }
 
     _handleClick(event: Event): boolean {
@@ -394,6 +362,7 @@ export class IDEToolbar extends Module {
                     border={{ radius: 4 }}
                     background={{ color: '#fff' }}
                     class="ide-toolbar"
+                    visible={false}
                 >
                     <i-hstack id="toolbar" gap="0.5rem"></i-hstack>
                 </i-panel>
