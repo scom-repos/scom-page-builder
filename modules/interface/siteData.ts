@@ -13,7 +13,12 @@ export interface IPageData {
 	footer: IPageFooter;
 }
 
-export type HeaderType = 'cover' | 'largeBanner' | 'banner' | 'titleOnly';
+export enum HeaderType {
+    'COVER' = 'cover',
+    'LARGE' = 'largeBanner',
+    'NORMAL' = 'banner',
+    'TITLE' = 'titleOnly'
+};
 export interface IPageHeader {
 	headerType: HeaderType;
 	image: string;

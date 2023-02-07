@@ -19,11 +19,17 @@ export class ResizeElementCommand implements ICommand {
   execute(): void {
     this.element.style.width = this.finalWidth;
     this.element.style.height = this.finalHeight;
+    const initData = (this.element as any).data || {};
+    if ((this.element as any).setData)
+      (this.element as any).setData({...initData, width: this.finalWidth, height: this.finalHeight});
   }
 
   undo(): void {
     this.element.style.width = this.initialWidth;
     this.element.style.height = this.initialHeight;
+    const initData = (this.element as any).data || {};
+    if ((this.element as any).setData)
+      (this.element as any).setData({...initData, width: this.initialWidth, height: this.initialHeight});
   }
 
   redo(): void {}

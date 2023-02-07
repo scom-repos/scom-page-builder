@@ -28,20 +28,20 @@ export class Editor extends Module {
 
     async getData() {
         const data = {
-            header: this.builderHeader?.data || null,
+            header: await this.builderHeader.getData(),
             sections: await this.pageRows.getRows(),
-            footer: this.builderFooter?.data || null
+            footer: await this.builderFooter.getData()
         };
         return data;
     }
 
-    async setData(value: IPageData) {
+    setData(value: IPageData) {
         this.builderHeader.data = value.header;
         this.pageRows.setRows(value.sections);
         this.builderFooter.data = value.footer;
     }
 
-    async onLoad() {
+    onLoad() {
         this.initEventBus();
     }
 

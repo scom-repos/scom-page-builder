@@ -28,11 +28,6 @@ export interface ToolbarElement extends ControlElement {
 }
 type IPosition = 'left'|'right'|'bottomLeft'|'bottomRight'|'bottom';
 const Theme = Styles.Theme.ThemeVars;
-interface ISemanticVersion {
-    major: number;
-    minor: number;
-    patch: number;
-}
 
 @customElements('ide-toolbar')
 export class IDEToolbar extends Module {
@@ -67,6 +62,8 @@ export class IDEToolbar extends Module {
         this._mouseDownHandler = this.handleMouseDown.bind(this);
         this._mouseUpHandler = this.handleMouseUp.bind(this);
         this._mouseMoveHandler = this.handleMouseMove.bind(this);
+        this.setData = this.setData.bind(this);
+        this.getData = this.getData.bind(this);
     }
 
     private handleMouseDown(e: MouseEvent) {
@@ -213,16 +210,15 @@ export class IDEToolbar extends Module {
     }
 
     showToolbars() {
-        if (this.toolList.length) {
+        if (this.toolList.length)
             this.toolsStack.visible = true;
-            this.contentStack.classList.add('active');
-            this.classList.add('active');
-        }
+        this.contentStack && this.contentStack.classList.add('active');
+        this.classList.add('active');
     }
 
     hideToolbars() {
         this.toolsStack.visible = false;
-        this.contentStack.classList.remove('active');
+        this.contentStack && this.contentStack.classList.remove('active');
         this.classList.remove('active');
     }
 
@@ -326,8 +322,15 @@ export class IDEToolbar extends Module {
         }
     }
 
-    setData(data: any) {
-        if (this._component) this._component.setData(data)
+    async setData(data: any) {
+        if (this._component)
+            await this._component.setData(data);
+    }
+
+    async getData() {
+        if (this._component)
+            return await this._component.getData();
+        return null;
     }
 
     setTag(tag: any) {
