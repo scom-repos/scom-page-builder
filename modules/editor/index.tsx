@@ -1,4 +1,4 @@
-import { application, customModule, Module } from '@ijstech/components';
+import { application, Container, customModule, Module, Panel } from '@ijstech/components';
 import { BuilderFooter, BuilderHeader } from '@page/builder';
 import { EVENT } from '@page/const';
 import { ElementType, IPageBlockData, IPageData } from '@page/interface';
@@ -18,13 +18,21 @@ export class Editor extends Module {
     private pageRows: PageRows;
     private builderHeader: BuilderHeader;
     private builderFooter: BuilderFooter;
+    private contentWrapper: Panel;
+
+    constructor(parent?: Container, options?: any) {
+        super(parent, options);
+        this.getData = this.getData.bind(this);
+        this.setData = this.setData.bind(this);
+    }
 
     async getData() {
-        return {
-            header: this.builderHeader.data,
+        const data = {
+            header: this.builderHeader?.data || null,
             sections: await this.pageRows.getRows(),
-            footer: this.builderFooter.data
-        }
+            footer: this.builderFooter?.data || null
+        };
+        return data;
     }
 
     async setData(value: IPageData) {
@@ -43,6 +51,7 @@ export class Editor extends Module {
             this.onAddRow(data);
         });
         application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => {})
+        application.EventBus.register(this, EVENT.ON_UPDATE_FOOTER, async () => this.onUpdateWrapper())
     }
 
     private async onAddRow(data: IElementConfig) {
@@ -63,6 +72,11 @@ export class Editor extends Module {
             elements: [element]
         };
         return await this.pageRows.appendRow(rowData);
+    }
+
+    private onUpdateWrapper() {
+        this.contentWrapper.minHeight = `calc((100vh - 6rem) - ${this.builderFooter.offsetHeight}px)`;
+        this.contentWrapper.padding = {bottom: this.builderFooter.offsetHeight};
     }
 
     render() {
@@ -91,7 +105,6 @@ export class Editor extends Module {
                             id="pageContent"
                             maxWidth={1400}
                             width="100%"
-                            // overflow={{x: 'hidden', y: 'auto'}}
                             margin={{ left: 'auto', right: 'auto'}}
                         >
                             <i-panel
@@ -101,20 +114,20 @@ export class Editor extends Module {
                                 background={{color: '#fff'}}
                                 class="pnl-editor-wrapper"
                             >
-                                <builder-header id="builderHeader"></builder-header>
-                                <ide-rows
-                                    id="pageRows"
-                                    draggable={true}
-                                ></ide-rows>
+                                <i-panel
+                                    id="contentWrapper"
+                                    padding={{bottom: '12rem'}}
+                                    minHeight="calc((100vh - 6rem) - 12rem)"
+                                >
+                                    <builder-header id="builderHeader"></builder-header>
+                                    <ide-rows id="pageRows" draggable={true}></ide-rows>
+                                </i-panel>
                                 <builder-footer id="builderFooter"></builder-footer>
                             </i-panel>
                         </i-panel>
                     </i-panel>
                     <i-panel class="main-sidebar" height="100%" overflow={{ y: 'auto' }}>
-                        <ide-sidebar
-                            id={'pageSidebar'}
-                            width="100%"
-                        ></ide-sidebar>
+                        <ide-sidebar id={'pageSidebar'} width="100%"></ide-sidebar>
                     </i-panel>
                 </i-grid-layout>
             </i-panel>
