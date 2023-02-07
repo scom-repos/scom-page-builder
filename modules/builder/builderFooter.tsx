@@ -36,10 +36,6 @@ export class BuilderFooter extends Module {
 
     private _image: string;
 	private _elements: IPageElement[];
-    private _data: IPageFooter = {
-        image: '',
-        elements: []
-    };
     private _readonly: boolean = false;
 
     @observable()
@@ -48,6 +44,7 @@ export class BuilderFooter extends Module {
     constructor(parent?: any) {
         super(parent);
         this.initEventBus();
+        this.getData = this.getData.bind(this);
     }
 
     initEventBus() {
@@ -68,13 +65,21 @@ export class BuilderFooter extends Module {
         };
     }
     set data(value: IPageFooter) {
-        this._data = value;
+        this._image = value.image || '';
+        this._elements = value.elements || [];
         this.updateFooter();
     }
 
+    async getData() {
+        let elements = [];
+        if (this._elements) {
+            const row = this.pnlFooterMain.querySelector('ide-row') as PageRow;
+            if (row) elements = (await row.getData())?.elements || [];
+        }
+        return {...this.data, elements};
+    }
+
     private async updateFooter() {
-        this._image = this.data.image || '';
-        this._elements = this.data.elements || [];
         this.showAddStack = this._elements.length === 0;
         this.pnlEditOverlay.visible = !this.showAddStack;
         if (this.pnlEditOverlay.visible)
@@ -104,9 +109,9 @@ export class BuilderFooter extends Module {
                 columnSpan: 4,
                 type: 'primitive',
                 module: {
-                    name: "Image",
-                    description: 'Image (dev)',
-                    localPath: 'modules/pageblocks/scom-image', // for testing
+                    description: 'Textbox (dev)',
+                    localPath: 'modules/pageblocks/pageblock-markdown-editor',
+                    name: "Textbox",
                     local: true
                 },
                 properties: {}

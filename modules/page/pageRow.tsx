@@ -45,6 +45,8 @@ export class PageRow extends Module {
 
     constructor(parent?: any) {
         super(parent);
+        this.setData = this.setData.bind(this);
+        this.getData = this.getData.bind(this);
     }
 
     private initEventBus() {
@@ -103,7 +105,7 @@ export class PageRow extends Module {
 
         const unitWidth = Number(this.pnlElements.offsetWidth) / 12;
         if (elements && elements.length > 0) {
-            if (elements.length === 1 && elements[0]?.properties.width === '100%') {
+            if (elements.length === 1 && elements[0]?.properties?.width === '100%') {
                 await this.createNewElement(0);
                 this.pnlElements.templateColumns = ['repeat(1, 1fr)'];
             } else {
@@ -125,11 +127,11 @@ export class PageRow extends Module {
         this.actionsBar.minHeight = '100%';
     }
 
-    getData() {
+    async getData() {
         const sections = this.pnlElements.querySelectorAll('ide-section');
         const sectionDataList: IPageElement[] = [];
         for (const section of sections) {
-            const sectionData = (section as PageSection).data;
+            const sectionData = await (section as PageSection).getData();
             if (!sectionData) continue;
             sectionDataList.push(sectionData);
         }

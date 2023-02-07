@@ -24,25 +24,20 @@ export interface HeaderElement extends ControlElement {
 export class BuilderHeader extends Module {
     private pnlHeader: Panel;
     private pnlHeaderMain: Panel;
-    private btnAddLogo: Button;
     private pnlTitle: Panel;
+    private pnlConfig: Panel;
+    private pnlHeaderType: Panel;
+    private pnlHeaderTypeMain: Panel;
+    private btnAddLogo: Button;
     private pnlLogo: Panel;
     private mdUpload: Modal;
     private uploader: Upload;
     private nameInput: Input;
     private btnChangeImg: Button;
-    private pnlConfig: Panel;
-    private pnlHeaderType: Panel;
-    private pnlHeaderTypeMain: Panel;
 
     private _headerType: HeaderType;
     private _image: string;
     private _elements: IPageElement[];
-    private _data: IPageHeader = {
-        headerType: 'banner',
-        image: '',
-        elements: []
-    };
     private _readonly: boolean = false;
     private _isUpdatingBg: boolean = false;
 
@@ -52,17 +47,13 @@ export class BuilderHeader extends Module {
     constructor(parent?: any) {
         super(parent);
         this.initEventBus();
+        this.getData = this.getData.bind(this);
     }
 
     initEventBus() {
         application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => {
-            // TODO: update data
-            if (!this.pnlHeaderMain.hasChildNodes()) {
-                this.showAddStack = true;
-                this.pnlHeader.background = {color: '#fff', image: ''};
-                this.pnlConfig.visible = false;
-                this.pnlHeaderType.visible = false;
-            }
+            if (!this.pnlHeaderMain.hasChildNodes())
+                this.resetData();
         })
     }
 
@@ -74,21 +65,38 @@ export class BuilderHeader extends Module {
         };
     }
     set data(value: IPageHeader) {
-        this._data = value;
         this._headerType = value.headerType;
         this._image = value.image;
         this._elements = value.elements;
         this.updateHeader();
     }
 
+    async getData() {
+        let elements = [];
+        if (this._elements) {
+            const row = this.pnlHeaderMain.querySelector('ide-row') as PageRow;
+            if (row) elements = (await row.getData())?.elements || [];
+        }
+        return {...this.data, elements};
+    }
+
+    private resetData() {
+        this.showAddStack = true;
+        this.pnlHeader.background = {color: '#fff', image: ''};
+        this.pnlConfig.visible = false;
+        this.pnlHeaderType.visible = false;
+    }
+
     private async updateHeader() {
         this.showAddStack = this._elements.length === 0;
         this.pnlHeader.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
+        this.updateHeaderType();
         !this.showAddStack && this.nameInput.classList.add('has-header');
         this.pnlConfig.visible = !this.showAddStack;
+
         this.pnlHeaderMain.clearInnerHTML();
-        const pageRow = (<ide-row maxWidth="100%"></ide-row>) as PageRow;
-        let rowData = {
+        const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
+        const rowData = {
             id: generateUUID(),
             row: 0,
             elements: this._elements
@@ -101,16 +109,16 @@ export class BuilderHeader extends Module {
     private addHeader() {
         this.data = {
             image: 'https://ssl.gstatic.com/atari/images/simple-header-blended-small.png',
-            headerType: 'banner',
+            headerType: HeaderType.NORMAL,
             elements: [{
                 id: generateUUID(),
                 column: 1,
                 columnSpan: 4,
                 type: 'primitive',
                 module: {
-                    name: "Image",
-                    description: 'Image (dev)',
-                    localPath: 'modules/pageblocks/scom-image', // for testing
+                    description: 'Textbox (dev)',
+                    localPath: 'modules/pageblocks/pageblock-markdown-editor',
+                    name: "Textbox",
                     local: true
                 },
                 properties: {}
@@ -140,6 +148,7 @@ export class BuilderHeader extends Module {
             const image = await this.uploader.toBase64(file) as string;
             this.pnlHeader.background = {image};
             this._image = image;
+            this._isUpdatingBg = false;
         } else {
             if (this.pnlTitle.contains(this.pnlLogo))
                 this.pnlTitle.removeChild(this.pnlLogo);
@@ -168,52 +177,62 @@ export class BuilderHeader extends Module {
             type.classList.remove('active');
         })
         source.classList.add('active');
-        type.onClick();
+        this._headerType = type.type;
+        this.updateHeaderType();
+    }
+
+    private updateHeaderType() {
+        switch (this._headerType) {
+            case HeaderType.COVER:
+                this.pnlHeader.height = '100vh';
+                this.pnlHeader.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
+                this.btnChangeImg.visible = true;
+                break;
+            case HeaderType.LARGE:
+                this.pnlHeader.height = 520;
+                this.pnlHeader.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
+                this.btnChangeImg.visible = true;
+                break;
+            case HeaderType.NORMAL:
+                this.pnlHeader.height = 340;
+                this.pnlHeader.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
+                this.btnChangeImg.visible = true;
+                break;
+            case HeaderType.TITLE:
+                this.pnlHeader.height = 180;
+                this.pnlHeader.background = {color: '#fff', image: ''};
+                this.btnChangeImg.visible = false;
+                break;
+        }
     }
 
     private renderHeaderType() {
         const headerTypes = [
             {
                 caption: 'Cover',
-                image: assets.fullPath('img/components/cover.svg'),
-                onClick: () => {
-                    this.pnlHeader.height = '100vh';
-                    this.pnlHeader.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
-                    this.btnChangeImg.visible = true;
-                }
+                type: HeaderType.COVER,
+                image: assets.fullPath('img/components/cover.svg')
             },
             {
                 caption: 'Large Banner',
-                image: assets.fullPath('img/components/large.svg'),
-                onClick: () => {
-                    this.pnlHeader.height = 520;
-                    this.pnlHeader.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
-                    this.btnChangeImg.visible = true;
-                }
+                type: HeaderType.LARGE,
+                image: assets.fullPath('img/components/large.svg')
             },
             {
                 caption: 'Banner',
-                image: assets.fullPath('img/components/banner.svg'),
-                onClick: () => {
-                    this.pnlHeader.height = 340;
-                    this.pnlHeader.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
-                    this.btnChangeImg.visible = true;
-                }
+                type: HeaderType.NORMAL,
+                image: assets.fullPath('img/components/banner.svg')
             },
             {
                 caption: 'Title Only',
-                image: assets.fullPath('img/components/title.svg'),
-                onClick: () => {
-                    this.pnlHeader.height = 180;
-                    this.pnlHeader.background = {color: '#fff', image: ''};
-                    this.btnChangeImg.visible = false;
-                }
+                type: HeaderType.TITLE,
+                image: assets.fullPath('img/components/title.svg')
             }
         ];
         this.pnlHeaderTypeMain.clearInnerHTML();
         this.pnlHeaderTypeMain.appendChild(
             <i-panel onClick={() => this.onToggleType(false)} class="pointer">
-                <i-icon name="caret-left" width={24} height={24} fill={Theme.text.primary}></i-icon>
+                <i-icon name="angle-left" width={24} height={24} fill="rgba(0,0,0,.54)"></i-icon>
             </i-panel>
         )
         headerTypes.forEach(type => {
@@ -226,7 +245,7 @@ export class BuilderHeader extends Module {
                     <i-panel>
                         <i-image url={type.image} width={34} height={34}></i-image>
                     </i-panel>
-                    <i-label caption={type.caption}></i-label>
+                    <i-label caption={type.caption} font={{color: 'rgba(0,0,0,.54)'}}></i-label>
                 </i-hstack>
             )
         })
@@ -241,7 +260,7 @@ export class BuilderHeader extends Module {
 
     render() {
         return (
-            <i-vstack id="pnlHeader" position="relative" width="100%">
+            <i-vstack id="pnlHeader" position="relative" width="100%" maxHeight="100%" maxWidth="100%">
                 <i-hstack
                     id="pnlTitle"
                     class="page-title"
@@ -268,6 +287,7 @@ export class BuilderHeader extends Module {
                 <i-vstack
                     id="pnlHeaderMain"
                     height="calc(100% - 36px - 52px)"
+                    overflow="hidden"
                     horizontalAlignment="center" verticalAlignment="center"
                 ></i-vstack>
                 <i-hstack
@@ -322,7 +342,7 @@ export class BuilderHeader extends Module {
                     <i-button
                         id="btnChangeImg"
                         class="btn-add"
-                        icon={{ name: 'plus-circle', fill: 'rgba(0,0,0,.54)' }}
+                        icon={{ name: 'image', fill: 'rgba(0,0,0,.54)' }}
                         font={{ color: 'rgba(0,0,0,.54)' }}
                         background={{ color: 'transparent' }}
                         padding={{ left: 6, right: 6 }} height="100%"
@@ -333,7 +353,7 @@ export class BuilderHeader extends Module {
                     <i-button
                         id="btnChangeType"
                         class="btn-add"
-                        icon={{ name: 'plus-circle', fill: 'rgba(0,0,0,.54)' }}
+                        icon={{ name: 'columns', fill: 'rgba(0,0,0,.54)' }}
                         font={{ color: 'rgba(0,0,0,.54)' }}
                         background={{ color: 'transparent' }}
                         padding={{ left: 6, right: 6 }} height="100%"
@@ -349,13 +369,13 @@ export class BuilderHeader extends Module {
                     bottom="0px" left="0px" position="absolute"
                     border={{ radius: 2 }}
                     margin={{left: 12, top: 12, bottom: 12, right: 12}}
-                    padding={{left: 8, top: 8, bottom: 8, right: 8}}
                     class="custom-box"
-                    height="40px" width="auto"
+                    height="auto" width="auto"
                 >
                     <i-hstack
                         id="pnlHeaderTypeMain"
                         gap="1rem"
+                        margin={{left: 8, top: 8, bottom: 8, right: 8}}
                         height="100%" width="100%"
                         verticalAlignment="center"
                     ></i-hstack>

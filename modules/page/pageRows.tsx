@@ -54,6 +54,8 @@ export class PageRows extends Module {
         this.mouseUpHandler = this.mouseUpHandler.bind(this);
         this.onMoveHandler = this.onMoveHandler.bind(this);
         this.initEventBus();
+        this.getRows = this.getRows.bind(this);
+        this.setRows = this.setRows.bind(this);
     }
 
     initEventBus() {
@@ -207,7 +209,7 @@ export class PageRows extends Module {
         const rows = this.pnlRows.querySelectorAll('ide-row');
         const rowDataList: IPageSection[] = [];
         for (const row of rows) {
-            const rowData = (row as PageRow).getData();
+            const rowData = await (row as PageRow).getData();
             rowDataList.push(rowData);
         }
         return rowDataList;

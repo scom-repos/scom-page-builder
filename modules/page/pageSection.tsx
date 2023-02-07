@@ -52,6 +52,8 @@ export class PageSection extends Module {
 
     constructor(parent?: any) {
         super(parent);
+        this.setData = this.setData.bind(this);
+        this.getData = this.getData.bind(this);
     }
 
     get size() {
@@ -80,7 +82,7 @@ export class PageSection extends Module {
         this.initEventListener();
     }
 
-    setActive() {
+    private setActive() {
         const pageRows= document.querySelectorAll('ide-row');
         if (pageRows) {
             for (const row of pageRows) {
@@ -91,11 +93,11 @@ export class PageSection extends Module {
         row && row.classList.add('active');
     }
 
-    initEventListener() {
+    private initEventListener() {
         this.onClick = (target, event) => this.setActive();
     }
 
-    updateContainerSize() {
+    private updateContainerSize() {
         const sizeWidth = this.size.width || 'none';
         const sizeHeight = this.size.height || 'none';
         if (this.pageSectionWrapper) {
@@ -126,15 +128,6 @@ export class PageSection extends Module {
         this.pnlMain.clearInnerHTML();
     }
 
-    get data() {
-        if (!this._data.type && !this._data.properties) return null;
-        return this._data;
-    }
-
-    get module() {
-        return this.currentToolbar;
-    }
-
     private async createToolbar(value: IPageElement) {
         let toolbar = await IDEToolbar.create({}) as IDEToolbar;
         toolbar.readonly = this._readonly;
@@ -145,7 +138,6 @@ export class PageSection extends Module {
 
     // TODO
     async setData(value: IPageElement) {
-        // id: string; // uuid
         // column: number;
         // columnSpan: number;
 
@@ -188,6 +180,27 @@ export class PageSection extends Module {
                 this.pnlMain.appendChild(stack);
             }
         }
+    }
+
+    async getData(): Promise<IPageElement> {
+        if (this._data?.type === 'primitive') {
+            let data: IPageElement = this._data;
+            let properties = null;
+            if (this.currentToolbar)
+                properties = await this.currentToolbar.getData();
+            this._data.properties = properties;
+        } else {
+            if (this.toolbarList.length) {
+                for (let i = 0; i < this._data.elements.length; i++) {
+                    const toolbar = this.toolbarList[i];
+                    if (toolbar) {
+                        const properties = await toolbar.getData();
+                        this._data.elements[i].properties = properties;
+                    }
+                }
+            }
+        }
+        return this._data;
     }
 
     render() {
