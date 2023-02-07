@@ -290,13 +290,12 @@ export class PageRows extends Module {
 
     render() {
         return (
-            <i-panel>
+            <i-panel height="100%">
                 <i-vstack
                     id={'pnlRows'}
                     class={'container'}
                     verticalAlignment="center"
-                    maxWidth="100%"
-                    padding={{bottom: '12rem'}}
+                    maxWidth="100%" height="100%"
                 ></i-vstack>
                 <i-panel
                     id="pnlRowOverlay"

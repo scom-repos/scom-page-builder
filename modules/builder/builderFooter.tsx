@@ -4,7 +4,6 @@ import {
     ControlElement,
     Styles,
     Panel,
-    Button,
     observable,
     application
 } from '@ijstech/components';
@@ -32,14 +31,19 @@ export interface FooterElement extends ControlElement {
 export class BuilderFooter extends Module {
     private pnlFooter: Panel;
     private pnlFooterMain: Panel;
+    private pnlEditOverlay: Panel;
+    private pnlOverlay: Panel;
 
     private _image: string;
 	private _elements: IPageElement[];
-    private _data: IPageFooter;
+    private _data: IPageFooter = {
+        image: '',
+        elements: []
+    };
     private _readonly: boolean = false;
 
     @observable()
-    private showEdit: boolean = true;
+    private showAddStack: boolean = true;
 
     constructor(parent?: any) {
         super(parent);
@@ -50,14 +54,18 @@ export class BuilderFooter extends Module {
         application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => {
             // TODO: update data
             if (!this.pnlFooterMain.hasChildNodes()) {
-                this.showEdit = true;
+                this.showAddStack = true;
                 this.pnlFooter.background = {color: '#fff', image: ''};
+                this.pnlEditOverlay.visible = false;
             }
         })
     }
 
-    get data() {
-        return this._data;
+    get data(): IPageFooter {
+        return {
+            image: this._image,
+            elements: this._elements
+        };
     }
     set data(value: IPageFooter) {
         this._data = value;
@@ -67,11 +75,16 @@ export class BuilderFooter extends Module {
     private async updateFooter() {
         this._image = this.data.image || '';
         this._elements = this.data.elements || [];
-        this.showEdit = this._elements.length === 0;
+        this.showAddStack = this._elements.length === 0;
+        this.pnlEditOverlay.visible = !this.showAddStack;
+        if (this.pnlEditOverlay.visible)
+            this.pnlEditOverlay.classList.add('flex');
+        else
+            this.pnlEditOverlay.classList.remove('flex');
         this.pnlFooter.background = {image: this._image};
         this.pnlFooterMain.clearInnerHTML();
         const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
-        let rowData = {
+        const rowData = {
             id: generateUUID(),
             row: -1,
             elements: this._elements
@@ -79,6 +92,7 @@ export class BuilderFooter extends Module {
         await pageRow.setData(rowData);
         pageRow.parent = this.pnlFooterMain;
         this.pnlFooterMain.append(pageRow);
+        application.EventBus.dispatch(EVENT.ON_UPDATE_FOOTER);
     }
 
     private addFooter() {
@@ -100,6 +114,16 @@ export class BuilderFooter extends Module {
         }
     }
 
+    private updateOverlay(value: boolean) {
+        this.pnlEditOverlay.visible = value;
+        if (this.pnlEditOverlay.visible)
+            this.pnlEditOverlay.classList.add('flex');
+        else
+            this.pnlEditOverlay.classList.remove('flex');
+        this.pnlOverlay.visible = !this.pnlEditOverlay.visible;
+        this.pnlOverlay.height = this.pnlOverlay.visible ? document.body.offsetHeight : 0;
+    }
+
     init() {
         this._readonly = this.getAttribute('readonly', true, false);
         super.init();
@@ -112,9 +136,41 @@ export class BuilderFooter extends Module {
 
     render() {
         return (
-            <i-vstack id="pnlFooter" width="100%" height="100%" max-maxWidth="100%" maxHeight="100%">
+            <i-vstack
+                id="pnlFooter"
+                width="100%" height="100%"
+                maxWidth="100%" maxHeight="100%"
+            >
+                <i-panel
+                    id="pnlOverlay"
+                    width="100%" height="100%"
+                    background={{color: 'rgba(0,0,0,.6)'}}
+                    zIndex={29}
+                    visible={false}
+                    onClick={() => this.updateOverlay(true)}
+                ></i-panel>
                 <i-hstack
-                    id="pnlEdit"
+                    id="pnlEditOverlay"
+                    width="100%" height="100%"
+                    dock='fill'
+                    background={{color: 'rgba(0,0,0,.6)'}}
+                    zIndex={29}
+                    class="edit-stack"
+                    visible={false}
+                    verticalAlignment="center" horizontalAlignment="center"
+                >
+                     <i-button
+                        class="btn-add"
+                        icon={{ name: 'plus-circle', fill: 'rgba(0,0,0,.54)' }}
+                        font={{ color: 'rgba(0,0,0,.54)' }}
+                        background={{ color: Theme.colors.secondary.light }}
+                        padding={{ top: 10, left: 6, right: 6, bottom: 10 }}
+                        border={{ radius: 2 }}
+                        caption="Edit Footer"
+                        onClick={() => this.updateOverlay(false)}
+                    ></i-button>
+                </i-hstack>
+                <i-hstack
                     verticalAlignment="end"
                     horizontalAlignment="center"
                     width="100%" height="auto"
@@ -122,7 +178,7 @@ export class BuilderFooter extends Module {
                     position="absolute" bottom="0px"
                     margin={{bottom: -10}}
                     class="edit-stack"
-                    visible={this.showEdit}
+                    visible={this.showAddStack}
                 >
                     <i-panel>
                         <i-button

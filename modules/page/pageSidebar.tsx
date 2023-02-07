@@ -137,11 +137,15 @@ export class PageSidebar extends Module {
     private async renderFirstStack() {
         this.firstStack.clearInnerHTML()
         if(!this._components) {
-            const modules = await this.getModules('5');
-            const filterdModules = modules.filter((v) => {
-                return v.name === "@PageBlock/OTC" || v.name === '@PageBlock/NFT Minter';
-            });
-            this._components = [...firstDevModules, ...filterdModules];
+            try {
+                const modules = await this.getModules('5');
+                const filterdModules = modules.filter((v) => {
+                    return v.name === "@PageBlock/OTC" || v.name === '@PageBlock/NFT Minter';
+                });
+                this._components = [...firstDevModules, ...filterdModules];
+            } catch {
+                this._components = [...firstDevModules];
+            }
         }
         let matchedModules = this._components;
         for (const module of matchedModules) {

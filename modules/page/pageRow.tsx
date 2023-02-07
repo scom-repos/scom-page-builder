@@ -143,6 +143,7 @@ export class PageRow extends Module {
     }
 
     private onClone() {
+        // TODO: move to pageRow
         const rowData = this.getData();
         if (!rowData) return;
         application.EventBus.dispatch(EVENT.ON_CLONE, { rowData, id: this.id });

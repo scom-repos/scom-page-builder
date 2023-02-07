@@ -6,20 +6,6 @@ Styles.cssRule('builder-footer', {
     '#pnlFooter': {
       backgroundSize: 'cover',
       $nest: {
-        'ide-section': {
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100%',
-          width: '100%'
-        },
-        'i-input > input': {
-          background: 'transparent',
-          boxShadow: 'none',
-          border: 'none',
-          color: 'rgba(255,255,255,1)',
-          textAlign: 'center'
-        },
         '&:hover ~ .edit-stack': {
           opacity: 1,
           transition: 'opacity 125ms cubic-bezier(0.4,0,0.2,1)'
@@ -32,6 +18,9 @@ Styles.cssRule('builder-footer', {
               transition: 'opacity 125ms cubic-bezier(0.4,0,0.2,1)'
             }
           }
+        },
+        '.flex': {
+          display: 'flex !important'
         }
       }
     }

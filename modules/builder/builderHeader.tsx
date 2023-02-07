@@ -1,4 +1,5 @@
-import { Module, customElements, ControlElement, Styles, Panel, Button, Modal, Upload, Input, observable, application } from '@ijstech/components';
+import { Module, customElements, ControlElement, Styles, Panel, Button, Modal, Upload, Input, observable, application, Control } from '@ijstech/components';
+import assets from '@page/assets';
 import { EVENT } from '@page/const';
 import { HeaderType, IPageElement, IPageHeader } from '@page/interface';
 import { PageRow } from '@page/page';
@@ -29,15 +30,24 @@ export class BuilderHeader extends Module {
     private mdUpload: Modal;
     private uploader: Upload;
     private nameInput: Input;
+    private btnChangeImg: Button;
+    private pnlConfig: Panel;
+    private pnlHeaderType: Panel;
+    private pnlHeaderTypeMain: Panel;
 
     private _headerType: HeaderType;
     private _image: string;
     private _elements: IPageElement[];
-    private _data: IPageHeader;
+    private _data: IPageHeader = {
+        headerType: 'banner',
+        image: '',
+        elements: []
+    };
     private _readonly: boolean = false;
+    private _isUpdatingBg: boolean = false;
 
     @observable()
-    private showEdit: boolean = true;
+    private showAddStack: boolean = true;
 
     constructor(parent?: any) {
         super(parent);
@@ -48,14 +58,20 @@ export class BuilderHeader extends Module {
         application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => {
             // TODO: update data
             if (!this.pnlHeaderMain.hasChildNodes()) {
-                this.showEdit = true;
+                this.showAddStack = true;
                 this.pnlHeader.background = {color: '#fff', image: ''};
+                this.pnlConfig.visible = false;
+                this.pnlHeaderType.visible = false;
             }
         })
     }
 
-    get data() {
-        return this._data;
+    get data(): IPageHeader {
+        return {
+            image: this._image,
+            elements: this._elements,
+            headerType: this._headerType
+        };
     }
     set data(value: IPageHeader) {
         this._data = value;
@@ -66,9 +82,10 @@ export class BuilderHeader extends Module {
     }
 
     private async updateHeader() {
-        this.showEdit = this._elements.length === 0;
-        this.pnlHeader.background = this.showEdit ? {color: '#fff', image: ''} : {image: this._image};
-        !this.showEdit && this.nameInput.classList.add('has-header');
+        this.showAddStack = this._elements.length === 0;
+        this.pnlHeader.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
+        !this.showAddStack && this.nameInput.classList.add('has-header');
+        this.pnlConfig.visible = !this.showAddStack;
         this.pnlHeaderMain.clearInnerHTML();
         const pageRow = (<ide-row maxWidth="100%"></ide-row>) as PageRow;
         let rowData = {
@@ -102,35 +119,124 @@ export class BuilderHeader extends Module {
     }
 
     private onShowUpload() {
+        this.uploader.clear();
         this.mdUpload.visible = true;
     }
 
-    private async onUploadLogo() {
+    private onChangedBg() {
+        this._isUpdatingBg = true;
+        this.onShowUpload();
+    }
+
+    private onToggleType(value: boolean) {
+        this.pnlHeaderType.visible = value;
+        this.pnlConfig.visible = !value;
+    }
+
+    private async onUpdateImage() {
         const fileList = this.uploader.fileList || [];
         const file = fileList[0];
-        if (this.pnlTitle.contains(this.pnlLogo))
-            this.pnlTitle.removeChild(this.pnlLogo);
-        if (!file) {
-            this.mdUpload.visible = false;
-            this.btnAddLogo.caption = 'Add logo';
-            this.pnlLogo = null;
-            return;
+        if (this._isUpdatingBg) {
+            const image = await this.uploader.toBase64(file) as string;
+            this.pnlHeader.background = {image};
+            this._image = image;
+        } else {
+            if (this.pnlTitle.contains(this.pnlLogo))
+                this.pnlTitle.removeChild(this.pnlLogo);
+            if (!file) {
+                this.mdUpload.visible = false;
+                this.btnAddLogo.caption = 'Add logo';
+                this.pnlLogo = null;
+                return;
+            }
+            const imgStr = await this.uploader.toBase64(file) as string;
+            this.pnlLogo = (
+                <i-panel>
+                    <i-image url={imgStr} width="35" height="auto" display="block"></i-image>
+                </i-panel>
+            );
+            this.btnAddLogo.caption = 'Edit logo';
+            this.pnlTitle.insertBefore(this.pnlLogo, this.nameInput);
         }
-        const imgStr = await this.uploader.toBase64(file) as string;
-        this.pnlLogo = (
-            <i-panel>
-                <i-image url={imgStr} width="35" height="auto" display="block"></i-image>
-            </i-panel>
-        );
-        this.btnAddLogo.caption = 'Edit logo';
-        this.pnlTitle.insertBefore(this.pnlLogo, this.nameInput);
+
         this.mdUpload.visible = false;
+    }
+
+    private onActiveType(source: Control, type: any) {
+        const types = Array.from(this.pnlHeaderTypeMain.querySelectorAll('.type'));
+        types.forEach(type => {
+            type.classList.remove('active');
+        })
+        source.classList.add('active');
+        type.onClick();
+    }
+
+    private renderHeaderType() {
+        const headerTypes = [
+            {
+                caption: 'Cover',
+                image: assets.fullPath('img/components/cover.svg'),
+                onClick: () => {
+                    this.pnlHeader.height = '100vh';
+                    this.pnlHeader.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
+                    this.btnChangeImg.visible = true;
+                }
+            },
+            {
+                caption: 'Large Banner',
+                image: assets.fullPath('img/components/large.svg'),
+                onClick: () => {
+                    this.pnlHeader.height = 520;
+                    this.pnlHeader.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
+                    this.btnChangeImg.visible = true;
+                }
+            },
+            {
+                caption: 'Banner',
+                image: assets.fullPath('img/components/banner.svg'),
+                onClick: () => {
+                    this.pnlHeader.height = 340;
+                    this.pnlHeader.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
+                    this.btnChangeImg.visible = true;
+                }
+            },
+            {
+                caption: 'Title Only',
+                image: assets.fullPath('img/components/title.svg'),
+                onClick: () => {
+                    this.pnlHeader.height = 180;
+                    this.pnlHeader.background = {color: '#fff', image: ''};
+                    this.btnChangeImg.visible = false;
+                }
+            }
+        ];
+        this.pnlHeaderTypeMain.clearInnerHTML();
+        this.pnlHeaderTypeMain.appendChild(
+            <i-panel onClick={() => this.onToggleType(false)} class="pointer">
+                <i-icon name="caret-left" width={24} height={24} fill={Theme.text.primary}></i-icon>
+            </i-panel>
+        )
+        headerTypes.forEach(type => {
+            this.pnlHeaderTypeMain.appendChild(
+                <i-hstack
+                    gap="10px" class="type"
+                    verticalAlignment="center"
+                    onClick={(source: Control) => this.onActiveType(source, type)}
+                >
+                    <i-panel>
+                        <i-image url={type.image} width={34} height={34}></i-image>
+                    </i-panel>
+                    <i-label caption={type.caption}></i-label>
+                </i-hstack>
+            )
+        })
     }
 
     init() {
         this._readonly = this.getAttribute('readonly', true, false);
         super.init();
         this.btnAddLogo.caption = this.pnlLogo ? 'Edit logo' : 'Add logo';
+        this.renderHeaderType();
     }
 
     render() {
@@ -159,7 +265,11 @@ export class BuilderHeader extends Module {
                         class="custom-input"
                     ></i-input>
                 </i-hstack>
-                <i-panel id="pnlHeaderMain"></i-panel>
+                <i-vstack
+                    id="pnlHeaderMain"
+                    height="calc(100% - 36px - 52px)"
+                    horizontalAlignment="center" verticalAlignment="center"
+                ></i-vstack>
                 <i-hstack
                     horizontalAlignment="space-between"
                     position="absolute"
@@ -192,12 +302,64 @@ export class BuilderHeader extends Module {
                             padding={{ top: 10, left: 6, right: 6, bottom: 10 }}
                             border={{ radius: 2 }}
                             caption="Add header"
-                            visible={this.showEdit}
+                            visible={this.showAddStack}
                             onClick={() => this.addHeader()}
                         ></i-button>
                     </i-panel>
                     <i-panel></i-panel>
                 </i-hstack>
+                <i-hstack
+                    id="pnlConfig"
+                    background={{ color: '#fafafa' }}
+                    bottom="0px" left="0px" position="absolute"
+                    verticalAlignment="center"
+                    border={{ radius: 2 }}
+                    margin={{left: 12, top: 12, bottom: 12, right: 12}}
+                    height="40px"
+                    class="custom-box"
+                    visible={false}
+                >
+                    <i-button
+                        id="btnChangeImg"
+                        class="btn-add"
+                        icon={{ name: 'plus-circle', fill: 'rgba(0,0,0,.54)' }}
+                        font={{ color: 'rgba(0,0,0,.54)' }}
+                        background={{ color: 'transparent' }}
+                        padding={{ left: 6, right: 6 }} height="100%"
+                        border={{ width: 0 }}
+                        caption="Change Image"
+                        onClick={() => this.onChangedBg()}
+                    ></i-button>
+                    <i-button
+                        id="btnChangeType"
+                        class="btn-add"
+                        icon={{ name: 'plus-circle', fill: 'rgba(0,0,0,.54)' }}
+                        font={{ color: 'rgba(0,0,0,.54)' }}
+                        background={{ color: 'transparent' }}
+                        padding={{ left: 6, right: 6 }} height="100%"
+                        border={{ width: 0, left: {width: '1px', style: 'solid', color: Theme.divider} }}
+                        caption="Header Type"
+                        onClick={() => this.onToggleType(true)}
+                    ></i-button>
+                </i-hstack>
+                <i-panel
+                    id="pnlHeaderType"
+                    visible={false}
+                    background={{ color: '#fafafa' }}
+                    bottom="0px" left="0px" position="absolute"
+                    border={{ radius: 2 }}
+                    margin={{left: 12, top: 12, bottom: 12, right: 12}}
+                    padding={{left: 8, top: 8, bottom: 8, right: 8}}
+                    class="custom-box"
+                    height="40px" width="auto"
+                >
+                    <i-hstack
+                        id="pnlHeaderTypeMain"
+                        gap="1rem"
+                        height="100%" width="100%"
+                        verticalAlignment="center"
+                    ></i-hstack>
+                </i-panel>
                 <i-modal
                     id='mdUpload'
                     title='Select Image'
@@ -221,7 +383,7 @@ export class BuilderHeader extends Module {
                                 padding={{top: 10, left: 6, right: 6, bottom: 10}}
                                 border={{radius: 2}}
                                 caption="Add Image"
-                                onClick={this.onUploadLogo.bind(this)}
+                                onClick={this.onUpdateImage.bind(this)}
                             ></i-button>
                         </i-hstack>
                     </i-vstack>
