@@ -242,7 +242,7 @@ export class PageRows extends Module {
     async appendRow(rowData: IPageSection) {
         if (!this.rows) this.rows = [];
         rowData.row = this.rows.length;
-        const pageRow = (<ide-row maxWidth="100%"></ide-row>) as PageRow;
+        const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
         this.rows.push(rowData);
         if (!this._readonly) {
             pageRow.border = { top: { width: '1px', style: 'dashed', color: Theme.divider } };

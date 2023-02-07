@@ -141,14 +141,10 @@ const generateUUID = () => {
 }
 
 const isEmpty = (value: any) => {
-    if (value === null || value === undefined || value === false || (typeof value === 'string' && !value)) return false;
-    let result = true;
-    if (value && typeof value === 'object') {
-        for (let prop in value) {
-            if (!prop) result = false;
-        }
-    }
-    return result;
+    if (value === null || value === undefined || value === false || (typeof value === 'string' && !value)) return true;
+    if (value && typeof value === 'object')
+        return Object.keys(value).length === 0
+    return false;
 }
 
 const getSCConfigByCid = async (cid: string) => {
