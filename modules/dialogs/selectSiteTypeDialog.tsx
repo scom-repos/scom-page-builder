@@ -13,10 +13,10 @@ import {
 } from '@ijstech/components';
 import { assignAttr } from '@page/utility';
 import './selectSiteTypeDialog.css';
-import { IConfigData, IRowSettings, ISiteType } from '@page/interface';
+import { IConfigData, IRowSettings } from '@page/interface';
 
 export interface RowSettingsDialogElement extends ControlElement {
-    onSave: (siteType: ISiteType) => void;
+    onSave: (siteType: any) => void;
 
 }
 
@@ -35,7 +35,7 @@ export class SelectSiteTypeDialog extends Module {
     private dialog: Modal;
     private pnlSecurePage: Panel;
     private pnlSecureBook: Panel;
-    private onSave: (siteType: ISiteType) => void;
+    private onSave: (siteType: any) => void;
     constructor(parent?: any) {
         super(parent);
         assignAttr(this);

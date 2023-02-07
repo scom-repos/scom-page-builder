@@ -296,6 +296,7 @@ export class PageRows extends Module {
                     class={'container'}
                     verticalAlignment="center"
                     maxWidth="100%"
+                    padding={{bottom: '12rem'}}
                 ></i-vstack>
                 <i-panel
                     id="pnlRowOverlay"

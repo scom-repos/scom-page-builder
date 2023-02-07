@@ -98,8 +98,8 @@ export class PageRow extends Module {
             this.background.color = backgroundColor;
         }
 
-        // this.isCloned = typeof this.rowData.config.isCloned === 'boolean' ? this.rowData.config.isCloned : true;
-        // this.isChanged = typeof this.rowData.config.isChanged === 'boolean' ? this.rowData.config.isChanged : true;
+        this.isCloned = this.parentElement.nodeName !== 'BUILDER-HEADER';
+        this.isChanged = this.parentElement.nodeName !== 'BUILDER-HEADER';
 
         const unitWidth = Number(this.pnlElements.offsetWidth) / 12;
         if (elements && elements.length > 0) {

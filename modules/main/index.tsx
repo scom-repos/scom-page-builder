@@ -7,7 +7,7 @@ import {
     Styles
 } from '@ijstech/components';
 import { match, compile } from '@page/utility';
-import { IMenu, IRoute, ISCConfig } from '@page/interface';
+import { IMenu, IPageData, IRoute, ISCConfig } from '@page/interface';
 import './index.css';
 import './style.css';
 import { updateNetworks, updateWallets } from '@page/wallet';
@@ -19,6 +19,8 @@ export class MainModule extends Module {
     private _options: ISCConfig;
     private currentModule: Module;
     private currentMenu: any;
+    private _data: IPageData;
+    private _mode: string;
 
     constructor(parent?: Container, options?: any) {
         super(parent, options);
@@ -29,6 +31,17 @@ export class MainModule extends Module {
             location.hash = toPath();
         } else
             this.handleHashChange(true);
+    }
+
+    async getData(): Promise<IPageData> {
+        const getDataFn = (this.currentModule as any)?.getData;
+        return getDataFn ? await getDataFn() : this._data;
+    }
+    
+    async setData(data: IPageData) {
+        this._data = data;
+        const setDataFn = (this.currentModule as any)?.setData;
+        if (setDataFn) await setDataFn(data);
     }
 
     async init() {

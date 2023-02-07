@@ -27,55 +27,6 @@ Styles.cssRule('#editor', {
       boxShadow: 'none',
       border: 'none',
       background: 'transparent'
-    },
-    '#headerStack': {
-      backgroundSize: 'cover',
-      $nest: {
-        'ide-section': {
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100%',
-          width: '100%'
-        },
-        'i-input > input': {
-          background: 'transparent',
-          boxShadow: 'none',
-          border: 'none',
-          color: 'rgba(255,255,255,1)',
-          textAlign: 'center'
-        },
-        '.page-title input': {
-          lineHeight: 1.333,
-          fontSize: '1rem',
-          textAlign: 'left'
-        },
-        '&:hover': {
-          $nest: {
-            '.page-title': {
-              transition: 'box-shadow 125ms cubic-bezier(0.4,0,0.2,1)',
-              $nest: {
-                '&:hover, &:focus': {
-                  boxShadow: '0 10px 20px rgb(0 0 0 / 19%), 0 6px 6px rgb(0 0 0 / 23%)'
-                },
-                '&:hover ~ .header-stack': {
-                  opacity: 1,
-                  transition: 'opacity 125ms cubic-bezier(0.4,0,0.2,1)'
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    '.header-stack': {
-      opacity: 0,
-      $nest: {
-        '&:hover': {
-          opacity: 1,
-          transition: 'opacity 125ms cubic-bezier(0.4,0,0.2,1)'
-        }
-      }
     }
   }
 });

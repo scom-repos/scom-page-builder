@@ -1,12 +1,5 @@
 import { IPageBlockData } from "./pageBlock";
 
-export type ISiteType = "secure-page" | "secure-book";
-
-export interface ISiteData {
-    config?: IConfigData;
-    pages: IPageData[];
-}
-
 export interface IPageData {
     cid?: string;
     title?: string;
@@ -20,8 +13,9 @@ export interface IPageData {
 	footer: IPageFooter;
 }
 
+export type HeaderType = 'cover' | 'largeBanner' | 'banner' | 'titleOnly';
 export interface IPageHeader {
-	headerType: 'cover' | 'largeBanner' | 'banner' | 'titleOnly';
+	headerType: HeaderType;
 	image: string;
 	elements: IPageElement[];
 }
@@ -49,6 +43,7 @@ export interface IPageElement {
     properties: any;
 	module?: IPageBlockData; // follow the standard defined in secure page, if type === 'primitive'
 	elements?: IPageElement[]; // type === 'composite'
+
     visibleOn?: string;
     invisibleOn?: string;
 }
@@ -81,7 +76,6 @@ export interface IContainerSettings {
 }
 
 export interface IConfigData {
-    type: ISiteType;
     header: {
         showHeader: boolean;
         showWalletAuthentication: boolean;

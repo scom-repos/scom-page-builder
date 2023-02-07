@@ -10,6 +10,7 @@ import './pageSection.css';
 import { IPageElement } from '@page/interface';
 import { RowSettingsDialog } from '@page/dialogs';
 import { ContainerDragger, IDEToolbar } from '@page/common';
+import { isEmpty } from '@page/utility';
 
 declare global {
     namespace JSX {
@@ -158,6 +159,11 @@ export class PageSection extends Module {
                 this.currentToolbar = await this.createToolbar(value);
                 this.currentToolbar.parent = this.pnlMain;
                 this.pnlMain.appendChild(this.currentToolbar);
+                if (!isEmpty(value.properties)) {
+                    this.currentToolbar.setData(value.properties);
+                    this.currentToolbar.setTag(value.properties);
+                }
+
             }
         } else if (value.elements?.length) {
             if (this.toolbarList.length) {
