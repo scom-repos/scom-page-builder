@@ -127,7 +127,7 @@ export class PageRow extends Module {
         this.actionsBar.minHeight = '100%';
     }
 
-    async getData() {
+    async getData(): Promise<IPageSection> {
         const sections = this.pnlElements.querySelectorAll('ide-section');
         const sectionDataList: IPageElement[] = [];
         for (const section of sections) {
@@ -144,9 +144,8 @@ export class PageRow extends Module {
         // this.rowSettings.show();
     }
 
-    private onClone() {
-        // TODO: move to pageRow
-        const rowData = this.getData();
+    private async onClone() {
+        const rowData = await this.getData();
         if (!rowData) return;
         application.EventBus.dispatch(EVENT.ON_CLONE, { rowData, id: this.id });
     }
@@ -333,7 +332,7 @@ export class PageRow extends Module {
                 <i-panel width="100%" height="100%" maxWidth="100%" padding={{left: '3rem', right: '3rem'}}>
                     <i-grid-layout
                         id={'pnlElements'}
-                        maxWidth="100%"
+                        maxWidth="100%" maxHeight="100%"
                         width="100%" height="100%"
                         gap={{column: 15}}
                         templateColumns={['repeat(12, 1fr)']}

@@ -91,11 +91,13 @@ export class BuilderHeader extends Module {
         this.showAddStack = this._elements.length === 0;
         this.pnlHeader.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
         this.updateHeaderType();
-        !this.showAddStack && this.nameInput.classList.add('has-header');
-        this.pnlConfig.visible = !this.showAddStack;
+        if (!this.showAddStack) {
+            this.nameInput.classList.add('has-header');
+            this.pnlConfig.visible = true;
+        }
 
         this.pnlHeaderMain.clearInnerHTML();
-        const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
+        const pageRow = (<ide-row width="100vw" maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
         const rowData = {
             id: generateUUID(),
             row: 0,
@@ -121,7 +123,10 @@ export class BuilderHeader extends Module {
                     name: "Textbox",
                     local: true
                 },
-                properties: {}
+                properties: {
+                    width: '100%',
+                    height: '100px'
+                }
             }]
         }
     }
@@ -145,7 +150,7 @@ export class BuilderHeader extends Module {
         const fileList = this.uploader.fileList || [];
         const file = fileList[0];
         if (this._isUpdatingBg) {
-            const image = await this.uploader.toBase64(file) as string;
+            const image = file ? await this.uploader.toBase64(file) as string : '';
             this.pnlHeader.background = {image};
             this._image = image;
             this._isUpdatingBg = false;
@@ -275,6 +280,7 @@ export class BuilderHeader extends Module {
                     }}
                     background={{ color: 'transparent' }}
                     verticalAlignment="center"
+                    visible={false}
                 >
                     <i-input
                         id="nameInput"
@@ -286,14 +292,13 @@ export class BuilderHeader extends Module {
                 </i-hstack>
                 <i-vstack
                     id="pnlHeaderMain"
-                    height="calc(100% - 36px - 52px)"
-                    overflow="hidden"
+                    height="calc(100% - 52px)"
                     horizontalAlignment="center" verticalAlignment="center"
                 ></i-vstack>
                 <i-hstack
                     horizontalAlignment="space-between"
                     position="absolute"
-                    top="4rem"
+                    top="0px"
                     zIndex={15}
                     width="100%"
                     padding={{ left: 10, bottom: 5, right: 10 }}
@@ -310,6 +315,7 @@ export class BuilderHeader extends Module {
                             border={{ radius: 2 }}
                             caption="Add logo"
                             onClick={() => this.onShowUpload()}
+                            visible={false}
                         ></i-button>
                     </i-panel>
                     <i-panel>

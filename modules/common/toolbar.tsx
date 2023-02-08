@@ -304,7 +304,7 @@ export class IDEToolbar extends Module {
             this._component = module;
             this._component.maxWidth = '100%';
             this._component.maxHeight = '100%';
-            this._component.overflow = {x: 'hidden', y: 'hidden'};
+            this._component.overflow = 'hidden';
             this._component.style.display = 'block';
             this._component.onClick = () => {
                 this.checkToolbar();
@@ -323,8 +323,11 @@ export class IDEToolbar extends Module {
     }
 
     async setData(data: any) {
-        if (this._component)
+        if (this._component) {
+            if (data.width) this._component.width = data.width;
+            if (data.height) this._component.height = data.height;
             await this._component.setData(data);
+        } 
     }
 
     async getData() {

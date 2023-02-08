@@ -5,7 +5,9 @@ import {
     Styles,
     Panel,
     observable,
-    application
+    application,
+    Modal,
+    Upload
 } from '@ijstech/components';
 import { EVENT } from '@page/const';
 import { IPageElement, IPageFooter } from '@page/interface';
@@ -33,6 +35,9 @@ export class BuilderFooter extends Module {
     private pnlFooterMain: Panel;
     private pnlEditOverlay: Panel;
     private pnlOverlay: Panel;
+    private pnlConfig: Panel;
+    private mdUpload: Modal;
+    private uploader: Upload;
 
     private _image: string;
 	private _elements: IPageElement[];
@@ -49,13 +54,17 @@ export class BuilderFooter extends Module {
 
     initEventBus() {
         application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => {
-            // TODO: update data
-            if (!this.pnlFooterMain.hasChildNodes()) {
-                this.showAddStack = true;
-                this.pnlFooter.background = {color: '#fff', image: ''};
-                this.pnlEditOverlay.visible = false;
-            }
+            if (!this.pnlFooterMain.hasChildNodes())
+                this.resetData();
         })
+    }
+
+    private resetData() {
+        this.showAddStack = true;
+        this.pnlFooter.background = {color: '#fff', image: ''};
+        this.pnlEditOverlay.visible = false;
+        this.pnlOverlay.visible = false;
+        this.pnlConfig.visible = false;
     }
 
     get data(): IPageFooter {
@@ -81,7 +90,10 @@ export class BuilderFooter extends Module {
 
     private async updateFooter() {
         this.showAddStack = this._elements.length === 0;
-        this.pnlEditOverlay.visible = !this.showAddStack;
+        if (!this.showAddStack) {
+            this.pnlEditOverlay.visible = true;
+            this.pnlConfig.visible = true;
+        }
         if (this.pnlEditOverlay.visible)
             this.pnlEditOverlay.classList.add('flex');
         else
@@ -114,7 +126,10 @@ export class BuilderFooter extends Module {
                     name: "Textbox",
                     local: true
                 },
-                properties: {}
+                properties: {
+                    width: '100%',
+                    height: '100px'
+                }
             }]
         }
     }
@@ -127,6 +142,20 @@ export class BuilderFooter extends Module {
             this.pnlEditOverlay.classList.remove('flex');
         this.pnlOverlay.visible = !this.pnlEditOverlay.visible;
         this.pnlOverlay.height = this.pnlOverlay.visible ? document.body.offsetHeight : 0;
+    }
+
+    onChangedBg() {
+        this.uploader.clear();
+        this.mdUpload.visible = true;
+    }
+
+    private async onUpdateImage() {
+        const fileList = this.uploader.fileList || [];
+        const file = fileList[0];
+        const image = file ? await this.uploader.toBase64(file) as string : '';
+        this.pnlFooterMain.background = {image};
+        this._image = image;
+        this.mdUpload.visible = false;
     }
 
     init() {
@@ -157,12 +186,12 @@ export class BuilderFooter extends Module {
                 <i-hstack
                     id="pnlEditOverlay"
                     width="100%" height="100%"
-                    dock='fill'
+                    position="absolute" top="0px" left="0px"
                     background={{color: 'rgba(0,0,0,.6)'}}
                     zIndex={29}
-                    class="edit-stack"
                     visible={false}
                     verticalAlignment="center" horizontalAlignment="center"
+                    class="edit-stack"
                 >
                      <i-button
                         class="btn-add"
@@ -200,6 +229,56 @@ export class BuilderFooter extends Module {
                     </i-panel>
                 </i-hstack>
                 <i-panel id="pnlFooterMain" max-maxWidth="100%" maxHeight="100%"></i-panel>
+                <i-hstack
+                    id="pnlConfig"
+                    background={{ color: '#fafafa' }}
+                    bottom="0px" left="0px" position="absolute"
+                    verticalAlignment="center"
+                    border={{ radius: 2 }}
+                    margin={{left: 12, top: 12, bottom: 12, right: 12}}
+                    height="40px"
+                    class="custom-box"
+                    visible={false}
+                >
+                    <i-button
+                        class="btn-add"
+                        icon={{ name: 'image', fill: 'rgba(0,0,0,.54)' }}
+                        font={{ color: 'rgba(0,0,0,.54)' }}
+                        background={{ color: 'transparent' }}
+                        padding={{ left: 6, right: 6 }} height="100%"
+                        border={{ width: 0 }}
+                        caption="Change Image"
+                        onClick={() => this.onChangedBg()}
+                    ></i-button>
+                </i-hstack>
+                <i-modal
+                    id='mdUpload'
+                    title='Select Image'
+                    closeIcon={{ name: 'times' }}
+                    width={400}
+                    closeOnBackdropClick={false}
+                >
+                    <i-vstack padding={{top: '1rem'}} gap="1rem">
+                        <i-upload
+                            id='uploader'
+                            draggable
+                            caption='Drag and Drop image'
+                            class="custom-uploader"
+                        ></i-upload>
+                        <i-hstack horizontalAlignment="end">
+                            <i-button
+                                id="btnAddImage"
+                                icon={{ name: 'plus-circle', fill: 'rgba(0,0,0,.54)' }}
+                                font={{color: 'rgba(0,0,0,.54)'}}
+                                background={{color: Theme.colors.secondary.light}}
+                                padding={{top: 10, left: 6, right: 6, bottom: 10}}
+                                border={{radius: 2}}
+                                caption="Add Image"
+                                onClick={this.onUpdateImage.bind(this)}
+                            ></i-button>
+                        </i-hstack>
+                    </i-vstack>
+                </i-modal>
             </i-vstack>
         )
     }

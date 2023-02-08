@@ -172,6 +172,10 @@ export class PageSection extends Module {
                 for (let i = 0; i < value.elements.length; i++) {
                     const element = value.elements[i];
                     const toolbar = await this.createToolbar(element);
+                    if (!isEmpty(element.properties)) {
+                        toolbar.setData(element.properties);
+                        toolbar.setTag(element.properties);
+                    }
                     toolbar.parent = stack;
                     stack.appendChild(toolbar);
                     this.toolbarList.push(toolbar);
@@ -184,7 +188,6 @@ export class PageSection extends Module {
 
     async getData(): Promise<IPageElement> {
         if (this._data?.type === 'primitive') {
-            let data: IPageElement = this._data;
             let properties = null;
             if (this.currentToolbar)
                 properties = await this.currentToolbar.getData();
@@ -205,8 +208,13 @@ export class PageSection extends Module {
 
     render() {
         return (
-            <i-panel id={'pnlPageSection'}>
-                <i-panel id="pageSectionWrapper" width={'100%'} height="100%" padding={{top: '1.5rem', bottom: '1.5rem'}}>
+            <i-panel id={'pnlPageSection'} maxWidth="100%" maxHeight="100%">
+                <i-panel
+                    id="pageSectionWrapper"
+                    width={'100%'} height="100%"
+                    maxWidth="100%" maxHeight="100%"
+                    padding={{top: '1.5rem', bottom: '1.5rem'}}
+                >
                     <i-panel id="pnlMain"></i-panel>
                 </i-panel>
             </i-panel>
