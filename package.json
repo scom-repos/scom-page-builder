@@ -18,10 +18,8 @@
     },
     "scripts": {
         "build": "rm -rf dist && npx @ijstech/compiler",
-        "build:local": "npm run build && npm run cp:local-pageblock",
         "build:dev": "rm -rf dist && npx @ijstech/compiler && npm run cp:pageblocksdev",
         "cp:pageblocksdev": "cp -r modules/pageblocks dist/modules/pageblocks",
-        "cp:local-pageblock": "if [ -d pageblocks ] ; then cp -r pageblocks dist/modules/pageblocks ; fi",
         "serve": "cd test && npm run serve && cd ..",
         "test": "cd test && npm run test && cd .."
     }

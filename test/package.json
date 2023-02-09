@@ -16,7 +16,8 @@
     },
     "scripts": {
         "cp:builder": "rm -rf ref && mkdir ref && cp ../package.json ref/package.json && cp -r ../dist ref/dist && cp -r ../pluginTypes ref/pluginTypes",
-        "build": "npm run cp:builder && rm -rf dist && npx @ijstech/compiler",
+        "cp:local-pageblock": "if [ -d pageblocks ] ; then cp -r pageblocks dist/modules/pageblocks ; fi",
+        "build": "npm run cp:builder && rm -rf dist && npx @ijstech/compiler && npm run cp:local-pageblock",
         "serve": "npx @ijstech/cli serve 8080",
         "test": "npm run build && npm run serve"
     }

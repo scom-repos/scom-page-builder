@@ -20,6 +20,7 @@ export class MainModule extends Module {
       if (this.options.data) {
         (module as any).setData(this.options.data);
       }
+      (module as any).onLoad();
     }
   }
 
