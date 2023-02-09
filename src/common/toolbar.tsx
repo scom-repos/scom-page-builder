@@ -5,13 +5,14 @@ import {
     ControlElement,
     Styles,
     HStack,
-    IMenuItem,
-    Menu,
-    Control,
     Button,
-    application
+    application,
+    renderUI,
+    Modal
 } from '@ijstech/components';
 import { EVENT } from '../const/index';
+import { IPageBlockAction } from '../interface/index';
+import { pageObject } from '../store/index';
 import { commandHistory, getModule, ResizeElementCommand } from '../utility/index';
 import './toolbar.css';
 
@@ -37,6 +38,7 @@ export class IDEToolbar extends Module {
     private _origWidth: number;
     private _origHeight: number;
     private _mouseDownPos: any;
+    private currentAction: IPageBlockAction = null;
 
     private contentStack: Panel;
     private toolsStack: Panel;
@@ -50,12 +52,15 @@ export class IDEToolbar extends Module {
     private _currentPosition: IPosition;
     private _component: any = null;
     private dragStack: Panel;
+    private pnlForm: Panel;
+    private mdActions: Modal;
 
     private _mouseDownHandler: any;
     private _mouseUpHandler: any;
     private _mouseMoveHandler: any;
 
     data: any;
+    private _rowId: string;
 
     constructor(parent?: any) {
         super(parent);
@@ -84,6 +89,7 @@ export class IDEToolbar extends Module {
             document.addEventListener('mouseup', this._mouseUpHandler);
         }
     };
+
     private handleMouseMove(e: MouseEvent) {
         e.preventDefault();
         e.stopPropagation();
@@ -119,6 +125,7 @@ export class IDEToolbar extends Module {
         this._component.height = newHeight;
         this.contentStack.refresh();
     };
+
     private handleMouseUp(e: MouseEvent) {
         e.stopPropagation();
         document.removeEventListener('mousemove', this._mouseMoveHandler);
@@ -142,6 +149,13 @@ export class IDEToolbar extends Module {
         this.renderToolbars();
     }
 
+    get rowId() {
+        return this._rowId;
+    }
+    set rowId(value: string) {
+        this._rowId = value;
+    }
+
     get readonly() {
         return this._readonly;
     }
@@ -149,63 +163,50 @@ export class IDEToolbar extends Module {
         this._readonly = value;
     }
 
-    private async createMenu(items: IMenuItem[]) {
-        let menu = await Menu.create({
-            data: items,
-            mode: 'vertical',
-            visible: true
-        });
-        return menu;
-    }
-
     private async renderToolbars() {
         this.toolbar.clearInnerHTML();
         for (let i = 0; i < this.toolList.length; i++) {
             const tool = this.toolList[i];
-            let elm: Control;
-            if (Array.isArray(tool)) {
-                const menu = await this.createMenu(tool);
-                const modal = (
-                    <i-modal
-                        showBackdrop={false}
-                        minWidth={200}
-                        popupPlacement='bottom'
-                        zIndex={100}
-                    >
-                        {menu}
-                    </i-modal>
-                );
-                elm =  (
-                    <i-panel>
-                        <i-button
-                            padding={{ left: '1rem', right: '1rem' }}
-                            height={52}
-                            caption={tool[0].name}
-                            background={{color: 'transparent'}}
-                            rightIcon={{name: 'caret-down', fill: Theme.text.primary, width: 20, height: 20}}
-                            onClick={() => modal.visible = !modal.visible}
-                        ></i-button>
-                        { modal }
-                    </i-panel>
-                );
-            } else {
-                elm = await Button.create({
-                    padding: { left: '12px', right: '12px', top: '12px', bottom: '12px' },
-                    width: 48,
-                    height: 48,
-                    border: {radius: '50%'},
-                    background: {color: 'transparent'},
-                    caption: `<i-icon name="${tool.icon}" width=${20} height=${20} display="block" fill="${Theme.text.primary}"></i-icon>`,
-                    onClick: () => {
-                        console.log('button click: ', tool.name)
-                        // const commandIns = tool.command(this, null);
-                        // commandHistory.execute(commandIns);
-                        this.hideToolbars();
-                    }
-                });
-                elm.classList.add('toolbar');
-            }
+            let elm = await Button.create({
+                padding: { left: '12px', right: '12px', top: '12px', bottom: '12px' },
+                width: 48,
+                height: 48,
+                border: {radius: '50%'},
+                background: {color: 'transparent'},
+                caption: `<i-icon name="${tool.icon}" width=${20} height=${20} display="block" fill="${Theme.text.primary}"></i-icon>`,
+                onClick: () => {
+                    console.log('button click: ', tool.name);
+                    this.currentAction = tool;
+                    this.mdActions.visible = true;
+                    this.hideToolbars();
+                }
+            });
+            elm.classList.add('toolbar');
             this.toolbar.appendChild(elm);
+        }
+    }
+
+    private onShowModal() {
+        this.renderToolbarAction(this.currentAction);
+    }
+
+    private async renderToolbarAction(action: IPageBlockAction) {
+        this.pnlForm.clearInnerHTML();
+        const data = await this.getData();
+        renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data);
+    }
+
+    private onSave(result: boolean, data: any) {
+        let trimedData = data.split(',').join(',\n');
+        trimedData = trimedData.split('{').join('{\n').split('}').join('\n}');
+        console.log(`result: ${result},\ndata: ${trimedData}`);
+        if (result) {
+            const commandIns = this.currentAction.command(this, JSON.parse(trimedData));
+            commandHistory.execute(commandIns);
+            this.mdActions.visible = false;
+        } else {
+            if (data === 'action canceled')
+                this.mdActions.visible = false;
         }
     }
 
@@ -326,18 +327,15 @@ export class IDEToolbar extends Module {
         if (this._component) {
             if (data.width) this._component.width = data.width;
             if (data.height) this._component.height = data.height;
+            await this._component.setTag(data);
             await this._component.setData(data);
+            pageObject.setElement(this.rowId, this.data.id, this._component.data);
+
         } 
     }
 
     async getData() {
-        if (this._component)
-            return await this._component.getData();
-        return null;
-    }
-
-    setTag(tag: any) {
-        if (this._component) this._component.setTag(tag)
+        return this._component ? await this._component.getData() : null;
     }
 
     private checkToolbar() {
@@ -407,6 +405,21 @@ export class IDEToolbar extends Module {
                         </i-grid-layout>
                     </i-vstack>
                 </i-panel>
+                <i-modal
+                    id='mdActions'
+                    title='Update Settings'
+                    closeIcon={{ name: 'times' }}
+                    minWidth={400}
+                    maxWidth={500}
+                    closeOnBackdropClick={false}
+                    onOpen={this.onShowModal.bind(this)}
+                    class="setting-modal"
+                >
+                    <i-panel
+                        id="pnlForm"
+                        padding={{left: '1rem', right: '1rem', top: '1rem', bottom: '1rem'}}
+                    ></i-panel>
+                </i-modal>
             </i-vstack>
         );
     }

@@ -1,9 +1,10 @@
 import { application, Container, customModule, Module, Panel } from '@ijstech/components';
-import {} from '@ijstech/eth-contract';
+import {} from '@ijstech/eth-contract'
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
 import { ElementType, IPageBlockData, IPageData } from './interface/index';
 import { PageRows } from './page/index';
+import { pageObject } from './store/index';
 import { LightTheme  } from './theme/index';
 import { generateUUID } from './utility/index';
 import './index.css';
@@ -27,16 +28,19 @@ export default class Editor extends Module {
         this.setData = this.setData.bind(this);
     }
 
-    async getData() {
-        const data = {
-            header: await this.builderHeader.getData(),
-            sections: await this.pageRows.getRows(),
-            footer: await this.builderFooter.getData()
-        };
-        return data;
+    getData() {
+        return {
+            header: pageObject.header,
+            sections: pageObject.sections,
+            footer: pageObject.footer
+        }
     }
 
     setData(value: IPageData) {
+        pageObject.header = value.header;
+        pageObject.sections = value.sections;
+        pageObject.footer = value.footer;
+
         this.builderHeader.data = value.header;
         this.pageRows.setRows(value.sections);
         this.builderFooter.data = value.footer;

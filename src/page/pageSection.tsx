@@ -49,11 +49,12 @@ export class PageSection extends Module {
     }
     private currentToolbar: IDEToolbar;
     private toolbarList: IDEToolbar[];
+    private rowId: string = '';
 
     constructor(parent?: any) {
         super(parent);
         this.setData = this.setData.bind(this);
-        this.getData = this.getData.bind(this);
+        // this.getData = this.getData.bind(this);
     }
 
     get size() {
@@ -132,28 +133,28 @@ export class PageSection extends Module {
         let toolbar = await IDEToolbar.create({}) as IDEToolbar;
         toolbar.readonly = this._readonly;
         toolbar.data = value;
+        toolbar.rowId = this.rowId;
         await toolbar.fetchModule();
         return toolbar;
     }
 
     // TODO
-    async setData(value: IPageElement) {
+    async setData(rowId: string, value: IPageElement) {
         // column: number;
         // columnSpan: number;
 
         this._data = value;
         this.id = value.id;
+        this.rowId = rowId;
         if (value.type === 'primitive') {
             if (this.currentToolbar) {
                 this.currentToolbar.setData(value.properties);
-                this.currentToolbar.setTag(value.properties);
             } else {
                 this.currentToolbar = await this.createToolbar(value);
                 this.currentToolbar.parent = this.pnlMain;
                 this.pnlMain.appendChild(this.currentToolbar);
                 if (!isEmpty(value.properties)) {
                     this.currentToolbar.setData(value.properties);
-                    this.currentToolbar.setTag(value.properties);
                 }
 
             }
@@ -164,7 +165,6 @@ export class PageSection extends Module {
                     const toolbar = this.toolbarList[i];
                     if (toolbar) {
                         toolbar.setData(element.properties);
-                        toolbar.setTag(element.properties);
                     }
                 }
             } else {
@@ -174,7 +174,6 @@ export class PageSection extends Module {
                     const toolbar = await this.createToolbar(element);
                     if (!isEmpty(element.properties)) {
                         toolbar.setData(element.properties);
-                        toolbar.setTag(element.properties);
                     }
                     toolbar.parent = stack;
                     stack.appendChild(toolbar);
@@ -186,25 +185,25 @@ export class PageSection extends Module {
         }
     }
 
-    async getData(): Promise<IPageElement> {
-        if (this._data?.type === 'primitive') {
-            let properties = null;
-            if (this.currentToolbar)
-                properties = await this.currentToolbar.getData();
-            this._data.properties = properties;
-        } else {
-            if (this.toolbarList.length) {
-                for (let i = 0; i < this._data.elements.length; i++) {
-                    const toolbar = this.toolbarList[i];
-                    if (toolbar) {
-                        const properties = await toolbar.getData();
-                        this._data.elements[i].properties = properties;
-                    }
-                }
-            }
-        }
-        return this._data;
-    }
+    // async getData(): Promise<IPageElement> {
+    //     if (this._data?.type === 'primitive') {
+    //         let properties = null;
+    //         if (this.currentToolbar)
+    //             properties = await this.currentToolbar.getData();
+    //         this._data.properties = properties;
+    //     } else {
+    //         if (this.toolbarList.length) {
+    //             for (let i = 0; i < this._data.elements.length; i++) {
+    //                 const toolbar = this.toolbarList[i];
+    //                 if (toolbar) {
+    //                     const properties = await toolbar.getData();
+    //                     this._data.elements[i].properties = properties;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     return this._data;
+    // }
 
     render() {
         return (
