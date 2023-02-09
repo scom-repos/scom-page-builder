@@ -22,8 +22,7 @@
         "build:dev": "rm -rf dist && npx @ijstech/compiler && npm run cp:pageblocksdev",
         "cp:pageblocksdev": "cp -r modules/pageblocks dist/modules/pageblocks",
         "cp:local-pageblock": "if [ -d pageblocks ] ; then cp -r pageblocks dist/modules/pageblocks ; fi",
-        "serve": "npx @ijstech/cli serve 8080",
-        "test": "npm run build && npm run serve",
-        "test:dev": "npm run build:dev && npm run serve"
+        "serve": "cd test && npm run serve && cd ..",
+        "test": "cd test && npm run test && cd .."
     }
 }
