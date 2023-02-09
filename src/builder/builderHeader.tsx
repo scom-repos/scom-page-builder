@@ -90,7 +90,7 @@ export class BuilderHeader extends Module {
     private resetData() {
         this.showAddStack = true;
         this.pnlHeader.background = {color: '#fff', image: ''};
-        this.pnlConfig.visible = false;``
+        this.pnlConfig.visible = false;
         this.pnlHeaderType.visible = false;
     }
 

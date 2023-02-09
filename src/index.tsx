@@ -1,4 +1,5 @@
 import { application, Container, customModule, Module, Panel } from '@ijstech/components';
+import {} from '@ijstech/eth-contract'
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
 import { ElementType, IPageBlockData, IPageData } from './interface/index';
