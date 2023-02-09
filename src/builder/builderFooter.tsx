@@ -13,6 +13,7 @@ import { EVENT } from '../const/index';
 import { IPageElement, IPageFooter } from '../interface/index';
 import { PageRow } from '../page/index';
 import { generateUUID } from '../utility/index';
+import { pageObject } from '../store/index';
 import './builderFooter.css';
 
 declare global {
@@ -49,7 +50,7 @@ export class BuilderFooter extends Module {
     constructor(parent?: any) {
         super(parent);
         this.initEventBus();
-        this.getData = this.getData.bind(this);
+        // this.getData = this.getData.bind(this);
     }
 
     initEventBus() {
@@ -74,18 +75,23 @@ export class BuilderFooter extends Module {
         };
     }
     set data(value: IPageFooter) {
-        this._image = value.image || '';
-        this._elements = value.elements || [];
+        this.setData(value);
         this.updateFooter();
     }
 
-    async getData() {
-        let elements = [];
-        if (this._elements) {
-            const row = this.pnlFooterMain.querySelector('ide-row') as PageRow;
-            if (row) elements = (await row.getData())?.elements || [];
-        }
-        return {...this.data, elements};
+    // async getData() {
+    //     let elements = [];
+    //     if (this._elements) {
+    //         const row = this.pnlFooterMain.querySelector('ide-row') as PageRow;
+    //         if (row) elements = (await row.getData())?.elements || [];
+    //     }
+    //     return {...this.data, elements};
+    // }
+
+    setData(value: IPageFooter) {
+        this._image = value.image;
+        this._elements = value.elements;
+        pageObject.footer = value;
     }
 
     private async updateFooter() {

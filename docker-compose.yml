@@ -7,7 +7,7 @@ services:
       - .:/app
     command: bash -c "cd /app && rm -rf node_modules && rm -f package-lock.json && npm i && cd /app/test && rm -rf node_modules && rm -f package-lock.json && npm i"
   build: 
-    user: node
+    user: root
     image: node:18
     volumes:
       - .:/app
@@ -19,7 +19,7 @@ services:
       - .:/app
     command: bash -c "cd /app/test && npm run build"  
   serve:
-    user: node
+    user: root
     image: node:18
     ports:
       - "8051:8080"

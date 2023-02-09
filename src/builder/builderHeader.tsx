@@ -3,6 +3,7 @@ import assets from '../assets';
 import { EVENT } from '../const/index';
 import { HeaderType, IPageElement, IPageHeader } from '../interface/index';
 import { PageRow } from '../page/index';
+import { pageObject } from '../store/index';
 import { generateUUID } from '../utility/index';
 import './builderHeader.css';
 
@@ -47,7 +48,8 @@ export class BuilderHeader extends Module {
     constructor(parent?: any) {
         super(parent);
         this.initEventBus();
-        this.getData = this.getData.bind(this);
+        // this.getData = this.getData.bind(this);
+        this.setData = this.setData.bind(this);
     }
 
     initEventBus() {
@@ -65,25 +67,30 @@ export class BuilderHeader extends Module {
         };
     }
     set data(value: IPageHeader) {
-        this._headerType = value.headerType;
-        this._image = value.image;
-        this._elements = value.elements;
+        this.setData(value);
         this.updateHeader();
     }
 
-    async getData() {
-        let elements = [];
-        if (this._elements) {
-            const row = this.pnlHeaderMain.querySelector('ide-row') as PageRow;
-            if (row) elements = (await row.getData())?.elements || [];
-        }
-        return {...this.data, elements};
+    // async getData() {
+    //     let elements = [];
+    //     if (this._elements) {
+    //         const row = this.pnlHeaderMain.querySelector('ide-row') as PageRow;
+    //         if (row) elements = (await row.getData())?.elements || [];
+    //     }
+    //     return {...this.data, elements};
+    // }
+
+    setData(value: IPageHeader) {
+        this._headerType = value.headerType;
+        this._image = value.image;
+        this._elements = value.elements;
+        pageObject.header = value;
     }
 
     private resetData() {
         this.showAddStack = true;
         this.pnlHeader.background = {color: '#fff', image: ''};
-        this.pnlConfig.visible = false;
+        this.pnlConfig.visible = false;``
         this.pnlHeaderType.visible = false;
     }
 
@@ -182,7 +189,7 @@ export class BuilderHeader extends Module {
             type.classList.remove('active');
         })
         source.classList.add('active');
-        this._headerType = type.type;
+        this.setData({...this.data, headerType: type.type});
         this.updateHeaderType();
     }
 

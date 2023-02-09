@@ -102,7 +102,7 @@ const devModules = [
 //         "@openswap/oracle-adaptor-sdk": "modules/packages/pageblocks/pageblock-buyback/sdks/oracle-adaptor-sdk/index.js",
 //         "@buyback/assets": "modules/packages/pageblocks/pageblock-buyback/assets/index.js",
 //         "@buyback/global": "modules/packages/pageblocks/pageblock-buyback/global/index.js",
-//         "@buyback/store": "modules/packages/pageblocks/pageblock-buyback/store/index.js",
+//         "@buyback/store/index": "modules/packages/pageblocks/pageblock-buyback/store/index/index.js",
 //         "@buyback/queue-utils": "modules/packages/pageblocks/pageblock-buyback/queue-utils/index.js",
 //         "@buyback/swap-utils": "modules/packages/pageblocks/pageblock-buyback/swap-utils/index.js"
 //     }

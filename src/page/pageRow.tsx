@@ -3,7 +3,6 @@ import {
     customElements,
     application,
     ControlElement,
-    Styles,
     Control,
     VStack,
     observable,
@@ -11,10 +10,9 @@ import {
 } from '@ijstech/components';
 import { PageSection } from './pageSection';
 import './pageRow.css';
-
-import { RowSettingsDialog } from '../dialogs/index';
 import { EVENT } from '../const/index';
-import { IPageElement, IPageSection, IRowSettings } from '../interface/index';
+import { IPageSection, IRowSettings } from '../interface/index';
+import { pageObject } from '../store/index';
 
 declare global {
     namespace JSX {
@@ -46,7 +44,7 @@ export class PageRow extends Module {
     constructor(parent?: any) {
         super(parent);
         this.setData = this.setData.bind(this);
-        this.getData = this.getData.bind(this);
+        // this.getData = this.getData.bind(this);
     }
 
     private initEventBus() {
@@ -67,7 +65,7 @@ export class PageRow extends Module {
             ></ide-section>
         ) as PageSection;
         this.pnlElements.appendChild(pageSection);
-        await pageSection.setData(sectionData);
+        await pageSection.setData(this.rowData.id, sectionData);
         return pageSection;
     }
 
@@ -80,25 +78,16 @@ export class PageRow extends Module {
     }
 
     async setData(rowData: IPageSection) {
-        console.log('rowData: ', rowData);
         this.pnlElements.clearInnerHTML();
         this.rowData = rowData;
         const { id, row, image, elements, backgroundColor } = this.rowData;
-        // if (this.rowData.config.width)
-        //     this.width = this.rowData.config.width;
-
-        // if (this.rowData.config.height)
-        //     this.minHeight = this.rowData.config.height;
 
         this.id = `row-${id}`;
         this.setAttribute('row', `${row}`);
-        // Background
-        if(image) {
+        if (image)
             this.background.image = image;
-        }
-        else if(backgroundColor) {
+        else if(backgroundColor)
             this.background.color = backgroundColor;
-        }
 
         this.isCloned = this.parentElement.nodeName !== 'BUILDER-HEADER';
         this.isChanged = this.parentElement.nodeName !== 'BUILDER-HEADER';
@@ -127,17 +116,17 @@ export class PageRow extends Module {
         this.actionsBar.minHeight = '100%';
     }
 
-    async getData(): Promise<IPageSection> {
-        const sections = this.pnlElements.querySelectorAll('ide-section');
-        const sectionDataList: IPageElement[] = [];
-        for (const section of sections) {
-            const sectionData = await (section as PageSection).getData();
-            if (!sectionData) continue;
-            sectionDataList.push(sectionData);
-        }
-        this.rowData.elements = sectionDataList;
-        return this.rowData;
-    }
+    // async getData(): Promise<IPageSection> {
+    //     const sections = this.pnlElements.querySelectorAll('ide-section');
+    //     const sectionDataList: IPageElement[] = [];
+    //     for (const section of sections) {
+    //         const sectionData = await (section as PageSection).getData();
+    //         if (!sectionData) continue;
+    //         sectionDataList.push(sectionData);
+    //     }
+    //     this.rowData.elements = sectionDataList;
+    //     return this.rowData;
+    // }
 
     onOpenRowSettingsDialog() {
         // this.rowSettings.setConfig(this.rowData.config);
@@ -145,7 +134,7 @@ export class PageRow extends Module {
     }
 
     private async onClone() {
-        const rowData = await this.getData();
+        const rowData = pageObject.getSection(this.rowData.id); // await this.getData();
         if (!rowData) return;
         application.EventBus.dispatch(EVENT.ON_CLONE, { rowData, id: this.id });
     }
@@ -248,6 +237,7 @@ export class PageRow extends Module {
     }
 
     async onDeleteRow(control: Control) {
+        // TODO
         this.remove();
         application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
     }

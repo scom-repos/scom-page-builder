@@ -8,7 +8,6 @@ import {
     Control,
     VStack
 } from '@ijstech/components';
-import { SelectModuleDialog } from '../dialogs/index';
 import { IPageData, IPageSection } from '../interface/index';
 import { PageSection } from './pageSection';
 import { PageRow } from './pageRow';
@@ -18,6 +17,7 @@ import './pageRows.css';
 import { EVENT } from '../const/index';
 import { AddElementCommand, commandHistory, MoveElementCommand } from '../utility/index';
 import { IDEToolbar } from '../common/index';
+import { pageObject } from '../store/index';
 
 declare global {
     namespace JSX {
@@ -36,7 +36,6 @@ const Theme = Styles.Theme.ThemeVars;
 
 @customElements('ide-rows')
 export class PageRows extends Module {
-    private rows: IPageSection[] = [];
     private pnlRows: VStack;
     private pagePaging: PagePaging;
     private pageFooter: PageFooter;
@@ -164,7 +163,7 @@ export class PageRows extends Module {
             // } else {
             //     this.pnlRows.insertBefore(this.currentRow, dropElm);
             // }
-            const moveRowCmd = new MoveElementCommand(this.currentRow, dropElm, this.pnlRows, this.rows);
+            const moveRowCmd = new MoveElementCommand(this.currentRow, dropElm, this.pnlRows, pageObject.sections);
             commandHistory.execute(moveRowCmd);
         }
         this.currentRow = null;
@@ -206,30 +205,31 @@ export class PageRows extends Module {
     }
 
     async getRows(): Promise<IPageSection[]> {
-        const rows = this.pnlRows.querySelectorAll('ide-row');
-        const rowDataList: IPageSection[] = [];
-        for (const row of rows) {
-            const rowData = await (row as PageRow).getData();
-            rowDataList.push(rowData);
-        }
-        return rowDataList;
+        // const rows = this.pnlRows.querySelectorAll('ide-row');
+        // const rowDataList: IPageSection[] = [];
+        // for (const row of rows) {
+        //     const rowData = await (row as PageRow).getData();
+        //     rowDataList.push(rowData);
+        // }
+        // return rowDataList;
+        return pageObject.sections;
     }
 
     async setRows(rows: IPageSection[]) {
-        this.rows = rows;
+        pageObject.sections = rows;
         await this.renderRows();
     }
 
     async renderRows() {
         this.clearRows();
         if (
-            (!this.rows || (this.rows && this.rows.length == 0)) &&
+            (!pageObject.sections || (pageObject.sections && pageObject.sections.length == 0)) &&
             window.location.hash.indexOf('/edit') >= 0
         ) {
-            this.rows = [];
+            pageObject.sections = [];
         }
-        for (let i = 0; i < this.rows.length; i++) {
-            const rowData = this.rows[i];
+        for (let i = 0; i < pageObject.sections.length; i++) {
+            const rowData = pageObject.sections[i];
             const pageRow = (<ide-row maxWidth="100%"></ide-row>) as PageRow;
             this.initDragEvent(pageRow);
             if (!this._readonly)
@@ -240,16 +240,14 @@ export class PageRows extends Module {
     }
 
     async appendRow(rowData: IPageSection) {
-        if (!this.rows) this.rows = [];
-        rowData.row = this.rows.length;
+        rowData.row = pageObject.sections.length;
         const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
-        this.rows.push(rowData);
         if (!this._readonly) {
             pageRow.border = { top: { width: '1px', style: 'dashed', color: Theme.divider } };
             this.initDragEvent(pageRow);
         }
         await pageRow.setData(rowData);
-        const addRowCmd = new AddElementCommand(pageRow, this.pnlRows);
+        const addRowCmd = new AddElementCommand(pageRow, this.pnlRows, rowData);
         commandHistory.execute(addRowCmd);
         return pageRow;
     }
@@ -319,4 +317,4 @@ export class PageRows extends Module {
     }
 }
 
-export { SelectModuleDialog, PageSection, PageFooter };
+export { PageSection, PageFooter };
