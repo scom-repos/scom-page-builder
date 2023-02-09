@@ -2,18 +2,16 @@
     "compilerOptions": {
         "target": "ES2017",
         "moduleResolution": "Node",
+        "module": "AMD",
         "experimentalDecorators": true,
         "jsx": "preserve",
         "jsxFactory": "this.$render",
         "jsxFragmentFactory": "this.$render",
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
-        "declaration": false,
-        "baseUrl": ".",
-        "paths": {
-            "@page/*":["modules/*"]
-        }
+        "declaration": true,
+        "baseUrl": "."
     },
-    "include": ["modules/**/*.ts","modules/**/*.tsx"],
+    "include": ["src/**/*.ts","src/**/*.tsx"],
     "exclude": ["node_modules"]
 }
