@@ -15,7 +15,7 @@ import { PageFooter } from './pageFooter';
 import { PagePaging } from './pagePaging';
 import './pageRows.css';
 import { EVENT } from '../const/index';
-import { AddElementCommand, commandHistory, MoveElementCommand } from '../utility/index';
+import { ElementCommand, commandHistory, MoveElementCommand } from '../utility/index';
 import { IDEToolbar } from '../common/index';
 import { pageObject } from '../store/index';
 
@@ -247,7 +247,7 @@ export class PageRows extends Module {
             this.initDragEvent(pageRow);
         }
         await pageRow.setData(rowData);
-        const addRowCmd = new AddElementCommand(pageRow, this.pnlRows, rowData);
+        const addRowCmd = new ElementCommand(pageRow, this.pnlRows, rowData);
         commandHistory.execute(addRowCmd);
         return pageRow;
     }

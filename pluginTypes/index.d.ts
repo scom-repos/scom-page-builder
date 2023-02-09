@@ -242,11 +242,12 @@ declare module "@scom/scom-page-builder/utility/command/interface.ts" {
 declare module "@scom/scom-page-builder/utility/command/add.ts" {
     import { Control } from "@ijstech/components";
     import { ICommand } from "@scom/scom-page-builder/utility/command/interface.ts";
-    export class AddElementCommand implements ICommand {
+    export class ElementCommand implements ICommand {
         private element;
         private parent;
         private data;
-        constructor(element: Control, parent?: HTMLElement, data?: any);
+        private isDeleted;
+        constructor(element: Control, parent: HTMLElement, data: any, isDeleted?: boolean);
         execute(): void;
         undo(): void;
         redo(): void;
@@ -298,7 +299,7 @@ declare module "@scom/scom-page-builder/utility/command/resize.ts" {
 }
 /// <amd-module name="@scom/scom-page-builder/utility/command/index.ts" />
 declare module "@scom/scom-page-builder/utility/command/index.ts" {
-    export { AddElementCommand } from "@scom/scom-page-builder/utility/command/add.ts";
+    export { ElementCommand } from "@scom/scom-page-builder/utility/command/add.ts";
     export { CommandHistory, commandHistory } from "@scom/scom-page-builder/utility/command/history.ts";
     export { MoveElementCommand } from "@scom/scom-page-builder/utility/command/move.ts";
     export { ResizeElementCommand } from "@scom/scom-page-builder/utility/command/resize.ts";
@@ -1178,7 +1179,7 @@ declare module "@scom/scom-page-builder/page/pageFooter.tsx" {
 declare module "@scom/scom-page-builder/page/pageRow.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/page/pageRow.tsx" />
 declare module "@scom/scom-page-builder/page/pageRow.tsx" {
-    import { Module, ControlElement, Control } from '@ijstech/components';
+    import { Module, ControlElement } from '@ijstech/components';
     import "@scom/scom-page-builder/page/pageRow.css.ts";
     import { IPageSection, IRowSettings } from "@scom/scom-page-builder/interface/index.ts";
     global {
@@ -1209,7 +1210,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private onClone;
         private onResized;
         handleSectionSettingSave(config: IRowSettings): Promise<void>;
-        onDeleteRow(control: Control): Promise<void>;
+        onDeleteRow(): Promise<void>;
         onMoveUp(): void;
         onMoveDown(): void;
         render(): Promise<any>;

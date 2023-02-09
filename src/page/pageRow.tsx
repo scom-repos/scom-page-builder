@@ -13,6 +13,7 @@ import './pageRow.css';
 import { EVENT } from '../const/index';
 import { IPageSection, IRowSettings } from '../interface/index';
 import { pageObject } from '../store/index';
+import { commandHistory, ElementCommand } from '../utility/index';
 
 declare global {
     namespace JSX {
@@ -236,10 +237,11 @@ export class PageRow extends Module {
         // application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS, null)
     }
 
-    async onDeleteRow(control: Control) {
-        // TODO
-        this.remove();
-        application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
+    async onDeleteRow() {
+        // this.remove();
+        // application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
+        const rowCmd = new ElementCommand(this, this.parent, this.rowData, true);
+        commandHistory.execute(rowCmd);
     }
 
     onMoveUp() {
