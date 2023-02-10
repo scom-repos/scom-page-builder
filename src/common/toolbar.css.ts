@@ -40,8 +40,10 @@ Styles.cssRule('ide-toolbar', {
         },
         'i-input': {
           border: `1px solid ${Theme.divider}`,
-          width: '100% !important',
           marginBottom: '1rem'
+        },
+        '.modal': {
+          padding: 0
         }
       }
     },

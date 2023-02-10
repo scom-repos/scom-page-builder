@@ -8,10 +8,11 @@ import {
     Button,
     application,
     renderUI,
-    Modal
+    Modal,
+    IRenderUIOptions
 } from '@ijstech/components';
 import { EVENT } from '../const/index';
-import { IPageBlockAction } from '../interface/index';
+import { IPageBlockAction, ValidationError } from '../interface/index';
 import { pageObject } from '../store/index';
 import { commandHistory, getModule, ResizeElementCommand } from '../utility/index';
 import './toolbar.css';
@@ -53,6 +54,7 @@ export class IDEToolbar extends Module {
     private _component: any = null;
     private dragStack: Panel;
     private pnlForm: Panel;
+    private pnlFormMsg: Panel;
     private mdActions: Modal;
 
     private _mouseDownHandler: any;
@@ -175,7 +177,6 @@ export class IDEToolbar extends Module {
                 background: {color: 'transparent'},
                 caption: `<i-icon name="${tool.icon}" width=${20} height=${20} display="block" fill="${Theme.text.primary}"></i-icon>`,
                 onClick: () => {
-                    console.log('button click: ', tool.name);
                     this.currentAction = tool;
                     this.mdActions.visible = true;
                     this.hideToolbars();
@@ -187,26 +188,34 @@ export class IDEToolbar extends Module {
     }
 
     private onShowModal() {
+        this.pnlFormMsg.visible = false;
         this.renderToolbarAction(this.currentAction);
     }
 
-    private async renderToolbarAction(action: IPageBlockAction) {
+    private renderToolbarAction(action: IPageBlockAction) {
         this.pnlForm.clearInnerHTML();
-        const data = await this.getData();
-        renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data);
+        const data = this.data.properties;
+        if (data.height === 'auto') data.height = this.offsetHeight;
+        if (data.width === 'auto') data.width = this.offsetWidth;
+        const options: IRenderUIOptions = {
+            columnWidth: '100%',
+            columnsPerRow: 1,
+            confirmButtonBackgroundColor: Theme.colors.primary.main,
+            confirmButtonFontColor: Theme.colors.primary.contrastText
+        }
+        console.log('schema: ', action.userInputDataSchema)
+        console.log('data: ', data)
+        renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data, options);
     }
 
     private onSave(result: boolean, data: any) {
-        let trimedData = data.split(',').join(',\n');
-        trimedData = trimedData.split('{').join('{\n').split('}').join('\n}');
-        console.log(`result: ${result},\ndata: ${trimedData}`);
         if (result) {
-            const commandIns = this.currentAction.command(this, JSON.parse(trimedData));
+            const commandIns = this.currentAction.command(this, data);
             commandHistory.execute(commandIns);
             this.mdActions.visible = false;
-        } else {
-            if (data === 'action canceled')
-                this.mdActions.visible = false;
+        } else if (data?.errors) {
+            this.pnlFormMsg.visible = true;
+            this.renderError(data.errors || []);
         }
     }
 
@@ -330,7 +339,6 @@ export class IDEToolbar extends Module {
             await this._component.setTag(data);
             await this._component.setData(data);
             pageObject.setElement(this.rowId, this.data.id, this._component.data);
-
         } 
     }
 
@@ -345,6 +353,18 @@ export class IDEToolbar extends Module {
             (toolbar as IDEToolbar).hideToolbars();
         }
         isShowing && this.showToolbars();
+    }
+
+    private renderError(errors: ValidationError[]) {
+        this.pnlFormMsg.clearInnerHTML();
+        errors.forEach(error => {
+            this.pnlFormMsg.appendChild(
+                <i-label
+                    caption={`${error.property} ${error.message}`}
+                    font={{color: Theme.colors.error.main, size: '0.75rem'}}
+                ></i-label>
+            );
+        })
     }
 
     _handleClick(event: Event): boolean {
@@ -415,10 +435,18 @@ export class IDEToolbar extends Module {
                     onOpen={this.onShowModal.bind(this)}
                     class="setting-modal"
                 >
-                    <i-panel
-                        id="pnlForm"
-                        padding={{left: '1rem', right: '1rem', top: '1rem', bottom: '1rem'}}
-                    ></i-panel>
+                    <i-panel>
+                        <i-vstack
+                            id="pnlFormMsg"
+                            padding={{left: '1.5rem', right: '1.5rem', top: '1rem'}}
+                            gap="0.5rem"
+                            visible={false}
+                        ></i-vstack>
+                        <i-panel
+                            id="pnlForm"
+                            padding={{left: '1rem', right: '1rem', top: '1rem', bottom: '1rem'}}
+                        ></i-panel>
+                    </i-panel>
                 </i-modal>
             </i-vstack>
         );
