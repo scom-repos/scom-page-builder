@@ -48,7 +48,6 @@ export class BuilderHeader extends Module {
     constructor(parent?: any) {
         super(parent);
         this.initEventBus();
-        // this.getData = this.getData.bind(this);
         this.setData = this.setData.bind(this);
     }
 
@@ -70,15 +69,6 @@ export class BuilderHeader extends Module {
         this.setData(value);
         this.updateHeader();
     }
-
-    // async getData() {
-    //     let elements = [];
-    //     if (this._elements) {
-    //         const row = this.pnlHeaderMain.querySelector('ide-row') as PageRow;
-    //         if (row) elements = (await row.getData())?.elements || [];
-    //     }
-    //     return {...this.data, elements};
-    // }
 
     setData(value: IPageHeader) {
         this._headerType = value.headerType;
@@ -106,7 +96,7 @@ export class BuilderHeader extends Module {
         this.pnlHeaderMain.clearInnerHTML();
         const pageRow = (<ide-row width="100vw" maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
         const rowData = {
-            id: generateUUID(),
+            id: 'header',
             row: 0,
             elements: this._elements
         }
@@ -132,7 +122,7 @@ export class BuilderHeader extends Module {
                 },
                 properties: {
                     width: '100%',
-                    height: '100px'
+                    height: '130px'
                 }
             }]
         }

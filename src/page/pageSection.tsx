@@ -132,9 +132,9 @@ export class PageSection extends Module {
     private async createToolbar(value: IPageElement) {
         let toolbar = await IDEToolbar.create({}) as IDEToolbar;
         toolbar.readonly = this._readonly;
-        toolbar.data = value;
         toolbar.rowId = this.rowId;
-        await toolbar.fetchModule();
+        toolbar.elementId = value.id;
+        await toolbar.fetchModule(value);
         return toolbar;
     }
 
@@ -148,33 +148,28 @@ export class PageSection extends Module {
         this.rowId = rowId;
         if (value.type === 'primitive') {
             if (this.currentToolbar) {
-                this.currentToolbar.setData(value.properties);
+                this.currentToolbar.setProperties(value.properties);
             } else {
                 this.currentToolbar = await this.createToolbar(value);
                 this.currentToolbar.parent = this.pnlMain;
                 this.pnlMain.appendChild(this.currentToolbar);
-                if (!isEmpty(value.properties)) {
-                    this.currentToolbar.setData(value.properties);
-                }
-
+                if (!isEmpty(value.properties))
+                    this.currentToolbar.setProperties(value.properties);
             }
         } else if (value.elements?.length) {
             if (this.toolbarList.length) {
                 for (let i = 0; i < value.elements.length; i++) {
                     const element = value.elements[i];
                     const toolbar = this.toolbarList[i];
-                    if (toolbar) {
-                        toolbar.setData(element.properties);
-                    }
+                    toolbar && toolbar.setProperties(element.properties);
                 }
             } else {
                 const stack = <i-vstack></i-vstack>
                 for (let i = 0; i < value.elements.length; i++) {
                     const element = value.elements[i];
                     const toolbar = await this.createToolbar(element);
-                    if (!isEmpty(element.properties)) {
-                        toolbar.setData(element.properties);
-                    }
+                    if (!isEmpty(element.properties))
+                        toolbar.setProperties(element.properties);
                     toolbar.parent = stack;
                     stack.appendChild(toolbar);
                     this.toolbarList.push(toolbar);

@@ -12,7 +12,7 @@ import {
     IRenderUIOptions
 } from '@ijstech/components';
 import { EVENT } from '../const/index';
-import { IPageBlockAction, ValidationError } from '../interface/index';
+import { IPageBlockAction, IPageElement, ValidationError } from '../interface/index';
 import { pageObject } from '../store/index';
 import { commandHistory, getModule, ResizeElementCommand } from '../utility/index';
 import './toolbar.css';
@@ -61,8 +61,9 @@ export class IDEToolbar extends Module {
     private _mouseUpHandler: any;
     private _mouseMoveHandler: any;
 
-    data: any;
     private _rowId: string;
+    private _elementId: string;
+    private _data: IPageElement;
 
     constructor(parent?: any) {
         super(parent);
@@ -70,7 +71,10 @@ export class IDEToolbar extends Module {
         this._mouseUpHandler = this.handleMouseUp.bind(this);
         this._mouseMoveHandler = this.handleMouseMove.bind(this);
         this.setData = this.setData.bind(this);
-        this.getData = this.getData.bind(this);
+    }
+
+    get data() {
+        return pageObject.getElement(this.rowId, this.elementId);
     }
 
     private handleMouseDown(e: MouseEvent) {
@@ -138,7 +142,7 @@ export class IDEToolbar extends Module {
         this._currentResizer = null;
         this._currentPosition = 'left';
         // TODO: check resize other component
-        const resizeCmd = new ResizeElementCommand(this._component, this._origWidth, this._origHeight);
+        const resizeCmd = new ResizeElementCommand(this, this._component, this._origWidth, this._origHeight);
         commandHistory.execute(resizeCmd);
         application.EventBus.dispatch(EVENT.ON_RESIZE, { newWidth: Number(this._component.width), oldWidth: this._origWidth });
     };
@@ -156,6 +160,13 @@ export class IDEToolbar extends Module {
     }
     set rowId(value: string) {
         this._rowId = value;
+    }
+
+    get elementId() {
+        return this._elementId;
+    }
+    set elementId(value: string) {
+        this._elementId = value;
     }
 
     get readonly() {
@@ -203,8 +214,8 @@ export class IDEToolbar extends Module {
             confirmButtonBackgroundColor: Theme.colors.primary.main,
             confirmButtonFontColor: Theme.colors.primary.contrastText
         }
-        console.log('schema: ', action.userInputDataSchema)
-        console.log('data: ', data)
+        // console.log('schema: ', action.userInputDataSchema)
+        // console.log('data: ', data)
         renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data, options);
     }
 
@@ -219,26 +230,33 @@ export class IDEToolbar extends Module {
         }
     }
 
+    private isTexbox() {
+        // TODO: Update
+        return this.data.module.name === 'Textbox';
+    }
+
     showToolbars() {
         if (this.toolList.length)
             this.toolsStack.visible = true;
         this.contentStack && this.contentStack.classList.add('active');
         this.classList.add('active');
+        this.isTexbox() && this._component.edit && this._component.edit();
     }
 
     hideToolbars() {
         this.toolsStack.visible = false;
         this.contentStack && this.contentStack.classList.remove('active');
         this.classList.remove('active');
+        this.isTexbox() && this._component.confirm && this._component.confirm();
     }
 
-    private renderResizeStack() {
+    private renderResizeStack(data: IPageElement) {
         this._eResizer = this.renderResizer('left');
         this._wResizer = this.renderResizer('right');
         this._nResizer = this.renderResizer('bottom');
         this._neResizer = this.renderResizer('bottomLeft');
         this._nwResizer = this.renderResizer('bottomRight');
-        const isImage = this.data.module?.name === 'Image';
+        const isImage = data?.module?.name === 'Image';
         if (this._nResizer) this._nResizer.visible = isImage;
         if (this._neResizer) this._neResizer.visible = isImage;
         if (this._nwResizer) this._nwResizer.visible = isImage;
@@ -303,10 +321,10 @@ export class IDEToolbar extends Module {
         return stack;
     }
 
-    async fetchModule() {
+    async fetchModule(data: IPageElement) {
         if (this._readonly) return;
-        const ipfscid = this.data.module?.ipfscid || '';
-        const localPath = this.data.module?.localPath || '';
+        const ipfscid = data.module?.ipfscid || '';
+        const localPath = data.module?.localPath || '';
         const module = await getModule({ipfscid, localPath});
         if (module) {
             module.parent = this.contentStack;
@@ -320,40 +338,37 @@ export class IDEToolbar extends Module {
                 this.toolList = this._component.getActions ? this._component.getActions() : [];
                 this.checkToolbar();
                 this.showToolbars();
-                console.log(this.data)
             }
-            // if (this.data.module?.name === 'Text box') {
-            //     this.dragStack.visible = true;
-            //     this.contentStack.classList.remove('move');
-            // } else {
-            //     this.dragStack.visible = false;
-            //     this.contentStack.classList.add('move');
-            // }
             this.dragStack.visible = false;
             this.contentStack.classList.add('move');
-            this.renderResizeStack();
+            this.renderResizeStack(data);
         }
     }
 
-    async setData(data: any) {
+    setData(data: any) {
+        // update data from pageblock
+        if (this._component)
+            pageObject.setElement(this.rowId, this.data.id, data);
+    }
+
+    async setProperties(data: any) {
         if (this._component) {
             if (data.width) this._component.width = data.width;
             if (data.height) this._component.height = data.height;
             await this._component.setTag(data);
             await this._component.setData(data);
-            pageObject.setElement(this.rowId, this.data.id, data);
         } 
-    }
-
-    async getData() {
-        return this._component ? await this._component.getData() : null;
     }
 
     private checkToolbar() {
         const isShowing = this.toolsStack.visible;
-        const toolbars = document.querySelectorAll('ide-toolbar');
-        for (const toolbar of toolbars) {
-            (toolbar as IDEToolbar).hideToolbars();
+        const pageRows= document.querySelectorAll('ide-row');
+        if (pageRows) {
+            for (const row of pageRows) {
+                const toolbarElm = row.querySelector('ide-toolbar') as IDEToolbar;
+                toolbarElm.hideToolbars();
+                row.classList.remove('active');
+            }
         }
         isShowing && this.showToolbars();
     }

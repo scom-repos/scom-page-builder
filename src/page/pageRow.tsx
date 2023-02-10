@@ -255,7 +255,7 @@ export class PageRow extends Module {
         this.background = {color: 'initial'};
     }
 
-    async render() {
+    render() {
         return (
             <i-panel class={'page-row'}  width="100%" height="100%">
                 <i-vstack

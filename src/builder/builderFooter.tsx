@@ -14,6 +14,7 @@ import { IPageElement, IPageFooter } from '../interface/index';
 import { PageRow } from '../page/index';
 import { generateUUID } from '../utility/index';
 import { pageObject } from '../store/index';
+import { IDEToolbar } from '../common/index';
 import './builderFooter.css';
 
 declare global {
@@ -50,7 +51,6 @@ export class BuilderFooter extends Module {
     constructor(parent?: any) {
         super(parent);
         this.initEventBus();
-        // this.getData = this.getData.bind(this);
     }
 
     initEventBus() {
@@ -79,15 +79,6 @@ export class BuilderFooter extends Module {
         this.updateFooter();
     }
 
-    // async getData() {
-    //     let elements = [];
-    //     if (this._elements) {
-    //         const row = this.pnlFooterMain.querySelector('ide-row') as PageRow;
-    //         if (row) elements = (await row.getData())?.elements || [];
-    //     }
-    //     return {...this.data, elements};
-    // }
-
     setData(value: IPageFooter) {
         this._image = value.image;
         this._elements = value.elements;
@@ -108,7 +99,7 @@ export class BuilderFooter extends Module {
         this.pnlFooterMain.clearInnerHTML();
         const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
         const rowData = {
-            id: generateUUID(),
+            id: 'footer', // generateUUID(),
             row: -1,
             elements: this._elements
         }
@@ -134,7 +125,7 @@ export class BuilderFooter extends Module {
                 },
                 properties: {
                     width: '100%',
-                    height: '100px'
+                    height: '130px'
                 }
             }]
         }
@@ -148,6 +139,16 @@ export class BuilderFooter extends Module {
             this.pnlEditOverlay.classList.remove('flex');
         this.pnlOverlay.visible = !this.pnlEditOverlay.visible;
         this.pnlOverlay.height = this.pnlOverlay.visible ? document.body.offsetHeight : 0;
+        if (!this.pnlOverlay.visible) {
+            const row = this.querySelector('ide-row');
+            if (row) {
+                row.classList.remove('active');
+                const toolbars = row.querySelectorAll('ide-toolbar');
+                toolbars.forEach((toolbar) => {
+                    (toolbar as IDEToolbar).hideToolbars();
+                })
+            }
+        }
     }
 
     onChangedBg() {
