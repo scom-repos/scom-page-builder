@@ -319,14 +319,17 @@ export class IDEToolbar extends Module {
             this._component.onClick = () => {
                 this.checkToolbar();
                 this.showToolbars();
+                console.log(this.data)
             }
-            if (this.data.module?.name === 'Text box') {
-                this.dragStack.visible = true;
-                this.contentStack.classList.remove('move');
-            } else {
-                this.dragStack.visible = false;
-                this.contentStack.classList.add('move');
-            }
+            // if (this.data.module?.name === 'Text box') {
+            //     this.dragStack.visible = true;
+            //     this.contentStack.classList.remove('move');
+            // } else {
+            //     this.dragStack.visible = false;
+            //     this.contentStack.classList.add('move');
+            // }
+            this.dragStack.visible = false;
+            this.contentStack.classList.add('move');
             this.renderResizeStack();
             this.toolList = this._component.getActions ? this._component.getActions() : [];
         }
