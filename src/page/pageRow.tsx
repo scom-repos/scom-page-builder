@@ -6,12 +6,13 @@ import {
     Control,
     VStack,
     observable,
-    GridLayout
+    GridLayout,
+    Panel
 } from '@ijstech/components';
 import { PageSection } from './pageSection';
 import './pageRow.css';
 import { EVENT } from '../const/index';
-import { IPageSection, IRowSettings } from '../interface/index';
+import { IPageSection } from '../interface/index';
 import { pageObject } from '../store/index';
 import { commandHistory, ElementCommand } from '../utility/index';
 
@@ -29,10 +30,10 @@ export interface PageRowElement extends ControlElement {
 
 @customElements('ide-row')
 export class PageRow extends Module {
-    // private rowSettings: RowSettingsDialog;
     private pnlElements: GridLayout;
     private actionsBar: VStack;
     private dragStack: VStack;
+    private pnlRow: Panel;
 
     private rowData: IPageSection;
     private _readonly: boolean;
@@ -56,6 +57,7 @@ export class PageRow extends Module {
         this._readonly = this.getAttribute('readonly', true, false);
         super.init();
         this.initEventBus();
+        this.renderFixedGrid();
     }
 
     private async createNewElement(i: number) {
@@ -166,78 +168,7 @@ export class PageRow extends Module {
         this.pnlElements.templateColumns = templateColumns;
     }
 
-    async handleSectionSettingSave(config: IRowSettings) {
-        // if(config.width && config.width != this.rowData.config.width) {
-        //     this.rowData.config.width = config.width;
-        //     this.width = config.width;
-        // }
-        // if(config.height && config.height != this.rowData.config.height) {
-        //     this.rowData.config.height = config.height;
-        //     this.height = config.height;
-        // }
-        // if (config.columnsSettings) {
-        //     this.rowData.config.columnsSettings = config.columnsSettings;
-        // }
-        // // Background
-        // if(config.backgroundImageUrl) {
-        //     this.background.image = config.backgroundImageUrl;
-        // }
-        // else if(config.backgroundColor) {
-        //     this.background.color = config.backgroundColor;
-        // }
-        // this.rowData.config.backgroundImageUrl = config.backgroundImageUrl;
-        // this.rowData.config.backgroundColor = config.backgroundColor;
-
-        // const columnsSettings = config.columnsSettings || {};
-        // if(config.columns) {
-        //     const sections = this.pnlElements.querySelectorAll('ide-section');
-        //     if (sections) {
-        //         let pageSections = [];
-        //         for (let i = 0; i < config.columns; i++) {
-        //             const colSettings = columnsSettings[i];
-        //             const section = (sections[i] as PageSection);
-        //             if (section && section.component) {
-        //                 section.maxWidth = colSettings?.width || '100%';
-        //                 section.size = colSettings?.size || {};
-        //                 pageSections.push(section);
-        //                 continue;
-        //             };
-        //             pageSections.push(<ide-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>);
-        //         }
-        //         this.pnlElements.clearInnerHTML();
-        //         this.pnlElements.append(...pageSections);
-        //     }
-        //     else {
-        //         const sections = this.pnlElements.querySelectorAll('ide-section');
-        //         const delNum = this.rowData.config.columns - config.columns;
-        //         let delCount = 0;
-        //         if (sections) {
-        //             for(let section of sections) {
-        //                 if(delCount >= delNum) break;
-        //                 if (section && (section as PageSection).component) continue;
-        //                 else {
-        //                     section.remove();
-        //                     delCount++;
-        //                 }
-        //             }
-        //             if(delCount < delNum) {
-        //                 const sections2 = this.pnlElements.querySelectorAll('ide-section');
-        //                 if(sections2) {
-        //                     for (let i = 0; i < delNum - delCount; i++) {
-        //                         if(sections2[sections2.length - 1])
-        //                             sections2[sections2.length - 1].remove();
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     this.rowData.config.columns = config.columns;
-        // }
-
-        // application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS, null)
-    }
-
-    async onDeleteRow() {
+    onDeleteRow() {
         // this.remove();
         // application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
         const rowCmd = new ElementCommand(this, this.parent, this.rowData, true);
@@ -255,9 +186,30 @@ export class PageRow extends Module {
         this.background = {color: 'initial'};
     }
 
-    async render() {
+    private renderFixedGrid() {
+        this.pnlRow.clearInnerHTML();
+        const grid = (
+            <i-grid-layout
+                position="absolute"
+                width="100%" height="100%"
+                top="0px" left="0px"
+            ></i-grid-layout>
+        )
+        for (let i = 0; i < 12; i++) {
+            const elm = (
+                <i-panel
+                    class="fixed-grid-item"
+                    grid={{column: i + 1}}
+                ></i-panel>
+            );
+            grid.append(elm);
+        }
+        this.pnlRow.appendChild(grid);
+    }
+
+    render() {
         return (
-            <i-panel class={'page-row'}  width="100%" height="100%">
+            <i-panel id="pnlRow" class={'page-row'}  width="100%" height="100%">
                 <i-vstack
                     id={'actionsBar'}
                     class="row-actions-bar"
@@ -272,7 +224,7 @@ export class PageRow extends Module {
                         <i-panel
                             id="btnSetting"
                             class="actions"
-                            tooltip={{content: 'Section section', placement: 'right'}}
+                            tooltip={{content: 'Section colors', placement: 'right'}}
                             visible={this.isChanged}
                             onClick={this.onOpenRowSettingsDialog}
                         >
@@ -330,10 +282,6 @@ export class PageRow extends Module {
                         templateColumns={['repeat(12, 1fr)']}
                     ></i-grid-layout>
                 </i-panel>
-                <scpage-row-settings-dialog
-                    id={'rowSettings'}
-                    onSave={this.handleSectionSettingSave}
-                ></scpage-row-settings-dialog>
             </i-panel>
         );
     }

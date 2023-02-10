@@ -1181,7 +1181,7 @@ declare module "@scom/scom-page-builder/page/pageRow.css.ts" { }
 declare module "@scom/scom-page-builder/page/pageRow.tsx" {
     import { Module, ControlElement } from '@ijstech/components';
     import "@scom/scom-page-builder/page/pageRow.css.ts";
-    import { IPageSection, IRowSettings } from "@scom/scom-page-builder/interface/index.ts";
+    import { IPageSection } from "@scom/scom-page-builder/interface/index.ts";
     global {
         namespace JSX {
             interface IntrinsicElements {
@@ -1196,6 +1196,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private pnlElements;
         private actionsBar;
         private dragStack;
+        private pnlRow;
         private rowData;
         private _readonly;
         private isCloned;
@@ -1209,11 +1210,11 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         onOpenRowSettingsDialog(): void;
         private onClone;
         private onResized;
-        handleSectionSettingSave(config: IRowSettings): Promise<void>;
-        onDeleteRow(): Promise<void>;
+        onDeleteRow(): void;
         onMoveUp(): void;
         onMoveDown(): void;
-        render(): Promise<any>;
+        private renderFixedGrid;
+        render(): any;
     }
 }
 /// <amd-module name="@scom/scom-page-builder/page/pagePaging.css.ts" />
