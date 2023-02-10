@@ -317,6 +317,7 @@ export class IDEToolbar extends Module {
             this._component.overflow = 'hidden';
             this._component.style.display = 'block';
             this._component.onClick = () => {
+                this.toolList = this._component.getActions ? this._component.getActions() : [];
                 this.checkToolbar();
                 this.showToolbars();
             }
@@ -328,7 +329,6 @@ export class IDEToolbar extends Module {
                 this.contentStack.classList.add('move');
             }
             this.renderResizeStack();
-            this.toolList = this._component.getActions ? this._component.getActions() : [];
         }
     }
 
@@ -338,7 +338,7 @@ export class IDEToolbar extends Module {
             if (data.height) this._component.height = data.height;
             await this._component.setTag(data);
             await this._component.setData(data);
-            pageObject.setElement(this.rowId, this.data.id, this._component.data);
+            pageObject.setElement(this.rowId, this.data.id, data);
         } 
     }
 
