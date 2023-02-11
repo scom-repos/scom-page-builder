@@ -1,9 +1,16 @@
 import { IPageHeader, IPageSection, IPageFooter, IPageElement } from "../interface/index";
 
 export class PageObject {
-  private _header: IPageHeader = null;
+  private _header: IPageHeader = {
+    headerType: 'banner' as any,
+    image: "",
+    elements: []
+  };
   private _sections: Map<string, IPageSection> = new Map();
-  private _footer: IPageFooter = null;
+  private _footer: IPageFooter = {
+    image: "",
+    elements: []
+  };
 
   set header(value: IPageHeader) {
     this._header = value;

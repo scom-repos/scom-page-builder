@@ -325,28 +325,33 @@ export class IDEToolbar extends Module {
         if (this._readonly) return;
         const ipfscid = data.module?.ipfscid || '';
         const localPath = data.module?.localPath || '';
-        const module = await getModule({ipfscid, localPath});
-        if (module) {
-            module.parent = this.contentStack;
-            this.contentStack.append(module);
-            this._component = module;
-            this._component.maxWidth = '100%';
-            this._component.maxHeight = '100%';
-            this._component.overflow = 'hidden';
-            this._component.style.display = 'block';
-            this._component.onClick = () => {
-                this.toolList = this._component.getActions ? this._component.getActions() : [];
-                this.checkToolbar();
-                this.showToolbars();
+        try {
+            const module = await getModule({ipfscid, localPath});
+            if (module) {
+                this._component = module;
+                this._component.maxWidth = '100%';
+                this._component.maxHeight = '100%';
+                this._component.overflow = 'hidden';
+                this._component.style.display = 'block';
+                this._component.onClick = () => {
+                    this.toolList = this._component.getActions ? this._component.getActions() : [];
+                    this.checkToolbar();
+                    this.showToolbars();
+                }
+                this.dragStack.visible = false;
+                this.contentStack.classList.add('move');
+                this.renderResizeStack(data);
+                this._component.parent = this.contentStack;
+                this.contentStack.append(module);
             }
-            this.dragStack.visible = false;
-            this.contentStack.classList.add('move');
-            this.renderResizeStack(data);
+        } catch(error) {
+            console.log('fetch module', error)
         }
     }
 
-    setData(data: any) {
+    async setData(data: any) {
         // update data from pageblock
+        console.log('set data', data);
         if (this._component)
             pageObject.setElement(this.rowId, this.data.id, data);
     }
@@ -366,7 +371,9 @@ export class IDEToolbar extends Module {
         if (pageRows) {
             for (const row of pageRows) {
                 const toolbarElm = row.querySelector('ide-toolbar') as IDEToolbar;
-                toolbarElm.hideToolbars();
+                toolbarElm.toolsStack.visible = false;
+                toolbarElm.contentStack && toolbarElm.contentStack.classList.remove('active');
+                toolbarElm.classList.remove('active');
                 row.classList.remove('active');
             }
         }

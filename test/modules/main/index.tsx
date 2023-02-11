@@ -18,7 +18,7 @@ export class MainModule extends Module {
     if (module) {
       this.pnlMain.append(module);
       if (this.options.data) {
-        (module as any).setData(this.options.data);
+        await (module as any).setData(this.options.data);
       }
       (module as any).onLoad();
     }

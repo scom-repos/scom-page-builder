@@ -962,7 +962,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private renderResizeStack;
         private renderResizer;
         fetchModule(data: IPageElement): Promise<void>;
-        setData(data: any): void;
+        setData(data: any): Promise<void>;
         setProperties(data: any): Promise<void>;
         private checkToolbar;
         private renderError;
@@ -1315,9 +1315,7 @@ declare module "@scom/scom-page-builder/builder/builderHeader.tsx" {
         private showAddStack;
         constructor(parent?: any);
         initEventBus(): void;
-        get data(): IPageHeader;
-        set data(value: IPageHeader);
-        setData(value: IPageHeader): void;
+        setData(value: IPageHeader): Promise<void>;
         private resetData;
         private updateHeader;
         private addHeader;
@@ -1364,9 +1362,7 @@ declare module "@scom/scom-page-builder/builder/builderFooter.tsx" {
         constructor(parent?: any);
         initEventBus(): void;
         private resetData;
-        get data(): IPageFooter;
-        set data(value: IPageFooter);
-        setData(value: IPageFooter): void;
+        setData(value: IPageFooter): Promise<void>;
         private updateFooter;
         private addFooter;
         private updateOverlay;
@@ -1417,7 +1413,7 @@ declare module "@scom/scom-page-builder" {
             sections: import("@scom/scom-page-builder/interface/siteData.ts").IPageSection[];
             footer: import("@scom/scom-page-builder/interface/siteData.ts").IPageFooter;
         };
-        setData(value: IPageData): void;
+        setData(value: IPageData): Promise<void>;
         onLoad(): void;
         initEventBus(): void;
         private onAddRow;

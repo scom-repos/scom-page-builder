@@ -51,6 +51,7 @@ export class BuilderFooter extends Module {
     constructor(parent?: any) {
         super(parent);
         this.initEventBus();
+        this.setData = this.setData.bind(this);
     }
 
     initEventBus() {
@@ -68,21 +69,11 @@ export class BuilderFooter extends Module {
         this.pnlConfig.visible = false;
     }
 
-    get data(): IPageFooter {
-        return {
-            image: this._image,
-            elements: this._elements
-        };
-    }
-    set data(value: IPageFooter) {
-        this.setData(value);
-        this.updateFooter();
-    }
-
-    setData(value: IPageFooter) {
+    async setData(value: IPageFooter) {
         this._image = value.image;
         this._elements = value.elements;
         pageObject.footer = value;
+        await this.updateFooter();
     }
 
     private async updateFooter() {
@@ -110,7 +101,7 @@ export class BuilderFooter extends Module {
     }
 
     private addFooter() {
-        this.data = {
+        this.setData({
             image: '',
             elements: [{
                 id: generateUUID(),
@@ -128,7 +119,7 @@ export class BuilderFooter extends Module {
                     height: '130px'
                 }
             }]
-        }
+        })
     }
 
     private updateOverlay(value: boolean) {
@@ -162,6 +153,7 @@ export class BuilderFooter extends Module {
         const image = file ? await this.uploader.toBase64(file) as string : '';
         this.pnlFooterMain.background = {image};
         this._image = image;
+        pageObject.footer = {...pageObject.footer, image: this._image};
         this.mdUpload.visible = false;
     }
 

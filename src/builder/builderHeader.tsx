@@ -58,23 +58,12 @@ export class BuilderHeader extends Module {
         })
     }
 
-    get data(): IPageHeader {
-        return {
-            image: this._image,
-            elements: this._elements,
-            headerType: this._headerType
-        };
-    }
-    set data(value: IPageHeader) {
-        this.setData(value);
-        this.updateHeader();
-    }
-
-    setData(value: IPageHeader) {
+    async setData(value: IPageHeader) {
         this._headerType = value.headerType;
         this._image = value.image;
         this._elements = value.elements;
         pageObject.header = value;
+        await this.updateHeader();
     }
 
     private resetData() {
@@ -106,7 +95,7 @@ export class BuilderHeader extends Module {
     }
 
     private addHeader() {
-        this.data = {
+        this.setData({
             image: 'https://ssl.gstatic.com/atari/images/simple-header-blended-small.png',
             headerType: HeaderType.NORMAL,
             elements: [{
@@ -125,7 +114,7 @@ export class BuilderHeader extends Module {
                     height: '130px'
                 }
             }]
-        }
+        })
     }
 
     private onShowUpload() {
@@ -150,6 +139,7 @@ export class BuilderHeader extends Module {
             const image = file ? await this.uploader.toBase64(file) as string : '';
             this.pnlHeader.background = {image};
             this._image = image;
+            pageObject.header = {...pageObject.header, image: this._image};
             this._isUpdatingBg = false;
         } else {
             if (this.pnlTitle.contains(this.pnlLogo))
@@ -179,7 +169,8 @@ export class BuilderHeader extends Module {
             type.classList.remove('active');
         })
         source.classList.add('active');
-        this.setData({...this.data, headerType: type.type});
+        const header = pageObject.header;
+        this.setData({...header, headerType: type.type});
         this.updateHeaderType();
     }
 
