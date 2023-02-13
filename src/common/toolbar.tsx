@@ -63,7 +63,7 @@ export class IDEToolbar extends Module {
 
     private _rowId: string;
     private _elementId: string;
-    private _data: IPageElement;
+    private isEditing: boolean = false;
 
     constructor(parent?: any) {
         super(parent);
@@ -71,10 +71,15 @@ export class IDEToolbar extends Module {
         this._mouseUpHandler = this.handleMouseUp.bind(this);
         this._mouseMoveHandler = this.handleMouseMove.bind(this);
         this.setData = this.setData.bind(this);
+        this.fetchModule = this.fetchModule.bind(this);
     }
 
     get data() {
         return pageObject.getElement(this.rowId, this.elementId);
+    }
+
+    get module() {
+        return this._component;
     }
 
     private handleMouseDown(e: MouseEvent) {
@@ -240,14 +245,20 @@ export class IDEToolbar extends Module {
             this.toolsStack.visible = true;
         this.contentStack && this.contentStack.classList.add('active');
         this.classList.add('active');
-        this.isTexbox() && this._component.edit && this._component.edit();
+        if (this.isTexbox() && this._component.edit) {
+            this._component.edit();
+            this.isEditing = true;
+        }
     }
 
     hideToolbars() {
         this.toolsStack.visible = false;
         this.contentStack && this.contentStack.classList.remove('active');
         this.classList.remove('active');
-        this.isTexbox() && this._component.confirm && this._component.confirm();
+        if (this.isTexbox() && this._component.confirm && this.isEditing) {
+            this._component.confirm();
+            this.isEditing = false;
+        }
     }
 
     private renderResizeStack(data: IPageElement) {
@@ -328,6 +339,9 @@ export class IDEToolbar extends Module {
         try {
             const module = await getModule({ipfscid, localPath});
             if (module) {
+                await module.init();
+                module.parent = this.contentStack;
+                this.contentStack.append(module);
                 this._component = module;
                 this._component.maxWidth = '100%';
                 this._component.maxHeight = '100%';
@@ -341,8 +355,6 @@ export class IDEToolbar extends Module {
                 this.dragStack.visible = false;
                 this.contentStack.classList.add('move');
                 this.renderResizeStack(data);
-                this._component.parent = this.contentStack;
-                this.contentStack.append(module);
             }
         } catch(error) {
             console.log('fetch module', error)
@@ -351,7 +363,6 @@ export class IDEToolbar extends Module {
 
     async setData(data: any) {
         // update data from pageblock
-        console.log('set data', data);
         if (this._component)
             pageObject.setElement(this.rowId, this.data.id, data);
     }
@@ -371,9 +382,12 @@ export class IDEToolbar extends Module {
         if (pageRows) {
             for (const row of pageRows) {
                 const toolbarElm = row.querySelector('ide-toolbar') as IDEToolbar;
-                toolbarElm.toolsStack.visible = false;
-                toolbarElm.contentStack && toolbarElm.contentStack.classList.remove('active');
-                toolbarElm.classList.remove('active');
+                if (toolbarElm) {
+                    toolbarElm.toolsStack.visible = false;
+                    toolbarElm.contentStack && toolbarElm.contentStack.classList.remove('active');
+                    toolbarElm.classList.remove('active');
+                    toolbarElm.hideToolbars();
+                }
                 row.classList.remove('active');
             }
         }
