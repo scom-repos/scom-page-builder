@@ -48,7 +48,6 @@ export class BuilderHeader extends Module {
     constructor(parent?: any) {
         super(parent);
         this.initEventBus();
-        // this.getData = this.getData.bind(this);
         this.setData = this.setData.bind(this);
     }
 
@@ -59,32 +58,12 @@ export class BuilderHeader extends Module {
         })
     }
 
-    get data(): IPageHeader {
-        return {
-            image: this._image,
-            elements: this._elements,
-            headerType: this._headerType
-        };
-    }
-    set data(value: IPageHeader) {
-        this.setData(value);
-        this.updateHeader();
-    }
-
-    // async getData() {
-    //     let elements = [];
-    //     if (this._elements) {
-    //         const row = this.pnlHeaderMain.querySelector('ide-row') as PageRow;
-    //         if (row) elements = (await row.getData())?.elements || [];
-    //     }
-    //     return {...this.data, elements};
-    // }
-
-    setData(value: IPageHeader) {
+    async setData(value: IPageHeader) {
         this._headerType = value.headerType;
         this._image = value.image;
         this._elements = value.elements;
         pageObject.header = value;
+        await this.updateHeader();
     }
 
     private resetData() {
@@ -106,7 +85,7 @@ export class BuilderHeader extends Module {
         this.pnlHeaderMain.clearInnerHTML();
         const pageRow = (<ide-row width="100vw" maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
         const rowData = {
-            id: generateUUID(),
+            id: 'header',
             row: 0,
             elements: this._elements
         }
@@ -116,7 +95,7 @@ export class BuilderHeader extends Module {
     }
 
     private addHeader() {
-        this.data = {
+        this.setData({
             image: 'https://ssl.gstatic.com/atari/images/simple-header-blended-small.png',
             headerType: HeaderType.NORMAL,
             elements: [{
@@ -132,10 +111,10 @@ export class BuilderHeader extends Module {
                 },
                 properties: {
                     width: '100%',
-                    height: '100px'
+                    height: '130px'
                 }
             }]
-        }
+        })
     }
 
     private onShowUpload() {
@@ -160,6 +139,7 @@ export class BuilderHeader extends Module {
             const image = file ? await this.uploader.toBase64(file) as string : '';
             this.pnlHeader.background = {image};
             this._image = image;
+            pageObject.header = {...pageObject.header, image: this._image};
             this._isUpdatingBg = false;
         } else {
             if (this.pnlTitle.contains(this.pnlLogo))
@@ -189,7 +169,8 @@ export class BuilderHeader extends Module {
             type.classList.remove('active');
         })
         source.classList.add('active');
-        this.setData({...this.data, headerType: type.type});
+        const header = pageObject.header;
+        this.setData({...header, headerType: type.type});
         this.updateHeaderType();
     }
 

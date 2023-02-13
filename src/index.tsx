@@ -36,14 +36,18 @@ export default class Editor extends Module {
         }
     }
 
-    setData(value: IPageData) {
+    async setData(value: IPageData) {
         pageObject.header = value.header;
         pageObject.sections = value.sections;
         pageObject.footer = value.footer;
 
-        this.builderHeader.data = value.header;
-        this.pageRows.setRows(value.sections);
-        this.builderFooter.data = value.footer;
+        try {
+            await this.builderHeader.setData(value.header);
+            await this.pageRows.setRows(value.sections);
+            await this.builderFooter.setData(value.footer);
+        } catch(error) {
+            console.log('setdata', error)
+        }
     }
 
     onLoad() {

@@ -246,9 +246,9 @@ export class PageRows extends Module {
             pageRow.border = { top: { width: '1px', style: 'dashed', color: Theme.divider } };
             this.initDragEvent(pageRow);
         }
-        await pageRow.setData(rowData);
         const addRowCmd = new ElementCommand(pageRow, this.pnlRows, rowData);
         commandHistory.execute(addRowCmd);
+        await pageRow.setData(rowData);
         return pageRow;
     }
 

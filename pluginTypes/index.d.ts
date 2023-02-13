@@ -287,11 +287,12 @@ declare module "@scom/scom-page-builder/utility/command/resize.ts" {
     import { ICommand } from "@scom/scom-page-builder/utility/command/interface.ts";
     export class ResizeElementCommand implements ICommand {
         private element;
+        private parent;
         private initialWidth;
         private initialHeight;
         private finalWidth;
         private finalHeight;
-        constructor(element: Control, initialWidth: number | string, initialHeight: number | string);
+        constructor(parent: any, element: Control, initialWidth: number | string, initialHeight: number | string);
         execute(): void;
         undo(): void;
         redo(): void;
@@ -897,6 +898,7 @@ declare module "@scom/scom-page-builder/common/toolbar.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/common/toolbar.tsx" />
 declare module "@scom/scom-page-builder/common/toolbar.tsx" {
     import { Module, ControlElement } from '@ijstech/components';
+    import { IPageElement } from "@scom/scom-page-builder/interface/index.ts";
     import "@scom/scom-page-builder/common/toolbar.css.ts";
     global {
         namespace JSX {
@@ -934,9 +936,11 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private _mouseDownHandler;
         private _mouseUpHandler;
         private _mouseMoveHandler;
-        data: any;
         private _rowId;
+        private _elementId;
+        private _data;
         constructor(parent?: any);
+        get data(): any;
         private handleMouseDown;
         private handleMouseMove;
         private handleMouseUp;
@@ -944,19 +948,22 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         set toolList(value: any[]);
         get rowId(): string;
         set rowId(value: string);
+        get elementId(): string;
+        set elementId(value: string);
         get readonly(): boolean;
         set readonly(value: boolean);
         private renderToolbars;
         private onShowModal;
         private renderToolbarAction;
         private onSave;
+        private isTexbox;
         showToolbars(): void;
         hideToolbars(): void;
         private renderResizeStack;
         private renderResizer;
-        fetchModule(): Promise<void>;
+        fetchModule(data: IPageElement): Promise<void>;
         setData(data: any): Promise<void>;
-        getData(): Promise<any>;
+        setProperties(data: any): Promise<void>;
         private checkToolbar;
         private renderError;
         _handleClick(event: Event): boolean;
@@ -1109,7 +1116,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         onDeleteRow(): Promise<void>;
         onMoveUp(): void;
         onMoveDown(): void;
-        render(): Promise<any>;
+        render(): any;
     }
 }
 /// <amd-module name="@scom/scom-page-builder/page/pagePaging.css.ts" />
@@ -1308,9 +1315,7 @@ declare module "@scom/scom-page-builder/builder/builderHeader.tsx" {
         private showAddStack;
         constructor(parent?: any);
         initEventBus(): void;
-        get data(): IPageHeader;
-        set data(value: IPageHeader);
-        setData(value: IPageHeader): void;
+        setData(value: IPageHeader): Promise<void>;
         private resetData;
         private updateHeader;
         private addHeader;
@@ -1357,9 +1362,7 @@ declare module "@scom/scom-page-builder/builder/builderFooter.tsx" {
         constructor(parent?: any);
         initEventBus(): void;
         private resetData;
-        get data(): IPageFooter;
-        set data(value: IPageFooter);
-        setData(value: IPageFooter): void;
+        setData(value: IPageFooter): Promise<void>;
         private updateFooter;
         private addFooter;
         private updateOverlay;
@@ -1410,7 +1413,7 @@ declare module "@scom/scom-page-builder" {
             sections: import("@scom/scom-page-builder/interface/siteData.ts").IPageSection[];
             footer: import("@scom/scom-page-builder/interface/siteData.ts").IPageFooter;
         };
-        setData(value: IPageData): void;
+        setData(value: IPageData): Promise<void>;
         onLoad(): void;
         initEventBus(): void;
         private onAddRow;
