@@ -395,8 +395,10 @@ export class PageRow extends Module {
                 const column = Number(target.getAttribute('data-column'));
                 const rectangle = target.closest('.fixed-grid').parentNode.querySelector(`.rectangle`) as Control;
                 rectangle.style.display = 'block';
-                rectangle.style.left = (gridColumnWidth + gapWidth) * (column - 1) + 'px';
                 const columnSpan = Number(self.currentElement.dataset.columnSpan);
+                const colSpan = Math.min(columnSpan, 12);
+                const colStart = Math.min(column, (12 - colSpan) + 1);
+                rectangle.style.left = (gridColumnWidth + gapWidth) * (colStart - 1) + 'px';
                 rectangle.style.width = (gridColumnWidth * columnSpan) + (gapWidth * (columnSpan - 1)) + 'px';
             }
         });
