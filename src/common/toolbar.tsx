@@ -8,10 +8,11 @@ import {
     Button,
     application,
     renderUI,
-    Modal
+    Modal,
+    IRenderUIOptions
 } from '@ijstech/components';
 import { EVENT } from '../const/index';
-import { IPageBlockAction } from '../interface/index';
+import { IPageBlockAction, IPageElement, ValidationError } from '../interface/index';
 import { pageObject } from '../store/index';
 import { commandHistory, getModule, ResizeElementCommand } from '../utility/index';
 import './toolbar.css';
@@ -53,14 +54,16 @@ export class IDEToolbar extends Module {
     private _component: any = null;
     private dragStack: Panel;
     private pnlForm: Panel;
+    private pnlFormMsg: Panel;
     private mdActions: Modal;
 
     private _mouseDownHandler: any;
     private _mouseUpHandler: any;
     private _mouseMoveHandler: any;
 
-    data: any;
     private _rowId: string;
+    private _elementId: string;
+    private isEditing: boolean = false;
 
     constructor(parent?: any) {
         super(parent);
@@ -68,7 +71,15 @@ export class IDEToolbar extends Module {
         this._mouseUpHandler = this.handleMouseUp.bind(this);
         this._mouseMoveHandler = this.handleMouseMove.bind(this);
         this.setData = this.setData.bind(this);
-        this.getData = this.getData.bind(this);
+        this.fetchModule = this.fetchModule.bind(this);
+    }
+
+    get data() {
+        return pageObject.getElement(this.rowId, this.elementId);
+    }
+
+    get module() {
+        return this._component;
     }
 
     private handleMouseDown(e: MouseEvent) {
@@ -136,7 +147,7 @@ export class IDEToolbar extends Module {
         this._currentResizer = null;
         this._currentPosition = 'left';
         // TODO: check resize other component
-        const resizeCmd = new ResizeElementCommand(this._component, this._origWidth, this._origHeight);
+        const resizeCmd = new ResizeElementCommand(this, this._component, this._origWidth, this._origHeight);
         commandHistory.execute(resizeCmd);
         application.EventBus.dispatch(EVENT.ON_RESIZE, { newWidth: Number(this._component.width), oldWidth: this._origWidth });
     };
@@ -154,6 +165,13 @@ export class IDEToolbar extends Module {
     }
     set rowId(value: string) {
         this._rowId = value;
+    }
+
+    get elementId() {
+        return this._elementId;
+    }
+    set elementId(value: string) {
+        this._elementId = value;
     }
 
     get readonly() {
@@ -175,7 +193,6 @@ export class IDEToolbar extends Module {
                 background: {color: 'transparent'},
                 caption: `<i-icon name="${tool.icon}" width=${20} height=${20} display="block" fill="${Theme.text.primary}"></i-icon>`,
                 onClick: () => {
-                    console.log('button click: ', tool.name);
                     this.currentAction = tool;
                     this.mdActions.visible = true;
                     this.hideToolbars();
@@ -187,27 +204,40 @@ export class IDEToolbar extends Module {
     }
 
     private onShowModal() {
+        this.pnlFormMsg.visible = false;
         this.renderToolbarAction(this.currentAction);
     }
 
-    private async renderToolbarAction(action: IPageBlockAction) {
+    private renderToolbarAction(action: IPageBlockAction) {
         this.pnlForm.clearInnerHTML();
-        const data = await this.getData();
-        renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data);
+        const data = this.data.properties;
+        if (data.height === 'auto') data.height = this.offsetHeight;
+        if (data.width === 'auto') data.width = this.offsetWidth;
+        const options: IRenderUIOptions = {
+            columnWidth: '100%',
+            columnsPerRow: 1,
+            confirmButtonBackgroundColor: Theme.colors.primary.main,
+            confirmButtonFontColor: Theme.colors.primary.contrastText
+        }
+        // console.log('schema: ', action.userInputDataSchema)
+        // console.log('data: ', data)
+        renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data, options);
     }
 
     private onSave(result: boolean, data: any) {
-        let trimedData = data.split(',').join(',\n');
-        trimedData = trimedData.split('{').join('{\n').split('}').join('\n}');
-        console.log(`result: ${result},\ndata: ${trimedData}`);
         if (result) {
-            const commandIns = this.currentAction.command(this, JSON.parse(trimedData));
+            const commandIns = this.currentAction.command(this, data);
             commandHistory.execute(commandIns);
             this.mdActions.visible = false;
-        } else {
-            if (data === 'action canceled')
-                this.mdActions.visible = false;
+        } else if (data?.errors) {
+            this.pnlFormMsg.visible = true;
+            this.renderError(data.errors || []);
         }
+    }
+
+    private isTexbox() {
+        // TODO: Update
+        return this.data.module.name === 'Textbox';
     }
 
     showToolbars() {
@@ -215,21 +245,29 @@ export class IDEToolbar extends Module {
             this.toolsStack.visible = true;
         this.contentStack && this.contentStack.classList.add('active');
         this.classList.add('active');
+        if (this.isTexbox() && this._component.edit) {
+            this._component.edit();
+            this.isEditing = true;
+        }
     }
 
     hideToolbars() {
         this.toolsStack.visible = false;
         this.contentStack && this.contentStack.classList.remove('active');
         this.classList.remove('active');
+        if (this.isTexbox() && this._component.confirm && this.isEditing) {
+            this._component.confirm();
+            this.isEditing = false;
+        }
     }
 
-    private renderResizeStack() {
+    private renderResizeStack(data: IPageElement) {
         this._eResizer = this.renderResizer('left');
         this._wResizer = this.renderResizer('right');
         this._nResizer = this.renderResizer('bottom');
         this._neResizer = this.renderResizer('bottomLeft');
         this._nwResizer = this.renderResizer('bottomRight');
-        const isImage = this.data.module?.name === 'Image';
+        const isImage = data?.module?.name === 'Image';
         if (this._nResizer) this._nResizer.visible = isImage;
         if (this._neResizer) this._neResizer.visible = isImage;
         if (this._nwResizer) this._nwResizer.visible = isImage;
@@ -294,57 +332,78 @@ export class IDEToolbar extends Module {
         return stack;
     }
 
-    async fetchModule() {
+    async fetchModule(data: IPageElement) {
         if (this._readonly) return;
-        const ipfscid = this.data.module?.ipfscid || '';
-        const localPath = this.data.module?.localPath || '';
-        const module = await getModule({ipfscid, localPath});
-        if (module) {
-            module.parent = this.contentStack;
-            this.contentStack.append(module);
-            this._component = module;
-            this._component.maxWidth = '100%';
-            this._component.maxHeight = '100%';
-            this._component.overflow = 'hidden';
-            this._component.style.display = 'block';
-            this._component.onClick = () => {
-                this.checkToolbar();
-                this.showToolbars();
-            }
-            if (this.data.module?.name === 'Text box') {
-                this.dragStack.visible = true;
-                this.contentStack.classList.remove('move');
-            } else {
+        const ipfscid = data.module?.ipfscid || '';
+        const localPath = data.module?.localPath || '';
+        try {
+            const module = await getModule({ipfscid, localPath});
+            if (module) {
+                await module.init();
+                module.parent = this.contentStack;
+                this.contentStack.append(module);
+                this._component = module;
+                this._component.maxWidth = '100%';
+                this._component.maxHeight = '100%';
+                this._component.overflow = 'hidden';
+                this._component.style.display = 'block';
+                this._component.onClick = () => {
+                    this.toolList = this._component.getActions ? this._component.getActions() : [];
+                    this.checkToolbar();
+                    this.showToolbars();
+                }
                 this.dragStack.visible = false;
                 this.contentStack.classList.add('move');
+                this.renderResizeStack(data);
             }
-            this.renderResizeStack();
-            this.toolList = this._component.getActions ? this._component.getActions() : [];
+        } catch(error) {
+            console.log('fetch module', error)
         }
     }
 
     async setData(data: any) {
+        // update data from pageblock
+        if (this._component)
+            pageObject.setElement(this.rowId, this.data.id, data);
+    }
+
+    async setProperties(data: any) {
         if (this._component) {
             if (data.width) this._component.width = data.width;
             if (data.height) this._component.height = data.height;
             await this._component.setTag(data);
             await this._component.setData(data);
-            pageObject.setElement(this.rowId, this.data.id, this._component.data);
-
         } 
-    }
-
-    async getData() {
-        return this._component ? await this._component.getData() : null;
     }
 
     private checkToolbar() {
         const isShowing = this.toolsStack.visible;
-        const toolbars = document.querySelectorAll('ide-toolbar');
-        for (const toolbar of toolbars) {
-            (toolbar as IDEToolbar).hideToolbars();
+        const pageRows= document.querySelectorAll('ide-row');
+        if (pageRows) {
+            for (const row of pageRows) {
+                const toolbarElm = row.querySelector('ide-toolbar') as IDEToolbar;
+                if (toolbarElm) {
+                    toolbarElm.toolsStack.visible = false;
+                    toolbarElm.contentStack && toolbarElm.contentStack.classList.remove('active');
+                    toolbarElm.classList.remove('active');
+                    toolbarElm.hideToolbars();
+                }
+                row.classList.remove('active');
+            }
         }
         isShowing && this.showToolbars();
+    }
+
+    private renderError(errors: ValidationError[]) {
+        this.pnlFormMsg.clearInnerHTML();
+        errors.forEach(error => {
+            this.pnlFormMsg.appendChild(
+                <i-label
+                    caption={`${error.property} ${error.message}`}
+                    font={{color: Theme.colors.error.main, size: '0.75rem'}}
+                ></i-label>
+            );
+        })
     }
 
     _handleClick(event: Event): boolean {
@@ -415,10 +474,18 @@ export class IDEToolbar extends Module {
                     onOpen={this.onShowModal.bind(this)}
                     class="setting-modal"
                 >
-                    <i-panel
-                        id="pnlForm"
-                        padding={{left: '1rem', right: '1rem', top: '1rem', bottom: '1rem'}}
-                    ></i-panel>
+                    <i-panel>
+                        <i-vstack
+                            id="pnlFormMsg"
+                            padding={{left: '1.5rem', right: '1.5rem', top: '1rem'}}
+                            gap="0.5rem"
+                            visible={false}
+                        ></i-vstack>
+                        <i-panel
+                            id="pnlForm"
+                            padding={{left: '1rem', right: '1rem', top: '1rem', bottom: '1rem'}}
+                        ></i-panel>
+                    </i-panel>
                 </i-modal>
             </i-vstack>
         );

@@ -1,9 +1,16 @@
 import { IPageHeader, IPageSection, IPageFooter, IPageElement } from "../interface/index";
 
 export class PageObject {
-  private _header: IPageHeader = null;
+  private _header: IPageHeader = {
+    headerType: 'banner' as any,
+    image: "",
+    elements: []
+  };
   private _sections: Map<string, IPageSection> = new Map();
-  private _footer: IPageFooter = null;
+  private _footer: IPageFooter = {
+    image: "",
+    elements: []
+  };
 
   set header(value: IPageHeader) {
     this._header = value;
@@ -55,8 +62,15 @@ export class PageObject {
   }
 
   getElement(sectionId: string, elementId: string) {
+    if (sectionId === 'header') {
+      const elements = pageObject.header?.elements || [];
+      return elements[0] || null;
+    }
+    if (sectionId === 'footer') {
+      const elements = pageObject.footer?.elements || [];
+      return elements[0] || null;
+    }
     const section = this.getSection(sectionId);
-    console.log('section', section)
     if (!section) return null;
     const elm = this.findElement(section.elements, elementId);
     return elm
@@ -64,9 +78,8 @@ export class PageObject {
 
   setElement(sectionId: string, elementId: string, value: any) {
     let elm = this.getElement(sectionId, elementId);
-    console.log(elm)
+    console.log('set elm', elm)
     if (elm) elm.properties = value;
-    console.log(this.sections)
   }
 }
 

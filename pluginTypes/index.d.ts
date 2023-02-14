@@ -287,11 +287,12 @@ declare module "@scom/scom-page-builder/utility/command/resize.ts" {
     import { ICommand } from "@scom/scom-page-builder/utility/command/interface.ts";
     export class ResizeElementCommand implements ICommand {
         private element;
+        private parent;
         private initialWidth;
         private initialHeight;
         private finalWidth;
         private finalHeight;
-        constructor(element: Control, initialWidth: number | string, initialHeight: number | string);
+        constructor(parent: any, element: Control, initialWidth: number | string, initialHeight: number | string);
         execute(): void;
         undo(): void;
         redo(): void;
@@ -393,69 +394,6 @@ declare module "@scom/scom-page-builder/interface/core.ts" {
         mobile: number;
         tablet: number;
         desktop: number;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/interface/jsonSchema.ts" />
-declare module "@scom/scom-page-builder/interface/jsonSchema.ts" {
-    export interface IDataSchema {
-        type: 'integer' | 'number' | 'boolean' | 'string' | 'object';
-        format?: 'date' | 'time' | 'date-time' | 'image';
-        enum?: string[];
-        oneOf?: {
-            const: string;
-            title: string;
-        }[];
-        required?: string[];
-        properties?: {
-            [key: string]: IDataSchema;
-        };
-        minLength?: number;
-        maxLength?: number;
-        minimum?: number;
-        maximum?: number;
-        default?: string | number | boolean;
-        description?: string;
-    }
-    export type IUISchemaType = 'VerticalLayout' | 'HorizontalLayout' | 'Group' | 'Categorization' | 'Category' | 'Control';
-    export type IUISchemaRulesEffect = 'HIDE' | 'SHOW' | 'DISABLE' | 'ENABLE';
-    export type IUISchemaValidationType = 'check-null';
-    export interface IUISchemaRulesCondition {
-        scope: string;
-        schema: {
-            [key: string]: any;
-        };
-    }
-    export interface IUISchemaRules {
-        effect?: IUISchemaRulesEffect;
-        condition?: IUISchemaRulesCondition;
-    }
-    export interface IUISchemaOptions {
-        detail?: 'DEFAULT' | 'GENERATED' | 'REGISTERED' | IUISchema;
-        showSortButtons?: boolean;
-        elementLabelProp?: string;
-        format?: 'date' | 'time' | 'date-time' | 'radio';
-        maxWidth?: string;
-        maxHeight?: string;
-        slider?: boolean;
-        multi?: boolean;
-        color?: boolean;
-        restrict?: boolean;
-        showUnfocusedDescription?: boolean;
-        hideRequiredAsterisk?: boolean;
-        toggle?: boolean;
-        readonly?: boolean;
-        autocomplete?: boolean;
-        variant?: 'stepper';
-        validationType?: IUISchemaValidationType;
-    }
-    export interface IUISchema {
-        title?: string;
-        type: IUISchemaType;
-        elements?: IUISchema[];
-        label?: string | boolean;
-        scope?: string;
-        rule?: IUISchemaRules;
-        options?: IUISchemaOptions;
     }
 }
 /// <amd-module name="@scom/scom-page-builder/interface/pageBlock.ts" />
@@ -628,14 +566,25 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         pageId: number;
     }
 }
+/// <amd-module name="@scom/scom-page-builder/interface/jsonSchema.ts" />
+declare module "@scom/scom-page-builder/interface/jsonSchema.ts" {
+    export interface ValidationResult {
+        valid: boolean;
+        errors: ValidationError[];
+    }
+    export interface ValidationError {
+        property: string;
+        message: string;
+    }
+}
 /// <amd-module name="@scom/scom-page-builder/interface/index.ts" />
 declare module "@scom/scom-page-builder/interface/index.ts" {
     import { IMenu, INetwork, IRoute, ITheme, ISCConfig, IBreakpoints } from "@scom/scom-page-builder/interface/core.ts";
-    import { IDataSchema, IUISchema, IUISchemaOptions, IUISchemaRules, IUISchemaRulesCondition, IUISchemaRulesEffect, IUISchemaType, IUISchemaValidationType } from "@scom/scom-page-builder/interface/jsonSchema.ts";
-    export { IMenu, INetwork, IRoute, ITheme, ISCConfig, IBreakpoints, IDataSchema, IUISchema, IUISchemaOptions, IUISchemaRules, IUISchemaRulesCondition, IUISchemaRulesEffect, IUISchemaType, IUISchemaValidationType };
+    export { IMenu, INetwork, IRoute, ITheme, ISCConfig, IBreakpoints };
     export * from "@scom/scom-page-builder/interface/pageBlock.ts";
     export * from "@scom/scom-page-builder/interface/component.ts";
     export * from "@scom/scom-page-builder/interface/siteData.ts";
+    export * from "@scom/scom-page-builder/interface/jsonSchema.ts";
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageHeader.css.ts" />
 declare module "@scom/scom-page-builder/page/pageHeader.css.ts" { }
@@ -934,59 +883,6 @@ declare module "@scom/scom-page-builder/dialogs/selectSiteTypeDialog.tsx" {
         render(): any;
     }
 }
-/// <amd-module name="@scom/scom-page-builder/dialogs/configDialog.css.ts" />
-declare module "@scom/scom-page-builder/dialogs/configDialog.css.ts" { }
-/// <amd-module name="@scom/scom-page-builder/dialogs/configDialog.tsx" />
-declare module "@scom/scom-page-builder/dialogs/configDialog.tsx" {
-    import { Module, ControlElement } from '@ijstech/components';
-    import "@scom/scom-page-builder/dialogs/configDialog.css.ts";
-    import { IDataSchema, IUISchema, IUISchemaValidationType } from "@scom/scom-page-builder/interface/index.ts";
-    export interface ConfigDialogElement extends ControlElement {
-        title?: string;
-        onConfirm?: (data: any) => void;
-    }
-    export interface ValidationElement {
-        scope: string;
-        validateType: IUISchemaValidationType;
-    }
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ['scpage-config-dialog']: ConfigDialogElement;
-            }
-        }
-    }
-    export class ConfigDialog extends Module {
-        private pnlConfigBody;
-        private pnlConfigSidebar;
-        private dialog;
-        private validationControlList;
-        private _dataSchema;
-        private _uiSchema;
-        private _flatRules;
-        private _tabs;
-        private onConfirm;
-        constructor(parent?: any);
-        init(): Promise<void>;
-        setSchema(dataSchema: IDataSchema, uiSchema: IUISchema): void;
-        show(): void;
-        hide(): void;
-        confirm(): void;
-        checkIfValidationNeed(uiSchema: IUISchema): void;
-        validateForm(): boolean;
-        showValidationFailMsg(validationFailList: ValidationElement[]): void;
-        getFormData(): any;
-        render(): any;
-        private clear;
-        private renderForm;
-        private getData;
-        private setupRules;
-        private createUI;
-        private generateTemplateColumnsByNumber;
-        private getDataSchemaByScope;
-        private convertFieldNameToLabel;
-    }
-}
 /// <amd-module name="@scom/scom-page-builder/dialogs/index.ts" />
 declare module "@scom/scom-page-builder/dialogs/index.ts" {
     import { ConfirmDialog } from "@scom/scom-page-builder/dialogs/confirmDialog.tsx";
@@ -995,14 +891,14 @@ declare module "@scom/scom-page-builder/dialogs/index.ts" {
     import { SettingsDialog } from "@scom/scom-page-builder/dialogs/settingsDialog.tsx";
     import { PageBlockSettingsDialog } from "@scom/scom-page-builder/dialogs/pageBlockSettingsDialog.tsx";
     import { SelectSiteTypeDialog } from "@scom/scom-page-builder/dialogs/selectSiteTypeDialog.tsx";
-    import { ConfigDialog } from "@scom/scom-page-builder/dialogs/configDialog.tsx";
-    export { ConfirmDialog, LoadingDialog, RowSettingsDialog, SettingsDialog, PageBlockSettingsDialog, SelectSiteTypeDialog, ConfigDialog };
+    export { ConfirmDialog, LoadingDialog, RowSettingsDialog, SettingsDialog, PageBlockSettingsDialog, SelectSiteTypeDialog };
 }
 /// <amd-module name="@scom/scom-page-builder/common/toolbar.css.ts" />
 declare module "@scom/scom-page-builder/common/toolbar.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/common/toolbar.tsx" />
 declare module "@scom/scom-page-builder/common/toolbar.tsx" {
     import { Module, ControlElement } from '@ijstech/components';
+    import { IPageElement } from "@scom/scom-page-builder/interface/index.ts";
     import "@scom/scom-page-builder/common/toolbar.css.ts";
     global {
         namespace JSX {
@@ -1035,13 +931,17 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private _component;
         private dragStack;
         private pnlForm;
+        private pnlFormMsg;
         private mdActions;
         private _mouseDownHandler;
         private _mouseUpHandler;
         private _mouseMoveHandler;
-        data: any;
         private _rowId;
+        private _elementId;
+        private isEditing;
         constructor(parent?: any);
+        get data(): any;
+        get module(): any;
         private handleMouseDown;
         private handleMouseMove;
         private handleMouseUp;
@@ -1049,20 +949,24 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         set toolList(value: any[]);
         get rowId(): string;
         set rowId(value: string);
+        get elementId(): string;
+        set elementId(value: string);
         get readonly(): boolean;
         set readonly(value: boolean);
         private renderToolbars;
         private onShowModal;
         private renderToolbarAction;
         private onSave;
+        private isTexbox;
         showToolbars(): void;
         hideToolbars(): void;
         private renderResizeStack;
         private renderResizer;
-        fetchModule(): Promise<void>;
+        fetchModule(data: IPageElement): Promise<void>;
         setData(data: any): Promise<void>;
-        getData(): Promise<any>;
+        setProperties(data: any): Promise<void>;
         private checkToolbar;
+        private renderError;
         _handleClick(event: Event): boolean;
         init(): void;
         render(): any;
@@ -1413,9 +1317,7 @@ declare module "@scom/scom-page-builder/builder/builderHeader.tsx" {
         private showAddStack;
         constructor(parent?: any);
         initEventBus(): void;
-        get data(): IPageHeader;
-        set data(value: IPageHeader);
-        setData(value: IPageHeader): void;
+        setData(value: IPageHeader): Promise<void>;
         private resetData;
         private updateHeader;
         private addHeader;
@@ -1462,9 +1364,7 @@ declare module "@scom/scom-page-builder/builder/builderFooter.tsx" {
         constructor(parent?: any);
         initEventBus(): void;
         private resetData;
-        get data(): IPageFooter;
-        set data(value: IPageFooter);
-        setData(value: IPageFooter): void;
+        setData(value: IPageFooter): Promise<void>;
         private updateFooter;
         private addFooter;
         private updateOverlay;
@@ -1515,7 +1415,7 @@ declare module "@scom/scom-page-builder" {
             sections: import("@scom/scom-page-builder/interface/siteData.ts").IPageSection[];
             footer: import("@scom/scom-page-builder/interface/siteData.ts").IPageFooter;
         };
-        setData(value: IPageData): void;
+        setData(value: IPageData): Promise<void>;
         onLoad(): void;
         initEventBus(): void;
         private onAddRow;

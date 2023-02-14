@@ -167,7 +167,7 @@ const getModule = async (options: IGetModuleOptions) => {
         const scconfigRes = await fetch(`${options.localPath}/scconfig.json`);
         const scconfig = await scconfigRes.json();
         scconfig.rootDir = options.localPath;
-        module = await application.newModule(scconfig.main, scconfig, true);
+        module = await application.newModule(scconfig.main, scconfig);
     }
     else {
         const scconfig = await getSCConfigByCid(options.ipfscid);
@@ -177,7 +177,7 @@ const getModule = async (options: IGetModuleOptions) => {
         const codeCID = result.codeCID;
         if (main.startsWith("@")) {
             scconfig.rootDir = `${IPFS_GATEWAY_IJS}${codeCID}/dist`;
-            module = await application.newModule(main, scconfig, true);
+            module = await application.newModule(main, scconfig);
         } else {
             const mainScriptPath = `${IPFS_GATEWAY_IJS}${main.replace(
                 '{root}',
