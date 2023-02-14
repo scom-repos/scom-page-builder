@@ -64,9 +64,6 @@ Styles.cssRule('ide-row', {
     transition: 'translate .3s ease-in',
     border: '2px solid transparent',
     $nest: {
-        'ide-section': {
-            flexGrow: '1'
-        },
         '&.dragenter': {
             border: '2px solid #1976D2'
         },
@@ -112,6 +109,20 @@ Styles.cssRule('ide-row', {
             border: `1px solid ${Theme.colors.primary.main}`,
             height: '100%',
             opacity: 1
+        },
+        '.rectangle': {
+            display: 'none',
+            position: 'absolute',
+            top: 0,
+            height: '100%',
+            border: 'solid 2px blue'
+        },
+        '.border-x-dotted': {
+            borderLeft: 'dotted 1px black',
+            borderRight: 'dotted 1px black'
+        },
+        '.border-dotted': {
+            border: 'dotted 1px black'
         }
     }
 });

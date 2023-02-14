@@ -33,7 +33,7 @@ export class PageSection extends Module {
     private pnlLoading: VStack;
     private pnlMain: Panel;
     private pageSectionWrapper: Panel;
-    private _dragger: ContainerDragger<PageSection>;
+    // private _dragger: ContainerDragger<PageSection>;
 
     private _data: IPageElement = {
         column: 0,
@@ -57,13 +57,13 @@ export class PageSection extends Module {
         // this.getData = this.getData.bind(this);
     }
 
-    get size() {
-        return this._size || {};
-    }
-    set size(value: { width?: string; height?: string }) {
-        this._size = value;
-        this.updateContainerSize();
-    }
+    // get size() {
+    //     return this._size || {};
+    // }
+    // set size(value: { width?: string; height?: string }) {
+    //     this._size = value;
+    //     this.updateContainerSize();
+    // }
 
     get readonly() {
         return this._readonly;
@@ -75,11 +75,11 @@ export class PageSection extends Module {
     init() {
         super.init();
         this.readonly = this.getAttribute('readonly', true, false);
-        const parent = this.parentElement.querySelector('#pnlElements') as Control;
-        if (!this.readonly && parent)
-            this._dragger = new ContainerDragger(this, parent, this);
-        this._size = this.getAttribute('containerSize', true, {});
-        this.updateContainerSize();
+        // const parent = this.parentElement.querySelector('#pnlElements') as Control;
+        // if (!this.readonly && parent)
+        //     this._dragger = new ContainerDragger(this, parent, this);
+        // this._size = this.getAttribute('containerSize', true, {});
+        // this.updateContainerSize();
         this.initEventListener();
     }
 
@@ -98,23 +98,23 @@ export class PageSection extends Module {
         this.onClick = (target, event) => this.setActive();
     }
 
-    private updateContainerSize() {
-        const sizeWidth = this.size.width || 'none';
-        const sizeHeight = this.size.height || 'none';
-        if (this.pageSectionWrapper) {
-            this.pageSectionWrapper.maxWidth = sizeWidth;
-            this.pageSectionWrapper.maxHeight = sizeHeight;
-            this.pageSectionWrapper.margin = { top: 'auto', bottom: 'auto', left: 'auto', right: 'auto' };
-        }
-        if (this.pnlLoading) {
-            this.pnlLoading.maxWidth = sizeWidth;
-            this.pnlLoading.maxHeight = sizeHeight;
-        }
-        if (this.pnlMain) {
-            this.pnlMain.maxWidth = sizeWidth;
-            this.pnlMain.maxHeight = sizeHeight;
-        }
-    }
+    // private updateContainerSize() {
+    //     const sizeWidth = this.size.width || 'none';
+    //     const sizeHeight = this.size.height || 'none';
+    //     if (this.pageSectionWrapper) {
+    //         this.pageSectionWrapper.maxWidth = sizeWidth;
+    //         this.pageSectionWrapper.maxHeight = sizeHeight;
+    //         this.pageSectionWrapper.margin = { top: 'auto', bottom: 'auto', left: 'auto', right: 'auto' };
+    //     }
+    //     if (this.pnlLoading) {
+    //         this.pnlLoading.maxWidth = sizeWidth;
+    //         this.pnlLoading.maxHeight = sizeHeight;
+    //     }
+    //     if (this.pnlMain) {
+    //         this.pnlMain.maxWidth = sizeWidth;
+    //         this.pnlMain.maxHeight = sizeHeight;
+    //     }
+    // }
 
     clear() {
         this.currentToolbar = null;
@@ -205,11 +205,11 @@ export class PageSection extends Module {
             <i-panel id={'pnlPageSection'} maxWidth="100%" maxHeight="100%">
                 <i-panel
                     id="pageSectionWrapper"
-                    width={'100%'} height="100%"
+                    width="100%" height="100%"
                     maxWidth="100%" maxHeight="100%"
                     padding={{top: '1.5rem', bottom: '1.5rem'}}
                 >
-                    <i-panel id="pnlMain"></i-panel>
+                    <i-panel id="pnlMain" maxWidth="100%" maxHeight="100%"></i-panel>
                 </i-panel>
             </i-panel>
         );

@@ -57,19 +57,12 @@ export class IDEToolbar extends Module {
     private pnlFormMsg: Panel;
     private mdActions: Modal;
 
-    private _mouseDownHandler: any;
-    private _mouseUpHandler: any;
-    private _mouseMoveHandler: any;
-
     private _rowId: string;
     private _elementId: string;
     private isEditing: boolean = false;
 
     constructor(parent?: any) {
         super(parent);
-        this._mouseDownHandler = this.handleMouseDown.bind(this);
-        this._mouseUpHandler = this.handleMouseUp.bind(this);
-        this._mouseMoveHandler = this.handleMouseMove.bind(this);
         this.setData = this.setData.bind(this);
         this.fetchModule = this.fetchModule.bind(this);
     }
@@ -82,75 +75,75 @@ export class IDEToolbar extends Module {
         return this._component;
     }
 
-    private handleMouseDown(e: MouseEvent) {
-        e.stopPropagation();
-        const target = e.target as HTMLElement;
-        const resizer = target.closest('.resize-stack') as Panel;
-        this._origHeight = this._component.offsetHeight;
-        this._origWidth = this._component.offsetWidth;
-        if (resizer) {
-            resizer.classList.add('resizing');
-            this._mouseDownPos = {
-                x: e.clientX,
-                y: e.clientY
-            };
-            this._currentResizer = resizer;
-            this._currentPosition = resizer.getAttribute('direction') as IPosition;
-            document.addEventListener('mousemove', this._mouseMoveHandler);
-            document.addEventListener('mouseup', this._mouseUpHandler);
-        }
-    };
+    // private handleMouseDown(e: MouseEvent) {
+    //     e.stopPropagation();
+    //     const target = e.target as HTMLElement;
+    //     const resizer = target.closest('.resize-stack') as Panel;
+    //     this._origHeight = this._component.offsetHeight;
+    //     this._origWidth = this._component.offsetWidth;
+    //     if (resizer) {
+    //         resizer.classList.add('resizing');
+    //         this._mouseDownPos = {
+    //             x: e.clientX,
+    //             y: e.clientY
+    //         };
+    //         this._currentResizer = resizer;
+    //         this._currentPosition = resizer.getAttribute('direction') as IPosition;
+    //         document.addEventListener('mousemove', this._mouseMoveHandler);
+    //         document.addEventListener('mouseup', this._mouseUpHandler);
+    //     }
+    // };
 
-    private handleMouseMove(e: MouseEvent) {
-        e.preventDefault();
-        e.stopPropagation();
-        let offsetX = e.clientX - this._mouseDownPos.x;
-        let offsetY = e.clientY - this._mouseDownPos.y;
-        let newWidth = '';
-        let newHeight = '';
-        switch (this._currentPosition) {
-            case 'left':
-                newWidth = (this._origWidth - offsetX) + 'px';
-                break;
-            case 'right':
-                newWidth = (this._origWidth + offsetX) + 'px';
-                break;
-            case 'bottom':
-                newHeight = (this._origHeight + offsetY) + 'px';
-                break;
-            case 'bottomLeft':
-                newWidth = (this._origWidth - offsetX) + 'px';
-                newHeight = (this._origHeight + offsetY) + 'px';
-                this.contentStack.style.left = `${Number(this._mouseDownPos.x) - offsetX}`;
-                this.contentStack.style.top = `${Number(this._mouseDownPos.y) - offsetY}`;
-                break;
-            case 'bottomRight':
-                newWidth = (this._origWidth + offsetX) + 'px';
-                newHeight = (this._origHeight + offsetY) + 'px';
-                this.contentStack.style.left = `${Number(this._mouseDownPos.x) - offsetX}`;
-                this.contentStack.style.top = `${Number(this._mouseDownPos.y) - offsetY}`;
-                break;
-        }
-        this.contentStack.width = 'fit-content';
-        this._component.width = newWidth;
-        this._component.height = newHeight;
-        this.contentStack.refresh();
-    };
+    // private handleMouseMove(e: MouseEvent) {
+    //     e.preventDefault();
+    //     e.stopPropagation();
+    //     let offsetX = e.clientX - this._mouseDownPos.x;
+    //     let offsetY = e.clientY - this._mouseDownPos.y;
+    //     let newWidth = '';
+    //     let newHeight = '';
+    //     switch (this._currentPosition) {
+    //         case 'left':
+    //             newWidth = (this._origWidth - offsetX) + 'px';
+    //             break;
+    //         case 'right':
+    //             newWidth = (this._origWidth + offsetX) + 'px';
+    //             break;
+    //         case 'bottom':
+    //             newHeight = (this._origHeight + offsetY) + 'px';
+    //             break;
+    //         case 'bottomLeft':
+    //             newWidth = (this._origWidth - offsetX) + 'px';
+    //             newHeight = (this._origHeight + offsetY) + 'px';
+    //             this.contentStack.style.left = `${Number(this._mouseDownPos.x) - offsetX}`;
+    //             this.contentStack.style.top = `${Number(this._mouseDownPos.y) - offsetY}`;
+    //             break;
+    //         case 'bottomRight':
+    //             newWidth = (this._origWidth + offsetX) + 'px';
+    //             newHeight = (this._origHeight + offsetY) + 'px';
+    //             this.contentStack.style.left = `${Number(this._mouseDownPos.x) - offsetX}`;
+    //             this.contentStack.style.top = `${Number(this._mouseDownPos.y) - offsetY}`;
+    //             break;
+    //     }
+    //     this.contentStack.width = 'fit-content';
+    //     this._component.width = newWidth;
+    //     this._component.height = newHeight;
+    //     this.contentStack.refresh();
+    // };
 
-    private handleMouseUp(e: MouseEvent) {
-        e.stopPropagation();
-        document.removeEventListener('mousemove', this._mouseMoveHandler);
-        document.removeEventListener('mouseup', this._mouseUpHandler);
-        const target = e.target as HTMLElement;
-        const resizer = target.closest('.resize-stack');
-        resizer && resizer.classList.remove('resizing');
-        this._currentResizer = null;
-        this._currentPosition = 'left';
-        // TODO: check resize other component
-        const resizeCmd = new ResizeElementCommand(this, this._component, this._origWidth, this._origHeight);
-        commandHistory.execute(resizeCmd);
-        application.EventBus.dispatch(EVENT.ON_RESIZE, { newWidth: Number(this._component.width), oldWidth: this._origWidth });
-    };
+    // private handleMouseUp(e: MouseEvent) {
+    //     e.stopPropagation();
+    //     document.removeEventListener('mousemove', this._mouseMoveHandler);
+    //     document.removeEventListener('mouseup', this._mouseUpHandler);
+    //     const target = e.target as HTMLElement;
+    //     const resizer = target.closest('.resize-stack');
+    //     resizer && resizer.classList.remove('resizing');
+    //     this._currentResizer = null;
+    //     this._currentPosition = 'left';
+    //     // TODO: check resize other component
+    //     const resizeCmd = new ResizeElementCommand(this, this._component, this._origWidth, this._origHeight);
+    //     commandHistory.execute(resizeCmd);
+    //     application.EventBus.dispatch(EVENT.ON_RESIZE, { newWidth: Number(this._component.width), oldWidth: this._origWidth });
+    // };
 
     get toolList() {
         return this._toolList || [];
@@ -213,6 +206,7 @@ export class IDEToolbar extends Module {
         const data = this.data.properties;
         if (data.height === 'auto') data.height = this.offsetHeight;
         if (data.width === 'auto') data.width = this.offsetWidth;
+        console.log(this.data)
         const options: IRenderUIOptions = {
             columnWidth: '100%',
             columnsPerRow: 1,
@@ -326,8 +320,7 @@ export class IDEToolbar extends Module {
                 break;
         }
         stack.appendChild(iconEl);
-        stack.setAttribute('direction', position);
-        stack.addEventListener('mousedown', this._mouseDownHandler);
+        stack.classList.add(position);
         this.contentStack.appendChild(stack);
         return stack;
     }
@@ -352,12 +345,17 @@ export class IDEToolbar extends Module {
                     this.checkToolbar();
                     this.showToolbars();
                 }
-                this.dragStack.visible = false;
-                this.contentStack.classList.add('move');
+                if (this.isTexbox()) {
+                    this.dragStack.visible = true;
+                    this.contentStack.classList.remove('move');
+                } else {
+                    this.dragStack.visible = false;
+                    this.contentStack.classList.add('move');
+                }
                 this.renderResizeStack(data);
             }
         } catch(error) {
-            console.log('fetch module', error)
+            console.log('fetch module error: ', error)
         }
     }
 
@@ -369,8 +367,8 @@ export class IDEToolbar extends Module {
 
     async setProperties(data: any) {
         if (this._component) {
-            if (data.width) this._component.width = data.width;
-            if (data.height) this._component.height = data.height;
+            // if (data.width) this._component.width = data.width;
+            // if (data.height) this._component.height = data.height;
             await this._component.setTag(data);
             await this._component.setData(data);
         } 
