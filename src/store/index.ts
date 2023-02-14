@@ -20,6 +20,7 @@ export class PageObject {
   }
 
   set sections(value: IPageSection[]) {
+    this._sections.clear();
     value.forEach(val => {
       this._sections.set(val.id, val)
     })

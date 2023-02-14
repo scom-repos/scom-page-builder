@@ -65,6 +65,7 @@ export class BuilderFooter extends Module {
         this.showAddStack = true;
         this.pnlFooter.background = {color: '#fff', image: ''};
         this.pnlEditOverlay.visible = false;
+        this.pnlEditOverlay.classList.remove('flex');
         this.pnlOverlay.visible = false;
         this.pnlConfig.visible = false;
     }
@@ -77,17 +78,15 @@ export class BuilderFooter extends Module {
     }
 
     private async updateFooter() {
-        this.showAddStack = this._elements.length === 0;
-        if (!this.showAddStack) {
-            this.pnlEditOverlay.visible = true;
-            this.pnlConfig.visible = true;
-        }
-        if (this.pnlEditOverlay.visible)
-            this.pnlEditOverlay.classList.add('flex');
-        else
-            this.pnlEditOverlay.classList.remove('flex');
-        this.pnlFooter.background = {image: this._image};
         this.pnlFooterMain.clearInnerHTML();
+        this.showAddStack = this._elements.length === 0;
+        if (this.showAddStack) {
+            this.resetData();
+            return;
+        }
+
+        this.pnlEditOverlay.visible = true;
+        this.pnlConfig.visible = true;
         const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
         const rowData = {
             id: 'footer', // generateUUID(),
@@ -97,6 +96,12 @@ export class BuilderFooter extends Module {
         await pageRow.setData(rowData);
         pageRow.parent = this.pnlFooterMain;
         this.pnlFooterMain.append(pageRow);
+
+        if (this.pnlEditOverlay.visible)
+            this.pnlEditOverlay.classList.add('flex');
+        else
+            this.pnlEditOverlay.classList.remove('flex');
+        this.pnlFooter.background = {image: this._image};
         application.EventBus.dispatch(EVENT.ON_UPDATE_FOOTER);
     }
 

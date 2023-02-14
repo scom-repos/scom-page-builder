@@ -8,16 +8,15 @@ import {
     Control,
     VStack
 } from '@ijstech/components';
-import { IPageData, IPageSection } from '../interface/index';
+import { IPageSection } from '../interface/index';
 import { PageSection } from './pageSection';
 import { PageRow } from './pageRow';
 import { PageFooter } from './pageFooter';
-import { PagePaging } from './pagePaging';
-import './pageRows.css';
 import { EVENT } from '../const/index';
 import { ElementCommand, commandHistory, MoveElementCommand } from '../utility/index';
 import { IDEToolbar } from '../common/index';
 import { pageObject } from '../store/index';
+import './pageRows.css';
 
 declare global {
     namespace JSX {
@@ -37,7 +36,7 @@ const Theme = Styles.Theme.ThemeVars;
 @customElements('ide-rows')
 export class PageRows extends Module {
     private pnlRows: VStack;
-    private pagePaging: PagePaging;
+    // private pagePaging: PagePaging;
     private pageFooter: PageFooter;
     private currentRow: PageRow;
     private pnlRowOverlay: Panel;
@@ -222,18 +221,14 @@ export class PageRows extends Module {
 
     async renderRows() {
         this.clearRows();
-        if (
-            (!pageObject.sections || (pageObject.sections && pageObject.sections.length == 0)) &&
-            window.location.hash.indexOf('/edit') >= 0
-        ) {
-            pageObject.sections = [];
-        }
         for (let i = 0; i < pageObject.sections.length; i++) {
             const rowData = pageObject.sections[i];
-            const pageRow = (<ide-row maxWidth="100%"></ide-row>) as PageRow;
-            this.initDragEvent(pageRow);
-            if (!this._readonly)
+            const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
+            if (!this._readonly) {
                 pageRow.border = { top: { width: '1px', style: 'dashed', color: Theme.divider } };
+                this.initDragEvent(pageRow);
+            }
+            pageRow.parent =  this.pnlRows;
             this.pnlRows.append(pageRow);
             await pageRow.setData(rowData);
         }
@@ -257,7 +252,8 @@ export class PageRows extends Module {
         const row = this.pnlRows.querySelector(`#${id}`)
         if (!row) return;
         let newRow = await this.appendRow(rowData)
-        this.pnlRows.insertBefore(row, newRow);
+        console.log(row)
+        // this.pnlRows.insertBefore(row, newRow);
     }
 
     clearRows() {
@@ -276,17 +272,17 @@ export class PageRows extends Module {
         this.pageFooter.footer = value;
     }
 
-    async setPaging(pages: IPageData[], currPage: IPageData) {
-        await this.pagePaging.setPaging(pages, currPage);
-    }
+    // async setPaging(pages: IPageData[], currPage: IPageData) {
+    //     await this.pagePaging.setPaging(pages, currPage);
+    // }
 
-    setPagingVisibility(pagingVisible: boolean) {
-        this.pagePaging.setVisible(pagingVisible);
-    }
+    // setPagingVisibility(pagingVisible: boolean) {
+    //     this.pagePaging.setVisible(pagingVisible);
+    // }
 
-    updatePaging() {
-        this.pagePaging.renderUI();
-    }
+    // updatePaging() {
+    //     this.pagePaging.renderUI();
+    // }
 
     render() {
         return (
@@ -306,7 +302,7 @@ export class PageRows extends Module {
                     background={{color: '#ddd'}}
                     class={'drag-overlay'}
                 ></i-panel>
-                <scpage-page-paging id={'pagePaging'} visible={false}></scpage-page-paging>
+                {/* <scpage-page-paging id={'pagePaging'} visible={false}></scpage-page-paging> */}
                 <scpage-page-footer
                     id={'pageFooter'}
                     class={'boxed-style'}
