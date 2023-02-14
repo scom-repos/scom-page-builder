@@ -938,9 +938,10 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private _mouseMoveHandler;
         private _rowId;
         private _elementId;
-        private _data;
+        private isEditing;
         constructor(parent?: any);
         get data(): any;
+        get module(): any;
         private handleMouseDown;
         private handleMouseMove;
         private handleMouseUp;
