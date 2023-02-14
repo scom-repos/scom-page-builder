@@ -252,8 +252,7 @@ export class PageRows extends Module {
         const row = this.pnlRows.querySelector(`#${id}`)
         if (!row) return;
         let newRow = await this.appendRow(rowData)
-        console.log(row)
-        // this.pnlRows.insertBefore(row, newRow);
+        this.pnlRows.insertBefore(newRow, row);
     }
 
     clearRows() {
