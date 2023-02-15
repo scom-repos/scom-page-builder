@@ -68,13 +68,11 @@ export default class Editor extends Module {
         let element = {
             id: generateUUID(),
             column: 1,
-            columnSpan: 12,
+            columnSpan: module.name === 'Textbox' ? 12 : 3,
             type,
             module,
             properties: {} as any
         }
-        if (module.name === "..Block/OTC" || module.name === '..Block/NFT Minter')
-            element.properties.width = 300;
         let rowData = {
             id: generateUUID(),
             row: 0,

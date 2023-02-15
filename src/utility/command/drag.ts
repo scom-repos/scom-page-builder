@@ -12,10 +12,9 @@ export class DragElementCommand implements ICommand {
   constructor(element: HTMLElement, dropElm: HTMLElement) {
     this.element = element;
     this.dropElm = dropElm;
-    console.log(element.getAttribute('data-column'), element)
     this.oldDataColumn = {
-      column: Number(element.getAttribute('data-column')),
-      columnSpan: Number(element.getAttribute('data-column-span'))
+      column: Number(element.dataset.column),
+      columnSpan: Number(element.dataset.columnSpan)
     }
   }
 
