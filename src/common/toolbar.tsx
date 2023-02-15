@@ -215,7 +215,16 @@ export class IDEToolbar extends Module {
         }
         // console.log('schema: ', action.userInputDataSchema)
         // console.log('data: ', data)
-        renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data, options);
+        // renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data, options);
+        let properties;
+        //FIXME: used temporarily for container type
+        if (data.content && data.content.properties) {
+            properties = data.content.properties;
+        }
+        else {
+            properties = data;
+        }
+        renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), properties, options);
     }
 
     private onSave(result: boolean, data: any) {
