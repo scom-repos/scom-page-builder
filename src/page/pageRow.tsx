@@ -11,9 +11,9 @@ import {
 import { PageSection } from './pageSection';
 import './pageRow.css';
 import { EVENT } from '../const/index';
-import { IPageSection, IRowSettings } from '../interface/index';
+import { IPageSection } from '../interface/index';
 import { pageObject } from '../store/index';
-import { commandHistory, ElementCommand } from '../utility/index';
+import { commandHistory, ElementCommand, ResizeElementCommand } from '../utility/index';
 
 declare global {
     namespace JSX {
@@ -29,13 +29,16 @@ export interface PageRowElement extends ControlElement {
 
 @customElements('ide-row')
 export class PageRow extends Module {
-    // private rowSettings: RowSettingsDialog;
-    private pnlElements: GridLayout;
     private actionsBar: VStack;
     private dragStack: VStack;
+    private pnlRow: GridLayout;
 
     private rowData: IPageSection;
     private _readonly: boolean;
+    private isResizing: boolean = false;
+    private currentWidth: number;
+    private currentHeight: number;
+    private currentElement: PageSection;
 
     @observable()
     private isCloned: boolean = true;
@@ -45,7 +48,6 @@ export class PageRow extends Module {
     constructor(parent?: any) {
         super(parent);
         this.setData = this.setData.bind(this);
-        // this.getData = this.getData.bind(this);
     }
 
     private initEventBus() {
@@ -55,7 +57,9 @@ export class PageRow extends Module {
     init() {
         this._readonly = this.getAttribute('readonly', true, false);
         super.init();
+        this.renderFixedGrid();
         this.initEventBus();
+        this.initEventListeners();
     }
 
     private async createNewElement(i: number) {
@@ -63,23 +67,78 @@ export class PageRow extends Module {
         const pageSection = (
             <ide-section
                 readonly={this._readonly}
+                display="block"
+                maxWidth="100%"
+                maxHeight="100%"
+                position="relative"
             ></ide-section>
         ) as PageSection;
-        this.pnlElements.appendChild(pageSection);
+        if (!this._readonly) {
+            pageSection.setAttribute('draggable', 'true');
+            pageSection.style.gridColumn = `${sectionData.column || 1} / span ${sectionData.columnSpan || 1}`;
+            pageSection.setAttribute('data-column', `${sectionData.column || 1}`);
+            pageSection.setAttribute('data-column-span', `${sectionData.columnSpan || 1}`);
+        }
+        this.pnlRow.appendChild(pageSection);
         await pageSection.setData(this.rowData.id, sectionData);
         return pageSection;
     }
 
-    private appendColumnsLayout(col: number) {
-        const length = this.pnlElements.children.length;
-        for (let i = 0; i < col; i++) {
-            const el = <i-vstack id={`dropzone-tmp-${length + i}`} opacity={0} class="dropzone"></i-vstack>;
-            this.pnlElements.appendChild(el);
-        }
+    // private appendColumnsLayout(col: number) {
+    //     const length = this.pnlElements.children.length;
+    //     for (let i = 0; i < col; i++) {
+    //         const el = <i-vstack id={`dropzone-tmp-${length + i}`} opacity={0} class="dropzone"></i-vstack>;
+    //         this.pnlElements.appendChild(el);
+    //     }
+    // }
+
+    // async setData(rowData: IPageSection) {
+    //     this.pnlElements.clearInnerHTML();
+    //     this.rowData = rowData;
+    //     const { id, row, image, elements, backgroundColor } = this.rowData;
+
+    //     this.id = `row-${id}`;
+    //     this.setAttribute('row', `${row}`);
+    //     if (image)
+    //         this.background.image = image;
+    //     else if(backgroundColor)
+    //         this.background.color = backgroundColor;
+
+    //     this.isCloned = this.parentElement.nodeName !== 'BUILDER-HEADER';
+    //     this.isChanged = this.parentElement.nodeName !== 'BUILDER-HEADER';
+
+    //     const unitWidth = Number(this.pnlElements.offsetWidth) / 12;
+    //     if (elements && elements.length > 0) {
+    //         if (elements.length === 1 && elements[0]?.properties?.width === '100%') {
+    //             await this.createNewElement(0);
+    //             this.pnlElements.templateColumns = ['repeat(1, 1fr)'];
+    //         } else {
+    //             const columns = elements.length;
+    //             const configColumns = columns > 12 ? 12 : columns;
+    //             let missingCols = 12 - configColumns;
+    //             for (let i = 0; i < elements.length; i++) {
+    //                 const pageSection = await this.createNewElement(i);
+    //                 const ratio = Math.ceil(Number(pageSection.width) / unitWidth);
+    //                 missingCols -= (ratio - 1);
+    //             }
+    //             for (let i = 0; i < missingCols; i++) {
+    //                 const el = <i-vstack id={`dropzone${i}`} opacity={0} class="dropzone"></i-vstack>;
+    //                 this.pnlElements.appendChild(el);
+    //             }
+    //             this.pnlElements.templateColumns = ['minmax(auto, 100%)', `repeat(${missingCols + configColumns - 1}, ${unitWidth}px)`];
+    //         }
+    //     }
+    //     this.actionsBar.minHeight = '100%';
+    // }
+
+    private async clearData() {
+        const children = this.pnlRow.querySelectorAll('ide-section');
+        if (children && children.length)
+            children.forEach(item => item.remove());
     }
 
     async setData(rowData: IPageSection) {
-        this.pnlElements.clearInnerHTML();
+        this.clearData();
         this.rowData = rowData;
         const { id, row, image, elements, backgroundColor } = this.rowData;
 
@@ -93,41 +152,13 @@ export class PageRow extends Module {
         this.isCloned = this.parentElement.nodeName !== 'BUILDER-HEADER';
         this.isChanged = this.parentElement.nodeName !== 'BUILDER-HEADER';
 
-        const unitWidth = Number(this.pnlElements.offsetWidth) / 12;
         if (elements && elements.length > 0) {
-            if (elements.length === 1 && elements[0]?.properties?.width === '100%') {
-                await this.createNewElement(0);
-                this.pnlElements.templateColumns = ['repeat(1, 1fr)'];
-            } else {
-                const columns = elements.length;
-                const configColumns = columns > 12 ? 12 : columns;
-                let missingCols = 12 - configColumns;
-                for (let i = 0; i < elements.length; i++) {
-                    const pageSection = await this.createNewElement(i);
-                    const ratio = Math.ceil(Number(pageSection.width) / unitWidth);
-                    missingCols -= (ratio - 1);
-                }
-                for (let i = 0; i < missingCols; i++) {
-                    const el = <i-vstack id={`dropzone${i}`} opacity={0} class="dropzone"></i-vstack>;
-                    this.pnlElements.appendChild(el);
-                }
-                this.pnlElements.templateColumns = ['minmax(auto, 100%)', `repeat(${missingCols + configColumns - 1}, ${unitWidth}px)`];
+            for (let i = 0; i < elements.length; i++) {
+                await this.createNewElement(i);
             }
         }
         this.actionsBar.minHeight = '100%';
     }
-
-    // async getData(): Promise<IPageSection> {
-    //     const sections = this.pnlElements.querySelectorAll('ide-section');
-    //     const sectionDataList: IPageElement[] = [];
-    //     for (const section of sections) {
-    //         const sectionData = await (section as PageSection).getData();
-    //         if (!sectionData) continue;
-    //         sectionDataList.push(sectionData);
-    //     }
-    //     this.rowData.elements = sectionDataList;
-    //     return this.rowData;
-    // }
 
     onOpenRowSettingsDialog() {
         // this.rowSettings.setConfig(this.rowData.config);
@@ -141,103 +172,32 @@ export class PageRow extends Module {
     }
 
     private onResized(data: any) {
-        const unitWidth = Number(this.pnlElements.offsetWidth) / 12;
-        const { newWidth, oldWidth } = data;
-        let list = Array.from(this.pnlElements.children);
-        if (newWidth > oldWidth) {
-            let ratio = Math.ceil(newWidth / unitWidth);
-            for (let i = list.length - 1; i >= 0 && ratio !== 1; i--) {
-                const node = list[i] as Control;
-                if (node.nodeName !== 'IDE-SECTION') {
-                    this.pnlElements.removeChild(node);
-                    ratio--;
-                }
-            }
-        } else {
-            let ratio = Math.ceil((oldWidth - newWidth) / unitWidth);
-            this.appendColumnsLayout(ratio - 1);
-        }
-        let templateColumns = [];
-        list = Array.from(this.pnlElements.children);
-        for (let i = 0; i < list.length; i++) {
-            const node = list[i] as Control;
-            templateColumns.push(node.nodeName === 'IDE-SECTION' ? 'minmax(auto, 100%)' : `${unitWidth}px`);
-        }
-        this.pnlElements.templateColumns = templateColumns;
-    }
-
-    async handleSectionSettingSave(config: IRowSettings) {
-        // if(config.width && config.width != this.rowData.config.width) {
-        //     this.rowData.config.width = config.width;
-        //     this.width = config.width;
-        // }
-        // if(config.height && config.height != this.rowData.config.height) {
-        //     this.rowData.config.height = config.height;
-        //     this.height = config.height;
-        // }
-        // if (config.columnsSettings) {
-        //     this.rowData.config.columnsSettings = config.columnsSettings;
-        // }
-        // // Background
-        // if(config.backgroundImageUrl) {
-        //     this.background.image = config.backgroundImageUrl;
-        // }
-        // else if(config.backgroundColor) {
-        //     this.background.color = config.backgroundColor;
-        // }
-        // this.rowData.config.backgroundImageUrl = config.backgroundImageUrl;
-        // this.rowData.config.backgroundColor = config.backgroundColor;
-
-        // const columnsSettings = config.columnsSettings || {};
-        // if(config.columns) {
-        //     const sections = this.pnlElements.querySelectorAll('ide-section');
-        //     if (sections) {
-        //         let pageSections = [];
-        //         for (let i = 0; i < config.columns; i++) {
-        //             const colSettings = columnsSettings[i];
-        //             const section = (sections[i] as PageSection);
-        //             if (section && section.component) {
-        //                 section.maxWidth = colSettings?.width || '100%';
-        //                 section.size = colSettings?.size || {};
-        //                 pageSections.push(section);
-        //                 continue;
-        //             };
-        //             pageSections.push(<ide-section maxWidth={colSettings?.width || ''} containerSize={colSettings?.size || {}} readonly={this._readonly}></ide-section>);
-        //         }
-        //         this.pnlElements.clearInnerHTML();
-        //         this.pnlElements.append(...pageSections);
-        //     }
-        //     else {
-        //         const sections = this.pnlElements.querySelectorAll('ide-section');
-        //         const delNum = this.rowData.config.columns - config.columns;
-        //         let delCount = 0;
-        //         if (sections) {
-        //             for(let section of sections) {
-        //                 if(delCount >= delNum) break;
-        //                 if (section && (section as PageSection).component) continue;
-        //                 else {
-        //                     section.remove();
-        //                     delCount++;
-        //                 }
-        //             }
-        //             if(delCount < delNum) {
-        //                 const sections2 = this.pnlElements.querySelectorAll('ide-section');
-        //                 if(sections2) {
-        //                     for (let i = 0; i < delNum - delCount; i++) {
-        //                         if(sections2[sections2.length - 1])
-        //                             sections2[sections2.length - 1].remove();
-        //                     }
-        //                 }
-        //             }
+        // const unitWidth = Number(this.pnlElements.offsetWidth) / 12;
+        // const { newWidth, oldWidth } = data;
+        // let list = Array.from(this.pnlElements.children);
+        // if (newWidth > oldWidth) {
+        //     let ratio = Math.ceil(newWidth / unitWidth);
+        //     for (let i = list.length - 1; i >= 0 && ratio !== 1; i--) {
+        //         const node = list[i] as Control;
+        //         if (node.nodeName !== 'IDE-SECTION') {
+        //             this.pnlElements.removeChild(node);
+        //             ratio--;
         //         }
         //     }
-        //     this.rowData.config.columns = config.columns;
+        // } else {
+        //     let ratio = Math.ceil((oldWidth - newWidth) / unitWidth);
+        //     this.appendColumnsLayout(ratio - 1);
         // }
-
-        // application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS, null)
+        // let templateColumns = [];
+        // list = Array.from(this.pnlElements.children);
+        // for (let i = 0; i < list.length; i++) {
+        //     const node = list[i] as Control;
+        //     templateColumns.push(node.nodeName === 'IDE-SECTION' ? 'minmax(auto, 100%)' : `${unitWidth}px`);
+        // }
+        // this.pnlElements.templateColumns = templateColumns;
     }
 
-    async onDeleteRow() {
+    onDeleteRow() {
         // this.remove();
         // application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
         const rowCmd = new ElementCommand(this, this.parent, this.rowData, true);
@@ -255,9 +215,233 @@ export class PageRow extends Module {
         this.background = {color: 'initial'};
     }
 
+    private renderFixedGrid() {
+        this.pnlRow.clearInnerHTML();
+        this.pnlRow.appendChild(
+            <i-panel class="rectangle"></i-panel>
+        )
+        const grid = (
+            <i-grid-layout
+                position="absolute"
+                width="100%" height="100%"
+                top="0px" left="0px"
+                class="fixed-grid"
+            ></i-grid-layout>
+        )
+        for (let i = 0; i < 12; i++) {
+            const elm = (
+                <i-panel class="fixed-grid-item"></i-panel>
+            );
+            elm.setAttribute('data-column', `${i + 1}`);
+            elm.style.gridColumn = `${i + 1}`;
+            grid.append(elm);
+        }
+        this.pnlRow.appendChild(grid);
+    }
+
+    private initEventListeners() {
+        let self = this;
+        let newWidth: number = 0;
+        let newHeight: number = 0;
+        let newLeft: number = 0;
+        let currentDot: Control;
+        let startX: number = 0;
+        let startY: number = 0;
+        let grids = document.getElementsByClassName('grid');
+        const gapWidth = 15;
+        const gridColumnWidth = (this.pnlRow.offsetWidth - gapWidth * 11) / 12;
+        for (const grid of grids) {
+            const gridElm = grid as GridLayout;
+            gridElm.templateColumns = [`repeat(12, ${gridColumnWidth}px)`];
+            gridElm.gap = {column: `${gapWidth}px`};
+        }
+
+        let fixedGrids = document.getElementsByClassName('fixed-grid');
+        for (const fixedGrid of fixedGrids) {
+            const fixedGridElm = fixedGrid as GridLayout;
+            fixedGridElm.templateColumns = [`repeat(12, ${gridColumnWidth}px)`];
+            fixedGridElm.gap = {column: `${gapWidth}px`};
+        }
+
+        function addDottedLines() {
+            const fixedGridItems = document.getElementsByClassName("fixed-grid-item");
+            for (let i = 0; i < fixedGridItems.length; i++) {
+                fixedGridItems[i].classList.add('border-x-dotted');
+            }
+            const fixedGrids = document.getElementsByClassName("fixed-grid");
+            for (let i = 0; i < fixedGrids.length; i++) {
+                fixedGrids[i].classList.add('border-dotted');
+            }
+        }
+
+        function removeDottedLines() {
+            const fixedGridItems = document.getElementsByClassName("fixed-grid-item");
+            for (let i = 0; i < fixedGridItems.length; i++) {
+                fixedGridItems[i].classList.remove('border-x-dotted');
+            }
+            const fixedGrids = document.getElementsByClassName("fixed-grid");
+            for (let i = 0; i < fixedGrids.length; i++) {
+                fixedGrids[i].classList.remove('border-dotted');
+            }
+        }
+
+        document.addEventListener("mousedown", e => {
+            const target = e.target as Control;
+            const parent = target.closest('.resize-stack') as Control;
+            if (!parent) return;
+            e.preventDefault();
+            const resizableElm = target.closest('ide-section') as PageSection;
+            self.currentElement = resizableElm;
+            addDottedLines();
+            this.isResizing = true;
+            currentDot = parent;
+            startX = e.clientX;
+            startY = e.clientY;
+            this.currentWidth = resizableElm.offsetWidth;
+            this.currentHeight = resizableElm.offsetHeight;
+        });
+
+        document.addEventListener("mouseup", e => {
+            e.preventDefault();
+            if (!self.currentElement) return;
+            this.isResizing = false;
+            removeDottedLines();
+            const width = newWidth;
+            const numberOfColumns = Math.ceil((width + gapWidth) / (gridColumnWidth + gapWidth));
+            const colSpan = Math.min(numberOfColumns, 12);
+            const columnStart = Math.ceil((Number(self.currentElement.left) + gapWidth) / (gridColumnWidth + gapWidth));
+            const colStart = Math.min(columnStart, (12 - colSpan) + 1);
+            self.currentElement.setAttribute('data-column-span', `${colSpan}`);
+            self.currentElement.style.gridColumn = `${colStart} / span ${colSpan}`;
+            self.currentElement.style.width = 'initial';
+            self.currentElement.style.left = 'initial';
+            self.currentElement.style.height = 'initial';
+            const resizeCmd = new ResizeElementCommand(self.currentElement, this.currentWidth, this.currentHeight);
+            commandHistory.execute(resizeCmd);
+            self.currentElement = null;
+        });
+
+        document.addEventListener("mousemove", e => {
+            if (!this.isResizing) return;
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+
+            if (currentDot.classList.contains("topLeft")) {
+                newWidth = this.currentWidth - deltaX;
+                newHeight = this.currentHeight - deltaY;
+                newLeft = deltaX;
+                self.currentElement.left = deltaX + "px"
+                self.currentElement.width = newWidth + "px";
+                self.currentElement.height = newHeight + "px";
+            } else if (currentDot.classList.contains("topRight")) {
+                newWidth = this.currentWidth + deltaX;
+                newHeight = this.currentHeight - deltaY;
+                self.currentElement.width = newWidth + "px";
+                self.currentElement.height = newHeight + "px";
+            } else if (currentDot.classList.contains("bottomLeft")) {
+                newWidth = this.currentWidth - deltaX;
+                newHeight = this.currentHeight + deltaY;
+                newLeft = deltaX;
+                self.currentElement.left = deltaX + "px"
+                self.currentElement.width = newWidth + "px";
+                self.currentElement.height = newHeight + "px";
+            } else if (currentDot.classList.contains("bottomRight")) {
+                newWidth = this.currentWidth + deltaX;
+                newHeight = this.currentHeight + deltaY;
+                self.currentElement.width = newWidth + "px";
+                self.currentElement.height = newHeight + "px";
+            } else if (currentDot.classList.contains("top")) {
+                newHeight = this.currentHeight - deltaY;
+                self.currentElement.height = newHeight + "px";
+            } else if (currentDot.classList.contains("bottom")) {
+                newHeight = this.currentHeight + deltaY;
+                self.currentElement.height = newHeight + "px";
+            } else if (currentDot.classList.contains("left")) {
+                newWidth = this.currentWidth - deltaX;
+                self.currentElement.left = deltaX + "px"
+                self.currentElement.width = newWidth + "px";
+            } else if (currentDot.classList.contains("right")) {
+                newWidth = this.currentWidth + deltaX;
+                self.currentElement.width = newWidth + "px";
+            }
+        })
+
+        document.addEventListener("dragstart", function (event) {
+            const target = (event.target as Control).closest('ide-section') as PageSection;
+            if (target) {
+                self.currentElement = target;
+                self.currentElement.opacity = 0;
+                addDottedLines();
+            } else {
+                event.preventDefault();
+            }
+        });
+
+        document.addEventListener("drag", function (event) {});
+
+        document.addEventListener("dragend", function (event) {
+            if (self.currentElement) self.currentElement.opacity = 1;
+            self.currentElement = null;
+            removeDottedLines();
+            let rectangles = document.getElementsByClassName('rectangle');
+            for (const rectangle of rectangles) {
+                (rectangle as Control).style.display = 'none';
+            }
+        });
+
+        document.addEventListener("dragenter", function (event) {
+            const target = (event.target as Control).closest('.fixed-grid-item') as Control;
+            if (target) {
+                const column = Number(target.getAttribute('data-column'));
+                const rectangle = target.closest('.fixed-grid').parentNode.querySelector(`.rectangle`) as Control;
+                rectangle.style.display = 'block';
+                const columnSpan = Number(self.currentElement.dataset.columnSpan);
+                const colSpan = Math.min(columnSpan, 12);
+                const colStart = Math.min(column, (12 - colSpan) + 1);
+                rectangle.style.left = (gridColumnWidth + gapWidth) * (colStart - 1) + 'px';
+                rectangle.style.width = (gridColumnWidth * columnSpan) + (gapWidth * (columnSpan - 1)) + 'px';
+            }
+        });
+
+        document.addEventListener("dragover", function (event) {
+            event.preventDefault();
+        });
+
+        document.addEventListener("dragleave", function (event) {
+            const target = (event.target as Control).closest('.fixed-grid-item') as Control;
+            if (target) {
+                target.style.border = "";
+                let rectangles = document.getElementsByClassName('rectangle');
+                for (const rectangle of rectangles) {
+                    (rectangle as Control).style.display = 'none';
+                }
+            }
+        });
+
+        document.addEventListener("drop", function (event) {
+            event.preventDefault();
+            const target = (event.target as Control).closest('.fixed-grid-item') as Control;
+            if (target) {
+                target.style.border = "";
+                const column = Number(target.getAttribute('data-column'));
+                const grid = target.closest('.grid');
+                const columnSpan = Number(self.currentElement.dataset.columnSpan);
+                let startCol = column;
+                let distance = (12 - columnSpan) + 1;
+                if (columnSpan > 1 && column > distance) {
+                    startCol = distance;
+                }
+                self.currentElement.style.gridRow = '1';
+                self.currentElement.style.gridColumn = `${startCol} / span ${columnSpan}`;
+                self.currentElement.setAttribute('data-column', `${startCol}`);
+                grid.appendChild(self.currentElement);
+            }
+        });
+    }
+
     render() {
         return (
-            <i-panel class={'page-row'}  width="100%" height="100%">
+            <i-panel class={'page-row'} width="100%" height="100%" padding={{left: '3rem', right: '3rem'}}>
                 <i-vstack
                     id={'actionsBar'}
                     class="row-actions-bar"
@@ -272,7 +456,7 @@ export class PageRow extends Module {
                         <i-panel
                             id="btnSetting"
                             class="actions"
-                            tooltip={{content: 'Section section', placement: 'right'}}
+                            tooltip={{content: 'Section colors', placement: 'right'}}
                             visible={this.isChanged}
                             onClick={this.onOpenRowSettingsDialog}
                         >
@@ -302,7 +486,7 @@ export class PageRow extends Module {
                     height="100%"
                     verticalAlignment="center"
                     position="absolute"
-                    left={0} top={0}
+                    left="0px" top="0px"
                     class="drag-stack"
                 >
                     <i-grid-layout
@@ -321,19 +505,15 @@ export class PageRow extends Module {
                         <i-icon name="circle" width={3} height={3}></i-icon>
                     </i-grid-layout>
                 </i-vstack>
-                <i-panel width="100%" height="100%" maxWidth="100%" padding={{left: '3rem', right: '3rem'}}>
-                    <i-grid-layout
-                        id={'pnlElements'}
-                        maxWidth="100%" maxHeight="100%"
-                        width="100%" height="100%"
-                        gap={{column: 15}}
-                        templateColumns={['repeat(12, 1fr)']}
-                    ></i-grid-layout>
-                </i-panel>
-                <scpage-row-settings-dialog
-                    id={'rowSettings'}
-                    onSave={this.handleSectionSettingSave}
-                ></scpage-row-settings-dialog>
+                <i-grid-layout
+                    id="pnlRow"
+                    width="100%"
+                    height="100%"
+                    maxWidth="100%"
+                    maxHeight="100%"
+                    position="relative"
+                    class="grid"
+                ></i-grid-layout>
             </i-panel>
         );
     }

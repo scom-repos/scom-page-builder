@@ -287,12 +287,12 @@ declare module "@scom/scom-page-builder/utility/command/resize.ts" {
     import { ICommand } from "@scom/scom-page-builder/utility/command/interface.ts";
     export class ResizeElementCommand implements ICommand {
         private element;
-        private parent;
+        private toolbar;
         private initialWidth;
         private initialHeight;
         private finalWidth;
         private finalHeight;
-        constructor(parent: any, element: Control, initialWidth: number | string, initialHeight: number | string);
+        constructor(element: Control, initialWidth: number, initialHeight: number);
         execute(): void;
         undo(): void;
         redo(): void;
@@ -933,18 +933,12 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private pnlForm;
         private pnlFormMsg;
         private mdActions;
-        private _mouseDownHandler;
-        private _mouseUpHandler;
-        private _mouseMoveHandler;
         private _rowId;
         private _elementId;
         private isEditing;
         constructor(parent?: any);
         get data(): any;
         get module(): any;
-        private handleMouseDown;
-        private handleMouseMove;
-        private handleMouseUp;
         get toolList(): any[];
         set toolList(value: any[]);
         get rowId(): string;
@@ -1022,7 +1016,6 @@ declare module "@scom/scom-page-builder/page/pageSection.tsx" {
         private pnlLoading;
         private pnlMain;
         private pageSectionWrapper;
-        private _dragger;
         private _data;
         private _readonly;
         private _size;
@@ -1030,20 +1023,11 @@ declare module "@scom/scom-page-builder/page/pageSection.tsx" {
         private toolbarList;
         private rowId;
         constructor(parent?: any);
-        get size(): {
-            width?: string;
-            height?: string;
-        };
-        set size(value: {
-            width?: string;
-            height?: string;
-        });
         get readonly(): boolean;
         set readonly(value: boolean);
         init(): void;
         private setActive;
         private initEventListener;
-        private updateContainerSize;
         clear(): void;
         private createToolbar;
         setData(rowId: string, value: IPageElement): Promise<void>;
@@ -1085,7 +1069,7 @@ declare module "@scom/scom-page-builder/page/pageRow.css.ts" { }
 declare module "@scom/scom-page-builder/page/pageRow.tsx" {
     import { Module, ControlElement } from '@ijstech/components';
     import "@scom/scom-page-builder/page/pageRow.css.ts";
-    import { IPageSection, IRowSettings } from "@scom/scom-page-builder/interface/index.ts";
+    import { IPageSection } from "@scom/scom-page-builder/interface/index.ts";
     global {
         namespace JSX {
             interface IntrinsicElements {
@@ -1097,26 +1081,31 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         readonly?: boolean;
     }
     export class PageRow extends Module {
-        private pnlElements;
         private actionsBar;
         private dragStack;
+        private pnlRow;
         private rowData;
         private _readonly;
+        private isResizing;
+        private currentWidth;
+        private currentHeight;
+        private currentElement;
         private isCloned;
         private isChanged;
         constructor(parent?: any);
         private initEventBus;
         init(): void;
         private createNewElement;
-        private appendColumnsLayout;
+        private clearData;
         setData(rowData: IPageSection): Promise<void>;
         onOpenRowSettingsDialog(): void;
         private onClone;
         private onResized;
-        handleSectionSettingSave(config: IRowSettings): Promise<void>;
-        onDeleteRow(): Promise<void>;
+        onDeleteRow(): void;
         onMoveUp(): void;
         onMoveDown(): void;
+        private renderFixedGrid;
+        private initEventListeners;
         render(): any;
     }
 }
