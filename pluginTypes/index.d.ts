@@ -1092,6 +1092,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private actionsBar;
         private dragStack;
         private pnlRow;
+        private pnlRowWrap;
         private rowData;
         private _readonly;
         private isResizing;
@@ -1113,6 +1114,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         onMoveUp(): void;
         onMoveDown(): void;
         private renderFixedGrid;
+        private renderLeftGrid;
         private initEventListeners;
         render(): any;
     }

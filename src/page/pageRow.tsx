@@ -6,7 +6,8 @@ import {
     Control,
     VStack,
     observable,
-    GridLayout
+    GridLayout,
+    Panel
 } from '@ijstech/components';
 import { PageSection } from './pageSection';
 import './pageRow.css';
@@ -32,6 +33,7 @@ export class PageRow extends Module {
     private actionsBar: VStack;
     private dragStack: VStack;
     private pnlRow: GridLayout;
+    private pnlRowWrap: Panel;
 
     private rowData: IPageSection;
     private _readonly: boolean;
@@ -58,6 +60,7 @@ export class PageRow extends Module {
         this._readonly = this.getAttribute('readonly', true, false);
         super.init();
         this.renderFixedGrid();
+        // this.renderLeftGrid();
         this.initEventBus();
         this.initEventListeners();
     }
@@ -166,7 +169,7 @@ export class PageRow extends Module {
     }
 
     private async onClone() {
-        const rowData = pageObject.getSection(this.rowData.id); // await this.getData();
+        const rowData = pageObject.getSection(this.rowData.id);
         if (!rowData) return;
         application.EventBus.dispatch(EVENT.ON_CLONE, { rowData, id: this.id });
     }
@@ -198,8 +201,6 @@ export class PageRow extends Module {
     }
 
     onDeleteRow() {
-        // this.remove();
-        // application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
         const rowCmd = new ElementCommand(this, this.parent, this.rowData, true);
         commandHistory.execute(rowCmd);
     }
@@ -238,6 +239,19 @@ export class PageRow extends Module {
         }
         this.pnlRow.appendChild(grid);
     }
+
+    // private renderLeftGrid() {
+    //     this.pnlRow.appendChild(
+    //         <i-panel
+    //             height="100%"
+    //             border={{radius: '30px', width: '5px', style: 'solid', color: 'transparent'}}
+    //             position="absolute"
+    //             right="-20px"
+    //             zIndex={99}
+    //             class="fixed-left"
+    //         ></i-panel>
+    //     )
+    // }
 
     private initEventListeners() {
         let self = this;
@@ -315,7 +329,7 @@ export class PageRow extends Module {
             self.currentElement.style.gridColumn = `${colStart} / span ${colSpan}`;
             self.currentElement.width = 'initial';
             self.currentElement.left = 'initial';
-            self.currentElement.height = 'initial';
+            // self.currentElement.height = 'initial';
             const resizeCmd = new ResizeElementCommand(self.currentElement, this.currentWidth, this.currentHeight);
             commandHistory.execute(resizeCmd);
             self.currentElement = null;
@@ -391,7 +405,9 @@ export class PageRow extends Module {
         });
 
         document.addEventListener("dragenter", function (event) {
-            const target = (event.target as Control).closest('.fixed-grid-item') as Control;
+            const eventTarget = (event.target as Control);
+            if (!eventTarget) return;
+            const target = eventTarget.closest('.fixed-grid-item') as Control;
             if (target) {
                 const column = Number(target.getAttribute('data-column'));
                 const rectangle = target.closest('.fixed-grid').parentNode.querySelector(`.rectangle`) as Control;
@@ -401,6 +417,18 @@ export class PageRow extends Module {
                 const colStart = Math.min(column, (12 - colSpan) + 1);
                 rectangle.style.left = (gridColumnWidth + gapWidth) * (colStart - 1) + 'px';
                 rectangle.style.width = (gridColumnWidth * columnSpan) + (gapWidth * (columnSpan - 1)) + 'px';
+            } else {
+                // const fixedLeft = eventTarget.closest('.fixed-left');
+                const parentRow = eventTarget.closest('#pnlRow');
+                if (parentRow) {
+                    const sections = Array.from(parentRow.querySelectorAll('ide-section'));
+                    const hasLastElm = sections.find(el => {
+                        const column = Number(el.getAttribute('data-column'));
+                        const columnSpan = Number(el.getAttribute('data-column-span'));
+                        return column + columnSpan === 13;
+                    })
+                    console.log('dragenter', sections, hasLastElm)
+                }
             }
         });
 
@@ -444,7 +472,12 @@ export class PageRow extends Module {
 
     render() {
         return (
-            <i-panel class={'page-row'} width="100%" height="100%" padding={{left: '3rem', right: '3rem'}}>
+            <i-panel
+                id="pnlRowWrap"
+                class={'page-row'}
+                width="100%" height="100%"
+                padding={{left: '3rem', right: '3rem'}}
+            >
                 <i-vstack
                     id={'actionsBar'}
                     class="row-actions-bar"

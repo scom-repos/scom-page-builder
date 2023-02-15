@@ -108,6 +108,7 @@ export class IDEToolbar extends Module {
                 height: 48,
                 border: {radius: '50%'},
                 background: {color: 'transparent'},
+                visible: tool.visible ? tool.visible() : true,
                 caption: `<i-icon name="${tool.icon}" width=${20} height=${20} display="block" fill="${Theme.text.primary}"></i-icon>`,
                 onClick: () => {
                     this.currentAction = tool;
