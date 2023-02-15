@@ -298,12 +298,26 @@ declare module "@scom/scom-page-builder/utility/command/resize.ts" {
         redo(): void;
     }
 }
+/// <amd-module name="@scom/scom-page-builder/utility/command/drag.ts" />
+declare module "@scom/scom-page-builder/utility/command/drag.ts" {
+    import { ICommand } from "@scom/scom-page-builder/utility/command/interface.ts";
+    export class DragElementCommand implements ICommand {
+        private element;
+        private dropElm;
+        private oldDataColumn;
+        constructor(element: HTMLElement, dropElm: HTMLElement);
+        execute(): void;
+        undo(): void;
+        redo(): void;
+    }
+}
 /// <amd-module name="@scom/scom-page-builder/utility/command/index.ts" />
 declare module "@scom/scom-page-builder/utility/command/index.ts" {
     export { ElementCommand } from "@scom/scom-page-builder/utility/command/add.ts";
     export { CommandHistory, commandHistory } from "@scom/scom-page-builder/utility/command/history.ts";
     export { MoveElementCommand } from "@scom/scom-page-builder/utility/command/move.ts";
     export { ResizeElementCommand } from "@scom/scom-page-builder/utility/command/resize.ts";
+    export { DragElementCommand } from "@scom/scom-page-builder/utility/command/drag.ts";
     export { ICommand } from "@scom/scom-page-builder/utility/command/interface.ts";
 }
 /// <amd-module name="@scom/scom-page-builder/utility/index.ts" />
@@ -913,10 +927,6 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
     export class IDEToolbar extends Module {
         private _toolList;
         private _readonly;
-        private _isResizing;
-        private _origWidth;
-        private _origHeight;
-        private _mouseDownPos;
         private currentAction;
         private contentStack;
         private toolsStack;
@@ -926,8 +936,6 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private _nResizer;
         private _neResizer;
         private _nwResizer;
-        private _currentResizer;
-        private _currentPosition;
         private _component;
         private dragStack;
         private pnlForm;
