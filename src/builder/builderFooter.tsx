@@ -41,8 +41,6 @@ export class BuilderFooter extends Module {
     private mdUpload: Modal;
     private uploader: Upload;
 
-    private _image: string;
-	private _elements: IPageElement[];
     private _readonly: boolean = false;
 
     @observable()
@@ -57,7 +55,7 @@ export class BuilderFooter extends Module {
     initEventBus() {
         application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => {
             if (!this.pnlFooterMain.hasChildNodes())
-                this.resetData();
+                this.updateFooter();
         })
     }
 
@@ -71,37 +69,39 @@ export class BuilderFooter extends Module {
     }
 
     async setData(value: IPageFooter) {
-        this._image = value.image;
-        this._elements = value.elements;
         pageObject.footer = value;
         await this.updateFooter();
     }
 
+    private get _elements() {
+        return pageObject.footer.elements || [];
+    }
+
+    private get _image() {
+        return pageObject.footer.image || '';
+    }
+
     private async updateFooter() {
         this.pnlFooterMain.clearInnerHTML();
-        this.showAddStack = this._elements.length === 0;
-        if (this.showAddStack) {
-            this.resetData();
-            return;
+        this.showAddStack = this._elements.length === 0 && !this._image;
+        this.pnlFooter.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
+        if (!this.showAddStack) {
+            this.pnlEditOverlay.visible = true;
+            this.pnlConfig.visible = true;
+            const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
+            const rowData = {
+                id: 'footer',
+                row: -1,
+                elements: this._elements
+            }
+            await pageRow.setData(rowData);
+            pageRow.parent = this.pnlFooterMain;
+            this.pnlFooterMain.append(pageRow);
         }
-
-        this.pnlEditOverlay.visible = true;
-        this.pnlConfig.visible = true;
-        const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
-        const rowData = {
-            id: 'footer', // generateUUID(),
-            row: -1,
-            elements: this._elements
-        }
-        await pageRow.setData(rowData);
-        pageRow.parent = this.pnlFooterMain;
-        this.pnlFooterMain.append(pageRow);
-
         if (this.pnlEditOverlay.visible)
             this.pnlEditOverlay.classList.add('flex');
         else
             this.pnlEditOverlay.classList.remove('flex');
-        this.pnlFooter.background = {image: this._image};
         application.EventBus.dispatch(EVENT.ON_UPDATE_FOOTER);
     }
 
@@ -111,7 +111,7 @@ export class BuilderFooter extends Module {
             elements: [{
                 id: generateUUID(),
                 column: 1,
-                columnSpan: 4,
+                columnSpan: 12,
                 type: 'primitive',
                 module: {
                     description: 'Textbox (dev)',
@@ -134,7 +134,7 @@ export class BuilderFooter extends Module {
         else
             this.pnlEditOverlay.classList.remove('flex');
         this.pnlOverlay.visible = !this.pnlEditOverlay.visible;
-        this.pnlOverlay.height = this.pnlOverlay.visible ? document.body.offsetHeight : 0;
+        this.pnlOverlay.height = this.pnlOverlay.visible ? document.body.offsetHeight + this.offsetHeight : 0;
         if (!this.pnlOverlay.visible) {
             const row = this.querySelector('ide-row');
             if (row) {
@@ -156,8 +156,7 @@ export class BuilderFooter extends Module {
         const fileList = this.uploader.fileList || [];
         const file = fileList[0];
         const image = file ? await this.uploader.toBase64(file) as string : '';
-        this.pnlFooterMain.background = {image};
-        this._image = image;
+        this.pnlFooter.background = {image};
         pageObject.footer = {...pageObject.footer, image: this._image};
         this.mdUpload.visible = false;
     }
@@ -177,13 +176,16 @@ export class BuilderFooter extends Module {
             <i-vstack
                 id="pnlFooter"
                 width="100%" height="100%"
-                maxWidth="100%" maxHeight="100%"
+                minHeight={180}
+                maxWidth="100%" maxHeight="40%"
             >
                 <i-panel
                     id="pnlOverlay"
                     width="100%" height="100%"
                     background={{color: 'rgba(0,0,0,.6)'}}
+                    position="absolute"
                     zIndex={29}
+                    left="0px" bottom="100%"
                     visible={false}
                     onClick={() => this.updateOverlay(true)}
                 ></i-panel>

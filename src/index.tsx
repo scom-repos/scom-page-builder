@@ -68,7 +68,7 @@ export default class Editor extends Module {
         let element = {
             id: generateUUID(),
             column: 1,
-            columnSpan: 1,
+            columnSpan: 12,
             type,
             module,
             properties: {} as any

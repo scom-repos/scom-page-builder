@@ -1,4 +1,5 @@
-import { Control } from "@ijstech/components";
+import { application, Control } from "@ijstech/components";
+import { EVENT } from "../../const/index";
 import { pageObject } from "../../store/index";
 import { ICommand } from "./interface";
 
@@ -20,6 +21,7 @@ export class ElementCommand implements ICommand {
     if (this.isDeleted) {
       this.parent.removeChild(this.element);
       pageObject.removeSection(this.data.id);
+      application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
     } else {
       this.parent.appendChild(this.element);
       pageObject.addSection(this.data);
@@ -33,6 +35,7 @@ export class ElementCommand implements ICommand {
       if (sibling)
         this.parent.insertBefore(this.element, sibling);
       pageObject.addSection(this.data);
+      application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
     } else {
       this.element.remove();
       this.data && pageObject.removeSection(this.data.id);
