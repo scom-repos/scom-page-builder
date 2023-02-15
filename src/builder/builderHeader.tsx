@@ -71,18 +71,20 @@ export class BuilderHeader extends Module {
         this.pnlHeader.background = {color: '#fff', image: ''};
         this.pnlConfig.visible = false;
         this.pnlHeaderType.visible = false;
+        this.pnlHeader.height = 'auto';
     }
 
     private async updateHeader() {
-        this.showAddStack = this._elements.length === 0;
-        this.pnlHeader.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
-        this.updateHeaderType();
-        if (!this.showAddStack) {
-            this.nameInput.classList.add('has-header');
-            this.pnlConfig.visible = true;
-        }
-
         this.pnlHeaderMain.clearInnerHTML();
+        this.showAddStack = this._elements.length === 0;
+        if (this.showAddStack) {
+            this.resetData();
+            return;
+        }
+        this.pnlHeader.background = {image: this._image};
+        this.updateHeaderType();
+        this.nameInput.classList.add('has-header');
+        this.pnlConfig.visible = true;
         const pageRow = (<ide-row width="100vw" maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
         const rowData = {
             id: 'header',
@@ -175,6 +177,7 @@ export class BuilderHeader extends Module {
     }
 
     private updateHeaderType() {
+        if (!this._headerType) return;
         switch (this._headerType) {
             case HeaderType.COVER:
                 this.pnlHeader.height = '100vh';

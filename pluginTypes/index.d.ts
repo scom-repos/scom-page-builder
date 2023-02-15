@@ -1117,58 +1117,12 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         render(): any;
     }
 }
-/// <amd-module name="@scom/scom-page-builder/page/pagePaging.css.ts" />
-declare module "@scom/scom-page-builder/page/pagePaging.css.ts" { }
-/// <amd-module name="@scom/scom-page-builder/page/pagePaging.tsx" />
-declare module "@scom/scom-page-builder/page/pagePaging.tsx" {
-    import { ControlElement, Module } from '@ijstech/components';
-    import "@scom/scom-page-builder/page/pagePaging.css.ts";
-    import { IPageData } from "@scom/scom-page-builder/interface/index.ts";
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ['scpage-page-paging']: PagePagingElement;
-            }
-        }
-    }
-    export interface PagePagingElement extends ControlElement {
-        pagesData?: IPageData[];
-        currentPageData?: IPageData;
-    }
-    export class PagePaging extends Module {
-        private _visiblePagesData;
-        private _currentPageData;
-        private currentPageIndex;
-        private prevPage;
-        private nextPage;
-        private prevPageWrapper;
-        private nextPageWrapper;
-        private prevPageLabel;
-        private nextPageLabel;
-        private prevPageNotExist;
-        private nextPageNotExist;
-        private isCurrentPageActive;
-        constructor(parent?: any);
-        init(): Promise<void>;
-        initEventBus(): void;
-        get pagesData(): IPageData[];
-        set pagesData(value: IPageData[]);
-        get currentPageData(): IPageData;
-        set currentpageData(value: IPageData);
-        setPaging(pages: IPageData[], currPage?: IPageData): Promise<void>;
-        setVisible(visible: boolean): void;
-        renderUI(): Promise<void>;
-        navToPrevPage(): void;
-        navToNextPage(): void;
-        render(): any;
-    }
-}
 /// <amd-module name="@scom/scom-page-builder/page/pageRows.css.ts" />
 declare module "@scom/scom-page-builder/page/pageRows.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/page/pageRows.tsx" />
 declare module "@scom/scom-page-builder/page/pageRows.tsx" {
     import { Module, ControlElement } from '@ijstech/components';
-    import { IPageData, IPageSection } from "@scom/scom-page-builder/interface/index.ts";
+    import { IPageSection } from "@scom/scom-page-builder/interface/index.ts";
     import { PageSection } from "@scom/scom-page-builder/page/pageSection.tsx";
     import { PageRow } from "@scom/scom-page-builder/page/pageRow.tsx";
     import { PageFooter } from "@scom/scom-page-builder/page/pageFooter.tsx";
@@ -1186,7 +1140,6 @@ declare module "@scom/scom-page-builder/page/pageRows.tsx" {
     }
     export class PageRows extends Module {
         private pnlRows;
-        private pagePaging;
         private pageFooter;
         private currentRow;
         private pnlRowOverlay;
@@ -1219,9 +1172,6 @@ declare module "@scom/scom-page-builder/page/pageRows.tsx" {
         set footerVisible(value: boolean);
         set footerSticky(value: boolean);
         set footerCopyright(value: string);
-        setPaging(pages: IPageData[], currPage: IPageData): Promise<void>;
-        setPagingVisibility(pagingVisible: boolean): void;
-        updatePaging(): void;
         render(): any;
     }
     export { PageSection, PageFooter };
@@ -1272,8 +1222,7 @@ declare module "@scom/scom-page-builder/page/index.ts" {
     import { PageRows } from "@scom/scom-page-builder/page/pageRows.tsx";
     import { PageRow } from "@scom/scom-page-builder/page/pageRow.tsx";
     import { PageSidebar } from "@scom/scom-page-builder/page/pageSidebar.tsx";
-    import { PagePaging } from "@scom/scom-page-builder/page/pagePaging.tsx";
-    export { PageHeader, PageSection, PageFooter, PageRows, PageRow, PageSidebar, PagePaging };
+    export { PageHeader, PageSection, PageFooter, PageRows, PageRow, PageSidebar };
 }
 /// <amd-module name="@scom/scom-page-builder/builder/builderHeader.css.ts" />
 declare module "@scom/scom-page-builder/builder/builderHeader.css.ts" { }
