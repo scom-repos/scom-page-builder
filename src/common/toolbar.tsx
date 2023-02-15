@@ -14,7 +14,7 @@ import {
 import { EVENT } from '../const/index';
 import { IPageBlockAction, IPageElement, ValidationError } from '../interface/index';
 import { pageObject } from '../store/index';
-import { commandHistory, getModule, ResizeElementCommand } from '../utility/index';
+import { commandHistory, getModule, isEmpty, ResizeElementCommand } from '../utility/index';
 import './toolbar.css';
 
 declare global {
@@ -35,10 +35,6 @@ const Theme = Styles.Theme.ThemeVars;
 export class IDEToolbar extends Module {
     private _toolList: any[] = [];
     private _readonly: boolean;
-    private _isResizing: boolean = false;
-    private _origWidth: number;
-    private _origHeight: number;
-    private _mouseDownPos: any;
     private currentAction: IPageBlockAction = null;
 
     private contentStack: Panel;
@@ -49,8 +45,6 @@ export class IDEToolbar extends Module {
     private _nResizer: Panel;
     private _neResizer: Panel;
     private _nwResizer: Panel;
-    private _currentResizer: Panel;
-    private _currentPosition: IPosition;
     private _component: any = null;
     private dragStack: Panel;
     private pnlForm: Panel;
@@ -74,76 +68,6 @@ export class IDEToolbar extends Module {
     get module() {
         return this._component;
     }
-
-    // private handleMouseDown(e: MouseEvent) {
-    //     e.stopPropagation();
-    //     const target = e.target as HTMLElement;
-    //     const resizer = target.closest('.resize-stack') as Panel;
-    //     this._origHeight = this._component.offsetHeight;
-    //     this._origWidth = this._component.offsetWidth;
-    //     if (resizer) {
-    //         resizer.classList.add('resizing');
-    //         this._mouseDownPos = {
-    //             x: e.clientX,
-    //             y: e.clientY
-    //         };
-    //         this._currentResizer = resizer;
-    //         this._currentPosition = resizer.getAttribute('direction') as IPosition;
-    //         document.addEventListener('mousemove', this._mouseMoveHandler);
-    //         document.addEventListener('mouseup', this._mouseUpHandler);
-    //     }
-    // };
-
-    // private handleMouseMove(e: MouseEvent) {
-    //     e.preventDefault();
-    //     e.stopPropagation();
-    //     let offsetX = e.clientX - this._mouseDownPos.x;
-    //     let offsetY = e.clientY - this._mouseDownPos.y;
-    //     let newWidth = '';
-    //     let newHeight = '';
-    //     switch (this._currentPosition) {
-    //         case 'left':
-    //             newWidth = (this._origWidth - offsetX) + 'px';
-    //             break;
-    //         case 'right':
-    //             newWidth = (this._origWidth + offsetX) + 'px';
-    //             break;
-    //         case 'bottom':
-    //             newHeight = (this._origHeight + offsetY) + 'px';
-    //             break;
-    //         case 'bottomLeft':
-    //             newWidth = (this._origWidth - offsetX) + 'px';
-    //             newHeight = (this._origHeight + offsetY) + 'px';
-    //             this.contentStack.style.left = `${Number(this._mouseDownPos.x) - offsetX}`;
-    //             this.contentStack.style.top = `${Number(this._mouseDownPos.y) - offsetY}`;
-    //             break;
-    //         case 'bottomRight':
-    //             newWidth = (this._origWidth + offsetX) + 'px';
-    //             newHeight = (this._origHeight + offsetY) + 'px';
-    //             this.contentStack.style.left = `${Number(this._mouseDownPos.x) - offsetX}`;
-    //             this.contentStack.style.top = `${Number(this._mouseDownPos.y) - offsetY}`;
-    //             break;
-    //     }
-    //     this.contentStack.width = 'fit-content';
-    //     this._component.width = newWidth;
-    //     this._component.height = newHeight;
-    //     this.contentStack.refresh();
-    // };
-
-    // private handleMouseUp(e: MouseEvent) {
-    //     e.stopPropagation();
-    //     document.removeEventListener('mousemove', this._mouseMoveHandler);
-    //     document.removeEventListener('mouseup', this._mouseUpHandler);
-    //     const target = e.target as HTMLElement;
-    //     const resizer = target.closest('.resize-stack');
-    //     resizer && resizer.classList.remove('resizing');
-    //     this._currentResizer = null;
-    //     this._currentPosition = 'left';
-    //     // TODO: check resize other component
-    //     const resizeCmd = new ResizeElementCommand(this, this._component, this._origWidth, this._origHeight);
-    //     commandHistory.execute(resizeCmd);
-    //     application.EventBus.dispatch(EVENT.ON_RESIZE, { newWidth: Number(this._component.width), oldWidth: this._origWidth });
-    // };
 
     get toolList() {
         return this._toolList || [];
@@ -187,7 +111,12 @@ export class IDEToolbar extends Module {
                 caption: `<i-icon name="${tool.icon}" width=${20} height=${20} display="block" fill="${Theme.text.primary}"></i-icon>`,
                 onClick: () => {
                     this.currentAction = tool;
-                    this.mdActions.visible = true;
+                    if (isEmpty(tool.userInputDataSchema)) {
+                        const commandIns = this.currentAction.command(this, null);
+                        commandHistory.execute(commandIns);
+                    } else {
+                        this.mdActions.visible = true;
+                    }
                     this.hideToolbars();
                 }
             });
@@ -206,7 +135,6 @@ export class IDEToolbar extends Module {
         const data = this.data.properties;
         if (data.height === 'auto') data.height = this.offsetHeight;
         if (data.width === 'auto') data.width = this.offsetWidth;
-        console.log(this.data)
         const options: IRenderUIOptions = {
             columnWidth: '100%',
             columnsPerRow: 1,
@@ -239,7 +167,6 @@ export class IDEToolbar extends Module {
     }
 
     private isTexbox() {
-        // TODO: Update
         return this.data.module.name === 'Textbox';
     }
 
@@ -248,20 +175,20 @@ export class IDEToolbar extends Module {
             this.toolsStack.visible = true;
         this.contentStack && this.contentStack.classList.add('active');
         this.classList.add('active');
-        if (this.isTexbox() && this._component.edit) {
-            this._component.edit();
-            this.isEditing = true;
-        }
+        // if (this.isTexbox() && this._component.edit) {
+        //     this._component.edit();
+        //     this.isEditing = true;
+        // }
     }
 
     hideToolbars() {
         this.toolsStack.visible = false;
         this.contentStack && this.contentStack.classList.remove('active');
         this.classList.remove('active');
-        if (this.isTexbox() && this._component.confirm && this.isEditing) {
-            this._component.confirm();
-            this.isEditing = false;
-        }
+        // if (this.isTexbox() && this._component.confirm && this.isEditing) {
+        //     this._component.confirm();
+        //     this.isEditing = false;
+        // }
     }
 
     private renderResizeStack(data: IPageElement) {
@@ -376,8 +303,6 @@ export class IDEToolbar extends Module {
 
     async setProperties(data: any) {
         if (this._component) {
-            // if (data.width) this._component.width = data.width;
-            // if (data.height) this._component.height = data.height;
             await this._component.setTag(data);
             await this._component.setData(data);
         } 
@@ -389,12 +314,8 @@ export class IDEToolbar extends Module {
         if (pageRows) {
             for (const row of pageRows) {
                 const toolbarElm = row.querySelector('ide-toolbar') as IDEToolbar;
-                if (toolbarElm) {
-                    toolbarElm.toolsStack.visible = false;
-                    toolbarElm.contentStack && toolbarElm.contentStack.classList.remove('active');
-                    toolbarElm.classList.remove('active');
+                if (toolbarElm)
                     toolbarElm.hideToolbars();
-                }
                 row.classList.remove('active');
             }
         }

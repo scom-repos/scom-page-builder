@@ -41,7 +41,12 @@ export class PageObject {
   }
 
   removeSection(id: string) {
-    this._sections.delete(id);
+    if (id === 'header')
+      this._header.elements = [];
+    else if (id === 'footer')
+      this._footer.elements = [];
+    else
+      this._sections.delete(id);
   }
 
   getSection(id: string) {

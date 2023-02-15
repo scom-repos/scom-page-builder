@@ -1,7 +1,6 @@
 import {
     Module,
     customElements,
-    Control,
     Panel,
     ControlElement,
     VStack
@@ -9,7 +8,7 @@ import {
 import './pageSection.css';
 import { IPageElement } from '../interface/index';
 import { RowSettingsDialog } from '../dialogs/index';
-import { ContainerDragger, IDEToolbar } from '../common/index';
+import { IDEToolbar } from '../common/index';
 import { isEmpty } from '../utility/index';
 
 declare global {
@@ -140,9 +139,6 @@ export class PageSection extends Module {
 
     // TODO
     async setData(rowId: string, value: IPageElement) {
-        // column: number;
-        // columnSpan: number;
-
         this._data = value;
         this.id = value.id;
         this.rowId = rowId;
@@ -179,26 +175,6 @@ export class PageSection extends Module {
             }
         }
     }
-
-    // async getData(): Promise<IPageElement> {
-    //     if (this._data?.type === 'primitive') {
-    //         let properties = null;
-    //         if (this.currentToolbar)
-    //             properties = await this.currentToolbar.getData();
-    //         this._data.properties = properties;
-    //     } else {
-    //         if (this.toolbarList.length) {
-    //             for (let i = 0; i < this._data.elements.length; i++) {
-    //                 const toolbar = this.toolbarList[i];
-    //                 if (toolbar) {
-    //                     const properties = await toolbar.getData();
-    //                     this._data.elements[i].properties = properties;
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return this._data;
-    // }
 
     render() {
         return (

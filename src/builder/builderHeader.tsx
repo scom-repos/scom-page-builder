@@ -36,9 +36,6 @@ export class BuilderHeader extends Module {
     private nameInput: Input;
     private btnChangeImg: Button;
 
-    private _headerType: HeaderType;
-    private _image: string;
-    private _elements: IPageElement[];
     private _readonly: boolean = false;
     private _isUpdatingBg: boolean = false;
 
@@ -54,56 +51,54 @@ export class BuilderHeader extends Module {
     initEventBus() {
         application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => {
             if (!this.pnlHeaderMain.hasChildNodes())
-                this.resetData();
+                this.updateHeader();
         })
     }
 
     async setData(value: IPageHeader) {
-        this._headerType = value.headerType;
-        this._image = value.image;
-        this._elements = value.elements;
         pageObject.header = value;
         await this.updateHeader();
     }
 
-    private resetData() {
-        this.showAddStack = true;
-        this.pnlHeader.background = {color: '#fff', image: ''};
-        this.pnlConfig.visible = false;
-        this.pnlHeaderType.visible = false;
-        this.pnlHeader.height = 'auto';
+    private get _elements() {
+        return pageObject.header.elements || [];
+    }
+
+    private get _image() {
+        return pageObject.header.image || '';
+    }
+
+    private get _headerType() {
+        return pageObject.header.headerType || '';
     }
 
     private async updateHeader() {
         this.pnlHeaderMain.clearInnerHTML();
-        this.showAddStack = this._elements.length === 0;
-        if (this.showAddStack) {
-            this.resetData();
-            return;
-        }
-        this.pnlHeader.background = {image: this._image};
+        this.showAddStack = this._elements.length === 0 && !this._image;
+        this.pnlHeader.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
         this.updateHeaderType();
-        this.nameInput.classList.add('has-header');
-        this.pnlConfig.visible = true;
-        const pageRow = (<ide-row width="100vw" maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
-        const rowData = {
-            id: 'header',
-            row: 0,
-            elements: this._elements
+        this.pnlConfig.visible = !this.showAddStack;
+        if (!this.showAddStack) {
+            const pageRow = (<ide-row width="100vw" maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
+            const rowData = {
+                id: 'header',
+                row: 0,
+                elements: this._elements
+            }
+            await pageRow.setData(rowData);
+            pageRow.parent = this.pnlHeaderMain;
+            this.pnlHeaderMain.append(pageRow);
         }
-        await pageRow.setData(rowData);
-        pageRow.parent = this.pnlHeaderMain;
-        this.pnlHeaderMain.append(pageRow);
     }
 
     private addHeader() {
         this.setData({
-            image: 'https://ssl.gstatic.com/atari/images/simple-header-blended-small.png',
+            image: '',
             headerType: HeaderType.NORMAL,
             elements: [{
                 id: generateUUID(),
-                column: 1,
-                columnSpan: 4,
+                column: 4,
+                columnSpan: 5,
                 type: 'primitive',
                 module: {
                     description: 'Textbox (dev)',
@@ -140,7 +135,6 @@ export class BuilderHeader extends Module {
         if (this._isUpdatingBg) {
             const image = file ? await this.uploader.toBase64(file) as string : '';
             this.pnlHeader.background = {image};
-            this._image = image;
             pageObject.header = {...pageObject.header, image: this._image};
             this._isUpdatingBg = false;
         } else {
@@ -177,7 +171,10 @@ export class BuilderHeader extends Module {
     }
 
     private updateHeaderType() {
-        if (!this._headerType) return;
+        if (!this._headerType || this.showAddStack) {
+            this.pnlHeader.height = 'auto';
+            return;
+        }
         switch (this._headerType) {
             case HeaderType.COVER:
                 this.pnlHeader.height = '100vh';

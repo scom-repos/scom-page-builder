@@ -13,7 +13,7 @@ import './pageRow.css';
 import { EVENT } from '../const/index';
 import { IPageSection } from '../interface/index';
 import { pageObject } from '../store/index';
-import { commandHistory, ElementCommand, ResizeElementCommand } from '../utility/index';
+import { commandHistory, ElementCommand, ResizeElementCommand, DragElementCommand } from '../utility/index';
 
 declare global {
     namespace JSX {
@@ -313,9 +313,9 @@ export class PageRow extends Module {
             const colStart = Math.min(columnStart, (12 - colSpan) + 1);
             self.currentElement.setAttribute('data-column-span', `${colSpan}`);
             self.currentElement.style.gridColumn = `${colStart} / span ${colSpan}`;
-            self.currentElement.style.width = 'initial';
-            self.currentElement.style.left = 'initial';
-            self.currentElement.style.height = 'initial';
+            self.currentElement.width = 'initial';
+            self.currentElement.left = 'initial';
+            self.currentElement.height = 'initial';
             const resizeCmd = new ResizeElementCommand(self.currentElement, this.currentWidth, this.currentHeight);
             commandHistory.execute(resizeCmd);
             self.currentElement = null;
@@ -368,7 +368,8 @@ export class PageRow extends Module {
 
         document.addEventListener("dragstart", function (event) {
             const target = (event.target as Control).closest('ide-section') as PageSection;
-            if (target) {
+            const toolbar = target?.querySelector('ide-toolbar') as Control;
+            if (target && !toolbar.classList.contains('is-editing')) {
                 self.currentElement = target;
                 self.currentElement.opacity = 0;
                 addDottedLines();
@@ -421,20 +422,22 @@ export class PageRow extends Module {
         document.addEventListener("drop", function (event) {
             event.preventDefault();
             const target = (event.target as Control).closest('.fixed-grid-item') as Control;
-            if (target) {
-                target.style.border = "";
-                const column = Number(target.getAttribute('data-column'));
-                const grid = target.closest('.grid');
-                const columnSpan = Number(self.currentElement.dataset.columnSpan);
-                let startCol = column;
-                let distance = (12 - columnSpan) + 1;
-                if (columnSpan > 1 && column > distance) {
-                    startCol = distance;
-                }
-                self.currentElement.style.gridRow = '1';
-                self.currentElement.style.gridColumn = `${startCol} / span ${columnSpan}`;
-                self.currentElement.setAttribute('data-column', `${startCol}`);
-                grid.appendChild(self.currentElement);
+            if (target && self.currentElement) {
+                // target.style.border = "";
+                // const column = Number(target.getAttribute('data-column'));
+                // const grid = target.closest('.grid');
+                // const columnSpan = Number(self.currentElement.dataset.columnSpan);
+                // let startCol = column;
+                // let distance = (12 - columnSpan) + 1;
+                // if (columnSpan > 1 && column > distance) {
+                //     startCol = distance;
+                // }
+                // self.currentElement.style.gridRow = '1';
+                // self.currentElement.style.gridColumn = `${startCol} / span ${columnSpan}`;
+                // self.currentElement.setAttribute('data-column', `${startCol}`);
+                // grid.appendChild(self.currentElement);
+                const moveRowCmd = new DragElementCommand(self.currentElement, target);
+                commandHistory.execute(moveRowCmd);
             }
         });
     }
