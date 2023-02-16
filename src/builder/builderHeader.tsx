@@ -82,7 +82,7 @@ export class BuilderHeader extends Module {
             const pageRow = (<ide-row width="100vw" maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
             const rowData = {
                 id: 'header',
-                row: 0,
+                row: 1,
                 elements: this._elements
             }
             await pageRow.setData(rowData);

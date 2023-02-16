@@ -53,6 +53,14 @@ export class PageObject {
     return this._sections.get(id) || null;
   }
 
+  updateSection(id: string, data: any) {
+    const section = this.getSection(id);
+    if (section) {
+      const newRow = data.row ?? section.row;
+      section.row = Number(newRow);
+    }
+  }
+
   private findElement(elements: IPageElement[], elementId: string) {
     if (!elements || !elements.length) return null;
     for (let i = 0; i < elements.length; i++) {
@@ -85,7 +93,9 @@ export class PageObject {
   setElement(sectionId: string, elementId: string, value: any) {
     let elm = this.getElement(sectionId, elementId);
     console.log('set elm', elm)
-    if (elm) elm.properties = value;
+    if (elm && value.properties) elm.properties = value.properties;
+    if (elm && value.column) elm.column = value.column;
+    if (elm && value.columnSpan) elm.columnSpan = value.columnSpan;
   }
 }
 
