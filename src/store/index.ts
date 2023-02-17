@@ -92,10 +92,11 @@ export class PageObject {
 
   setElement(sectionId: string, elementId: string, value: any) {
     let elm = this.getElement(sectionId, elementId);
-    console.log('set elm', elm)
+    console.log('set elm', sectionId, elementId, value)
     if (elm && value.properties) elm.properties = value.properties;
     if (elm && value.column) elm.column = value.column;
     if (elm && value.columnSpan) elm.columnSpan = value.columnSpan;
+    if (elm && value.tag) elm.tag = value.tag;
   }
 }
 
