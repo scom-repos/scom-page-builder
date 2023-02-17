@@ -24,7 +24,7 @@ Styles.cssRule('ide-sidebar', {
                 },
                 'i-tab:not(.disabled).active .tab-item': {
                     color: Theme.colors.primary.main,
-                    borderBottom: `1px solid ${Theme.colors.primary.main}`
+                    // borderBottom: `1px solid ${Theme.colors.primary.main}`
                 },
                 '.tab-item': {
                     fontWeight: 600,
@@ -35,6 +35,9 @@ Styles.cssRule('ide-sidebar', {
                     backgroundColor: Theme.action.hover
                 }
             }
+        },
+        'i-tabs i-tab:not(.disabled).active': {
+            borderColor: 'transparent'
         }
     }
 });

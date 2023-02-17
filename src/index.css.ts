@@ -23,7 +23,7 @@ Styles.cssRule('#editor', {
       borderRadius: '10px',
       outline: '1px solid transparent'
     },
-    'i-input > input': {
+    '#pnlForm i-input > input': {
       boxShadow: 'none',
       border: 'none',
       background: 'transparent'
