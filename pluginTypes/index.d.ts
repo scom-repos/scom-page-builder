@@ -210,7 +210,7 @@ declare module "@scom/scom-page-builder/utility/pathToRegexp.ts" {
 }
 /// <amd-module name="@scom/scom-page-builder/store/index.ts" />
 declare module "@scom/scom-page-builder/store/index.ts" {
-    import { IPageHeader, IPageSection, IPageFooter } from "@scom/scom-page-builder/interface/index.ts";
+    import { IPageHeader, IPageSection, IPageFooter, IPageElement } from "@scom/scom-page-builder/interface/index.ts";
     export class PageObject {
         private _header;
         private _sections;
@@ -228,6 +228,8 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         private findElement;
         getElement(sectionId: string, elementId: string): any;
         setElement(sectionId: string, elementId: string, value: any): void;
+        removeElement(sectionId: string, elementId: string): void;
+        addElement(sectionId: string, elementId: string, value: IPageElement): void;
     }
     export const pageObject: PageObject;
 }
@@ -324,6 +326,21 @@ declare module "@scom/scom-page-builder/utility/command/drag.ts" {
         redo(): void;
     }
 }
+/// <amd-module name="@scom/scom-page-builder/utility/command/removeToolbar.ts" />
+declare module "@scom/scom-page-builder/utility/command/removeToolbar.ts" {
+    import { ICommand } from "@scom/scom-page-builder/utility/command/interface.ts";
+    export class RemoveToolbarCommand implements ICommand {
+        private element;
+        private pageRow;
+        private data;
+        private rowId;
+        private elementId;
+        constructor(element: any);
+        execute(): void;
+        undo(): void;
+        redo(): void;
+    }
+}
 /// <amd-module name="@scom/scom-page-builder/utility/command/index.ts" />
 declare module "@scom/scom-page-builder/utility/command/index.ts" {
     export { ElementCommand } from "@scom/scom-page-builder/utility/command/add.ts";
@@ -331,6 +348,7 @@ declare module "@scom/scom-page-builder/utility/command/index.ts" {
     export { MoveElementCommand } from "@scom/scom-page-builder/utility/command/move.ts";
     export { ResizeElementCommand } from "@scom/scom-page-builder/utility/command/resize.ts";
     export { DragElementCommand } from "@scom/scom-page-builder/utility/command/drag.ts";
+    export { RemoveToolbarCommand } from "@scom/scom-page-builder/utility/command/removeToolbar.ts";
     export { ICommand, IDataColumn, MAX_COLUMN } from "@scom/scom-page-builder/utility/command/interface.ts";
 }
 /// <amd-module name="@scom/scom-page-builder/utility/index.ts" />
@@ -967,8 +985,8 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private renderResizer;
         fetchModule(data: IPageElement): Promise<void>;
         setData(properties: any): Promise<void>;
-        setProperties(data: any): Promise<void>;
         setTag(tag: any): Promise<void>;
+        setProperties(data: any): Promise<void>;
         private checkToolbar;
         private renderError;
         _handleClick(event: Event): boolean;

@@ -14,7 +14,7 @@ import {
 import { EVENT } from '../const/index';
 import { IPageBlockAction, IPageElement, ValidationError } from '../interface/index';
 import { pageObject } from '../store/index';
-import { commandHistory, getModule, isEmpty, ResizeElementCommand } from '../utility/index';
+import { commandHistory, getModule, isEmpty, RemoveToolbarCommand, ResizeElementCommand } from '../utility/index';
 import './toolbar.css';
 
 declare global {
@@ -124,6 +124,21 @@ export class IDEToolbar extends Module {
             elm.classList.add('toolbar');
             this.toolbar.appendChild(elm);
         }
+        const removeBtn = await Button.create({
+            padding: { left: '12px', right: '12px', top: '12px', bottom: '12px' },
+            width: 48,
+            height: 48,
+            border: {radius: '50%'},
+            background: {color: 'transparent'},
+            caption: `<i-icon name="trash" width=${20} height=${20} display="block" fill="${Theme.text.primary}"></i-icon>`,
+            onClick: () => {
+                const removeCmd = new RemoveToolbarCommand(this);
+                commandHistory.execute(removeCmd);
+                this.hideToolbars();
+            }
+        });
+        removeBtn.classList.add('toolbar');
+        this.toolbar.appendChild(removeBtn);
     }
 
     private onShowModal() {
@@ -151,16 +166,14 @@ export class IDEToolbar extends Module {
         // console.log('data: ', data)
         // renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data, options);
         let properties;
-        let tag;
         //FIXME: used temporarily for container type
         if (data.content && data.content.properties) {
             properties = data.content.properties;
-            tag = data.content.tag;
         }
         else {
             properties = data;
-            tag = this.data.tag;
         }
+        let tag = data?.content?.tag || this.data.tag || {};
         renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), {...properties, ...tag}, options);
     }
 
@@ -310,21 +323,21 @@ export class IDEToolbar extends Module {
         pageObject.setElement(this.rowId, this.data.id, { properties });
     }
 
-    async setProperties(data: any) {
-        if (!this._component) return;
-        await this._component.setData(data);
-    }
-
     async setTag(tag: any) {
         if (!this._component) return;
         await this._component.setTag(tag);
-        if (this.data?.properties?.content?.tag) {
+        if (this.data?.properties?.content) {
             const properties = this.data.properties;
             properties.content.tag = tag;
             pageObject.setElement(this.rowId, this.data.id, { properties });
         }
         else
             pageObject.setElement(this.rowId, this.data.id, { tag });
+    }
+
+    async setProperties(data: any) {
+        if (!this._component) return;
+        await this._component.setData(data);
     }
 
     private checkToolbar() {

@@ -228,6 +228,7 @@ export class PageRows extends Module {
                 pageRow.border = { top: { width: '1px', style: 'dashed', color: Theme.divider } };
                 this.initDragEvent(pageRow);
             }
+            pageRow.visible = !!rowData?.elements?.length;
             pageRow.parent =  this.pnlRows;
             this.pnlRows.append(pageRow);
             await pageRow.setData(rowData);
@@ -240,6 +241,7 @@ export class PageRows extends Module {
             pageRow.border = { top: { width: '1px', style: 'dashed', color: Theme.divider } };
             this.initDragEvent(pageRow);
         }
+        pageRow.visible = !!rowData?.elements?.length;
         const addRowCmd = new ElementCommand(pageRow, this.pnlRows, rowData);
         commandHistory.execute(addRowCmd);
         await pageRow.setData(rowData);

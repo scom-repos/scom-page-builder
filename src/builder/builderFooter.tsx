@@ -85,9 +85,9 @@ export class BuilderFooter extends Module {
         this.pnlFooterMain.clearInnerHTML();
         this.showAddStack = this._elements.length === 0 && !this._image;
         this.pnlFooter.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
+        this.pnlEditOverlay.visible = !this.showAddStack;
+        this.pnlConfig.visible = !this.showAddStack;
         if (!this.showAddStack) {
-            this.pnlEditOverlay.visible = true;
-            this.pnlConfig.visible = true;
             const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
             const rowData = {
                 id: 'footer',
@@ -157,7 +157,7 @@ export class BuilderFooter extends Module {
         const file = fileList[0];
         const image = file ? await this.uploader.toBase64(file) as string : '';
         this.pnlFooter.background = {image};
-        pageObject.footer = {...pageObject.footer, image: this._image};
+        pageObject.footer = {...pageObject.footer, image};
         this.mdUpload.visible = false;
     }
 
