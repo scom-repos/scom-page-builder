@@ -91,8 +91,8 @@ export class PageSidebar extends Module {
 
     private firstStack: GridLayout;
     private _contentBlocks: IContentBlock[] = [];
-    private _components: any[];
     private onSelectModule: (selectedModule: IPageBlockData) => Promise<void>;
+    private pageBlocks: IPageBlockData[];
 
     constructor(parent?: any) {
         super(parent);
@@ -105,8 +105,9 @@ export class PageSidebar extends Module {
     }
 
     private async renderUI() {
+        this.pageBlocks = await this.getModules('5');
         this.renderFirstStack();
-        this.renderBlockStack();
+        // this.renderBlockStack();
         this.renderComponentList();
         // const categories = await this.getCategories();
     }
@@ -145,18 +146,21 @@ export class PageSidebar extends Module {
 
     private async renderFirstStack() {
         this.firstStack.clearInnerHTML()
-        if(!this._components) {
-            try {
-                const modules = await this.getModules('5');
-                const filterdModules = modules.filter((v) => {
-                    return v.name === "@PageBlock/OTC" || v.name === '@PageBlock/NFT Minter';
-                });
-                this._components = [...firstDevModules, ...filterdModules];
-            } catch {
-                this._components = [...firstDevModules];
+        let components = [];
+        try {
+            const filterdModules = this.pageBlocks.filter((v) => {
+                return v.name === "@PageBlock/Scom Image" || v.name === '@PageBlock/Markdown Editor';
+            });
+            for (let module of filterdModules) {
+                if (module.name === "@PageBlock/Scom Image") module.name = "Image";
+                else if (module.name === "@PageBlock/Markdown Editor") module.name = "Text box";
+                components.push(module);
             }
+            // components = [...firstDevModules, ...filterdModules];
+        } catch {
+            components = [...firstDevModules];
         }
-        let matchedModules = this._components;
+        let matchedModules = components;
         for (const module of matchedModules) {
             const moduleCard = (
                 <i-vstack
@@ -236,12 +240,19 @@ export class PageSidebar extends Module {
 
     private async renderComponentList(keyword?: string) {
         this.componentsStack.clearInnerHTML()
-        if(!this._components)
-            this._components = [...devModules];
-            // this._components = [...await this.getModules('5'), ...devModules];
-        let matchedModules = this._components;
+        let components = [];
+        // components = [...devModules];
+        const filterdModules = this.pageBlocks.filter((v) => {
+            return v.name === "@PageBlock/NFT Minter" || v.name === '@PageBlock/Gem Token';
+        }); 
+        for (let module of filterdModules) {
+            if (module.name === "@PageBlock/NFT Minter") module.name = "NFT Minter Dapp";
+            else if (module.name === "@PageBlock/Gem Token") module.name = "Gem Token Dapp";
+            components.push(module);
+        }  
+        let matchedModules = components;
         if(keyword) {
-            matchedModules = this._components.filter((v) => {
+            matchedModules = components.filter((v) => {
                 return v.name.toLowerCase().indexOf(keyword.toLowerCase()) >= 0 || v.description.toLowerCase().indexOf(keyword.toLowerCase()) >= 0
             });
         }
@@ -272,17 +283,18 @@ export class PageSidebar extends Module {
                     class="insert-tabs"
                 >
                     <i-tab
-                        caption='Insert'
+                        caption='Components'
                         background={{color: 'transparent'}}
                     >
                         <i-panel height="100%" overflow={{y: 'hidden'}}>
                             <i-grid-layout
                                 id="firstStack"
                                 templateColumns={['repeat(2, 1fr)']}
-                                templateRows={['repeat(2, 5rem)']}
+                                templateRows={['repeat(1, 5rem)']}
                                 margin={{top: 6}}
                             ></i-grid-layout>
                             <i-vstack
+                                visible={false}
                                 border={{bottom: { width: 1, style: 'solid', color: Theme.divider}, top: { width: 1, style: 'solid', color: Theme.divider}}}
                             >
                                 <i-hstack
@@ -309,11 +321,11 @@ export class PageSidebar extends Module {
                             ></i-vstack>
                         </i-panel>
                     </i-tab>
-                    <i-tab caption='Pages'>
+                    {/* <i-tab caption='Pages'>
                         <i-panel padding={{left: '1rem', right: '1rem', top: '1rem'}}>
                             <i-label caption='Pages'></i-label>
                         </i-panel>
-                    </i-tab>
+                    </i-tab> */}
                 </i-tabs>
             </i-panel>
         );

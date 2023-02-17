@@ -1212,8 +1212,8 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
         private componentsStack;
         private firstStack;
         private _contentBlocks;
-        private _components;
         private onSelectModule;
+        private pageBlocks;
         constructor(parent?: any);
         init(): void;
         private renderUI;
