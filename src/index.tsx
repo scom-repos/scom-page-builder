@@ -75,7 +75,7 @@ export default class Editor extends Module {
         }
         let rowData = {
             id: generateUUID(),
-            row: 0,
+            row: pageObject.sections.length + 1,
             elements: [element]
         };
         return await this.pageRows.appendRow(rowData);

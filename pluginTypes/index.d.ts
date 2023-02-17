@@ -224,6 +224,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         addSection(value: IPageSection): void;
         removeSection(id: string): void;
         getSection(id: string): IPageSection;
+        updateSection(id: string, data: any): void;
         private findElement;
         getElement(sectionId: string, elementId: string): any;
         setElement(sectionId: string, elementId: string, value: any): void;
@@ -237,6 +238,11 @@ declare module "@scom/scom-page-builder/utility/command/interface.ts" {
         undo(): void;
         redo(): void;
     }
+    export interface IDataColumn {
+        column: number;
+        columnSpan: number;
+    }
+    export const MAX_COLUMN = 12;
 }
 /// <amd-module name="@scom/scom-page-builder/utility/command/add.ts" />
 declare module "@scom/scom-page-builder/utility/command/add.ts" {
@@ -292,7 +298,11 @@ declare module "@scom/scom-page-builder/utility/command/resize.ts" {
         private initialHeight;
         private finalWidth;
         private finalHeight;
-        constructor(element: Control, initialWidth: number, initialHeight: number);
+        private oldDataColumn;
+        private gapWidth;
+        private gridColumnWidth;
+        constructor(element: Control, initialWidth: number, initialHeight: number, finalWidth: number, finalHeight: number);
+        private getColumnData;
         execute(): void;
         undo(): void;
         redo(): void;
@@ -304,8 +314,11 @@ declare module "@scom/scom-page-builder/utility/command/drag.ts" {
     export class DragElementCommand implements ICommand {
         private element;
         private dropElm;
+        private toolbar;
         private oldDataColumn;
+        private oldRow;
         constructor(element: HTMLElement, dropElm: HTMLElement);
+        private getColumnData;
         execute(): void;
         undo(): void;
         redo(): void;
@@ -318,7 +331,7 @@ declare module "@scom/scom-page-builder/utility/command/index.ts" {
     export { MoveElementCommand } from "@scom/scom-page-builder/utility/command/move.ts";
     export { ResizeElementCommand } from "@scom/scom-page-builder/utility/command/resize.ts";
     export { DragElementCommand } from "@scom/scom-page-builder/utility/command/drag.ts";
-    export { ICommand } from "@scom/scom-page-builder/utility/command/interface.ts";
+    export { ICommand, IDataColumn, MAX_COLUMN } from "@scom/scom-page-builder/utility/command/interface.ts";
 }
 /// <amd-module name="@scom/scom-page-builder/utility/index.ts" />
 declare module "@scom/scom-page-builder/utility/index.ts" {
@@ -957,6 +970,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         set readonly(value: boolean);
         private renderToolbars;
         private onShowModal;
+        private onCloseModal;
         private renderToolbarAction;
         private onSave;
         private isTexbox;
@@ -965,7 +979,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private renderResizeStack;
         private renderResizer;
         fetchModule(data: IPageElement): Promise<void>;
-        setData(data: any): Promise<void>;
+        setData(properties: any): Promise<void>;
         setProperties(data: any): Promise<void>;
         private checkToolbar;
         private renderError;

@@ -108,6 +108,7 @@ export class IDEToolbar extends Module {
                 height: 48,
                 border: {radius: '50%'},
                 background: {color: 'transparent'},
+                visible: tool.visible ? tool.visible() : true,
                 caption: `<i-icon name="${tool.icon}" width=${20} height=${20} display="block" fill="${Theme.text.primary}"></i-icon>`,
                 onClick: () => {
                     this.currentAction = tool;
@@ -126,8 +127,13 @@ export class IDEToolbar extends Module {
     }
 
     private onShowModal() {
+        this.classList.add('is-setting');
         this.pnlFormMsg.visible = false;
         this.renderToolbarAction(this.currentAction);
+    }
+
+    private onCloseModal() {
+        this.classList.remove('is-setting');
     }
 
     private renderToolbarAction(action: IPageBlockAction) {
@@ -295,10 +301,10 @@ export class IDEToolbar extends Module {
         }
     }
 
-    async setData(data: any) {
+    async setData(properties: any) {
         // update data from pageblock
         if (this._component)
-            pageObject.setElement(this.rowId, this.data.id, data);
+            pageObject.setElement(this.rowId, this.data.id, { properties });
     }
 
     async setProperties(data: any) {
@@ -400,6 +406,7 @@ export class IDEToolbar extends Module {
                     maxWidth={500}
                     closeOnBackdropClick={false}
                     onOpen={this.onShowModal.bind(this)}
+                    onClose={this.onCloseModal.bind(this)}
                     class="setting-modal"
                 >
                     <i-panel>
