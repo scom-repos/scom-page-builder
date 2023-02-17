@@ -151,14 +151,17 @@ export class IDEToolbar extends Module {
         // console.log('data: ', data)
         // renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data, options);
         let properties;
+        let tag;
         //FIXME: used temporarily for container type
         if (data.content && data.content.properties) {
             properties = data.content.properties;
+            tag = data.content.tag;
         }
         else {
             properties = data;
+            tag = this.data.tag;
         }
-        renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), properties, options);
+        renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), {...properties, ...tag}, options);
     }
 
     private onSave(result: boolean, data: any) {
@@ -303,15 +306,25 @@ export class IDEToolbar extends Module {
 
     async setData(properties: any) {
         // update data from pageblock
-        if (this._component)
-            pageObject.setElement(this.rowId, this.data.id, { properties });
+        if (!this._component) return;
+        pageObject.setElement(this.rowId, this.data.id, { properties });
     }
 
     async setProperties(data: any) {
-        if (this._component) {
-            await this._component.setTag(data);
-            await this._component.setData(data);
-        } 
+        if (!this._component) return;
+        await this._component.setData(data);
+    }
+
+    async setTag(tag: any) {
+        if (!this._component) return;
+        await this._component.setTag(tag);
+        if (this.data?.properties?.content?.tag) {
+            const properties = this.data.properties;
+            properties.content.tag = tag;
+            pageObject.setElement(this.rowId, this.data.id, { properties });
+        }
+        else
+            pageObject.setElement(this.rowId, this.data.id, { tag });
     }
 
     private checkToolbar() {

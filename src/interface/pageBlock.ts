@@ -1,3 +1,5 @@
+import { IDataSchema } from "@ijstech/components";
+
 export interface IPageBlockData {
     name: string;
     description: string;
@@ -26,7 +28,7 @@ export interface IPageBlockAction {
 	name: string;
 	icon: string;
 	command: (builder: any, userInputData: any) => ICommand;
-	userInputDataSchema: IConfigSchema; // follow the standard defined in the components repo
+	userInputDataSchema: IDataSchema
 }
 
 export interface IPageBlock {
@@ -35,15 +37,6 @@ export interface IPageBlock {
 	setData: (data: any) => Promise<void>;
 	getTag: () => any;
 	setTag: (tag: any) => Promise<void>;	
-}
-
-export interface IConfigSchema {
-    type: 'integer' | 'number' | 'boolean' | 'object';
-    format?: 'date' | 'datetime' | 'color';
-    required?: string[];
-    properties?: {
-        [key: string]: IConfigSchema
-    };
 }
 
 export interface IGetModuleOptions {

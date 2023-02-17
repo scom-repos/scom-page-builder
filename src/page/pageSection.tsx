@@ -145,19 +145,24 @@ export class PageSection extends Module {
         if (value.type === 'primitive') {
             if (this.currentToolbar) {
                 this.currentToolbar.setProperties(value.properties);
+                value.tag && this.currentToolbar.setTag(value.tag);
             } else {
                 this.currentToolbar = await this.createToolbar(value);
                 this.currentToolbar.parent = this.pnlMain;
                 this.pnlMain.appendChild(this.currentToolbar);
                 if (!isEmpty(value.properties))
                     this.currentToolbar.setProperties(value.properties);
+                value.tag && this.currentToolbar.setTag(value.tag);
             }
         } else if (value.elements?.length) {
             if (this.toolbarList.length) {
                 for (let i = 0; i < value.elements.length; i++) {
                     const element = value.elements[i];
                     const toolbar = this.toolbarList[i];
-                    toolbar && toolbar.setProperties(element.properties);
+                    if (toolbar) {
+                        toolbar.setProperties(element.properties);
+                        element.tag && toolbar.setTag(element.tag);
+                    }
                 }
             } else {
                 const stack = <i-vstack></i-vstack>
@@ -166,6 +171,7 @@ export class PageSection extends Module {
                     const toolbar = await this.createToolbar(element);
                     if (!isEmpty(element.properties))
                         toolbar.setProperties(element.properties);
+                    element.tag && toolbar.setTag(element.tag);
                     toolbar.parent = stack;
                     stack.appendChild(toolbar);
                     this.toolbarList.push(toolbar);

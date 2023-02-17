@@ -44,7 +44,8 @@ export interface IPageElement {
     id: string; // uuid
 	column: number;
 	columnSpan: number;
-	type: 'primitive' | 'composite',
+	type: ElementType,
+    tag?: any;
     properties: any;
 	module?: IPageBlockData; // follow the standard defined in secure page, if type === 'primitive'
 	elements?: IPageElement[]; // type === 'composite'
@@ -109,14 +110,3 @@ export interface IConfigData {
         urlSuffix: string;
     };
 }
-
-export interface IAddPageArgs {
-    name: string;
-    url: string;
-}
-
-export interface IUpdatePageArgs {
-    pageId: number;
-}
-
-

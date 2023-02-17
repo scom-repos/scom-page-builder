@@ -425,6 +425,7 @@ declare module "@scom/scom-page-builder/interface/core.ts" {
 }
 /// <amd-module name="@scom/scom-page-builder/interface/pageBlock.ts" />
 declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
+    import { IDataSchema } from "@ijstech/components";
     export interface IPageBlockData {
         name: string;
         description: string;
@@ -451,7 +452,7 @@ declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
         name: string;
         icon: string;
         command: (builder: any, userInputData: any) => ICommand;
-        userInputDataSchema: IConfigSchema;
+        userInputDataSchema: IDataSchema;
     }
     export interface IPageBlock {
         getActions: () => IPageBlockAction[];
@@ -459,14 +460,6 @@ declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
         setData: (data: any) => Promise<void>;
         getTag: () => any;
         setTag: (tag: any) => Promise<void>;
-    }
-    export interface IConfigSchema {
-        type: 'integer' | 'number' | 'boolean' | 'object';
-        format?: 'date' | 'datetime' | 'color';
-        required?: string[];
-        properties?: {
-            [key: string]: IConfigSchema;
-        };
     }
     export interface IGetModuleOptions {
         ipfscid?: string;
@@ -525,7 +518,8 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         id: string;
         column: number;
         columnSpan: number;
-        type: 'primitive' | 'composite';
+        type: ElementType;
+        tag?: any;
         properties: any;
         module?: IPageBlockData;
         elements?: IPageElement[];
@@ -584,13 +578,6 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         url: {
             urlSuffix: string;
         };
-    }
-    export interface IAddPageArgs {
-        name: string;
-        url: string;
-    }
-    export interface IUpdatePageArgs {
-        pageId: number;
     }
 }
 /// <amd-module name="@scom/scom-page-builder/interface/jsonSchema.ts" />
@@ -981,6 +968,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         fetchModule(data: IPageElement): Promise<void>;
         setData(properties: any): Promise<void>;
         setProperties(data: any): Promise<void>;
+        setTag(tag: any): Promise<void>;
         private checkToolbar;
         private renderError;
         _handleClick(event: Event): boolean;
