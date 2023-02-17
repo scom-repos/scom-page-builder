@@ -10,7 +10,7 @@ import {
     Upload
 } from '@ijstech/components';
 import { EVENT } from '../const/index';
-import { IPageElement, IPageFooter } from '../interface/index';
+import { IPageFooter } from '../interface/index';
 import { PageRow } from '../page/index';
 import { generateUUID } from '../utility/index';
 import { pageObject } from '../store/index';
@@ -86,6 +86,7 @@ export class BuilderFooter extends Module {
         this.showAddStack = this._elements.length === 0 && !this._image;
         this.pnlFooter.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
         this.pnlEditOverlay.visible = !this.showAddStack;
+        this.pnlEditOverlay.classList.remove('flex');
         this.pnlConfig.visible = !this.showAddStack;
         if (!this.showAddStack) {
             const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
@@ -97,11 +98,8 @@ export class BuilderFooter extends Module {
             await pageRow.setData(rowData);
             pageRow.parent = this.pnlFooterMain;
             this.pnlFooterMain.append(pageRow);
-        }
-        if (this.pnlEditOverlay.visible)
             this.pnlEditOverlay.classList.add('flex');
-        else
-            this.pnlEditOverlay.classList.remove('flex');
+        }
         application.EventBus.dispatch(EVENT.ON_UPDATE_FOOTER);
     }
 
