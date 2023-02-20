@@ -98,6 +98,34 @@ export class PageObject {
     if (elm && value.columnSpan) elm.columnSpan = value.columnSpan;
     if (elm && value.tag) elm.tag = value.tag;
   }
+
+  removeElement(sectionId: string, elementId: string) {
+    if (sectionId === 'header') {
+      this._header.elements = [];
+    }
+    if (sectionId === 'footer') {
+      this._footer.elements = [];
+    }
+    const section = this.getSection(sectionId);
+    if (!section) return;
+    // TODO: check with composite
+    const elementIndex = section.elements.findIndex(elm => elm.id === elementId);
+    if (elementIndex !== -1) {
+      section.elements.splice(elementIndex, 1);
+    }
+  }
+
+  addElement(sectionId: string, elementId: string, value: IPageElement) {
+    if (sectionId === 'header') {
+      this._header.elements = [value];
+    }
+    if (sectionId === 'footer') {
+      this._footer.elements = [value];
+    }
+    const section = this.getSection(sectionId);
+    if (!section) return;
+    section.elements.push(value);
+  }
 }
 
 export const pageObject = new PageObject();

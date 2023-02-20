@@ -135,7 +135,7 @@ export class BuilderHeader extends Module {
         if (this._isUpdatingBg) {
             const image = file ? await this.uploader.toBase64(file) as string : '';
             this.pnlHeader.background = {image};
-            pageObject.header = {...pageObject.header, image: this._image};
+            pageObject.header = {...pageObject.header, image};
             this._isUpdatingBg = false;
         } else {
             if (this.pnlTitle.contains(this.pnlLogo))

@@ -79,6 +79,7 @@ export class PageRow extends Module {
             pageSection.setAttribute('data-column', `${sectionData.column || 1}`);
             pageSection.setAttribute('data-column-span', `${sectionData.columnSpan || 1}`);
         }
+        pageSection.visible = !!sectionData;
         this.pnlRow.appendChild(pageSection);
         await pageSection.setData(this.rowData.id, sectionData);
         return pageSection;
