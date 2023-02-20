@@ -1,4 +1,4 @@
-import { IPageHeader, IPageSection, IPageFooter, IPageElement } from "../interface/index";
+import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData } from "../interface/index";
 
 export class PageObject {
   private _header: IPageHeader = {
@@ -129,3 +129,15 @@ export class PageObject {
 }
 
 export const pageObject = new PageObject();
+
+export const state = {
+  pageBlocks: []
+}
+
+export const setPageBlocks = (value: IPageBlockData[]) => {
+  state.pageBlocks = value || [];
+}
+
+export const getPageBlocks = () => {
+  return state.pageBlocks || [];
+}

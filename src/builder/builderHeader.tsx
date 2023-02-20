@@ -1,9 +1,9 @@
 import { Module, customElements, ControlElement, Styles, Panel, Button, Modal, Upload, Input, observable, application, Control } from '@ijstech/components';
 import assets from '../assets';
 import { EVENT } from '../const/index';
-import { HeaderType, IPageElement, IPageHeader } from '../interface/index';
+import { HeaderType, IPageHeader } from '../interface/index';
 import { PageRow } from '../page/index';
-import { pageObject } from '../store/index';
+import { getPageBlocks, pageObject } from '../store/index';
 import { generateUUID } from '../utility/index';
 import './builderHeader.css';
 
@@ -92,6 +92,8 @@ export class BuilderHeader extends Module {
     }
 
     private addHeader() {
+        const pageBlocks = getPageBlocks();
+        const textBlock = pageBlocks.find((v) => v.name === 'Text box');
         this.setData({
             image: '',
             headerType: HeaderType.NORMAL,
@@ -100,12 +102,7 @@ export class BuilderHeader extends Module {
                 column: 4,
                 columnSpan: 5,
                 type: 'primitive',
-                module: {
-                    description: 'Textbox (dev)',
-                    localPath: 'modules/pageblocks/pageblock-markdown-editor',
-                    name: "Textbox",
-                    local: true
-                },
+                module: textBlock,
                 properties: {
                     width: '100%',
                     height: '130px'

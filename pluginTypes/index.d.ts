@@ -210,7 +210,7 @@ declare module "@scom/scom-page-builder/utility/pathToRegexp.ts" {
 }
 /// <amd-module name="@scom/scom-page-builder/store/index.ts" />
 declare module "@scom/scom-page-builder/store/index.ts" {
-    import { IPageHeader, IPageSection, IPageFooter, IPageElement } from "@scom/scom-page-builder/interface/index.ts";
+    import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData } from "@scom/scom-page-builder/interface/index.ts";
     export class PageObject {
         private _header;
         private _sections;
@@ -232,6 +232,11 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         addElement(sectionId: string, elementId: string, value: IPageElement): void;
     }
     export const pageObject: PageObject;
+    export const state: {
+        pageBlocks: any[];
+    };
+    export const setPageBlocks: (value: IPageBlockData[]) => void;
+    export const getPageBlocks: () => any[];
 }
 /// <amd-module name="@scom/scom-page-builder/utility/command/interface.ts" />
 declare module "@scom/scom-page-builder/utility/command/interface.ts" {
@@ -961,7 +966,6 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private mdActions;
         private _rowId;
         private _elementId;
-        private isEditing;
         constructor(parent?: any);
         get data(): any;
         get module(): any;
