@@ -27,7 +27,7 @@ export class RemoveToolbarCommand implements ICommand {
   }
 
   undo(): void {
-    pageObject.addElement(this.rowId, this.elementId, this.data);
+    pageObject.addElement(this.rowId, this.data);
     const section = pageObject.getSection(this.rowId);
     if (this.pageRow) {
       this.pageRow.setData(section);

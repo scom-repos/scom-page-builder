@@ -10,6 +10,7 @@ import { IPageElement } from '../interface/index';
 import { RowSettingsDialog } from '../dialogs/index';
 import { IDEToolbar } from '../common/index';
 import { isEmpty } from '../utility/index';
+import { pageObject } from '../store/index';
 
 declare global {
     namespace JSX {
@@ -34,13 +35,6 @@ export class PageSection extends Module {
     private pageSectionWrapper: Panel;
     // private _dragger: ContainerDragger<PageSection>;
 
-    private _data: IPageElement = {
-        column: 0,
-        columnSpan: 0,
-        type: 'primitive',
-        properties: undefined,
-        id: ''
-    };
     private _readonly: boolean;
     private _size: {
         width?: string;
@@ -69,6 +63,10 @@ export class PageSection extends Module {
     }
     set readonly(value: boolean) {
         this._readonly = value;
+    }
+
+    get data() {
+        return pageObject.getElement(this.rowId, this.id);
     }
 
     init() {
@@ -118,13 +116,6 @@ export class PageSection extends Module {
     clear() {
         this.currentToolbar = null;
         this.toolbarList = null;
-        this._data = {
-            id: '',
-            column: 0,
-            columnSpan: 0,
-            type: 'primitive',
-            properties: undefined
-        };
         this.pnlMain.clearInnerHTML();
     }
 
@@ -139,7 +130,6 @@ export class PageSection extends Module {
 
     // TODO
     async setData(rowId: string, value: IPageElement) {
-        this._data = value;
         this.id = value.id;
         this.rowId = rowId;
         if (value.type === 'primitive') {

@@ -63,7 +63,7 @@ export class ResizeElementCommand implements ICommand {
       const rowId = this.toolbar.rowId;
       const elementId = this.toolbar.elementId;
       const currentProp = this.toolbar?.data?.properties || {};
-      const properties = {...currentProp, width: this.finalWidth, height: this.finalHeight};
+      const properties = {...currentProp, width: '100%', height: this.finalHeight};
       this.toolbar.setProperties(properties);
       pageObject.setElement(rowId, elementId, {properties, ...newColumnData});
     }

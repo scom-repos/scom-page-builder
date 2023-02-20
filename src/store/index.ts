@@ -115,7 +115,7 @@ export class PageObject {
     }
   }
 
-  addElement(sectionId: string, elementId: string, value: IPageElement) {
+  addElement(sectionId: string, value: IPageElement) {
     if (sectionId === 'header') {
       this._header.elements = [value];
     }

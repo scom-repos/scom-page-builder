@@ -3,22 +3,22 @@ import { pageObject } from "../../store/index";
 import { Control } from "@ijstech/components";
 
 export class DragElementCommand implements ICommand {
-  private element: HTMLElement;
+  private element: any;
   private dropElm: HTMLElement;
-  private toolbar: any;
   private oldDataColumn: IDataColumn;
-  private oldRow: string;
+  private oldDataRow: string;
+  private data: any;
 
-  constructor(element: HTMLElement, dropElm: HTMLElement) {
+  constructor(element: any, dropElm: HTMLElement) {
     this.element = element;
-    this.toolbar = element.querySelector('ide-toolbar');
     this.dropElm = dropElm;
     this.oldDataColumn = {
       column: Number(element.dataset.column),
       columnSpan: Number(element.dataset.columnSpan)
     }
     const pageRow = element.closest('ide-row') as Control;
-    this.oldRow = pageRow?.dataset?.row;
+    this.oldDataRow = (pageRow?.id || '').replace('row-', '');
+    this.data = element.data;
   }
 
   private getColumnData() {
@@ -66,29 +66,41 @@ export class DragElementCommand implements ICommand {
       this.element.setAttribute('data-column', `${newColumnData.column}`);
     }
     const elementRow = this.element.closest('ide-row') as Control;
-    grid.appendChild(this.element);
-    // TODO: update data in store
-    if (!elementRow?.querySelectorAll('ide-section').length) {
-      elementRow.remove();
+    const dropRow = this.dropElm.closest('ide-row') as Control;
+    const dropRowId = (dropRow?.id || '').replace('row-', '');
+    const elementRowId = (elementRow?.id || '').replace('row-', '');
+    pageObject.setElement(elementRowId, this.element.id, {...newColumnData});
+
+    if (!elementRow.isEqualNode(dropRow)) {
+      pageObject.addElement(dropRowId, this.data);
+      pageObject.removeElement(elementRowId, this.element.id);
+      grid.appendChild(this.element);
     }
-    if (this.toolbar) {
-      const rowId = this.toolbar.rowId;
-      const elementId = this.toolbar.elementId;
-      pageObject.setElement(rowId, elementId, {...newColumnData});
-      const dropRow = this.dropElm.closest('ide-row') as Control;
-      pageObject.updateSection(rowId, {row: dropRow?.dataset.row});
-    }
+
+    const elementSection = pageObject.getSection(elementRowId);
+    elementRow.visible =  !!elementSection?.elements?.length;
   }
 
   undo(): void {
     this.element.style.gridRow = '1';
     this.element.style.gridColumn = `${this.oldDataColumn.column} / span ${this.oldDataColumn.columnSpan}`;
     this.element.setAttribute('data-column', `${this.oldDataColumn.column}`);
-    if (this.toolbar) {
-      const rowId = this.toolbar.rowId;
-      const elementId = this.toolbar.elementId;
-      pageObject.setElement(rowId, elementId, {...this.oldDataColumn});
-      pageObject.updateSection(rowId, {row: this.oldRow});
+
+    const elementRow = this.element.closest('ide-row') as Control;
+    const elementRowId = (elementRow?.id || '').replace('row-', '');
+    pageObject.setElement(elementRowId, this.element.id, {...this.oldDataColumn});
+
+    if (this.oldDataRow) {
+      const oldElementRow = document.querySelector(`#row-${this.oldDataRow}`) as Control;
+      if (oldElementRow && !elementRow.isEqualNode(oldElementRow)) {
+        pageObject.addElement(this.oldDataRow, this.data);
+        pageObject.removeElement(elementRowId, this.element.id);
+        const oldGrid = oldElementRow.querySelector('.grid');
+        oldGrid && oldGrid.appendChild(this.element);
+      }
+
+      const oldElementSection = pageObject.getSection(this.oldDataRow);
+      oldElementRow && (oldElementRow.visible = !!oldElementSection?.elements?.length);
     }
   }
 
