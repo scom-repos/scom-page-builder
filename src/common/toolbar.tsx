@@ -6,12 +6,10 @@ import {
     Styles,
     HStack,
     Button,
-    application,
     renderUI,
     Modal,
     IRenderUIOptions
 } from '@ijstech/components';
-import { EVENT } from '../const/index';
 import { IPageBlockAction, IPageElement, ValidationError } from '../interface/index';
 import { pageObject } from '../store/index';
 import { commandHistory, getModule, isEmpty, RemoveToolbarCommand, ResizeElementCommand } from '../utility/index';
@@ -53,7 +51,6 @@ export class IDEToolbar extends Module {
 
     private _rowId: string;
     private _elementId: string;
-    private isEditing: boolean = false;
 
     constructor(parent?: any) {
         super(parent);

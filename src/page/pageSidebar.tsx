@@ -9,6 +9,7 @@ import {
     VStack,
     application
 } from '@ijstech/components';
+import { setPageBlocks } from '../store/index';
 import assets from '../assets';
 import { EVENT, textStyles } from '../const/index';
 import { ElementType, IPageBlockData } from '../interface/index';
@@ -106,6 +107,7 @@ export class PageSidebar extends Module {
 
     private async renderUI() {
         this.pageBlocks = await this.getModules('5');
+        setPageBlocks(this.pageBlocks);
         this.renderFirstStack();
         // this.renderBlockStack();
         this.renderComponentList();

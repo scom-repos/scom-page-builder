@@ -13,7 +13,7 @@ import { EVENT } from '../const/index';
 import { IPageFooter } from '../interface/index';
 import { PageRow } from '../page/index';
 import { generateUUID } from '../utility/index';
-import { pageObject } from '../store/index';
+import { getPageBlocks, pageObject } from '../store/index';
 import { IDEToolbar } from '../common/index';
 import './builderFooter.css';
 
@@ -104,6 +104,8 @@ export class BuilderFooter extends Module {
     }
 
     private addFooter() {
+        const pageBlocks = getPageBlocks();
+        const textBlock = pageBlocks.find((v) => v.name === 'Text box');
         this.setData({
             image: '',
             elements: [{
@@ -111,12 +113,7 @@ export class BuilderFooter extends Module {
                 column: 1,
                 columnSpan: 12,
                 type: 'primitive',
-                module: {
-                    description: 'Textbox (dev)',
-                    localPath: 'modules/pageblocks/pageblock-markdown-editor',
-                    name: "Textbox",
-                    local: true
-                },
+                module: textBlock,
                 properties: {
                     width: '100%',
                     height: '130px'
