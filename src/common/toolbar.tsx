@@ -10,7 +10,7 @@ import {
     Modal,
     IRenderUIOptions
 } from '@ijstech/components';
-import { IPageBlockAction, IPageElement, ValidationError } from '../interface/index';
+import { ELEMENT_NAME, IPageBlockAction, IPageElement, ValidationError } from '../interface/index';
 import { pageObject } from '../store/index';
 import { commandHistory, getModule, isEmpty, RemoveToolbarCommand } from '../utility/index';
 import './toolbar.css';
@@ -186,7 +186,7 @@ export class IDEToolbar extends Module {
     }
 
     private isTexbox() {
-        return this.data.module.name === 'Textbox';
+        return this.data.module.name === ELEMENT_NAME.TEXTBOX;
     }
 
     showToolbars() {
@@ -216,7 +216,7 @@ export class IDEToolbar extends Module {
         this._nResizer = this.renderResizer('bottom');
         this._neResizer = this.renderResizer('bottomLeft');
         this._nwResizer = this.renderResizer('bottomRight');
-        const isImage = data?.module?.name === 'Image';
+        const isImage = data?.module?.name === ELEMENT_NAME.IMAGE;
         if (this._nResizer) this._nResizer.visible = isImage;
         if (this._neResizer) this._neResizer.visible = isImage;
         if (this._nwResizer) this._nwResizer.visible = isImage;

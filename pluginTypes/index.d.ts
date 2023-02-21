@@ -237,6 +237,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
     };
     export const setPageBlocks: (value: IPageBlockData[]) => void;
     export const getPageBlocks: () => any[];
+    export const getDappContainer: () => any;
 }
 /// <amd-module name="@scom/scom-page-builder/utility/command/interface.ts" />
 declare module "@scom/scom-page-builder/utility/command/interface.ts" {
@@ -623,6 +624,12 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
     export * from "@scom/scom-page-builder/interface/component.ts";
     export * from "@scom/scom-page-builder/interface/siteData.ts";
     export * from "@scom/scom-page-builder/interface/jsonSchema.ts";
+    export enum ELEMENT_NAME {
+        TEXTBOX = "Text box",
+        IMAGE = "Image",
+        NFT = "NFT Minter Dapp",
+        GEM_TOKEN = "Gem Token Dapp"
+    }
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageHeader.css.ts" />
 declare module "@scom/scom-page-builder/page/pageHeader.css.ts" { }

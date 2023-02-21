@@ -2,9 +2,9 @@ import { application, Container, customModule, Module, Panel } from '@ijstech/co
 import {} from '@ijstech/eth-contract'
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
-import { ElementType, IPageBlockData, IPageData } from './interface/index';
+import { ElementType, ELEMENT_NAME, IPageBlockData, IPageData } from './interface/index';
 import { PageRows } from './page/index';
-import { pageObject } from './store/index';
+import { getDappContainer, pageObject } from './store/index';
 import { LightTheme  } from './theme/index';
 import { generateUUID } from './utility/index';
 import './index.css';
@@ -68,7 +68,7 @@ export default class Editor extends Module {
         let element = {
             id: generateUUID(),
             column: 1,
-            columnSpan: module.name === 'Textbox' ? 12 : 3,
+            columnSpan: module.name === ELEMENT_NAME.TEXTBOX ? 12 : 3,
             type,
             module,
             properties: {} as any
@@ -78,6 +78,20 @@ export default class Editor extends Module {
             row: pageObject.sections.length + 1,
             elements: [element]
         };
+        if (module.name === ELEMENT_NAME.NFT || module.name === ELEMENT_NAME.GEM_TOKEN) {
+            element.module = getDappContainer();
+            element.columnSpan = 6;
+            element.properties = {
+                networks: [43113],
+                wallets: ["metamask"],
+                content: {
+                    module,
+                    properties: {
+                        width: '100%'
+                    }
+                }
+            }
+        }
         return await this.pageRows.appendRow(rowData);
     }
 

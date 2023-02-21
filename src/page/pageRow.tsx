@@ -238,6 +238,8 @@ export class PageRow extends Module {
             removeDottedLines();
             toolbar.width = 'initial';
             toolbar.height = 'initial';
+            self.currentElement.width = 'initial';
+            self.currentElement.height = 'initial';
             const resizeCmd = new ResizeElementCommand(
                 self.currentElement,
                 this.currentWidth,
@@ -270,7 +272,7 @@ export class PageRow extends Module {
             } else if (currentDot.classList.contains("bottomLeft")) {
                 newWidth = this.currentWidth - deltaX;
                 newHeight = this.currentHeight + deltaY;
-                self.currentElement.left = deltaX + "px"
+                self.currentElement.left = deltaX + "px";
                 toolbar.width = newWidth + "px";
                 toolbar.height = newHeight + "px";
             } else if (currentDot.classList.contains("bottomRight")) {
@@ -278,7 +280,6 @@ export class PageRow extends Module {
                 newHeight = this.currentHeight + deltaY;
                 toolbar.width = newWidth + "px";
                 toolbar.height = newHeight + "px";
-                console.log(newHeight, toolbar.height)
             } else if (currentDot.classList.contains("top")) {
                 newHeight = this.currentHeight - deltaY;
                 toolbar.height = newHeight + "px";
