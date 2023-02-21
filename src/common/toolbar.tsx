@@ -12,7 +12,7 @@ import {
 } from '@ijstech/components';
 import { IPageBlockAction, IPageElement, ValidationError } from '../interface/index';
 import { pageObject } from '../store/index';
-import { commandHistory, getModule, isEmpty, RemoveToolbarCommand, ResizeElementCommand } from '../utility/index';
+import { commandHistory, getModule, isEmpty, RemoveToolbarCommand } from '../utility/index';
 import './toolbar.css';
 
 declare global {

@@ -13,7 +13,7 @@ import { PageSection } from './pageSection';
 import { PageRow } from './pageRow';
 import { PageFooter } from './pageFooter';
 import { EVENT } from '../const/index';
-import { ElementCommand, commandHistory, MoveElementCommand } from '../utility/index';
+import { ElementCommand, commandHistory, MoveElementCommand, generateUUID } from '../utility/index';
 import { IDEToolbar } from '../common/index';
 import { pageObject } from '../store/index';
 import './pageRows.css';
@@ -252,7 +252,8 @@ export class PageRows extends Module {
         const { rowData, id } = data;
         const row = this.pnlRows.querySelector(`#${id}`)
         if (!row) return;
-        let newRow = await this.appendRow(rowData)
+        const newId = generateUUID()
+        let newRow = await this.appendRow({...rowData, id: newId})
         this.pnlRows.insertBefore(newRow, row);
     }
 

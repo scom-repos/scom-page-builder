@@ -172,7 +172,6 @@ export class PageRow extends Module {
         let self = this;
         let newWidth: number = 0;
         let newHeight: number = 0;
-        let newLeft: number = 0;
         let currentDot: Control;
         let startX: number = 0;
         let startY: number = 0;
@@ -239,9 +238,15 @@ export class PageRow extends Module {
             removeDottedLines();
             toolbar.width = 'initial';
             toolbar.height = 'initial';
-            self.currentElement.left = 'initial'; // TODO: check later
-            const resizeCmd = new ResizeElementCommand(self.currentElement, this.currentWidth, this.currentHeight, newWidth, newHeight);
+            const resizeCmd = new ResizeElementCommand(
+                self.currentElement,
+                this.currentWidth,
+                this.currentHeight,
+                newWidth,
+                newHeight
+            );
             commandHistory.execute(resizeCmd);
+            self.currentElement.left = 'initial';
             self.currentElement = null;
             toolbar = null;
         });
@@ -254,7 +259,6 @@ export class PageRow extends Module {
             if (currentDot.classList.contains("topLeft")) {
                 newWidth = this.currentWidth - deltaX;
                 newHeight = this.currentHeight - deltaY;
-                newLeft = deltaX;
                 self.currentElement.left = deltaX + "px"
                 toolbar.width = newWidth + "px";
                 toolbar.height = newHeight + "px";
@@ -266,7 +270,6 @@ export class PageRow extends Module {
             } else if (currentDot.classList.contains("bottomLeft")) {
                 newWidth = this.currentWidth - deltaX;
                 newHeight = this.currentHeight + deltaY;
-                newLeft = deltaX;
                 self.currentElement.left = deltaX + "px"
                 toolbar.width = newWidth + "px";
                 toolbar.height = newHeight + "px";
@@ -275,6 +278,7 @@ export class PageRow extends Module {
                 newHeight = this.currentHeight + deltaY;
                 toolbar.width = newWidth + "px";
                 toolbar.height = newHeight + "px";
+                console.log(newHeight, toolbar.height)
             } else if (currentDot.classList.contains("top")) {
                 newHeight = this.currentHeight - deltaY;
                 toolbar.height = newHeight + "px";

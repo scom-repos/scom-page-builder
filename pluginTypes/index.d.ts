@@ -308,6 +308,7 @@ declare module "@scom/scom-page-builder/utility/command/resize.ts" {
         private oldDataColumn;
         private gapWidth;
         private gridColumnWidth;
+        private finalLeft;
         constructor(element: Control, initialWidth: number, initialHeight: number, finalWidth: number, finalHeight: number);
         private getColumnData;
         execute(): void;
