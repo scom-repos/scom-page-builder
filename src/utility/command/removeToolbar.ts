@@ -17,12 +17,14 @@ export class RemoveToolbarCommand implements ICommand {
   }
 
   execute(): void {
-    this.element.remove();
     pageObject.removeElement(this.rowId, this.elementId);
+    const ideSection = this.element.closest('ide-section');
+    if (ideSection) ideSection.remove();
+    console.log(ideSection)
     const section = pageObject.getSection(this.rowId);
     if (this.pageRow) {
-      const toolbars = this.pageRow.querySelectorAll('ide-toolbar');
-      this.pageRow.visible = toolbars.length;  //TODO: check with !!section.elements.length
+      // const toolbars = this.pageRow.querySelectorAll('ide-toolbar');
+      this.pageRow.visible = !!section?.elements?.length;
     }
   }
 

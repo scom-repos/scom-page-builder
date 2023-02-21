@@ -65,9 +65,9 @@ export class PageObject {
     if (!elements || !elements.length) return null;
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
-      if (element.id === elementId) {
+      if (element && element.id === elementId) {
         return element;
-      } else if (element.type === 'composite') {
+      } else if (element && element.type === 'composite') {
         const elm = this.findElement(element.elements, elementId);
         if (elm) return elm;
       }
