@@ -628,7 +628,8 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
         TEXTBOX = "Text box",
         IMAGE = "Image",
         NFT = "NFT Minter Dapp",
-        GEM_TOKEN = "Gem Token Dapp"
+        GEM_TOKEN = "Gem Token Dapp",
+        RANDOMIZER = "Randomizer"
     }
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageHeader.css.ts" />

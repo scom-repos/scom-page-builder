@@ -17,5 +17,6 @@ export enum ELEMENT_NAME {
   TEXTBOX = "Text box",
   IMAGE = "Image",
   NFT = "NFT Minter Dapp",
-  GEM_TOKEN = "Gem Token Dapp"
+  GEM_TOKEN = "Gem Token Dapp",
+  RANDOMIZER = "Randomizer"
 }
