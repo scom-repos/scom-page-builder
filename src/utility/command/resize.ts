@@ -37,10 +37,17 @@ export class ResizeElementCommand implements ICommand {
     if (!grid) return null;
 
     const sections = Array.from(grid.querySelectorAll('ide-section'));
+    let prevElm = null;
+    let afterElm = null;
     currentSpan = sections.reduce((result: number, el: HTMLElement) => {
       if (!el.contains(this.element)) {
         const columnSpan = Number(el.dataset.columnSpan);
         result += (columnSpan);
+        const column = Number(el.dataset.column);
+        if (this.oldDataColumn.column > column)
+          prevElm = el;
+        if (this.oldDataColumn.column < column)
+          afterElm = el;
       }
       return result;
     }, 0);
@@ -48,7 +55,18 @@ export class ResizeElementCommand implements ICommand {
     const numberOfColumns = Math.ceil((this.finalWidth + this.gapWidth) / (this.gridColumnWidth + this.gapWidth));
     const finalColumnSpan = Math.max(Math.min(numberOfColumns, MAX_COLUMN - currentSpan), 1);
     const column = Math.ceil((this.finalLeft + this.gapWidth) / (this.gridColumnWidth + this.gapWidth));
-    const finalColumn = Math.max(Math.min(column, (MAX_COLUMN - finalColumnSpan) + 1), 1);
+    let finalColumn = Math.max(Math.min(column, (MAX_COLUMN - finalColumnSpan) + 1), 1);
+    if (prevElm) {
+      const prevColumn = Number(prevElm.dataset.column);
+      const prevColumnSpan = Number(prevElm.dataset.columnSpan);
+      if (finalColumn < prevColumn + prevColumnSpan)
+        finalColumn = prevColumn + prevColumnSpan;
+    }
+    if (afterElm) {
+      const afterColumn = Number(afterElm.dataset.column);
+      if (finalColumn >= afterColumn)
+        finalColumn = afterColumn - finalColumnSpan;
+    }
     return { column: finalColumn, columnSpan: finalColumnSpan };
   }
 
@@ -58,8 +76,6 @@ export class ResizeElementCommand implements ICommand {
       this.element.setAttribute('data-column-span', `${newColumnData.columnSpan}`);
       this.element.setAttribute('data-column', `${newColumnData.column}`);
       this.element.style.gridColumn = `${newColumnData.column} / span ${newColumnData.columnSpan}`;
-      // const maxWidth = this.gridColumnWidth * newColumnData.columnSpan +  this.gapWidth * (newColumnData.columnSpan - 1)
-      // this.element.maxWidth = maxWidth;
     }
     if (this.toolbar) {
       const rowId = this.toolbar.rowId;

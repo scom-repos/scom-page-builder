@@ -26,12 +26,35 @@ export class DragElementCommand implements ICommand {
     const sections = Array.from(grid?.querySelectorAll('ide-section'));
     const column = Number(this.dropElm.getAttribute('data-column'));
     if (!isNaN(column)) {
-      const columnSpan = Number(this.element.dataset.columnSpan);
-      let newColumn = column;
-      const maxColumnStart = (MAX_COLUMN - columnSpan) + 1;
-      if (columnSpan > 1 && column > maxColumnStart)
-        newColumn = maxColumnStart;
-      return { column: newColumn, columnSpan: Math.min(columnSpan, (MAX_COLUMN + 1) - newColumn) };
+      let columnSpan = Number(this.element.dataset.columnSpan);
+      const maxColumn = (MAX_COLUMN - columnSpan) + 1;
+      let newColumn = (columnSpan > 1 && column > maxColumn) ? maxColumn : column;
+      let prevDropElm = null;
+      let afterDropElm = null;
+      let currentSpan = 0;
+      const dropColumn = Number(this.dropElm.dataset.column);
+      currentSpan = sections.reduce((result: number, el: HTMLElement) => {
+        if (!el.contains(this.element)) {
+          const columnSpan = Number(el.dataset.columnSpan);
+          result += (columnSpan);
+          const column = Number(el.dataset.column);
+          if (dropColumn > column)
+            prevDropElm = el;
+          if (dropColumn < column)
+            afterDropElm = el;
+        }
+        return result;
+      }, 0);
+
+      // TODO: check later
+      if (prevDropElm) {
+        const prevColumn = Number(prevDropElm.dataset.column);
+        const prevColumnSpan = Number(prevDropElm.dataset.columnSpan);
+        if (newColumn < prevColumn + prevColumnSpan)
+          newColumn = prevColumn + prevColumnSpan;
+      }
+      const finalColumnSpan = Math.max(Math.min(columnSpan, MAX_COLUMN - currentSpan), 1);
+      return { column: newColumn, columnSpan: finalColumnSpan };
     } else {
       // For last child
       const hasLastElm = sections.find(el => {
@@ -44,16 +67,15 @@ export class DragElementCommand implements ICommand {
         const lastColumnSpan = Number(hasLastElm.dataset.columnSpan);
         const newSpan = lastColumnSpan - columnSpan;
         const lastColumn = Number(hasLastElm.dataset.column);
-
         const pageRow = this.dropElm.closest('ide-row') as Control;
-        const lastRowId = (pageRow?.id || '').replace('row-', '');
+        const pageRowId = (pageRow?.id || '').replace('row-', '');
         if (sections.length === 1 && (newSpan * 2 < MAX_COLUMN) && lastColumn > columnSpan) {
           const newLastColumn = lastColumn - columnSpan;
-          pageObject.setElement(lastRowId, hasLastElm.id, {column: newLastColumn, columnSpan: lastColumnSpan});
+          pageObject.setElement(pageRowId, hasLastElm.id, {column: newLastColumn, columnSpan: lastColumnSpan});
           hasLastElm.setAttribute('data-column-span', `${lastColumnSpan}`);
           hasLastElm.style.gridColumn = `${newLastColumn} / span ${lastColumnSpan}`;
         } else {
-          pageObject.setElement(lastRowId, hasLastElm.id, {column: lastColumn, columnSpan: newSpan});
+          pageObject.setElement(pageRowId, hasLastElm.id, {column: lastColumn, columnSpan: newSpan});
           hasLastElm.setAttribute('data-column-span', `${newSpan}`);
           hasLastElm.style.gridColumn = `${lastColumn} / span ${newSpan}`;
         }
@@ -72,6 +94,7 @@ export class DragElementCommand implements ICommand {
       this.element.style.gridRow = '1';
       this.element.style.gridColumn = `${newColumnData.column} / span ${newColumnData.columnSpan}`;
       this.element.setAttribute('data-column', `${newColumnData.column}`);
+      this.element.setAttribute('data-column-span', `${newColumnData.columnSpan}`);
     }
     const elementRow = this.element.closest('ide-row') as Control;
     const dropRow = this.dropElm.closest('ide-row') as Control;
@@ -95,6 +118,7 @@ export class DragElementCommand implements ICommand {
     this.element.style.gridRow = '1';
     this.element.style.gridColumn = `${this.oldDataColumn.column} / span ${this.oldDataColumn.columnSpan}`;
     this.element.setAttribute('data-column', `${this.oldDataColumn.column}`);
+    this.element.setAttribute('data-column-span', `${this.oldDataColumn.columnSpan}`);
 
     const elementRow = this.element.closest('ide-row') as Control;
     const elementRowId = (elementRow?.id || '').replace('row-', '');
