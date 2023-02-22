@@ -12,12 +12,14 @@ export class ResizeElementCommand implements ICommand {
   private oldDataColumn: IDataColumn;
   private gapWidth: number = 15;
   private gridColumnWidth: number = 0;
+  private finalLeft: number;
 
   constructor(element: Control, initialWidth: number, initialHeight: number, finalWidth: number, finalHeight: number) {
     this.element = element;
     this.toolbar = element.querySelector('ide-toolbar');
     this.finalWidth = finalWidth;
     this.finalHeight = finalHeight;
+    this.finalLeft = Number(this.element.left);
     this.initialWidth = initialWidth;
     this.initialHeight = initialHeight;
     this.oldDataColumn = {
@@ -45,7 +47,7 @@ export class ResizeElementCommand implements ICommand {
 
     const numberOfColumns = Math.ceil((this.finalWidth + this.gapWidth) / (this.gridColumnWidth + this.gapWidth));
     const finalColumnSpan = Math.max(Math.min(numberOfColumns, MAX_COLUMN - currentSpan), 1);
-    const column = Math.ceil((Number(this.element.left) + this.gapWidth) / (this.gridColumnWidth + this.gapWidth));
+    const column = Math.ceil((this.finalLeft + this.gapWidth) / (this.gridColumnWidth + this.gapWidth));
     const finalColumn = Math.max(Math.min(column, (MAX_COLUMN - finalColumnSpan) + 1), 1);
     return { column: finalColumn, columnSpan: finalColumnSpan };
   }
@@ -63,7 +65,7 @@ export class ResizeElementCommand implements ICommand {
       const rowId = this.toolbar.rowId;
       const elementId = this.toolbar.elementId;
       const currentProp = this.toolbar?.data?.properties || {};
-      const properties = {...currentProp, width: this.finalWidth, height: this.finalHeight};
+      const properties = {...currentProp, width: '100%', height: this.finalHeight || this.initialHeight};
       this.toolbar.setProperties(properties);
       pageObject.setElement(rowId, elementId, {properties, ...newColumnData});
     }

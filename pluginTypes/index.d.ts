@@ -229,7 +229,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         getElement(sectionId: string, elementId: string): any;
         setElement(sectionId: string, elementId: string, value: any): void;
         removeElement(sectionId: string, elementId: string): void;
-        addElement(sectionId: string, elementId: string, value: IPageElement): void;
+        addElement(sectionId: string, value: IPageElement): void;
     }
     export const pageObject: PageObject;
     export const state: {
@@ -237,6 +237,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
     };
     export const setPageBlocks: (value: IPageBlockData[]) => void;
     export const getPageBlocks: () => any[];
+    export const getDappContainer: () => any;
 }
 /// <amd-module name="@scom/scom-page-builder/utility/command/interface.ts" />
 declare module "@scom/scom-page-builder/utility/command/interface.ts" {
@@ -308,6 +309,7 @@ declare module "@scom/scom-page-builder/utility/command/resize.ts" {
         private oldDataColumn;
         private gapWidth;
         private gridColumnWidth;
+        private finalLeft;
         constructor(element: Control, initialWidth: number, initialHeight: number, finalWidth: number, finalHeight: number);
         private getColumnData;
         execute(): void;
@@ -321,10 +323,10 @@ declare module "@scom/scom-page-builder/utility/command/drag.ts" {
     export class DragElementCommand implements ICommand {
         private element;
         private dropElm;
-        private toolbar;
         private oldDataColumn;
-        private oldRow;
-        constructor(element: HTMLElement, dropElm: HTMLElement);
+        private oldDataRow;
+        private data;
+        constructor(element: any, dropElm: HTMLElement);
         private getColumnData;
         execute(): void;
         undo(): void;
@@ -622,6 +624,12 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
     export * from "@scom/scom-page-builder/interface/component.ts";
     export * from "@scom/scom-page-builder/interface/siteData.ts";
     export * from "@scom/scom-page-builder/interface/jsonSchema.ts";
+    export enum ELEMENT_NAME {
+        TEXTBOX = "Text box",
+        IMAGE = "Image",
+        NFT = "NFT Minter Dapp",
+        GEM_TOKEN = "Gem Token Dapp"
+    }
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageHeader.css.ts" />
 declare module "@scom/scom-page-builder/page/pageHeader.css.ts" { }
@@ -1048,7 +1056,6 @@ declare module "@scom/scom-page-builder/page/pageSection.tsx" {
         private pnlLoading;
         private pnlMain;
         private pageSectionWrapper;
-        private _data;
         private _readonly;
         private _size;
         private currentToolbar;
@@ -1057,6 +1064,7 @@ declare module "@scom/scom-page-builder/page/pageSection.tsx" {
         constructor(parent?: any);
         get readonly(): boolean;
         set readonly(value: boolean);
+        get data(): any;
         init(): void;
         private setActive;
         private initEventListener;

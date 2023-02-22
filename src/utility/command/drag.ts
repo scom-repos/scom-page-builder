@@ -3,25 +3,27 @@ import { pageObject } from "../../store/index";
 import { Control } from "@ijstech/components";
 
 export class DragElementCommand implements ICommand {
-  private element: HTMLElement;
+  private element: any;
   private dropElm: HTMLElement;
-  private toolbar: any;
   private oldDataColumn: IDataColumn;
-  private oldRow: string;
+  private oldDataRow: string;
+  private data: any;
 
-  constructor(element: HTMLElement, dropElm: HTMLElement) {
+  constructor(element: any, dropElm: HTMLElement) {
     this.element = element;
-    this.toolbar = element.querySelector('ide-toolbar');
     this.dropElm = dropElm;
     this.oldDataColumn = {
       column: Number(element.dataset.column),
       columnSpan: Number(element.dataset.columnSpan)
     }
     const pageRow = element.closest('ide-row') as Control;
-    this.oldRow = pageRow?.dataset?.row;
+    this.oldDataRow = (pageRow?.id || '').replace('row-', '');
+    this.data = element.data;
   }
 
   private getColumnData() {
+    const grid = this.dropElm.closest('.grid');
+    const sections = Array.from(grid?.querySelectorAll('ide-section'));
     const column = Number(this.dropElm.getAttribute('data-column'));
     if (!isNaN(column)) {
       const columnSpan = Number(this.element.dataset.columnSpan);
@@ -29,11 +31,9 @@ export class DragElementCommand implements ICommand {
       const maxColumnStart = (MAX_COLUMN - columnSpan) + 1;
       if (columnSpan > 1 && column > maxColumnStart)
         newColumn = maxColumnStart;
-      return { column: newColumn, columnSpan };
+      return { column: newColumn, columnSpan: Math.min(columnSpan, (MAX_COLUMN + 1) - newColumn) };
     } else {
       // For last child
-      const grid = this.dropElm.closest('.grid');
-      const sections = Array.from(grid?.querySelectorAll('ide-section'));
       const hasLastElm = sections.find(el => {
         const column = Number(el.getAttribute('data-column'));
         const columnSpan = Number(el.getAttribute('data-column-span'));
@@ -44,12 +44,20 @@ export class DragElementCommand implements ICommand {
         const lastColumnSpan = Number(hasLastElm.dataset.columnSpan);
         const newSpan = lastColumnSpan - columnSpan;
         const lastColumn = Number(hasLastElm.dataset.column);
-        hasLastElm.setAttribute('data-column-span', `${newSpan}`);
-        hasLastElm.style.gridColumn = `${lastColumn} / span ${newSpan}`;
+
         const pageRow = this.dropElm.closest('ide-row') as Control;
         const lastRowId = (pageRow?.id || '').replace('row-', '');
-        pageObject.setElement(lastRowId, hasLastElm.id, {column: lastColumn, columnSpan: newSpan});
-        return { column: newSpan + 1, columnSpan };
+        if (sections.length === 1 && (newSpan * 2 < MAX_COLUMN) && lastColumn > columnSpan) {
+          const newLastColumn = lastColumn - columnSpan;
+          pageObject.setElement(lastRowId, hasLastElm.id, {column: newLastColumn, columnSpan: lastColumnSpan});
+          hasLastElm.setAttribute('data-column-span', `${lastColumnSpan}`);
+          hasLastElm.style.gridColumn = `${newLastColumn} / span ${lastColumnSpan}`;
+        } else {
+          pageObject.setElement(lastRowId, hasLastElm.id, {column: lastColumn, columnSpan: newSpan});
+          hasLastElm.setAttribute('data-column-span', `${newSpan}`);
+          hasLastElm.style.gridColumn = `${lastColumn} / span ${newSpan}`;
+        }
+        return { column: lastColumn + newSpan, columnSpan };
       }
     }
     return null;
@@ -66,30 +74,46 @@ export class DragElementCommand implements ICommand {
       this.element.setAttribute('data-column', `${newColumnData.column}`);
     }
     const elementRow = this.element.closest('ide-row') as Control;
-    grid.appendChild(this.element);
-    // TODO: update data in store
-    if (!elementRow?.querySelectorAll('ide-section').length) {
-      elementRow.remove();
+    const dropRow = this.dropElm.closest('ide-row') as Control;
+    const dropRowId = (dropRow?.id || '').replace('row-', '');
+    const elementRowId = (elementRow?.id || '').replace('row-', '');
+    pageObject.setElement(elementRowId, this.element.id, {...newColumnData});
+
+    if (!elementRow.isEqualNode(dropRow)) {
+      pageObject.addElement(dropRowId, this.data);
+      pageObject.removeElement(elementRowId, this.element.id);
+      grid.appendChild(this.element);
+      const toolbar = this.element.querySelector('ide-toolbar') as any;
+      if (toolbar) toolbar.rowId = dropRowId;
     }
-    if (this.toolbar) {
-      const rowId = this.toolbar.rowId;
-      const elementId = this.toolbar.elementId;
-      pageObject.setElement(rowId, elementId, {...newColumnData});
-      const dropRow = this.dropElm.closest('ide-row') as Control;
-      pageObject.updateSection(rowId, {row: dropRow?.dataset.row});
-    }
+
+    const elementSection = pageObject.getSection(elementRowId);
+    elementRow.visible =  !!elementSection?.elements?.length;
   }
 
   undo(): void {
     this.element.style.gridRow = '1';
     this.element.style.gridColumn = `${this.oldDataColumn.column} / span ${this.oldDataColumn.columnSpan}`;
     this.element.setAttribute('data-column', `${this.oldDataColumn.column}`);
-    if (this.toolbar) {
-      const rowId = this.toolbar.rowId;
-      const elementId = this.toolbar.elementId;
-      pageObject.setElement(rowId, elementId, {...this.oldDataColumn});
-      pageObject.updateSection(rowId, {row: this.oldRow});
+
+    const elementRow = this.element.closest('ide-row') as Control;
+    const elementRowId = (elementRow?.id || '').replace('row-', '');
+    pageObject.setElement(elementRowId, this.element.id, {...this.oldDataColumn});
+
+    if (!this.oldDataRow) return;
+    const oldElementRow = document.querySelector(`#row-${this.oldDataRow}`) as Control;
+    if (oldElementRow && !elementRow.isEqualNode(oldElementRow)) {
+      pageObject.addElement(this.oldDataRow, this.data);
+      pageObject.removeElement(elementRowId, this.element.id);
+      const oldGrid = oldElementRow.querySelector('.grid');
+      if (oldGrid) {
+        oldGrid.appendChild(this.element);
+        const toolbar = this.element.querySelector('ide-toolbar') as any;
+        if (toolbar) toolbar.rowId = this.oldDataRow;
+      }
     }
+    const oldElementSection = pageObject.getSection(this.oldDataRow);
+    oldElementRow && (oldElementRow.visible = !!oldElementSection?.elements?.length);
   }
 
   redo(): void {}

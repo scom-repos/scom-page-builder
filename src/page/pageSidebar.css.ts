@@ -29,7 +29,8 @@ Styles.cssRule('ide-sidebar', {
                 '.tab-item': {
                     fontWeight: 600,
                     fontSize: '1rem',
-                    color: Theme.text.primary
+                    color: Theme.text.primary,
+                    fontFamily: Theme.typography.fontFamily
                 },
                 'i-tab:not(.disabled):hover': {
                     backgroundColor: Theme.action.hover

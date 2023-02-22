@@ -75,6 +75,7 @@ export class PageRow extends Module {
         ) as PageSection;
         if (!this._readonly) {
             pageSection.setAttribute('draggable', 'true');
+            pageSection.style.gridRow = '1';
             pageSection.style.gridColumn = `${sectionData.column || 1} / span ${sectionData.columnSpan || 1}`;
             pageSection.setAttribute('data-column', `${sectionData.column || 1}`);
             pageSection.setAttribute('data-column-span', `${sectionData.columnSpan || 1}`);
@@ -171,7 +172,6 @@ export class PageRow extends Module {
         let self = this;
         let newWidth: number = 0;
         let newHeight: number = 0;
-        let newLeft: number = 0;
         let currentDot: Control;
         let startX: number = 0;
         let startY: number = 0;
@@ -238,9 +238,17 @@ export class PageRow extends Module {
             removeDottedLines();
             toolbar.width = 'initial';
             toolbar.height = 'initial';
-            self.currentElement.left = 'initial'; // TODO: check later
-            const resizeCmd = new ResizeElementCommand(self.currentElement, this.currentWidth, this.currentHeight, newWidth, newHeight);
+            self.currentElement.width = 'initial';
+            self.currentElement.height = 'initial';
+            const resizeCmd = new ResizeElementCommand(
+                self.currentElement,
+                this.currentWidth,
+                this.currentHeight,
+                newWidth,
+                newHeight
+            );
             commandHistory.execute(resizeCmd);
+            self.currentElement.left = 'initial';
             self.currentElement = null;
             toolbar = null;
         });
@@ -253,7 +261,6 @@ export class PageRow extends Module {
             if (currentDot.classList.contains("topLeft")) {
                 newWidth = this.currentWidth - deltaX;
                 newHeight = this.currentHeight - deltaY;
-                newLeft = deltaX;
                 self.currentElement.left = deltaX + "px"
                 toolbar.width = newWidth + "px";
                 toolbar.height = newHeight + "px";
@@ -265,8 +272,7 @@ export class PageRow extends Module {
             } else if (currentDot.classList.contains("bottomLeft")) {
                 newWidth = this.currentWidth - deltaX;
                 newHeight = this.currentHeight + deltaY;
-                newLeft = deltaX;
-                self.currentElement.left = deltaX + "px"
+                self.currentElement.left = deltaX + "px";
                 toolbar.width = newWidth + "px";
                 toolbar.height = newHeight + "px";
             } else if (currentDot.classList.contains("bottomRight")) {
@@ -290,10 +296,12 @@ export class PageRow extends Module {
             }
         })
 
-        document.addEventListener("dragstart", function (event) {
-            const target = (event.target as Control).closest('ide-section') as PageSection;
+        this.addEventListener("dragstart", function (event) {
+            const eventTarget = event.target as Control;
+            if (eventTarget instanceof PageRow) return;
+            const target = eventTarget.closest('ide-section') as PageSection;
             const toolbar = target?.querySelector('ide-toolbar') as Control;
-            const cannotDrag = toolbar && toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting');
+            const cannotDrag = toolbar && (toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting'));
             if (target && !cannotDrag) {
                 self.currentElement = target;
                 self.currentElement.opacity = 0;
@@ -317,7 +325,7 @@ export class PageRow extends Module {
 
         document.addEventListener("dragenter", function (event) {
             const eventTarget = (event.target as Control);
-            if (!eventTarget) return;
+            if (!eventTarget || !self.currentElement) return;
             const target = eventTarget.closest('.fixed-grid-item') as Control;
             if (target) {
                 const column = Number(target.getAttribute('data-column'));
@@ -365,6 +373,7 @@ export class PageRow extends Module {
 
         document.addEventListener("drop", function (event) {
             event.preventDefault();
+            event.stopPropagation();
             if (!self.currentElement) return;
             const eventTarget = event.target as Control;
             const target = eventTarget.closest('.fixed-grid-item') as Control;

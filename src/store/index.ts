@@ -65,9 +65,9 @@ export class PageObject {
     if (!elements || !elements.length) return null;
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
-      if (element.id === elementId) {
+      if (element && element.id === elementId) {
         return element;
-      } else if (element.type === 'composite') {
+      } else if (element && element.type === 'composite') {
         const elm = this.findElement(element.elements, elementId);
         if (elm) return elm;
       }
@@ -115,7 +115,7 @@ export class PageObject {
     }
   }
 
-  addElement(sectionId: string, elementId: string, value: IPageElement) {
+  addElement(sectionId: string, value: IPageElement) {
     if (sectionId === 'header') {
       this._header.elements = [value];
     }
@@ -140,4 +140,8 @@ export const setPageBlocks = (value: IPageBlockData[]) => {
 
 export const getPageBlocks = () => {
   return state.pageBlocks || [];
+}
+
+export const getDappContainer = () => {
+  return (state.pageBlocks || []).find(pageblock => pageblock.name === '@PageBlock/Dapp Container');
 }
