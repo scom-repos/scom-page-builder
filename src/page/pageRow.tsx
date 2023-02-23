@@ -376,6 +376,7 @@ export class PageRow extends Module {
             event.stopPropagation();
             if (!self.currentElement) return;
             const eventTarget = event.target as Control;
+            console.log(eventTarget)
             const target = eventTarget.closest('.fixed-grid-item') as Control;
             if (target) {
                 const dragCmd = new DragElementCommand(self.currentElement, target);

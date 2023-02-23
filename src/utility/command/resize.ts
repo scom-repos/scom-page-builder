@@ -83,7 +83,8 @@ export class ResizeElementCommand implements ICommand {
       const currentProp = this.toolbar?.data?.properties || {};
       const properties = {...currentProp, width: '100%', height: this.finalHeight || this.initialHeight};
       this.toolbar.setProperties(properties);
-      pageObject.setElement(rowId, elementId, {properties, ...newColumnData});
+      if (newColumnData.column !== this.oldDataColumn.column || newColumnData.columnSpan !== this.oldDataColumn.columnSpan)
+        pageObject.setElement(rowId, elementId, {properties, ...newColumnData});
     }
   }
 
@@ -91,8 +92,6 @@ export class ResizeElementCommand implements ICommand {
     this.element.style.gridColumn = `${this.oldDataColumn.column} / span ${this.oldDataColumn.columnSpan}`;
     this.element.setAttribute('data-column', `${this.oldDataColumn.column}`);
     this.element.setAttribute('data-column-span', `${this.oldDataColumn.columnSpan}`);
-    // const maxWidth = this.gridColumnWidth * this.oldDataColumn.columnSpan +  this.gapWidth * (this.oldDataColumn.columnSpan - 1)
-    // this.element.maxWidth = maxWidth;
     if (this.toolbar) {
       const rowId = this.toolbar.rowId;
       const elementId = this.toolbar.elementId;
