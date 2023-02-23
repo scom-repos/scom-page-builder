@@ -80,11 +80,11 @@ export class ResizeElementCommand implements ICommand {
     if (this.toolbar) {
       const rowId = this.toolbar.rowId;
       const elementId = this.toolbar.elementId;
-      const currentProp = this.toolbar?.data?.properties || {};
-      const properties = {...currentProp, width: '100%', height: this.finalHeight || this.initialHeight};
-      this.toolbar.setProperties(properties);
+      const currentTag = this.toolbar?.data?.tag || {};
+      const tag = {...currentTag, width: '100%', height: this.finalHeight || this.initialHeight};
+      this.toolbar.setTag(tag);
       if (newColumnData.column !== this.oldDataColumn.column || newColumnData.columnSpan !== this.oldDataColumn.columnSpan)
-        pageObject.setElement(rowId, elementId, {properties, ...newColumnData});
+        pageObject.setElement(rowId, elementId, {tag, ...newColumnData});
     }
   }
 
@@ -95,10 +95,10 @@ export class ResizeElementCommand implements ICommand {
     if (this.toolbar) {
       const rowId = this.toolbar.rowId;
       const elementId = this.toolbar.elementId;
-      const currentProp = this.toolbar?.data?.properties || {};
-      const properties = {...currentProp, width: this.initialWidth, height: this.initialHeight};
-      this.toolbar.setProperties(properties);
-      pageObject.setElement(rowId, elementId, {properties, ...this.oldDataColumn});
+      const currentTag = this.toolbar?.data?.tag || {};
+      const tag = {...currentTag, width: this.initialWidth, height: this.initialHeight};
+      this.toolbar.setTag(tag);
+      pageObject.setElement(rowId, elementId, {tag, ...this.oldDataColumn});
     }
   }
 

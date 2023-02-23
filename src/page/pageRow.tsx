@@ -214,7 +214,7 @@ export class PageRow extends Module {
             }
         }
 
-        document.addEventListener("mousedown", e => {
+        this.addEventListener("mousedown", e => {
             const target = e.target as Control;
             const parent = target.closest('.resize-stack') as Control;
             if (!parent) return;
@@ -337,6 +337,7 @@ export class PageRow extends Module {
                 rectangle.style.left = (gridColumnWidth + gapWidth) * (colStart - 1) + 'px';
                 rectangle.style.width = (gridColumnWidth * columnSpan) + (gapWidth * (columnSpan - 1)) + 'px';
             } else {
+                console.log('drag enter', eventTarget, event)
                 if (eventTarget.classList.contains('page-row')) {
                     const sections = Array.from(eventTarget.querySelectorAll('ide-section'));
                     const hasLastElm = sections.find(el => {
