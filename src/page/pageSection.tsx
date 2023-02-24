@@ -33,6 +33,7 @@ export class PageSection extends Module {
     private pnlLoading: VStack;
     private pnlMain: Panel;
     private pageSectionWrapper: Panel;
+    private pnlBack: Panel;
     // private _dragger: ContainerDragger<PageSection>;
 
     private _readonly: boolean;
@@ -183,6 +184,16 @@ export class PageSection extends Module {
                 >
                     <i-panel id="pnlMain" maxWidth="100%" maxHeight="100%"></i-panel>
                 </i-panel>
+                <i-panel
+                    id="pnlBack"
+                    position="absolute"
+                    width={15}
+                    height="100%"
+                    top="0px" right="-18px"
+                    zIndex={999}
+                    visible={false}
+                    class="back-block"
+                ></i-panel>
             </i-panel>
         );
     }

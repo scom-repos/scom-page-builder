@@ -252,8 +252,14 @@ export class PageRows extends Module {
         const { rowData, id } = data;
         const row = this.pnlRows.querySelector(`#${id}`)
         if (!row) return;
-        const newId = generateUUID()
-        let newRow = await this.appendRow({...rowData, id: newId})
+        const clonedData = JSON.parse(JSON.stringify(rowData));
+        const newId = generateUUID();
+        const newElements = clonedData.elements.map((el) => {
+            el.id = generateUUID();
+            return el;
+        });
+
+        const newRow = await this.appendRow({...clonedData, elements: newElements, id: newId});
         this.pnlRows.insertBefore(newRow, row);
     }
 

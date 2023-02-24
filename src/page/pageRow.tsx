@@ -6,14 +6,20 @@ import {
     Control,
     VStack,
     observable,
-    GridLayout
+    GridLayout,
 } from '@ijstech/components';
-import { PageSection } from './pageSection';
+import { PageSection, RowSettingsDialog } from './pageSection';
 import './pageRow.css';
 import { EVENT } from '../const/index';
 import { IPageSection } from '../interface/index';
 import { pageObject } from '../store/index';
-import { commandHistory, ElementCommand, ResizeElementCommand, DragElementCommand } from '../utility/index';
+import {
+    commandHistory,
+    ElementCommand,
+    ResizeElementCommand,
+    DragElementCommand,
+    MAX_COLUMN,
+} from '../utility/index';
 
 declare global {
     namespace JSX {
@@ -32,13 +38,14 @@ export class PageRow extends Module {
     private actionsBar: VStack;
     private dragStack: VStack;
     private pnlRow: GridLayout;
+    private mdRowSetting: RowSettingsDialog;
 
-    private rowData: IPageSection;
     private _readonly: boolean;
     private isResizing: boolean = false;
     private currentWidth: number;
     private currentHeight: number;
     private currentElement: PageSection;
+    private rowId: string = '';
 
     @observable()
     private isCloned: boolean = true;
@@ -48,6 +55,10 @@ export class PageRow extends Module {
     constructor(parent?: any) {
         super(parent);
         this.setData = this.setData.bind(this);
+    }
+
+    get data(): IPageSection | null {
+        return this.rowId ? pageObject.getSection(this.rowId) : null;
     }
 
     private initEventBus() {
@@ -63,7 +74,7 @@ export class PageRow extends Module {
     }
 
     private async createNewElement(i: number) {
-        const sectionData = this.rowData.elements[i];
+        const sectionData = this.data.elements[i];
         const pageSection = (
             <ide-section
                 readonly={this._readonly}
@@ -76,33 +87,32 @@ export class PageRow extends Module {
         if (!this._readonly) {
             pageSection.setAttribute('draggable', 'true');
             pageSection.style.gridRow = '1';
-            pageSection.style.gridColumn = `${sectionData.column || 1} / span ${sectionData.columnSpan || 1}`;
+            pageSection.style.gridColumn = `${sectionData.column || 1} / span ${
+                sectionData.columnSpan || 1
+            }`;
             pageSection.setAttribute('data-column', `${sectionData.column || 1}`);
             pageSection.setAttribute('data-column-span', `${sectionData.columnSpan || 1}`);
         }
         pageSection.visible = !!sectionData;
         this.pnlRow.appendChild(pageSection);
-        await pageSection.setData(this.rowData.id, sectionData);
+        await pageSection.setData(this.rowId, sectionData);
         return pageSection;
     }
 
     private async clearData() {
         const children = this.pnlRow.querySelectorAll('ide-section');
-        if (children && children.length)
-            children.forEach(item => item.remove());
+        if (children && children.length) children.forEach((item) => item.remove());
     }
 
     async setData(rowData: IPageSection) {
         this.clearData();
-        this.rowData = rowData;
-        const { id, row, image, elements, backgroundColor } = this.rowData;
+        const { id, row, image, elements, backgroundColor } = rowData;
 
         this.id = `row-${id}`;
+        this.rowId = id;
         this.setAttribute('data-row', `${row}`);
-        if (image)
-            this.background.image = image;
-        else if(backgroundColor)
-            this.background.color = backgroundColor;
+        if (image) this.background.image = image;
+        else if (backgroundColor) this.background.color = backgroundColor;
 
         this.isCloned = this.parentElement.nodeName !== 'BUILDER-HEADER';
         this.isChanged = this.parentElement.nodeName !== 'BUILDER-HEADER';
@@ -115,13 +125,19 @@ export class PageRow extends Module {
         this.actionsBar.minHeight = '100%';
     }
 
-    onOpenRowSettingsDialog() {
-        // this.rowSettings.setConfig(this.rowData.config);
-        // this.rowSettings.show();
+    private onOpenRowSettingsDialog() {
+        this.mdRowSetting.show();
+    }
+
+    private onSaveRowSettings(color: string) {
+        if (this.data) {
+            this.data.backgroundColor = color;
+            this.style.backgroundColor = color;
+        }
     }
 
     private async onClone() {
-        const rowData = pageObject.getSection(this.rowData.id);
+        const rowData = pageObject.getSection(this.rowId);
         if (!rowData) return;
         application.EventBus.dispatch(EVENT.ON_CLONE, { rowData, id: this.id });
     }
@@ -129,38 +145,36 @@ export class PageRow extends Module {
     private onResized(data: any) {}
 
     onDeleteRow() {
-        const rowCmd = new ElementCommand(this, this.parent, this.rowData, true);
+        const rowCmd = new ElementCommand(this, this.parent, this.data, true);
         commandHistory.execute(rowCmd);
     }
 
     onMoveUp() {
         this.actionsBar.classList.add('hidden');
         this.dragStack.classList.add('hidden');
-        this.background = {color: '#f2f2f2'};
+        this.background = { color: '#f2f2f2' };
     }
     onMoveDown() {
         this.actionsBar.classList.remove('hidden');
         this.dragStack.classList.remove('hidden');
-        this.background = {color: 'initial'};
+        this.background = { color: 'initial' };
     }
 
     private renderFixedGrid() {
         this.pnlRow.clearInnerHTML();
-        this.pnlRow.appendChild(
-            <i-panel class="rectangle"></i-panel>
-        )
+        this.pnlRow.appendChild(<i-panel class="rectangle"></i-panel>);
         const grid = (
             <i-grid-layout
                 position="absolute"
-                width="100%" height="100%"
-                top="0px" left="0px"
+                width="100%"
+                height="100%"
+                top="0px"
+                left="0px"
                 class="fixed-grid"
             ></i-grid-layout>
-        )
+        );
         for (let i = 0; i < 12; i++) {
-            const elm = (
-                <i-panel class="fixed-grid-item"></i-panel>
-            );
+            const elm = <i-panel class="fixed-grid-item"></i-panel>;
             elm.setAttribute('data-column', `${i + 1}`);
             elm.style.gridColumn = `${i + 1}`;
             grid.append(elm);
@@ -182,39 +196,39 @@ export class PageRow extends Module {
         for (const grid of grids) {
             const gridElm = grid as GridLayout;
             gridElm.templateColumns = [`repeat(12, ${gridColumnWidth}px)`];
-            gridElm.gap = {column: `${gapWidth}px`};
+            gridElm.gap = { column: `${gapWidth}px` };
         }
 
         let fixedGrids = document.getElementsByClassName('fixed-grid');
         for (const fixedGrid of fixedGrids) {
             const fixedGridElm = fixedGrid as GridLayout;
             fixedGridElm.templateColumns = [`repeat(12, ${gridColumnWidth}px)`];
-            fixedGridElm.gap = {column: `${gapWidth}px`};
+            fixedGridElm.gap = { column: `${gapWidth}px` };
         }
 
         function addDottedLines() {
-            const fixedGridItems = document.getElementsByClassName("fixed-grid-item");
+            const fixedGridItems = document.getElementsByClassName('fixed-grid-item');
             for (let i = 0; i < fixedGridItems.length; i++) {
                 fixedGridItems[i].classList.add('border-x-dotted');
             }
-            const fixedGrids = document.getElementsByClassName("fixed-grid");
+            const fixedGrids = document.getElementsByClassName('fixed-grid');
             for (let i = 0; i < fixedGrids.length; i++) {
                 fixedGrids[i].classList.add('border-dotted');
             }
         }
 
         function removeDottedLines() {
-            const fixedGridItems = document.getElementsByClassName("fixed-grid-item");
+            const fixedGridItems = document.getElementsByClassName('fixed-grid-item');
             for (let i = 0; i < fixedGridItems.length; i++) {
                 fixedGridItems[i].classList.remove('border-x-dotted');
             }
-            const fixedGrids = document.getElementsByClassName("fixed-grid");
+            const fixedGrids = document.getElementsByClassName('fixed-grid');
             for (let i = 0; i < fixedGrids.length; i++) {
                 fixedGrids[i].classList.remove('border-dotted');
             }
         }
 
-        this.addEventListener("mousedown", e => {
+        this.addEventListener('mousedown', (e) => {
             const target = e.target as Control;
             const parent = target.closest('.resize-stack') as Control;
             if (!parent) return;
@@ -231,7 +245,7 @@ export class PageRow extends Module {
             this.currentHeight = toolbar.offsetHeight;
         });
 
-        document.addEventListener("mouseup", e => {
+        document.addEventListener('mouseup', (e) => {
             e.preventDefault();
             if (!toolbar) return;
             this.isResizing = false;
@@ -253,55 +267,58 @@ export class PageRow extends Module {
             toolbar = null;
         });
 
-        document.addEventListener("mousemove", e => {
+        document.addEventListener('mousemove', (e) => {
             if (!this.isResizing || !toolbar) return;
             const deltaX = e.clientX - startX;
             const deltaY = e.clientY - startY;
 
-            if (currentDot.classList.contains("topLeft")) {
+            if (currentDot.classList.contains('topLeft')) {
                 newWidth = this.currentWidth - deltaX;
                 newHeight = this.currentHeight - deltaY;
-                self.currentElement.left = deltaX + "px"
-                toolbar.width = newWidth + "px";
-                toolbar.height = newHeight + "px";
-            } else if (currentDot.classList.contains("topRight")) {
+                self.currentElement.left = deltaX + 'px';
+                toolbar.width = newWidth + 'px';
+                toolbar.height = newHeight + 'px';
+            } else if (currentDot.classList.contains('topRight')) {
                 newWidth = this.currentWidth + deltaX;
                 newHeight = this.currentHeight - deltaY;
-                toolbar.width = newWidth + "px";
-                toolbar.height = newHeight + "px";
-            } else if (currentDot.classList.contains("bottomLeft")) {
+                toolbar.width = newWidth + 'px';
+                toolbar.height = newHeight + 'px';
+            } else if (currentDot.classList.contains('bottomLeft')) {
                 newWidth = this.currentWidth - deltaX;
                 newHeight = this.currentHeight + deltaY;
-                self.currentElement.left = deltaX + "px";
-                toolbar.width = newWidth + "px";
-                toolbar.height = newHeight + "px";
-            } else if (currentDot.classList.contains("bottomRight")) {
+                self.currentElement.left = deltaX + 'px';
+                toolbar.width = newWidth + 'px';
+                toolbar.height = newHeight + 'px';
+            } else if (currentDot.classList.contains('bottomRight')) {
                 newWidth = this.currentWidth + deltaX;
                 newHeight = this.currentHeight + deltaY;
-                toolbar.width = newWidth + "px";
-                toolbar.height = newHeight + "px";
-            } else if (currentDot.classList.contains("top")) {
+                toolbar.width = newWidth + 'px';
+                toolbar.height = newHeight + 'px';
+            } else if (currentDot.classList.contains('top')) {
                 newHeight = this.currentHeight - deltaY;
-                toolbar.height = newHeight + "px";
-            } else if (currentDot.classList.contains("bottom")) {
+                toolbar.height = newHeight + 'px';
+            } else if (currentDot.classList.contains('bottom')) {
                 newHeight = this.currentHeight + deltaY;
-                toolbar.height = newHeight + "px";
-            } else if (currentDot.classList.contains("left")) {
+                toolbar.height = newHeight + 'px';
+            } else if (currentDot.classList.contains('left')) {
                 newWidth = this.currentWidth - deltaX;
-                self.currentElement.left = deltaX + "px"
-                toolbar.width = newWidth + "px";
-            } else if (currentDot.classList.contains("right")) {
+                self.currentElement.left = deltaX + 'px';
+                toolbar.width = newWidth + 'px';
+            } else if (currentDot.classList.contains('right')) {
                 newWidth = this.currentWidth + deltaX;
-                toolbar.width = newWidth + "px";
+                toolbar.width = newWidth + 'px';
             }
-        })
+        });
 
-        this.addEventListener("dragstart", function (event) {
+        this.addEventListener('dragstart', function (event) {
             const eventTarget = event.target as Control;
             if (eventTarget instanceof PageRow) return;
             const target = eventTarget.closest('ide-section') as PageSection;
             const toolbar = target?.querySelector('ide-toolbar') as Control;
-            const cannotDrag = toolbar && (toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting'));
+            const cannotDrag =
+                toolbar &&
+                (toolbar.classList.contains('is-editing') ||
+                    toolbar.classList.contains('is-setting'));
             if (target && !cannotDrag) {
                 self.currentElement = target;
                 self.currentElement.opacity = 0;
@@ -311,9 +328,9 @@ export class PageRow extends Module {
             }
         });
 
-        document.addEventListener("drag", function (event) {});
+        document.addEventListener('drag', function (event) {});
 
-        document.addEventListener("dragend", function (event) {
+        document.addEventListener('dragend', function (event) {
             if (self.currentElement) self.currentElement.opacity = 1;
             self.currentElement = null;
             removeDottedLines();
@@ -321,30 +338,53 @@ export class PageRow extends Module {
             for (const rectangle of rectangles) {
                 (rectangle as Control).style.display = 'none';
             }
+            let backBlocks = document.getElementsByClassName('back-block');
+            for (const block of backBlocks) {
+                (block as Control).visible = false;
+                block.classList.remove('active-bd');
+            }
         });
 
-        document.addEventListener("dragenter", function (event) {
-            const eventTarget = (event.target as Control);
+        document.addEventListener('dragenter', function (event) {
+            const eventTarget = event.target as Control;
             if (!eventTarget || !self.currentElement) return;
             const target = eventTarget.closest('.fixed-grid-item') as Control;
             if (target) {
                 const column = Number(target.getAttribute('data-column'));
-                const rectangle = target.closest('.fixed-grid').parentNode.querySelector(`.rectangle`) as Control;
+                const rectangle = target
+                    .closest('.fixed-grid')
+                    .parentNode.querySelector(`.rectangle`) as Control;
                 rectangle.style.display = 'block';
                 const columnSpan = Number(self.currentElement.dataset.columnSpan);
                 const colSpan = Math.min(columnSpan, 12);
-                const colStart = Math.min(column, (12 - colSpan) + 1);
+                const colStart = Math.min(column, 12 - colSpan + 1);
                 rectangle.style.left = (gridColumnWidth + gapWidth) * (colStart - 1) + 'px';
-                rectangle.style.width = (gridColumnWidth * columnSpan) + (gapWidth * (columnSpan - 1)) + 'px';
+                rectangle.style.width =
+                    gridColumnWidth * columnSpan + gapWidth * (columnSpan - 1) + 'px';
             } else {
-                console.log('drag enter', eventTarget, event)
+                // const section = eventTarget.closest('ide-section') as Control;
+                // if (section && !section.isSameNode(self.currentElement)) {
+                //     const nextElm = eventTarget.nextElementSibling as Control;
+                //     const currentElmColumn = Number(section?.dataset?.column);
+                //     const currentElmColumnSpan = Number(section?.dataset?.columnSpan);
+                //     const nextSectionColumn = Number(nextElm?.dataset?.column);
+                //     if (currentElmColumn === 1 && (currentElmColumn + currentElmColumnSpan === MAX_COLUMN + 1)) {
+                //         const hiddenBlock = section.querySelector('.back-block') as Control;
+                //         hiddenBlock && (hiddenBlock.visible = true);
+                //     }
+                // }
+                // const backBlock = eventTarget.closest('.back-block') as Control;
+                // if (backBlock) {
+                //     backBlock.classList.add('active-bd'); // is-dragenter
+                // }
+
                 if (eventTarget.classList.contains('page-row')) {
                     const sections = Array.from(eventTarget.querySelectorAll('ide-section'));
-                    const hasLastElm = sections.find(el => {
+                    const hasLastElm = sections.find((el) => {
                         const column = Number(el.getAttribute('data-column'));
                         const columnSpan = Number(el.getAttribute('data-column-span'));
                         return column + columnSpan === 13;
-                    })
+                    });
                     if (hasLastElm) {
                         const rectangle = eventTarget.querySelector(`.rectangle`) as Control;
                         rectangle.style.display = 'block';
@@ -357,14 +397,14 @@ export class PageRow extends Module {
             }
         });
 
-        document.addEventListener("dragover", function (event) {
+        document.addEventListener('dragover', function (event) {
             event.preventDefault();
         });
 
-        document.addEventListener("dragleave", function (event) {
+        document.addEventListener('dragleave', function (event) {
             const target = (event.target as Control).closest('.fixed-grid-item') as Control;
             if (target) {
-                target.style.border = "";
+                target.style.border = '';
                 let rectangles = document.getElementsByClassName('rectangle');
                 for (const rectangle of rectangles) {
                     (rectangle as Control).style.display = 'none';
@@ -372,21 +412,22 @@ export class PageRow extends Module {
             }
         });
 
-        document.addEventListener("drop", function (event) {
+        document.addEventListener('drop', function (event) {
             event.preventDefault();
             event.stopPropagation();
             if (!self.currentElement) return;
             const eventTarget = event.target as Control;
-            console.log(eventTarget)
             const target = eventTarget.closest('.fixed-grid-item') as Control;
             if (target) {
                 const dragCmd = new DragElementCommand(self.currentElement, target);
                 commandHistory.execute(dragCmd);
             } else {
                 const isPageRow = eventTarget.classList.contains('page-row');
-                const dropElm = (isPageRow ?
-                    eventTarget.querySelector('.is-dragenter') :
-                    eventTarget.closest('.is-dragenter')) as Control;
+                const dropElm = (
+                    isPageRow
+                        ? eventTarget.querySelector('.is-dragenter')
+                        : eventTarget.closest('.is-dragenter')
+                ) as Control;
                 if (dropElm) {
                     dropElm.classList.remove('is-dragenter');
                     const dragCmd = new DragElementCommand(self.currentElement, dropElm);
@@ -401,24 +442,21 @@ export class PageRow extends Module {
             <i-panel
                 id="pnlRowWrap"
                 class={'page-row'}
-                width="100%" height="100%"
-                padding={{left: '3rem', right: '3rem'}}
+                width="100%"
+                height="100%"
+                padding={{ left: '3rem', right: '3rem' }}
             >
-                <i-vstack
-                    id={'actionsBar'}
-                    class="row-actions-bar"
-                    verticalAlignment="center"
-                >
+                <i-vstack id={'actionsBar'} class="row-actions-bar" verticalAlignment="center">
                     <i-panel
-                        background={{color: '#fff'}}
-                        border={{radius: '20px'}}
+                        background={{ color: '#fff' }}
+                        border={{ radius: '20px' }}
                         maxWidth="100%"
                         maxHeight="100%"
                     >
                         <i-panel
                             id="btnSetting"
                             class="actions"
-                            tooltip={{content: 'Section colors', placement: 'right'}}
+                            tooltip={{ content: 'Section colors', placement: 'right' }}
                             visible={this.isChanged}
                             onClick={this.onOpenRowSettingsDialog}
                         >
@@ -427,7 +465,7 @@ export class PageRow extends Module {
                         <i-panel
                             id="btnClone"
                             class="actions"
-                            tooltip={{content: 'Duplicate section', placement: 'right'}}
+                            tooltip={{ content: 'Duplicate section', placement: 'right' }}
                             visible={this.isCloned}
                             onClick={this.onClone}
                         >
@@ -436,7 +474,7 @@ export class PageRow extends Module {
                         <i-panel
                             id="btnDelete"
                             class="actions delete"
-                            tooltip={{content: 'Delete section', placement: 'right'}}
+                            tooltip={{ content: 'Delete section', placement: 'right' }}
                             onClick={this.onDeleteRow}
                         >
                             <i-icon name="trash"></i-icon>
@@ -448,7 +486,8 @@ export class PageRow extends Module {
                     height="100%"
                     verticalAlignment="center"
                     position="absolute"
-                    left="0px" top="0px"
+                    left="0px"
+                    top="0px"
                     class="drag-stack"
                 >
                     <i-grid-layout
@@ -476,6 +515,10 @@ export class PageRow extends Module {
                     position="relative"
                     class="grid"
                 ></i-grid-layout>
+                <ide-row-settings-dialog
+                    id="mdRowSetting"
+                    onSave={this.onSaveRowSettings.bind(this)}
+                ></ide-row-settings-dialog>
             </i-panel>
         );
     }
