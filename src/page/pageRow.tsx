@@ -343,7 +343,7 @@ export class PageRow extends Module {
             let backBlocks = document.getElementsByClassName('back-block');
             for (const block of backBlocks) {
                 (block as Control).visible = false;
-                block.classList.remove('active-bd');
+                block.classList.remove('is-dragenter');
             }
         });
 
@@ -364,38 +364,26 @@ export class PageRow extends Module {
                 rectangle.style.width =
                     gridColumnWidth * columnSpan + gapWidth * (columnSpan - 1) + 'px';
             } else {
-                // const section = eventTarget.closest('ide-section') as Control;
-                // if (section && !section.isSameNode(self.currentElement)) {
-                //     const nextElm = eventTarget.nextElementSibling as Control;
-                //     const currentElmColumn = Number(section?.dataset?.column);
-                //     const currentElmColumnSpan = Number(section?.dataset?.columnSpan);
-                //     const nextSectionColumn = Number(nextElm?.dataset?.column);
-                //     if (currentElmColumn === 1 && (currentElmColumn + currentElmColumnSpan === MAX_COLUMN + 1)) {
-                //         const hiddenBlock = section.querySelector('.back-block') as Control;
-                //         hiddenBlock && (hiddenBlock.visible = true);
-                //     }
-                // }
-                // const backBlock = eventTarget.closest('.back-block') as Control;
-                // if (backBlock) {
-                //     backBlock.classList.add('active-bd'); // is-dragenter
-                // }
+                const section = eventTarget.closest('ide-section') as Control;
+                if (section && !section.isSameNode(self.currentElement)) {
+                    const curElmCol = Number(section?.dataset?.column);
+                    const curElmColSpan = Number(section?.dataset?.columnSpan);
+                    const sections = Array.from(section.closest('#pnlRow')?.querySelectorAll('ide-section'));
+                    const nextElm = sections.find((el: Control) => {
+                        const column = Number(el.dataset.column);
+                        return !isNaN(column) && (curElmCol + curElmColSpan === column);
+                    }) as Control;
+                    const showHiddenBlock = curElmCol === 1 && (curElmCol + curElmColSpan === MAX_COLUMN + 1) ||
+                        (nextElm) ||
+                        (curElmCol + curElmColSpan === MAX_COLUMN + 1);
 
-                if (eventTarget.classList.contains('page-row')) {
-                    const sections = Array.from(eventTarget.querySelectorAll('ide-section'));
-                    const hasLastElm = sections.find((el) => {
-                        const column = Number(el.getAttribute('data-column'));
-                        const columnSpan = Number(el.getAttribute('data-column-span'));
-                        return column + columnSpan === 13;
-                    });
-                    if (hasLastElm) {
-                        const rectangle = eventTarget.querySelector(`.rectangle`) as Control;
-                        rectangle.style.display = 'block';
-                        rectangle.style.left = 'auto';
-                        rectangle.style.width = 'auto';
-                        rectangle.style.right = '-15px';
-                        rectangle.classList.add('is-dragenter');
+                    if (showHiddenBlock) {
+                        const hiddenBlock = section.querySelector('.back-block') as Control;
+                        hiddenBlock && (hiddenBlock.visible = true);
                     }
                 }
+                const backBlock = eventTarget.closest('.back-block') as Control;
+                backBlock && backBlock.classList.add('is-dragenter');
             }
         });
 
@@ -404,12 +392,19 @@ export class PageRow extends Module {
         });
 
         document.addEventListener('dragleave', function (event) {
-            const target = (event.target as Control).closest('.fixed-grid-item') as Control;
+            const eventTarget = event.target as Control;
+            const target = eventTarget.closest('.fixed-grid-item') as Control;
             if (target) {
                 target.style.border = '';
                 let rectangles = document.getElementsByClassName('rectangle');
                 for (const rectangle of rectangles) {
                     (rectangle as Control).style.display = 'none';
+                }
+            } else {
+                const block  = eventTarget.closest('.back-block') as Control;
+                if (block) {
+                    block.visible = false;
+                    block.classList.remove('is-dragenter');
                 }
             }
         });

@@ -175,7 +175,7 @@ export class PageSection extends Module {
 
     render() {
         return (
-            <i-panel id={'pnlPageSection'} maxWidth="100%" maxHeight="100%">
+            <i-panel id={'pnlPageSection'} maxWidth="100%" maxHeight="100%" height="100%">
                 <i-panel
                     id="pageSectionWrapper"
                     width="100%" height="100%"

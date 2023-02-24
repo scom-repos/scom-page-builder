@@ -12,7 +12,7 @@ export class RemoveToolbarCommand implements ICommand {
 
   constructor(element: any) {
     this.element = element;
-    this.data = this.element.data;
+    this.data = JSON.parse(JSON.stringify(element.data));
     this.rowId = this.element.rowId;
     this.elementId = this.element.elementId;
     this.pageRow = this.element.closest('ide-row');
