@@ -96,8 +96,8 @@ export default class Editor extends Module {
     }
 
     private onUpdateWrapper() {
-        this.contentWrapper.minHeight = `calc((100vh - 6rem) - ${this.builderFooter.offsetHeight}px)`;
-        this.contentWrapper.padding = {bottom: this.builderFooter.offsetHeight};
+        //     this.contentWrapper.minHeight = `calc((100vh - 6rem) - ${this.builderFooter.offsetHeight}px)`;
+        //     this.contentWrapper.padding = {bottom: this.builderFooter.offsetHeight};
     }
 
     render() {
