@@ -224,7 +224,9 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         addSection(value: IPageSection): void;
         removeSection(id: string): void;
         getSection(id: string): IPageSection;
-        updateSection(id: string, data: any): void;
+        getRow(rowId: string): IPageSection | IPageFooter;
+        removeRow(id: string): void;
+        addRow(data: any, id?: string): void;
         private findElement;
         getElement(sectionId: string, elementId: string): any;
         setElement(sectionId: string, elementId: string, value: any): void;
@@ -260,6 +262,7 @@ declare module "@scom/scom-page-builder/utility/command/add.ts" {
         private element;
         private parent;
         private data;
+        private rowId;
         private isDeleted;
         constructor(element: Control, parent: HTMLElement, data: any, isDeleted?: boolean);
         execute(): void;
@@ -951,6 +954,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private currentHeight;
         private currentElement;
         private rowId;
+        private rowData;
         private isCloned;
         private isChanged;
         constructor(parent?: any);

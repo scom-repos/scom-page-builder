@@ -50,7 +50,7 @@ export class BuilderHeader extends Module {
 
     initEventBus() {
         application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => {
-            if (!this.pnlHeaderMain.hasChildNodes())
+            if (!pageObject.header?.elements?.length)
                 this.updateHeader();
         })
     }

@@ -65,19 +65,13 @@ export class RowSettingsDialog extends Module {
         return (
             <i-modal
                 id={'dialog'}
-                closeOnBackdropClick={false}
                 minWidth={400}
                 maxWidth={500}
-                popupPlacement={'center'}
+                title="Section Colors"
+                closeOnBackdropClick={false}
+                closeIcon={{ name: 'times' }}
+                class="setting-modal"
             >
-                <i-panel class="settings-header">
-                    <i-label caption="Section Colors" class="settings-header-title"></i-label>
-                    <i-button
-                        icon={{ name: 'times' }}
-                        class="settings-close"
-                        onClick={this.hide}></i-button>
-                </i-panel>
-
                <i-vstack padding={{left: '1rem', right: '1rem', top: '1rem', bottom: '1rem'}}>
                     <i-vstack class={'form-group'} margin={{bottom: '2rem'}} gap="0.5rem">
                         <i-label class={'form-label'} caption={'Background color'}></i-label>

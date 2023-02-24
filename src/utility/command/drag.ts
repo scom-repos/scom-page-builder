@@ -115,8 +115,7 @@ export class DragElementCommand implements ICommand {
       const toolbar = this.element.querySelector('ide-toolbar') as any;
       if (toolbar) toolbar.rowId = dropRowId;
     }
-
-    const elementSection = pageObject.getSection(elementRowId);
+    const elementSection = pageObject.getRow(elementRowId);
     elementRow.visible =  !!elementSection?.elements?.length;
   }
 
@@ -142,7 +141,7 @@ export class DragElementCommand implements ICommand {
         if (toolbar) toolbar.rowId = this.oldDataRow;
       }
     }
-    const oldElementSection = pageObject.getSection(this.oldDataRow);
+    const oldElementSection = pageObject.getRow(this.oldDataRow);
     oldElementRow && (oldElementRow.visible = !!oldElementSection?.elements?.length);
   }
 

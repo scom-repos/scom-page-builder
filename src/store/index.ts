@@ -41,24 +41,37 @@ export class PageObject {
   }
 
   removeSection(id: string) {
-    if (id === 'header')
-      this._header.elements = [];
-    else if (id === 'footer')
-      this._footer.elements = [];
-    else
-      this._sections.delete(id);
+    this._sections.delete(id);
   }
 
   getSection(id: string) {
     return this._sections.get(id) || null;
   }
 
-  updateSection(id: string, data: any) {
-    const section = this.getSection(id);
-    if (section) {
-      const newRow = data.row ?? section.row;
-      section.row = Number(newRow);
-    }
+  getRow(rowId: string) {
+    if (rowId === 'header')
+      return this.header;
+    if (rowId === 'footer')
+      return this.footer;
+    return rowId ? this.getSection(rowId) : null;
+  }
+
+  removeRow(id: string) {
+    if (id === 'header')
+      this._header.elements = [];
+    else if (id === 'footer')
+      this._footer.elements = [];
+    else
+      this.removeSection(id);
+  }
+
+  addRow(data: any, id?: string) {
+    if (id === 'header')
+      this.header = data;
+    else if (id === 'footer')
+      this.footer = data;
+    else
+      this.addSection(data);
   }
 
   private findElement(elements: IPageElement[], elementId: string) {

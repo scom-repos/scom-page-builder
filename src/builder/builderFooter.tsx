@@ -54,7 +54,7 @@ export class BuilderFooter extends Module {
 
     initEventBus() {
         application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => {
-            if (!this.pnlFooterMain.hasChildNodes())
+            if (!pageObject.footer?.elements?.length)
                 this.updateFooter();
         })
     }
@@ -123,12 +123,12 @@ export class BuilderFooter extends Module {
     }
 
     private updateOverlay(value: boolean) {
-        this.pnlEditOverlay.visible = value;
+        this.pnlEditOverlay.visible = value && !this.showAddStack;
         if (this.pnlEditOverlay.visible)
             this.pnlEditOverlay.classList.add('flex');
         else
             this.pnlEditOverlay.classList.remove('flex');
-        this.pnlOverlay.visible = !this.pnlEditOverlay.visible;
+        this.pnlOverlay.visible = !this.pnlEditOverlay.visible && !this.showAddStack;
         this.pnlOverlay.height = this.pnlOverlay.visible ? document.body.offsetHeight + this.offsetHeight : 0;
         if (!this.pnlOverlay.visible) {
             const row = this.querySelector('ide-row');
