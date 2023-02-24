@@ -171,7 +171,8 @@ export class IDEToolbar extends Module {
             properties = data;
         }
         let tag = data?.content?.tag || this.data.tag || {};
-        renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), {...properties, ...tag}, options);
+
+        renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), action.userInputUISchema, {...properties, ...tag}, options);
     }
 
     private onSave(result: boolean, data: any) {

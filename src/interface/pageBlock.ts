@@ -1,4 +1,4 @@
-import { IDataSchema } from "@ijstech/components";
+import { IDataSchema, IUISchema } from "@ijstech/components";
 
 export interface IPageBlockData {
     name: string;
@@ -28,7 +28,8 @@ export interface IPageBlockAction {
 	name: string;
 	icon: string;
 	command: (builder: any, userInputData: any) => ICommand;
-	userInputDataSchema: IDataSchema
+	userInputDataSchema: IDataSchema;
+    userInputUISchema: IUISchema;
 }
 
 export interface IPageBlock {

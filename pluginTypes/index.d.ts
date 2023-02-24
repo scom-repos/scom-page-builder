@@ -453,7 +453,7 @@ declare module "@scom/scom-page-builder/interface/core.ts" {
 }
 /// <amd-module name="@scom/scom-page-builder/interface/pageBlock.ts" />
 declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
-    import { IDataSchema } from "@ijstech/components";
+    import { IDataSchema, IUISchema } from "@ijstech/components";
     export interface IPageBlockData {
         name: string;
         description: string;
@@ -481,6 +481,7 @@ declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
         icon: string;
         command: (builder: any, userInputData: any) => ICommand;
         userInputDataSchema: IDataSchema;
+        userInputUISchema: IUISchema;
     }
     export interface IPageBlock {
         getActions: () => IPageBlockAction[];
