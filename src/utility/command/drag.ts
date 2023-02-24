@@ -18,7 +18,7 @@ export class DragElementCommand implements ICommand {
     }
     const pageRow = element.closest('ide-row') as Control;
     this.oldDataRow = (pageRow?.id || '').replace('row-', '');
-    this.data = element.data;
+    this.data = JSON.parse(JSON.stringify(element.data));
   }
 
   private getColumnData() {
@@ -62,30 +62,29 @@ export class DragElementCommand implements ICommand {
       const finalColumnSpan = Math.max(Math.min(columnSpan, MAX_COLUMN - currentSpan), 1);
       return { column: newColumn, columnSpan: finalColumnSpan };
     } else {
-      // For last child
-      const hasLastElm = sections.find(el => {
-        const column = Number(el.getAttribute('data-column'));
-        const columnSpan = Number(el.getAttribute('data-column-span'));
-        return column + columnSpan === 13;
-      }) as Control;
-      if (hasLastElm) {
+      const dropSection = this.dropElm.closest('ide-section') as Control;
+      if (dropSection) {
+        const dropColumn = Number(dropSection.dataset.column);
+        const dropColumnSpan = Number(dropSection.dataset.columnSpan);
         const columnSpan = Number(this.element.dataset.columnSpan);
-        const lastColumnSpan = Number(hasLastElm.dataset.columnSpan);
-        const newSpan = lastColumnSpan - columnSpan;
-        const lastColumn = Number(hasLastElm.dataset.column);
+        const newSpan = dropColumnSpan - columnSpan;
         const pageRow = this.dropElm.closest('ide-row') as Control;
         const pageRowId = (pageRow?.id || '').replace('row-', '');
-        if (sections.length === 1 && (newSpan * 2 < MAX_COLUMN) && lastColumn > columnSpan) {
-          const newLastColumn = lastColumn - columnSpan;
-          pageObject.setElement(pageRowId, hasLastElm.id, {column: newLastColumn, columnSpan: lastColumnSpan});
-          hasLastElm.setAttribute('data-column-span', `${lastColumnSpan}`);
-          hasLastElm.style.gridColumn = `${newLastColumn} / span ${lastColumnSpan}`;
+
+        const nxtDropSection = dropSection.nextElementSibling as Control;
+        // TODO: console.log(nxtDropSection)
+
+        if (sections.length >= 1 && (newSpan * 2 < MAX_COLUMN) && dropColumn > columnSpan) {
+          const newLastColumn = dropColumn - columnSpan;
+          pageObject.setElement(pageRowId, dropSection.id, {column: newLastColumn, columnSpan: dropColumnSpan});
+          dropSection.setAttribute('data-column-span', `${dropColumnSpan}`);
+          dropSection.style.gridColumn = `${newLastColumn} / span ${dropColumnSpan}`;
         } else {
-          pageObject.setElement(pageRowId, hasLastElm.id, {column: lastColumn, columnSpan: newSpan});
-          hasLastElm.setAttribute('data-column-span', `${newSpan}`);
-          hasLastElm.style.gridColumn = `${lastColumn} / span ${newSpan}`;
+          pageObject.setElement(pageRowId, dropSection.id, {column: dropColumn, columnSpan: newSpan});
+          dropSection.setAttribute('data-column-span', `${newSpan}`);
+          dropSection.style.gridColumn = `${dropColumn} / span ${newSpan}`;
         }
-        return { column: lastColumn + newSpan, columnSpan };
+        return { column: dropColumn + newSpan, columnSpan };
       }
     }
     return null;
@@ -109,7 +108,7 @@ export class DragElementCommand implements ICommand {
     pageObject.setElement(elementRowId, this.element.id, {...newColumnData});
 
     if (!elementRow.isEqualNode(dropRow)) {
-      pageObject.addElement(dropRowId, this.data);
+      pageObject.addElement(dropRowId, {...this.data, ...newColumnData});
       pageObject.removeElement(elementRowId, this.element.id);
       grid.appendChild(this.element);
       const toolbar = this.element.querySelector('ide-toolbar') as any;
@@ -132,7 +131,7 @@ export class DragElementCommand implements ICommand {
     if (!this.oldDataRow) return;
     const oldElementRow = document.querySelector(`#row-${this.oldDataRow}`) as Control;
     if (oldElementRow && !elementRow.isEqualNode(oldElementRow)) {
-      pageObject.addElement(this.oldDataRow, this.data);
+      pageObject.addElement(this.oldDataRow, {...this.data, ...this.oldDataColumn});
       pageObject.removeElement(elementRowId, this.element.id);
       const oldGrid = oldElementRow.querySelector('.grid');
       if (oldGrid) {
