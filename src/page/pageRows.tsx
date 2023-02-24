@@ -229,7 +229,7 @@ export class PageRows extends Module {
                 this.initDragEvent(pageRow);
             }
             pageRow.visible = !!rowData?.elements?.length;
-            pageRow.parent =  this.pnlRows;
+            pageRow.parent = this.pnlRows;
             this.pnlRows.append(pageRow);
             await pageRow.setData(rowData);
         }

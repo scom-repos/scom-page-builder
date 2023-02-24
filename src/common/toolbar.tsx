@@ -282,8 +282,8 @@ export class IDEToolbar extends Module {
 
     async fetchModule(data: IPageElement) {
         if (this._readonly) return;
-        const ipfscid = data.module?.ipfscid || '';
-        const localPath = data.module?.localPath || '';
+        const ipfscid = data?.module?.ipfscid || '';
+        const localPath = data?.module?.localPath || '';
         try {
             const module = await getModule({ipfscid, localPath});
             if (module) {
@@ -325,7 +325,8 @@ export class IDEToolbar extends Module {
         if (tag.width === '100%') tag.width = Number(this.width);
         if (tag.height === '100%') tag.height = Number(this.height);
         await this._component.setTag(tag);
-        if (this.data?.properties?.content) {
+        const isContainer = this.data?.properties?.content && typeof this.data?.properties?.content === 'object';
+        if (isContainer) {
             const properties = this.data.properties;
             properties.content.tag = tag;
             pageObject.setElement(this.rowId, this.data.id, { properties });

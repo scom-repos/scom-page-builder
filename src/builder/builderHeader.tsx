@@ -1,7 +1,7 @@
 import { Module, customElements, ControlElement, Styles, Panel, Button, Modal, Upload, Input, observable, application, Control } from '@ijstech/components';
 import assets from '../assets';
 import { EVENT } from '../const/index';
-import { HeaderType, IPageHeader } from '../interface/index';
+import { ELEMENT_NAME, HeaderType, IPageHeader } from '../interface/index';
 import { PageRow } from '../page/index';
 import { getPageBlocks, pageObject } from '../store/index';
 import { generateUUID } from '../utility/index';
@@ -50,7 +50,7 @@ export class BuilderHeader extends Module {
 
     initEventBus() {
         application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => {
-            if (!this.pnlHeaderMain.hasChildNodes())
+            if (!pageObject.header?.elements?.length)
                 this.updateHeader();
         })
     }
@@ -87,13 +87,13 @@ export class BuilderHeader extends Module {
             }
             await pageRow.setData(rowData);
             pageRow.parent = this.pnlHeaderMain;
-            this.pnlHeaderMain.append(pageRow);
+            this.pnlHeaderMain.appendChild(pageRow);
         }
     }
 
     private addHeader() {
         const pageBlocks = getPageBlocks();
-        const textBlock = pageBlocks.find((v) => v.name === 'Text box');
+        const textBlock = pageBlocks.find((v) => v.name === ELEMENT_NAME.TEXTBOX);
         this.setData({
             image: '',
             headerType: HeaderType.NORMAL,

@@ -46,6 +46,7 @@ export class PageRow extends Module {
     private currentHeight: number;
     private currentElement: PageSection;
     private rowId: string = '';
+    private rowData: IPageSection;
 
     @observable()
     private isCloned: boolean = true;
@@ -57,8 +58,8 @@ export class PageRow extends Module {
         this.setData = this.setData.bind(this);
     }
 
-    get data(): IPageSection | null {
-        return this.rowId ? pageObject.getSection(this.rowId) : null;
+    get data(): any {
+        return this.rowId ? pageObject.getRow(this.rowId) : this.rowData;
     }
 
     private initEventBus() {
@@ -110,6 +111,7 @@ export class PageRow extends Module {
 
         this.id = `row-${id}`;
         this.rowId = id;
+        this.rowData = rowData;
         this.setAttribute('data-row', `${row}`);
         if (image) this.background.image = image;
         else if (backgroundColor) this.background.color = backgroundColor;
@@ -137,7 +139,7 @@ export class PageRow extends Module {
     }
 
     private async onClone() {
-        const rowData = pageObject.getSection(this.rowId);
+        const rowData = pageObject.getRow(this.rowId);
         if (!rowData) return;
         application.EventBus.dispatch(EVENT.ON_CLONE, { rowData, id: this.id });
     }

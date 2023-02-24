@@ -224,7 +224,9 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         addSection(value: IPageSection): void;
         removeSection(id: string): void;
         getSection(id: string): IPageSection;
-        updateSection(id: string, data: any): void;
+        getRow(rowId: string): IPageSection | IPageFooter;
+        removeRow(id: string): void;
+        addRow(data: any, id?: string): void;
         private findElement;
         getElement(sectionId: string, elementId: string): any;
         setElement(sectionId: string, elementId: string, value: any): void;
@@ -260,6 +262,7 @@ declare module "@scom/scom-page-builder/utility/command/add.ts" {
         private element;
         private parent;
         private data;
+        private rowId;
         private isDeleted;
         constructor(element: Control, parent: HTMLElement, data: any, isDeleted?: boolean);
         execute(): void;
@@ -550,42 +553,6 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         elements?: IPageElement[];
         visibleOn?: string;
         invisibleOn?: string;
-    }
-    type StyleValues = "-moz-initial" | "inherit" | "initial" | "revert" | "unset";
-    export interface IContainerSettings {
-        width?: string;
-        maxWidth?: string;
-        textAlign?: StyleValues | "center" | "end" | "justify" | "left" | "match-parent" | "right" | "start";
-        overflow?: StyleValues | "-moz-hidden-unscrollable" | "auto" | "clip" | "hidden" | "scroll" | "visible" | (string & {});
-    }
-    export interface IConfigData {
-        header: {
-            showHeader: boolean;
-            showWalletAuthentication: boolean;
-            showLogo: boolean;
-            headerBackgroundColor: string;
-            logo: string;
-        };
-        body: {
-            boxedLayout: boolean;
-            boxedWidth: string;
-            containerLayout: boolean;
-            containerSettings: IContainerSettings;
-            showPagination: boolean;
-        };
-        footer: {
-            showFooter: boolean;
-            stickyFooter: boolean;
-            copyrightText: string;
-        };
-        menu: {
-            showTopMenu: boolean;
-            showSideMenu: boolean;
-            fontColor: string;
-        };
-        url: {
-            urlSuffix: string;
-        };
     }
 }
 /// <amd-module name="@scom/scom-page-builder/interface/jsonSchema.ts" />
@@ -987,10 +954,11 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private currentHeight;
         private currentElement;
         private rowId;
+        private rowData;
         private isCloned;
         private isChanged;
         constructor(parent?: any);
-        get data(): IPageSection | null;
+        get data(): any;
         private initEventBus;
         init(): void;
         private createNewElement;
