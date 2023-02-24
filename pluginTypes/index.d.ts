@@ -551,23 +551,6 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         visibleOn?: string;
         invisibleOn?: string;
     }
-    export interface IRowSettings {
-        height?: string;
-        width?: string;
-        columns?: number;
-        columnsSettings?: {
-            width?: string;
-            size?: {
-                width?: string;
-                height?: string;
-            };
-        }[];
-        backgroundColor?: string;
-        backgroundImageUrl?: string;
-        isCloned?: boolean | true;
-        isChanged?: boolean | true;
-        isDeleted?: boolean | true;
-    }
     type StyleValues = "-moz-initial" | "inherit" | "initial" | "revert" | "unset";
     export interface IContainerSettings {
         width?: string;
@@ -735,126 +718,29 @@ declare module "@scom/scom-page-builder/dialogs/loadingDialog.tsx" {
 declare module "@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx" />
 declare module "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx" {
-    import { Module, ControlElement, Control } from '@ijstech/components';
+    import { Module, ControlElement } from '@ijstech/components';
     import "@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts";
-    import { IRowSettings } from "@scom/scom-page-builder/interface/index.ts";
     export interface RowSettingsDialogElement extends ControlElement {
-        onSave: (config: IRowSettings) => Promise<void>;
+        onSave: () => Promise<void>;
     }
     global {
         namespace JSX {
             interface IntrinsicElements {
-                ['scpage-row-settings-dialog']: RowSettingsDialogElement;
+                ['ide-row-settings-dialog']: RowSettingsDialogElement;
             }
         }
     }
     export class RowSettingsDialog extends Module {
         private dialog;
-        private ipWidth;
-        private ipHeight;
-        private ipColumns;
         private txtRowBackgroundColor;
-        private txtRowBackgroundImageURL;
-        private vstackColumnsWidth;
-        private columnsWidth;
-        private vstackColumnsSize;
-        private columnsSize;
         private onSave;
         constructor(parent?: any);
-        init(): Promise<void>;
         show(): void;
         hide(): void;
-        setConfig(config: IRowSettings): void;
-        getConfig(): IRowSettings;
-        getColumnsSettings(): any[];
-        onColumnsChanged(): void;
-        onColumnWidthChanged(src: Control, idx: number): void;
-        onColumnSizeChanged(src: Control, idx: number, key: string): void;
-        updateColumnsSettings(length: number, columnsSettings?: any): void;
+        setConfig(config: string): void;
+        getConfig(): any;
         confirm(): Promise<void>;
         cancel(): void;
-        render(): any;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/dialogs/settingsDialog.css.ts" />
-declare module "@scom/scom-page-builder/dialogs/settingsDialog.css.ts" { }
-/// <amd-module name="@scom/scom-page-builder/dialogs/settingsDialog.tsx" />
-declare module "@scom/scom-page-builder/dialogs/settingsDialog.tsx" {
-    import { Module, ControlElement, Upload } from '@ijstech/components';
-    import "@scom/scom-page-builder/dialogs/settingsDialog.css.ts";
-    import { IConfigData } from "@scom/scom-page-builder/interface/index.ts";
-    export interface SettingsDialogElement extends ControlElement {
-        onSave: (config: IConfigData) => Promise<void>;
-    }
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ['scpage-site-settings-dialog']: SettingsDialogElement;
-            }
-        }
-    }
-    export class SettingsDialog extends Module {
-        private dialog;
-        private switchShowHeader;
-        private switchBoxedLayout;
-        private pnlInputBoxed;
-        private inputBoxedWidth;
-        private switchContainerLayout;
-        private pnlInputContainer;
-        private inputContainerWidth;
-        private inputContainerMaxWidth;
-        private btnContainerTextAlign;
-        private modalContainerTextAlign;
-        private containerTextAlign?;
-        private btnContainerOverflow;
-        private modalContainerOverflow;
-        private containerOverflow?;
-        private switchShowPagination;
-        private switchShowLogo;
-        private switchShowTopMenu;
-        private switchShowSideMenu;
-        private switchShowWalletAuthentication;
-        private switchStickyFooter;
-        private switchShowFooter;
-        private uploadLogo;
-        private txtHeaderBackgroundColor;
-        private txtMenuFontColor;
-        private txCopyright;
-        private btnWebsiteType;
-        private modalWebsiteType;
-        private gpBoxedLayout;
-        private gpContainerLayout;
-        private gpHeaderVisible;
-        private gpShowWalletAuthentication;
-        private gpLogoVisible;
-        private gpLogo;
-        private gpHeaderBackgroundColor;
-        private gpPaginationVisible;
-        private gpFooterVisible;
-        private gpStickyFooter;
-        private gpCopyright;
-        private gpTopMenuVisible;
-        private gpSideMenuVisible;
-        private gpMenuFontColor;
-        private onSave;
-        private logo;
-        constructor(parent?: any);
-        init(): Promise<void>;
-        initEventBus(): void;
-        show(): void;
-        hide(): void;
-        setConfig(config: IConfigData): void;
-        getConfig(): Promise<IConfigData>;
-        confirm(): Promise<void>;
-        onFileChanged(source: Upload, fileList: File[]): Promise<void>;
-        onBoxedChanged(): void;
-        onContainerChanged(): void;
-        onTextAlignChanged(value: string): void;
-        showModalContainerTextAlign(): void;
-        onOverflowChanged(value: string): void;
-        onSiteTypeChanged(value: string): void;
-        showModalWebsiteType(): void;
-        showModalContainerOverflow(): void;
         render(): any;
     }
 }
@@ -899,45 +785,13 @@ declare module "@scom/scom-page-builder/dialogs/pageBlockSettingsDialog.tsx" {
         render(): Promise<any>;
     }
 }
-/// <amd-module name="@scom/scom-page-builder/dialogs/selectSiteTypeDialog.css.ts" />
-declare module "@scom/scom-page-builder/dialogs/selectSiteTypeDialog.css.ts" { }
-/// <amd-module name="@scom/scom-page-builder/dialogs/selectSiteTypeDialog.tsx" />
-declare module "@scom/scom-page-builder/dialogs/selectSiteTypeDialog.tsx" {
-    import { Module, ControlElement, Control } from '@ijstech/components';
-    import "@scom/scom-page-builder/dialogs/selectSiteTypeDialog.css.ts";
-    export interface RowSettingsDialogElement extends ControlElement {
-        onSave: (siteType: any) => void;
-    }
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ['scpage-select-site-type-dialog']: RowSettingsDialogElement;
-            }
-        }
-    }
-    export class SelectSiteTypeDialog extends Module {
-        private dialog;
-        private pnlSecurePage;
-        private pnlSecureBook;
-        private onSave;
-        constructor(parent?: any);
-        init(): Promise<void>;
-        show(): void;
-        hide(): void;
-        selectSecurePage(target: Control): void;
-        selectSecureBook(target: Control): void;
-        render(): any;
-    }
-}
 /// <amd-module name="@scom/scom-page-builder/dialogs/index.ts" />
 declare module "@scom/scom-page-builder/dialogs/index.ts" {
     import { ConfirmDialog } from "@scom/scom-page-builder/dialogs/confirmDialog.tsx";
     import { LoadingDialog } from "@scom/scom-page-builder/dialogs/loadingDialog.tsx";
     import { RowSettingsDialog } from "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx";
-    import { SettingsDialog } from "@scom/scom-page-builder/dialogs/settingsDialog.tsx";
     import { PageBlockSettingsDialog } from "@scom/scom-page-builder/dialogs/pageBlockSettingsDialog.tsx";
-    import { SelectSiteTypeDialog } from "@scom/scom-page-builder/dialogs/selectSiteTypeDialog.tsx";
-    export { ConfirmDialog, LoadingDialog, RowSettingsDialog, SettingsDialog, PageBlockSettingsDialog, SelectSiteTypeDialog };
+    export { ConfirmDialog, LoadingDialog, RowSettingsDialog, PageBlockSettingsDialog };
 }
 /// <amd-module name="@scom/scom-page-builder/common/toolbar.css.ts" />
 declare module "@scom/scom-page-builder/common/toolbar.css.ts" { }
@@ -1057,6 +911,7 @@ declare module "@scom/scom-page-builder/page/pageSection.tsx" {
         private pnlLoading;
         private pnlMain;
         private pageSectionWrapper;
+        private pnlBack;
         private _readonly;
         private _size;
         private currentToolbar;
@@ -1125,21 +980,24 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private actionsBar;
         private dragStack;
         private pnlRow;
-        private rowData;
+        private mdRowSetting;
         private _readonly;
         private isResizing;
         private currentWidth;
         private currentHeight;
         private currentElement;
+        private rowId;
         private isCloned;
         private isChanged;
         constructor(parent?: any);
+        get data(): IPageSection | null;
         private initEventBus;
         init(): void;
         private createNewElement;
         private clearData;
         setData(rowData: IPageSection): Promise<void>;
-        onOpenRowSettingsDialog(): void;
+        private onOpenRowSettingsDialog;
+        private onSaveRowSettings;
         private onClone;
         private onResized;
         onDeleteRow(): void;

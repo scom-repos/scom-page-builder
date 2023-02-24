@@ -22,7 +22,6 @@ export class RemoveToolbarCommand implements ICommand {
     if (ideSection) ideSection.remove();
     const section = pageObject.getSection(this.rowId);
     if (this.pageRow) {
-      // const toolbars = this.pageRow.querySelectorAll('ide-toolbar');
       this.pageRow.visible = !!section?.elements?.length;
     }
   }

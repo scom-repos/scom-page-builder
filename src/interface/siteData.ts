@@ -54,24 +54,6 @@ export interface IPageElement {
     invisibleOn?: string;
 }
 
-export interface IRowSettings {
-    height?: string;
-    width?: string;
-    columns?: number;
-    columnsSettings?: {
-        width?: string;
-        size?: {
-            width?: string;
-            height?: string;
-        }
-    }[];
-    backgroundColor?: string;
-    backgroundImageUrl?: string;
-    isCloned?: boolean | true;
-    isChanged?: boolean | true;
-    isDeleted?: boolean | true;
-}
-
 type StyleValues = "-moz-initial" | "inherit" | "initial" | "revert" | "unset";
 
 export interface IContainerSettings {

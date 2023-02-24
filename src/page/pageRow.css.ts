@@ -117,6 +117,9 @@ Styles.cssRule('ide-row', {
             height: '100%',
             border: 'solid 2px blue'
         },
+        '.active-bd': {
+            border: 'solid 2px blue'
+        },
         '.border-x-dotted': {
             borderLeft: 'dotted 1px black',
             borderRight: 'dotted 1px black'

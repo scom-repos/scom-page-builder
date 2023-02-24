@@ -46,12 +46,18 @@ export class DragElementCommand implements ICommand {
         return result;
       }, 0);
 
-      // TODO: check later
       if (prevDropElm) {
         const prevColumn = Number(prevDropElm.dataset.column);
         const prevColumnSpan = Number(prevDropElm.dataset.columnSpan);
         if (newColumn < prevColumn + prevColumnSpan)
           newColumn = prevColumn + prevColumnSpan;
+      }
+      if (afterDropElm) {
+        const afterColumn = Number(afterDropElm.dataset.column);
+        // const afterColumnSpan = Number(afterDropElm.dataset.columnSpan);
+        if (newColumn + columnSpan > afterColumn) {
+          newColumn = afterColumn - columnSpan;
+        }
       }
       const finalColumnSpan = Math.max(Math.min(columnSpan, MAX_COLUMN - currentSpan), 1);
       return { column: newColumn, columnSpan: finalColumnSpan };
