@@ -57,7 +57,11 @@ export class PageRow extends Module {
         this.setData = this.setData.bind(this);
     }
 
-    get data(): IPageSection | null {
+    get data(): any {
+        if (this.rowId === 'header')
+            return pageObject.header;
+        if (this.rowId === 'footer')
+            return pageObject.footer;
         return this.rowId ? pageObject.getSection(this.rowId) : null;
     }
 

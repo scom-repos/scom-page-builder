@@ -551,42 +551,6 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         visibleOn?: string;
         invisibleOn?: string;
     }
-    type StyleValues = "-moz-initial" | "inherit" | "initial" | "revert" | "unset";
-    export interface IContainerSettings {
-        width?: string;
-        maxWidth?: string;
-        textAlign?: StyleValues | "center" | "end" | "justify" | "left" | "match-parent" | "right" | "start";
-        overflow?: StyleValues | "-moz-hidden-unscrollable" | "auto" | "clip" | "hidden" | "scroll" | "visible" | (string & {});
-    }
-    export interface IConfigData {
-        header: {
-            showHeader: boolean;
-            showWalletAuthentication: boolean;
-            showLogo: boolean;
-            headerBackgroundColor: string;
-            logo: string;
-        };
-        body: {
-            boxedLayout: boolean;
-            boxedWidth: string;
-            containerLayout: boolean;
-            containerSettings: IContainerSettings;
-            showPagination: boolean;
-        };
-        footer: {
-            showFooter: boolean;
-            stickyFooter: boolean;
-            copyrightText: string;
-        };
-        menu: {
-            showTopMenu: boolean;
-            showSideMenu: boolean;
-            fontColor: string;
-        };
-        url: {
-            urlSuffix: string;
-        };
-    }
 }
 /// <amd-module name="@scom/scom-page-builder/interface/jsonSchema.ts" />
 declare module "@scom/scom-page-builder/interface/jsonSchema.ts" {
@@ -990,7 +954,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private isCloned;
         private isChanged;
         constructor(parent?: any);
-        get data(): IPageSection | null;
+        get data(): any;
         private initEventBus;
         init(): void;
         private createNewElement;
