@@ -52,7 +52,7 @@ export class DragElementCommand implements ICommand {
         const prevColumnSpan = Number(prevDropElm.dataset.columnSpan);
         if (newColumn < prevColumn + prevColumnSpan) {
           const data = prevColumn + prevColumnSpan;
-          if (data <= 13) newColumn = prevColumn + prevColumnSpan;
+          if (data < 13) newColumn = prevColumn + prevColumnSpan;
         }
       }
       if (afterDropElm) {
