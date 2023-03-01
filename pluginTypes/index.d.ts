@@ -78,6 +78,42 @@ declare module "@scom/scom-page-builder/const/index.ts" {
     export const IPFS_GATEWAY = "https://ipfs.io/ipfs/";
     export * from "@scom/scom-page-builder/const/textbox.ts";
 }
+/// <amd-module name="@scom/scom-page-builder/store/index.ts" />
+declare module "@scom/scom-page-builder/store/index.ts" {
+    import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData } from "@scom/scom-page-builder/interface/index.ts";
+    export class PageObject {
+        private _header;
+        private _sections;
+        private _footer;
+        set header(value: IPageHeader);
+        get header(): IPageHeader;
+        set sections(value: IPageSection[]);
+        get sections(): IPageSection[];
+        set footer(value: IPageFooter);
+        get footer(): IPageFooter;
+        addSection(value: IPageSection): void;
+        removeSection(id: string): void;
+        getSection(id: string): IPageSection;
+        getRow(rowId: string): IPageSection | IPageFooter;
+        removeRow(id: string): void;
+        addRow(data: any, id?: string): void;
+        private findElement;
+        getElement(sectionId: string, elementId: string): any;
+        setElement(sectionId: string, elementId: string, value: any): void;
+        removeElement(sectionId: string, elementId: string): void;
+        addElement(sectionId: string, value: IPageElement): void;
+    }
+    export const pageObject: PageObject;
+    export const state: {
+        pageBlocks: any[];
+        rootDir: string;
+    };
+    export const setPageBlocks: (value: IPageBlockData[]) => void;
+    export const getPageBlocks: () => any[];
+    export const getDappContainer: () => any;
+    export const setRootDir: (value: string) => void;
+    export const getRootDir: () => string;
+}
 /// <amd-module name="@scom/scom-page-builder/utility/pathToRegexp.ts" />
 declare module "@scom/scom-page-builder/utility/pathToRegexp.ts" {
     export interface ParseOptions {
@@ -207,39 +243,6 @@ declare module "@scom/scom-page-builder/utility/pathToRegexp.ts" {
      * contain `[{ name: 'id', delimiter: '/', optional: false, repeat: false }]`.
      */
     export function pathToRegexp(path: Path, keys?: Key[], options?: TokensToRegexpOptions & ParseOptions): RegExp;
-}
-/// <amd-module name="@scom/scom-page-builder/store/index.ts" />
-declare module "@scom/scom-page-builder/store/index.ts" {
-    import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData } from "@scom/scom-page-builder/interface/index.ts";
-    export class PageObject {
-        private _header;
-        private _sections;
-        private _footer;
-        set header(value: IPageHeader);
-        get header(): IPageHeader;
-        set sections(value: IPageSection[]);
-        get sections(): IPageSection[];
-        set footer(value: IPageFooter);
-        get footer(): IPageFooter;
-        addSection(value: IPageSection): void;
-        removeSection(id: string): void;
-        getSection(id: string): IPageSection;
-        getRow(rowId: string): IPageSection | IPageFooter;
-        removeRow(id: string): void;
-        addRow(data: any, id?: string): void;
-        private findElement;
-        getElement(sectionId: string, elementId: string): any;
-        setElement(sectionId: string, elementId: string, value: any): void;
-        removeElement(sectionId: string, elementId: string): void;
-        addElement(sectionId: string, value: IPageElement): void;
-    }
-    export const pageObject: PageObject;
-    export const state: {
-        pageBlocks: any[];
-    };
-    export const setPageBlocks: (value: IPageBlockData[]) => void;
-    export const getPageBlocks: () => any[];
-    export const getDappContainer: () => any;
 }
 /// <amd-module name="@scom/scom-page-builder/utility/command/interface.ts" />
 declare module "@scom/scom-page-builder/utility/command/interface.ts" {
@@ -1214,6 +1217,7 @@ declare module "@scom/scom-page-builder" {
         private builderFooter;
         private contentWrapper;
         constructor(parent?: Container, options?: any);
+        setRootDir(value: string): void;
         getData(): {
             header: import("@scom/scom-page-builder/interface/siteData.ts").IPageHeader;
             sections: import("@scom/scom-page-builder/interface/siteData.ts").IPageSection[];

@@ -7,6 +7,7 @@ import { PageRows } from './page/index';
 import { getDappContainer, pageObject } from './store/index';
 import { LightTheme  } from './theme/index';
 import { generateUUID } from './utility/index';
+import { setRootDir as _setRootDir } from './store/index';
 import './index.css';
 
 const Theme = LightTheme;
@@ -26,6 +27,10 @@ export default class Editor extends Module {
         super(parent, options);
         this.getData = this.getData.bind(this);
         this.setData = this.setData.bind(this);
+    }
+
+    setRootDir(value: string) {
+        _setRootDir(value);
     }
 
     getData() {

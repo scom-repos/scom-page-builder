@@ -144,7 +144,8 @@ export class PageObject {
 export const pageObject = new PageObject();
 
 export const state = {
-  pageBlocks: []
+  pageBlocks: [],
+  rootDir: ''
 }
 
 export const setPageBlocks = (value: IPageBlockData[]) => {
@@ -157,4 +158,12 @@ export const getPageBlocks = () => {
 
 export const getDappContainer = () => {
   return (state.pageBlocks || []).find(pageblock => pageblock.name === '@PageBlock/Dapp Container');
+}
+
+export const setRootDir = (value: string) => {
+  state.rootDir = value || '';
+}
+
+export const getRootDir = () => {
+  return state.rootDir;
 }

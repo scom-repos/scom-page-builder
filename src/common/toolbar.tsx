@@ -11,7 +11,7 @@ import {
     IRenderUIOptions
 } from '@ijstech/components';
 import { ELEMENT_NAME, IPageBlockAction, IPageElement, ValidationError } from '../interface/index';
-import { pageObject } from '../store/index';
+import { getRootDir, pageObject } from '../store/index';
 import { commandHistory, getModule, isEmpty, RemoveToolbarCommand } from '../utility/index';
 import './toolbar.css';
 
@@ -338,6 +338,10 @@ export class IDEToolbar extends Module {
 
     async setProperties(data: any) {
         if (!this._component) return;
+        if (this._component.setRootDir) {
+            const rootDir = getRootDir();
+            this._component.setRootDir(rootDir);
+        }
         await this._component.setData(data);
     }
 

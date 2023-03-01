@@ -1,5 +1,6 @@
 import { application, Module } from '@ijstech/components';
 import { BigNumber } from '@ijstech/eth-wallet';
+import { getRootDir } from '../store/index';
 import { IPFS_UPLOAD_END_POINT, IPFS_GATEWAY_IJS, IPFS_GATEWAY } from '../const/index';
 import { match, MatchFunction, compile } from './pathToRegexp';
 
@@ -164,9 +165,11 @@ const getSCConfigByCid = async (cid: string) => {
 const getModule = async (options: IGetModuleOptions) => {
     let module: Module;
     if (options.localPath) {
-        const scconfigRes = await fetch(`${options.localPath}/scconfig.json`);
+        const rootDir = getRootDir();
+        const localRootPath = rootDir ? `${rootDir}/${options.localPath}` : options.localPath;
+        const scconfigRes = await fetch(`${localRootPath}/scconfig.json`);
         const scconfig = await scconfigRes.json();
-        scconfig.rootDir = options.localPath;
+        scconfig.rootDir = localRootPath;
         module = await application.newModule(scconfig.main, scconfig);
     }
     else {
