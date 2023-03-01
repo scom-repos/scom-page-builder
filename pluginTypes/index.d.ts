@@ -253,6 +253,7 @@ declare module "@scom/scom-page-builder/utility/command/interface.ts" {
         columnSpan: number;
     }
     export const MAX_COLUMN = 12;
+    export const MIN_COLUMN = 2;
 }
 /// <amd-module name="@scom/scom-page-builder/utility/command/add.ts" />
 declare module "@scom/scom-page-builder/utility/command/add.ts" {
@@ -330,6 +331,10 @@ declare module "@scom/scom-page-builder/utility/command/drag.ts" {
         private oldDataRow;
         private data;
         constructor(element: any, dropElm: HTMLElement);
+        private updateColumnData;
+        private getColumn;
+        private getColumnSpan;
+        private getTotalColumn;
         private getColumnData;
         execute(): void;
         undo(): void;

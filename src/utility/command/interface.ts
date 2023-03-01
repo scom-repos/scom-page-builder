@@ -10,3 +10,4 @@ export interface IDataColumn {
 }
 
 export const MAX_COLUMN = 12;
+export const MIN_COLUMN = 2;

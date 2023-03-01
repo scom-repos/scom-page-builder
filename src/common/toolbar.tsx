@@ -195,20 +195,12 @@ export class IDEToolbar extends Module {
             this.toolsStack.visible = true;
         this.contentStack && this.contentStack.classList.add('active');
         this.classList.add('active');
-        // if (this.isTexbox() && this._component.edit) {
-        //     this._component.edit();
-        //     this.isEditing = true;
-        // }
     }
 
     hideToolbars() {
         this.toolsStack.visible = false;
         this.contentStack && this.contentStack.classList.remove('active');
         this.classList.remove('active');
-        // if (this.isTexbox() && this._component.confirm && this.isEditing) {
-        //     this._component.confirm();
-        //     this.isEditing = false;
-        // }
     }
 
     private renderResizeStack(data: IPageElement) {
@@ -346,9 +338,8 @@ export class IDEToolbar extends Module {
         const pageRows= document.querySelectorAll('ide-row');
         if (pageRows) {
             for (const row of pageRows) {
-                const toolbarElm = row.querySelector('ide-toolbar') as IDEToolbar;
-                if (toolbarElm)
-                    toolbarElm.hideToolbars();
+                const toolbarElms = row.querySelectorAll('ide-toolbar');
+                if (toolbarElms) toolbarElms.forEach((toolbarElm: IDEToolbar) => toolbarElm.hideToolbars());
                 row.classList.remove('active');
             }
         }
