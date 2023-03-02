@@ -19,6 +19,7 @@ import {
     ResizeElementCommand,
     DragElementCommand,
     MAX_COLUMN,
+    UpdateElementCommand,
 } from '../utility/index';
 
 declare global {
@@ -132,10 +133,8 @@ export class PageRow extends Module {
     }
 
     private onSaveRowSettings(color: string) {
-        if (this.data) {
-            this.data.backgroundColor = color;
-            this.style.backgroundColor = color;
-        }
+        const updateCmd = new UpdateElementCommand(this, color);
+        commandHistory.execute(updateCmd);
     }
 
     private async onClone() {
@@ -170,6 +169,7 @@ export class PageRow extends Module {
                 position="absolute"
                 width="100%"
                 height="100%"
+                minHeight="3rem"
                 top="0px"
                 left="0px"
                 class="fixed-grid"
@@ -315,7 +315,7 @@ export class PageRow extends Module {
         this.addEventListener('dragstart', function (event) {
             const eventTarget = event.target as Control;
             if (eventTarget instanceof PageRow) return;
-            const target = eventTarget.closest('ide-section') as PageSection;
+            const target = eventTarget.closest && eventTarget.closest('ide-section') as PageSection;
             const toolbar = target?.querySelector('ide-toolbar') as Control;
             const cannotDrag =
                 toolbar &&
@@ -352,14 +352,24 @@ export class PageRow extends Module {
             if (!eventTarget || !self.currentElement) return;
             const target = eventTarget.closest('.fixed-grid-item') as Control;
             if (target) {
-                const column = Number(target.getAttribute('data-column'));
+                const column = Number(target.dataset.column);
+                const columnSpan = Number(self.currentElement.dataset.columnSpan);
+                const colSpan = Math.min(columnSpan, 12);
+                const colStart = Math.min(column, 12 - colSpan + 1);
+                const grid = target.closest('.grid');
+                const sections = Array.from(grid?.querySelectorAll('ide-section'));
+                const sortedSections = sections.sort((a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column));
+                const findedSection = sortedSections.find((section: Control) => {
+                    const sectionColumn = Number(section.dataset.column);
+                    const sectionColumnSpan = Number(section.dataset.columnSpan);
+                    const colData = colStart + colSpan;
+                    return colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan;
+                });
+                if (findedSection) return;
                 const rectangle = target
                     .closest('.fixed-grid')
                     .parentNode.querySelector(`.rectangle`) as Control;
                 rectangle.style.display = 'block';
-                const columnSpan = Number(self.currentElement.dataset.columnSpan);
-                const colSpan = Math.min(columnSpan, 12);
-                const colStart = Math.min(column, 12 - colSpan + 1);
                 rectangle.style.left = (gridColumnWidth + gapWidth) * (colStart - 1) + 'px';
                 rectangle.style.width =
                     gridColumnWidth * columnSpan + gapWidth * (columnSpan - 1) + 'px';
@@ -416,8 +426,23 @@ export class PageRow extends Module {
             const eventTarget = event.target as Control;
             const target = eventTarget.closest('.fixed-grid-item') as Control;
             if (target) {
-                const dragCmd = new DragElementCommand(self.currentElement, target);
-                commandHistory.execute(dragCmd);
+                const column = Number(target.dataset.column);
+                const columnSpan = Number(self.currentElement.dataset.columnSpan);
+                const colSpan = Math.min(columnSpan, 12);
+                const colStart = Math.min(column, 12 - colSpan + 1);
+                const grid = target.closest('.grid');
+                const sections = Array.from(grid?.querySelectorAll('ide-section'));
+                const sortedSections = sections.sort((a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column));
+                const findedSection = sortedSections.find((section: Control) => {
+                    const sectionColumn = Number(section.dataset.column);
+                    const sectionColumnSpan = Number(section.dataset.columnSpan);
+                    const colData = colStart + colSpan;
+                    return colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan;
+                });
+                if (!findedSection) {
+                    const dragCmd = new DragElementCommand(self.currentElement, target);
+                    commandHistory.execute(dragCmd);
+                }
             } else {
                 const isPageRow = eventTarget.classList.contains('page-row');
                 const dropElm = (

@@ -8,6 +8,7 @@ export class DragElementCommand implements ICommand {
   private oldDataColumn: IDataColumn;
   private oldDataRow: string;
   private data: any;
+  private oldDataColumnMap: any[] = [];
 
   constructor(element: any, dropElm: HTMLElement) {
     this.element = element;
@@ -23,6 +24,7 @@ export class DragElementCommand implements ICommand {
 
   private updateColumnData(el: Control, rowId: string, column?: number, columnSpan?: number) {
     if (!column && !columnSpan) return;
+    this.oldDataColumnMap.push({el, rowId, column: this.getColumn(el), columnSpan: this.getColumnSpan(el)});
     const col = column || this.getColumn(el);
     const colSpan = columnSpan || this.getColumnSpan(el);
     const newColumnData: any = {column: col, columnSpan: colSpan};
@@ -31,6 +33,14 @@ export class DragElementCommand implements ICommand {
     el.setAttribute('data-column-span', `${colSpan}`);
     el.style.gridColumn = `${col} / span ${colSpan}`;
   }
+
+  private resetColumnData(el: Control, rowId: string, column: number, columnSpan: number) {
+    pageObject.setElement(rowId, el.id, {column, columnSpan});
+    el.setAttribute('data-column', `${column}`);
+    el.setAttribute('data-column-span', `${columnSpan}`);
+    el.style.gridColumn = `${column} / span ${columnSpan}`;
+  }
+
 
   private getColumn(el: Control) {
     return Number(el.dataset.column);
@@ -89,28 +99,31 @@ export class DragElementCommand implements ICommand {
     } else {
       const dropSection = this.dropElm.closest('ide-section') as Control;
       if (dropSection) {
-        const columnSpan = Math.min(this.getColumnSpan(this.element), MIN_COLUMN);
         const pageRow = this.dropElm.closest('ide-row') as Control;
         const pageRowId = (pageRow?.id || '').replace('row-', '');
         let newColumn = this.getNextColumn(dropSection);
-
-        const nxtDrop = sortedSections.find((el: Control) => {
-          return !isNaN(this.getColumn(el)) && (newColumn === this.getColumn(el));
-        }) as Control;
         if (pageRow.contains(this.element)) {
-          if (nxtDrop) {
-            const newNxtDropColumn = this.getColumn(nxtDrop) + columnSpan;
-            this.updateColumnData(nxtDrop, pageRowId, newNxtDropColumn, this.getColumnSpan(nxtDrop));
-            return {column: this.getColumn(nxtDrop), columnSpan};
-          } else {
-            this.updateColumnData(dropSection, pageRowId, this.getColumn(this.element));
-            return {column: this.getColumn(this.element) + this.getColumnSpan(dropSection), columnSpan};
+          const elementIndex = sortedSections.findIndex(el => this.getColumn(el as Control) === this.getColumn(this.element));
+          const dropIndex = sortedSections.findIndex(el => this.getColumn(el as Control) === this.getColumn(dropSection));
+          if (this.getColumn(this.element) > this.getColumn(dropSection)) {
+            for (let j = elementIndex + 1; j < dropIndex; j++) {
+              const elm = sortedSections[j] as Control;
+              this.updateColumnData(elm, pageRowId, this.getColumn(elm) + this.getColumnSpan(this.element));
+            }
+          } else if (this.getColumn(this.element) < this.getColumn(dropSection)) {
+            for (let j = elementIndex - 1; j >= dropIndex; j--) {
+              const elm = sortedSections[j] as Control;
+              this.updateColumnData(elm, pageRowId, this.getColumn(elm) - this.getColumnSpan(this.element));
+            }
           }
+          newColumn = this.getNextColumn(dropSection);
+          return {column: newColumn, columnSpan: this.getColumnSpan(this.element)};
         }
 
         const hasSpace = sortedSections.find((section: Control) => this.getColumnSpan(section) > MIN_COLUMN);
         if (!hasSpace && sortedSections.length >= 6) return null;
 
+        const columnSpan = Math.min(this.getColumnSpan(this.element), MIN_COLUMN);
         for (let i = 0; i < sortedSections.length; i++) {
           const el = sortedSections[i] as Control;
           const prevElm = sortedSections[i - 1] as Control;
@@ -119,23 +132,22 @@ export class DragElementCommand implements ICommand {
           if (this.getColumnSpan(el) > columnSpan) {
             const newElColSpan = this.getColumnSpan(el) - columnSpan;
             if (this.getColumn(dropSection) < this.getColumn(el)) {
+              const nextPos = this.getColumn(el) - this.getColumnSpan(nextElm);
+              if (this.getColumn(nextElm) !== nextPos && nextPos !== this.getNextColumn(dropSection))
+                this.updateColumnData(nextElm, pageRowId, nextPos);
               this.updateColumnData(el, pageRowId, this.getColumn(el) + columnSpan, newElColSpan);
               newColumn = this.getNextColumn(dropSection);
-              const nextPos = this.getColumn(el) - this.getColumnSpan(nextElm);
-              if (this.getColumn(nextElm) !== nextPos && nextPos !== newColumn)
-                this.updateColumnData(nextElm, pageRowId, nextPos);
             } else if (this.getColumn(dropSection) > this.getColumn(el)) {
               this.updateColumnData(el, pageRowId, this.getColumn(el), newElColSpan);
               if (prevElm) {
-                newColumn = this.getNextColumn(dropSection);
                 for (let j = i - 1; j >= 0; j--) {
                   const elm = sortedSections[j] as Control;
                   const newElmCol = this.getColumn(elm) - columnSpan;
-                  if (newElmCol !== newColumn)
+                  if (newElmCol !== this.getNextColumn(dropSection))
                     this.updateColumnData(elm, pageRowId, newElmCol);
                 }
-                newColumn -= columnSpan;
               }
+              newColumn = this.getNextColumn(dropSection);
             } else {
               this.updateColumnData(el, pageRowId, this.getColumn(el), newElColSpan);
               newColumn = this.getColumn(el) + newElColSpan;
@@ -145,18 +157,17 @@ export class DragElementCommand implements ICommand {
             if (this.getNextColumn(el) < MAX_COLUMN + 1 && i === 0) {
               this.updateColumnData(el, pageRowId, (MAX_COLUMN + 1) - this.getColumnSpan(el));
             }
-            newColumn = this.getNextColumn(dropSection);
             if (nextElm) {
               const canUpdated = this.getNextColumn(nextElm) !== this.getColumn(el) &&
                 this.getColumnSpan(nextElm) <= MIN_COLUMN;
               if (canUpdated) {
                 if (this.getColumn(dropSection) < this.getColumn(el)) {
                   const pos = this.getColumn(el) - this.getColumnSpan(nextElm);
-                  pos !== newColumn && this.updateColumnData(nextElm, pageRowId, pos);
+                  pos !== this.getNextColumn(dropSection) && this.updateColumnData(nextElm, pageRowId, pos);
                 } else if (this.getColumn(dropSection) > this.getColumn(el)) {
                   for (let j = i; j >= 0; j--) {
                     const elm = sortedSections[j] as Control;
-                    if (this.getPrevColumn(elm) !== newColumn) {
+                    if (this.getPrevColumn(elm) !== this.getNextColumn(dropSection)) {
                       this.updateColumnData(elm, pageRowId, this.getPrevColumn(elm));
                     }
                   }
@@ -165,6 +176,7 @@ export class DragElementCommand implements ICommand {
                 }
               }
             }
+            newColumn = this.getNextColumn(dropSection);
           }
         }
         return { column: newColumn, columnSpan };
@@ -230,6 +242,11 @@ export class DragElementCommand implements ICommand {
     }
     const oldElementSection = pageObject.getRow(this.oldDataRow);
     oldElementRow && (oldElementRow.visible = !!oldElementSection?.elements?.length);
+
+    for (let columnData of this.oldDataColumnMap) {
+      const { el, rowId, column, columnSpan } = columnData;
+      this.resetColumnData(el, rowId, column, columnSpan);
+    }
   }
 
   redo(): void {}
