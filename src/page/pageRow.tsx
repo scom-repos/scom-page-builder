@@ -21,6 +21,7 @@ import {
     MAX_COLUMN,
     UpdateElementCommand,
 } from '../utility/index';
+import { IDEToolbar } from '../common/index';
 
 declare global {
     namespace JSX {
@@ -64,7 +65,7 @@ export class PageRow extends Module {
     }
 
     private initEventBus() {
-        application.EventBus.register(this, EVENT.ON_RESIZE, this.onResized);
+        // application.EventBus.register(this, EVENT.ON_RESIZE, this.onResized);
     }
 
     init() {
@@ -143,8 +144,6 @@ export class PageRow extends Module {
         application.EventBus.dispatch(EVENT.ON_CLONE, { rowData, id: this.id });
     }
 
-    private onResized(data: any) {}
-
     onDeleteRow() {
         const rowCmd = new ElementCommand(this, this.parent, this.data, true);
         commandHistory.execute(rowCmd);
@@ -185,6 +184,7 @@ export class PageRow extends Module {
     }
 
     private initEventListeners() {
+        this.onClick = (target, event) => this.setActive();
         let self = this;
         let newWidth: number = 0;
         let newHeight: number = 0;
@@ -457,6 +457,18 @@ export class PageRow extends Module {
                 }
             }
         });
+    }
+
+    private setActive() {
+        const pageRows = document.querySelectorAll('ide-row');
+        if (pageRows) {
+            for (const row of pageRows) {
+                row.classList.remove('active');
+                const toolbars = row.querySelectorAll('ide-toolbar');
+                toolbars.forEach((toolbar: IDEToolbar) => toolbar.hideToolbars())
+            }
+        }
+        this.classList.add('active');
     }
 
     render() {

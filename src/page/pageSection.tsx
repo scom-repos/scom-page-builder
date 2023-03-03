@@ -74,22 +74,7 @@ export class PageSection extends Module {
         this.readonly = this.getAttribute('readonly', true, false);
         // this._size = this.getAttribute('containerSize', true, {});
         // this.updateContainerSize();
-        this.initEventListener();
-    }
-
-    private setActive() {
-        const pageRows= document.querySelectorAll('ide-row');
-        if (pageRows) {
-            for (const row of pageRows) {
-                row.classList.remove('active');
-            }
-        }
-        const row = this.closest('ide-row');
-        row && row.classList.add('active');
-    }
-
-    private initEventListener() {
-        this.onClick = (target, event) => this.setActive();
+        // this.initEventListener();
     }
 
     // private updateContainerSize() {

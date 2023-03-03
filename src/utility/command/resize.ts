@@ -17,8 +17,8 @@ export class ResizeElementCommand implements ICommand {
   constructor(element: Control, initialWidth: number, initialHeight: number, finalWidth: number, finalHeight: number) {
     this.element = element;
     this.toolbar = element.querySelector('ide-toolbar');
-    this.finalWidth = finalWidth;
-    this.finalHeight = finalHeight;
+    this.finalWidth = finalWidth || initialWidth;
+    this.finalHeight = finalHeight || initialHeight;
     this.finalLeft = Number(this.element.left);
     this.initialWidth = initialWidth;
     this.initialHeight = initialHeight;
@@ -80,7 +80,9 @@ export class ResizeElementCommand implements ICommand {
     if (this.toolbar) {
       const rowId = this.toolbar.rowId;
       const elementId = this.toolbar.elementId;
-      const currentTag = this.toolbar?.data?.tag || {};
+      const isContainer = this.toolbar?.data?.properties?.content && typeof this.toolbar?.data?.properties?.content === 'object';
+      const contentTag = isContainer ? this.toolbar?.data?.properties?.content?.tag : null;
+      const currentTag = contentTag || this.toolbar?.data?.tag || {};
       const tag = {...currentTag, width: '100%', height: this.finalHeight || this.initialHeight};
       this.toolbar.setTag(tag);
       if (newColumnData.column !== this.oldDataColumn.column || newColumnData.columnSpan !== this.oldDataColumn.columnSpan)
@@ -95,7 +97,9 @@ export class ResizeElementCommand implements ICommand {
     if (this.toolbar) {
       const rowId = this.toolbar.rowId;
       const elementId = this.toolbar.elementId;
-      const currentTag = this.toolbar?.data?.tag || {};
+      const isContainer = this.toolbar?.data?.properties?.content && typeof this.toolbar?.data?.properties?.content === 'object';
+      const contentTag = isContainer ? this.toolbar?.data?.properties?.content?.tag : null;
+      const currentTag = contentTag || this.toolbar?.data?.tag || {};
       const tag = {...currentTag, width: this.initialWidth, height: this.initialHeight};
       this.toolbar.setTag(tag);
       pageObject.setElement(rowId, elementId, {tag, ...this.oldDataColumn});

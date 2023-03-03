@@ -917,8 +917,6 @@ declare module "@scom/scom-page-builder/page/pageSection.tsx" {
         set readonly(value: boolean);
         get data(): any;
         init(): void;
-        private setActive;
-        private initEventListener;
         clear(): void;
         private createToolbar;
         setData(rowId: string, value: IPageElement): Promise<void>;
@@ -995,12 +993,12 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private onOpenRowSettingsDialog;
         private onSaveRowSettings;
         private onClone;
-        private onResized;
         onDeleteRow(): void;
         onMoveUp(): void;
         onMoveDown(): void;
         private renderFixedGrid;
         private initEventListeners;
+        private setActive;
         render(): any;
     }
 }
