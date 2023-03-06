@@ -107,16 +107,16 @@ import { commandHistory } from '../utility/index';
     async init() {
       super.init();
       this.iconList = [
-        // {
-        //   name: 'undo',
-        //   tooltip: {content: 'Undo last action', placement: 'bottom'},
-        //   onClick: () => commandHistory.undo()
-        // },
-        // {
-        //   name: 'redo',
-        //   tooltip: {content: 'Redo last action', placement: 'bottom'},
-        //   onClick: () => commandHistory.redo()
-        // },
+        {
+          name: 'undo',
+          tooltip: {content: 'Undo last action', placement: 'bottom'},
+          onClick: () => commandHistory.undo()
+        },
+        {
+          name: 'redo',
+          tooltip: {content: 'Redo last action', placement: 'bottom'},
+          onClick: () => commandHistory.redo()
+        },
         // {
         //   name: 'tablet',
         //   tooltip: {content: 'Preview', placement: 'bottom'},

@@ -147,21 +147,6 @@ export class PageRows extends Module {
             return;
         }
         if (dropElm && !this.currentRow.isSameNode(dropElm)) {
-            // let dragIndex = 0;
-            // let dropIndex = 0;
-            // const rows = this.pnlRows.querySelectorAll('ide-row');
-            // for (let i = 0; i < rows.length; i++) {
-            //     if (this.currentRow.isEqualNode(rows[i])) { dragIndex = i; }
-            //     if (dropElm.isEqualNode(rows[i])) { dropIndex = i; }
-            // }
-            // const [dragRowData] = this.rows.splice(dragIndex, 1);
-            // this.rows.splice(dropIndex, 0, dragRowData);
-            
-            // if (dragIndex < dropIndex) {
-            //     this.pnlRows.insertBefore(this.currentRow, dropElm.nextSibling);
-            // } else {
-            //     this.pnlRows.insertBefore(this.currentRow, dropElm);
-            // }
             const moveRowCmd = new MoveElementCommand(this.currentRow, dropElm, this.pnlRows, pageObject.sections);
             commandHistory.execute(moveRowCmd);
         }

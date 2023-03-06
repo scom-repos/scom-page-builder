@@ -34,7 +34,6 @@ export class PageSection extends Module {
     private pnlMain: Panel;
     private pageSectionWrapper: Panel;
     private pnlBack: Panel;
-    // private _dragger: ContainerDragger<PageSection>;
 
     private _readonly: boolean;
     private _size: {
@@ -73,27 +72,9 @@ export class PageSection extends Module {
     init() {
         super.init();
         this.readonly = this.getAttribute('readonly', true, false);
-        // const parent = this.parentElement.querySelector('#pnlElements') as Control;
-        // if (!this.readonly && parent)
-        //     this._dragger = new ContainerDragger(this, parent, this);
         // this._size = this.getAttribute('containerSize', true, {});
         // this.updateContainerSize();
-        this.initEventListener();
-    }
-
-    private setActive() {
-        const pageRows= document.querySelectorAll('ide-row');
-        if (pageRows) {
-            for (const row of pageRows) {
-                row.classList.remove('active');
-            }
-        }
-        const row = this.closest('ide-row');
-        row && row.classList.add('active');
-    }
-
-    private initEventListener() {
-        this.onClick = (target, event) => this.setActive();
+        // this.initEventListener();
     }
 
     // private updateContainerSize() {

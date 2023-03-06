@@ -94,6 +94,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         addSection(value: IPageSection): void;
         removeSection(id: string): void;
         getSection(id: string): IPageSection;
+        updateSection(id: string, data: any): void;
         getRow(rowId: string): IPageSection | IPageFooter;
         removeRow(id: string): void;
         addRow(data: any, id?: string): void;
@@ -274,6 +275,20 @@ declare module "@scom/scom-page-builder/utility/command/add.ts" {
         redo(): void;
     }
 }
+/// <amd-module name="@scom/scom-page-builder/utility/command/update.ts" />
+declare module "@scom/scom-page-builder/utility/command/update.ts" {
+    import { Control } from "@ijstech/components";
+    import { ICommand } from "@scom/scom-page-builder/utility/command/interface.ts";
+    export class UpdateElementCommand implements ICommand {
+        private element;
+        private color;
+        private oldColor;
+        constructor(element: Control, color: string);
+        execute(): void;
+        undo(): void;
+        redo(): void;
+    }
+}
 /// <amd-module name="@scom/scom-page-builder/utility/command/history.ts" />
 declare module "@scom/scom-page-builder/utility/command/history.ts" {
     import { ICommand } from "@scom/scom-page-builder/utility/command/interface.ts";
@@ -333,11 +348,14 @@ declare module "@scom/scom-page-builder/utility/command/drag.ts" {
         private oldDataColumn;
         private oldDataRow;
         private data;
+        private oldDataColumnMap;
         constructor(element: any, dropElm: HTMLElement);
         private updateColumnData;
+        private resetColumnData;
         private getColumn;
         private getColumnSpan;
-        private getTotalColumn;
+        private getNextColumn;
+        private getPrevColumn;
         private getColumnData;
         execute(): void;
         undo(): void;
@@ -362,6 +380,7 @@ declare module "@scom/scom-page-builder/utility/command/removeToolbar.ts" {
 /// <amd-module name="@scom/scom-page-builder/utility/command/index.ts" />
 declare module "@scom/scom-page-builder/utility/command/index.ts" {
     export { ElementCommand } from "@scom/scom-page-builder/utility/command/add.ts";
+    export { UpdateElementCommand } from "@scom/scom-page-builder/utility/command/update.ts";
     export { CommandHistory, commandHistory } from "@scom/scom-page-builder/utility/command/history.ts";
     export { MoveElementCommand } from "@scom/scom-page-builder/utility/command/move.ts";
     export { ResizeElementCommand } from "@scom/scom-page-builder/utility/command/resize.ts";
@@ -898,8 +917,6 @@ declare module "@scom/scom-page-builder/page/pageSection.tsx" {
         set readonly(value: boolean);
         get data(): any;
         init(): void;
-        private setActive;
-        private initEventListener;
         clear(): void;
         private createToolbar;
         setData(rowId: string, value: IPageElement): Promise<void>;
@@ -976,12 +993,12 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private onOpenRowSettingsDialog;
         private onSaveRowSettings;
         private onClone;
-        private onResized;
         onDeleteRow(): void;
         onMoveUp(): void;
         onMoveDown(): void;
         private renderFixedGrid;
         private initEventListeners;
+        private setActive;
         render(): any;
     }
 }

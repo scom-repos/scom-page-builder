@@ -48,6 +48,13 @@ export class PageObject {
     return this._sections.get(id) || null;
   }
 
+  updateSection(id: string, data: any) {
+    const section = this.getSection(id);
+    if (section) {
+      if (data.backgroundColor !== undefined) section.backgroundColor = data.backgroundColor;
+    }
+  }
+
   getRow(rowId: string) {
     if (rowId === 'header')
       return this.header;
@@ -113,27 +120,28 @@ export class PageObject {
   }
 
   removeElement(sectionId: string, elementId: string) {
+    let elements = [];
     if (sectionId === 'header') {
-      this._header.elements = [];
+      elements = this._header.elements;
+    } else if (sectionId === 'footer') {
+      elements = this._footer.elements;
+    } else {
+      const section = this.getSection(sectionId);
+      // TODO: check with composite
+      elements = section?.elements || [];
     }
-    if (sectionId === 'footer') {
-      this._footer.elements = [];
-    }
-    const section = this.getSection(sectionId);
-    if (!section) return;
-    // TODO: check with composite
-    const elementIndex = section.elements.findIndex(elm => elm.id === elementId);
+    const elementIndex = elements.findIndex(elm => elm.id === elementId);
     if (elementIndex !== -1) {
-      section.elements.splice(elementIndex, 1);
+      elements.splice(elementIndex, 1);
     }
   }
 
   addElement(sectionId: string, value: IPageElement) {
     if (sectionId === 'header') {
-      this._header.elements = [value];
+      this._header.elements.push(value);
     }
     if (sectionId === 'footer') {
-      this._footer.elements = [value];
+      this._footer.elements.push(value);
     }
     const section = this.getSection(sectionId);
     if (!section) return;

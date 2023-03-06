@@ -169,27 +169,27 @@ export class BuilderHeader extends Module {
 
     private updateHeaderType() {
         if (!this._headerType || this.showAddStack) {
-            this.pnlHeader.height = 'auto';
+            this.height = 'auto';
             return;
         }
         switch (this._headerType) {
             case HeaderType.COVER:
-                this.pnlHeader.height = '100vh';
+                this.height = '100vh';
                 this.pnlHeader.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
                 this.btnChangeImg.visible = true;
                 break;
             case HeaderType.LARGE:
-                this.pnlHeader.height = 520;
+                this.height = 520;
                 this.pnlHeader.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
                 this.btnChangeImg.visible = true;
                 break;
             case HeaderType.NORMAL:
-                this.pnlHeader.height = 340;
+                this.height = 340;
                 this.pnlHeader.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
                 this.btnChangeImg.visible = true;
                 break;
             case HeaderType.TITLE:
-                this.pnlHeader.height = 180;
+                this.height = 180;
                 this.pnlHeader.background = {color: '#fff', image: ''};
                 this.btnChangeImg.visible = false;
                 break;
@@ -244,13 +244,14 @@ export class BuilderHeader extends Module {
     init() {
         this._readonly = this.getAttribute('readonly', true, false);
         super.init();
+        this.display = "block";
         this.btnAddLogo.caption = this.pnlLogo ? 'Edit logo' : 'Add logo';
         this.renderHeaderType();
     }
 
     render() {
         return (
-            <i-vstack id="pnlHeader" position="relative" width="100%" maxHeight="100%" maxWidth="100%">
+            <i-vstack id="pnlHeader" position="relative" width="100%" height="100%" maxHeight="100%" maxWidth="100%">
                 <i-hstack
                     id="pnlTitle"
                     class="page-title"
@@ -277,7 +278,7 @@ export class BuilderHeader extends Module {
                 </i-hstack>
                 <i-vstack
                     id="pnlHeaderMain"
-                    height="calc(100% - 52px)"
+                    height="100%" maxHeight="100%"
                     horizontalAlignment="center" verticalAlignment="center"
                 ></i-vstack>
                 <i-hstack

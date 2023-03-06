@@ -8,7 +8,8 @@ import {
     Button,
     renderUI,
     Modal,
-    IRenderUIOptions
+    IRenderUIOptions,
+    Control
 } from '@ijstech/components';
 import { ELEMENT_NAME, IPageBlockAction, IPageElement, ValidationError } from '../interface/index';
 import { getRootDir, pageObject } from '../store/index';
@@ -288,11 +289,13 @@ export class IDEToolbar extends Module {
                 this._component.maxHeight = '100%';
                 this._component.overflow = 'hidden';
                 this._component.style.display = 'block';
-                this._component.onClick = () => {
+                this._component.addEventListener('click', (event: Event) => {
+                    event.stopImmediatePropagation();
+                    event.preventDefault()
                     this.toolList = this._component.getActions ? this._component.getActions() : [];
                     this.checkToolbar();
                     this.showToolbars();
-                }
+                })
                 if (this.isTexbox()) {
                     this.dragStack.visible = true;
                     this.contentStack.classList.remove('move');
