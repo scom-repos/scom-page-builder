@@ -188,7 +188,7 @@ export class IDEToolbar extends Module {
     }
 
     private isTexbox() {
-        return this.data.module.name === ELEMENT_NAME.TEXTBOX;
+        return this.data?.module?.name === ELEMENT_NAME.TEXTBOX;
     }
 
     showToolbars() {
@@ -281,7 +281,7 @@ export class IDEToolbar extends Module {
         try {
             const module = await getModule({ipfscid, localPath});
             if (module) {
-                await module.init();
+                module.init();
                 module.parent = this.contentStack;
                 this.contentStack.append(module);
                 this._component = module;
@@ -378,7 +378,7 @@ export class IDEToolbar extends Module {
 
     render() {
         return (
-            <i-vstack id="mainWrapper" width="auto" maxWidth="100%" maxHeight="100%">
+            <i-vstack id="mainWrapper" width="auto" maxWidth="100%" maxHeight="100%" position="relative">
                 <i-panel
                     id="toolsStack"
                     border={{ radius: 4 }}
@@ -423,6 +423,15 @@ export class IDEToolbar extends Module {
                         </i-grid-layout>
                     </i-vstack>
                 </i-panel>
+
+                <i-panel
+                    position="absolute"
+                    width="100%"
+                    height="15px"
+                    bottom="-15px"
+                    zIndex={999}
+                    visible={false}
+                ></i-panel>
                 <i-modal
                     id='mdActions'
                     title='Update Settings'

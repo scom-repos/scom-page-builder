@@ -2,8 +2,7 @@ import {
     Module,
     customElements,
     Panel,
-    ControlElement,
-    VStack
+    ControlElement
 } from '@ijstech/components';
 import './pageSection.css';
 import { IPageElement } from '../interface/index';
@@ -30,33 +29,15 @@ export interface PageSectionElement extends ControlElement {
 
 @customElements('ide-section')
 export class PageSection extends Module {
-    private pnlLoading: VStack;
     private pnlMain: Panel;
-    private pageSectionWrapper: Panel;
-    private pnlBack: Panel;
 
     private _readonly: boolean;
-    private _size: {
-        width?: string;
-        height?: string;
-    }
-    private currentToolbar: IDEToolbar;
-    private toolbarList: IDEToolbar[];
     private rowId: string = '';
 
     constructor(parent?: any) {
         super(parent);
         this.setData = this.setData.bind(this);
-        // this.getData = this.getData.bind(this);
     }
-
-    // get size() {
-    //     return this._size || {};
-    // }
-    // set size(value: { width?: string; height?: string }) {
-    //     this._size = value;
-    //     this.updateContainerSize();
-    // }
 
     get readonly() {
         return this._readonly;
@@ -72,84 +53,32 @@ export class PageSection extends Module {
     init() {
         super.init();
         this.readonly = this.getAttribute('readonly', true, false);
-        // this._size = this.getAttribute('containerSize', true, {});
-        // this.updateContainerSize();
-        // this.initEventListener();
     }
 
-    // private updateContainerSize() {
-    //     const sizeWidth = this.size.width || 'none';
-    //     const sizeHeight = this.size.height || 'none';
-    //     if (this.pageSectionWrapper) {
-    //         this.pageSectionWrapper.maxWidth = sizeWidth;
-    //         this.pageSectionWrapper.maxHeight = sizeHeight;
-    //         this.pageSectionWrapper.margin = { top: 'auto', bottom: 'auto', left: 'auto', right: 'auto' };
-    //     }
-    //     if (this.pnlLoading) {
-    //         this.pnlLoading.maxWidth = sizeWidth;
-    //         this.pnlLoading.maxHeight = sizeHeight;
-    //     }
-    //     if (this.pnlMain) {
-    //         this.pnlMain.maxWidth = sizeWidth;
-    //         this.pnlMain.maxHeight = sizeHeight;
-    //     }
-    // }
-
     clear() {
-        this.currentToolbar = null;
-        this.toolbarList = null;
         this.pnlMain.clearInnerHTML();
     }
 
     private async createToolbar(value: IPageElement) {
-        let toolbar = await IDEToolbar.create({}) as IDEToolbar;
-        toolbar.readonly = this._readonly;
+        const toolbar = <ide-toolbar readonly={this._readonly}></ide-toolbar> as IDEToolbar;
+        toolbar.id = `elm-${value.id}`;
         toolbar.rowId = this.rowId;
         toolbar.elementId = value.id;
+        toolbar.parent = this.pnlMain;
+        this.pnlMain.appendChild(toolbar);
         await toolbar.fetchModule(value);
-        return toolbar;
+        if (!isEmpty(value.properties)) toolbar.setProperties(value.properties);
+        value.tag && toolbar.setTag(value.tag);
     }
 
-    // TODO
     async setData(rowId: string, value: IPageElement) {
         this.id = value.id;
         this.rowId = rowId;
         if (value.type === 'primitive') {
-            if (this.currentToolbar) {
-                this.currentToolbar.setProperties(value.properties);
-                value.tag && this.currentToolbar.setTag(value.tag);
-            } else {
-                this.currentToolbar = await this.createToolbar(value);
-                this.currentToolbar.parent = this.pnlMain;
-                this.pnlMain.appendChild(this.currentToolbar);
-                if (!isEmpty(value.properties))
-                    this.currentToolbar.setProperties(value.properties);
-                value.tag && this.currentToolbar.setTag(value.tag);
-            }
-        } else if (value.elements?.length) {
-            if (this.toolbarList.length) {
-                for (let i = 0; i < value.elements.length; i++) {
-                    const element = value.elements[i];
-                    const toolbar = this.toolbarList[i];
-                    if (toolbar) {
-                        toolbar.setProperties(element.properties);
-                        element.tag && toolbar.setTag(element.tag);
-                    }
-                }
-            } else {
-                const stack = <i-vstack></i-vstack>
-                for (let i = 0; i < value.elements.length; i++) {
-                    const element = value.elements[i];
-                    const toolbar = await this.createToolbar(element);
-                    if (!isEmpty(element.properties))
-                        toolbar.setProperties(element.properties);
-                    element.tag && toolbar.setTag(element.tag);
-                    toolbar.parent = stack;
-                    stack.appendChild(toolbar);
-                    this.toolbarList.push(toolbar);
-                }
-                stack.parent = this.pnlMain;
-                this.pnlMain.appendChild(stack);
+            await this.createToolbar(value);
+        } else if (value?.elements?.length) {
+            for (let element of value.elements) {
+                await this.createToolbar(element);
             }
         }
     }
@@ -166,7 +95,6 @@ export class PageSection extends Module {
                     <i-panel id="pnlMain" maxWidth="100%" maxHeight="100%"></i-panel>
                 </i-panel>
                 <i-panel
-                    id="pnlBack"
                     position="absolute"
                     width={15}
                     height="100%"
