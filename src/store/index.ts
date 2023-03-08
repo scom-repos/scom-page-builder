@@ -21,9 +21,7 @@ export class PageObject {
 
   set sections(value: IPageSection[]) {
     this._sections.clear();
-    value.forEach(val => {
-      this._sections.set(val.id, val)
-    })
+    value.forEach(val => this._sections.set(val.id, val));
   }
   get sections(): IPageSection[] {
     return Array.from(this._sections.values());
@@ -119,6 +117,19 @@ export class PageObject {
     if (elm && value.tag) elm.tag = value.tag;
   }
 
+  private removeElementFn(elements: IPageElement[], elementId: string) {
+    if (!elements || !elements.length) return;
+    for (let i = 0; i < elements.length; i++) {
+      const element = elements[i];
+      if (element && element.id === elementId) {
+        elements.splice(i, 1);
+        break;
+      } else if (element && element.type === 'composite') {
+        this.removeElementFn(element.elements, elementId);
+      }
+    }
+  }
+
   removeElement(sectionId: string, elementId: string) {
     let elements = [];
     if (sectionId === 'header') {
@@ -127,25 +138,31 @@ export class PageObject {
       elements = this._footer.elements;
     } else {
       const section = this.getSection(sectionId);
-      // TODO: check with composite
       elements = section?.elements || [];
     }
-    const elementIndex = elements.findIndex(elm => elm.id === elementId);
-    if (elementIndex !== -1) {
-      elements.splice(elementIndex, 1);
-    }
+    this.removeElementFn(elements, elementId);
   }
 
-  addElement(sectionId: string, value: IPageElement) {
+  addElement(sectionId: string, value: IPageElement, parentElmId = '', elementIndex?: number) {
     if (sectionId === 'header') {
       this._header.elements.push(value);
-    }
-    if (sectionId === 'footer') {
+    } else if (sectionId === 'footer') {
       this._footer.elements.push(value);
+    } else {
+      const section = this.getSection(sectionId);
+      if (!section) return;
+      if (!parentElmId || parentElmId === value.id) {
+        section.elements.push(value);
+      } else {
+        const parentElement = section.elements.find(elm => elm.id === parentElmId);
+        if (parentElement) {
+          if (typeof elementIndex === 'number' && elementIndex !== -1)
+            parentElement.elements.splice(elementIndex, 0, value);
+          else
+            parentElement.elements.push(value);
+        }
+      }
     }
-    const section = this.getSection(sectionId);
-    if (!section) return;
-    section.elements.push(value);
   }
 }
 

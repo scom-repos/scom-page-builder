@@ -54,18 +54,9 @@ export class BuilderFooter extends Module {
 
     initEventBus() {
         application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => {
-            if (!pageObject.footer?.elements?.length)
-                this.updateFooter();
+            // if (!pageObject.footer?.elements?.length)
+            this.updateFooter();
         })
-    }
-
-    private resetData() {
-        this.showAddStack = true;
-        this.pnlFooter.background = {color: '#fff', image: ''};
-        this.pnlEditOverlay.visible = false;
-        this.pnlEditOverlay.classList.remove('flex');
-        this.pnlOverlay.visible = false;
-        this.pnlConfig.visible = false;
     }
 
     async setData(value: IPageFooter) {
@@ -114,7 +105,8 @@ export class BuilderFooter extends Module {
                 columnSpan: 12,
                 type: 'primitive',
                 module: textBlock,
-                properties: {
+                properties: {},
+                tag: {
                     width: '100%',
                     height: '130px'
                 }

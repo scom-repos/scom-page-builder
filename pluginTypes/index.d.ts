@@ -101,8 +101,9 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         private findElement;
         getElement(sectionId: string, elementId: string): any;
         setElement(sectionId: string, elementId: string, value: any): void;
+        private removeElementFn;
         removeElement(sectionId: string, elementId: string): void;
-        addElement(sectionId: string, value: IPageElement): void;
+        addElement(sectionId: string, value: IPageElement, parentElmId?: string, elementIndex?: number): void;
     }
     export const pageObject: PageObject;
     export const state: {
@@ -371,6 +372,8 @@ declare module "@scom/scom-page-builder/utility/command/removeToolbar.ts" {
         private data;
         private rowId;
         private elementId;
+        private sectionId;
+        private elementIndex;
         constructor(element: any);
         execute(): void;
         undo(): void;
@@ -903,14 +906,8 @@ declare module "@scom/scom-page-builder/page/pageSection.tsx" {
         };
     }
     export class PageSection extends Module {
-        private pnlLoading;
         private pnlMain;
-        private pageSectionWrapper;
-        private pnlBack;
         private _readonly;
-        private _size;
-        private currentToolbar;
-        private toolbarList;
         private rowId;
         constructor(parent?: any);
         get readonly(): boolean;
@@ -985,7 +982,6 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private isChanged;
         constructor(parent?: any);
         get data(): any;
-        private initEventBus;
         init(): void;
         private createNewElement;
         private clearData;
@@ -1190,7 +1186,6 @@ declare module "@scom/scom-page-builder/builder/builderFooter.tsx" {
         private showAddStack;
         constructor(parent?: any);
         initEventBus(): void;
-        private resetData;
         setData(value: IPageFooter): Promise<void>;
         private get _elements();
         private get _image();

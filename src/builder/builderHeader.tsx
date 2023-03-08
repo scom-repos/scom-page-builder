@@ -50,8 +50,7 @@ export class BuilderHeader extends Module {
 
     initEventBus() {
         application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => {
-            if (!pageObject.header?.elements?.length)
-                this.updateHeader();
+            this.updateHeader();
         })
     }
 
@@ -103,7 +102,8 @@ export class BuilderHeader extends Module {
                 columnSpan: 5,
                 type: 'primitive',
                 module: textBlock,
-                properties: {
+                properties: {},
+                tag: {
                     width: '100%',
                     height: '130px'
                 }

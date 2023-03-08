@@ -64,15 +64,10 @@ export class PageRow extends Module {
         return this.rowId ? pageObject.getRow(this.rowId) : this.rowData;
     }
 
-    private initEventBus() {
-        // application.EventBus.register(this, EVENT.ON_RESIZE, this.onResized);
-    }
-
     init() {
         this._readonly = this.getAttribute('readonly', true, false);
         super.init();
         this.renderFixedGrid();
-        this.initEventBus();
         this.initEventListeners();
     }
 
@@ -118,8 +113,8 @@ export class PageRow extends Module {
         if (image) this.background.image = image;
         else if (backgroundColor) this.background.color = backgroundColor;
 
-        this.isCloned = this.parentElement.nodeName !== 'BUILDER-HEADER';
-        this.isChanged = this.parentElement.nodeName !== 'BUILDER-HEADER';
+        this.isCloned = this.parentElement?.nodeName !== 'BUILDER-HEADER';
+        this.isChanged = this.parentElement?.nodeName !== 'BUILDER-HEADER';
 
         if (elements && elements.length > 0) {
             for (let i = 0; i < elements.length; i++) {
