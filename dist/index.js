@@ -2657,7 +2657,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                             this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
                             this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
                             this.$render("i-icon", { name: "circle", width: 3, height: 3 })))),
-                this.$render("i-panel", { position: "absolute", width: "100%", height: "15px", bottom: "-15px", zIndex: 999, visible: false, class: "back-block" }),
+                this.$render("i-panel", { position: "absolute", width: "100%", height: "15px", bottom: "-15px", zIndex: 999, border: { radius: '50px' }, visible: false, class: "bottom-block" }),
                 this.$render("i-modal", { id: 'mdActions', title: 'Update Settings', closeIcon: { name: 'times' }, minWidth: 400, maxWidth: 500, closeOnBackdropClick: false, onOpen: this.onShowModal.bind(this), onClose: this.onCloseModal.bind(this), class: "setting-modal" },
                     this.$render("i-panel", null,
                         this.$render("i-vstack", { id: "pnlFormMsg", padding: { left: '1.5rem', right: '1.5rem', top: '1rem' }, gap: "0.5rem", visible: false }),
@@ -2856,7 +2856,7 @@ define("@scom/scom-page-builder/page/pageSection.tsx", ["require", "exports", "@
             return (this.$render("i-panel", { id: 'pnlPageSection', maxWidth: "100%", maxHeight: "100%", height: "100%" },
                 this.$render("i-panel", { id: "pageSectionWrapper", width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%", padding: { top: '1.5rem', bottom: '1.5rem' } },
                     this.$render("i-panel", { id: "pnlMain", maxWidth: "100%", maxHeight: "100%" })),
-                this.$render("i-panel", { position: "absolute", width: 15, height: "100%", top: "0px", right: "-18px", zIndex: 999, visible: false, class: "back-block" })));
+                this.$render("i-panel", { position: "absolute", width: 15, height: "100%", top: "0px", right: "-18px", zIndex: 999, border: { radius: '50px' }, visible: false, class: "back-block" })));
         }
     };
     PageSection = __decorate([
@@ -3305,7 +3305,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 for (const rectangle of rectangles) {
                     rectangle.style.display = 'none';
                 }
-                let backBlocks = document.getElementsByClassName('back-block');
+                let backBlocks = document.getElementsByClassName('is-dragenter');
                 for (const block of backBlocks) {
                     block.visible = false;
                     block.classList.remove('is-dragenter');
@@ -3344,6 +3344,19 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 else {
                     const section = eventTarget.closest('ide-section');
                     if (section && !section.isSameNode(self.currentElement)) {
+                        const toolbar = eventTarget.closest('ide-toolbar');
+                        if (toolbar) {
+                            const { y, height } = toolbar.getBoundingClientRect();
+                            if (Math.ceil(event.clientY) >= Math.ceil(y + height) - 2) {
+                                console.log('_________', event.clientY, y + height);
+                                const bottomBlock = toolbar.querySelector('.bottom-block');
+                                if (bottomBlock) {
+                                    bottomBlock.visible = true;
+                                    bottomBlock.classList.add('is-dragenter');
+                                    return;
+                                }
+                            }
+                        }
                         const curElmCol = Number((_a = section === null || section === void 0 ? void 0 : section.dataset) === null || _a === void 0 ? void 0 : _a.column);
                         const curElmColSpan = Number((_b = section === null || section === void 0 ? void 0 : section.dataset) === null || _b === void 0 ? void 0 : _b.columnSpan);
                         const sections = Array.from((_c = section.closest('#pnlRow')) === null || _c === void 0 ? void 0 : _c.querySelectorAll('ide-section'));
@@ -3377,7 +3390,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     }
                 }
                 else {
-                    const block = eventTarget.closest('.back-block');
+                    const block = eventTarget.closest('.is-dragenter');
                     if (block) {
                         block.visible = false;
                         block.classList.remove('is-dragenter');
@@ -3415,6 +3428,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     const dropElm = (isPageRow
                         ? eventTarget.querySelector('.is-dragenter')
                         : eventTarget.closest('.is-dragenter'));
+                    console.log('drop', dropElm);
                     if (dropElm) {
                         dropElm.classList.remove('is-dragenter');
                         const dragCmd = new index_25.DragElementCommand(self.currentElement, dropElm);

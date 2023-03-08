@@ -335,7 +335,7 @@ export class PageRow extends Module {
             for (const rectangle of rectangles) {
                 (rectangle as Control).style.display = 'none';
             }
-            let backBlocks = document.getElementsByClassName('back-block');
+            let backBlocks = document.getElementsByClassName('is-dragenter');
             for (const block of backBlocks) {
                 (block as Control).visible = false;
                 block.classList.remove('is-dragenter');
@@ -371,6 +371,19 @@ export class PageRow extends Module {
             } else {
                 const section = eventTarget.closest('ide-section') as Control;
                 if (section && !section.isSameNode(self.currentElement)) {
+                    const toolbar = eventTarget.closest('ide-toolbar') as Control;
+                    if (toolbar) {
+                        const { y, height} = toolbar.getBoundingClientRect();
+                        if (Math.ceil(event.clientY) >= Math.ceil(y + height) - 2) {
+                            console.log('_________', event.clientY, y + height)
+                            const bottomBlock = toolbar.querySelector('.bottom-block') as Control;
+                            if (bottomBlock) {
+                                bottomBlock.visible = true;
+                                bottomBlock.classList.add('is-dragenter');
+                                return;
+                            }  
+                        }
+                    }
                     const curElmCol = Number(section?.dataset?.column);
                     const curElmColSpan = Number(section?.dataset?.columnSpan);
                     const sections = Array.from(section.closest('#pnlRow')?.querySelectorAll('ide-section'));
@@ -406,7 +419,7 @@ export class PageRow extends Module {
                     (rectangle as Control).style.display = 'none';
                 }
             } else {
-                const block  = eventTarget.closest('.back-block') as Control;
+                const block  = eventTarget.closest('.is-dragenter') as Control;
                 if (block) {
                     block.visible = false;
                     block.classList.remove('is-dragenter');

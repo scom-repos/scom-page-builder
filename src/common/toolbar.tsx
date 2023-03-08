@@ -430,7 +430,9 @@ export class IDEToolbar extends Module {
                     height="15px"
                     bottom="-15px"
                     zIndex={999}
+                    border={{radius: '50px'}}
                     visible={false}
+                    class="bottom-block"
                 ></i-panel>
                 <i-modal
                     id='mdActions'

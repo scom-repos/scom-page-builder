@@ -100,6 +100,7 @@ export class PageSection extends Module {
                     height="100%"
                     top="0px" right="-18px"
                     zIndex={999}
+                    border={{radius: '50px'}}
                     visible={false}
                     class="back-block"
                 ></i-panel>
