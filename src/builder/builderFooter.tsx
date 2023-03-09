@@ -10,7 +10,7 @@ import {
     Upload
 } from '@ijstech/components';
 import { EVENT } from '../const/index';
-import { ELEMENT_NAME, IPageFooter } from '../interface/index';
+import { ElementType, ELEMENT_NAME, IPageFooter } from '../interface/index';
 import { PageRow } from '../page/index';
 import { generateUUID } from '../utility/index';
 import { getPageBlocks, pageObject } from '../store/index';
@@ -103,7 +103,7 @@ export class BuilderFooter extends Module {
                 id: generateUUID(),
                 column: 1,
                 columnSpan: 12,
-                type: 'primitive',
+                type: ElementType.PRIMITIVE,
                 module: textBlock,
                 properties: {},
                 tag: {

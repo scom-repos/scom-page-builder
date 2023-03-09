@@ -13,7 +13,8 @@ import {
 } from '@ijstech/components';
 import { ELEMENT_NAME, IPageBlockAction, IPageElement, ValidationError } from '../interface/index';
 import { getRootDir, pageObject } from '../store/index';
-import { commandHistory, getModule, isEmpty, RemoveToolbarCommand } from '../utility/index';
+import { getModule, isEmpty } from '../utility/index';
+import { commandHistory, RemoveToolbarCommand } from '../command/index';
 import './toolbar.css';
 
 declare global {
@@ -430,7 +431,9 @@ export class IDEToolbar extends Module {
                     height="15px"
                     bottom="-15px"
                     zIndex={999}
+                    border={{radius: '50px'}}
                     visible={false}
+                    class="bottom-block"
                 ></i-panel>
                 <i-modal
                     id='mdActions'

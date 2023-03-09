@@ -7,7 +7,7 @@ import {
     HStack,
     Panel
   } from '@ijstech/components';
-import { commandHistory } from '../utility/index';
+import { commandHistory } from '../command/index';
   import './pageHeader.css';
   
   declare global {

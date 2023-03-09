@@ -216,5 +216,3 @@ export {
     isEmpty,
     getModule
 };
-
-export * from './command/index';

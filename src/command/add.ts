@@ -1,6 +1,6 @@
 import { application, Control } from "@ijstech/components";
-import { EVENT } from "../../const/index";
-import { pageObject } from "../../store/index";
+import { EVENT } from "../const/index";
+import { pageObject } from "../store/index";
 import { ICommand } from "./interface";
 
 export class ElementCommand implements ICommand {

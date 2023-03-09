@@ -1,5 +1,5 @@
 import { ICommand, IDataColumn, MAX_COLUMN, MIN_COLUMN } from "./interface";
-import { pageObject } from "../../store/index";
+import { pageObject } from "../store/index";
 import { Control } from "@ijstech/components";
 
 export class DragElementCommand implements ICommand {

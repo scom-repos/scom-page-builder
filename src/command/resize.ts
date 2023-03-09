@@ -1,5 +1,5 @@
 import { Control } from "@ijstech/components";
-import { pageObject } from "../../store/index";
+import { pageObject } from "../store/index";
 import { ICommand, IDataColumn, MAX_COLUMN } from "./interface";
 
 export class ResizeElementCommand implements ICommand {

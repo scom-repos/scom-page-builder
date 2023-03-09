@@ -246,151 +246,6 @@ declare module "@scom/scom-page-builder/utility/pathToRegexp.ts" {
      */
     export function pathToRegexp(path: Path, keys?: Key[], options?: TokensToRegexpOptions & ParseOptions): RegExp;
 }
-/// <amd-module name="@scom/scom-page-builder/utility/command/interface.ts" />
-declare module "@scom/scom-page-builder/utility/command/interface.ts" {
-    export interface ICommand {
-        execute(): void;
-        undo(): void;
-        redo(): void;
-    }
-    export interface IDataColumn {
-        column: number;
-        columnSpan: number;
-    }
-    export const MAX_COLUMN = 12;
-    export const MIN_COLUMN = 2;
-}
-/// <amd-module name="@scom/scom-page-builder/utility/command/add.ts" />
-declare module "@scom/scom-page-builder/utility/command/add.ts" {
-    import { Control } from "@ijstech/components";
-    import { ICommand } from "@scom/scom-page-builder/utility/command/interface.ts";
-    export class ElementCommand implements ICommand {
-        private element;
-        private parent;
-        private data;
-        private rowId;
-        private isDeleted;
-        constructor(element: Control, parent: HTMLElement, data: any, isDeleted?: boolean);
-        execute(): void;
-        undo(): void;
-        redo(): void;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/utility/command/update.ts" />
-declare module "@scom/scom-page-builder/utility/command/update.ts" {
-    import { Control } from "@ijstech/components";
-    import { ICommand } from "@scom/scom-page-builder/utility/command/interface.ts";
-    export class UpdateElementCommand implements ICommand {
-        private element;
-        private color;
-        private oldColor;
-        constructor(element: Control, color: string);
-        execute(): void;
-        undo(): void;
-        redo(): void;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/utility/command/history.ts" />
-declare module "@scom/scom-page-builder/utility/command/history.ts" {
-    import { ICommand } from "@scom/scom-page-builder/utility/command/interface.ts";
-    export class CommandHistory {
-        private commands;
-        private currentCommandIndex;
-        execute(command: ICommand): void;
-        undo(): void;
-        redo(): void;
-    }
-    export const commandHistory: CommandHistory;
-}
-/// <amd-module name="@scom/scom-page-builder/utility/command/move.ts" />
-declare module "@scom/scom-page-builder/utility/command/move.ts" {
-    import { ICommand } from "@scom/scom-page-builder/utility/command/interface.ts";
-    export class MoveElementCommand implements ICommand {
-        private element;
-        private dropElm;
-        private parent;
-        private dataList;
-        private dragIndex;
-        private dropIndex;
-        constructor(element: HTMLElement, dropElm: HTMLElement, parent: HTMLElement, data?: any[]);
-        execute(): void;
-        undo(): void;
-        redo(): void;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/utility/command/resize.ts" />
-declare module "@scom/scom-page-builder/utility/command/resize.ts" {
-    import { Control } from "@ijstech/components";
-    import { ICommand } from "@scom/scom-page-builder/utility/command/interface.ts";
-    export class ResizeElementCommand implements ICommand {
-        private element;
-        private toolbar;
-        private initialWidth;
-        private initialHeight;
-        private finalWidth;
-        private finalHeight;
-        private oldDataColumn;
-        private gapWidth;
-        private gridColumnWidth;
-        private finalLeft;
-        constructor(element: Control, initialWidth: number, initialHeight: number, finalWidth: number, finalHeight: number);
-        private getColumnData;
-        execute(): void;
-        undo(): void;
-        redo(): void;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/utility/command/drag.ts" />
-declare module "@scom/scom-page-builder/utility/command/drag.ts" {
-    import { ICommand } from "@scom/scom-page-builder/utility/command/interface.ts";
-    export class DragElementCommand implements ICommand {
-        private element;
-        private dropElm;
-        private oldDataColumn;
-        private oldDataRow;
-        private data;
-        private oldDataColumnMap;
-        constructor(element: any, dropElm: HTMLElement);
-        private updateColumnData;
-        private resetColumnData;
-        private getColumn;
-        private getColumnSpan;
-        private getNextColumn;
-        private getPrevColumn;
-        private getColumnData;
-        execute(): void;
-        undo(): void;
-        redo(): void;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/utility/command/removeToolbar.ts" />
-declare module "@scom/scom-page-builder/utility/command/removeToolbar.ts" {
-    import { ICommand } from "@scom/scom-page-builder/utility/command/interface.ts";
-    export class RemoveToolbarCommand implements ICommand {
-        private element;
-        private pageRow;
-        private data;
-        private rowId;
-        private elementId;
-        private sectionId;
-        private elementIndex;
-        constructor(element: any);
-        execute(): void;
-        undo(): void;
-        redo(): void;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/utility/command/index.ts" />
-declare module "@scom/scom-page-builder/utility/command/index.ts" {
-    export { ElementCommand } from "@scom/scom-page-builder/utility/command/add.ts";
-    export { UpdateElementCommand } from "@scom/scom-page-builder/utility/command/update.ts";
-    export { CommandHistory, commandHistory } from "@scom/scom-page-builder/utility/command/history.ts";
-    export { MoveElementCommand } from "@scom/scom-page-builder/utility/command/move.ts";
-    export { ResizeElementCommand } from "@scom/scom-page-builder/utility/command/resize.ts";
-    export { DragElementCommand } from "@scom/scom-page-builder/utility/command/drag.ts";
-    export { RemoveToolbarCommand } from "@scom/scom-page-builder/utility/command/removeToolbar.ts";
-    export { ICommand, IDataColumn, MAX_COLUMN } from "@scom/scom-page-builder/utility/command/interface.ts";
-}
 /// <amd-module name="@scom/scom-page-builder/utility/index.ts" />
 declare module "@scom/scom-page-builder/utility/index.ts" {
     import { Module } from '@ijstech/components';
@@ -412,7 +267,6 @@ declare module "@scom/scom-page-builder/utility/index.ts" {
     const isEmpty: (value: any) => boolean;
     const getModule: (options: IGetModuleOptions) => Promise<Module>;
     export { assignAttr, uploadToIPFS, fetchFromIPFS, match, MatchFunction, compile, formatNumber, formatNumberWithSeparators, isCID, getCID, getPagePath, updatePagePath, generateUUID, isEmpty, getModule };
-    export * from "@scom/scom-page-builder/utility/command/index.ts";
 }
 /// <amd-module name="@scom/scom-page-builder/interface/core.ts" />
 declare module "@scom/scom-page-builder/interface/core.ts" {
@@ -572,7 +426,10 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         image: string;
         elements: IPageElement[];
     }
-    export type ElementType = 'primitive' | 'composite';
+    export enum ElementType {
+        PRIMITIVE = "primitive",
+        COMPOSITE = "composite"
+    }
     export interface IPageElement {
         id: string;
         column: number;
@@ -612,6 +469,169 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
         GEM_TOKEN = "Gem Token Dapp",
         RANDOMIZER = "Randomizer"
     }
+}
+/// <amd-module name="@scom/scom-page-builder/command/interface.ts" />
+declare module "@scom/scom-page-builder/command/interface.ts" {
+    export interface ICommand {
+        execute(): void;
+        undo(): void;
+        redo(): void;
+    }
+    export interface IDataColumn {
+        column: number;
+        columnSpan: number;
+    }
+    export const MAX_COLUMN = 12;
+    export const MIN_COLUMN = 2;
+}
+/// <amd-module name="@scom/scom-page-builder/command/add.ts" />
+declare module "@scom/scom-page-builder/command/add.ts" {
+    import { Control } from "@ijstech/components";
+    import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
+    export class ElementCommand implements ICommand {
+        private element;
+        private parent;
+        private data;
+        private rowId;
+        private isDeleted;
+        constructor(element: Control, parent: HTMLElement, data: any, isDeleted?: boolean);
+        execute(): void;
+        undo(): void;
+        redo(): void;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/command/updateColor.ts" />
+declare module "@scom/scom-page-builder/command/updateColor.ts" {
+    import { Control } from "@ijstech/components";
+    import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
+    export class UpdateColorCommand implements ICommand {
+        private element;
+        private color;
+        private oldColor;
+        constructor(element: Control, color: string);
+        execute(): void;
+        undo(): void;
+        redo(): void;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/command/history.ts" />
+declare module "@scom/scom-page-builder/command/history.ts" {
+    import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
+    export class CommandHistory {
+        private commands;
+        private currentCommandIndex;
+        execute(command: ICommand): void;
+        undo(): void;
+        redo(): void;
+    }
+    export const commandHistory: CommandHistory;
+}
+/// <amd-module name="@scom/scom-page-builder/command/moveRow.ts" />
+declare module "@scom/scom-page-builder/command/moveRow.ts" {
+    import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
+    export class MoveElementCommand implements ICommand {
+        private element;
+        private dropElm;
+        private parent;
+        private dataList;
+        private dragIndex;
+        private dropIndex;
+        constructor(element: HTMLElement, dropElm: HTMLElement, parent: HTMLElement, data?: any[]);
+        execute(): void;
+        undo(): void;
+        redo(): void;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/command/resize.ts" />
+declare module "@scom/scom-page-builder/command/resize.ts" {
+    import { Control } from "@ijstech/components";
+    import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
+    export class ResizeElementCommand implements ICommand {
+        private element;
+        private toolbar;
+        private initialWidth;
+        private initialHeight;
+        private finalWidth;
+        private finalHeight;
+        private oldDataColumn;
+        private gapWidth;
+        private gridColumnWidth;
+        private finalLeft;
+        constructor(element: Control, initialWidth: number, initialHeight: number, finalWidth: number, finalHeight: number);
+        private getColumnData;
+        execute(): void;
+        undo(): void;
+        redo(): void;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/command/dragElement.ts" />
+declare module "@scom/scom-page-builder/command/dragElement.ts" {
+    import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
+    export class DragElementCommand implements ICommand {
+        private element;
+        private dropElm;
+        private oldDataColumn;
+        private oldDataRow;
+        private data;
+        private oldDataColumnMap;
+        constructor(element: any, dropElm: HTMLElement);
+        private updateColumnData;
+        private resetColumnData;
+        private getColumn;
+        private getColumnSpan;
+        private getNextColumn;
+        private getPrevColumn;
+        private getColumnData;
+        execute(): void;
+        undo(): void;
+        redo(): void;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/command/removeToolbar.ts" />
+declare module "@scom/scom-page-builder/command/removeToolbar.ts" {
+    import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
+    export class RemoveToolbarCommand implements ICommand {
+        private element;
+        private pageRow;
+        private data;
+        private rowId;
+        private elementId;
+        private sectionId;
+        private elementIndex;
+        constructor(element: any);
+        execute(): void;
+        undo(): void;
+        redo(): void;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/command/updateType.ts" />
+declare module "@scom/scom-page-builder/command/updateType.ts" {
+    import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
+    import { Control } from "@ijstech/components";
+    export class UpdateTypeCommand implements ICommand {
+        private element;
+        private dropElm;
+        private oldDataRow;
+        private data;
+        private oldDropData;
+        constructor(element: any, dropElm: Control);
+        private getElements;
+        execute(): void;
+        undo(): void;
+        redo(): void;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/command/index.ts" />
+declare module "@scom/scom-page-builder/command/index.ts" {
+    export { ElementCommand } from "@scom/scom-page-builder/command/add.ts";
+    export { UpdateColorCommand } from "@scom/scom-page-builder/command/updateColor.ts";
+    export { CommandHistory, commandHistory } from "@scom/scom-page-builder/command/history.ts";
+    export { MoveElementCommand } from "@scom/scom-page-builder/command/moveRow.ts";
+    export { ResizeElementCommand } from "@scom/scom-page-builder/command/resize.ts";
+    export { DragElementCommand } from "@scom/scom-page-builder/command/dragElement.ts";
+    export { RemoveToolbarCommand } from "@scom/scom-page-builder/command/removeToolbar.ts";
+    export { UpdateTypeCommand } from "@scom/scom-page-builder/command/updateType.ts";
+    export { ICommand, IDataColumn, MAX_COLUMN } from "@scom/scom-page-builder/command/interface.ts";
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageHeader.css.ts" />
 declare module "@scom/scom-page-builder/page/pageHeader.css.ts" { }
@@ -916,6 +936,7 @@ declare module "@scom/scom-page-builder/page/pageSection.tsx" {
         init(): void;
         clear(): void;
         private createToolbar;
+        private clearData;
         setData(rowId: string, value: IPageElement): Promise<void>;
         render(): any;
     }

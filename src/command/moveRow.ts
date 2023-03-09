@@ -1,4 +1,3 @@
-import { Control } from "@ijstech/components";
 import { ICommand } from "./interface";
 
 export class MoveElementCommand implements ICommand {
