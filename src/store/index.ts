@@ -110,11 +110,27 @@ export class PageObject {
 
   setElement(sectionId: string, elementId: string, value: any) {
     let elm = this.getElement(sectionId, elementId);
+    if (!elm) return;
     console.log('set elm', sectionId, elementId, value)
-    if (elm && value.properties) elm.properties = value.properties;
-    if (elm && value.column) elm.column = value.column;
-    if (elm && value.columnSpan) elm.columnSpan = value.columnSpan;
-    if (elm && value.tag) elm.tag = value.tag;
+    if (value.properties !== undefined) elm.properties = value.properties;
+    if (value.column !== undefined) elm.column = value.column;
+    if (value.columnSpan !== undefined) elm.columnSpan = value.columnSpan;
+    if (value.tag !== undefined) elm.tag = value.tag;
+    if (value.type !== undefined && elm.type !== value.type) {
+      if (value.type === 'primitive') {
+        elm.type = value.type;
+        elm.module = value.elements?.[0] || {};
+        elm.elements = [];
+      } else if (value.type === 'composite') {
+        const oldValue = JSON.parse(JSON.stringify(elm));
+        oldValue.id = generateUUID();
+        elm.elements = [oldValue];
+        elm.module = {};
+        elm.type = value.type;
+      }
+    }
+    if (value.module !== undefined) elm.module = value.module;
+    if (value.elements !== undefined) elm.elements = value.elements;
   }
 
   private removeElementFn(elements: IPageElement[], elementId: string) {
@@ -191,4 +207,11 @@ export const setRootDir = (value: string) => {
 
 export const getRootDir = () => {
   return state.rootDir;
+}
+
+const generateUUID = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 }

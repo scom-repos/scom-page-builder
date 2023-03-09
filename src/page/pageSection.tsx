@@ -5,7 +5,7 @@ import {
     ControlElement
 } from '@ijstech/components';
 import './pageSection.css';
-import { IPageElement } from '../interface/index';
+import { ElementType, IPageElement } from '../interface/index';
 import { RowSettingsDialog } from '../dialogs/index';
 import { IDEToolbar } from '../common/index';
 import { isEmpty } from '../utility/index';
@@ -71,10 +71,16 @@ export class PageSection extends Module {
         value.tag && toolbar.setTag(value.tag);
     }
 
+    private async clearData() {
+        const children = this.pnlMain.querySelectorAll('ide-toolbar');
+        if (children && children.length) children.forEach((item) => item.remove());
+    }
+
     async setData(rowId: string, value: IPageElement) {
+        this.clearData();
         this.id = value.id;
         this.rowId = rowId;
-        if (value.type === 'primitive') {
+        if (value.type === ElementType.PRIMITIVE) {
             await this.createToolbar(value);
         } else if (value?.elements?.length) {
             for (let element of value.elements) {

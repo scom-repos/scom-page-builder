@@ -38,7 +38,10 @@ export interface IPageFooter {
 	elements: IPageElement[];
 }
 
-export type ElementType = 'primitive' | 'composite';
+export enum ElementType {
+    PRIMITIVE = 'primitive',
+    COMPOSITE = 'composite'
+}
 
 export interface IPageElement {
     id: string; // uuid

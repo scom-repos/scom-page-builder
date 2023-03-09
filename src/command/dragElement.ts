@@ -1,8 +1,8 @@
 import { ICommand, IDataColumn, MAX_COLUMN, MIN_COLUMN } from "./interface";
-import { pageObject } from "../../store/index";
+import { pageObject } from "../store/index";
 import { Control } from "@ijstech/components";
 
-export class UpdateTypeCommand implements ICommand {
+export class DragElementCommand implements ICommand {
   private element: any;
   private dropElm: HTMLElement;
   private oldDataColumn: IDataColumn;
@@ -191,9 +191,6 @@ export class UpdateTypeCommand implements ICommand {
     if (!grid) return;
     const newColumnData = this.getColumnData();
     if (!newColumnData) return;
-
-    const isBottomBlock = this.dropElm.classList.contains('bottom-block');
-    console.log(newColumnData, isBottomBlock);
 
     this.element.style.gridRow = '1';
     this.element.style.gridColumn = `${newColumnData.column} / span ${newColumnData.columnSpan}`;

@@ -1,5 +1,5 @@
 import { Control, Module, Panel } from '@ijstech/components';
-import { commandHistory, MoveElementCommand } from '../utility/index';
+import { commandHistory, MoveElementCommand } from '../command/index';
 
 export class ContainerDragger<T extends Module> {
     private target: T;

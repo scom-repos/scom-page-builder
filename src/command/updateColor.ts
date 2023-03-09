@@ -1,8 +1,8 @@
 import { Control } from "@ijstech/components";
-import { pageObject } from "../../store/index";
+import { pageObject } from "../store/index";
 import { ICommand } from "./interface";
 
-export class UpdateElementCommand implements ICommand {
+export class UpdateColorCommand implements ICommand {
   private element: any;
   private color: string
   private oldColor: string;

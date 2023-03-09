@@ -1,5 +1,5 @@
 export { ElementCommand } from './add';
-export { UpdateElementCommand } from './updateColor';
+export { UpdateColorCommand } from './updateColor';
 export { CommandHistory, commandHistory } from './history';
 export { MoveElementCommand } from './moveRow';
 export { ResizeElementCommand } from './resize';

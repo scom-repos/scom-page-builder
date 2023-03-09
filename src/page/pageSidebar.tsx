@@ -185,7 +185,7 @@ export class PageSidebar extends Module {
                     class="text-center pointer"
                     verticalAlignment="center" horizontalAlignment='center'
                     minWidth={88} gap="0.5rem"
-                    onClick={() => this.onAddComponent(module, 'primitive')}
+                    onClick={() => this.onAddComponent(module, ElementType.PRIMITIVE)}
                 >
                     <i-panel>
                         <i-image url={module.imgUrl} width={24} height={24} display="block"></i-image>
@@ -285,7 +285,7 @@ export class PageSidebar extends Module {
                     gap="1rem"
                     padding={{left: '1rem', right: '1rem'}}
                     class="pointer"
-                    onClick={() => this.onAddComponent(module, 'primitive')}
+                    onClick={() => this.onAddComponent(module, ElementType.PRIMITIVE)}
                 >
                     <i-panel>
                         <i-image url={module.imgUrl} width={24} height={24} display="block"></i-image>

@@ -19,8 +19,9 @@ import {
     ResizeElementCommand,
     DragElementCommand,
     MAX_COLUMN,
-    UpdateElementCommand,
-} from '../utility/index';
+    UpdateColorCommand,
+    UpdateTypeCommand,
+} from '../command/index';
 import { IDEToolbar } from '../common/index';
 
 declare global {
@@ -129,7 +130,7 @@ export class PageRow extends Module {
     }
 
     private onSaveRowSettings(color: string) {
-        const updateCmd = new UpdateElementCommand(this, color);
+        const updateCmd = new UpdateColorCommand(this, color);
         commandHistory.execute(updateCmd);
     }
 
@@ -375,7 +376,6 @@ export class PageRow extends Module {
                     if (toolbar) {
                         const { y, height} = toolbar.getBoundingClientRect();
                         if (Math.ceil(event.clientY) >= Math.ceil(y + height) - 2) {
-                            console.log('_________', event.clientY, y + height)
                             const bottomBlock = toolbar.querySelector('.bottom-block') as Control;
                             if (bottomBlock) {
                                 bottomBlock.visible = true;
@@ -460,8 +460,14 @@ export class PageRow extends Module {
                 ) as Control;
                 if (dropElm) {
                     dropElm.classList.remove('is-dragenter');
-                    const dragCmd = new DragElementCommand(self.currentElement, dropElm);
-                    commandHistory.execute(dragCmd);
+                    const isBottomBlock = dropElm.classList.contains('bottom-block');
+                    if (isBottomBlock) {
+                        const dragCmd = new UpdateTypeCommand(self.currentElement, dropElm);
+                        commandHistory.execute(dragCmd);
+                    } else {
+                        const dragCmd = new DragElementCommand(self.currentElement, dropElm);
+                        commandHistory.execute(dragCmd);
+                    }
                 }
             }
         });
