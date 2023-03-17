@@ -2541,15 +2541,6 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 data.height = this.offsetHeight;
             if (data.width === 'auto')
                 data.width = this.offsetWidth;
-            const options = {
-                columnWidth: '100%',
-                columnsPerRow: 1,
-                confirmButtonBackgroundColor: Theme.colors.primary.main,
-                confirmButtonFontColor: Theme.colors.primary.contrastText
-            };
-            // console.log('schema: ', action.userInputDataSchema)
-            // console.log('data: ', data)
-            // renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data, options);
             let properties;
             //FIXME: used temporarily for container type
             if (data.content && data.content.properties) {
@@ -2559,7 +2550,20 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 properties = data;
             }
             let tag = ((_a = data === null || data === void 0 ? void 0 : data.content) === null || _a === void 0 ? void 0 : _a.tag) || this.data.tag || {};
-            components_15.renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), action.userInputUISchema, Object.assign(Object.assign({}, properties), tag), options);
+            const options = {
+                columnWidth: '100%',
+                columnsPerRow: 1,
+                confirmButtonBackgroundColor: Theme.colors.primary.main,
+                confirmButtonFontColor: Theme.colors.primary.contrastText,
+                jsonSchema: action.userInputDataSchema,
+                data: Object.assign(Object.assign({}, properties), tag)
+            };
+            if (action.userInputUISchema)
+                options.jsonUISchema = action.userInputUISchema;
+            // console.log('schema: ', action.userInputDataSchema)
+            // console.log('data: ', data)
+            // renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data, options);
+            components_15.renderUI(this.pnlForm, options, this.onSave.bind(this));
         }
         onSave(result, data) {
             if (result) {
@@ -3541,7 +3545,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     const dropElm = (isPageRow
                         ? eventTarget.querySelector('.is-dragenter')
                         : eventTarget.closest('.is-dragenter'));
-                    console.log(dropElm);
                     if (dropElm) {
                         dropElm.classList.remove('is-dragenter');
                         const isBottomBlock = dropElm.classList.contains('bottom-block');
