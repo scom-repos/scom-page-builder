@@ -8,7 +8,8 @@ import {
     Panel
   } from '@ijstech/components';
 import { commandHistory } from '../command/index';
-  import './pageHeader.css';
+import { currentTheme  } from '../theme/index';
+import './pageHeader.css';
   
   declare global {
     namespace JSX {
@@ -18,8 +19,8 @@ import { commandHistory } from '../command/index';
     }
   }
   
-  const Theme = Styles.Theme.ThemeVars;
-  
+  const Theme = currentTheme;
+    
   export interface PageHeaderElement extends ControlElement {}
   
   @customElements('ide-header')

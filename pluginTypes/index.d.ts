@@ -1,3 +1,4 @@
+/// <reference path="@ijstech/components/index.d.ts" />
 /// <amd-module name="@scom/scom-page-builder/assets.ts" />
 declare module "@scom/scom-page-builder/assets.ts" {
     function fullPath(path: string): string;
@@ -633,6 +634,25 @@ declare module "@scom/scom-page-builder/command/index.ts" {
     export { UpdateTypeCommand } from "@scom/scom-page-builder/command/updateType.ts";
     export { ICommand, IDataColumn, MAX_COLUMN } from "@scom/scom-page-builder/command/interface.ts";
 }
+/// <amd-module name="@scom/scom-page-builder/theme/light.theme.ts" />
+declare module "@scom/scom-page-builder/theme/light.theme.ts" {
+    import { Styles } from '@ijstech/components';
+    const Theme: Styles.Theme.ITheme;
+    export default Theme;
+}
+/// <amd-module name="@scom/scom-page-builder/theme/dark.theme.ts" />
+declare module "@scom/scom-page-builder/theme/dark.theme.ts" {
+    import { Styles } from '@ijstech/components';
+    const Theme: Styles.Theme.ITheme;
+    export default Theme;
+}
+/// <amd-module name="@scom/scom-page-builder/theme/index.ts" />
+declare module "@scom/scom-page-builder/theme/index.ts" {
+    import LightTheme from "@scom/scom-page-builder/theme/light.theme.ts";
+    import DarkTheme from "@scom/scom-page-builder/theme/dark.theme.ts";
+    const currentTheme: import("packages/style/src/theme").ITheme;
+    export { currentTheme, LightTheme, DarkTheme };
+}
 /// <amd-module name="@scom/scom-page-builder/page/pageHeader.css.ts" />
 declare module "@scom/scom-page-builder/page/pageHeader.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/page/pageHeader.tsx" />
@@ -1223,24 +1243,6 @@ declare module "@scom/scom-page-builder/builder/builderFooter.tsx" {
 declare module "@scom/scom-page-builder/builder/index.ts" {
     export { BuilderHeader } from "@scom/scom-page-builder/builder/builderHeader.tsx";
     export { BuilderFooter } from "@scom/scom-page-builder/builder/builderFooter.tsx";
-}
-/// <amd-module name="@scom/scom-page-builder/theme/light.theme.ts" />
-declare module "@scom/scom-page-builder/theme/light.theme.ts" {
-    import { Styles } from '@ijstech/components';
-    const Theme: Styles.Theme.ITheme;
-    export default Theme;
-}
-/// <amd-module name="@scom/scom-page-builder/theme/dark.theme.ts" />
-declare module "@scom/scom-page-builder/theme/dark.theme.ts" {
-    import { Styles } from '@ijstech/components';
-    const Theme: Styles.Theme.ITheme;
-    export default Theme;
-}
-/// <amd-module name="@scom/scom-page-builder/theme/index.ts" />
-declare module "@scom/scom-page-builder/theme/index.ts" {
-    import LightTheme from "@scom/scom-page-builder/theme/light.theme.ts";
-    import DarkTheme from "@scom/scom-page-builder/theme/dark.theme.ts";
-    export { LightTheme, DarkTheme };
 }
 /// <amd-module name="@scom/scom-page-builder/index.css.ts" />
 declare module "@scom/scom-page-builder/index.css.ts" { }

@@ -1,4 +1,6 @@
 import LightTheme from './light.theme';
 import DarkTheme from './dark.theme';
 
-export { LightTheme, DarkTheme };
+const currentTheme = LightTheme;
+
+export { currentTheme, LightTheme, DarkTheme };

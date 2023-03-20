@@ -1,5 +1,6 @@
 import { Styles } from '@ijstech/components';
-const Theme = Styles.Theme.ThemeVars;
+import { currentTheme  } from './theme/index';
+const Theme = currentTheme;
 
 Styles.cssRule('#editor', {
   $nest: {

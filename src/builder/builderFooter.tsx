@@ -15,6 +15,7 @@ import { PageRow } from '../page/index';
 import { generateUUID } from '../utility/index';
 import { getPageBlocks, pageObject } from '../store/index';
 import { IDEToolbar } from '../common/index';
+import { currentTheme  } from '../theme/index';
 import './builderFooter.css';
 
 declare global {
@@ -25,7 +26,7 @@ declare global {
     }
 }
 
-const Theme = Styles.Theme.ThemeVars;
+const Theme = currentTheme;
 
 export interface FooterElement extends ControlElement {
     readonly?: boolean;

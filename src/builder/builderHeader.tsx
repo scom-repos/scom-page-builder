@@ -5,6 +5,7 @@ import { ElementType, ELEMENT_NAME, HeaderType, IPageHeader } from '../interface
 import { PageRow } from '../page/index';
 import { getPageBlocks, pageObject } from '../store/index';
 import { generateUUID } from '../utility/index';
+import { currentTheme  } from '../theme/index';
 import './builderHeader.css';
 
 declare global {
@@ -15,7 +16,7 @@ declare global {
     }
 }
 
-const Theme = Styles.Theme.ThemeVars;
+const Theme = currentTheme;
 
 export interface HeaderElement extends ControlElement {
     readonly?: boolean;
