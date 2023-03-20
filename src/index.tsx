@@ -5,12 +5,12 @@ import { EVENT } from './const/index';
 import { ElementType, ELEMENT_NAME, IPageBlockData, IPageData } from './interface/index';
 import { PageRows } from './page/index';
 import { getDappContainer, pageObject } from './store/index';
-import { LightTheme  } from './theme/index';
+import { currentTheme  } from './theme/index';
 import { generateUUID } from './utility/index';
 import { setRootDir as _setRootDir } from './store/index';
 import './index.css';
 
-const Theme = LightTheme;
+const Theme = currentTheme;
 interface IElementConfig {
     module: IPageBlockData;
     type: ElementType;

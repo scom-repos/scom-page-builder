@@ -9,6 +9,8 @@ import {
     Styles
 } from '@ijstech/components';
 import {assignAttr} from '../utility/index';
+import { currentTheme  } from '../theme/index';
+const Theme = currentTheme;
 
 export interface ConfirmDialogElement extends ControlElement {
     message: string;
@@ -85,7 +87,7 @@ export class ConfirmDialog extends Module {
                     <i-label id={"lbMessage"} caption={"Confirm?"}></i-label>
                 </i-panel>
                 <i-hstack justifyContent={"end"} alignItems={"center"} padding={{top: 5, bottom: 5}}>
-                    <i-button id={"btnCancel"} caption={"No"} onClick={this.cancel} background={{color: Styles.Theme.ThemeVars.colors.success.main}}></i-button>
+                    <i-button id={"btnCancel"} caption={"No"} onClick={this.cancel} background={{color: Theme.colors.success.main}}></i-button>
                     <i-button id={"btnConfirm"} caption={"Yes"} onClick={this.confirm} margin={{left: 5}}></i-button>
                 </i-hstack>
             </i-modal>

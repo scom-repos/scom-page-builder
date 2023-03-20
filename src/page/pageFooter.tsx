@@ -7,6 +7,7 @@ import {
     application
 } from '@ijstech/components';
 import assets from '../assets';
+import { currentTheme  } from '../theme/index';
 import './pageFooter.css';
 
 declare global {
@@ -21,7 +22,7 @@ export interface PageFooterElement extends ControlElement {
 
 }
 
-const Theme = Styles.Theme.ThemeVars;
+const Theme = currentTheme;
 
 @customElements('scpage-page-footer')
 export class PageFooter extends Module {

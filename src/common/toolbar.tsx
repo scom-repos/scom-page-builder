@@ -15,6 +15,7 @@ import { ELEMENT_NAME, IPageBlockAction, IPageElement, ValidationError } from '.
 import { getRootDir, pageObject } from '../store/index';
 import { getModule, isEmpty } from '../utility/index';
 import { commandHistory, RemoveToolbarCommand } from '../command/index';
+import { currentTheme  } from '../theme/index';
 import './toolbar.css';
 
 declare global {
@@ -29,7 +30,7 @@ export interface ToolbarElement extends ControlElement {
     readonly?: boolean;
 }
 type IPosition = 'left'|'right'|'bottomLeft'|'bottomRight'|'bottom';
-const Theme = Styles.Theme.ThemeVars;
+const Theme = currentTheme;
 
 @customElements('ide-toolbar')
 export class IDEToolbar extends Module {

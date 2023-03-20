@@ -1,6 +1,8 @@
 import {Styles} from '@ijstech/components';
+import { currentTheme  } from '../theme/index';
 
-const Theme = Styles.Theme.ThemeVars;
+const Theme = currentTheme;
+
 
 Styles.cssRule('ide-section', {
     display: 'block',

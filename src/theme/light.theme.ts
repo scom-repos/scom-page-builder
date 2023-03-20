@@ -1,5 +1,5 @@
 import {Styles} from '@ijstech/components';
-const Theme = Styles.Theme.defaultTheme
+const Theme: Styles.Theme.ITheme = JSON.parse(JSON.stringify(Styles.Theme.defaultTheme));
 
 // Background
 Theme.background.main = '#FFFFFF';
