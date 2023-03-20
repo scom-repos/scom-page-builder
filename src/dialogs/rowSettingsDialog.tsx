@@ -8,8 +8,9 @@ import {
 } from '@ijstech/components';
 import { assignAttr } from '../utility/index';
 import './rowSettingsDialog.css';
+import { currentTheme  } from '../theme/index';
 
-const Theme = Styles.Theme.ThemeVars;
+const Theme = currentTheme;
 
 export interface RowSettingsDialogElement extends ControlElement {
     onSave: () => Promise<void>;

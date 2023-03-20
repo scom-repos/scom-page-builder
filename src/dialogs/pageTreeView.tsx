@@ -1,7 +1,6 @@
 import { customElements, Styles, ControlElement, Button, Control, Icon } from '@ijstech/components';
 
 import './pageTreeView.css';
-const Theme = Styles.Theme.ThemeVars;
 
 type activedChangeCallback = (target: PageTreeView, prevNode?: PageTreeNode, event?: Event) => void;
 type changeCallback = (

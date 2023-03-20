@@ -17,6 +17,7 @@ import { generateUUID } from '../utility/index';
 import { ElementCommand, commandHistory, MoveElementCommand } from '../command/index';
 import { IDEToolbar } from '../common/index';
 import { pageObject } from '../store/index';
+import { currentTheme  } from '../theme/index';
 import './pageRows.css';
 
 declare global {
@@ -32,7 +33,7 @@ export interface PageRowsElement extends ControlElement {
     draggable?: boolean;
 }
 
-const Theme = Styles.Theme.ThemeVars;
+const Theme = currentTheme;
 
 @customElements('ide-rows')
 export class PageRows extends Module {

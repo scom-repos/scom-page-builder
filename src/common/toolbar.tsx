@@ -15,6 +15,7 @@ import { ELEMENT_NAME, IPageBlockAction, IPageElement, ValidationError } from '.
 import { getRootDir, pageObject } from '../store/index';
 import { getModule, isEmpty } from '../utility/index';
 import { commandHistory, RemoveToolbarCommand } from '../command/index';
+import { currentTheme  } from '../theme/index';
 import './toolbar.css';
 
 declare global {
@@ -29,7 +30,7 @@ export interface ToolbarElement extends ControlElement {
     readonly?: boolean;
 }
 type IPosition = 'left'|'right'|'bottomLeft'|'bottomRight'|'bottom';
-const Theme = Styles.Theme.ThemeVars;
+const Theme = currentTheme;
 
 @customElements('ide-toolbar')
 export class IDEToolbar extends Module {
@@ -155,15 +156,6 @@ export class IDEToolbar extends Module {
         const data = this.data.properties;
         if (data.height === 'auto') data.height = this.offsetHeight;
         if (data.width === 'auto') data.width = this.offsetWidth;
-        const options: IRenderUIOptions = {
-            columnWidth: '100%',
-            columnsPerRow: 1,
-            confirmButtonBackgroundColor: Theme.colors.primary.main,
-            confirmButtonFontColor: Theme.colors.primary.contrastText
-        }
-        // console.log('schema: ', action.userInputDataSchema)
-        // console.log('data: ', data)
-        // renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data, options);
         let properties;
         //FIXME: used temporarily for container type
         if (data.content && data.content.properties) {
@@ -173,8 +165,20 @@ export class IDEToolbar extends Module {
             properties = data;
         }
         let tag = data?.content?.tag || this.data.tag || {};
+        const options: IRenderUIOptions = {
+            columnWidth: '100%',
+            columnsPerRow: 1,
+            confirmButtonBackgroundColor: Theme.colors.primary.main,
+            confirmButtonFontColor: Theme.colors.primary.contrastText,
+            jsonSchema: action.userInputDataSchema,
+            data: {...properties, ...tag}
+        }
+        if (action.userInputUISchema) options.jsonUISchema = action.userInputUISchema;
+        // console.log('schema: ', action.userInputDataSchema)
+        // console.log('data: ', data)
+        // renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data, options);
 
-        renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), action.userInputUISchema, {...properties, ...tag}, options);
+        renderUI(this.pnlForm, options, this.onSave.bind(this));
     }
 
     private onSave(result: boolean, data: any) {
