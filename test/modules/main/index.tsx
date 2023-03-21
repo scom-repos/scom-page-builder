@@ -1,8 +1,9 @@
 import { application, Container, customModule, Module, Panel } from "@ijstech/components";
+import Editor from '@scom/scom-page-builder';
 
 @customModule
 export class MainModule extends Module {
-  private pnlMain: Panel;
+  private pageBuilder: Editor;
 
   constructor(parent?: Container, options?: any) {
     super(parent, options);
@@ -10,25 +11,15 @@ export class MainModule extends Module {
 
   init() {
     super.init();
-    this.loadPageBuilderModule();
-  }
-
-  async loadPageBuilderModule() {
-    let module = await application.newModule("libs/@scom/scom-page-builder/index.js");
-    if (module) {
-      this.pnlMain.append(module);
-      if (this.options.data) {
-        await (module as any).setData(this.options.data);
-      }
-      (module as any).onLoad();
-    }
+    if (this.options.data)
+      this.pageBuilder.setData(this.options.data);
   }
 
   render() {
     return (
-      <i-vstack height="inherit">
-        <i-panel id="pnlMain" stack={{ grow: "1" }}></i-panel>
-      </i-vstack>
+      <i-panel width="100%" height="100%">
+        <i-scom-page-builder id="pageBuilder"></i-scom-page-builder>
+      </i-panel>
     )
   }
 }
