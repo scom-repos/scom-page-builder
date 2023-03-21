@@ -4847,6 +4847,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             super(parent, options);
             this.getData = this.getData.bind(this);
             this.setData = this.setData.bind(this);
+            this.initEventBus();
         }
         setRootDir(value) {
             index_67.setRootDir(value);
@@ -4870,9 +4871,6 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             catch (error) {
                 console.log('setdata', error);
             }
-        }
-        onLoad() {
-            this.initEventBus();
         }
         initEventBus() {
             components_33.application.EventBus.register(this, index_62.EVENT.ON_ADD_ELEMENT, (data) => {
@@ -4934,6 +4932,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         }
     };
     Editor = __decorate([
+        components_33.customElements("i-scom-page-builder"),
         components_33.customModule
     ], Editor);
     exports.default = Editor;
