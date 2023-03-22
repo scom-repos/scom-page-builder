@@ -2,24 +2,6 @@
 declare module "@scom/scom-page-builder/assets.ts" {
     function fullPath(path: string): string;
     const _default: {
-        fonts: {
-            roboto: {
-                bold: string;
-                italic: string;
-                light: string;
-                medium: string;
-                regular: string;
-                thin: string;
-            };
-            notosans: {
-                bold: string;
-                italic: string;
-                light: string;
-                medium: string;
-                regular: string;
-                thin: string;
-            };
-        };
         icons: {
             logo: string;
             logoMobile: string;
