@@ -909,11 +909,14 @@ define("@scom/scom-page-builder/utility/index.ts", ["require", "exports", "@ijst
         let module;
         if (options.localPath) {
             const rootDir = index_1.getRootDir();
-            const localRootPath = rootDir ? `${rootDir}/${options.localPath}` : options.localPath;
-            const scconfigRes = await fetch(`${localRootPath}/scconfig.json`);
-            const scconfig = await scconfigRes.json();
-            scconfig.rootDir = localRootPath;
-            module = await components_2.application.newModule(scconfig.main, scconfig);
+            let localRootPath = rootDir ? `${rootDir}/${options.localPath}` : options.localPath;
+            // const scconfigRes = await fetch(`${localRootPath}/scconfig.json`);
+            // const scconfig = await scconfigRes.json();
+            // scconfig.rootDir = localRootPath;
+            // module = await application.newModule(scconfig.main, scconfig);
+            if (!localRootPath.endsWith("index.js"))
+                localRootPath += "/index.js";
+            module = await components_2.application.newModule(localRootPath);
         }
         else {
             const scconfig = await getSCConfigByCid(options.ipfscid);
