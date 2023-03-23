@@ -1,26 +1,7 @@
-/// <reference path="@ijstech/components/index.d.ts" />
 /// <amd-module name="@scom/scom-page-builder/assets.ts" />
 declare module "@scom/scom-page-builder/assets.ts" {
     function fullPath(path: string): string;
     const _default: {
-        fonts: {
-            roboto: {
-                bold: string;
-                italic: string;
-                light: string;
-                medium: string;
-                regular: string;
-                thin: string;
-            };
-            notosans: {
-                bold: string;
-                italic: string;
-                light: string;
-                medium: string;
-                regular: string;
-                thin: string;
-            };
-        };
         icons: {
             logo: string;
             logoMobile: string;
@@ -648,9 +629,10 @@ declare module "@scom/scom-page-builder/theme/dark.theme.ts" {
 }
 /// <amd-module name="@scom/scom-page-builder/theme/index.ts" />
 declare module "@scom/scom-page-builder/theme/index.ts" {
+    import { Styles } from '@ijstech/components';
     import LightTheme from "@scom/scom-page-builder/theme/light.theme.ts";
     import DarkTheme from "@scom/scom-page-builder/theme/dark.theme.ts";
-    const currentTheme: import("packages/style/src/theme").ITheme;
+    const currentTheme: Styles.Theme.ITheme;
     export { currentTheme, LightTheme, DarkTheme };
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageHeader.css.ts" />
@@ -1248,9 +1230,16 @@ declare module "@scom/scom-page-builder/builder/index.ts" {
 declare module "@scom/scom-page-builder/index.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder" />
 declare module "@scom/scom-page-builder" {
-    import { Container, Module } from '@ijstech/components';
+    import { Container, ControlElement, Module } from '@ijstech/components';
     import { IPageData } from "@scom/scom-page-builder/interface/index.ts";
     import "@scom/scom-page-builder/index.css.ts";
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ['i-scom-page-builder']: ControlElement;
+            }
+        }
+    }
     export default class Editor extends Module {
         private pageRows;
         private builderHeader;
@@ -1264,7 +1253,6 @@ declare module "@scom/scom-page-builder" {
             footer: import("@scom/scom-page-builder/interface/siteData.ts").IPageFooter;
         };
         setData(value: IPageData): Promise<void>;
-        onLoad(): void;
         initEventBus(): void;
         private onAddRow;
         private onUpdateWrapper;

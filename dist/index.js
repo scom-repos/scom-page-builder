@@ -22,24 +22,6 @@ define("@scom/scom-page-builder/assets.ts", ["require", "exports", "@ijstech/com
         return `${moduleDir}/${path}`;
     }
     exports.default = {
-        fonts: {
-            roboto: {
-                bold: fullPath('fonts/roboto/Roboto-Bold.ttf'),
-                italic: fullPath('fonts/roboto/Roboto-Italic.ttf'),
-                light: fullPath('fonts/roboto/Roboto-Light.ttf'),
-                medium: fullPath('fonts/roboto/Roboto-Medium.ttf'),
-                regular: fullPath('fonts/roboto/Roboto-Regular.ttf'),
-                thin: fullPath('fonts/roboto/Roboto-Thin.ttf'),
-            },
-            notosans: {
-                bold: fullPath('fonts/notosans/NotoSans-Bold.ttf'),
-                italic: fullPath('fonts/notosans/NotoSans-Italic.ttf'),
-                light: fullPath('fonts/notosans/NotoSans-Light.ttf'),
-                medium: fullPath('fonts/notosans/NotoSans-Medium.ttf'),
-                regular: fullPath('fonts/notosans/NotoSans-Regular.ttf'),
-                thin: fullPath('fonts/notosans/NotoSans-Thin.ttf'),
-            }
-        },
         icons: {
             logo: fullPath('img/sc-logo.svg'),
             logoMobile: fullPath('img/sc-logo-mobile.svg'),
@@ -927,11 +909,14 @@ define("@scom/scom-page-builder/utility/index.ts", ["require", "exports", "@ijst
         let module;
         if (options.localPath) {
             const rootDir = index_1.getRootDir();
-            const localRootPath = rootDir ? `${rootDir}/${options.localPath}` : options.localPath;
-            const scconfigRes = await fetch(`${localRootPath}/scconfig.json`);
-            const scconfig = await scconfigRes.json();
-            scconfig.rootDir = localRootPath;
-            module = await components_2.application.newModule(scconfig.main, scconfig);
+            let localRootPath = rootDir ? `${rootDir}/${options.localPath}` : options.localPath;
+            // const scconfigRes = await fetch(`${localRootPath}/scconfig.json`);
+            // const scconfig = await scconfigRes.json();
+            // scconfig.rootDir = localRootPath;
+            // module = await application.newModule(scconfig.main, scconfig);
+            if (!localRootPath.endsWith("index.js"))
+                localRootPath += "/index.js";
+            module = await components_2.application.newModule(localRootPath);
         }
         else {
             const scconfig = await getSCConfigByCid(options.ipfscid);
@@ -4865,6 +4850,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             super(parent, options);
             this.getData = this.getData.bind(this);
             this.setData = this.setData.bind(this);
+            this.initEventBus();
         }
         setRootDir(value) {
             index_67.setRootDir(value);
@@ -4888,9 +4874,6 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             catch (error) {
                 console.log('setdata', error);
             }
-        }
-        onLoad() {
-            this.initEventBus();
         }
         initEventBus() {
             components_33.application.EventBus.register(this, index_62.EVENT.ON_ADD_ELEMENT, (data) => {
@@ -4952,6 +4935,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         }
     };
     Editor = __decorate([
+        components_33.customElements("i-scom-page-builder"),
         components_33.customModule
     ], Editor);
     exports.default = Editor;
