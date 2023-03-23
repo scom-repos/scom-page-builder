@@ -193,6 +193,7 @@ export class PageSidebar extends Module {
                     verticalAlignment="center"
                     horizontalAlignment="center"
                     minWidth={88}
+                    height="5rem"
                     gap="0.5rem"
                     onClick={() => this.onAddComponent(module, ElementType.PRIMITIVE)}
                 >
@@ -340,12 +341,11 @@ export class PageSidebar extends Module {
         return (
             <i-panel class="navigator" height={'100%'} maxWidth="100%">
                 <i-tabs class="insert-tabs">
-                    <i-tab caption="Components" background={{ color: 'transparent' }}>
+                    <i-tab caption="Components" background={{ color: 'transparent' }} font={{name: Theme.typography.fontFamily}}>
                         <i-panel height="100%" overflow={{ y: 'hidden' }}>
                             <i-grid-layout
                                 id="firstStack"
                                 templateColumns={['repeat(2, 1fr)']}
-                                templateRows={['repeat(1, 5rem)']}
                                 margin={{ top: 6 }}
                             ></i-grid-layout>
                             <i-vstack
