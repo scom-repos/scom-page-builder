@@ -495,11 +495,13 @@ export class PageRow extends Module {
                 padding={{ left: '3rem', right: '3rem' }}
             >
                 <i-vstack id={'actionsBar'} class="row-actions-bar" verticalAlignment="center">
-                    <i-panel
+                    <i-vstack
                         background={{ color: '#fff' }}
                         border={{ radius: '20px' }}
                         maxWidth="100%"
                         maxHeight="100%"
+                        horizontalAlignment="center"
+                        padding={{top: 5, bottom: 5}}
                     >
                         <i-panel
                             id="btnSetting"
@@ -508,7 +510,7 @@ export class PageRow extends Module {
                             visible={this.isChanged}
                             onClick={this.onOpenRowSettingsDialog}
                         >
-                            <i-icon name="palette"></i-icon>
+                            <i-icon name="palette" width={16} height={16} fill="#80868b"></i-icon>
                         </i-panel>
                         <i-panel
                             id="btnClone"
@@ -517,7 +519,7 @@ export class PageRow extends Module {
                             visible={this.isCloned}
                             onClick={this.onClone}
                         >
-                            <i-icon name="clone"></i-icon>
+                            <i-icon name="clone" width={16} height={16} fill="#80868b"></i-icon>
                         </i-panel>
                         <i-panel
                             id="btnDelete"
@@ -525,9 +527,9 @@ export class PageRow extends Module {
                             tooltip={{ content: 'Delete section', placement: 'right' }}
                             onClick={this.onDeleteRow}
                         >
-                            <i-icon name="trash"></i-icon>
+                            <i-icon name="trash" width={16} height={16} fill="#80868b"></i-icon>
                         </i-panel>
-                    </i-panel>
+                    </i-vstack>
                 </i-vstack>
                 <i-vstack
                     id="dragStack"

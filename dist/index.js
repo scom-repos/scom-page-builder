@@ -1768,7 +1768,7 @@ define("@scom/scom-page-builder/theme/light.theme.ts", ["require", "exports", "@
     Theme.combobox.background = '#FAFAFA';
     // Theme.combobox.fontColor = '';
     // Action
-    Theme.action.hover = 'FF6600DD';
+    Theme.action.hover = 'rgba(0, 0, 0, 0.04)';
     // Theme.action.hoverOpacity = 1;
     // Theme.action.active = '';
     // Theme.action.activeOpacity = 1;
@@ -3254,54 +3254,9 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const Theme = index_37.currentTheme;
+    console.log(Theme);
     components_22.Styles.cssRule('#editor', {
         $nest: {
-            '.row-actions-bar': {
-                opacity: 0,
-                zIndex: 10,
-                position: 'absolute',
-                top: '0',
-                left: '-3em',
-                width: '34px',
-                padding: 0,
-                transition: 'opacity .3s .3s cubic-bezier(0.4,0,0.2,1), visibility 0s .2s',
-                $nest: {
-                    '.actions': {
-                        display: 'flex',
-                        justifyContent: 'center',
-                        maxHeight: '30px',
-                        cursor: 'pointer',
-                        $nest: {
-                            svg: {
-                                width: '14px',
-                                fill: '#80868b'
-                            }
-                        }
-                    },
-                    '&:hover': {
-                        opacity: '1 !important',
-                        visibility: 'initial',
-                        $nest: {
-                            '> i-panel': {
-                                boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)'
-                            }
-                        }
-                    }
-                }
-            },
-            'ide-row:hover': {
-                $nest: {
-                    '.row-actions-bar': {
-                        opacity: '1 !important',
-                        transition: 'opacity .3s .3s cubic-bezier(0.4,0,0.2,1), visibility 0s .2s',
-                        $nest: {
-                            '> i-panel': {
-                                boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)'
-                            }
-                        }
-                    }
-                }
-            },
             '.hidden': {
                 display: 'none'
             }
@@ -3342,6 +3297,58 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
             '&.disabled:hover': {
                 cursor: 'default',
                 backgroundColor: 'inherit'
+            },
+            '.row-actions-bar': {
+                opacity: 0,
+                zIndex: 10,
+                position: 'absolute',
+                top: '0',
+                left: '-3em',
+                width: '34px',
+                padding: 0,
+                transition: 'opacity .3s .3s cubic-bezier(0.4,0,0.2,1), visibility 0s .2s',
+                $nest: {
+                    '.actions': {
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        cursor: 'pointer',
+                        borderRadius: '50%',
+                        width: 30,
+                        height: 30,
+                        padding: 3,
+                        background: 'transparent',
+                        $nest: {
+                            '&:hover': {
+                                boxShadow: 'none',
+                                background: Theme.action.hover,
+                                transition: 'background .3s ease-in'
+                            }
+                        }
+                    },
+                    '&:hover': {
+                        opacity: '1 !important',
+                        visibility: 'initial',
+                        $nest: {
+                            '> i-panel': {
+                                boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)'
+                            }
+                        }
+                    }
+                }
+            },
+            '&:hover': {
+                $nest: {
+                    '.row-actions-bar': {
+                        opacity: '1 !important',
+                        transition: 'opacity .3s .3s cubic-bezier(0.4,0,0.2,1), visibility 0s .2s',
+                        $nest: {
+                            '> i-panel': {
+                                boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)'
+                            }
+                        }
+                    }
+                }
             },
             'h1, h2, h3, h4, h5, h6': {
                 margin: 0
@@ -3783,13 +3790,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         render() {
             return (this.$render("i-panel", { id: "pnlRowWrap", class: 'page-row', width: "100%", height: "100%", padding: { left: '3rem', right: '3rem' } },
                 this.$render("i-vstack", { id: 'actionsBar', class: "row-actions-bar", verticalAlignment: "center" },
-                    this.$render("i-panel", { background: { color: '#fff' }, border: { radius: '20px' }, maxWidth: "100%", maxHeight: "100%" },
+                    this.$render("i-vstack", { background: { color: '#fff' }, border: { radius: '20px' }, maxWidth: "100%", maxHeight: "100%", horizontalAlignment: "center", padding: { top: 5, bottom: 5 } },
                         this.$render("i-panel", { id: "btnSetting", class: "actions", tooltip: { content: 'Section colors', placement: 'right' }, visible: this.isChanged, onClick: this.onOpenRowSettingsDialog },
-                            this.$render("i-icon", { name: "palette" })),
+                            this.$render("i-icon", { name: "palette", width: 16, height: 16, fill: "#80868b" })),
                         this.$render("i-panel", { id: "btnClone", class: "actions", tooltip: { content: 'Duplicate section', placement: 'right' }, visible: this.isCloned, onClick: this.onClone },
-                            this.$render("i-icon", { name: "clone" })),
+                            this.$render("i-icon", { name: "clone", width: 16, height: 16, fill: "#80868b" })),
                         this.$render("i-panel", { id: "btnDelete", class: "actions delete", tooltip: { content: 'Delete section', placement: 'right' }, onClick: this.onDeleteRow },
-                            this.$render("i-icon", { name: "trash" })))),
+                            this.$render("i-icon", { name: "trash", width: 16, height: 16, fill: "#80868b" })))),
                 this.$render("i-vstack", { id: "dragStack", height: "100%", verticalAlignment: "center", position: "absolute", left: "0px", top: "0px", class: "drag-stack" },
                     this.$render("i-grid-layout", { verticalAlignment: "center", autoFillInHoles: true, columnsPerRow: 2, class: "main-drag" },
                         this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
