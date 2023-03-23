@@ -2746,6 +2746,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 confirmButtonBackgroundColor: Theme.colors.primary.main,
                 confirmButtonFontColor: Theme.colors.primary.contrastText,
                 jsonSchema: action.userInputDataSchema,
+                dateTimeFormat: 'MM/DD/YYYY HH:mm:ss',
+                dateFormat: 'MM/DD/YYYY',
                 data: Object.assign(Object.assign({}, properties), tag)
             };
             if (action.userInputUISchema)
@@ -2878,7 +2880,9 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this._component.overflow = 'hidden';
             this._component.style.display = 'block';
             this._component.addEventListener('click', (event) => {
-                event.stopImmediatePropagation();
+                var _a, _b;
+                if (((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.module) === null || _b === void 0 ? void 0 : _b.name) === index_25.ELEMENT_NAME.IMAGE)
+                    event.stopImmediatePropagation();
                 event.preventDefault();
                 this.toolList = this._component.getActions ? this._component.getActions() : [];
                 this.checkToolbar();
@@ -3239,7 +3243,6 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const Theme = index_37.currentTheme;
-    console.log(Theme);
     components_22.Styles.cssRule('#editor', {
         $nest: {
             '.hidden': {
@@ -4230,7 +4233,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
             }
             let matchedModules = components;
             for (const module of matchedModules) {
-                const moduleCard = (this.$render("i-vstack", { class: "text-center pointer", verticalAlignment: "center", horizontalAlignment: "center", minWidth: 88, gap: "0.5rem", onClick: () => this.onAddComponent(module, index_49.ElementType.PRIMITIVE) },
+                const moduleCard = (this.$render("i-vstack", { class: "text-center pointer", verticalAlignment: "center", horizontalAlignment: "center", minWidth: 88, height: "5rem", gap: "0.5rem", onClick: () => this.onAddComponent(module, index_49.ElementType.PRIMITIVE) },
                     this.$render("i-panel", null,
                         this.$render("i-image", { url: module.imgUrl, width: 24, height: 24, display: "block" })),
                     this.$render("i-label", { caption: module.name })));
@@ -4330,9 +4333,9 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
         render() {
             return (this.$render("i-panel", { class: "navigator", height: '100%', maxWidth: "100%" },
                 this.$render("i-tabs", { class: "insert-tabs" },
-                    this.$render("i-tab", { caption: "Components", background: { color: 'transparent' } },
+                    this.$render("i-tab", { caption: "Components", background: { color: 'transparent' }, font: { name: Theme.typography.fontFamily } },
                         this.$render("i-panel", { height: "100%", overflow: { y: 'hidden' } },
-                            this.$render("i-grid-layout", { id: "firstStack", templateColumns: ['repeat(2, 1fr)'], templateRows: ['repeat(1, 5rem)'], margin: { top: 6 } }),
+                            this.$render("i-grid-layout", { id: "firstStack", templateColumns: ['repeat(2, 1fr)'], margin: { top: 6 } }),
                             this.$render("i-vstack", { visible: false, border: {
                                     bottom: { width: 1, style: 'solid', color: Theme.divider },
                                     top: { width: 1, style: 'solid', color: Theme.divider },

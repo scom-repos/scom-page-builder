@@ -169,6 +169,8 @@ export class IDEToolbar extends Module {
             confirmButtonBackgroundColor: Theme.colors.primary.main,
             confirmButtonFontColor: Theme.colors.primary.contrastText,
             jsonSchema: action.userInputDataSchema,
+            dateTimeFormat: 'MM/DD/YYYY HH:mm:ss',
+            dateFormat: 'MM/DD/YYYY',
             data: {...properties, ...tag}
         }
         if (action.userInputUISchema) options.jsonUISchema = action.userInputUISchema;
@@ -309,7 +311,8 @@ export class IDEToolbar extends Module {
         this._component.overflow = 'hidden';
         this._component.style.display = 'block';
         this._component.addEventListener('click', (event: Event) => {
-            event.stopImmediatePropagation();
+            if (this.data?.module?.name === ELEMENT_NAME.IMAGE)
+                event.stopImmediatePropagation();
             event.preventDefault()
             this.toolList = this._component.getActions ? this._component.getActions() : [];
             this.checkToolbar();

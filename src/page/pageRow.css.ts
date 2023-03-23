@@ -2,7 +2,6 @@ import { Styles } from '@ijstech/components';
 import { currentTheme  } from '../theme/index';
 
 const Theme = currentTheme;
-console.log(Theme)
 
 Styles.cssRule('#editor', {
     $nest: {
