@@ -5,54 +5,6 @@ const Theme = currentTheme;
 
 Styles.cssRule('#editor', {
     $nest: {
-        '.row-actions-bar': {
-            opacity: 0,
-            zIndex: 10,
-            position: 'absolute',
-            top: '0',
-            left: '-3em',
-            width: '34px',
-            padding: 0,
-            transition: 'opacity .3s .3s cubic-bezier(0.4,0,0.2,1), visibility 0s .2s',
-
-            $nest: {
-                '.actions': {
-                    display: 'flex',
-                    justifyContent: 'center',
-                    maxHeight: '30px',
-                    cursor: 'pointer',
-
-                    $nest: {
-                        svg: {
-                            width: '14px',
-                            fill: '#80868b'
-                        }
-                    }
-                },
-                '&:hover': {
-                    opacity: '1 !important',
-                    visibility: 'initial',
-                    $nest: {
-                        '> i-panel': {
-                            boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)'
-                        }
-                    }
-                }
-            }
-        },
-        'ide-row:hover': {
-            $nest: {
-                '.row-actions-bar': {
-                    opacity: '1 !important',
-                    transition: 'opacity .3s .3s cubic-bezier(0.4,0,0.2,1), visibility 0s .2s',
-                    $nest: {
-                        '> i-panel': {
-                            boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)'
-                        }
-                    }
-                }
-            }
-        },
         '.hidden': {
             display: 'none'
         }
@@ -94,6 +46,59 @@ Styles.cssRule('ide-row', {
         '&.disabled:hover': {
             cursor: 'default',
             backgroundColor: 'inherit'
+        },
+        '.row-actions-bar': {
+            opacity: 0,
+            zIndex: 10,
+            position: 'absolute',
+            top: '0',
+            left: '-3em',
+            width: '34px',
+            padding: 0,
+            transition: 'opacity .3s .3s cubic-bezier(0.4,0,0.2,1), visibility 0s .2s',
+
+            $nest: {
+                '.actions': {
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    borderRadius: '50%',
+                    width: 30,
+                    height: 30,
+                    padding: 3,
+                    background: 'transparent',
+                    $nest: {
+                        '&:hover': {
+                            boxShadow: 'none',
+                            background: Theme.action.hover,
+                            transition: 'background .3s ease-in'
+                        }
+                    }
+                },
+                '&:hover': {
+                    opacity: '1 !important',
+                    visibility: 'initial',
+                    $nest: {
+                        '> i-panel': {
+                            boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)'
+                        }
+                    }
+                }
+            }
+        },
+        '&:hover': {
+            $nest: {
+                '.row-actions-bar': {
+                    opacity: '1 !important',
+                    transition: 'opacity .3s .3s cubic-bezier(0.4,0,0.2,1), visibility 0s .2s',
+                    $nest: {
+                        '> i-panel': {
+                            boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)'
+                        }
+                    }
+                }
+            }
         },
         'h1, h2, h3, h4, h5, h6': {
             margin: 0

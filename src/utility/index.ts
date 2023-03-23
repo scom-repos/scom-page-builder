@@ -162,6 +162,25 @@ const getSCConfigByCid = async (cid: string) => {
     return scConfig;
 };
 
+const getEmbedElement = async (options: IGetModuleOptions) => {
+    let path: string = '';
+    if (options.localPath) {
+        path = options.localPath;
+    } else {
+        // const response = await fetchFromIPFS(options.ipfscid);
+        // const result = await response.json();
+        // const codeCID = result.codeCID;
+        // path = `${IPFS_GATEWAY_IJS}${codeCID}/dist`;
+    }
+    application.currentModuleDir = path;
+    const result = await application.loadScript(`${path}/index.js`);
+    application.currentModuleDir = '';
+    if (!result) return null;
+    const elementName = `i-${path.split('/').pop()}`;
+    const element = document.createElement(elementName);
+    return element;
+}
+
 const getModule = async (options: IGetModuleOptions) => {
     let module: Module;
     if (options.localPath) {
@@ -216,5 +235,6 @@ export {
     updatePagePath,
     generateUUID,
     isEmpty,
-    getModule
+    getModule,
+    getEmbedElement
 };

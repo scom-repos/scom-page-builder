@@ -76,7 +76,7 @@ Theme.combobox.background = '#FAFAFA';
 // Theme.combobox.fontColor = '';
 
 // Action
-Theme.action.hover = 'FF6600DD';
+Theme.action.hover = 'rgba(0, 0, 0, 0.04)';
 // Theme.action.hoverOpacity = 1;
 // Theme.action.active = '';
 // Theme.action.activeOpacity = 1;

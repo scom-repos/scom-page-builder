@@ -247,8 +247,9 @@ declare module "@scom/scom-page-builder/utility/index.ts" {
     const updatePagePath: (pagePath: string) => void;
     const generateUUID: () => string;
     const isEmpty: (value: any) => boolean;
+    const getEmbedElement: (options: IGetModuleOptions) => Promise<HTMLElement>;
     const getModule: (options: IGetModuleOptions) => Promise<Module>;
-    export { assignAttr, uploadToIPFS, fetchFromIPFS, match, MatchFunction, compile, formatNumber, formatNumberWithSeparators, isCID, getCID, getPagePath, updatePagePath, generateUUID, isEmpty, getModule };
+    export { assignAttr, uploadToIPFS, fetchFromIPFS, match, MatchFunction, compile, formatNumber, formatNumberWithSeparators, isCID, getCID, getPagePath, updatePagePath, generateUUID, isEmpty, getModule, getEmbedElement };
 }
 /// <amd-module name="@scom/scom-page-builder/interface/core.ts" />
 declare module "@scom/scom-page-builder/interface/core.ts" {
@@ -871,6 +872,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private renderResizeStack;
         private renderResizer;
         fetchModule(data: IPageElement): Promise<void>;
+        private setModule;
         setData(properties: any): Promise<void>;
         setTag(tag: any): Promise<void>;
         setProperties(data: any): Promise<void>;

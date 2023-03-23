@@ -3,17 +3,15 @@ import {
     customElements,
     Panel,
     ControlElement,
-    Styles,
     HStack,
     Button,
     renderUI,
     Modal,
-    IRenderUIOptions,
-    Control
+    IRenderUIOptions
 } from '@ijstech/components';
 import { ELEMENT_NAME, IPageBlockAction, IPageElement, ValidationError } from '../interface/index';
 import { getRootDir, pageObject } from '../store/index';
-import { getModule, isEmpty } from '../utility/index';
+import { getEmbedElement, isEmpty } from '../utility/index';
 import { commandHistory, RemoveToolbarCommand } from '../command/index';
 import { currentTheme  } from '../theme/index';
 import './toolbar.css';
@@ -284,35 +282,39 @@ export class IDEToolbar extends Module {
         const ipfscid = data?.module?.ipfscid || '';
         const localPath = data?.module?.localPath || '';
         try {
-            const module = await getModule({ipfscid, localPath});
-            if (module) {
-                module.init();
-                module.parent = this.contentStack;
-                this.contentStack.append(module);
-                this._component = module;
-                this._component.maxWidth = '100%';
-                this._component.maxHeight = '100%';
-                this._component.overflow = 'hidden';
-                this._component.style.display = 'block';
-                this._component.addEventListener('click', (event: Event) => {
-                    event.stopImmediatePropagation();
-                    event.preventDefault()
-                    this.toolList = this._component.getActions ? this._component.getActions() : [];
-                    this.checkToolbar();
-                    this.showToolbars();
-                })
-                if (this.isTexbox()) {
-                    this.dragStack.visible = true;
-                    this.contentStack.classList.remove('move');
-                } else {
-                    this.dragStack.visible = false;
-                    this.contentStack.classList.add('move');
-                }
-                this.renderResizeStack(data);
+            const module: any = await getEmbedElement({ipfscid, localPath});
+            if (!module) throw new Error('not found');
+            await this.setModule(module);
+            if (this.isTexbox()) {
+                this.dragStack.visible = true;
+                this.contentStack.classList.remove('move');
+            } else {
+                this.dragStack.visible = false;
+                this.contentStack.classList.add('move');
             }
+            this.renderResizeStack(data);
         } catch(error) {
-            console.log('fetch module error: ', error)
+            console.log('fetch module error: ', error);
+            commandHistory.undo();
         }
+    }
+
+    private async setModule(module: Module) {
+        this._component = module;
+        this._component.parent = this.contentStack;
+        this.contentStack.append(this._component);
+        await this._component.ready();
+        this._component.maxWidth = '100%';
+        this._component.maxHeight = '100%';
+        this._component.overflow = 'hidden';
+        this._component.style.display = 'block';
+        this._component.addEventListener('click', (event: Event) => {
+            event.stopImmediatePropagation();
+            event.preventDefault()
+            this.toolList = this._component.getActions ? this._component.getActions() : [];
+            this.checkToolbar();
+            this.showToolbars();
+        })
     }
 
     async setData(properties: any) {
