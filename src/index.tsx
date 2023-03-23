@@ -1,11 +1,11 @@
-import { application, Container, customModule, Module, Panel } from '@ijstech/components';
-import {} from '@ijstech/eth-contract'
+import { application, Container, ControlElement, customElements, customModule, Module, Panel } from '@ijstech/components';
+import { } from '@ijstech/eth-contract'
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
 import { ElementType, ELEMENT_NAME, IPageBlockData, IPageData } from './interface/index';
 import { PageRows } from './page/index';
 import { getDappContainer, pageObject } from './store/index';
-import { currentTheme  } from './theme/index';
+import { currentTheme } from './theme/index';
 import { generateUUID } from './utility/index';
 import { setRootDir as _setRootDir } from './store/index';
 import './index.css';
@@ -16,6 +16,15 @@ interface IElementConfig {
     type: ElementType;
 }
 
+declare global {
+    namespace JSX {
+        interface IntrinsicElements {
+            ['i-scom-page-builder']: ControlElement;
+        }
+    }
+}
+
+@customElements("i-scom-page-builder")
 @customModule
 export default class Editor extends Module {
     private pageRows: PageRows;
@@ -27,6 +36,7 @@ export default class Editor extends Module {
         super(parent, options);
         this.getData = this.getData.bind(this);
         this.setData = this.setData.bind(this);
+        this.initEventBus();
     }
 
     setRootDir(value: string) {
@@ -50,13 +60,9 @@ export default class Editor extends Module {
             await this.builderHeader.setData(value.header);
             await this.pageRows.setRows(value.sections);
             await this.builderFooter.setData(value.footer);
-        } catch(error) {
+        } catch (error) {
             console.log('setdata', error)
         }
-    }
-
-    onLoad() {
-        this.initEventBus();
     }
 
     initEventBus() {
@@ -64,7 +70,7 @@ export default class Editor extends Module {
             if (!data) return;
             this.onAddRow(data);
         });
-        application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => {})
+        application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => { })
         application.EventBus.register(this, EVENT.ON_UPDATE_FOOTER, async () => this.onUpdateWrapper())
     }
 
@@ -125,24 +131,24 @@ export default class Editor extends Module {
                         overflow={{ y: 'auto' }}
                         background={{ color: Theme.background.default }}
                         border={{ right: { width: 1, style: 'solid', color: Theme.divider } }}
-                        padding={{bottom: '1rem'}}
+                        padding={{ bottom: '1rem' }}
                     >
                         <i-panel
                             id="pageContent"
                             maxWidth={1400}
                             width="100%"
-                            margin={{ left: 'auto', right: 'auto'}}
+                            margin={{ left: 'auto', right: 'auto' }}
                         >
                             <i-panel
                                 maxWidth={1280}
                                 minHeight="100vh"
-                                margin={{top: 8, bottom: 8, left: 60, right: 60}}
-                                background={{color: '#fff'}}
+                                margin={{ top: 8, bottom: 8, left: 60, right: 60 }}
+                                background={{ color: '#fff' }}
                                 class="pnl-editor-wrapper"
                             >
                                 <i-panel
                                     id="contentWrapper"
-                                    padding={{bottom: '12rem'}}
+                                    padding={{ bottom: '12rem' }}
                                     minHeight="calc((100vh - 6rem) - 12rem)"
                                 >
                                     <builder-header id="builderHeader"></builder-header>

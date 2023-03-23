@@ -5,24 +5,6 @@ function fullPath(path: string): string{
     return `${moduleDir}/${path}`
 }
 export default {
-    fonts: {
-        roboto: {
-            bold: fullPath('fonts/roboto/Roboto-Bold.ttf'),
-            italic: fullPath('fonts/roboto/Roboto-Italic.ttf'),
-            light: fullPath('fonts/roboto/Roboto-Light.ttf'),
-            medium: fullPath('fonts/roboto/Roboto-Medium.ttf'),
-            regular: fullPath('fonts/roboto/Roboto-Regular.ttf'),
-            thin: fullPath('fonts/roboto/Roboto-Thin.ttf'),
-        },
-        notosans: {
-            bold: fullPath('fonts/notosans/NotoSans-Bold.ttf'),
-            italic: fullPath('fonts/notosans/NotoSans-Italic.ttf'),
-            light: fullPath('fonts/notosans/NotoSans-Light.ttf'),
-            medium: fullPath('fonts/notosans/NotoSans-Medium.ttf'),
-            regular: fullPath('fonts/notosans/NotoSans-Regular.ttf'),
-            thin: fullPath('fonts/notosans/NotoSans-Thin.ttf'),
-        }
-    },
     icons: {
         logo: fullPath('img/sc-logo.svg'),
         logoMobile: fullPath('img/sc-logo-mobile.svg'),

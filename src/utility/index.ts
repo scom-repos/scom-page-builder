@@ -185,11 +185,13 @@ const getModule = async (options: IGetModuleOptions) => {
     let module: Module;
     if (options.localPath) {
         const rootDir = getRootDir();
-        const localRootPath = rootDir ? `${rootDir}/${options.localPath}` : options.localPath;
-        const scconfigRes = await fetch(`${localRootPath}/scconfig.json`);
-        const scconfig = await scconfigRes.json();
-        scconfig.rootDir = localRootPath;
-        module = await application.newModule(scconfig.main, scconfig);
+        let localRootPath = rootDir ? `${rootDir}/${options.localPath}` : options.localPath;
+        // const scconfigRes = await fetch(`${localRootPath}/scconfig.json`);
+        // const scconfig = await scconfigRes.json();
+        // scconfig.rootDir = localRootPath;
+        // module = await application.newModule(scconfig.main, scconfig);
+        if (!localRootPath.endsWith("index.js")) localRootPath += "/index.js";
+        module = await application.newModule(localRootPath);
     }
     else {
         const scconfig = await getSCConfigByCid(options.ipfscid);

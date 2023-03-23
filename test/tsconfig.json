@@ -11,7 +11,8 @@
         "declaration": false,        
         "baseUrl": ".",
         "paths": {
-            "@modules/*":["modules/*"]
+            "@modules/*":["modules/*"],
+            "@scom/scom-page-builder": [".."]
         }
     },
     "include": ["modules/**/*.ts","modules/**/*.tsx"],
