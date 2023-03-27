@@ -172,6 +172,7 @@ export class IDEToolbar extends Module {
             confirmButtonBackgroundColor: Theme.colors.primary.main,
             confirmButtonFontColor: Theme.colors.primary.contrastText,
             jsonSchema: action.userInputDataSchema,
+            dateTimeFormat: 'MM/DD/YYYY HH:mm',
             data: {...properties, ...tag}
         }
         if (action.userInputUISchema) options.jsonUISchema = action.userInputUISchema;

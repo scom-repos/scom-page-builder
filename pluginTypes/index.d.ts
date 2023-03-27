@@ -451,7 +451,8 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
         NFT = "NFT Minter Dapp",
         GEM_TOKEN = "Gem Token Dapp",
         RANDOMIZER = "Randomizer",
-        VIDEO = "Video"
+        VIDEO = "Video",
+        CAROUSEL = "Carousel"
     }
 }
 /// <amd-module name="@scom/scom-page-builder/command/interface.ts" />
@@ -1115,9 +1116,7 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
         private onAddComponent;
         private getModules;
         private getDevPageBlocks;
-        private getCategories;
         private renderFirstStack;
-        private renderBlockStack;
         private renderComponentList;
         render(): any;
     }
