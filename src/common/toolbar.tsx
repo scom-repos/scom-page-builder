@@ -10,7 +10,7 @@ import {
     IRenderUIOptions,
     VStack
 } from '@ijstech/components';
-import { ELEMENT_NAME, IPageBlockAction, IPageElement, ValidationError } from '../interface/index';
+import { ELEMENT_NAME, IPageBlockAction, IPageElement } from '../interface/index';
 import { getRootDir, pageObject } from '../store/index';
 import { getEmbedElement, isEmpty } from '../utility/index';
 import { commandHistory, RemoveToolbarCommand } from '../command/index';
@@ -30,7 +30,8 @@ export interface ToolbarElement extends ControlElement {
 }
 type IPosition = 'left'|'right'|'bottomLeft'|'bottomRight'|'bottom';
 const Theme = currentTheme;
-const disableClickedModules = [ELEMENT_NAME.IMAGE, ELEMENT_NAME.VIDEO];
+const disableClickedModules = [ELEMENT_NAME.IMAGE, ELEMENT_NAME.VIDEO, ELEMENT_NAME.MAP];
+const shownBackdropList = [ELEMENT_NAME.VIDEO, ELEMENT_NAME.MAP];
 
 @customElements('ide-toolbar')
 export class IDEToolbar extends Module {
@@ -312,7 +313,7 @@ export class IDEToolbar extends Module {
         this._component.maxHeight = '100%';
         this._component.overflow = 'hidden';
         this._component.style.display = 'block';
-        this.backdropStack.visible = this.data?.module?.name === ELEMENT_NAME.VIDEO;
+        this.backdropStack.visible = shownBackdropList.includes(this.data?.module?.name);
         this._component.addEventListener('click', (event: Event) => {
             if (disableClickedModules.includes(this.data?.module?.name))
                 event.stopImmediatePropagation();
@@ -443,7 +444,7 @@ export class IDEToolbar extends Module {
                         id="backdropStack"
                         width="100%" height="100%"
                         position="absolute"
-                        top="0px" left="0px" zIndex={99}
+                        top="0px" left="0px" zIndex={15}
                         visible={false}
                         onClick={this.showToolList.bind(this)}
                     ></i-vstack>

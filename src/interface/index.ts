@@ -20,5 +20,6 @@ export enum ELEMENT_NAME {
   GEM_TOKEN = "Gem Token Dapp",
   RANDOMIZER = "Randomizer",
   VIDEO = "Video",
-  CAROUSEL = "Carousel"
+  CAROUSEL = "Carousel",
+  MAP = "Map"
 }

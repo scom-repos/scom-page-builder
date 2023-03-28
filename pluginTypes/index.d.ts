@@ -452,7 +452,8 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
         GEM_TOKEN = "Gem Token Dapp",
         RANDOMIZER = "Randomizer",
         VIDEO = "Video",
-        CAROUSEL = "Carousel"
+        CAROUSEL = "Carousel",
+        MAP = "Map"
     }
 }
 /// <amd-module name="@scom/scom-page-builder/command/interface.ts" />
