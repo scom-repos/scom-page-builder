@@ -309,6 +309,9 @@ export class IDEToolbar extends Module {
                     this.contentStack.classList.add('move');
                 }
                 this.renderResizeStack(data);
+                this.toolList = this._component.getActions ? this._component.getActions() : [];
+                this.checkToolbar();
+                this.showToolbars();
             }
         } catch(error) {
             console.log('fetch module error: ', error)
