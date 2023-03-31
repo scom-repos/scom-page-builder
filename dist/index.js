@@ -2872,7 +2872,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this._component = module;
             this._component.parent = this.contentStack;
             this.contentStack.append(this._component);
-            await this._component.ready();
+            if (this._component.ready)
+                await this._component.ready();
             this._component.maxWidth = '100%';
             this._component.maxHeight = '100%';
             this._component.overflow = 'hidden';
@@ -2884,6 +2885,9 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 this.checkToolbar();
                 this.showToolbars();
             });
+            this.toolList = this._component.getActions ? this._component.getActions() : [];
+            this.checkToolbar();
+            this.showToolbars();
         }
         async setData(properties) {
             // update data from pageblock
