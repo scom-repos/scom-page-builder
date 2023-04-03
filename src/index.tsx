@@ -28,7 +28,7 @@ declare global {
 @customModule
 export default class Editor extends Module {
     private pageRows: PageRows;
-    private builderHeader: BuilderHeader;
+    // private builderHeader: BuilderHeader;
     private builderFooter: BuilderFooter;
     private contentWrapper: Panel;
 
@@ -57,7 +57,7 @@ export default class Editor extends Module {
         pageObject.footer = value.footer;
 
         try {
-            await this.builderHeader.setData(value.header);
+            // await this.builderHeader.setData(value.header);
             await this.pageRows.setRows(value.sections);
             await this.builderFooter.setData(value.footer);
         } catch (error) {
@@ -151,7 +151,7 @@ export default class Editor extends Module {
                                     padding={{ bottom: '12rem' }}
                                     minHeight="calc((100vh - 6rem) - 12rem)"
                                 >
-                                    <builder-header id="builderHeader"></builder-header>
+                                    {/* <builder-header id="builderHeader"></builder-header> */}
                                     <ide-rows id="pageRows" draggable={true}></ide-rows>
                                 </i-panel>
                                 <builder-footer id="builderFooter"></builder-footer>

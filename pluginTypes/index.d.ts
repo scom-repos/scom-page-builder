@@ -1244,7 +1244,6 @@ declare module "@scom/scom-page-builder" {
     }
     export default class Editor extends Module {
         private pageRows;
-        private builderHeader;
         private builderFooter;
         private contentWrapper;
         constructor(parent?: Container, options?: any);
