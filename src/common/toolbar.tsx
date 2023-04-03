@@ -7,7 +7,8 @@ import {
     Button,
     renderUI,
     Modal,
-    IRenderUIOptions
+    IRenderUIOptions,
+    IDataSchema
 } from '@ijstech/components';
 import { ELEMENT_NAME, IPageBlockAction, IPageElement, ValidationError } from '../interface/index';
 import { getRootDir, pageObject } from '../store/index';
@@ -163,6 +164,12 @@ export class IDEToolbar extends Module {
             properties = data;
         }
         let tag = data?.content?.tag || this.data.tag || {};
+        if (typeof tag.width === 'number' && (action.userInputDataSchema.properties?.width as IDataSchema)?.type === 'string') {
+            tag.width = "" + tag.width;
+        }
+        if (typeof tag.height === 'number' && (action.userInputDataSchema.properties?.height as IDataSchema)?.type === 'string') {
+            tag.height = "" + tag.height;
+        }
         const options: IRenderUIOptions = {
             columnWidth: '100%',
             columnsPerRow: 1,
