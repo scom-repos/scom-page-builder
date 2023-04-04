@@ -180,7 +180,7 @@ export class PageSidebar extends Module {
                     v.name === '@PageBlock/Scom Image' ||
                     v.name === '@PageBlock/Markdown Editor' ||
                     v.name === 'Carousel (dev)' ||
-                    v.name === 'Banner (dev)'
+                    v.name === ELEMENT_NAME.BANNER
                 );
             });
             for (let module of filterdModules) {

@@ -1014,6 +1014,7 @@ define("@scom/scom-page-builder/interface/index.ts", ["require", "exports", "@sc
         ELEMENT_NAME["NFT"] = "NFT Minter Dapp";
         ELEMENT_NAME["GEM_TOKEN"] = "Gem Token Dapp";
         ELEMENT_NAME["RANDOMIZER"] = "Randomizer";
+        ELEMENT_NAME["BANNER"] = "Banner";
     })(ELEMENT_NAME = exports.ELEMENT_NAME || (exports.ELEMENT_NAME = {}));
 });
 define("@scom/scom-page-builder/command/interface.ts", ["require", "exports"], function (require, exports) {
@@ -4171,7 +4172,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
     const bannerModule = {
         description: 'Banner (dev)',
         localPath: 'modules/pageblocks/scom-banner',
-        name: 'Banner (dev)',
+        name: index_49.ELEMENT_NAME.BANNER,
         imgUrl: assets_2.default.icons.logo,
         local: true
     };
@@ -4229,7 +4230,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                     return (v.name === '@PageBlock/Scom Image' ||
                         v.name === '@PageBlock/Markdown Editor' ||
                         v.name === 'Carousel (dev)' ||
-                        v.name === 'Banner (dev)');
+                        v.name === index_49.ELEMENT_NAME.BANNER);
                 });
                 for (let module of filterdModules) {
                     if (module.name === '@PageBlock/Scom Image')
