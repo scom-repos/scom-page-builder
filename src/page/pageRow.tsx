@@ -250,6 +250,11 @@ export class PageRow extends Module {
             removeDottedLines();
             toolbar.width = 'initial';
             toolbar.height = 'initial';
+            const contentStack = toolbar.querySelector('#contentStack') as Control
+            if (contentStack) {
+                contentStack.height = 'initial';
+                contentStack.width = 'initial';
+            }
             self.currentElement.width = 'initial';
             self.currentElement.height = 'initial';
             const resizeCmd = new ResizeElementCommand(
@@ -265,6 +270,16 @@ export class PageRow extends Module {
             toolbar = null;
         });
 
+        function updateDimension(newWidth?: number, newHeight?: number) {
+            if (newWidth !== undefined) toolbar.width = newWidth;
+            if (newHeight !== undefined) toolbar.height = newHeight;
+            const contentStack = toolbar.querySelector('#contentStack') as Control
+            if (contentStack) {
+                if (newWidth !== undefined) contentStack.width = newWidth;
+                if (newHeight !== undefined) contentStack.height = newHeight;
+            }
+        }
+
         document.addEventListener('mousemove', (e) => {
             if (!this.isResizing || !toolbar) return;
             const deltaX = e.clientX - startX;
@@ -274,37 +289,33 @@ export class PageRow extends Module {
                 newWidth = this.currentWidth - deltaX;
                 newHeight = this.currentHeight - deltaY;
                 self.currentElement.left = deltaX + 'px';
-                toolbar.width = newWidth + 'px';
-                toolbar.height = newHeight + 'px';
+                updateDimension(newWidth, newHeight)
             } else if (currentDot.classList.contains('topRight')) {
                 newWidth = this.currentWidth + deltaX;
                 newHeight = this.currentHeight - deltaY;
-                toolbar.width = newWidth + 'px';
-                toolbar.height = newHeight + 'px';
+                updateDimension(newWidth, newHeight)
             } else if (currentDot.classList.contains('bottomLeft')) {
                 newWidth = this.currentWidth - deltaX;
                 newHeight = this.currentHeight + deltaY;
                 self.currentElement.left = deltaX + 'px';
-                toolbar.width = newWidth + 'px';
-                toolbar.height = newHeight + 'px';
+                updateDimension(newWidth, newHeight)
             } else if (currentDot.classList.contains('bottomRight')) {
                 newWidth = this.currentWidth + deltaX;
                 newHeight = this.currentHeight + deltaY;
-                toolbar.width = newWidth + 'px';
-                toolbar.height = newHeight + 'px';
+                updateDimension(newWidth, newHeight)
             } else if (currentDot.classList.contains('top')) {
                 newHeight = this.currentHeight - deltaY;
-                toolbar.height = newHeight + 'px';
+                updateDimension(undefined, newHeight)
             } else if (currentDot.classList.contains('bottom')) {
                 newHeight = this.currentHeight + deltaY;
-                toolbar.height = newHeight + 'px';
+                updateDimension(undefined, newHeight)
             } else if (currentDot.classList.contains('left')) {
                 newWidth = this.currentWidth - deltaX;
                 self.currentElement.left = deltaX + 'px';
-                toolbar.width = newWidth + 'px';
+                updateDimension(newWidth, undefined)
             } else if (currentDot.classList.contains('right')) {
                 newWidth = this.currentWidth + deltaX;
-                toolbar.width = newWidth + 'px';
+                updateDimension(newWidth, undefined)
             }
         });
 

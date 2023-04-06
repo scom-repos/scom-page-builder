@@ -450,7 +450,12 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
         IMAGE = "Image",
         NFT = "NFT Minter Dapp",
         GEM_TOKEN = "Gem Token Dapp",
-        RANDOMIZER = "Randomizer"
+        RANDOMIZER = "Randomizer",
+        VIDEO = "Video",
+        CAROUSEL = "Carousel",
+        MAP = "Map",
+        BANNER = "Banner",
+        BLOG = "Blog"
     }
 }
 /// <amd-module name="@scom/scom-page-builder/command/interface.ts" />
@@ -848,6 +853,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private pnlForm;
         private pnlFormMsg;
         private mdActions;
+        private backdropStack;
         private _rowId;
         private _elementId;
         constructor(parent?: any);
@@ -873,11 +879,11 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private renderResizer;
         fetchModule(data: IPageElement): Promise<void>;
         private setModule;
+        private showToolList;
         setData(properties: any): Promise<void>;
         setTag(tag: any): Promise<void>;
         setProperties(data: any): Promise<void>;
         private checkToolbar;
-        private renderError;
         _handleClick(event: Event): boolean;
         init(): void;
         render(): any;
@@ -1088,6 +1094,7 @@ declare module "@scom/scom-page-builder/page/pageSidebar.css.ts" { }
 declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
     import { Module, ControlElement } from '@ijstech/components';
     import { IPageBlockData } from "@scom/scom-page-builder/interface/index.ts";
+    import "@scom/scom-page-builder/page/pageSidebar.css.ts";
     global {
         namespace JSX {
             interface IntrinsicElements {
@@ -1095,7 +1102,6 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
             }
         }
     }
-    import "@scom/scom-page-builder/page/pageSidebar.css.ts";
     export interface PageSidebarElement extends ControlElement {
         onSelectModule?: (selectedModule: IPageBlockData) => Promise<void>;
     }
@@ -1113,9 +1119,7 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
         private onAddComponent;
         private getModules;
         private getDevPageBlocks;
-        private getCategories;
         private renderFirstStack;
-        private renderBlockStack;
         private renderComponentList;
         render(): any;
     }
@@ -1244,7 +1248,6 @@ declare module "@scom/scom-page-builder" {
     }
     export default class Editor extends Module {
         private pageRows;
-        private builderHeader;
         private builderFooter;
         private contentWrapper;
         constructor(parent?: Container, options?: any);
