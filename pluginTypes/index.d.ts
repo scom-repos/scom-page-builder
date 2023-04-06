@@ -909,11 +909,48 @@ declare module "@scom/scom-page-builder/common/dragger.tsx" {
         private mouseMoveHandler;
     }
 }
+/// <amd-module name="@scom/scom-page-builder/common/collapse.css.ts" />
+declare module "@scom/scom-page-builder/common/collapse.css.ts" {
+    export const collapseStyle: string;
+}
+/// <amd-module name="@scom/scom-page-builder/common/collapse.tsx" />
+declare module "@scom/scom-page-builder/common/collapse.tsx" {
+    import { Container, ControlElement, Module } from "@ijstech/components";
+    export interface CollapseElement extends ControlElement {
+        title?: string;
+        item?: Container;
+        expanded?: boolean;
+    }
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ['i-scom-page-builder-collapse']: CollapseElement;
+            }
+        }
+    }
+    export class Collapse extends Module {
+        private lblTitle;
+        private iconCollapse;
+        private pnlContent;
+        private _expanded;
+        constructor(parent?: Container, options?: any);
+        get title(): string;
+        set title(value: string);
+        get item(): Container;
+        set item(target: Container);
+        get expanded(): boolean;
+        set expanded(value: boolean);
+        init(): void;
+        onCollapse(): void;
+        render(): any;
+    }
+}
 /// <amd-module name="@scom/scom-page-builder/common/index.ts" />
 declare module "@scom/scom-page-builder/common/index.ts" {
     import { IDEToolbar } from "@scom/scom-page-builder/common/toolbar.tsx";
     import { ContainerDragger } from "@scom/scom-page-builder/common/dragger.tsx";
-    export { IDEToolbar, ContainerDragger };
+    import { Collapse } from "@scom/scom-page-builder/common/collapse.tsx";
+    export { IDEToolbar, ContainerDragger, Collapse, };
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageSection.tsx" />
 declare module "@scom/scom-page-builder/page/pageSection.tsx" {

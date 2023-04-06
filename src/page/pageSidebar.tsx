@@ -12,6 +12,7 @@ import {
 import { setPageBlocks } from '../store/index';
 import { EVENT } from '../const/index';
 import { ElementType, ELEMENT_NAME, IPageBlockData } from '../interface/index';
+import { Collapse } from '../common/index';
 import './pageSidebar.css';
 import assets from '../assets';
 
@@ -380,8 +381,8 @@ export class PageSidebar extends Module {
     render() {
         return (
             <i-panel class="navigator" height={'100%'} maxWidth="100%">
-                <i-tabs class="insert-tabs">
-                    <i-tab caption="Components" background={{ color: 'transparent' }} font={{name: Theme.typography.fontFamily}}>
+                {/* <i-tabs class="insert-tabs">
+                    <i-tab caption="Components" background={{ color: 'transparent' }} font={{ name: Theme.typography.fontFamily }}>
                         <i-panel height="100%" overflow={{ y: 'hidden' }}>
                             <i-grid-layout
                                 id="firstStack"
@@ -433,12 +434,20 @@ export class PageSidebar extends Module {
                             ></i-vstack>
                         </i-panel>
                     </i-tab>
-                    {/* <i-tab caption='Pages'>
-                        <i-panel padding={{left: '1rem', right: '1rem', top: '1rem'}}>
-                            <i-label caption='Pages'></i-label>
-                        </i-panel>
-                    </i-tab> */}
-                </i-tabs>
+                </i-tabs> */}
+                <i-scom-page-builder-collapse title="Components" border={{ bottom: { width: 1, style: 'solid', color: Theme.divider } }} expanded={true}>
+                    <i-grid-layout
+                        id="firstStack"
+                        templateColumns={['repeat(2, 1fr)']}
+                        margin={{ top: 6 }}
+                    ></i-grid-layout>
+                </i-scom-page-builder-collapse>
+                <i-scom-page-builder-collapse title="Micro DApps" border={{ bottom: { width: 1, style: 'solid', color: Theme.divider } }} expanded={true}>
+                    <i-vstack
+                        id="componentsStack"
+                        padding={{ top: '8px', bottom: '8px' }}
+                    ></i-vstack>
+                </i-scom-page-builder-collapse>
             </i-panel>
         );
     }
