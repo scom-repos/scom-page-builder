@@ -309,7 +309,7 @@ export class IDEToolbar extends Module {
         this._component.overflow = 'hidden';
         this._component.style.display = 'block';
         this._component.addEventListener('click', (event: Event) => {
-            event.stopImmediatePropagation();
+            // event.stopImmediatePropagation();
             event.preventDefault()
             this.toolList = this._component.getActions ? this._component.getActions() : [];
             this.checkToolbar();
