@@ -5091,7 +5091,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         getData() {
             return {
                 header: index_65.pageObject.header,
-                sections: index_65.pageObject.sections,
+                sections: index_65.pageObject.sections.filter(section => section.elements && section.elements.length),
                 footer: index_65.pageObject.footer
             };
         }

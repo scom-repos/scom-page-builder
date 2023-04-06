@@ -46,7 +46,7 @@ export default class Editor extends Module {
     getData() {
         return {
             header: pageObject.header,
-            sections: pageObject.sections,
+            sections: pageObject.sections.filter(section => section.elements && section.elements.length),
             footer: pageObject.footer
         }
     }
