@@ -13,7 +13,7 @@ import { setPageBlocks } from '../store/index';
 import { EVENT } from '../const/index';
 import { ElementType, ELEMENT_NAME, IPageBlockData } from '../interface/index';
 import './pageSidebar.css';
-import assets from 'src/assets';
+import assets from '../assets';
 
 const Theme = Styles.Theme.ThemeVars;
 const GET_PAGE_BLOCK_URL = `https://data.scom.dev/api/v1/audit/auditedPageBlock?packageType=2`;
@@ -99,10 +99,28 @@ const mapModule: any = {
     local: true,
 };
 
+const bannerModule: any = {
+    description: 'Banner',
+    localPath: 'modules/pageblocks/scom-banner',
+    name: ELEMENT_NAME.BANNER,
+    imgUrl: assets.icons.logo,
+    local: true
+}
+
+const blogModule: any = {
+    description: 'Blog',
+    localPath: 'modules/pageblocks/scom-blog',
+    name: ELEMENT_NAME.BLOG,
+    imgUrl: assets.icons.logo,
+    local: true
+}
+
 const firstDevModules = [
     textboxModule,
     imageModule,
-    carouselModule
+    carouselModule,
+    bannerModule,
+    blogModule
 ];
 
 const devModules = [
@@ -197,7 +215,8 @@ export class PageSidebar extends Module {
                     v.name === '@PageBlock/Scom Image' ||
                     v.name === '@PageBlock/Markdown Editor' ||
                     v.name === ELEMENT_NAME.CAROUSEL ||
-                    v.name === ELEMENT_NAME.BANNER
+                    v.name === ELEMENT_NAME.BANNER ||
+                    v.name === ELEMENT_NAME.BLOG
                 );
             });
             for (let module of filterdModules) {

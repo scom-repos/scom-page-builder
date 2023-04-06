@@ -22,5 +22,6 @@ export enum ELEMENT_NAME {
   VIDEO = "Video",
   CAROUSEL = "Carousel",
   MAP = "Map",
-  BANNER = "Banner"
+  BANNER = "Banner",
+  BLOG = "Blog",
 }

@@ -453,7 +453,9 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
         RANDOMIZER = "Randomizer",
         VIDEO = "Video",
         CAROUSEL = "Carousel",
-        MAP = "Map"
+        MAP = "Map",
+        BANNER = "Banner",
+        BLOG = "Blog"
     }
 }
 /// <amd-module name="@scom/scom-page-builder/command/interface.ts" />
@@ -1092,6 +1094,7 @@ declare module "@scom/scom-page-builder/page/pageSidebar.css.ts" { }
 declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
     import { Module, ControlElement } from '@ijstech/components';
     import { IPageBlockData } from "@scom/scom-page-builder/interface/index.ts";
+    import "@scom/scom-page-builder/page/pageSidebar.css.ts";
     global {
         namespace JSX {
             interface IntrinsicElements {
@@ -1099,7 +1102,6 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
             }
         }
     }
-    import "@scom/scom-page-builder/page/pageSidebar.css.ts";
     export interface PageSidebarElement extends ControlElement {
         onSelectModule?: (selectedModule: IPageBlockData) => Promise<void>;
     }
@@ -1246,7 +1248,6 @@ declare module "@scom/scom-page-builder" {
     }
     export default class Editor extends Module {
         private pageRows;
-        private builderHeader;
         private builderFooter;
         private contentWrapper;
         constructor(parent?: Container, options?: any);
