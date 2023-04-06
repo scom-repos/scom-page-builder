@@ -8,9 +8,10 @@ import {
     renderUI,
     Modal,
     IRenderUIOptions,
-    IDataSchema
+    IDataSchema,
+    VStack
 } from '@ijstech/components';
-import { ELEMENT_NAME, IPageBlockAction, IPageElement, ValidationError } from '../interface/index';
+import { ELEMENT_NAME, IPageBlockAction, IPageElement } from '../interface/index';
 import { getRootDir, pageObject } from '../store/index';
 import { getEmbedElement, isEmpty } from '../utility/index';
 import { commandHistory, RemoveToolbarCommand } from '../command/index';
@@ -30,6 +31,8 @@ export interface ToolbarElement extends ControlElement {
 }
 type IPosition = 'left'|'right'|'bottomLeft'|'bottomRight'|'bottom';
 const Theme = currentTheme;
+const disableClickedModules = [ELEMENT_NAME.IMAGE, ELEMENT_NAME.VIDEO, ELEMENT_NAME.MAP];
+const shownBackdropList = [ELEMENT_NAME.VIDEO, ELEMENT_NAME.MAP];
 
 @customElements('ide-toolbar')
 export class IDEToolbar extends Module {
@@ -50,6 +53,7 @@ export class IDEToolbar extends Module {
     private pnlForm: Panel;
     private pnlFormMsg: Panel;
     private mdActions: Modal;
+    private backdropStack: VStack
 
     private _rowId: string;
     private _elementId: string;
@@ -176,6 +180,7 @@ export class IDEToolbar extends Module {
             confirmButtonBackgroundColor: Theme.colors.primary.main,
             confirmButtonFontColor: Theme.colors.primary.contrastText,
             jsonSchema: action.userInputDataSchema,
+            dateTimeFormat: 'MM/DD/YYYY HH:mm',
             data: {...properties, ...tag}
         }
         if (action.userInputUISchema) options.jsonUISchema = action.userInputUISchema;
@@ -192,8 +197,8 @@ export class IDEToolbar extends Module {
             commandHistory.execute(commandIns);
             this.mdActions.visible = false;
         } else if (data?.errors) {
-            this.pnlFormMsg.visible = true;
-            this.renderError(data.errors || []);
+            // this.pnlFormMsg.visible = true;
+            // this.renderError(data.errors || []);
         }
     }
 
@@ -220,10 +225,10 @@ export class IDEToolbar extends Module {
         this._nResizer = this.renderResizer('bottom');
         this._neResizer = this.renderResizer('bottomLeft');
         this._nwResizer = this.renderResizer('bottomRight');
-        const isImage = data?.module?.name === ELEMENT_NAME.IMAGE;
-        if (this._nResizer) this._nResizer.visible = isImage;
-        if (this._neResizer) this._neResizer.visible = isImage;
-        if (this._nwResizer) this._nwResizer.visible = isImage;
+        const showFull = disableClickedModules.includes(data?.module?.name as ELEMENT_NAME)
+        if (this._nResizer) this._nResizer.visible = showFull;
+        if (this._neResizer) this._neResizer.visible = showFull;
+        if (this._nwResizer) this._nwResizer.visible = showFull;
     }
 
     private renderResizer(position: IPosition) {
@@ -315,13 +320,19 @@ export class IDEToolbar extends Module {
         this._component.maxHeight = '100%';
         this._component.overflow = 'hidden';
         this._component.style.display = 'block';
+        this.backdropStack.visible = shownBackdropList.includes(this.data?.module?.name);
         this._component.addEventListener('click', (event: Event) => {
-            event.stopImmediatePropagation();
+            if (disableClickedModules.includes(this.data?.module?.name))
+                event.stopImmediatePropagation();
             event.preventDefault()
-            this.toolList = this._component.getActions ? this._component.getActions() : [];
-            this.checkToolbar();
-            this.showToolbars();
+            this.showToolList();
         })
+        this.toolList = this._component.getActions ? this._component.getActions() : [];
+        this.checkToolbar();
+        this.showToolbars();
+    }
+
+    private showToolList() {
         this.toolList = this._component.getActions ? this._component.getActions() : [];
         this.checkToolbar();
         this.showToolbars();
@@ -370,17 +381,17 @@ export class IDEToolbar extends Module {
         isShowing && this.showToolbars();
     }
 
-    private renderError(errors: ValidationError[]) {
-        this.pnlFormMsg.clearInnerHTML();
-        errors.forEach(error => {
-            this.pnlFormMsg.appendChild(
-                <i-label
-                    caption={`${error.property} ${error.message}`}
-                    font={{color: Theme.colors.error.main, size: '0.75rem'}}
-                ></i-label>
-            );
-        })
-    }
+    // private renderError(errors: ValidationError[]) {
+    //     this.pnlFormMsg.clearInnerHTML();
+    //     errors.forEach(error => {
+    //         this.pnlFormMsg.appendChild(
+    //             <i-label
+    //                 caption={`${error.property} ${error.message}`}
+    //                 font={{color: Theme.colors.error.main, size: '0.75rem'}}
+    //             ></i-label>
+    //         );
+    //     })
+    // }
 
     _handleClick(event: Event): boolean {
         if (this._readonly) return super._handleClick(event, true);
@@ -439,6 +450,14 @@ export class IDEToolbar extends Module {
                             <i-icon name="circle" width={3} height={3}></i-icon>
                         </i-grid-layout>
                     </i-vstack>
+                    <i-vstack
+                        id="backdropStack"
+                        width="100%" height="100%"
+                        position="absolute"
+                        top="0px" left="0px" zIndex={15}
+                        visible={false}
+                        onClick={this.showToolList.bind(this)}
+                    ></i-vstack>
                 </i-panel>
 
                 <i-panel

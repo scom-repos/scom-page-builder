@@ -10,32 +10,35 @@ import {
     application,
 } from '@ijstech/components';
 import { setPageBlocks } from '../store/index';
-import assets from '../assets';
-import { EVENT, textStyles } from '../const/index';
+import { EVENT } from '../const/index';
 import { ElementType, ELEMENT_NAME, IPageBlockData } from '../interface/index';
+import './pageSidebar.css';
+import assets from 'src/assets';
 
 const Theme = Styles.Theme.ThemeVars;
 const GET_PAGE_BLOCK_URL = `https://data.scom.dev/api/v1/audit/auditedPageBlock?packageType=2`;
-const GET_CATEGORIES_URL = `https://data.scom.dev/api/v1/master/getPackageCategory?packageStatus=1&packageType=2`;
-const SHOW_DEV_PAGEBLOCK = true;
-interface ICategoryData {
-    name: string;
-    idx: string;
-    icon: string;
-    count: number;
-}
+// const GET_CATEGORIES_URL = `https://data.scom.dev/api/v1/master/getPackageCategory?packageStatus=1&packageType=2`;
+const SHOW_DEV_PAGEBLOCK = true; // For showing dev modules
+
+// interface ICategoryData {
+//     name: string;
+//     idx: string;
+//     icon: string;
+//     count: number;
+// }
+
 const imageModule: any = {
     description: 'Image (dev)',
     localPath: 'modules/pageblocks/scom-image',
-    name: ELEMENT_NAME.IMAGE,
+    name: '@PageBlock/Scom Image',
     imgUrl: assets.icons.logo,
     local: true,
 };
 
-const buttonModule: any = {
-    description: 'Button (dev)',
-    localPath: 'modules/pageblocks/scom-button',
-    name: 'Button',
+const dappModule: any = {
+    description: 'Dapp ',
+    localPath: 'modules/pageblocks/scom-dapp-container',
+    name: '@PageBlock/Dapp Container',
     imgUrl: assets.icons.logo,
     local: true,
 };
@@ -43,7 +46,7 @@ const buttonModule: any = {
 const nftModule: any = {
     description: 'Nft (dev)',
     localPath: 'modules/pageblocks/scom-nft-minter',
-    name: ELEMENT_NAME.NFT,
+    name: '@PageBlock/NFT Minter',
     imgUrl: assets.icons.logo,
     local: true,
 };
@@ -51,7 +54,7 @@ const nftModule: any = {
 const gemModule: any = {
     description: 'Gem (dev)',
     localPath: 'modules/pageblocks/scom-gem-token',
-    name: ELEMENT_NAME.GEM_TOKEN,
+    name: '@PageBlock/Gem Token',
     imgUrl: assets.icons.logo,
     local: true,
 };
@@ -59,7 +62,7 @@ const gemModule: any = {
 const randomizerModule: any = {
     description: 'Randomizer (dev)',
     localPath: 'modules/pageblocks/scom-randomizer',
-    name: ELEMENT_NAME.RANDOMIZER,
+    name: '@PageBlock/Randomizer',
     imgUrl: assets.icons.logo,
     local: true,
 };
@@ -67,7 +70,7 @@ const randomizerModule: any = {
 const textboxModule: any = {
     description: 'Textbox (dev)',
     localPath: 'modules/pageblocks/scom-markdown-editor',
-    name: ELEMENT_NAME.TEXTBOX,
+    name: '@PageBlock/Markdown Editor',
     imgUrl: assets.icons.logo,
     local: true,
 };
@@ -75,20 +78,42 @@ const textboxModule: any = {
 const carouselModule: any = {
     description: 'Carousel (dev)',
     localPath: 'modules/pageblocks/scom-carousel',
-    name: 'Carousel (dev)',
+    name: ELEMENT_NAME.CAROUSEL,
     imgUrl: assets.icons.logo,
     local: true,
 };
 
-const bannerModule: any = {
-    description: 'Banner (dev)',
-    localPath: 'modules/pageblocks/scom-banner',
-    name: ELEMENT_NAME.BANNER,
+const videoModule: any = {
+    description: 'Video',
+    localPath: 'modules/pageblocks/scom-video',
+    name: ELEMENT_NAME.VIDEO,
     imgUrl: assets.icons.logo,
-    local: true
-}
+    local: true,
+};
 
-const firstDevModules = [textboxModule, imageModule, carouselModule, bannerModule];
+const mapModule: any = {
+    description: 'Map',
+    localPath: 'modules/pageblocks/scom-map',
+    name: ELEMENT_NAME.MAP,
+    imgUrl: assets.icons.logo,
+    local: true,
+};
+
+const firstDevModules = [
+    textboxModule,
+    imageModule,
+    carouselModule
+];
+
+const devModules = [
+    ...firstDevModules,
+    dappModule,
+    nftModule,
+    gemModule,
+    videoModule,
+    randomizerModule,
+    mapModule
+];
 
 declare global {
     namespace JSX {
@@ -97,8 +122,6 @@ declare global {
         }
     }
 }
-
-import './pageSidebar.css';
 
 export interface PageSidebarElement extends ControlElement {
     onSelectModule?: (selectedModule: IPageBlockData) => Promise<void>;
@@ -134,7 +157,6 @@ export class PageSidebar extends Module {
         this.renderFirstStack();
         // this.renderBlockStack();
         this.renderComponentList();
-        // const categories = await this.getCategories();
     }
 
     private onToggleBlock(source: Control) {
@@ -148,27 +170,22 @@ export class PageSidebar extends Module {
     }
 
     private async getModules(category?: string): Promise<IPageBlockData[]> {
-        const request = new Request(
-            `${GET_PAGE_BLOCK_URL}${category ? `&categories=${category}` : ''}`
-        );
-        const response = await fetch(request);
-        let data = (await response.json()) as IPageBlockData[];
+        let data = [];
         if (SHOW_DEV_PAGEBLOCK) {
             const devPageblocks: IPageBlockData[] = await this.getDevPageBlocks();
-            data = [...data, ...devPageblocks];
+            data = [...devPageblocks];
+        } else {
+            const request = new Request(
+                `${GET_PAGE_BLOCK_URL}${category ? `&categories=${category}` : ''}`
+            );
+            const response = await fetch(request);
+            data = (await response.json()) as IPageBlockData[];
         }
         return data;
     }
 
     private async getDevPageBlocks(): Promise<IPageBlockData[]> {
-        return [...firstDevModules]; // []; // Mikey Test: [...firstDevModules];
-    }
-
-    private async getCategories() {
-        const request = new Request(GET_CATEGORIES_URL);
-        const response = await fetch(request);
-        const data = (await response.json()) as ICategoryData[];
-        return data;
+        return [...devModules]; // []; // Mikey Test: [...firstDevModules];
     }
 
     private async renderFirstStack() {
@@ -179,7 +196,7 @@ export class PageSidebar extends Module {
                 return (
                     v.name === '@PageBlock/Scom Image' ||
                     v.name === '@PageBlock/Markdown Editor' ||
-                    v.name === 'Carousel (dev)' ||
+                    v.name === ELEMENT_NAME.CAROUSEL ||
                     v.name === ELEMENT_NAME.BANNER
                 );
             });
@@ -187,10 +204,9 @@ export class PageSidebar extends Module {
                 if (module.name === '@PageBlock/Scom Image') module.name = ELEMENT_NAME.IMAGE;
                 else if (module.name === '@PageBlock/Markdown Editor')
                     module.name = ELEMENT_NAME.TEXTBOX;
-                else if (module.name === 'Carousel (dev)') module.name = 'Carousel (dev)';
+                // else if (module.name === 'Carousel (dev)') module.name = 'Carousel (dev)';
                 components.push(module);
             }
-            // components = [...firstDevModules, ...filterdModules];
         } catch {
             components = [...firstDevModules];
         }
@@ -221,74 +237,74 @@ export class PageSidebar extends Module {
         }
     }
 
-    private renderBlockStack() {
-        this._contentBlocks = [
-            {
-                image: 'img/blocks/block1.svg',
-                columns: 2,
-            },
-            {
-                image: 'img/blocks/block2.svg',
-                columns: 2,
-            },
-            {
-                image: 'img/blocks/block3.svg',
-                columns: 2,
-            },
-            {
-                image: 'img/blocks/block4.svg',
-                columns: 3,
-            },
-        ];
-        this.blockStack.clearInnerHTML();
-        this._contentBlocks.forEach((block) => {
-            let config = { width: '100%', columns: block.columns };
-            let sectionData: any = {};
-            sectionData.toolList = [
-                textStyles,
-                {
-                    caption: `<i-icon name="bold" width=${20} height=${20} fill="${
-                        Theme.text.primary
-                    }"></i-icon>`,
-                    onClick: () => {},
-                },
-                {
-                    caption: `<i-icon name="italic" width=${20} height=${20} fill="${
-                        Theme.text.primary
-                    }"></i-icon>`,
-                    onClick: () => {},
-                },
-                {
-                    caption: `<i-icon name="trash" width=${20} height=${20} fill="${
-                        Theme.text.primary
-                    }"></i-icon>`,
-                    onClick: async () => {},
-                },
-            ];
-            sectionData.component = {
-                type: 'Input',
-                properties: {
-                    minHeight: '2.5rem',
-                    width: '100%',
-                    minWidth: 200,
-                },
-            };
-            this.blockStack.appendChild(
-                <i-vstack
-                    class="block-image pointer"
-                    verticalAlignment="center"
-                    horizontalAlignment="center"
-                    // onClick={() => this.onAddRow({ config, elements: [sectionData, sectionData] })}
-                >
-                    <i-image
-                        width="auto"
-                        height="100%"
-                        url={assets.fullPath(block.image)}
-                    ></i-image>
-                </i-vstack>
-            );
-        });
-    }
+    // private renderBlockStack() {
+    //     this._contentBlocks = [
+    //         {
+    //             image: 'img/blocks/block1.svg',
+    //             columns: 2,
+    //         },
+    //         {
+    //             image: 'img/blocks/block2.svg',
+    //             columns: 2,
+    //         },
+    //         {
+    //             image: 'img/blocks/block3.svg',
+    //             columns: 2,
+    //         },
+    //         {
+    //             image: 'img/blocks/block4.svg',
+    //             columns: 3,
+    //         },
+    //     ];
+    //     this.blockStack.clearInnerHTML();
+    //     this._contentBlocks.forEach((block) => {
+    //         let config = { width: '100%', columns: block.columns };
+    //         let sectionData: any = {};
+    //         sectionData.toolList = [
+    //             textStyles,
+    //             {
+    //                 caption: `<i-icon name="bold" width=${20} height=${20} fill="${
+    //                     Theme.text.primary
+    //                 }"></i-icon>`,
+    //                 onClick: () => {},
+    //             },
+    //             {
+    //                 caption: `<i-icon name="italic" width=${20} height=${20} fill="${
+    //                     Theme.text.primary
+    //                 }"></i-icon>`,
+    //                 onClick: () => {},
+    //             },
+    //             {
+    //                 caption: `<i-icon name="trash" width=${20} height=${20} fill="${
+    //                     Theme.text.primary
+    //                 }"></i-icon>`,
+    //                 onClick: async () => {},
+    //             },
+    //         ];
+    //         sectionData.component = {
+    //             type: 'Input',
+    //             properties: {
+    //                 minHeight: '2.5rem',
+    //                 width: '100%',
+    //                 minWidth: 200,
+    //             },
+    //         };
+    //         this.blockStack.appendChild(
+    //             <i-vstack
+    //                 class="block-image pointer"
+    //                 verticalAlignment="center"
+    //                 horizontalAlignment="center"
+    //                 // onClick={() => this.onAddRow({ config, elements: [sectionData, sectionData] })}
+    //             >
+    //                 <i-image
+    //                     width="auto"
+    //                     height="100%"
+    //                     url={assets.fullPath(block.image)}
+    //                 ></i-image>
+    //             </i-vstack>
+    //         );
+    //     });
+    // }
 
     private async renderComponentList(keyword?: string) {
         this.componentsStack.clearInnerHTML();
@@ -298,6 +314,8 @@ export class PageSidebar extends Module {
                 '@PageBlock/NFT Minter',
                 '@PageBlock/Gem Token',
                 '@PageBlock/Randomizer',
+                ELEMENT_NAME.VIDEO,
+                ELEMENT_NAME.MAP
             ].includes(v.name);
         });
         for (let module of filterdModules) {
@@ -306,12 +324,6 @@ export class PageSidebar extends Module {
             else if (module.name === '@PageBlock/Randomizer') module.name = ELEMENT_NAME.RANDOMIZER;
             components.push(module);
         }
-        // For testing
-        components.push(imageModule);
-        components.push(textboxModule);
-        components.push(nftModule);
-        components.push(gemModule);
-        components.push(randomizerModule);
         let matchedModules = components;
         if (keyword) {
             matchedModules = components.filter((v) => {
