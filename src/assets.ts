@@ -6,7 +6,7 @@ function fullPath(path: string): string{
 }
 export default {
     icons: {
-        logo: fullPath('img/sc-logo.svg'),
+        logo: fullPath('img/sc-logo.png'),
         logoMobile: fullPath('img/sc-logo-mobile.svg'),
         validocs: fullPath('img/validocs.svg')
     },

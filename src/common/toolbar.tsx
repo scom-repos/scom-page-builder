@@ -8,6 +8,7 @@ import {
     renderUI,
     Modal,
     IRenderUIOptions,
+    IDataSchema,
     VStack
 } from '@ijstech/components';
 import { ELEMENT_NAME, IPageBlockAction, IPageElement } from '../interface/index';
@@ -167,6 +168,12 @@ export class IDEToolbar extends Module {
             properties = data;
         }
         let tag = data?.content?.tag || this.data.tag || {};
+        if (typeof tag.width === 'number' && (action.userInputDataSchema.properties?.width as IDataSchema)?.type === 'string') {
+            tag.width = "" + tag.width;
+        }
+        if (typeof tag.height === 'number' && (action.userInputDataSchema.properties?.height as IDataSchema)?.type === 'string') {
+            tag.height = "" + tag.height;
+        }
         const options: IRenderUIOptions = {
             columnWidth: '100%',
             columnsPerRow: 1,
@@ -308,7 +315,7 @@ export class IDEToolbar extends Module {
         this._component = module;
         this._component.parent = this.contentStack;
         this.contentStack.append(this._component);
-        await this._component.ready();
+        if (this._component.ready) await this._component.ready();
         this._component.maxWidth = '100%';
         this._component.maxHeight = '100%';
         this._component.overflow = 'hidden';
@@ -320,6 +327,9 @@ export class IDEToolbar extends Module {
             event.preventDefault()
             this.showToolList();
         })
+        this.toolList = this._component.getActions ? this._component.getActions() : [];
+        this.checkToolbar();
+        this.showToolbars();
     }
 
     private showToolList() {
