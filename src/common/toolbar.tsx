@@ -31,7 +31,7 @@ export interface ToolbarElement extends ControlElement {
 }
 type IPosition = 'left'|'right'|'bottomLeft'|'bottomRight'|'bottom';
 const Theme = currentTheme;
-const disableClickedModules = [ELEMENT_NAME.IMAGE, ELEMENT_NAME.VIDEO, ELEMENT_NAME.MAP];
+const disableClickedModules = [ELEMENT_NAME.IMAGE, ELEMENT_NAME.VIDEO, ELEMENT_NAME.MAP, ELEMENT_NAME.BLOG];
 const shownBackdropList = [ELEMENT_NAME.VIDEO, ELEMENT_NAME.MAP];
 
 @customElements('ide-toolbar')

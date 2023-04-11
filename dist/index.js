@@ -2637,7 +2637,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.IDEToolbar = void 0;
     const Theme = index_29.currentTheme;
-    const disableClickedModules = [index_25.ELEMENT_NAME.IMAGE, index_25.ELEMENT_NAME.VIDEO, index_25.ELEMENT_NAME.MAP];
+    const disableClickedModules = [index_25.ELEMENT_NAME.IMAGE, index_25.ELEMENT_NAME.VIDEO, index_25.ELEMENT_NAME.MAP, index_25.ELEMENT_NAME.BLOG];
     const shownBackdropList = [index_25.ELEMENT_NAME.VIDEO, index_25.ELEMENT_NAME.MAP];
     let IDEToolbar = class IDEToolbar extends components_17.Module {
         constructor(parent) {
