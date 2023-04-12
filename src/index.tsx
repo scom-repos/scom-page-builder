@@ -79,7 +79,7 @@ export default class Editor extends Module {
         let element = {
             id: generateUUID(),
             column: 1,
-            columnSpan: module.name === ELEMENT_NAME.TEXTBOX ? 12 : 3,
+            columnSpan: module.category === 'components' ? 12 : 3,
             type,
             module,
             properties: {} as any
@@ -89,14 +89,14 @@ export default class Editor extends Module {
             row: pageObject.sections.length + 1,
             elements: [element]
         };
-        if (module.name === ELEMENT_NAME.NFT || module.name === ELEMENT_NAME.GEM_TOKEN) {
+        if (module.path === 'scom-nft-minter' || module.path === 'scom-gem-token') {
             element.module = getDappContainer();
             element.columnSpan = 6;
             element.properties = {
                 networks: [43113],
                 wallets: ["metamask"],
                 content: {
-                    module,
+                    module: { ...module, localPath: `libs/@scom/${module.path}` },
                     properties: {
                         width: '100%'
                     }

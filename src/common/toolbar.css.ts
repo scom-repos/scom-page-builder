@@ -85,6 +85,41 @@ Styles.cssRule('ide-toolbar', {
           transition: 'opacity .3s .3s cubic-bezier(0.4,0,0.2,1), visibility 0s .2s'
         }
       }
+    },
+    '.setting-modal i-tabs': {
+      $nest: {
+        '> .tabs-nav-wrap': {
+          margin: 0,
+          $nest: {
+            '.tabs-nav': {
+              border: 0,
+              borderRight: `1px solid ${Theme.divider}`,
+              paddingRight: '0.5rem'
+            },
+            'i-tab': {
+              background: 'transparent',
+              border: 0,
+              borderRadius: '0.25rem',
+              color: Theme.text.primary,
+              fontFamily: Theme.typography.fontFamily,
+              fontSize: '0.875rem',
+              marginBottom: 0,
+            },
+            'i-tab:not(.disabled).active': {
+              background: Theme.action.selected,
+              color: Theme.text.primary,
+              fontWeight: 600,
+            },
+            'i-tab:not(.disabled):hover': {
+              background: Theme.action.hover,
+              color: Theme.text.primary,
+            },
+            'i-tab .tab-item': {
+              padding: '0.5rem 0.75rem',
+            },
+          }
+        },
+      }
     }
   }
 })
