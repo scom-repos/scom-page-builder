@@ -158,8 +158,10 @@ const getSCConfigByCid = async (cid: string) => {
 };
 
 const getEmbedElement = async (path: string) => {
-    application.currentModuleDir = path;
-    const result = await application.loadScript(`libs/@scom/${path}/index.js`);
+    const rootDir = getRootDir();
+    let modulePath = rootDir ? `${rootDir}/libs/@scom/${path}` : `libs/@scom/${path}`;
+    application.currentModuleDir = modulePath;
+    const result = await application.loadScript(`${modulePath}/index.js`);
     application.currentModuleDir = '';
     if (!result) return null;
     const elementName = `i-${path.split('/').pop()}`;
