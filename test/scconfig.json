@@ -37,11 +37,6 @@
       "category": "components",
       "disableClicked": true
     },
-    "@scom/scom-content-block": {
-      "name": "Content Block",
-      "path": "scom-content-block",
-      "category": "components"
-    },
     "@scom/scom-nft-minter": {
       "name": "NFT Minter DApp",
       "path": "scom-nft-minter",
