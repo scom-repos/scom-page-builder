@@ -66,16 +66,16 @@ export class BuilderFooter extends Module {
     }
 
     private get _elements() {
-        return pageObject.footer.elements || [];
+        return pageObject.footer?.elements || [];
     }
 
     private get _image() {
-        return pageObject.footer.image || '';
+        return pageObject.footer?.image || '';
     }
 
     private async updateFooter() {
         this.pnlFooterMain.clearInnerHTML();
-        this.showAddStack = this._elements.length === 0 && !this._image;
+        this.showAddStack = this._elements?.length === 0 && !this._image;
         this.pnlFooter.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
         this.pnlEditOverlay.visible = !this.showAddStack;
         this.pnlEditOverlay.classList.remove('flex');
