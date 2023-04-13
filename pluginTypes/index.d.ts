@@ -230,12 +230,7 @@ declare module "@scom/scom-page-builder/utility/pathToRegexp.ts" {
 }
 /// <amd-module name="@scom/scom-page-builder/utility/index.ts" />
 declare module "@scom/scom-page-builder/utility/index.ts" {
-    import { Module } from '@ijstech/components';
     import { match, MatchFunction, compile } from "@scom/scom-page-builder/utility/pathToRegexp.ts";
-    interface IGetModuleOptions {
-        ipfscid?: string;
-        localPath?: string;
-    }
     const assignAttr: (module: any) => void;
     const uploadToIPFS: (data: any) => Promise<string>;
     const fetchFromIPFS: (cid: string) => Promise<any>;
@@ -247,9 +242,8 @@ declare module "@scom/scom-page-builder/utility/index.ts" {
     const updatePagePath: (pagePath: string) => void;
     const generateUUID: () => string;
     const isEmpty: (value: any) => boolean;
-    const getEmbedElement: (options: IGetModuleOptions) => Promise<HTMLElement>;
-    const getModule: (options: IGetModuleOptions) => Promise<Module>;
-    export { assignAttr, uploadToIPFS, fetchFromIPFS, match, MatchFunction, compile, formatNumber, formatNumberWithSeparators, isCID, getCID, getPagePath, updatePagePath, generateUUID, isEmpty, getModule, getEmbedElement };
+    const getEmbedElement: (path: string) => Promise<HTMLElement>;
+    export { assignAttr, uploadToIPFS, fetchFromIPFS, match, MatchFunction, compile, formatNumber, formatNumberWithSeparators, isCID, getCID, getPagePath, updatePagePath, generateUUID, isEmpty, getEmbedElement };
 }
 /// <amd-module name="@scom/scom-page-builder/interface/core.ts" />
 declare module "@scom/scom-page-builder/interface/core.ts" {
@@ -323,20 +317,11 @@ declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
     import { IDataSchema, IUISchema } from "@ijstech/components";
     export interface IPageBlockData {
         name: string;
-        description: string;
-        ipfscid?: string;
+        path: string;
+        category?: "components" | "micro-dapps";
         imgUrl?: string;
-        category?: {
-            icon: string;
-            idx: string;
-            name: string;
-        }[];
-        chainId?: number;
-        packageId?: number;
-        projectId?: number;
-        local?: boolean;
-        localPath?: string;
-        dependencies?: any;
+        disableClicked?: boolean;
+        shownBackdrop?: boolean;
     }
     export interface ICommand {
         execute(): void;
@@ -356,10 +341,6 @@ declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
         setData: (data: any) => Promise<void>;
         getTag: () => any;
         setTag: (tag: any) => Promise<void>;
-    }
-    export interface IGetModuleOptions {
-        ipfscid?: string;
-        localPath?: string;
     }
 }
 /// <amd-module name="@scom/scom-page-builder/interface/component.ts" />
@@ -909,11 +890,48 @@ declare module "@scom/scom-page-builder/common/dragger.tsx" {
         private mouseMoveHandler;
     }
 }
+/// <amd-module name="@scom/scom-page-builder/common/collapse.css.ts" />
+declare module "@scom/scom-page-builder/common/collapse.css.ts" {
+    export const collapseStyle: string;
+}
+/// <amd-module name="@scom/scom-page-builder/common/collapse.tsx" />
+declare module "@scom/scom-page-builder/common/collapse.tsx" {
+    import { Container, ControlElement, Module } from "@ijstech/components";
+    export interface CollapseElement extends ControlElement {
+        title?: string;
+        item?: Container;
+        expanded?: boolean;
+    }
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ['i-scom-page-builder-collapse']: CollapseElement;
+            }
+        }
+    }
+    export class Collapse extends Module {
+        private lblTitle;
+        private iconCollapse;
+        private pnlContent;
+        private _expanded;
+        constructor(parent?: Container, options?: any);
+        get title(): string;
+        set title(value: string);
+        get item(): Container;
+        set item(target: Container);
+        get expanded(): boolean;
+        set expanded(value: boolean);
+        init(): void;
+        onCollapse(): void;
+        render(): any;
+    }
+}
 /// <amd-module name="@scom/scom-page-builder/common/index.ts" />
 declare module "@scom/scom-page-builder/common/index.ts" {
     import { IDEToolbar } from "@scom/scom-page-builder/common/toolbar.tsx";
     import { ContainerDragger } from "@scom/scom-page-builder/common/dragger.tsx";
-    export { IDEToolbar, ContainerDragger };
+    import { Collapse } from "@scom/scom-page-builder/common/collapse.tsx";
+    export { IDEToolbar, ContainerDragger, Collapse, };
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageSection.tsx" />
 declare module "@scom/scom-page-builder/page/pageSection.tsx" {
@@ -1106,21 +1124,17 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
         onSelectModule?: (selectedModule: IPageBlockData) => Promise<void>;
     }
     export class PageSidebar extends Module {
-        private blockStack;
+        private microDAppsStack;
         private componentsStack;
-        private firstStack;
-        private _contentBlocks;
         private onSelectModule;
         private pageBlocks;
         constructor(parent?: any);
         init(): void;
         private renderUI;
-        private onToggleBlock;
+        getPageBlocks(): Promise<IPageBlockData[]>;
         private onAddComponent;
-        private getModules;
-        private getDevPageBlocks;
-        private renderFirstStack;
         private renderComponentList;
+        private renderMircoDAppList;
         render(): any;
     }
 }
@@ -1239,10 +1253,13 @@ declare module "@scom/scom-page-builder" {
     import { Container, ControlElement, Module } from '@ijstech/components';
     import { IPageData } from "@scom/scom-page-builder/interface/index.ts";
     import "@scom/scom-page-builder/index.css.ts";
+    interface PageBuilderElement extends ControlElement {
+        rootDir?: string;
+    }
     global {
         namespace JSX {
             interface IntrinsicElements {
-                ['i-scom-page-builder']: ControlElement;
+                ['i-scom-page-builder']: PageBuilderElement;
             }
         }
     }
@@ -1251,9 +1268,9 @@ declare module "@scom/scom-page-builder" {
         private builderFooter;
         private contentWrapper;
         constructor(parent?: Container, options?: any);
+        init(): void;
         setRootDir(value: string): void;
         getData(): {
-            header: import("@scom/scom-page-builder/interface/siteData.ts").IPageHeader;
             sections: import("@scom/scom-page-builder/interface/siteData.ts").IPageSection[];
             footer: import("@scom/scom-page-builder/interface/siteData.ts").IPageFooter;
         };

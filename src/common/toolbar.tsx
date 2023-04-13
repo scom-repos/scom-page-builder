@@ -31,8 +31,6 @@ export interface ToolbarElement extends ControlElement {
 }
 type IPosition = 'left'|'right'|'bottomLeft'|'bottomRight'|'bottom';
 const Theme = currentTheme;
-const disableClickedModules = [ELEMENT_NAME.IMAGE, ELEMENT_NAME.VIDEO, ELEMENT_NAME.MAP];
-const shownBackdropList = [ELEMENT_NAME.VIDEO, ELEMENT_NAME.MAP];
 
 @customElements('ide-toolbar')
 export class IDEToolbar extends Module {
@@ -225,7 +223,7 @@ export class IDEToolbar extends Module {
         this._nResizer = this.renderResizer('bottom');
         this._neResizer = this.renderResizer('bottomLeft');
         this._nwResizer = this.renderResizer('bottomRight');
-        const showFull = disableClickedModules.includes(data?.module?.name as ELEMENT_NAME)
+        const showFull = data?.module?.disableClicked;
         if (this._nResizer) this._nResizer.visible = showFull;
         if (this._neResizer) this._neResizer.visible = showFull;
         if (this._nwResizer) this._nwResizer.visible = showFull;
@@ -291,10 +289,8 @@ export class IDEToolbar extends Module {
 
     async fetchModule(data: IPageElement) {
         if (this._readonly) return;
-        const ipfscid = data?.module?.ipfscid || '';
-        const localPath = data?.module?.localPath || '';
         try {
-            const module: any = await getEmbedElement({ipfscid, localPath});
+            const module: any = await getEmbedElement(data?.module?.path || '');
             if (!module) throw new Error('not found');
             await this.setModule(module);
             if (this.isTexbox()) {
@@ -320,9 +316,9 @@ export class IDEToolbar extends Module {
         this._component.maxHeight = '100%';
         this._component.overflow = 'hidden';
         this._component.style.display = 'block';
-        this.backdropStack.visible = shownBackdropList.includes(this.data?.module?.name);
+        this.backdropStack.visible = this.data?.module?.shownBackdrop;
         this._component.addEventListener('click', (event: Event) => {
-            if (disableClickedModules.includes(this.data?.module?.name))
+            if (this.data?.module?.disableClicked)
                 event.stopImmediatePropagation();
             event.preventDefault()
             this.showToolList();

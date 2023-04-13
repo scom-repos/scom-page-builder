@@ -8,5 +8,67 @@
   },
   "dependencies": {
     "@scom/scom-page-builder": "*"
+  },
+  "components": {
+    "@scom/scom-markdown-editor": {
+      "name": "Text Box",
+      "path": "scom-markdown-editor",
+      "category": "components"
+    },
+    "@scom/scom-image": {
+      "name": "Image",
+      "path": "scom-image",
+      "category": "components",
+      "disableClicked": true
+    },
+    "@scom/scom-carousel": {
+      "name": "Carousel",
+      "path": "scom-carousel",
+      "category": "components"
+    },
+    "@scom/scom-banner": {
+      "name": "Banner",
+      "path": "scom-banner",
+      "category": "components"
+    },
+    "@scom/scom-blog": {
+      "name": "Blog",
+      "path": "scom-blog",
+      "category": "components",
+      "disableClicked": true
+    },
+    "@scom/scom-nft-minter": {
+      "name": "NFT Minter DApp",
+      "path": "scom-nft-minter",
+      "category": "micro-dapps"
+    },
+    "@scom/scom-gem-token": {
+      "name": "Gem Token DApp",
+      "path": "scom-gem-token",
+      "category": "micro-dapps"
+    },
+    "@scom/scom-randomizer": {
+      "name": "Randomizer",
+      "path": "scom-randomizer",
+      "category": "micro-dapps"
+    },
+    "@scom/scom-video": {
+      "name": "Video",
+      "path": "scom-video",
+      "category": "micro-dapps",
+      "disableClicked": true,
+      "shownBackdrop": true
+    },
+    "@scom/scom-map": {
+      "name": "Map",
+      "path": "scom-map",
+      "category": "micro-dapps",
+      "disableClicked": true,
+      "shownBackdrop": true
+    },
+    "@scom/scom-dapp-container": {
+      "name": "DApp Container",
+      "path": "scom-dapp-container"
+    }
   }
 }

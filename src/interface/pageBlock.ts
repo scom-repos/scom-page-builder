@@ -2,20 +2,11 @@ import { IDataSchema, IUISchema } from "@ijstech/components";
 
 export interface IPageBlockData {
     name: string;
-    description: string;
-    ipfscid?: string;
+    path: string;
+    category?: "components" | "micro-dapps";
     imgUrl?: string;
-    category?: {
-        icon: string;
-        idx: string;
-        name: string;
-    }[];
-    chainId?: number;
-    packageId?: number;
-    projectId?: number;
-    local?: boolean;
-    localPath?: string;
-    dependencies?: any;
+    disableClicked?: boolean;
+    shownBackdrop?: boolean;
 }
 
 export interface ICommand {
@@ -40,7 +31,3 @@ export interface IPageBlock {
 	setTag: (tag: any) => Promise<void>;	
 }
 
-export interface IGetModuleOptions {
-    ipfscid?: string;
-    localPath?: string;
-}

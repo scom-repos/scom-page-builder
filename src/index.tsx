@@ -16,10 +16,14 @@ interface IElementConfig {
     type: ElementType;
 }
 
+interface PageBuilderElement extends ControlElement {
+    rootDir?: string;
+}
+
 declare global {
     namespace JSX {
         interface IntrinsicElements {
-            ['i-scom-page-builder']: ControlElement;
+            ['i-scom-page-builder']: PageBuilderElement;
         }
     }
 }
@@ -39,27 +43,35 @@ export default class Editor extends Module {
         this.initEventBus();
     }
 
+    init() {
+        const rootDir = this.getAttribute('rootDir', true);
+        if (rootDir) {
+            this.setRootDir(rootDir);
+        }
+        super.init();
+    }
+
     setRootDir(value: string) {
         _setRootDir(value);
     }
 
     getData() {
         return {
-            header: pageObject.header,
-            sections: pageObject.sections,
+            // header: pageObject.header,
+            sections: pageObject.sections.filter(section => section.elements && section.elements.length),
             footer: pageObject.footer
         }
     }
 
     async setData(value: IPageData) {
-        pageObject.header = value.header;
-        pageObject.sections = value.sections;
-        pageObject.footer = value.footer;
+        // pageObject.header = value.header;
+        pageObject.sections = value?.sections || [];
+        pageObject.footer = value?.footer;
 
         try {
             // await this.builderHeader.setData(value.header);
-            await this.pageRows.setRows(value.sections);
-            await this.builderFooter.setData(value.footer);
+            await this.pageRows.setRows(value?.sections || []);
+            await this.builderFooter.setData(value?.footer);
         } catch (error) {
             console.log('setdata', error)
         }
@@ -79,7 +91,7 @@ export default class Editor extends Module {
         let element = {
             id: generateUUID(),
             column: 1,
-            columnSpan: module.name === ELEMENT_NAME.TEXTBOX ? 12 : 3,
+            columnSpan: module.category === 'components' ? 12 : 3,
             type,
             module,
             properties: {} as any
@@ -89,14 +101,14 @@ export default class Editor extends Module {
             row: pageObject.sections.length + 1,
             elements: [element]
         };
-        if (module.name === ELEMENT_NAME.NFT || module.name === ELEMENT_NAME.GEM_TOKEN) {
+        if (module.path === 'scom-nft-minter' || module.path === 'scom-gem-token') {
             element.module = getDappContainer();
             element.columnSpan = 6;
             element.properties = {
                 networks: [43113],
                 wallets: ["metamask"],
                 content: {
-                    module,
+                    module: { ...module, localPath: `libs/@scom/${module.path}` },
                     properties: {
                         width: '100%'
                     }
