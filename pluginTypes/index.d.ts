@@ -1253,10 +1253,13 @@ declare module "@scom/scom-page-builder" {
     import { Container, ControlElement, Module } from '@ijstech/components';
     import { IPageData } from "@scom/scom-page-builder/interface/index.ts";
     import "@scom/scom-page-builder/index.css.ts";
+    interface PageBuilderElement extends ControlElement {
+        rootDir?: string;
+    }
     global {
         namespace JSX {
             interface IntrinsicElements {
-                ['i-scom-page-builder']: ControlElement;
+                ['i-scom-page-builder']: PageBuilderElement;
             }
         }
     }
@@ -1265,9 +1268,9 @@ declare module "@scom/scom-page-builder" {
         private builderFooter;
         private contentWrapper;
         constructor(parent?: Container, options?: any);
+        init(): void;
         setRootDir(value: string): void;
         getData(): {
-            header: import("@scom/scom-page-builder/interface/siteData.ts").IPageHeader;
             sections: import("@scom/scom-page-builder/interface/siteData.ts").IPageSection[];
             footer: import("@scom/scom-page-builder/interface/siteData.ts").IPageFooter;
         };

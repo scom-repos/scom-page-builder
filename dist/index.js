@@ -4688,14 +4688,17 @@ define("@scom/scom-page-builder/builder/builderFooter.tsx", ["require", "exports
             await this.updateFooter();
         }
         get _elements() {
-            return index_60.pageObject.footer.elements || [];
+            var _a;
+            return ((_a = index_60.pageObject.footer) === null || _a === void 0 ? void 0 : _a.elements) || [];
         }
         get _image() {
-            return index_60.pageObject.footer.image || '';
+            var _a;
+            return ((_a = index_60.pageObject.footer) === null || _a === void 0 ? void 0 : _a.image) || '';
         }
         async updateFooter() {
+            var _a;
             this.pnlFooterMain.clearInnerHTML();
-            this.showAddStack = this._elements.length === 0 && !this._image;
+            this.showAddStack = ((_a = this._elements) === null || _a === void 0 ? void 0 : _a.length) === 0 && !this._image;
             this.pnlFooter.background = this.showAddStack ? { color: '#fff', image: '' } : { image: this._image };
             this.pnlEditOverlay.visible = !this.showAddStack;
             this.pnlEditOverlay.classList.remove('flex');
@@ -4851,24 +4854,31 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.setData = this.setData.bind(this);
             this.initEventBus();
         }
+        init() {
+            const rootDir = this.getAttribute('rootDir', true);
+            if (rootDir) {
+                this.setRootDir(rootDir);
+            }
+            super.init();
+        }
         setRootDir(value) {
             index_67.setRootDir(value);
         }
         getData() {
             return {
-                header: index_64.pageObject.header,
+                // header: pageObject.header,
                 sections: index_64.pageObject.sections.filter(section => section.elements && section.elements.length),
                 footer: index_64.pageObject.footer
             };
         }
         async setData(value) {
-            index_64.pageObject.header = value.header;
-            index_64.pageObject.sections = value.sections;
-            index_64.pageObject.footer = value.footer;
+            // pageObject.header = value.header;
+            index_64.pageObject.sections = (value === null || value === void 0 ? void 0 : value.sections) || [];
+            index_64.pageObject.footer = value === null || value === void 0 ? void 0 : value.footer;
             try {
                 // await this.builderHeader.setData(value.header);
-                await this.pageRows.setRows(value.sections);
-                await this.builderFooter.setData(value.footer);
+                await this.pageRows.setRows((value === null || value === void 0 ? void 0 : value.sections) || []);
+                await this.builderFooter.setData(value === null || value === void 0 ? void 0 : value.footer);
             }
             catch (error) {
                 console.log('setdata', error);

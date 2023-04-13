@@ -16,10 +16,14 @@ interface IElementConfig {
     type: ElementType;
 }
 
+interface PageBuilderElement extends ControlElement {
+    rootDir?: string;
+}
+
 declare global {
     namespace JSX {
         interface IntrinsicElements {
-            ['i-scom-page-builder']: ControlElement;
+            ['i-scom-page-builder']: PageBuilderElement;
         }
     }
 }
@@ -39,27 +43,35 @@ export default class Editor extends Module {
         this.initEventBus();
     }
 
+    init() {
+        const rootDir = this.getAttribute('rootDir', true);
+        if (rootDir) {
+            this.setRootDir(rootDir);
+        }
+        super.init();
+    }
+
     setRootDir(value: string) {
         _setRootDir(value);
     }
 
     getData() {
         return {
-            header: pageObject.header,
+            // header: pageObject.header,
             sections: pageObject.sections.filter(section => section.elements && section.elements.length),
             footer: pageObject.footer
         }
     }
 
     async setData(value: IPageData) {
-        pageObject.header = value.header;
-        pageObject.sections = value.sections;
-        pageObject.footer = value.footer;
+        // pageObject.header = value.header;
+        pageObject.sections = value?.sections || [];
+        pageObject.footer = value?.footer;
 
         try {
             // await this.builderHeader.setData(value.header);
-            await this.pageRows.setRows(value.sections);
-            await this.builderFooter.setData(value.footer);
+            await this.pageRows.setRows(value?.sections || []);
+            await this.builderFooter.setData(value?.footer);
         } catch (error) {
             console.log('setdata', error)
         }
