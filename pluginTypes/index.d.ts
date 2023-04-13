@@ -50,6 +50,7 @@ declare module "@scom/scom-page-builder/const/index.ts" {
         ON_CLONE: string;
         ON_RESIZE: string;
         ON_UPDATE_FOOTER: string;
+        ON_UPDATE_TOOLBAR: string;
     };
     export const DEFAULT_BOXED_LAYOUT_WIDTH = "1200px";
     export const DEFAULT_SCROLLBAR_WIDTH = 17;
@@ -875,6 +876,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private isTexbox;
         showToolbars(): void;
         hideToolbars(): void;
+        updateToolbar(): void;
         private renderResizeStack;
         private renderResizer;
         fetchModule(data: IPageElement): Promise<void>;

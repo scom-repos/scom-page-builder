@@ -9,8 +9,10 @@ import {
     Modal,
     IRenderUIOptions,
     IDataSchema,
-    VStack
+    VStack,
+    application
 } from '@ijstech/components';
+import { EVENT } from '../const/index';
 import { ELEMENT_NAME, IPageBlockAction, IPageElement } from '../interface/index';
 import { getRootDir, pageObject } from '../store/index';
 import { getEmbedElement, isEmpty } from '../utility/index';
@@ -219,6 +221,10 @@ export class IDEToolbar extends Module {
         this.classList.remove('active');
     }
 
+    updateToolbar() {
+        this.toolList = this._component.getActions ? this._component.getActions() : [];
+    }
+
     private renderResizeStack(data: IPageElement) {
         this._eResizer = this.renderResizer('left');
         this._wResizer = this.renderResizer('right');
@@ -327,9 +333,7 @@ export class IDEToolbar extends Module {
             event.preventDefault()
             this.showToolList();
         })
-        this.toolList = this._component.getActions ? this._component.getActions() : [];
-        this.checkToolbar();
-        this.showToolbars();
+        this.showToolList()
     }
 
     private showToolList() {
@@ -402,6 +406,7 @@ export class IDEToolbar extends Module {
     init() {
         super.init();
         this.readonly = this.getAttribute('readonly', true, false);
+        application.EventBus.register(this, EVENT.ON_UPDATE_TOOLBAR, () => this.updateToolbar())
     }
 
     render() {
