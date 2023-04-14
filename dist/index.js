@@ -2875,6 +2875,10 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this._component = module;
             this._component.parent = this.contentStack;
             this.contentStack.append(this._component);
+            if (this._component.setRootDir) {
+                const rootDir = index_26.getRootDir();
+                this._component.setRootDir(rootDir);
+            }
             if (this._component.ready)
                 await this._component.ready();
             this._component.maxWidth = '100%';

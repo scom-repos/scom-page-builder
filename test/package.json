@@ -23,7 +23,8 @@
         "@scom/scom-gem-token": "https://github.com/scom-repos/scom-gem-token",
         "@scom/scom-randomizer": "https://github.com/scom-repos/scom-randomizer",
         "@scom/scom-video": "https://github.com/scom-repos/scom-video",
-        "@scom/scom-map": "https://github.com/scom-repos/scom-map"
+        "@scom/scom-map": "https://github.com/scom-repos/scom-map",
+        "@scom/scom-content-block": "https://github.com/scom-repos/scom-content-block"
     },
     "scripts": {
         "cp:builder": "rm -rf ref && mkdir ref && cp ../package.json ref/package.json && cp -r ../dist ref/dist && cp -r ../pluginTypes ref/pluginTypes",
