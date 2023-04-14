@@ -317,6 +317,10 @@ export class IDEToolbar extends Module {
         this._component = module;
         this._component.parent = this.contentStack;
         this.contentStack.append(this._component);
+        if (this._component.setRootDir) {
+            const rootDir = getRootDir();
+            this._component.setRootDir(rootDir);
+        }
         if (this._component.ready) await this._component.ready();
         this._component.maxWidth = '100%';
         this._component.maxHeight = '100%';
