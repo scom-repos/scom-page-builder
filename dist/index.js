@@ -89,7 +89,9 @@ define("@scom/scom-page-builder/const/index.ts", ["require", "exports", "@scom/s
         ON_CLONE: 'ON_CLONE',
         ON_RESIZE: 'ON_RESIZE',
         ON_UPDATE_FOOTER: 'ON_UPDATE_FOOTER',
-        ON_UPDATE_TOOLBAR: 'ON_UPDATE_TOOLBAR'
+        // Content-Block
+        ON_UPDATE_TOOLBAR: 'ON_UPDATE_TOOLBAR',
+        ON_SET_ACTION_BLOCK: 'ON_SET_ACTION_BLOCK'
     };
     exports.DEFAULT_BOXED_LAYOUT_WIDTH = '1200px';
     exports.DEFAULT_SCROLLBAR_WIDTH = 17;
@@ -977,6 +979,7 @@ define("@scom/scom-page-builder/interface/index.ts", ["require", "exports", "@sc
         ELEMENT_NAME["MAP"] = "Map";
         ELEMENT_NAME["BANNER"] = "Banner";
         ELEMENT_NAME["BLOG"] = "Blog";
+        ELEMENT_NAME["CONTENT_BLOCK"] = "Content Block";
     })(ELEMENT_NAME = exports.ELEMENT_NAME || (exports.ELEMENT_NAME = {}));
 });
 define("@scom/scom-page-builder/command/interface.ts", ["require", "exports"], function (require, exports) {
@@ -2630,6 +2633,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.IDEToolbar = void 0;
     const Theme = index_30.currentTheme;
+    const SINGLE_CONTENT_BLOCK_ID = 'single-content-block__';
     let IDEToolbar = class IDEToolbar extends components_17.Module {
         constructor(parent) {
             super(parent);
@@ -2734,6 +2738,9 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             if (data.content && data.content.properties) {
                 properties = data.content.properties;
             }
+            else if (this.isContentBlock()) {
+                properties = data[this._currentSingleContentBlockId].properties;
+            }
             else {
                 properties = data;
             }
@@ -2774,6 +2781,10 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
         isTexbox() {
             var _a, _b;
             return ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.module) === null || _b === void 0 ? void 0 : _b.name) === index_26.ELEMENT_NAME.TEXTBOX;
+        }
+        isContentBlock() {
+            var _a, _b;
+            return ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.module) === null || _b === void 0 ? void 0 : _b.name) === index_26.ELEMENT_NAME.CONTENT_BLOCK;
         }
         showToolbars() {
             if (this.toolList.length)
@@ -2880,7 +2891,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this._component.parent = this.contentStack;
             this.contentStack.append(this._component);
             if (this._component.setRootDir) {
-                const rootDir = index_26.getRootDir();
+                const rootDir = index_27.getRootDir();
                 this._component.setRootDir(rootDir);
             }
             if (this._component.ready)
@@ -2908,7 +2919,20 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             // update data from pageblock
             if (!this._component)
                 return;
-            index_27.pageObject.setElement(this.rowId, this.data.id, { properties });
+            if (this.isContentBlock()) {
+                const isInitialization = Object.keys(properties)[0].includes(SINGLE_CONTENT_BLOCK_ID);
+                if (isInitialization) {
+                    index_27.pageObject.setElement(this.rowId, this.data.id, { properties });
+                }
+                else {
+                    const element = this.data.properties[this._currentSingleContentBlockId];
+                    element.properties = properties;
+                    index_27.pageObject.setElement(this.rowId, this.data.id, Object.assign(Object.assign({}, this.data.properties), { [this._currentSingleContentBlockId]: element }));
+                }
+            }
+            else {
+                index_27.pageObject.setElement(this.rowId, this.data.id, { properties });
+            }
         }
         async setTag(tag) {
             var _a, _b, _c, _d;
@@ -2972,6 +2996,12 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             super.init();
             this.readonly = this.getAttribute('readonly', true, false);
             components_17.application.EventBus.register(this, index_25.EVENT.ON_UPDATE_TOOLBAR, () => this.updateToolbar());
+            components_17.application.EventBus.register(this, index_25.EVENT.ON_SET_ACTION_BLOCK, (data) => {
+                const { id, element } = data;
+                this.setData(Object.assign(Object.assign({}, this.data.properties), { [id]: element }));
+                this._currentSingleContentBlockId = id;
+                console.log('---------- data: ', this.data);
+            });
         }
         render() {
             return (this.$render("i-vstack", { id: "mainWrapper", width: "auto", maxWidth: "100%", maxHeight: "100%", position: "relative" },

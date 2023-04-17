@@ -34,6 +34,8 @@ export interface ToolbarElement extends ControlElement {
 type IPosition = 'left'|'right'|'bottomLeft'|'bottomRight'|'bottom';
 const Theme = currentTheme;
 
+const SINGLE_CONTENT_BLOCK_ID = 'single-content-block__';
+
 @customElements('ide-toolbar')
 export class IDEToolbar extends Module {
     private _toolList: any[] = [];
@@ -57,6 +59,7 @@ export class IDEToolbar extends Module {
 
     private _rowId: string;
     private _elementId: string;
+    private _currentSingleContentBlockId: string;
 
     constructor(parent?: any) {
         super(parent);
@@ -163,8 +166,9 @@ export class IDEToolbar extends Module {
         //FIXME: used temporarily for container type
         if (data.content && data.content.properties) {
             properties = data.content.properties;
-        }
-        else {
+        } else if (this.isContentBlock()) {
+            properties = data[this._currentSingleContentBlockId].properties;
+        } else {
             properties = data;
         }
         let tag = data?.content?.tag || this.data.tag || {};
@@ -204,6 +208,10 @@ export class IDEToolbar extends Module {
 
     private isTexbox() {
         return this.data?.module?.name === ELEMENT_NAME.TEXTBOX;
+    }
+
+    private isContentBlock() {
+        return this.data?.module?.name === ELEMENT_NAME.CONTENT_BLOCK;
     }
 
     showToolbars() {
@@ -345,7 +353,19 @@ export class IDEToolbar extends Module {
     async setData(properties: any) {
         // update data from pageblock
         if (!this._component) return;
-        pageObject.setElement(this.rowId, this.data.id, { properties });
+        if (this.isContentBlock()) {
+            const isInitialization = Object.keys(properties)[0].includes(SINGLE_CONTENT_BLOCK_ID)
+
+            if (isInitialization) {
+                pageObject.setElement(this.rowId, this.data.id, { properties });
+            } else {
+                const element = this.data.properties[this._currentSingleContentBlockId]
+                element.properties = properties
+                pageObject.setElement(this.rowId, this.data.id, {...this.data.properties, [this._currentSingleContentBlockId]: element})
+            }
+        } else {
+            pageObject.setElement(this.rowId, this.data.id, { properties });
+        }
     }
 
     async setTag(tag: any) {
@@ -407,6 +427,11 @@ export class IDEToolbar extends Module {
         super.init();
         this.readonly = this.getAttribute('readonly', true, false);
         application.EventBus.register(this, EVENT.ON_UPDATE_TOOLBAR, () => this.updateToolbar())
+        application.EventBus.register(this, EVENT.ON_SET_ACTION_BLOCK,  (data: {id: string; element: IPageElement}) => {
+            const {id, element} = data;
+            this.setData({...this.data.properties, [id]: element})
+            this._currentSingleContentBlockId = id;
+        })
     }
 
     render() {
