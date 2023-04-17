@@ -5,15 +5,15 @@
         "node": ">=18.0.0"
     },
     "dependencies": {
-        "@ijstech/components": "^0.1.40",
+        "@ijstech/components": "^0.1.51",
         "@ijstech/eth-contract": "^0.1.10",
-        "@ijstech/eth-wallet": "^0.1.35"
+        "@ijstech/eth-wallet": "^0.1.52"
     },
     "devDependencies": {
         "@ijstech/cli": "^0.1.28",
         "@ijstech/compiler": "^0.1.23",
         "@scom/scom-page-builder": "file:./ref",
-        "@scom/scom-dapp-container": "0.1.1",
+        "@scom/scom-dapp-container": "https://github.com/scom-repos/scom-dapp-container",
         "@scom/scom-markdown-editor": "https://github.com/scom-repos/scom-markdown-editor",
         "@scom/scom-image": "https://github.com/scom-repos/scom-image",
         "@scom/scom-carousel": "https://github.com/scom-repos/scom-carousel",
@@ -24,7 +24,9 @@
         "@scom/scom-randomizer": "https://github.com/scom-repos/scom-randomizer",
         "@scom/scom-video": "https://github.com/scom-repos/scom-video",
         "@scom/scom-map": "https://github.com/scom-repos/scom-map",
-        "@scom/scom-content-block": "https://github.com/scom-repos/scom-content-block"
+        "@scom/scom-content-block": "https://github.com/scom-repos/scom-content-block",
+        "@scom/scom-network-list": "^0.1.0",
+        "@scom/scom-token-list": "https://github.com/scom-repos/scom-token-list"
     },
     "scripts": {
         "cp:builder": "rm -rf ref && mkdir ref && cp ../package.json ref/package.json && cp -r ../dist ref/dist && cp -r ../pluginTypes ref/pluginTypes",
