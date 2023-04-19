@@ -2739,7 +2739,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 properties = data.content.properties;
             }
             else if (this.isContentBlock()) {
-                properties = data[this._currentSingleContentBlockId].properties;
+                properties = this._currentSingleContentBlockId ? data[this._currentSingleContentBlockId].properties : data;
             }
             else {
                 properties = data;
@@ -2863,6 +2863,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
         }
         async fetchModule(data) {
             var _a;
+            console.log('----------- fetch: ', data);
             if (this._readonly)
                 return;
             try {
@@ -2873,6 +2874,16 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 if (this.isTexbox()) {
                     this.dragStack.visible = true;
                     this.contentStack.classList.remove('move');
+                }
+                else if (this.isContentBlock()) {
+                    const allSingleContentBlockId = Object.keys(data.properties).filter(prop => prop.includes(SINGLE_CONTENT_BLOCK_ID));
+                    for (let singleContentBlockId of allSingleContentBlockId) {
+                        const singleContentBlock = this.parentElement.querySelector(`#${singleContentBlockId}`);
+                        console.log('---- singleContentBlock: ', singleContentBlock);
+                        singleContentBlock.fetchModule(data.properties[singleContentBlockId]);
+                    }
+                    this.dragStack.visible = false;
+                    this.contentStack.classList.add('move');
                 }
                 else {
                     this.dragStack.visible = false;
@@ -3000,7 +3011,6 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 const { id, element } = data;
                 this.setData(Object.assign(Object.assign({}, this.data.properties), { [id]: element }));
                 this._currentSingleContentBlockId = id;
-                console.log('---------- data: ', this.data);
             });
         }
         render() {

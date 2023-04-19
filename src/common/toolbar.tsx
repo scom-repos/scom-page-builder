@@ -167,7 +167,7 @@ export class IDEToolbar extends Module {
         if (data.content && data.content.properties) {
             properties = data.content.properties;
         } else if (this.isContentBlock()) {
-            properties = data[this._currentSingleContentBlockId].properties;
+            properties = this._currentSingleContentBlockId ? data[this._currentSingleContentBlockId].properties : data
         } else {
             properties = data;
         }
@@ -310,7 +310,15 @@ export class IDEToolbar extends Module {
             if (this.isTexbox()) {
                 this.dragStack.visible = true;
                 this.contentStack.classList.remove('move');
-            } else {
+            } else if (this.isContentBlock()) {
+                const allSingleContentBlockId = Object.keys(data.properties).filter(prop => prop.includes(SINGLE_CONTENT_BLOCK_ID))
+                for (let singleContentBlockId of allSingleContentBlockId) {
+                    const singleContentBlock = this.parentElement.querySelector(`#${singleContentBlockId}`) as any
+                    singleContentBlock.fetchModule(data.properties[singleContentBlockId])
+                }
+                this.dragStack.visible = false;
+                this.contentStack.classList.add('move');
+            }else {
                 this.dragStack.visible = false;
                 this.contentStack.classList.add('move');
             }
