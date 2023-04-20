@@ -2863,7 +2863,6 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
         }
         async fetchModule(data) {
             var _a;
-            console.log('----------- fetch: ', data);
             if (this._readonly)
                 return;
             try {
@@ -2879,7 +2878,6 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                     const allSingleContentBlockId = Object.keys(data.properties).filter(prop => prop.includes(SINGLE_CONTENT_BLOCK_ID));
                     for (let singleContentBlockId of allSingleContentBlockId) {
                         const singleContentBlock = this.parentElement.querySelector(`#${singleContentBlockId}`);
-                        console.log('---- singleContentBlock: ', singleContentBlock);
                         singleContentBlock.fetchModule(data.properties[singleContentBlockId]);
                     }
                     this.dragStack.visible = false;
@@ -2900,6 +2898,9 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             var _a, _b;
             this._component = module;
             this._component.parent = this.contentStack;
+            if (this._component.setElementId) {
+                this._component.setElementId(this.elementId);
+            }
             this.contentStack.append(this._component);
             if (this._component.setRootDir) {
                 const rootDir = index_27.getRootDir();
@@ -2932,13 +2933,19 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 return;
             if (this.isContentBlock()) {
                 const isInitialization = Object.keys(properties)[0].includes(SINGLE_CONTENT_BLOCK_ID);
+                const isContentBlockProps = Object.keys(properties).includes('numberOfBlocks');
                 if (isInitialization) {
                     index_27.pageObject.setElement(this.rowId, this.data.id, { properties });
                 }
                 else {
-                    const element = this.data.properties[this._currentSingleContentBlockId];
-                    element.properties = properties;
-                    index_27.pageObject.setElement(this.rowId, this.data.id, Object.assign(Object.assign({}, this.data.properties), { [this._currentSingleContentBlockId]: element }));
+                    if (isContentBlockProps) {
+                        index_27.pageObject.setElement(this.rowId, this.data.id, { properties: Object.assign(Object.assign({}, this.data.properties), properties) });
+                    }
+                    else {
+                        const element = this.data.properties[this._currentSingleContentBlockId];
+                        element.properties = properties;
+                        index_27.pageObject.setElement(this.rowId, this.data.id, { properties: Object.assign(Object.assign({}, this.data.properties), { [this._currentSingleContentBlockId]: element }) });
+                    }
                 }
             }
             else {
@@ -3008,9 +3015,11 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this.readonly = this.getAttribute('readonly', true, false);
             components_17.application.EventBus.register(this, index_25.EVENT.ON_UPDATE_TOOLBAR, () => this.updateToolbar());
             components_17.application.EventBus.register(this, index_25.EVENT.ON_SET_ACTION_BLOCK, (data) => {
-                const { id, element } = data;
-                this.setData(Object.assign(Object.assign({}, this.data.properties), { [id]: element }));
-                this._currentSingleContentBlockId = id;
+                const { id, element, elementId } = data;
+                if (elementId && elementId === this.elementId) {
+                    this.setData(Object.assign(Object.assign({}, this.data.properties), { [id]: element }));
+                    this._currentSingleContentBlockId = id;
+                }
             });
         }
         render() {

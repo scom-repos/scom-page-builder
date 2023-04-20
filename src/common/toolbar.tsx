@@ -332,6 +332,9 @@ export class IDEToolbar extends Module {
     private async setModule(module: Module) {
         this._component = module;
         this._component.parent = this.contentStack;
+        if (this._component.setElementId) {
+            this._component.setElementId(this.elementId)
+        }
         this.contentStack.append(this._component);
         if (this._component.setRootDir) {
             const rootDir = getRootDir();
@@ -363,13 +366,19 @@ export class IDEToolbar extends Module {
         if (!this._component) return;
         if (this.isContentBlock()) {
             const isInitialization = Object.keys(properties)[0].includes(SINGLE_CONTENT_BLOCK_ID)
+            const isContentBlockProps = Object.keys(properties).includes('numberOfBlocks')
 
             if (isInitialization) {
                 pageObject.setElement(this.rowId, this.data.id, { properties });
             } else {
-                const element = this.data.properties[this._currentSingleContentBlockId]
-                element.properties = properties
-                pageObject.setElement(this.rowId, this.data.id, {...this.data.properties, [this._currentSingleContentBlockId]: element})
+                if (isContentBlockProps) {
+                    pageObject.setElement(this.rowId, this.data.id, {properties: {...this.data.properties, ...properties }});
+                } else {
+                    const element = this.data.properties[this._currentSingleContentBlockId]
+                    element.properties = properties
+                    pageObject.setElement(this.rowId, this.data.id, {properties: {...this.data.properties, [this._currentSingleContentBlockId]: element}})
+            
+                }
             }
         } else {
             pageObject.setElement(this.rowId, this.data.id, { properties });
@@ -435,10 +444,12 @@ export class IDEToolbar extends Module {
         super.init();
         this.readonly = this.getAttribute('readonly', true, false);
         application.EventBus.register(this, EVENT.ON_UPDATE_TOOLBAR, () => this.updateToolbar())
-        application.EventBus.register(this, EVENT.ON_SET_ACTION_BLOCK,  (data: {id: string; element: IPageElement}) => {
-            const {id, element} = data;
-            this.setData({...this.data.properties, [id]: element})
-            this._currentSingleContentBlockId = id;
+        application.EventBus.register(this, EVENT.ON_SET_ACTION_BLOCK,  (data: {id: string; element: IPageElement, elementId:string}) => {
+            const {id, element, elementId} = data;
+            if (elementId && elementId === this.elementId) {
+                this.setData({...this.data.properties, [id]: element})
+                this._currentSingleContentBlockId = id;
+            }
         })
     }
 
