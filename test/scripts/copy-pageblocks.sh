@@ -1,4 +1,3 @@
-mkdir dist/libs/@scom/scom-dapp-container && cp -r node_modules/@scom/scom-dapp-container/dist/* dist/libs/@scom/scom-dapp-container && 
 mkdir dist/libs/@scom/scom-markdown-editor && cp -r node_modules/@scom/scom-markdown-editor/dist/* dist/libs/@scom/scom-markdown-editor && 
 mkdir dist/libs/@scom/scom-image && cp -r node_modules/@scom/scom-image/dist/* dist/libs/@scom/scom-image &&
 mkdir dist/libs/@scom/scom-carousel && cp -r node_modules/@scom/scom-carousel/dist/* dist/libs/@scom/scom-carousel &&

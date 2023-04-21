@@ -102,17 +102,16 @@ export default class Editor extends Module {
             elements: [element]
         };
         if (module.path === 'scom-nft-minter' || module.path === 'scom-gem-token') {
-            element.module = getDappContainer();
+            element.module = module;
             element.columnSpan = 6;
             element.properties = {
-                networks: [43113],
-                wallets: ["metamask"],
-                content: {
-                    module: { ...module, localPath: `libs/@scom/${module.path}` },
-                    properties: {
-                        width: '100%'
-                    }
-                }
+                networks: [{
+                    chainId: 43113
+                }],
+                wallets: [{
+                    name: "metamask"
+                }],
+                width: '100%'
             }
         }
         return await this.pageRows.appendRow(rowData);
