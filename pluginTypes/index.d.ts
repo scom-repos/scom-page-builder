@@ -50,6 +50,8 @@ declare module "@scom/scom-page-builder/const/index.ts" {
         ON_CLONE: string;
         ON_RESIZE: string;
         ON_UPDATE_FOOTER: string;
+        ON_UPDATE_TOOLBAR: string;
+        ON_SET_ACTION_BLOCK: string;
     };
     export const DEFAULT_BOXED_LAYOUT_WIDTH = "1200px";
     export const DEFAULT_SCROLLBAR_WIDTH = 17;
@@ -436,7 +438,8 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
         CAROUSEL = "Carousel",
         MAP = "Map",
         BANNER = "Banner",
-        BLOG = "Blog"
+        BLOG = "Blog",
+        CONTENT_BLOCK = "Content Block"
     }
 }
 /// <amd-module name="@scom/scom-page-builder/command/interface.ts" />
@@ -837,6 +840,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private backdropStack;
         private _rowId;
         private _elementId;
+        private _currentSingleContentBlockId;
         constructor(parent?: any);
         get data(): any;
         get module(): any;
@@ -854,8 +858,10 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private renderToolbarAction;
         private onSave;
         private isTexbox;
+        private isContentBlock;
         showToolbars(): void;
         hideToolbars(): void;
+        updateToolbar(): void;
         private renderResizeStack;
         private renderResizer;
         fetchModule(data: IPageElement): Promise<void>;

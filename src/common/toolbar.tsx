@@ -9,8 +9,10 @@ import {
     Modal,
     IRenderUIOptions,
     IDataSchema,
-    VStack
+    VStack,
+    application
 } from '@ijstech/components';
+import { EVENT } from '../const/index';
 import { ELEMENT_NAME, IPageBlockAction, IPageElement } from '../interface/index';
 import { getRootDir, pageObject } from '../store/index';
 import { getEmbedElement, isEmpty } from '../utility/index';
@@ -31,6 +33,8 @@ export interface ToolbarElement extends ControlElement {
 }
 type IPosition = 'left'|'right'|'bottomLeft'|'bottomRight'|'bottom';
 const Theme = currentTheme;
+
+const SINGLE_CONTENT_BLOCK_ID = 'single-content-block__';
 
 @customElements('ide-toolbar')
 export class IDEToolbar extends Module {
@@ -55,6 +59,7 @@ export class IDEToolbar extends Module {
 
     private _rowId: string;
     private _elementId: string;
+    private _currentSingleContentBlockId: string;
 
     constructor(parent?: any) {
         super(parent);
@@ -161,8 +166,9 @@ export class IDEToolbar extends Module {
         //FIXME: used temporarily for container type
         if (data.content && data.content.properties) {
             properties = data.content.properties;
-        }
-        else {
+        } else if (this.isContentBlock()) {
+            properties = this._currentSingleContentBlockId ? data[this._currentSingleContentBlockId].properties : data
+        } else {
             properties = data;
         }
         let tag = data?.content?.tag || this.data.tag || {};
@@ -204,6 +210,10 @@ export class IDEToolbar extends Module {
         return this.data?.module?.name === ELEMENT_NAME.TEXTBOX;
     }
 
+    private isContentBlock() {
+        return this.data?.module?.name === ELEMENT_NAME.CONTENT_BLOCK;
+    }
+
     showToolbars() {
         if (this.toolList.length)
             this.toolsStack.visible = true;
@@ -215,6 +225,10 @@ export class IDEToolbar extends Module {
         this.toolsStack.visible = false;
         this.contentStack && this.contentStack.classList.remove('active');
         this.classList.remove('active');
+    }
+
+    updateToolbar() {
+        this.toolList = this._component.getActions ? this._component.getActions() : [];
     }
 
     private renderResizeStack(data: IPageElement) {
@@ -296,7 +310,15 @@ export class IDEToolbar extends Module {
             if (this.isTexbox()) {
                 this.dragStack.visible = true;
                 this.contentStack.classList.remove('move');
-            } else {
+            } else if (this.isContentBlock()) {
+                const allSingleContentBlockId = Object.keys(data.properties).filter(prop => prop.includes(SINGLE_CONTENT_BLOCK_ID))
+                for (let singleContentBlockId of allSingleContentBlockId) {
+                    const singleContentBlock = this.parentElement.querySelector(`#${singleContentBlockId}`) as any
+                    singleContentBlock.fetchModule(data.properties[singleContentBlockId])
+                }
+                this.dragStack.visible = false;
+                this.contentStack.classList.add('move');
+            }else {
                 this.dragStack.visible = false;
                 this.contentStack.classList.add('move');
             }
@@ -310,6 +332,9 @@ export class IDEToolbar extends Module {
     private async setModule(module: Module) {
         this._component = module;
         this._component.parent = this.contentStack;
+        if (this._component.setElementId) {
+            this._component.setElementId(this.elementId)
+        }
         this.contentStack.append(this._component);
         if (this._component.setRootDir) {
             const rootDir = getRootDir();
@@ -327,9 +352,7 @@ export class IDEToolbar extends Module {
             event.preventDefault()
             this.showToolList();
         })
-        this.toolList = this._component.getActions ? this._component.getActions() : [];
-        this.checkToolbar();
-        this.showToolbars();
+        this.showToolList()
     }
 
     private showToolList() {
@@ -341,7 +364,25 @@ export class IDEToolbar extends Module {
     async setData(properties: any) {
         // update data from pageblock
         if (!this._component) return;
-        pageObject.setElement(this.rowId, this.data.id, { properties });
+        if (this.isContentBlock()) {
+            const isInitialization = Object.keys(properties)[0].includes(SINGLE_CONTENT_BLOCK_ID)
+            const isContentBlockProps = Object.keys(properties).includes('numberOfBlocks')
+
+            if (isInitialization) {
+                pageObject.setElement(this.rowId, this.data.id, { properties });
+            } else {
+                if (isContentBlockProps) {
+                    pageObject.setElement(this.rowId, this.data.id, {properties: {...this.data.properties, ...properties }});
+                } else {
+                    const element = this.data.properties[this._currentSingleContentBlockId]
+                    element.properties = properties
+                    pageObject.setElement(this.rowId, this.data.id, {properties: {...this.data.properties, [this._currentSingleContentBlockId]: element}})
+            
+                }
+            }
+        } else {
+            pageObject.setElement(this.rowId, this.data.id, { properties });
+        }
     }
 
     async setTag(tag: any) {
@@ -402,6 +443,14 @@ export class IDEToolbar extends Module {
     init() {
         super.init();
         this.readonly = this.getAttribute('readonly', true, false);
+        application.EventBus.register(this, EVENT.ON_UPDATE_TOOLBAR, () => this.updateToolbar())
+        application.EventBus.register(this, EVENT.ON_SET_ACTION_BLOCK,  (data: {id: string; element: IPageElement, elementId:string}) => {
+            const {id, element, elementId} = data;
+            if (elementId && elementId === this.elementId) {
+                this.setData({...this.data.properties, [id]: element})
+                this._currentSingleContentBlockId = id;
+            }
+        })
     }
 
     render() {
