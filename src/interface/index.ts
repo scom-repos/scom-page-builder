@@ -24,4 +24,5 @@ export enum ELEMENT_NAME {
   MAP = "Map",
   BANNER = "Banner",
   BLOG = "Blog",
+  CONTENT_BLOCK = "Content Block"
 }
