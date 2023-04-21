@@ -25,6 +25,7 @@
         "@scom/scom-video": "https://github.com/scom-repos/scom-video",
         "@scom/scom-map": "https://github.com/scom-repos/scom-map",
         "@scom/scom-content-block": "https://github.com/scom-repos/scom-content-block",
+        "@scom/scom-network-picker": "^0.1.0",
         "@scom/scom-network-list": "^0.1.0",
         "@scom/scom-token-list": "https://github.com/scom-repos/scom-token-list"
     },

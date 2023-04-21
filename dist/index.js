@@ -4913,17 +4913,18 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 elements: [element]
             };
             if (module.path === 'scom-nft-minter' || module.path === 'scom-gem-token') {
-                element.module = index_64.getDappContainer();
+                // { ...module, localPath: `libs/@scom/${module.path}` }
+                console.log(module);
+                element.module = module;
                 element.columnSpan = 6;
                 element.properties = {
-                    networks: [43113],
-                    wallets: ["metamask"],
-                    content: {
-                        module: Object.assign(Object.assign({}, module), { localPath: `libs/@scom/${module.path}` }),
-                        properties: {
-                            width: '100%'
-                        }
-                    }
+                    networks: [{
+                            chainId: 43113
+                        }],
+                    wallets: [{
+                            name: "metamask"
+                        }],
+                    width: '100%'
                 };
             }
             return await this.pageRows.appendRow(rowData);
