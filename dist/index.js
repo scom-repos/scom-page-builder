@@ -4913,8 +4913,6 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 elements: [element]
             };
             if (module.path === 'scom-nft-minter' || module.path === 'scom-gem-token') {
-                // { ...module, localPath: `libs/@scom/${module.path}` }
-                console.log(module);
                 element.module = module;
                 element.columnSpan = 6;
                 element.properties = {

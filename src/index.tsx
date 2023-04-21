@@ -102,8 +102,6 @@ export default class Editor extends Module {
             elements: [element]
         };
         if (module.path === 'scom-nft-minter' || module.path === 'scom-gem-token') {
-            // { ...module, localPath: `libs/@scom/${module.path}` }
-            console.log(module)
             element.module = module;
             element.columnSpan = 6;
             element.properties = {
