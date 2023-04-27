@@ -3723,7 +3723,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.currentElement.height = 'initial';
                 const resizeCmd = new index_42.ResizeElementCommand(self.currentElement, this.currentWidth, this.currentHeight, newWidth, newHeight);
                 index_42.commandHistory.execute(resizeCmd);
-                self.currentElement.left = 'initial';
+                self.currentElement.style.left = 'initial';
                 self.currentElement = null;
                 toolbar = null;
             });
@@ -3748,7 +3748,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 if (currentDot.classList.contains('topLeft')) {
                     newWidth = this.currentWidth - deltaX;
                     newHeight = this.currentHeight - deltaY;
-                    self.currentElement.left = deltaX + 'px';
+                    self.currentElement.style.left = deltaX + 'px';
                     updateDimension(newWidth, newHeight);
                 }
                 else if (currentDot.classList.contains('topRight')) {
@@ -3759,7 +3759,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 else if (currentDot.classList.contains('bottomLeft')) {
                     newWidth = this.currentWidth - deltaX;
                     newHeight = this.currentHeight + deltaY;
-                    self.currentElement.left = deltaX + 'px';
+                    self.currentElement.style.left = deltaX + 'px';
                     updateDimension(newWidth, newHeight);
                 }
                 else if (currentDot.classList.contains('bottomRight')) {
@@ -3777,7 +3777,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
                 else if (currentDot.classList.contains('left')) {
                     newWidth = this.currentWidth - deltaX;
-                    self.currentElement.left = deltaX + 'px';
+                    self.currentElement.style.left = deltaX + 'px';
                     updateDimension(newWidth, undefined);
                 }
                 else if (currentDot.classList.contains('right')) {
@@ -4957,7 +4957,10 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 columnSpan: module.category === 'components' ? 12 : 3,
                 type,
                 module,
-                properties: {}
+                properties: {
+                    showHeader: false,
+                    showFooter: false
+                }
             };
             let rowData = {
                 id: index_67.generateUUID(),

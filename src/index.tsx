@@ -94,7 +94,10 @@ export default class Editor extends Module {
             columnSpan: module.category === 'components' ? 12 : 3,
             type,
             module,
-            properties: {} as any
+            properties: {
+                showHeader: false,
+                showFooter: false
+            } as any
         }
         let rowData = {
             id: generateUUID(),
