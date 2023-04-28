@@ -265,7 +265,7 @@ export class PageRow extends Module {
                 newHeight
             );
             commandHistory.execute(resizeCmd);
-            self.currentElement.left = 'initial';
+            self.currentElement.style.left = 'initial';
             self.currentElement = null;
             toolbar = null;
         });
@@ -288,7 +288,7 @@ export class PageRow extends Module {
             if (currentDot.classList.contains('topLeft')) {
                 newWidth = this.currentWidth - deltaX;
                 newHeight = this.currentHeight - deltaY;
-                self.currentElement.left = deltaX + 'px';
+                self.currentElement.style.left = deltaX + 'px';
                 updateDimension(newWidth, newHeight)
             } else if (currentDot.classList.contains('topRight')) {
                 newWidth = this.currentWidth + deltaX;
@@ -297,7 +297,7 @@ export class PageRow extends Module {
             } else if (currentDot.classList.contains('bottomLeft')) {
                 newWidth = this.currentWidth - deltaX;
                 newHeight = this.currentHeight + deltaY;
-                self.currentElement.left = deltaX + 'px';
+                self.currentElement.style.left = deltaX + 'px';
                 updateDimension(newWidth, newHeight)
             } else if (currentDot.classList.contains('bottomRight')) {
                 newWidth = this.currentWidth + deltaX;
@@ -311,7 +311,7 @@ export class PageRow extends Module {
                 updateDimension(undefined, newHeight)
             } else if (currentDot.classList.contains('left')) {
                 newWidth = this.currentWidth - deltaX;
-                self.currentElement.left = deltaX + 'px';
+                self.currentElement.style.left = deltaX + 'px';
                 updateDimension(newWidth, undefined)
             } else if (currentDot.classList.contains('right')) {
                 newWidth = this.currentWidth + deltaX;
