@@ -4987,9 +4987,9 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             //     this.contentWrapper.padding = {bottom: this.builderFooter.offsetHeight};
         }
         render() {
-            return (this.$render("i-panel", { id: "editor", width: '100%', height: '100%' },
-                this.$render("ide-header", { id: 'pageHeader', dock: 'top', border: { bottom: { width: 1, style: 'solid', color: '#dadce0' } } }),
-                this.$render("i-grid-layout", { templateColumns: ['auto', '400px'], autoFillInHoles: true, dock: "fill", height: "100%" },
+            return (this.$render("i-vstack", { id: "editor", width: '100%', height: '100%' },
+                this.$render("ide-header", { id: 'pageHeader', border: { bottom: { width: 1, style: 'solid', color: '#dadce0' } } }),
+                this.$render("i-grid-layout", { templateColumns: ['auto', '400px'], autoFillInHoles: true, height: "100%" },
                     this.$render("i-panel", { class: "main-content", height: "100%", overflow: { y: 'auto' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } }, padding: { bottom: '1rem' } },
                         this.$render("i-panel", { id: "pageContent", maxWidth: 1400, width: "100%", margin: { left: 'auto', right: 'auto' } },
                             this.$render("i-panel", { maxWidth: 1280, minHeight: "100vh", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: '#fff' }, class: "pnl-editor-wrapper" },

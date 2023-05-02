@@ -127,16 +127,14 @@ export default class Editor extends Module {
 
     render() {
         return (
-            <i-panel id="editor" width={'100%'} height={'100%'}>
+            <i-vstack id="editor" width={'100%'} height={'100%'}>
                 <ide-header
                     id={'pageHeader'}
-                    dock={'top'}
                     border={{ bottom: { width: 1, style: 'solid', color: '#dadce0' } }}
                 ></ide-header>
                 <i-grid-layout
                     templateColumns={['auto', '400px']}
                     autoFillInHoles={true}
-                    dock="fill"
                     height="100%"
                 >
                     <i-panel
@@ -176,7 +174,7 @@ export default class Editor extends Module {
                         <ide-sidebar id={'pageSidebar'} width="100%"></ide-sidebar>
                     </i-panel>
                 </i-grid-layout>
-            </i-panel>
+            </i-vstack>
         );
     }
 }
