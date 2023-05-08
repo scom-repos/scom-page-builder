@@ -2797,8 +2797,17 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this.contentStack && this.contentStack.classList.remove('active');
             this.classList.remove('active');
         }
+        getActions() {
+            if (this._component.getConfigurators) {
+                const configs = this._component.getConfigurators() || [];
+                const builderTarget = configs.find(conf => conf.target === 'Builders');
+                if (builderTarget && builderTarget.getActions)
+                    return builderTarget.getActions();
+            }
+            return this._component.getActions();
+        }
         updateToolbar() {
-            this.toolList = this._component.getActions ? this._component.getActions() : [];
+            this.toolList = this.getActions() || [];
         }
         renderResizeStack(data) {
             var _a;
@@ -2923,7 +2932,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this.showToolList();
         }
         showToolList() {
-            this.toolList = this._component.getActions ? this._component.getActions() : [];
+            this.toolList = this.getActions() || [];
             this.checkToolbar();
             this.showToolbars();
         }
@@ -2953,32 +2962,36 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             }
         }
         async setTag(tag) {
-            var _a, _b, _c, _d;
             if (!this._component)
                 return;
             if (tag.width === '100%')
                 tag.width = Number(this.width);
             if (tag.height === '100%')
                 tag.height = Number(this.height);
-            await this._component.setTag(tag);
-            const isContainer = ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.properties) === null || _b === void 0 ? void 0 : _b.content) && typeof ((_d = (_c = this.data) === null || _c === void 0 ? void 0 : _c.properties) === null || _d === void 0 ? void 0 : _d.content) === 'object';
-            if (isContainer) {
-                const properties = this.data.properties;
-                properties.content.tag = tag;
-                index_27.pageObject.setElement(this.rowId, this.data.id, { properties });
+            if (this._component.getConfigurators) {
+                const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
+                if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setTag)
+                    await builderTarget.setTag(tag);
             }
-            else {
-                index_27.pageObject.setElement(this.rowId, this.data.id, { tag });
-            }
+            index_27.pageObject.setElement(this.rowId, this.data.id, { tag });
+            // const isContainer = this.data?.properties?.content && typeof this.data?.properties?.content === 'object';
+            // if (isContainer) {
+            //     const properties = this.data.properties;
+            //     properties.content.tag = tag;
+            //     pageObject.setElement(this.rowId, this.data.id, { properties });
+            // } else {
+            //     pageObject.setElement(this.rowId, this.data.id, { tag });
+            // }
         }
         async setProperties(data) {
-            if (!this._component)
+            var _a;
+            if (!this._component || !((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators))
                 return;
-            if (this._component.setRootDir) {
-                const rootDir = index_27.getRootDir();
-                this._component.setRootDir(rootDir);
-            }
-            await this._component.setData(data);
+            const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
+            if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setData)
+                await builderTarget.setData(data);
+            if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setRootDir)
+                builderTarget.setRootDir(index_27.getRootDir());
         }
         checkToolbar() {
             const isShowing = this.toolsStack.visible;

@@ -62,7 +62,7 @@ export class PageRows extends Module {
         application.EventBus.register(this, EVENT.ON_CLONE, this.onClone);
     }
 
-    _handleClick(event: Event): boolean {
+    _handleClick(event: MouseEvent): boolean {
         if (this._readonly) return super._handleClick(event, true);
         const toolbars = document.querySelectorAll('ide-toolbar');
         for (const toolbar of toolbars) {

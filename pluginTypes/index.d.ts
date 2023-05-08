@@ -861,6 +861,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private isContentBlock;
         showToolbars(): void;
         hideToolbars(): void;
+        private getActions;
         updateToolbar(): void;
         private renderResizeStack;
         private renderResizer;
@@ -871,7 +872,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         setTag(tag: any): Promise<void>;
         setProperties(data: any): Promise<void>;
         private checkToolbar;
-        _handleClick(event: Event): boolean;
+        _handleClick(event: MouseEvent): boolean;
         init(): void;
         render(): any;
     }
@@ -1085,7 +1086,7 @@ declare module "@scom/scom-page-builder/page/pageRows.tsx" {
         private isDragging;
         constructor(parent?: any);
         initEventBus(): void;
-        _handleClick(event: Event): boolean;
+        _handleClick(event: MouseEvent): boolean;
         init(): void;
         get draggable(): boolean;
         set draggable(value: boolean);
