@@ -426,7 +426,7 @@ export class PageTreeNode extends Control {
         this._childNodeElm.classList.add('scpage-tree-node-children');
     }
 
-    _handleClick(event: Event): boolean {
+    _handleClick(event: MouseEvent): boolean {
         const target = event.target as HTMLElement;
 
         const parent = this._parent || target.closest('scpage-tree-view');
@@ -441,7 +441,7 @@ export class PageTreeNode extends Control {
         return super._handleClick(event, true);
     }
 
-    _handleDblClick(event: Event): boolean {
+    _handleDblClick(event: MouseEvent): boolean {
         const target = event.target as HTMLElement;
         const parent = this._parent || target.closest('scpage-tree-view');
         if (this.editable) {
@@ -452,7 +452,7 @@ export class PageTreeNode extends Control {
         return super._handleClick(event, true);
     }
 
-    _handleContextMenu(event: Event): boolean {
+    _handleContextMenu(event: MouseEvent): boolean {
         const target = event.target as HTMLElement;
         const parent = this._parent || target.closest('scpage-tree-view');
         if (parent instanceof PageTreeView)

@@ -227,8 +227,18 @@ export class IDEToolbar extends Module {
         this.classList.remove('active');
     }
 
+    private getActions() {
+        if (this._component.getConfigurators) {
+            const configs = this._component.getConfigurators() || [];
+            const builderTarget = configs.find(conf => conf.target === 'Builders');
+            if (builderTarget && builderTarget.getActions)
+                return builderTarget.getActions();
+        }
+        return this._component.getActions();
+    }
+
     updateToolbar() {
-        this.toolList = this._component.getActions ? this._component.getActions() : [];
+        this.toolList = this.getActions() || [];
     }
 
     private renderResizeStack(data: IPageElement) {
@@ -356,7 +366,7 @@ export class IDEToolbar extends Module {
     }
 
     private showToolList() {
-        this.toolList = this._component.getActions ? this._component.getActions() : [];
+        this.toolList = this.getActions() || [];
         this.checkToolbar();
         this.showToolbars();
     }
@@ -389,24 +399,26 @@ export class IDEToolbar extends Module {
         if (!this._component) return;
         if (tag.width === '100%') tag.width = Number(this.width);
         if (tag.height === '100%') tag.height = Number(this.height);
-        await this._component.setTag(tag);
-        const isContainer = this.data?.properties?.content && typeof this.data?.properties?.content === 'object';
-        if (isContainer) {
-            const properties = this.data.properties;
-            properties.content.tag = tag;
-            pageObject.setElement(this.rowId, this.data.id, { properties });
-        } else {
-            pageObject.setElement(this.rowId, this.data.id, { tag });
+        if (this._component.getConfigurators) {
+            const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
+            if (builderTarget?.setTag) await builderTarget.setTag(tag);
         }
+        pageObject.setElement(this.rowId, this.data.id, { tag });
+        // const isContainer = this.data?.properties?.content && typeof this.data?.properties?.content === 'object';
+        // if (isContainer) {
+        //     const properties = this.data.properties;
+        //     properties.content.tag = tag;
+        //     pageObject.setElement(this.rowId, this.data.id, { properties });
+        // } else {
+        //     pageObject.setElement(this.rowId, this.data.id, { tag });
+        // }
     }
 
     async setProperties(data: any) {
-        if (!this._component) return;
-        if (this._component.setRootDir) {
-            const rootDir = getRootDir();
-            this._component.setRootDir(rootDir);
-        }
-        await this._component.setData(data);
+        if (!this._component || !this._component?.getConfigurators) return;
+        const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
+        if (builderTarget?.setData) await builderTarget.setData(data);
+        if (builderTarget?.setRootDir) builderTarget.setRootDir(getRootDir());
     }
 
     private checkToolbar() {
@@ -434,7 +446,7 @@ export class IDEToolbar extends Module {
     //     })
     // }
 
-    _handleClick(event: Event): boolean {
+    _handleClick(event: MouseEvent): boolean {
         if (this._readonly) return super._handleClick(event, true);
         this.checkToolbar();
         return super._handleClick(event, true);
