@@ -118,7 +118,7 @@ export class IDEToolbar extends Module {
                 caption: `<i-icon name="${tool.icon}" width=${20} height=${20} display="block" fill="${Theme.text.primary}"></i-icon>`,
                 onClick: () => {
                     this.currentAction = tool;
-                    if (isEmpty(tool.userInputDataSchema)) {
+                    if (isEmpty(tool.userInputDataSchema) && isEmpty(tool.customUI)) {
                         const commandIns = this.currentAction.command(this, null);
                         commandHistory.execute(commandIns);
                     } else {
@@ -172,27 +172,35 @@ export class IDEToolbar extends Module {
             properties = data;
         }
         let tag = data?.content?.tag || this.data.tag || {};
-        if (typeof tag.width === 'number' && (action.userInputDataSchema.properties?.width as IDataSchema)?.type === 'string') {
-            tag.width = "" + tag.width;
-        }
-        if (typeof tag.height === 'number' && (action.userInputDataSchema.properties?.height as IDataSchema)?.type === 'string') {
-            tag.height = "" + tag.height;
-        }
-        const options: IRenderUIOptions = {
-            columnWidth: '100%',
-            columnsPerRow: 1,
-            confirmButtonBackgroundColor: Theme.colors.primary.main,
-            confirmButtonFontColor: Theme.colors.primary.contrastText,
-            jsonSchema: action.userInputDataSchema,
-            dateTimeFormat: 'MM/DD/YYYY HH:mm',
-            data: {...properties, ...tag}
-        }
-        if (action.userInputUISchema) options.jsonUISchema = action.userInputUISchema;
-        // console.log('schema: ', action.userInputDataSchema)
-        // console.log('data: ', data)
-        // renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data, options);
 
-        renderUI(this.pnlForm, options, this.onSave.bind(this));
+        if (action.customUI) {
+            const customUI = action.customUI;
+            const element = customUI.render({...properties, ...tag}, this.onSave.bind(this));
+            this.pnlForm.append(element);
+        }
+        else {
+            if (typeof tag.width === 'number' && (action.userInputDataSchema.properties?.width as IDataSchema)?.type === 'string') {
+                tag.width = "" + tag.width;
+            }
+            if (typeof tag.height === 'number' && (action.userInputDataSchema.properties?.height as IDataSchema)?.type === 'string') {
+                tag.height = "" + tag.height;
+            }
+            const options: IRenderUIOptions = {
+                columnWidth: '100%',
+                columnsPerRow: 1,
+                confirmButtonBackgroundColor: Theme.colors.primary.main,
+                confirmButtonFontColor: Theme.colors.primary.contrastText,
+                jsonSchema: action.userInputDataSchema,
+                dateTimeFormat: 'MM/DD/YYYY HH:mm',
+                data: {...properties, ...tag}
+            }
+            if (action.userInputUISchema) options.jsonUISchema = action.userInputUISchema;
+            // console.log('schema: ', action.userInputDataSchema)
+            // console.log('data: ', data)
+            // renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data, options);
+    
+            renderUI(this.pnlForm, options, this.onSave.bind(this));
+        }
     }
 
     private onSave(result: boolean, data: any) {
@@ -412,7 +420,14 @@ export class IDEToolbar extends Module {
     async setProperties(data: any) {
         if (!this._component || !this._component?.getConfigurators) return;
         const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
-        if (builderTarget?.setData) await builderTarget.setData(data);
+        if (builderTarget?.setData) {
+            await builderTarget.setData(data);
+            //FIXME: need to check if this is needed
+            if (builderTarget?.getData) {
+                const data = await builderTarget.getData();
+                await this.setData(data);
+            }
+        }
         if (builderTarget?.setRootDir) builderTarget.setRootDir(getRootDir());
     }
 

@@ -2688,7 +2688,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                     caption: `<i-icon name="${tool.icon}" width=${20} height=${20} display="block" fill="${Theme.text.primary}"></i-icon>`,
                     onClick: () => {
                         this.currentAction = tool;
-                        if (index_28.isEmpty(tool.userInputDataSchema)) {
+                        if (index_28.isEmpty(tool.userInputDataSchema) && index_28.isEmpty(tool.customUI)) {
                             const commandIns = this.currentAction.command(this, null);
                             index_29.commandHistory.execute(commandIns);
                         }
@@ -2745,27 +2745,34 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 properties = data;
             }
             let tag = ((_a = data === null || data === void 0 ? void 0 : data.content) === null || _a === void 0 ? void 0 : _a.tag) || this.data.tag || {};
-            if (typeof tag.width === 'number' && ((_c = (_b = action.userInputDataSchema.properties) === null || _b === void 0 ? void 0 : _b.width) === null || _c === void 0 ? void 0 : _c.type) === 'string') {
-                tag.width = "" + tag.width;
+            if (action.customUI) {
+                const customUI = action.customUI;
+                const element = customUI.render(Object.assign(Object.assign({}, properties), tag), this.onSave.bind(this));
+                this.pnlForm.append(element);
             }
-            if (typeof tag.height === 'number' && ((_e = (_d = action.userInputDataSchema.properties) === null || _d === void 0 ? void 0 : _d.height) === null || _e === void 0 ? void 0 : _e.type) === 'string') {
-                tag.height = "" + tag.height;
+            else {
+                if (typeof tag.width === 'number' && ((_c = (_b = action.userInputDataSchema.properties) === null || _b === void 0 ? void 0 : _b.width) === null || _c === void 0 ? void 0 : _c.type) === 'string') {
+                    tag.width = "" + tag.width;
+                }
+                if (typeof tag.height === 'number' && ((_e = (_d = action.userInputDataSchema.properties) === null || _d === void 0 ? void 0 : _d.height) === null || _e === void 0 ? void 0 : _e.type) === 'string') {
+                    tag.height = "" + tag.height;
+                }
+                const options = {
+                    columnWidth: '100%',
+                    columnsPerRow: 1,
+                    confirmButtonBackgroundColor: Theme.colors.primary.main,
+                    confirmButtonFontColor: Theme.colors.primary.contrastText,
+                    jsonSchema: action.userInputDataSchema,
+                    dateTimeFormat: 'MM/DD/YYYY HH:mm',
+                    data: Object.assign(Object.assign({}, properties), tag)
+                };
+                if (action.userInputUISchema)
+                    options.jsonUISchema = action.userInputUISchema;
+                // console.log('schema: ', action.userInputDataSchema)
+                // console.log('data: ', data)
+                // renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data, options);
+                components_17.renderUI(this.pnlForm, options, this.onSave.bind(this));
             }
-            const options = {
-                columnWidth: '100%',
-                columnsPerRow: 1,
-                confirmButtonBackgroundColor: Theme.colors.primary.main,
-                confirmButtonFontColor: Theme.colors.primary.contrastText,
-                jsonSchema: action.userInputDataSchema,
-                dateTimeFormat: 'MM/DD/YYYY HH:mm',
-                data: Object.assign(Object.assign({}, properties), tag)
-            };
-            if (action.userInputUISchema)
-                options.jsonUISchema = action.userInputUISchema;
-            // console.log('schema: ', action.userInputDataSchema)
-            // console.log('data: ', data)
-            // renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data, options);
-            components_17.renderUI(this.pnlForm, options, this.onSave.bind(this));
         }
         onSave(result, data) {
             if (result) {
@@ -2989,8 +2996,14 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             if (!this._component || !((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators))
                 return;
             const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
-            if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setData)
+            if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setData) {
                 await builderTarget.setData(data);
+                //FIXME: need to check if this is needed
+                if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getData) {
+                    const data = await builderTarget.getData();
+                    await this.setData(data);
+                }
+            }
             if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setRootDir)
                 builderTarget.setRootDir(index_27.getRootDir());
         }
@@ -4976,11 +4989,24 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                     showFooter: false
                 }
             };
+            if (module.category === 'components') {
+                element.properties = {
+                    showHeader: false,
+                    showFooter: false
+                };
+            }
+            else if (module.category === 'micro-dapps') {
+                element.properties = {
+                    showHeader: true,
+                    showFooter: true
+                };
+            }
             let rowData = {
                 id: index_67.generateUUID(),
                 row: index_65.pageObject.sections.length + 1,
                 elements: [element]
             };
+            //FIXME: remove this
             if (module.path === 'scom-nft-minter' || module.path === 'scom-gem-token') {
                 element.module = module;
                 element.columnSpan = 6;

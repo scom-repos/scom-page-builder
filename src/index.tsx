@@ -99,11 +99,26 @@ export default class Editor extends Module {
                 showFooter: false
             } as any
         }
+
+        if (module.category === 'components') {
+            element.properties = {
+                showHeader: false,
+                showFooter: false
+            }     
+        }
+        else if (module.category === 'micro-dapps') {
+            element.properties = {
+                showHeader: true,
+                showFooter: true
+            }    
+        }
+
         let rowData = {
             id: generateUUID(),
             row: pageObject.sections.length + 1,
             elements: [element]
         };
+        //FIXME: remove this
         if (module.path === 'scom-nft-minter' || module.path === 'scom-gem-token') {
             element.module = module;
             element.columnSpan = 6;
