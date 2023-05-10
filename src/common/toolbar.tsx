@@ -228,13 +228,12 @@ export class IDEToolbar extends Module {
     }
 
     private getActions() {
-        if (this._component.getConfigurators) {
+        if (this._component?.getConfigurators) {
             const configs = this._component.getConfigurators() || [];
             const builderTarget = configs.find(conf => conf.target === 'Builders');
-            if (builderTarget && builderTarget.getActions)
-                return builderTarget.getActions();
+            if (builderTarget?.getActions) return builderTarget.getActions();
         }
-        return this._component.getActions();
+        return [];
     }
 
     updateToolbar() {
@@ -342,14 +341,10 @@ export class IDEToolbar extends Module {
     private async setModule(module: Module) {
         this._component = module;
         this._component.parent = this.contentStack;
-        if (this._component.setElementId) {
-            this._component.setElementId(this.elementId)
-        }
+        const builderTarget = this._component?.getConfigurators ? this._component.getConfigurators().find((conf: any) => conf.target === 'Builders') : null;
+        if (builderTarget?.setElementId) builderTarget.setElementId(this.elementId);
         this.contentStack.append(this._component);
-        if (this._component.setRootDir) {
-            const rootDir = getRootDir();
-            this._component.setRootDir(rootDir);
-        }
+        if (builderTarget?.setRootDir) builderTarget.setRootDir(getRootDir());
         if (this._component.ready) await this._component.ready();
         this._component.maxWidth = '100%';
         this._component.maxHeight = '100%';
@@ -385,7 +380,7 @@ export class IDEToolbar extends Module {
                     pageObject.setElement(this.rowId, this.data.id, {properties: {...this.data.properties, ...properties }});
                 } else {
                     const element = this.data.properties[this._currentSingleContentBlockId]
-                    element.properties = properties
+                    if (element) element.properties = properties
                     pageObject.setElement(this.rowId, this.data.id, {properties: {...this.data.properties, [this._currentSingleContentBlockId]: element}})
             
                 }
@@ -399,7 +394,7 @@ export class IDEToolbar extends Module {
         if (!this._component) return;
         if (tag.width === '100%') tag.width = Number(this.width);
         if (tag.height === '100%') tag.height = Number(this.height);
-        if (this._component.getConfigurators) {
+        if (this._component?.getConfigurators) {
             const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
             if (builderTarget?.setTag) await builderTarget.setTag(tag);
         }

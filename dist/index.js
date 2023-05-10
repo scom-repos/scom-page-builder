@@ -2798,13 +2798,14 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this.classList.remove('active');
         }
         getActions() {
-            if (this._component.getConfigurators) {
+            var _a;
+            if ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) {
                 const configs = this._component.getConfigurators() || [];
                 const builderTarget = configs.find(conf => conf.target === 'Builders');
-                if (builderTarget && builderTarget.getActions)
+                if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getActions)
                     return builderTarget.getActions();
             }
-            return this._component.getActions();
+            return [];
         }
         updateToolbar() {
             this.toolList = this.getActions() || [];
@@ -2904,24 +2905,22 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             }
         }
         async setModule(module) {
-            var _a, _b;
+            var _a, _b, _c;
             this._component = module;
             this._component.parent = this.contentStack;
-            if (this._component.setElementId) {
-                this._component.setElementId(this.elementId);
-            }
+            const builderTarget = ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) ? this._component.getConfigurators().find((conf) => conf.target === 'Builders') : null;
+            if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setElementId)
+                builderTarget.setElementId(this.elementId);
             this.contentStack.append(this._component);
-            if (this._component.setRootDir) {
-                const rootDir = index_27.getRootDir();
-                this._component.setRootDir(rootDir);
-            }
+            if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setRootDir)
+                builderTarget.setRootDir(index_27.getRootDir());
             if (this._component.ready)
                 await this._component.ready();
             this._component.maxWidth = '100%';
             this._component.maxHeight = '100%';
             this._component.overflow = 'hidden';
             this._component.style.display = 'block';
-            this.backdropStack.visible = (_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.module) === null || _b === void 0 ? void 0 : _b.shownBackdrop;
+            this.backdropStack.visible = (_c = (_b = this.data) === null || _b === void 0 ? void 0 : _b.module) === null || _c === void 0 ? void 0 : _c.shownBackdrop;
             this._component.addEventListener('click', (event) => {
                 var _a, _b;
                 if ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.module) === null || _b === void 0 ? void 0 : _b.disableClicked)
@@ -2952,7 +2951,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                     }
                     else {
                         const element = this.data.properties[this._currentSingleContentBlockId];
-                        element.properties = properties;
+                        if (element)
+                            element.properties = properties;
                         index_27.pageObject.setElement(this.rowId, this.data.id, { properties: Object.assign(Object.assign({}, this.data.properties), { [this._currentSingleContentBlockId]: element }) });
                     }
                 }
@@ -2962,13 +2962,14 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             }
         }
         async setTag(tag) {
+            var _a;
             if (!this._component)
                 return;
             if (tag.width === '100%')
                 tag.width = Number(this.width);
             if (tag.height === '100%')
                 tag.height = Number(this.height);
-            if (this._component.getConfigurators) {
+            if ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) {
                 const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
                 if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setTag)
                     await builderTarget.setTag(tag);
