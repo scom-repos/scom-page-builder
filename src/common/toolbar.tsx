@@ -157,9 +157,10 @@ export class IDEToolbar extends Module {
         this.classList.remove('is-setting');
     }
 
-    private renderToolbarAction(action: IPageBlockAction) {
+    private async renderToolbarAction(action: IPageBlockAction) {
         this.pnlForm.clearInnerHTML();
-        const data = this.data.properties;
+        const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
+        const data = builderTarget?.getData ? await builderTarget.getData() : this.data.properties;
         if (data.height === 'auto') data.height = this.offsetHeight;
         if (data.width === 'auto') data.width = this.offsetWidth;
         let properties;

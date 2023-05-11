@@ -2725,10 +2725,11 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
         onCloseModal() {
             this.classList.remove('is-setting');
         }
-        renderToolbarAction(action) {
+        async renderToolbarAction(action) {
             var _a, _b, _c, _d, _e;
             this.pnlForm.clearInnerHTML();
-            const data = this.data.properties;
+            const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
+            const data = (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getData) ? await builderTarget.getData() : this.data.properties;
             if (data.height === 'auto')
                 data.height = this.offsetHeight;
             if (data.width === 'auto')
