@@ -22,7 +22,7 @@ export const collapseStyle = Styles.style({
     '.collapsible-content': {
       maxHeight: '0px',
       opacity: 0,
-      overflow: 'hidden',
+      overflow: 'hidden auto',
       transition: 'all 0.25s ease-in-out',
     },
     '.collapsible-content.--expanded': {
