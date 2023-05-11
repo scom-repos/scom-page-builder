@@ -186,7 +186,7 @@ export default class Editor extends Module {
                         </i-panel>
                     </i-panel>
                     <i-panel class="main-sidebar" height="100%" overflow={{ y: 'auto' }}>
-                        <ide-sidebar id={'pageSidebar'} width="100%"></ide-sidebar>
+                        <ide-sidebar id={'pageSidebar'} display={'block'} width="100%"></ide-sidebar>
                     </i-panel>
                 </i-grid-layout>
             </i-vstack>

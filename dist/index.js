@@ -3225,7 +3225,7 @@ define("@scom/scom-page-builder/common/collapse.css.ts", ["require", "exports", 
             '.collapsible-content': {
                 maxHeight: '0px',
                 opacity: 0,
-                overflow: 'hidden',
+                overflow: 'hidden auto',
                 transition: 'all 0.25s ease-in-out',
             },
             '.collapsible-content.--expanded': {
@@ -4337,6 +4337,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
             index_49.setPageBlocks(this.pageBlocks);
             this.renderComponentList();
             this.renderMircoDAppList();
+            this.renderChartList();
         }
         async getPageBlocks() {
             let rootDir = index_49.getRootDir();
@@ -4380,12 +4381,26 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                 this.microDAppsStack.append(moduleCard);
             }
         }
+        async renderChartList() {
+            this.chartsStack.clearInnerHTML();
+            let components = this.pageBlocks.filter(p => p.category === 'charts');
+            let matchedModules = components;
+            for (const module of matchedModules) {
+                const moduleCard = (this.$render("i-hstack", { height: 48, verticalAlignment: "center", gap: "1rem", padding: { left: '1rem', right: '1rem' }, class: "pointer", onClick: () => this.onAddComponent(module, index_51.ElementType.PRIMITIVE) },
+                    this.$render("i-panel", null,
+                        this.$render("i-image", { url: module.imgUrl || assets_2.default.icons.logo, width: 24, height: 24, display: "block" })),
+                    this.$render("i-label", { caption: module.name, font: { weight: 600 } })));
+                this.chartsStack.append(moduleCard);
+            }
+        }
         render() {
             return (this.$render("i-panel", { class: "navigator", height: '100%', maxWidth: "100%" },
                 this.$render("i-scom-page-builder-collapse", { title: "Components", border: { bottom: { width: 1, style: 'solid', color: Theme.divider } }, expanded: true },
                     this.$render("i-grid-layout", { id: "componentsStack", templateColumns: ['repeat(2, 1fr)'], margin: { top: 6 } })),
                 this.$render("i-scom-page-builder-collapse", { title: "Micro DApps", border: { bottom: { width: 1, style: 'solid', color: Theme.divider } }, expanded: true },
-                    this.$render("i-vstack", { id: "microDAppsStack", padding: { top: '8px', bottom: '8px' } }))));
+                    this.$render("i-vstack", { id: "microDAppsStack", padding: { top: '8px', bottom: '8px' } })),
+                this.$render("i-scom-page-builder-collapse", { title: "Charts", border: { bottom: { width: 1, style: 'solid', color: Theme.divider } }, expanded: true },
+                    this.$render("i-vstack", { id: "chartsStack", padding: { top: '8px', bottom: '8px' } }))));
         }
     };
     PageSidebar = __decorate([
@@ -5037,7 +5052,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                                     this.$render("ide-rows", { id: "pageRows", draggable: true })),
                                 this.$render("builder-footer", { id: "builderFooter" })))),
                     this.$render("i-panel", { class: "main-sidebar", height: "100%", overflow: { y: 'auto' } },
-                        this.$render("ide-sidebar", { id: 'pageSidebar', width: "100%" })))));
+                        this.$render("ide-sidebar", { id: 'pageSidebar', display: 'block', width: "100%" })))));
         }
     };
     Editor = __decorate([
