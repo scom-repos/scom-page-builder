@@ -2683,6 +2683,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                     width: 48,
                     height: 48,
                     border: { radius: '50%' },
+                    tooltip: tool.name ? { trigger: 'hover', content: tool.name, color: '#555555' } : undefined,
                     background: { color: 'transparent' },
                     visible: tool.visible ? tool.visible() : true,
                     caption: `<i-icon name="${tool.icon}" width=${20} height=${20} display="block" fill="${Theme.text.primary}"></i-icon>`,
@@ -2706,6 +2707,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 width: 48,
                 height: 48,
                 border: { radius: '50%' },
+                tooltip: { trigger: 'hover', content: 'Delete', color: '#555555' },
                 background: { color: 'transparent' },
                 caption: `<i-icon name="trash" width=${20} height=${20} display="block" fill="${Theme.text.primary}"></i-icon>`,
                 onClick: () => {
@@ -2745,6 +2747,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 properties = data;
             }
             let tag = ((_a = data === null || data === void 0 ? void 0 : data.content) === null || _a === void 0 ? void 0 : _a.tag) || this.data.tag || {};
+            this.mdActions.title = action.name || 'Update Settings';
             if (action.customUI) {
                 const customUI = action.customUI;
                 const element = customUI.render(Object.assign(Object.assign({}, properties), tag), this.onSave.bind(this));
