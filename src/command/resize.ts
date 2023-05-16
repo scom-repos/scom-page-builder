@@ -26,7 +26,7 @@ export class ResizeElementCommand implements ICommand {
       column: Number(element.dataset.column),
       columnSpan: Number(element.dataset.columnSpan)
     }
-    const grid = this.element.closest('.grid') as HTMLElement;
+    const grid = this.element.parent.closest('.grid') as HTMLElement;
     if (grid)
       this.gridColumnWidth = (grid.offsetWidth - this.gapWidth * (MAX_COLUMN - 1)) / MAX_COLUMN;
   }
@@ -71,7 +71,10 @@ export class ResizeElementCommand implements ICommand {
   }
 
   execute(): void {
+    this.element = document.getElementById(`${this.element.id}`) as Control;
+    this.toolbar = this.element.querySelector('ide-toolbar');
     const newColumnData = this.getColumnData();
+    if (!newColumnData) return;
     if (newColumnData) {
       this.element.setAttribute('data-column-span', `${newColumnData.columnSpan}`);
       this.element.setAttribute('data-column', `${newColumnData.column}`);
@@ -80,10 +83,8 @@ export class ResizeElementCommand implements ICommand {
     if (this.toolbar) {
       const rowId = this.toolbar.rowId;
       const elementId = this.toolbar.elementId;
-      const isContainer = this.toolbar?.data?.properties?.content && typeof this.toolbar?.data?.properties?.content === 'object';
-      const contentTag = isContainer ? this.toolbar?.data?.properties?.content?.tag : null;
-      const currentTag = contentTag || this.toolbar?.data?.tag || {};
-      const tag = {...currentTag, width: '100%', height: this.finalHeight || this.initialHeight};
+      const currentTag = this.toolbar?.data?.tag || {};
+      const tag = {...currentTag, width: this.finalWidth || '100%', height: this.finalHeight || this.initialHeight};
       this.toolbar.setTag(tag);
       if (newColumnData.column !== this.oldDataColumn.column || newColumnData.columnSpan !== this.oldDataColumn.columnSpan)
         pageObject.setElement(rowId, elementId, {tag, ...newColumnData});
@@ -97,9 +98,7 @@ export class ResizeElementCommand implements ICommand {
     if (this.toolbar) {
       const rowId = this.toolbar.rowId;
       const elementId = this.toolbar.elementId;
-      const isContainer = this.toolbar?.data?.properties?.content && typeof this.toolbar?.data?.properties?.content === 'object';
-      const contentTag = isContainer ? this.toolbar?.data?.properties?.content?.tag : null;
-      const currentTag = contentTag || this.toolbar?.data?.tag || {};
+      const currentTag = this.toolbar?.data?.tag || {};
       const tag = {...currentTag, width: this.initialWidth, height: this.initialHeight};
       this.toolbar.setTag(tag);
       pageObject.setElement(rowId, elementId, {tag, ...this.oldDataColumn});

@@ -113,6 +113,7 @@ export class IDEToolbar extends Module {
                 width: 48,
                 height: 48,
                 border: {radius: '50%'},
+                tooltip: tool.name ? { trigger: 'hover', content: tool.name, color: '#555555' } : undefined,
                 background: {color: 'transparent'},
                 visible: tool.visible ? tool.visible() : true,
                 caption: `<i-icon name="${tool.icon}" width=${20} height=${20} display="block" fill="${Theme.text.primary}"></i-icon>`,
@@ -135,6 +136,7 @@ export class IDEToolbar extends Module {
             width: 48,
             height: 48,
             border: {radius: '50%'},
+            tooltip: { trigger: 'hover', content: 'Delete', color: '#555555' },
             background: {color: 'transparent'},
             caption: `<i-icon name="trash" width=${20} height=${20} display="block" fill="${Theme.text.primary}"></i-icon>`,
             onClick: () => {
@@ -173,7 +175,7 @@ export class IDEToolbar extends Module {
             properties = data;
         }
         let tag = data?.content?.tag || this.data.tag || {};
-
+        this.mdActions.title = action.name || 'Update Settings';
         if (action.customUI) {
             const customUI = action.customUI;
             const element = customUI.render({...properties, ...tag}, this.onSave.bind(this));
@@ -395,7 +397,7 @@ export class IDEToolbar extends Module {
                 }
             }
         } else {
-            pageObject.setElement(this.rowId, this.data.id, { properties });
+            this.data && pageObject.setElement(this.rowId, this.data.id, { properties });
         }
     }
 
@@ -408,14 +410,6 @@ export class IDEToolbar extends Module {
             if (builderTarget?.setTag) await builderTarget.setTag(tag);
         }
         pageObject.setElement(this.rowId, this.data.id, { tag });
-        // const isContainer = this.data?.properties?.content && typeof this.data?.properties?.content === 'object';
-        // if (isContainer) {
-        //     const properties = this.data.properties;
-        //     properties.content.tag = tag;
-        //     pageObject.setElement(this.rowId, this.data.id, { properties });
-        // } else {
-        //     pageObject.setElement(this.rowId, this.data.id, { tag });
-        // }
     }
 
     async setProperties(data: any) {

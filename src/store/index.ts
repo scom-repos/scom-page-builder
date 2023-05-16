@@ -1,4 +1,4 @@
-import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData } from "../interface/index";
+import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig } from "../interface/index";
 
 export class PageObject {
   private _header: IPageHeader = {
@@ -6,7 +6,7 @@ export class PageObject {
     image: "",
     elements: []
   };
-  private _sections: Map<string, IPageSection> = new Map();
+  private _sections: IPageSection[] = []; // Map<string, IPageSection> = new Map();
   private _footer: IPageFooter = {
     image: "",
     elements: []
@@ -20,11 +20,10 @@ export class PageObject {
   }
 
   set sections(value: IPageSection[]) {
-    this._sections.clear();
-    value.forEach(val => this._sections.set(val.id, val));
+    this._sections = value || [];
   }
   get sections(): IPageSection[] {
-    return Array.from(this._sections.values());
+    return this._sections || [];
   }
 
   set footer(value: IPageFooter) {
@@ -34,16 +33,21 @@ export class PageObject {
     return this._footer;
   }
 
-  addSection(value: IPageSection) {
-    this._sections.set(value.id, value);
+  addSection(value: IPageSection, prependId?: string) {
+    const prependIndex = prependId ? this._sections.findIndex(section => section.id === prependId) : -1;
+    if (prependIndex === -1)
+      this._sections.push(value);
+    else
+      this._sections.splice(prependIndex + 1, 0, value);
   }
 
   removeSection(id: string) {
-    this._sections.delete(id);
+    const sectionIndex = this._sections.findIndex(section => section.id === id);
+    if (sectionIndex !== -1) this._sections.splice(sectionIndex, 1);
   }
 
   getSection(id: string) {
-    return this._sections.get(id) || null;
+    return this._sections.find(section => section.id === id);
   }
 
   updateSection(id: string, data: any) {
@@ -70,13 +74,13 @@ export class PageObject {
       this.removeSection(id);
   }
 
-  addRow(data: any, id?: string) {
+  addRow(data: any, id?: string, prependId?: string) {
     if (id === 'header')
       this.header = data;
     else if (id === 'footer')
       this.footer = data;
     else
-      this.addSection(data);
+      this.addSection(data, prependId);
   }
 
   private findElement(elements: IPageElement[], elementId: string) {
@@ -186,7 +190,8 @@ export const pageObject = new PageObject();
 
 export const state = {
   pageBlocks: [],
-  rootDir: ''
+  rootDir: '',
+  dragData: null
 }
 
 export const setPageBlocks = (value: IPageBlockData[]) => {
@@ -207,6 +212,14 @@ export const setRootDir = (value: string) => {
 
 export const getRootDir = () => {
   return state.rootDir;
+}
+
+export const setDragData = (value: IElementConfig | null) => {
+  state.dragData = value;
+}
+
+export const getDragData = () => {
+  return state.dragData || null;
 }
 
 const generateUUID = () => {

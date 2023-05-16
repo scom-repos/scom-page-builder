@@ -2,19 +2,15 @@ import { application, Container, ControlElement, customElements, customModule, M
 import { } from '@ijstech/eth-contract'
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
-import { ElementType, ELEMENT_NAME, IPageBlockData, IPageData } from './interface/index';
+import { IPageData, IElementConfig } from './interface/index';
 import { PageRows } from './page/index';
-import { getDappContainer, pageObject } from './store/index';
+import { pageObject } from './store/index';
 import { currentTheme } from './theme/index';
 import { generateUUID } from './utility/index';
 import { setRootDir as _setRootDir } from './store/index';
 import './index.css';
 
 const Theme = currentTheme;
-interface IElementConfig {
-    module: IPageBlockData;
-    type: ElementType;
-}
 
 interface PageBuilderElement extends ControlElement {
     rootDir?: string;
@@ -34,7 +30,9 @@ export default class Editor extends Module {
     private pageRows: PageRows;
     // private builderHeader: BuilderHeader;
     private builderFooter: BuilderFooter;
-    private contentWrapper: Panel;
+    private editor: Panel;
+    private pnlWrap: Panel;
+    private events: any[] = [];
 
     constructor(parent?: Container, options?: any) {
         super(parent, options);
@@ -45,10 +43,25 @@ export default class Editor extends Module {
 
     init() {
         const rootDir = this.getAttribute('rootDir', true);
-        if (rootDir) {
-            this.setRootDir(rootDir);
-        }
+        if (rootDir) this.setRootDir(rootDir);
         super.init();
+        const self = this;
+
+        self.pnlWrap.addEventListener('dragenter', (event) => {
+            event.preventDefault();
+            const { height } = self.pnlWrap.getBoundingClientRect();
+            const mouseY = event.clientY;
+            const scrollThreshold = 30;
+            if (mouseY < scrollThreshold) {
+                self.pnlWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else if (mouseY > height - scrollThreshold) {
+                self.pnlWrap.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }
+        });
+
+        self.pnlWrap.addEventListener('dragleave', () => {
+            self.pnlWrap.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+        });
     }
 
     setRootDir(value: string) {
@@ -58,7 +71,7 @@ export default class Editor extends Module {
     getData() {
         return {
             // header: pageObject.header,
-            sections: pageObject.sections.filter(section => section.elements && section.elements.length),
+            sections: pageObject.sections, // TODO: filter(section => section.elements && section.elements.length),
             footer: pageObject.footer
         }
     }
@@ -77,17 +90,24 @@ export default class Editor extends Module {
         }
     }
 
+    onHide() {
+        for (let event of this.events) {
+            event.unregister();
+        }
+        this.events = [];
+    };
+
     initEventBus() {
-        application.EventBus.register(this, EVENT.ON_ADD_ELEMENT, (data: IElementConfig) => {
+        this.events.push(application.EventBus.register(this, EVENT.ON_ADD_ELEMENT, (data: IElementConfig) => {
             if (!data) return;
             this.onAddRow(data);
-        });
-        application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => { })
-        application.EventBus.register(this, EVENT.ON_UPDATE_FOOTER, async () => this.onUpdateWrapper())
+        }));
+        this.events.push(application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => { }))
+        this.events.push(application.EventBus.register(this, EVENT.ON_UPDATE_FOOTER, async () => this.onUpdateWrapper()));
     }
 
     private async onAddRow(data: IElementConfig) {
-        const { type, module } = data;
+        const { type, module, prependId } = data;
         let element = {
             id: generateUUID(),
             column: 1,
@@ -132,7 +152,7 @@ export default class Editor extends Module {
                 width: '100%'
             }
         }
-        return await this.pageRows.appendRow(rowData);
+        return await this.pageRows.appendRow(rowData, prependId);
     }
 
     private onUpdateWrapper() {
@@ -142,7 +162,7 @@ export default class Editor extends Module {
 
     render() {
         return (
-            <i-vstack id="editor" width={'100%'} height={'100%'}>
+            <i-vstack id="editor" width={'100%'} height={'100%'} overflow={"hidden"}>
                 <ide-header
                     id={'pageHeader'}
                     border={{ bottom: { width: 1, style: 'solid', color: '#dadce0' } }}
@@ -150,9 +170,11 @@ export default class Editor extends Module {
                 <i-grid-layout
                     templateColumns={['auto', '400px']}
                     autoFillInHoles={true}
-                    height="100%"
+                    height="calc(100% -64px)"
+                    overflow={{y: 'auto'}}
                 >
                     <i-panel
+                        id="pnlWrap"
                         class="main-content"
                         height="100%"
                         overflow={{ y: 'auto' }}
@@ -186,7 +208,7 @@ export default class Editor extends Module {
                         </i-panel>
                     </i-panel>
                     <i-panel class="main-sidebar" height="100%" overflow={{ y: 'auto' }}>
-                        <ide-sidebar id={'pageSidebar'} width="100%"></ide-sidebar>
+                        <ide-sidebar id={'pageSidebar'} display={'block'} width="100%"></ide-sidebar>
                     </i-panel>
                 </i-grid-layout>
             </i-vstack>

@@ -78,6 +78,16 @@
     "@scom/scom-dapp-container": {
       "name": "DApp Container",
       "path": "scom-dapp-container"
+    },
+    "@scom/scom-table": {
+      "name": "Table",
+      "path": "scom-table",
+      "category": "charts"
+    },
+    "@scom/scom-pie-chart": {
+      "name": "Pie Chart",
+      "path": "scom-pie-chart",
+      "category": "charts"
     }
   }
 }
