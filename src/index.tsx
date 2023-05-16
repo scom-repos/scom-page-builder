@@ -1,20 +1,16 @@
-import { application, Container, ControlElement, customElements, customModule, Module, Panel } from '@ijstech/components';
+import { application, Container, Control, ControlElement, customElements, customModule, Module } from '@ijstech/components';
 import { } from '@ijstech/eth-contract'
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
-import { ElementType, ELEMENT_NAME, IPageBlockData, IPageData } from './interface/index';
-import { PageRows } from './page/index';
-import { getDappContainer, pageObject } from './store/index';
+import { IPageData, IElementConfig } from './interface/index';
+import { PageRow, PageRows } from './page/index';
+import { getDragData, pageObject, setDragData } from './store/index';
 import { currentTheme } from './theme/index';
 import { generateUUID } from './utility/index';
 import { setRootDir as _setRootDir } from './store/index';
 import './index.css';
 
 const Theme = currentTheme;
-interface IElementConfig {
-    module: IPageBlockData;
-    type: ElementType;
-}
 
 interface PageBuilderElement extends ControlElement {
     rootDir?: string;
@@ -34,13 +30,13 @@ export default class Editor extends Module {
     private pageRows: PageRows;
     // private builderHeader: BuilderHeader;
     private builderFooter: BuilderFooter;
-    private contentWrapper: Panel;
 
     constructor(parent?: Container, options?: any) {
         super(parent, options);
         this.getData = this.getData.bind(this);
         this.setData = this.setData.bind(this);
         this.initEventBus();
+        this.initEventListener();
     }
 
     init() {
@@ -86,8 +82,37 @@ export default class Editor extends Module {
         application.EventBus.register(this, EVENT.ON_UPDATE_FOOTER, async () => this.onUpdateWrapper())
     }
 
+    private initEventListener() {
+        const self = this;
+        document.addEventListener('drag', function (event) {});
+        document.addEventListener('dragend', function (event) {
+            const target = event.target as Control;
+            setDragData(null);
+            const pnlRow = target.closest('ide-row') as PageRow;
+            if (pnlRow) pnlRow.removeDottedLines();
+        })
+        document.addEventListener('dragenter', function (event) {
+            const target = event.target as Control;
+            const pnlRow = target.closest('ide-row') as PageRow;
+            if (pnlRow) pnlRow.addDottedLines();
+        })
+        document.addEventListener('dragover', function (event) {
+            event.preventDefault();
+        })
+        document.addEventListener('drop', function (event) {
+            const target = event.target as Control;
+            if (target.id !== 'contentWrapper' && !target.closest('#contentWrapper')) return;
+            const rows = self.pageRows.getRows();
+            const isEmptyPage = rows.every(row => !row.elements?.length);
+            if (isEmptyPage) {
+                const data = getDragData();
+                data && self.onAddRow(data);
+            }
+        })
+    }
+
     private async onAddRow(data: IElementConfig) {
-        const { type, module } = data;
+        const { type, module, prependId } = data;
         let element = {
             id: generateUUID(),
             column: 1,
@@ -132,7 +157,7 @@ export default class Editor extends Module {
                 width: '100%'
             }
         }
-        return await this.pageRows.appendRow(rowData);
+        return await this.pageRows.appendRow(rowData, prependId);
     }
 
     private onUpdateWrapper() {

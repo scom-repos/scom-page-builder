@@ -2,7 +2,8 @@ import {
     Module,
     customElements,
     Panel,
-    ControlElement
+    ControlElement,
+    Container
 } from '@ijstech/components';
 import './pageSection.css';
 import { ElementType, IPageElement } from '../interface/index';
@@ -34,8 +35,8 @@ export class PageSection extends Module {
     private _readonly: boolean;
     private rowId: string = '';
 
-    constructor(parent?: any) {
-        super(parent);
+    constructor(parent?: Container, options?: any) {
+        super(parent, options);
         this.setData = this.setData.bind(this);
     }
 
@@ -93,6 +94,16 @@ export class PageSection extends Module {
         return (
             <i-panel id={'pnlPageSection'} maxWidth="100%" maxHeight="100%" height="100%">
                 <i-panel
+                    position="absolute"
+                    width={15}
+                    height="100%"
+                    top="0px" left="-18px"
+                    zIndex={999}
+                    border={{radius: '50px'}}
+                    visible={false}
+                    class="front-block block"
+                ></i-panel>
+                <i-panel
                     id="pageSectionWrapper"
                     width="100%" height="100%"
                     maxWidth="100%" maxHeight="100%"
@@ -108,7 +119,7 @@ export class PageSection extends Module {
                     zIndex={999}
                     border={{radius: '50px'}}
                     visible={false}
-                    class="back-block"
+                    class="back-block block"
                 ></i-panel>
             </i-panel>
         );

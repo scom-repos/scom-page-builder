@@ -9,13 +9,15 @@ export class ElementCommand implements ICommand {
   private data: any
   private rowId: string;
   private isDeleted: boolean = false;
+  private prependId: string = '';
 
-  constructor(element: Control, parent: HTMLElement, data: any, isDeleted?: boolean) {
+  constructor(element: Control, parent: HTMLElement, data: any, isDeleted?: boolean, prependId?: string) {
     this.element = element;
     this.data = JSON.parse(JSON.stringify(data));
-    this.rowId = this.element.rowId;
+    this.rowId = data.id;
     this.parent = parent || document.body;
     this.isDeleted = typeof isDeleted === 'boolean' ? isDeleted : false;
+    this.prependId = prependId || '';
   }
 
   execute(): void {
@@ -26,7 +28,11 @@ export class ElementCommand implements ICommand {
       application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
     } else {
       this.parent.appendChild(this.element);
-      pageObject.addRow(this.data, this.rowId);
+      if (this.prependId) {
+        const prependRow = this.parent.querySelector(`#${this.prependId}`);
+        prependRow && prependRow.insertAdjacentElement('afterend', this.element);
+      }
+      pageObject.addRow(this.data, this.rowId, this.prependId.replace('row-', ''));
     }
   }
 

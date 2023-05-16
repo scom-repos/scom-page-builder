@@ -1,4 +1,6 @@
 import {IMenu, INetwork, IRoute, ITheme, ISCConfig, IBreakpoints} from './core';
+import { IPageBlockData } from './pageBlock';
+import { ElementType } from './siteData';
 
 export {
   IMenu,
@@ -14,7 +16,7 @@ export * from './component';
 export * from './siteData';
 export * from './jsonSchema';
 export enum ELEMENT_NAME {
-  TEXTBOX = "Text box",
+  TEXTBOX = "Text Box",
   IMAGE = "Image",
   NFT = "NFT Minter Dapp",
   GEM_TOKEN = "Gem Token Dapp",
@@ -25,4 +27,10 @@ export enum ELEMENT_NAME {
   BANNER = "Banner",
   BLOG = "Blog",
   CONTENT_BLOCK = "Content Block"
+}
+export interface IElementConfig {
+  module: IPageBlockData;
+  type: ElementType;
+  prependId?: string;
+  appendId?: string;
 }

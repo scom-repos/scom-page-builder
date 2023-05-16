@@ -395,7 +395,7 @@ export class IDEToolbar extends Module {
                 }
             }
         } else {
-            pageObject.setElement(this.rowId, this.data.id, { properties });
+            this.data && pageObject.setElement(this.rowId, this.data.id, { properties });
         }
     }
 

@@ -9,7 +9,7 @@ import {
     VStack,
     application,
 } from '@ijstech/components';
-import { getRootDir, setPageBlocks } from '../store/index';
+import { getRootDir, setDragData, setPageBlocks } from '../store/index';
 import { EVENT } from '../const/index';
 import { ElementType, ELEMENT_NAME, IPageBlockData } from '../interface/index';
 import { Collapse } from '../common/index';
@@ -27,11 +27,6 @@ declare global {
 }
 
 export interface PageSidebarElement extends ControlElement {
-    onSelectModule?: (selectedModule: IPageBlockData) => Promise<void>;
-}
-interface IContentBlock {
-    image: string;
-    columns: number;
 }
 
 @customElements('ide-sidebar')
@@ -39,7 +34,6 @@ export class PageSidebar extends Module {
     private microDAppsStack: VStack;
 
     private componentsStack: GridLayout;
-    private onSelectModule: (selectedModule: IPageBlockData) => Promise<void>;
     private pageBlocks: IPageBlockData[];
 
     constructor(parent?: any) {
@@ -47,9 +41,9 @@ export class PageSidebar extends Module {
     }
 
     init() {
-        this.onSelectModule = this.getAttribute('onSelectModule', true);
         super.init();
         this.renderUI();
+        this.initEventListeners();
     }
 
     private async renderUI() {
@@ -93,18 +87,19 @@ export class PageSidebar extends Module {
                     gap="0.5rem"
                     onClick={() => this.onAddComponent(module, ElementType.PRIMITIVE)}
                 >
-                    <i-panel>
-                        <i-image
-                            url={module.imgUrl || assets.icons.logo}
-                            width={24}
-                            height={24}
-                            display="block"
-                        ></i-image>
-                    </i-panel>
+                    <i-image
+                        url={module.imgUrl || assets.icons.logo}
+                        width={24}
+                        height={24}
+                        display="block"
+                    ></i-image>
                     <i-label caption={module.name}></i-label>
                 </i-vstack>
             );
             this.componentsStack.append(moduleCard);
+            moduleCard.setAttribute('draggable', true);
+            moduleCard.setAttribute('data-type', ElementType.PRIMITIVE);
+            moduleCard.setAttribute('data-name', module.name);
         }
     }
 
@@ -122,19 +117,35 @@ export class PageSidebar extends Module {
                     class="pointer"
                     onClick={() => this.onAddComponent(module, ElementType.PRIMITIVE)}
                 >
-                    <i-panel>
-                        <i-image
-                            url={module.imgUrl || assets.icons.logo}
-                            width={24}
-                            height={24}
-                            display="block"
-                        ></i-image>
-                    </i-panel>
+                    <i-image
+                        url={module.imgUrl || assets.icons.logo}
+                        width={24}
+                        height={24}
+                        display="block"
+                    ></i-image>
                     <i-label caption={module.name} font={{ weight: 600 }}></i-label>
                 </i-hstack>
             );
             this.microDAppsStack.append(moduleCard);
+            moduleCard.setAttribute('draggable', true);
+            moduleCard.setAttribute('data-type', ElementType.PRIMITIVE);
+            moduleCard.setAttribute('data-name', module.name);
         }
+    }
+
+    private initEventListeners() {
+        const self = this;
+        this.addEventListener('dragstart', function (event) {
+            const eventTarget = event.target as Control;
+            if (eventTarget.nodeName === 'IMG') event.preventDefault();
+            const currentName = eventTarget.dataset.name;
+            const type = eventTarget.dataset.type as ElementType;
+            const module = self.pageBlocks.find(block => block.name === currentName);
+            if (module && type) {
+                application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, eventTarget);
+                setDragData({ module, type });
+            } 
+        })
     }
 
     render() {

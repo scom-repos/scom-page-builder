@@ -11,8 +11,8 @@ import {
 import { PageSection, RowSettingsDialog } from './pageSection';
 import './pageRow.css';
 import { EVENT } from '../const/index';
-import { IPageSection } from '../interface/index';
-import { pageObject } from '../store/index';
+import { IPageElement, IPageSection } from '../interface/index';
+import { getDragData, pageObject } from '../store/index';
 import {
     commandHistory,
     ElementCommand,
@@ -21,6 +21,8 @@ import {
     MAX_COLUMN,
     UpdateColorCommand,
     UpdateTypeCommand,
+    AddElementCommand,
+    MIN_COLUMN
 } from '../command/index';
 import { IDEToolbar } from '../common/index';
 
@@ -70,10 +72,15 @@ export class PageRow extends Module {
         super.init();
         this.renderFixedGrid();
         this.initEventListeners();
+        application.EventBus.register(this, EVENT.ON_SET_DRAG_ELEMENT, async (el: any) => this.currentElement = el)
     }
 
     private async createNewElement(i: number) {
         const sectionData = this.data.elements[i];
+        return this.createElementFn(sectionData);
+    }
+
+    private async createElementFn(data: IPageElement) {
         const pageSection = (
             <ide-section
                 readonly={this._readonly}
@@ -86,20 +93,25 @@ export class PageRow extends Module {
         if (!this._readonly) {
             pageSection.setAttribute('draggable', 'true');
             pageSection.style.gridRow = '1';
-            pageSection.style.gridColumn = `${sectionData.column || 1} / span ${
-                sectionData.columnSpan || 1
+            pageSection.style.gridColumn = `${data.column || 1} / span ${
+                data.columnSpan || 1
             }`;
-            pageSection.setAttribute('data-column', `${sectionData.column || 1}`);
-            pageSection.setAttribute('data-column-span', `${sectionData.columnSpan || 1}`);
+            pageSection.setAttribute('data-column', `${data.column || 1}`);
+            pageSection.setAttribute('data-column-span', `${data.columnSpan || 1}`);
         }
-        pageSection.visible = !!sectionData;
+        pageSection.visible = !!data;
         this.pnlRow.appendChild(pageSection);
-        await pageSection.setData(this.rowId, sectionData);
+        await pageSection.setData(this.rowId, data);
         return pageSection;
     }
 
+    async addElement(data: IPageElement) {
+        if (!data) return;
+        return await this.createElementFn(data);
+    }
+
     private async clearData() {
-        const children = this.pnlRow.querySelectorAll('ide-section');
+        const children = this.pnlRow?.querySelectorAll('ide-section');
         if (children && children.length) children.forEach((item) => item.remove());
     }
 
@@ -204,28 +216,6 @@ export class PageRow extends Module {
             fixedGridElm.gap = { column: `${gapWidth}px` };
         }
 
-        function addDottedLines() {
-            const fixedGridItems = document.getElementsByClassName('fixed-grid-item');
-            for (let i = 0; i < fixedGridItems.length; i++) {
-                fixedGridItems[i].classList.add('border-x-dotted');
-            }
-            const fixedGrids = document.getElementsByClassName('fixed-grid');
-            for (let i = 0; i < fixedGrids.length; i++) {
-                fixedGrids[i].classList.add('border-dotted');
-            }
-        }
-
-        function removeDottedLines() {
-            const fixedGridItems = document.getElementsByClassName('fixed-grid-item');
-            for (let i = 0; i < fixedGridItems.length; i++) {
-                fixedGridItems[i].classList.remove('border-x-dotted');
-            }
-            const fixedGrids = document.getElementsByClassName('fixed-grid');
-            for (let i = 0; i < fixedGrids.length; i++) {
-                fixedGrids[i].classList.remove('border-dotted');
-            }
-        }
-
         this.addEventListener('mousedown', (e) => {
             const target = e.target as Control;
             const parent = target.closest('.resize-stack') as Control;
@@ -234,7 +224,7 @@ export class PageRow extends Module {
             const resizableElm = target.closest('ide-section') as PageSection;
             self.currentElement = resizableElm;
             toolbar = self.currentElement.querySelector('ide-toolbar');
-            addDottedLines();
+            self.addDottedLines();
             this.isResizing = true;
             currentDot = parent;
             startX = e.clientX;
@@ -247,7 +237,7 @@ export class PageRow extends Module {
             e.preventDefault();
             if (!toolbar) return;
             this.isResizing = false;
-            removeDottedLines();
+            self.removeDottedLines();
             toolbar.width = 'initial';
             toolbar.height = 'initial';
             const contentStack = toolbar.querySelector('#contentStack') as Control
@@ -331,7 +321,9 @@ export class PageRow extends Module {
             if (target && !cannotDrag) {
                 self.currentElement = target;
                 self.currentElement.opacity = 0;
-                addDottedLines();
+                application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, target);
+                // TODO: use common
+                self.addDottedLines();
             } else {
                 event.preventDefault();
             }
@@ -342,7 +334,7 @@ export class PageRow extends Module {
         document.addEventListener('dragend', function (event) {
             if (self.currentElement) self.currentElement.opacity = 1;
             self.currentElement = null;
-            removeDottedLines();
+            self.removeDottedLines();
             let rectangles = document.getElementsByClassName('rectangle');
             for (const rectangle of rectangles) {
                 (rectangle as Control).style.display = 'none';
@@ -395,6 +387,7 @@ export class PageRow extends Module {
                             }  
                         }
                     }
+
                     const curElmCol = Number(section?.dataset?.column);
                     const curElmColSpan = Number(section?.dataset?.columnSpan);
                     const sections = Array.from(section.closest('#pnlRow')?.querySelectorAll('ide-section'));
@@ -405,10 +398,17 @@ export class PageRow extends Module {
                     const showHiddenBlock = curElmCol === 1 && (curElmCol + curElmColSpan === MAX_COLUMN + 1) ||
                         (nextElm) ||
                         (curElmCol + curElmColSpan === MAX_COLUMN + 1);
-
                     if (showHiddenBlock) {
-                        const hiddenBlock = section.querySelector('.back-block') as Control;
-                        hiddenBlock && (hiddenBlock.visible = true);
+                        const { width } = section.getBoundingClientRect();
+                        const backBlock = section.querySelector('.back-block') as Control;
+                        const frontBlock = section.querySelector('.front-block') as Control;
+                        if (backBlock) {
+                            backBlock.visible = event.clientX > Math.floor(width / 2);
+                        }
+                        if (frontBlock) {
+                            frontBlock.visible = event.clientX <= Math.floor(width / 2) && curElmCol === 1;
+                            frontBlock.classList.add('is-dragenter');
+                        }
                     }
                 }
                 const backBlock = eventTarget.closest('.back-block') as Control;
@@ -446,21 +446,33 @@ export class PageRow extends Module {
             const target = eventTarget.closest('.fixed-grid-item') as Control;
             if (target) {
                 const column = Number(target.dataset.column);
-                const columnSpan = Number(self.currentElement.dataset.columnSpan);
+                const columnSpan = self.currentElement.dataset.columnSpan ? Number(self.currentElement.dataset.columnSpan) : MIN_COLUMN;
                 const colSpan = Math.min(columnSpan, 12);
                 const colStart = Math.min(column, 12 - colSpan + 1);
                 const grid = target.closest('.grid');
                 const sections = Array.from(grid?.querySelectorAll('ide-section'));
+                let prependId = '';
                 const sortedSections = sections.sort((a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column));
                 const findedSection = sortedSections.find((section: Control) => {
                     const sectionColumn = Number(section.dataset.column);
                     const sectionColumnSpan = Number(section.dataset.columnSpan);
                     const colData = colStart + colSpan;
+                    if (sectionColumn < colStart && colData > sectionColumn + sectionColumnSpan) {
+                        prependId = section.id;
+                    }
                     return colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan;
                 });
                 if (!findedSection) {
-                    const dragCmd = new DragElementCommand(self.currentElement, target);
-                    commandHistory.execute(dragCmd);
+                    if (self.currentElement.data) {
+                        const dragCmd = new DragElementCommand(self.currentElement, target);
+                        commandHistory.execute(dragCmd);
+                    } else if (getDragData()) {
+                        const elementConfig = {...(getDragData() || {})};
+                        console.log('prependId: ', prependId)
+                        const rowElm = eventTarget.closest('ide-row') as Control;
+                        const dragCmd = new AddElementCommand(rowElm, elementConfig, true, prependId);
+                        commandHistory.execute(dragCmd);
+                    }
                 }
             } else {
                 const isPageRow = eventTarget.classList.contains('page-row');
@@ -472,16 +484,56 @@ export class PageRow extends Module {
                 if (dropElm) {
                     dropElm.classList.remove('is-dragenter');
                     const isBottomBlock = dropElm.classList.contains('bottom-block');
-                    if (isBottomBlock) {
-                        const dragCmd = new UpdateTypeCommand(self.currentElement, dropElm);
-                        commandHistory.execute(dragCmd);
+                    if (getDragData()) {
+                        const elementConfig = {...(getDragData() || {})};
+                        if (isBottomBlock) { 
+                            const prependId = eventTarget.closest('ide-row')?.id || '';
+                            const prependIndex = pageObject.sections.findIndex(section => section.id === prependId.replace('row-', ''));
+                            application.EventBus.dispatch(EVENT.ON_ADD_ELEMENT, {
+                                ...elementConfig,
+                                prependId : prependIndex === pageObject.sections.length - 1 ? '' : prependId}
+                            );
+                        } else {
+                            const sectionId = eventTarget.closest('ide-section')?.id || '';
+                            const isAppend = dropElm.classList.contains('back-block');
+                            const rowElm = dropElm.closest('ide-row') as Control;
+                            const dragCmd = new AddElementCommand(rowElm, elementConfig, isAppend, sectionId);
+                            commandHistory.execute(dragCmd);
+                        }
                     } else {
-                        const dragCmd = new DragElementCommand(self.currentElement, dropElm);
-                        commandHistory.execute(dragCmd);
+                        if (isBottomBlock) {
+                            const dragCmd = new UpdateTypeCommand(self.currentElement, dropElm);
+                            commandHistory.execute(dragCmd);
+                        } else {
+                            const dragCmd = new DragElementCommand(self.currentElement, dropElm);
+                            commandHistory.execute(dragCmd);
+                        }
                     }
                 }
             }
         });
+    }
+
+    addDottedLines() {
+        const fixedGridItems = document.getElementsByClassName('fixed-grid-item');
+        for (let i = 0; i < fixedGridItems.length; i++) {
+            fixedGridItems[i].classList.add('border-x-dotted');
+        }
+        const fixedGrids = document.getElementsByClassName('fixed-grid');
+        for (let i = 0; i < fixedGrids.length; i++) {
+            fixedGrids[i].classList.add('border-dotted');
+        }
+    }
+
+    removeDottedLines() {
+        const fixedGridItems = document.getElementsByClassName('fixed-grid-item');
+        for (let i = 0; i < fixedGridItems.length; i++) {
+            fixedGridItems[i].classList.remove('border-x-dotted');
+        }
+        const fixedGrids = document.getElementsByClassName('fixed-grid');
+        for (let i = 0; i < fixedGrids.length; i++) {
+            fixedGrids[i].classList.remove('border-dotted');
+        }
     }
 
     private setActive() {

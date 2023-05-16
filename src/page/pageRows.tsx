@@ -190,7 +190,7 @@ export class PageRows extends Module {
         this.updateCurrentRow(x - this.currentPosition.x, y - this.currentPosition.y);
     }
 
-    async getRows(): Promise<IPageSection[]> {
+    getRows(): IPageSection[] {
         // const rows = this.pnlRows.querySelectorAll('ide-row');
         // const rowDataList: IPageSection[] = [];
         // for (const row of rows) {
@@ -222,14 +222,14 @@ export class PageRows extends Module {
         }
     }
 
-    async appendRow(rowData: IPageSection) {
+    async appendRow(rowData: IPageSection, prependId?: string) {
         const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
         if (!this._readonly) {
             pageRow.border = { top: { width: '1px', style: 'dashed', color: Theme.divider } };
             this.initDragEvent(pageRow);
         }
         pageRow.visible = !!rowData?.elements?.length;
-        const addRowCmd = new ElementCommand(pageRow, this.pnlRows, rowData);
+        const addRowCmd = new ElementCommand(pageRow, this.pnlRows, rowData, false, prependId);
         commandHistory.execute(addRowCmd);
         await pageRow.setData(rowData);
         return pageRow;
