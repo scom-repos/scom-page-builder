@@ -32,7 +32,7 @@ export interface PageSidebarElement extends ControlElement {
 @customElements('ide-sidebar')
 export class PageSidebar extends Module {
     private microDAppsStack: VStack;
-
+    private chartsStack: VStack;
     private componentsStack: GridLayout;
     private pageBlocks: IPageBlockData[];
 
@@ -51,6 +51,7 @@ export class PageSidebar extends Module {
         setPageBlocks(this.pageBlocks);
         this.renderComponentList();
         this.renderMircoDAppList();
+        this.renderChartList();
     }
 
     async getPageBlocks() {
@@ -148,6 +149,35 @@ export class PageSidebar extends Module {
         })
     }
 
+    private async renderChartList() {
+        this.chartsStack.clearInnerHTML();
+        let components = this.pageBlocks.filter(p => p.category === 'charts');
+        let matchedModules = components;
+        for (const module of matchedModules) {
+            const moduleCard = (
+                <i-hstack
+                    height={48}
+                    verticalAlignment="center"
+                    gap="1rem"
+                    padding={{ left: '1rem', right: '1rem' }}
+                    class="pointer"
+                    onClick={() => this.onAddComponent(module, ElementType.PRIMITIVE)}
+                >
+                    <i-panel>
+                        <i-image
+                            url={module.imgUrl || assets.icons.logo}
+                            width={24}
+                            height={24}
+                            display="block"
+                        />
+                    </i-panel>
+                    <i-label caption={module.name} font={{ weight: 600 }} />
+                </i-hstack>
+            );
+            this.chartsStack.append(moduleCard);
+        }
+    }
+
     render() {
         return (
             <i-panel class="navigator" height={'100%'} maxWidth="100%">
@@ -163,6 +193,12 @@ export class PageSidebar extends Module {
                         id="microDAppsStack"
                         padding={{ top: '8px', bottom: '8px' }}
                     ></i-vstack>
+                </i-scom-page-builder-collapse>
+                <i-scom-page-builder-collapse title="Charts" border={{ bottom: { width: 1, style: 'solid', color: Theme.divider } }} expanded={true}>
+                    <i-vstack
+                        id="chartsStack"
+                        padding={{ top: '8px', bottom: '8px' }}
+                    />
                 </i-scom-page-builder-collapse>
             </i-panel>
         );

@@ -324,7 +324,7 @@ declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
     export interface IPageBlockData {
         name: string;
         path: string;
-        category?: "components" | "micro-dapps";
+        category?: "components" | "micro-dapps" | "charts";
         imgUrl?: string;
         disableClicked?: boolean;
         shownBackdrop?: boolean;
@@ -1176,6 +1176,7 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
     }
     export class PageSidebar extends Module {
         private microDAppsStack;
+        private chartsStack;
         private componentsStack;
         private pageBlocks;
         constructor(parent?: any);
@@ -1186,6 +1187,7 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
         private renderComponentList;
         private renderMircoDAppList;
         private initEventListeners;
+        private renderChartList;
         render(): any;
     }
 }
