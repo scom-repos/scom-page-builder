@@ -3,7 +3,7 @@ import { EVENT } from "../const/index";
 import { pageObject } from "../store/index";
 import { ICommand } from "./interface";
 
-export class ElementCommand implements ICommand {
+export class UpdateRowCommand implements ICommand {
   private element: any;
   private parent: HTMLElement;
   private data: any

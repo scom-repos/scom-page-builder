@@ -12,7 +12,7 @@ Styles.cssRule('ide-sidebar', {
             overflow: 'hidden'
         },
         '.pointer': {
-            cursor: 'pointer'
+            cursor: 'grab'
         },
         '.pointer:hover': {
             background: Theme.action.hover

@@ -7,15 +7,17 @@ import {
     VStack,
     observable,
     GridLayout,
+    Styles,
+    Panel
 } from '@ijstech/components';
 import { PageSection, RowSettingsDialog } from './pageSection';
 import './pageRow.css';
 import { EVENT } from '../const/index';
 import { IPageElement, IPageSection } from '../interface/index';
-import { getDragData, pageObject } from '../store/index';
+import { getDragData, pageObject, setDragData } from '../store/index';
 import {
     commandHistory,
-    ElementCommand,
+    UpdateRowCommand,
     ResizeElementCommand,
     DragElementCommand,
     MAX_COLUMN,
@@ -25,6 +27,7 @@ import {
     MIN_COLUMN
 } from '../command/index';
 import { IDEToolbar } from '../common/index';
+const Theme = Styles.Theme.ThemeVars;
 
 declare global {
     namespace JSX {
@@ -44,6 +47,8 @@ export class PageRow extends Module {
     private dragStack: VStack;
     private pnlRow: GridLayout;
     private mdRowSetting: RowSettingsDialog;
+    private pnlEmty: VStack;
+    private pnlWrap: Panel;
 
     private _readonly: boolean;
     private isResizing: boolean = false;
@@ -52,6 +57,7 @@ export class PageRow extends Module {
     private currentElement: PageSection;
     private rowId: string = '';
     private rowData: IPageSection;
+    private isDragging: boolean = false;
 
     @observable()
     private isCloned: boolean = true;
@@ -72,7 +78,14 @@ export class PageRow extends Module {
         super.init();
         this.renderFixedGrid();
         this.initEventListeners();
+        const hasData = this.data?.elements?.length;
+        this.toggleUI(hasData);
         application.EventBus.register(this, EVENT.ON_SET_DRAG_ELEMENT, async (el: any) => this.currentElement = el)
+    }
+
+    private toggleUI(value: boolean) {
+        if (this.pnlWrap) this.pnlWrap.opacity = value ? 1 : 0;
+        if (this.pnlEmty) this.pnlEmty.visible = !value;
     }
 
     private async createNewElement(i: number) {
@@ -107,12 +120,14 @@ export class PageRow extends Module {
 
     async addElement(data: IPageElement) {
         if (!data) return;
-        return await this.createElementFn(data);
+        const element = await this.createElementFn(data);
+        this.toggleUI(true);
+        return element;
     }
 
     private async clearData() {
         const children = this.pnlRow?.querySelectorAll('ide-section');
-        if (children && children.length) children.forEach((item) => item.remove());
+        if (children?.length) children.forEach((item) => item.remove());
     }
 
     async setData(rowData: IPageSection) {
@@ -135,6 +150,8 @@ export class PageRow extends Module {
             }
         }
         this.actionsBar.minHeight = '100%';
+        const hasData = this.data?.elements?.length;
+        this.toggleUI(hasData);
     }
 
     private onOpenRowSettingsDialog() {
@@ -153,7 +170,7 @@ export class PageRow extends Module {
     }
 
     onDeleteRow() {
-        const rowCmd = new ElementCommand(this, this.parent, this.data, true);
+        const rowCmd = new UpdateRowCommand(this, this.parent, this.data, true);
         commandHistory.execute(rowCmd);
     }
 
@@ -322,18 +339,19 @@ export class PageRow extends Module {
                 self.currentElement = target;
                 self.currentElement.opacity = 0;
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, target);
-                // TODO: use common
                 self.addDottedLines();
             } else {
                 event.preventDefault();
             }
         });
 
-        document.addEventListener('drag', function (event) {});
+        this.addEventListener('drag', function (event) {});
 
         document.addEventListener('dragend', function (event) {
             if (self.currentElement) self.currentElement.opacity = 1;
             self.currentElement = null;
+            self.isDragging = false;
+            setDragData(null);
             self.removeDottedLines();
             let rectangles = document.getElementsByClassName('rectangle');
             for (const rectangle of rectangles) {
@@ -346,13 +364,13 @@ export class PageRow extends Module {
             }
         });
 
-        document.addEventListener('dragenter', function (event) {
+        this.addEventListener('dragenter', function (event) {
             const eventTarget = event.target as Control;
             if (!eventTarget || !self.currentElement) return;
             const target = eventTarget.closest('.fixed-grid-item') as Control;
             if (target) {
                 const column = Number(target.dataset.column);
-                const columnSpan = Number(self.currentElement.dataset.columnSpan);
+                const columnSpan = self.currentElement.dataset.columnSpan ? Number(self.currentElement.dataset.columnSpan) : MIN_COLUMN ;
                 const colSpan = Math.min(columnSpan, 12);
                 const colStart = Math.min(column, 12 - colSpan + 1);
                 const grid = target.closest('.grid');
@@ -399,14 +417,14 @@ export class PageRow extends Module {
                         (nextElm) ||
                         (curElmCol + curElmColSpan === MAX_COLUMN + 1);
                     if (showHiddenBlock) {
-                        const { width } = section.getBoundingClientRect();
+                        const { left, width } = section.getBoundingClientRect();
                         const backBlock = section.querySelector('.back-block') as Control;
                         const frontBlock = section.querySelector('.front-block') as Control;
                         if (backBlock) {
                             backBlock.visible = event.clientX > Math.floor(width / 2);
                         }
                         if (frontBlock) {
-                            frontBlock.visible = event.clientX <= Math.floor(width / 2) && curElmCol === 1;
+                            frontBlock.visible = Math.abs(event.clientX - left) <= 15  && curElmCol === 1;
                             frontBlock.classList.add('is-dragenter');
                         }
                     }
@@ -430,26 +448,30 @@ export class PageRow extends Module {
                     (rectangle as Control).style.display = 'none';
                 }
             } else {
-                const block  = eventTarget.closest('.is-dragenter') as Control;
-                if (block) {
-                    block.visible = false;
+                let backBlocks = document.getElementsByClassName('is-dragenter');
+                for (const block of backBlocks) {
+                    (block as Control).visible = false;
                     block.classList.remove('is-dragenter');
                 }
             }
         });
 
-        document.addEventListener('drop', function (event) {
+        this.addEventListener('drop', async function (event) {
             event.preventDefault();
             event.stopPropagation();
             if (!self.currentElement) return;
             const eventTarget = event.target as Control;
-            const target = eventTarget.closest('.fixed-grid-item') as Control;
-            if (target) {
-                const column = Number(target.dataset.column);
-                const columnSpan = self.currentElement.dataset.columnSpan ? Number(self.currentElement.dataset.columnSpan) : MIN_COLUMN;
+            const pageRow = eventTarget.closest('ide-row') as PageRow;
+            const nearestFixedItem = eventTarget.closest('.fixed-grid-item') as Control;
+            const elementConfig = getDragData();
+
+            if (nearestFixedItem) {
+                const column = Number(nearestFixedItem.dataset.column);
+                const columnSpan = self.currentElement.dataset.columnSpan ?
+                    Number(self.currentElement.dataset.columnSpan) : MIN_COLUMN;
                 const colSpan = Math.min(columnSpan, 12);
                 const colStart = Math.min(column, 12 - colSpan + 1);
-                const grid = target.closest('.grid');
+                const grid = nearestFixedItem.closest('.grid');
                 const sections = Array.from(grid?.querySelectorAll('ide-section'));
                 let prependId = '';
                 const sortedSections = sections.sort((a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column));
@@ -457,23 +479,23 @@ export class PageRow extends Module {
                     const sectionColumn = Number(section.dataset.column);
                     const sectionColumnSpan = Number(section.dataset.columnSpan);
                     const colData = colStart + colSpan;
-                    if (sectionColumn < colStart && colData > sectionColumn + sectionColumnSpan) {
+                    const sectionData = sectionColumn + sectionColumnSpan;
+                    if (sectionColumn < colStart && colData > sectionData) {
                         prependId = section.id;
                     }
-                    return colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan;
+                    return colStart >= sectionColumn && colData <= sectionData;
                 });
-                if (!findedSection) {
-                    if (self.currentElement.data) {
-                        const dragCmd = new DragElementCommand(self.currentElement, target);
-                        commandHistory.execute(dragCmd);
-                    } else if (getDragData()) {
-                        const elementConfig = {...(getDragData() || {})};
-                        console.log('prependId: ', prependId)
-                        const rowElm = eventTarget.closest('ide-row') as Control;
-                        const dragCmd = new AddElementCommand(rowElm, elementConfig, true, prependId);
-                        commandHistory.execute(dragCmd);
-                    }
+                if (findedSection || self.isDragging) return;
+                self.isDragging = true;
+                if (self.currentElement.data) {
+                    const dragCmd = new DragElementCommand(self.currentElement, nearestFixedItem);
+                    commandHistory.execute(dragCmd);
+                } else if (getDragData()) {
+                    const elementConfig = {...(getDragData() || {})};
+                    const dragCmd = new AddElementCommand(elementConfig, true, nearestFixedItem, null, prependId);
+                    commandHistory.execute(dragCmd);
                 }
+                self.isDragging = false;
             } else {
                 const isPageRow = eventTarget.classList.contains('page-row');
                 const dropElm = (
@@ -481,9 +503,12 @@ export class PageRow extends Module {
                         ? eventTarget.querySelector('.is-dragenter')
                         : eventTarget.closest('.is-dragenter')
                 ) as Control;
+                if (self.isDragging) return;
                 if (dropElm) {
+                    self.isDragging = true;
                     dropElm.classList.remove('is-dragenter');
                     const isBottomBlock = dropElm.classList.contains('bottom-block');
+                    // TODO: Fix bottom block
                     if (getDragData()) {
                         const elementConfig = {...(getDragData() || {})};
                         if (isBottomBlock) { 
@@ -496,8 +521,7 @@ export class PageRow extends Module {
                         } else {
                             const sectionId = eventTarget.closest('ide-section')?.id || '';
                             const isAppend = dropElm.classList.contains('back-block');
-                            const rowElm = dropElm.closest('ide-row') as Control;
-                            const dragCmd = new AddElementCommand(rowElm, elementConfig, isAppend, sectionId);
+                            const dragCmd = new AddElementCommand(elementConfig, isAppend, dropElm, null, sectionId);
                             commandHistory.execute(dragCmd);
                         }
                     } else {
@@ -509,6 +533,12 @@ export class PageRow extends Module {
                             commandHistory.execute(dragCmd);
                         }
                     }
+                    self.isDragging = false;
+                } else if (pageRow && elementConfig && !self.isDragging) {
+                    self.isDragging = true
+                    const dragCmd = new AddElementCommand(elementConfig, true, null, pageRow);
+                    await commandHistory.execute(dragCmd);
+                    self.isDragging = false;
                 }
             }
         });
@@ -619,15 +649,36 @@ export class PageRow extends Module {
                         <i-icon name="circle" width={3} height={3}></i-icon>
                     </i-grid-layout>
                 </i-vstack>
-                <i-grid-layout
-                    id="pnlRow"
+                <i-vstack
+                    id="pnlEmty"
                     width="100%"
-                    height="100%"
-                    maxWidth="100%"
-                    maxHeight="100%"
-                    position="relative"
-                    class="grid"
-                ></i-grid-layout>
+                    visible={false}
+                    verticalAlignment='center' horizontalAlignment='center'
+                >
+                    <i-panel
+                        padding={{top: '3rem', bottom: '3rem'}}
+                        margin={{top: '3rem', bottom: '3rem'}}
+                        width="100%"
+                        border={{width: '1px', style: 'dashed', color: Theme.divider}}
+                        class="text-center"
+                    >
+                        <i-label
+                            caption='Drag Elements Here'
+                            font={{transform: 'uppercase', color: Theme.divider, size: '1.25rem'}}
+                        ></i-label>
+                    </i-panel>
+                </i-vstack>
+                <i-panel id="pnlWrap" opacity={0}>
+                    <i-grid-layout
+                        id="pnlRow"
+                        width="100%"
+                        height="100%"
+                        maxWidth="100%"
+                        maxHeight="100%"
+                        position="relative"
+                        class="grid"
+                    ></i-grid-layout>
+                </i-panel>
                 <ide-row-settings-dialog
                     id="mdRowSetting"
                     onSave={this.onSaveRowSettings.bind(this)}

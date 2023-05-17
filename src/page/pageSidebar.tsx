@@ -5,14 +5,13 @@ import {
     Styles,
     GridLayout,
     Control,
-    Icon,
     VStack,
     application,
 } from '@ijstech/components';
-import { getRootDir, setDragData, setPageBlocks } from '../store/index';
+import { getDragData, getRootDir, setDragData, setPageBlocks } from '../store/index';
 import { EVENT } from '../const/index';
-import { ElementType, ELEMENT_NAME, IPageBlockData } from '../interface/index';
-import { Collapse } from '../common/index';
+import { ElementType, IPageBlockData } from '../interface/index';
+// import { Collapse } from '../common/index';
 import './pageSidebar.css';
 import assets from '../assets';
 
@@ -34,6 +33,8 @@ export class PageSidebar extends Module {
     private microDAppsStack: VStack;
     private chartsStack: VStack;
     private componentsStack: GridLayout;
+    private sectionStack: VStack;
+
     private pageBlocks: IPageBlockData[];
 
     constructor(parent?: any) {
@@ -52,6 +53,7 @@ export class PageSidebar extends Module {
         this.renderComponentList();
         this.renderMircoDAppList();
         this.renderChartList();
+        this.sectionStack.setAttribute('draggable', 'true');
     }
 
     async getPageBlocks() {
@@ -69,9 +71,9 @@ export class PageSidebar extends Module {
         return pageBlocks;
     }
 
-    private onAddComponent(module: IPageBlockData, type: ElementType) {
-        application.EventBus.dispatch(EVENT.ON_ADD_ELEMENT, { type, module });
-    }
+    // private onAddComponent(module: IPageBlockData, type: ElementType) {
+    //     application.EventBus.dispatch(EVENT.ON_ADD_ELEMENT, { type, module });
+    // }
 
     private async renderComponentList() {
         this.componentsStack.clearInnerHTML();
@@ -86,7 +88,7 @@ export class PageSidebar extends Module {
                     minWidth={88}
                     height="5rem"
                     gap="0.5rem"
-                    onClick={() => this.onAddComponent(module, ElementType.PRIMITIVE)}
+                    // onClick={() => this.onAddComponent(module, ElementType.PRIMITIVE)}
                 >
                     <i-image
                         url={module.imgUrl || assets.icons.logo}
@@ -116,7 +118,7 @@ export class PageSidebar extends Module {
                     gap="1rem"
                     padding={{ left: '1rem', right: '1rem' }}
                     class="pointer"
-                    onClick={() => this.onAddComponent(module, ElementType.PRIMITIVE)}
+                    // onClick={() => this.onAddComponent(module, ElementType.PRIMITIVE)}
                 >
                     <i-image
                         url={module.imgUrl || assets.icons.logo}
@@ -137,15 +139,21 @@ export class PageSidebar extends Module {
     private initEventListeners() {
         const self = this;
         this.addEventListener('dragstart', function (event) {
+            event.stopPropagation();
             const eventTarget = event.target as Control;
             if (eventTarget.nodeName === 'IMG') event.preventDefault();
-            const currentName = eventTarget.dataset.name;
-            const type = eventTarget.dataset.type as ElementType;
-            const module = self.pageBlocks.find(block => block.name === currentName);
-            if (module && type) {
-                application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, eventTarget);
-                setDragData({ module, type });
-            } 
+            if (eventTarget.id === 'sectionStack') {
+                application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
+            }
+            else {
+                const currentName = eventTarget.dataset.name;
+                const type = eventTarget.dataset.type as ElementType;
+                const module = self.pageBlocks.find(block => block.name === currentName);
+                if (module && type) {
+                    application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, eventTarget);
+                    setDragData({ module, type });
+                }
+            }
         })
     }
 
@@ -161,7 +169,7 @@ export class PageSidebar extends Module {
                     gap="1rem"
                     padding={{ left: '1rem', right: '1rem' }}
                     class="pointer"
-                    onClick={() => this.onAddComponent(module, ElementType.PRIMITIVE)}
+                    // onClick={() => this.onAddComponent(module, ElementType.PRIMITIVE)}
                 >
                     <i-panel>
                         <i-image
@@ -181,6 +189,26 @@ export class PageSidebar extends Module {
     render() {
         return (
             <i-panel class="navigator" height={'100%'} maxWidth="100%">
+                <i-vstack
+                    padding={{top: '1rem', bottom: '1rem', left: '1rem', right: '1rem'}}
+                >
+                    <i-vstack
+                        id="sectionStack"
+                        class="text-center pointer"
+                        verticalAlignment="center"
+                        horizontalAlignment="center"
+                        height="5rem" width="100%"
+                        gap="0.5rem"
+                    >
+                        <i-image
+                            url={assets.icons.logo}
+                            width={24}
+                            height={24}
+                            display="block"
+                        ></i-image>
+                        <i-label caption="Section"></i-label>
+                    </i-vstack>
+                </i-vstack>
                 <i-scom-page-builder-collapse title="Components" border={{ bottom: { width: 1, style: 'solid', color: Theme.divider } }} expanded={true}>
                     <i-grid-layout
                         id="componentsStack"

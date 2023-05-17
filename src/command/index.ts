@@ -1,4 +1,4 @@
-export { ElementCommand } from './add';
+export { UpdateRowCommand } from './updateRow';
 export { UpdateColorCommand } from './updateColor';
 export { CommandHistory, commandHistory } from './history';
 export { MoveElementCommand } from './moveRow';

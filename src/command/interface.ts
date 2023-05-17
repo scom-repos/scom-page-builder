@@ -1,5 +1,5 @@
 export interface ICommand {
-  execute(): void;
+  execute(): any;
   undo(): void;
   redo(): void;
 }

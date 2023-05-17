@@ -4,11 +4,11 @@ export class CommandHistory {
   private commands: ICommand[] = [];
   private currentCommandIndex = -1;
 
-  execute(command: ICommand): void {
+  async execute(command: ICommand): Promise<void> {
     this.commands = this.commands.slice(0, this.currentCommandIndex + 1);
     this.commands.push(command);
     this.currentCommandIndex++;
-    command.execute();
+    await command.execute();
   }
 
   undo(): void {

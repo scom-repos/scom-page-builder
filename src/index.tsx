@@ -9,6 +9,7 @@ import { currentTheme } from './theme/index';
 import { generateUUID } from './utility/index';
 import { setRootDir as _setRootDir } from './store/index';
 import './index.css';
+import { AddElementCommand, commandHistory } from './command/index';
 
 const Theme = currentTheme;
 
@@ -36,7 +37,6 @@ export default class Editor extends Module {
         this.getData = this.getData.bind(this);
         this.setData = this.setData.bind(this);
         this.initEventBus();
-        this.initEventListener();
     }
 
     init() {
@@ -54,7 +54,7 @@ export default class Editor extends Module {
     getData() {
         return {
             // header: pageObject.header,
-            sections: pageObject.sections.filter(section => section.elements && section.elements.length),
+            sections: pageObject.sections, // TODO: filter(section => section.elements && section.elements.length),
             footer: pageObject.footer
         }
     }
@@ -80,35 +80,6 @@ export default class Editor extends Module {
         });
         application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => { })
         application.EventBus.register(this, EVENT.ON_UPDATE_FOOTER, async () => this.onUpdateWrapper())
-    }
-
-    private initEventListener() {
-        const self = this;
-        document.addEventListener('drag', function (event) {});
-        document.addEventListener('dragend', function (event) {
-            const target = event.target as Control;
-            setDragData(null);
-            const pnlRow = target.closest('ide-row') as PageRow;
-            if (pnlRow) pnlRow.removeDottedLines();
-        })
-        document.addEventListener('dragenter', function (event) {
-            const target = event.target as Control;
-            const pnlRow = target.closest('ide-row') as PageRow;
-            if (pnlRow) pnlRow.addDottedLines();
-        })
-        document.addEventListener('dragover', function (event) {
-            event.preventDefault();
-        })
-        document.addEventListener('drop', function (event) {
-            const target = event.target as Control;
-            if (target.id !== 'contentWrapper' && !target.closest('#contentWrapper')) return;
-            const rows = self.pageRows.getRows();
-            const isEmptyPage = rows.every(row => !row.elements?.length);
-            if (isEmptyPage) {
-                const data = getDragData();
-                data && self.onAddRow(data);
-            }
-        })
     }
 
     private async onAddRow(data: IElementConfig) {
