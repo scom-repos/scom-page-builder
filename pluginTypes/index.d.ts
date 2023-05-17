@@ -1277,6 +1277,7 @@ declare module "@scom/scom-page-builder" {
         private pageRows;
         private builderFooter;
         private contentWrapper;
+        private events;
         constructor(parent?: Container, options?: any);
         init(): void;
         setRootDir(value: string): void;
@@ -1285,6 +1286,7 @@ declare module "@scom/scom-page-builder" {
             footer: import("@scom/scom-page-builder/interface/siteData.ts").IPageFooter;
         };
         setData(value: IPageData): Promise<void>;
+        onHide(): void;
         initEventBus(): void;
         private onAddRow;
         private onUpdateWrapper;
