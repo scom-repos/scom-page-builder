@@ -31,6 +31,7 @@ export default class Editor extends Module {
     private pageRows: PageRows;
     // private builderHeader: BuilderHeader;
     private builderFooter: BuilderFooter;
+    private events: any[] = [];
 
     constructor(parent?: Container, options?: any) {
         super(parent, options);
@@ -73,13 +74,20 @@ export default class Editor extends Module {
         }
     }
 
+    onHide() {
+        for (let event of this.events) {
+            event.unregister();
+        }
+        this.events = [];
+    };
+
     initEventBus() {
-        application.EventBus.register(this, EVENT.ON_ADD_ELEMENT, (data: IElementConfig) => {
+        this.events.push(application.EventBus.register(this, EVENT.ON_ADD_ELEMENT, (data: IElementConfig) => {
             if (!data) return;
             this.onAddRow(data);
-        });
-        application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => { })
-        application.EventBus.register(this, EVENT.ON_UPDATE_FOOTER, async () => this.onUpdateWrapper())
+        }));
+        this.events.push(application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => { }))
+        this.events.push(application.EventBus.register(this, EVENT.ON_UPDATE_FOOTER, async () => this.onUpdateWrapper()));
     }
 
     private async onAddRow(data: IElementConfig) {

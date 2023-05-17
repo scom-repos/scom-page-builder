@@ -5286,6 +5286,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
     let Editor = class Editor extends components_35.Module {
         constructor(parent, options) {
             super(parent, options);
+            this.events = [];
             this.getData = this.getData.bind(this);
             this.setData = this.setData.bind(this);
             this.initEventBus();
@@ -5320,14 +5321,21 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 console.log('setdata', error);
             }
         }
+        onHide() {
+            for (let event of this.events) {
+                event.unregister();
+            }
+            this.events = [];
+        }
+        ;
         initEventBus() {
-            components_35.application.EventBus.register(this, index_67.EVENT.ON_ADD_ELEMENT, (data) => {
+            this.events.push(components_35.application.EventBus.register(this, index_67.EVENT.ON_ADD_ELEMENT, (data) => {
                 if (!data)
                     return;
                 this.onAddRow(data);
-            });
-            components_35.application.EventBus.register(this, index_67.EVENT.ON_UPDATE_SECTIONS, async () => { });
-            components_35.application.EventBus.register(this, index_67.EVENT.ON_UPDATE_FOOTER, async () => this.onUpdateWrapper());
+            }));
+            this.events.push(components_35.application.EventBus.register(this, index_67.EVENT.ON_UPDATE_SECTIONS, async () => { }));
+            this.events.push(components_35.application.EventBus.register(this, index_67.EVENT.ON_UPDATE_FOOTER, async () => this.onUpdateWrapper()));
         }
         async onAddRow(data) {
             const { type, module, prependId } = data;
