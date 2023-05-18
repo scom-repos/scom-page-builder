@@ -610,14 +610,17 @@ declare module "@scom/scom-page-builder/command/removeToolbar.ts" {
 declare module "@scom/scom-page-builder/command/updateType.ts" {
     import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
     import { Control } from "@ijstech/components";
+    import { IElementConfig } from "@scom/scom-page-builder/interface/index.ts";
     export class UpdateTypeCommand implements ICommand {
         private element;
         private dropElm;
         private oldDataRow;
         private data;
         private oldDropData;
-        constructor(element: any, dropElm: Control);
+        private config;
+        constructor(dropElm: Control, element?: any, config?: IElementConfig);
         private getElements;
+        private get isNew();
         execute(): void;
         undo(): void;
         redo(): void;
@@ -632,10 +635,10 @@ declare module "@scom/scom-page-builder/command/addElement.ts" {
         private parent;
         private dropElm;
         private data;
-        private sectionId;
         private isAppend;
         private oldDataColumnMap;
-        constructor(data: any, isAppend: boolean, dropElm?: Control, parent?: any, sectionId?: string);
+        private oldId;
+        constructor(data: any, isAppend: boolean, dropElm?: Control, parent?: any);
         private get isNew();
         private updateData;
         private getNewColumn;
@@ -1110,6 +1113,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         onMoveDown(): void;
         private renderFixedGrid;
         private initEventListeners;
+        private getNewElementData;
         addDottedLines(): void;
         removeDottedLines(): void;
         private setActive;
@@ -1204,8 +1208,9 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
         getPageBlocks(): Promise<IPageBlockData[]>;
         private renderComponentList;
         private renderMircoDAppList;
-        private initEventListeners;
         private renderChartList;
+        private initDrag;
+        private initEventListeners;
         render(): any;
     }
 }
@@ -1337,6 +1342,8 @@ declare module "@scom/scom-page-builder" {
     export default class Editor extends Module {
         private pageRows;
         private builderFooter;
+        private pageContent;
+        private pnlWrap;
         private events;
         constructor(parent?: Container, options?: any);
         init(): void;

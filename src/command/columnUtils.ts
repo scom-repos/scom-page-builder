@@ -114,6 +114,8 @@ const getAppendColumnData = (dropElm: Control, sortedSections: HTMLElement[], up
         const nextPos = getColumn(el) - getColumnSpan(nextElm);
         if (getColumn(nextElm) !== nextPos && nextPos !== getNextColumn(dropSection)) {
           updateData(nextElm, pageRowId, nextPos);
+        } else if (getColumn(nextElm) === nextPos && nextPos === getNextColumn(dropSection)) {
+          updateData(nextElm, pageRowId, nextPos + newElColSpan);
         }
         updateData(el, pageRowId, getColumn(el) + columnSpan, newElColSpan);
         newColumn = getNextColumn(dropSection);

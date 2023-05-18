@@ -1,15 +1,14 @@
-import { application, Container, Control, ControlElement, customElements, customModule, Module } from '@ijstech/components';
+import { application, Container, ControlElement, customElements, customModule, Module, Panel } from '@ijstech/components';
 import { } from '@ijstech/eth-contract'
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
 import { IPageData, IElementConfig } from './interface/index';
-import { PageRow, PageRows } from './page/index';
-import { getDragData, pageObject, setDragData } from './store/index';
+import { PageRows } from './page/index';
+import { pageObject } from './store/index';
 import { currentTheme } from './theme/index';
 import { generateUUID } from './utility/index';
 import { setRootDir as _setRootDir } from './store/index';
 import './index.css';
-import { AddElementCommand, commandHistory } from './command/index';
 
 const Theme = currentTheme;
 
@@ -31,6 +30,8 @@ export default class Editor extends Module {
     private pageRows: PageRows;
     // private builderHeader: BuilderHeader;
     private builderFooter: BuilderFooter;
+    private pageContent: Panel;
+    private pnlWrap: Panel;
     private events: any[] = [];
 
     constructor(parent?: Container, options?: any) {
@@ -42,10 +43,19 @@ export default class Editor extends Module {
 
     init() {
         const rootDir = this.getAttribute('rootDir', true);
-        if (rootDir) {
-            this.setRootDir(rootDir);
-        }
+        if (rootDir) this.setRootDir(rootDir);
         super.init();
+        const self = this;
+        document.addEventListener('dragenter', function (event) {
+            event.preventDefault();
+            const { top, height } = self.pnlWrap.getBoundingClientRect();
+            if (event.clientY < top) {
+                self.pageContent.scrollBy(0, -10);
+            }
+            if (event.clientY > height) {
+                self.pageContent.scrollBy(0, 10);
+            }
+        });
     }
 
     setRootDir(value: string) {
@@ -146,7 +156,7 @@ export default class Editor extends Module {
 
     render() {
         return (
-            <i-vstack id="editor" width={'100%'} height={'100%'}>
+            <i-vstack id="editor" width={'100%'} height={'100%'} overflow={"hidden"}>
                 <ide-header
                     id={'pageHeader'}
                     border={{ bottom: { width: 1, style: 'solid', color: '#dadce0' } }}
@@ -154,9 +164,11 @@ export default class Editor extends Module {
                 <i-grid-layout
                     templateColumns={['auto', '400px']}
                     autoFillInHoles={true}
-                    height="100%"
+                    height="calc(100% -64px)"
+                    overflow={{y: 'auto'}}
                 >
                     <i-panel
+                        id="pnlWrap"
                         class="main-content"
                         height="100%"
                         overflow={{ y: 'auto' }}

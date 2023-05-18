@@ -27,6 +27,7 @@ import {
     MIN_COLUMN
 } from '../command/index';
 import { IDEToolbar } from '../common/index';
+import { generateUUID } from '../utility/index';
 const Theme = Styles.Theme.ThemeVars;
 
 declare global {
@@ -287,6 +288,10 @@ export class PageRow extends Module {
             }
         }
 
+        function updateClass(el: Control, value: boolean) {
+
+        }
+
         document.addEventListener('mousemove', (e) => {
             if (!this.isResizing || !toolbar) return;
             const deltaX = e.clientX - startX;
@@ -396,13 +401,14 @@ export class PageRow extends Module {
                     const toolbar = eventTarget.closest('ide-toolbar') as Control;
                     if (toolbar) {
                         const { y, height} = toolbar.getBoundingClientRect();
-                        if (Math.ceil(event.clientY) >= Math.ceil(y + height) - 2) {
-                            const bottomBlock = toolbar.querySelector('.bottom-block') as Control;
-                            if (bottomBlock) {
-                                bottomBlock.visible = true;
+                        const bottomBlock = toolbar.querySelector('.bottom-block') as Control;
+                        if (bottomBlock) {
+                            bottomBlock.visible = Math.ceil(event.clientY) >= Math.ceil(y + height) - 2;
+                            if (bottomBlock.visible) {
                                 bottomBlock.classList.add('is-dragenter');
-                                return;
-                            }  
+                            } else {
+                                bottomBlock.classList.remove('is-dragenter');
+                            }
                         }
                     }
 
@@ -417,20 +423,29 @@ export class PageRow extends Module {
                         (nextElm) ||
                         (curElmCol + curElmColSpan === MAX_COLUMN + 1);
                     if (showHiddenBlock) {
-                        const { left, width } = section.getBoundingClientRect();
+                        const { left, right } = section.getBoundingClientRect();
                         const backBlock = section.querySelector('.back-block') as Control;
                         const frontBlock = section.querySelector('.front-block') as Control;
+
                         if (backBlock) {
-                            backBlock.visible = event.clientX > Math.floor(width / 2);
+                            backBlock.visible = Math.abs(event.clientX - right) <= 15;
+                            if (backBlock.visible) {
+                                backBlock.classList.add('is-dragenter');
+                            } else {
+                                backBlock.classList.remove('is-dragenter');
+                            }
                         }
+
                         if (frontBlock) {
                             frontBlock.visible = Math.abs(event.clientX - left) <= 15  && curElmCol === 1;
-                            frontBlock.classList.add('is-dragenter');
+                            if (frontBlock.visible) {
+                                frontBlock.classList.add('is-dragenter');
+                            } else {
+                                frontBlock.classList.remove('is-dragenter');
+                            }
                         }
                     }
                 }
-                const backBlock = eventTarget.closest('.back-block') as Control;
-                backBlock && backBlock.classList.add('is-dragenter');
             }
         });
 
@@ -448,10 +463,15 @@ export class PageRow extends Module {
                     (rectangle as Control).style.display = 'none';
                 }
             } else {
-                let backBlocks = document.getElementsByClassName('is-dragenter');
-                for (const block of backBlocks) {
-                    (block as Control).visible = false;
-                    block.classList.remove('is-dragenter');
+                const backBlock = eventTarget.closest('.back-block') as Control;
+                if (backBlock) {
+                    backBlock.visible = false;
+                    backBlock.classList.remove('is-dragenter');
+                }
+                const bottomBlock = eventTarget.closest('.bottom-block') as Control;
+                if (bottomBlock) {
+                    bottomBlock.visible = false;
+                    bottomBlock.classList.remove('is-dragenter');
                 }
             }
         });
@@ -491,8 +511,7 @@ export class PageRow extends Module {
                     const dragCmd = new DragElementCommand(self.currentElement, nearestFixedItem);
                     commandHistory.execute(dragCmd);
                 } else if (getDragData()) {
-                    const elementConfig = {...(getDragData() || {})};
-                    const dragCmd = new AddElementCommand(elementConfig, true, nearestFixedItem, null, prependId);
+                    const dragCmd = new AddElementCommand(self.getNewElementData(), true, nearestFixedItem);
                     commandHistory.execute(dragCmd);
                 }
                 self.isDragging = false;
@@ -508,25 +527,14 @@ export class PageRow extends Module {
                     self.isDragging = true;
                     dropElm.classList.remove('is-dragenter');
                     const isBottomBlock = dropElm.classList.contains('bottom-block');
-                    // TODO: Fix bottom block
-                    if (getDragData()) {
-                        const elementConfig = {...(getDragData() || {})};
-                        if (isBottomBlock) { 
-                            const prependId = eventTarget.closest('ide-row')?.id || '';
-                            const prependIndex = pageObject.sections.findIndex(section => section.id === prependId.replace('row-', ''));
-                            application.EventBus.dispatch(EVENT.ON_ADD_ELEMENT, {
-                                ...elementConfig,
-                                prependId : prependIndex === pageObject.sections.length - 1 ? '' : prependId}
-                            );
-                        } else {
-                            const sectionId = eventTarget.closest('ide-section')?.id || '';
-                            const isAppend = dropElm.classList.contains('back-block');
-                            const dragCmd = new AddElementCommand(elementConfig, isAppend, dropElm, null, sectionId);
-                            commandHistory.execute(dragCmd);
-                        }
+                    if (isBottomBlock) {
+                        const dragCmd = new UpdateTypeCommand(dropElm, getDragData() ? null : self.currentElement, getDragData());
+                        commandHistory.execute(dragCmd);
                     } else {
-                        if (isBottomBlock) {
-                            const dragCmd = new UpdateTypeCommand(self.currentElement, dropElm);
+                        if (getDragData()) {
+                            // const sectionId = eventTarget.closest('ide-section')?.id || '';
+                            const isAppend = dropElm.classList.contains('back-block');
+                            const dragCmd = new AddElementCommand(self.getNewElementData(), isAppend, dropElm, null);
                             commandHistory.execute(dragCmd);
                         } else {
                             const dragCmd = new DragElementCommand(self.currentElement, dropElm);
@@ -535,13 +543,22 @@ export class PageRow extends Module {
                     }
                     self.isDragging = false;
                 } else if (pageRow && elementConfig && !self.isDragging) {
+                    const parentId = pageRow?.id.replace('row-', '');
+                    const elements = parentId ? pageObject.getRow(parentId)?.elements || [] : [];
+                    if (elements.length) return;
                     self.isDragging = true
-                    const dragCmd = new AddElementCommand(elementConfig, true, null, pageRow);
+                    const dragCmd = new AddElementCommand(self.getNewElementData(), true, null, pageRow);
                     await commandHistory.execute(dragCmd);
                     self.isDragging = false;
                 }
             }
         });
+    }
+
+    private getNewElementData() {
+        const elementConfig = {...(getDragData() || {})};
+        const id = generateUUID();
+        return {...elementConfig, id};
     }
 
     addDottedLines() {

@@ -8,7 +8,7 @@ import {
     VStack,
     application,
 } from '@ijstech/components';
-import { getDragData, getRootDir, setDragData, setPageBlocks } from '../store/index';
+import { getRootDir, setDragData, setPageBlocks } from '../store/index';
 import { EVENT } from '../const/index';
 import { ElementType, IPageBlockData } from '../interface/index';
 // import { Collapse } from '../common/index';
@@ -82,13 +82,12 @@ export class PageSidebar extends Module {
         for (const module of matchedModules) {
             const moduleCard = (
                 <i-vstack
-                    class="text-center pointer"
+                    class="text-center pointer builder-item"
                     verticalAlignment="center"
                     horizontalAlignment="center"
                     minWidth={88}
                     height="5rem"
                     gap="0.5rem"
-                    // onClick={() => this.onAddComponent(module, ElementType.PRIMITIVE)}
                 >
                     <i-image
                         url={module.imgUrl || assets.icons.logo}
@@ -100,9 +99,7 @@ export class PageSidebar extends Module {
                 </i-vstack>
             );
             this.componentsStack.append(moduleCard);
-            moduleCard.setAttribute('draggable', true);
-            moduleCard.setAttribute('data-type', ElementType.PRIMITIVE);
-            moduleCard.setAttribute('data-name', module.name);
+            this.initDrag(moduleCard, module);
         }
     }
 
@@ -117,8 +114,7 @@ export class PageSidebar extends Module {
                     verticalAlignment="center"
                     gap="1rem"
                     padding={{ left: '1rem', right: '1rem' }}
-                    class="pointer"
-                    // onClick={() => this.onAddComponent(module, ElementType.PRIMITIVE)}
+                    class="pointer builder-item"
                 >
                     <i-image
                         url={module.imgUrl || assets.icons.logo}
@@ -130,31 +126,8 @@ export class PageSidebar extends Module {
                 </i-hstack>
             );
             this.microDAppsStack.append(moduleCard);
-            moduleCard.setAttribute('draggable', true);
-            moduleCard.setAttribute('data-type', ElementType.PRIMITIVE);
-            moduleCard.setAttribute('data-name', module.name);
+            this.initDrag(moduleCard, module);
         }
-    }
-
-    private initEventListeners() {
-        const self = this;
-        this.addEventListener('dragstart', function (event) {
-            event.stopPropagation();
-            const eventTarget = event.target as Control;
-            if (eventTarget.nodeName === 'IMG') event.preventDefault();
-            if (eventTarget.id === 'sectionStack') {
-                application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
-            }
-            else {
-                const currentName = eventTarget.dataset.name;
-                const type = eventTarget.dataset.type as ElementType;
-                const module = self.pageBlocks.find(block => block.name === currentName);
-                if (module && type) {
-                    application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, eventTarget);
-                    setDragData({ module, type });
-                }
-            }
-        })
     }
 
     private async renderChartList() {
@@ -168,8 +141,7 @@ export class PageSidebar extends Module {
                     verticalAlignment="center"
                     gap="1rem"
                     padding={{ left: '1rem', right: '1rem' }}
-                    class="pointer"
-                    // onClick={() => this.onAddComponent(module, ElementType.PRIMITIVE)}
+                    class="pointer builder-item"
                 >
                     <i-panel>
                         <i-image
@@ -183,7 +155,35 @@ export class PageSidebar extends Module {
                 </i-hstack>
             );
             this.chartsStack.append(moduleCard);
+            this.initDrag(moduleCard, module);
         }
+    }
+
+    private initDrag(module: Control, data: IPageBlockData) {
+        module.setAttribute('draggable', 'true');
+        module.setAttribute('data-type', ElementType.PRIMITIVE);
+        module.setAttribute('data-name', data.name);
+    }
+
+    private initEventListeners() {
+        const self = this;
+        this.addEventListener('dragstart', function (event) {
+            event.stopPropagation();
+            const eventTarget = event.target as Control;
+            if (eventTarget.nodeName === 'IMG' || !eventTarget.closest('.builder-item'))
+                event.preventDefault();
+            if (eventTarget.id === 'sectionStack')
+                application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
+            else {
+                const currentName = eventTarget.dataset.name;
+                const type = eventTarget.dataset.type as ElementType;
+                const module = self.pageBlocks.find(block => block.name === currentName);
+                if (module && type) {
+                    application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, eventTarget);
+                    setDragData({ module, type });
+                }
+            }
+        })
     }
 
     render() {
@@ -194,7 +194,7 @@ export class PageSidebar extends Module {
                 >
                     <i-vstack
                         id="sectionStack"
-                        class="text-center pointer"
+                        class="text-center pointer builder-item"
                         verticalAlignment="center"
                         horizontalAlignment="center"
                         height="5rem" width="100%"

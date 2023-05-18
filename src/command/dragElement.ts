@@ -42,6 +42,7 @@ export class DragElementCommand implements ICommand {
   }
 
   execute(): void {
+    this.element = document.getElementById(`${this.element.id}`) as Control;
     this.dropElm.style.border = "";
     const grid = this.dropElm.closest('.grid') as Control;
     if (!grid) return;
@@ -59,7 +60,7 @@ export class DragElementCommand implements ICommand {
     const elementRowId = (elementRow?.id || '').replace('row-', '');
     pageObject.setElement(elementRowId, this.element.id, {...newColumnData});
 
-    if (!elementRow.isEqualNode(dropRow)) {
+    if (elementRow && !elementRow.isEqualNode(dropRow)) {
       pageObject.addElement(dropRowId, {...this.data, ...newColumnData});
       pageObject.removeElement(elementRowId, this.element.id);
       grid.appendChild(this.element);

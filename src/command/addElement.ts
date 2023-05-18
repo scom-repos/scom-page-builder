@@ -1,7 +1,6 @@
 import { Control } from "@ijstech/components";
 import { pageObject } from "../store/index";
-import { ICommand, MIN_COLUMN } from "./interface";
-import { generateUUID } from "../utility/index";
+import { ICommand } from "./interface";
 import { getColumn, getColumnSpan, getNextColumn, resetColumnData, updateColumnData, getDropColumnData, getAppendColumnData } from "./columnUtils";
 
 export class AddElementCommand implements ICommand {
@@ -9,21 +8,21 @@ export class AddElementCommand implements ICommand {
   private parent: any;
   private dropElm: Control;
   private data: any
-  private sectionId: string = '';
   private isAppend: boolean = true;
   private oldDataColumnMap: any[] = [];
+  private oldId: string = '';
 
-  constructor(data: any, isAppend: boolean, dropElm?: Control, parent?: any, sectionId?: string) {
+  constructor(data: any, isAppend: boolean, dropElm?: Control, parent?: any) {
     this.data = JSON.parse(JSON.stringify(data));
     this.dropElm = dropElm;
     this.parent = parent || dropElm.closest('ide-row');
-    this.sectionId = sectionId || '';
     this.isAppend = isAppend;
     this.updateData = this.updateData.bind(this);
+    this.oldId = this.data.id;
   }
 
   private get isNew() {
-    return this.isAppend && !this.sectionId && !this.dropElm;
+    return this.isAppend && !this.dropElm;
   }
 
   private updateData(el: Control, rowId: string, column?: number, columnSpan?: number) {
@@ -35,9 +34,9 @@ export class AddElementCommand implements ICommand {
   }
 
   private getNewColumn(oldDropColumn: number) {
-    const dropSection = document.getElementById(`${this.sectionId}`) as Control;
-    if (!dropSection) return oldDropColumn;
-    return this.isAppend ? getNextColumn(dropSection) : oldDropColumn;
+    // const dropSection = document.getElementById(`${this.sectionId}`) as Control;
+    // if (!dropSection) return oldDropColumn;
+    return this.isAppend ? getNextColumn(this.dropElm) : oldDropColumn;
   }
 
   // private getColumnData() {
@@ -124,7 +123,6 @@ export class AddElementCommand implements ICommand {
     const sections = Array.from(grid?.querySelectorAll('ide-section'));
     const sortedSections = sections.sort((a: HTMLElement, b: HTMLElement) => Number(b.dataset.column) - Number(a.dataset.column));
     const dropElmCol = Number(this.dropElm.getAttribute('data-column'));
-    // const sectionFromStore = this.parent?.id ? (pageObject.getRow(this.parent.id)?.elements || []) : [];
     return isNaN(dropElmCol) ?
       getAppendColumnData(this.dropElm, sortedSections as HTMLElement[], this.updateData) :
       getDropColumnData(this.dropElm, sortedSections as HTMLElement[]);
@@ -143,7 +141,7 @@ export class AddElementCommand implements ICommand {
 
     const isMicroDapps= this.data?.module?.category === 'micro-dapps';
     const newElData = {
-      id: generateUUID(),
+      id: this.oldId,
       column,
       columnSpan,
       type: this.data.type,
@@ -155,7 +153,7 @@ export class AddElementCommand implements ICommand {
     };
     this.element = await this.parent.addElement(newElData);
     const parentId = this.parent.id.replace('row-', '');
-    pageObject.addElement(parentId, this.element.data || newElData);
+    pageObject.addElement(parentId, newElData);
   }
 
   undo(): void {
