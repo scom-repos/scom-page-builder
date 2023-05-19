@@ -61,7 +61,6 @@ const getDropColumnData = (dropElm: Control, sortedSections: HTMLElement[], elem
       newColumnSpan = afterColumn - newColumn;
   }
   const finalColumnSpan = Math.max(Math.min(newColumnSpan, MAX_COLUMN - currentSpan), 1);
-  // console.log(newColumnSpan, MAX_COLUMN - currentSpan)
   return { column: newColumn, columnSpan: finalColumnSpan };
 }
 
@@ -69,11 +68,11 @@ const getNewColumn = (dropSection: Control, oldDropColumn: number, isAppend: boo
   return isAppend ? getNextColumn(dropSection) : oldDropColumn;
 }
 
-const getAppendColumnData = (dropElm: HTMLElement, sortedSections: HTMLElement[], updateData: any, element?: Control, isAppend: boolean = true) => {
-  const dropSection = dropElm.closest('ide-section') as Control;
-  if (!dropSection) return null;
-
-  const pageRow = dropElm.closest('ide-row') as Control;
+const getAppendColumnData = (dropElm: Control, sortedSections: HTMLElement[], updateData: any, element?: Control, isAppend: boolean = true) => {
+  let dropSection = dropElm.closest('ide-section') as Control;
+  if (!dropSection?.id) return null;
+  dropSection = document.getElementById(`${dropSection.id}`) as Control;
+  const pageRow = dropSection.closest('ide-row') as Control;
   const pageRowId = (pageRow?.id || '').replace('row-', '');
   const oldDropColumn = getColumn(dropSection);
   let newColumn = getNewColumn(dropSection, oldDropColumn, isAppend);
@@ -107,16 +106,15 @@ const getAppendColumnData = (dropElm: HTMLElement, sortedSections: HTMLElement[]
       const newElColSpan = getColumnSpan(el) - columnSpan;
       if (getColumn(dropSection) < getColumn(el)) {
         updateData(el, pageRowId, getColumn(el) + columnSpan, newElColSpan);
-        if (!isAppend) {
-          // console.log(dropSection, document.getElementById(`${dropSection.id}`))
-          updateData(dropSection, pageRowId, getColumn(dropSection) + columnSpan);
-        }
         if (nextElm) {
           for (let j = i + 1; j < sortedSections.length; j++) {
             const elm = sortedSections[j] as Control;
             if (getColumn(elm) < getNextColumn(dropSection)) break;
             updateData(elm, pageRowId, getColumn(elm) + columnSpan);
           }
+        }
+        if (!isAppend) {
+          updateData(dropSection, pageRowId, getColumn(dropSection) + columnSpan);
         }
         newColumn = getNewColumn(dropSection, oldDropColumn, isAppend);
       } else if (getColumn(dropSection) > getColumn(el)) {

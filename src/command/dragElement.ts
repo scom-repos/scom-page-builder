@@ -1,4 +1,4 @@
-import { ICommand, IDataColumn, MAX_COLUMN, MIN_COLUMN } from "./interface";
+import { ICommand, IDataColumn } from "./interface";
 import { pageObject } from "../store/index";
 import { Control } from "@ijstech/components";
 import { getAppendColumnData, getColumn, getColumnSpan, getDropColumnData, updateColumnData } from "./columnUtils";
@@ -27,49 +27,59 @@ export class DragElementCommand implements ICommand {
   private updateData(el: Control, rowId: string, column?: number, columnSpan?: number) {
     if (!column && !columnSpan) return;
     const oldColumnData = {el, rowId, column: getColumn(el), columnSpan: getColumnSpan(el)};
-    this.oldDataColumnMap.push(oldColumnData);
+    const hasItem = this.oldDataColumnMap.find(data => data.el.id === el.id);
+    !hasItem && this.oldDataColumnMap.push(oldColumnData);
     const col = column || getColumn(el);
     const colSpan = columnSpan || getColumnSpan(el);
     updateColumnData(el, rowId, col, colSpan);
   }
 
   private getColumnData() {
-    const grid = this.dropElm.closest('.grid');
-    const sections = Array.from(grid?.querySelectorAll('ide-section'));
+    const grid = this.dropElm.closest('.grid') as Control;
+    const sections = grid ? Array.from(grid.querySelectorAll('ide-section')) : [];
     const sortedSections = sections.sort((a: HTMLElement, b: HTMLElement) => Number(b.dataset.column) - Number(a.dataset.column));
-    const dropElmCol = Number(this.dropElm.getAttribute('data-column'));
+    const dropElmCol = Number(this.dropElm.dataset.column);
     return isNaN(dropElmCol) ?
       getAppendColumnData(this.dropElm, sortedSections as HTMLElement[], this.updateData, this.element) :
-      getDropColumnData(this.dropElm, sortedSections as HTMLElement[]);
+      getDropColumnData(this.dropElm, sortedSections as HTMLElement[], this.element);
   }
 
   execute(): void {
     this.element = document.getElementById(`${this.element.id}`) as Control;
+    if (!this.element) return;
     this.dropElm.style.border = "";
-    const grid = this.dropElm.closest('.grid') as Control;
-    if (!grid) return;
-    const newColumnData = this.getColumnData();
-    if (!newColumnData) return;
+    let column = 1;
+    let columnSpan = Number(this.element.dataset.columnSpan);
 
+    let grid = this.dropElm.closest('.grid') as Control;
+    if (grid) {
+      const columnData = this.getColumnData();
+      if (!columnData) return;
+      column = columnData.column;
+      columnSpan = columnData.columnSpan;
+    }
+  
     this.element.style.gridRow = '1';
-    this.element.style.gridColumn = `${newColumnData.column} / span ${newColumnData.columnSpan}`;
-    this.element.setAttribute('data-column', `${newColumnData.column}`);
-    this.element.setAttribute('data-column-span', `${newColumnData.columnSpan}`);
+    this.element.style.gridColumn = `${column} / span ${columnSpan}`;
+    this.element.setAttribute('data-column', `${column}`);
+    this.element.setAttribute('data-column-span', `${columnSpan}`);
 
     const elementRow = this.element.closest('ide-row') as Control;
     const dropRow = this.dropElm.closest('ide-row') as Control;
     const dropRowId = (dropRow?.id || '').replace('row-', '');
     const elementRowId = (elementRow?.id || '').replace('row-', '');
-    pageObject.setElement(elementRowId, this.element.id, {...newColumnData});
+    pageObject.setElement(elementRowId, this.element.id, {column, columnSpan});
 
     if (elementRow && !elementRow.isEqualNode(dropRow)) {
-      pageObject.addElement(dropRowId, {...this.data, ...newColumnData});
+      pageObject.addElement(dropRowId, {...this.data, column, columnSpan});
       pageObject.removeElement(elementRowId, this.element.id);
+      grid = grid || this.dropElm.querySelector('.grid');
       grid.appendChild(this.element);
       const toolbar = this.element.querySelector('ide-toolbar') as any;
       if (toolbar) toolbar.rowId = dropRowId;
       this.element.rowId = dropRowId;
       this.element.parent = grid;
+      (dropRow as any).toggleUI(true);
     }
     const elementSection = pageObject.getRow(elementRowId);
     elementRow.visible = !!elementSection?.elements?.length;

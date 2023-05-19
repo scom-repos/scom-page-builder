@@ -1346,7 +1346,6 @@ define("@scom/scom-page-builder/command/columnUtils.ts", ["require", "exports", 
                 newColumnSpan = afterColumn - newColumn;
         }
         const finalColumnSpan = Math.max(Math.min(newColumnSpan, interface_2.MAX_COLUMN - currentSpan), 1);
-        // console.log(newColumnSpan, MAX_COLUMN - currentSpan)
         return { column: newColumn, columnSpan: finalColumnSpan };
     };
     exports.getDropColumnData = getDropColumnData;
@@ -1354,10 +1353,11 @@ define("@scom/scom-page-builder/command/columnUtils.ts", ["require", "exports", 
         return isAppend ? getNextColumn(dropSection) : oldDropColumn;
     };
     const getAppendColumnData = (dropElm, sortedSections, updateData, element, isAppend = true) => {
-        const dropSection = dropElm.closest('ide-section');
-        if (!dropSection)
+        let dropSection = dropElm.closest('ide-section');
+        if (!(dropSection === null || dropSection === void 0 ? void 0 : dropSection.id))
             return null;
-        const pageRow = dropElm.closest('ide-row');
+        dropSection = document.getElementById(`${dropSection.id}`);
+        const pageRow = dropSection.closest('ide-row');
         const pageRowId = ((pageRow === null || pageRow === void 0 ? void 0 : pageRow.id) || '').replace('row-', '');
         const oldDropColumn = getColumn(dropSection);
         let newColumn = getNewColumn(dropSection, oldDropColumn, isAppend);
@@ -1391,10 +1391,6 @@ define("@scom/scom-page-builder/command/columnUtils.ts", ["require", "exports", 
                 const newElColSpan = getColumnSpan(el) - columnSpan;
                 if (getColumn(dropSection) < getColumn(el)) {
                     updateData(el, pageRowId, getColumn(el) + columnSpan, newElColSpan);
-                    if (!isAppend) {
-                        // console.log(dropSection, document.getElementById(`${dropSection.id}`))
-                        updateData(dropSection, pageRowId, getColumn(dropSection) + columnSpan);
-                    }
                     if (nextElm) {
                         for (let j = i + 1; j < sortedSections.length; j++) {
                             const elm = sortedSections[j];
@@ -1402,6 +1398,9 @@ define("@scom/scom-page-builder/command/columnUtils.ts", ["require", "exports", 
                                 break;
                             updateData(elm, pageRowId, getColumn(elm) + columnSpan);
                         }
+                    }
+                    if (!isAppend) {
+                        updateData(dropSection, pageRowId, getColumn(dropSection) + columnSpan);
                     }
                     newColumn = getNewColumn(dropSection, oldDropColumn, isAppend);
                 }
@@ -1479,48 +1478,57 @@ define("@scom/scom-page-builder/command/dragElement.ts", ["require", "exports", 
             if (!column && !columnSpan)
                 return;
             const oldColumnData = { el, rowId, column: columnUtils_1.getColumn(el), columnSpan: columnUtils_1.getColumnSpan(el) };
-            this.oldDataColumnMap.push(oldColumnData);
+            const hasItem = this.oldDataColumnMap.find(data => data.el.id === el.id);
+            !hasItem && this.oldDataColumnMap.push(oldColumnData);
             const col = column || columnUtils_1.getColumn(el);
             const colSpan = columnSpan || columnUtils_1.getColumnSpan(el);
             columnUtils_1.updateColumnData(el, rowId, col, colSpan);
         }
         getColumnData() {
             const grid = this.dropElm.closest('.grid');
-            const sections = Array.from(grid === null || grid === void 0 ? void 0 : grid.querySelectorAll('ide-section'));
+            const sections = grid ? Array.from(grid.querySelectorAll('ide-section')) : [];
             const sortedSections = sections.sort((a, b) => Number(b.dataset.column) - Number(a.dataset.column));
-            const dropElmCol = Number(this.dropElm.getAttribute('data-column'));
+            const dropElmCol = Number(this.dropElm.dataset.column);
             return isNaN(dropElmCol) ?
                 columnUtils_1.getAppendColumnData(this.dropElm, sortedSections, this.updateData, this.element) :
-                columnUtils_1.getDropColumnData(this.dropElm, sortedSections);
+                columnUtils_1.getDropColumnData(this.dropElm, sortedSections, this.element);
         }
         execute() {
             var _a;
             this.element = document.getElementById(`${this.element.id}`);
+            if (!this.element)
+                return;
             this.dropElm.style.border = "";
-            const grid = this.dropElm.closest('.grid');
-            if (!grid)
-                return;
-            const newColumnData = this.getColumnData();
-            if (!newColumnData)
-                return;
+            let column = 1;
+            let columnSpan = Number(this.element.dataset.columnSpan);
+            let grid = this.dropElm.closest('.grid');
+            if (grid) {
+                const columnData = this.getColumnData();
+                if (!columnData)
+                    return;
+                column = columnData.column;
+                columnSpan = columnData.columnSpan;
+            }
             this.element.style.gridRow = '1';
-            this.element.style.gridColumn = `${newColumnData.column} / span ${newColumnData.columnSpan}`;
-            this.element.setAttribute('data-column', `${newColumnData.column}`);
-            this.element.setAttribute('data-column-span', `${newColumnData.columnSpan}`);
+            this.element.style.gridColumn = `${column} / span ${columnSpan}`;
+            this.element.setAttribute('data-column', `${column}`);
+            this.element.setAttribute('data-column-span', `${columnSpan}`);
             const elementRow = this.element.closest('ide-row');
             const dropRow = this.dropElm.closest('ide-row');
             const dropRowId = ((dropRow === null || dropRow === void 0 ? void 0 : dropRow.id) || '').replace('row-', '');
             const elementRowId = ((elementRow === null || elementRow === void 0 ? void 0 : elementRow.id) || '').replace('row-', '');
-            index_8.pageObject.setElement(elementRowId, this.element.id, Object.assign({}, newColumnData));
+            index_8.pageObject.setElement(elementRowId, this.element.id, { column, columnSpan });
             if (elementRow && !elementRow.isEqualNode(dropRow)) {
-                index_8.pageObject.addElement(dropRowId, Object.assign(Object.assign({}, this.data), newColumnData));
+                index_8.pageObject.addElement(dropRowId, Object.assign(Object.assign({}, this.data), { column, columnSpan }));
                 index_8.pageObject.removeElement(elementRowId, this.element.id);
+                grid = grid || this.dropElm.querySelector('.grid');
                 grid.appendChild(this.element);
                 const toolbar = this.element.querySelector('ide-toolbar');
                 if (toolbar)
                     toolbar.rowId = dropRowId;
                 this.element.rowId = dropRowId;
                 this.element.parent = grid;
+                dropRow.toggleUI(true);
             }
             const elementSection = index_8.pageObject.getRow(elementRowId);
             elementRow.visible = !!((_a = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _a === void 0 ? void 0 : _a.length);
@@ -1735,7 +1743,8 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
             if (!column && !columnSpan)
                 return;
             const oldColumnData = { el, rowId, column: columnUtils_2.getColumn(el), columnSpan: columnUtils_2.getColumnSpan(el) };
-            this.oldDataColumnMap.push(oldColumnData);
+            const hasItem = this.oldDataColumnMap.find(data => data.el.id === el.id);
+            !hasItem && this.oldDataColumnMap.push(oldColumnData);
             const col = column || columnUtils_2.getColumn(el);
             const colSpan = columnSpan || columnUtils_2.getColumnSpan(el);
             columnUtils_2.updateColumnData(el, rowId, col, colSpan);
@@ -1746,7 +1755,7 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
             const grid = this.dropElm.closest('.grid') || this.parent;
             const sections = grid ? Array.from(grid.querySelectorAll('ide-section')) : [];
             const sortedSections = sections.sort((a, b) => Number(b.dataset.column) - Number(a.dataset.column));
-            const dropElmCol = Number(this.dropElm.getAttribute('data-column'));
+            const dropElmCol = Number(this.dropElm.dataset.column);
             return isNaN(dropElmCol) ?
                 columnUtils_2.getAppendColumnData(this.dropElm, sortedSections, this.updateData, null, this.isAppend) :
                 columnUtils_2.getDropColumnData(this.dropElm, sortedSections);
@@ -1784,7 +1793,7 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
             this.element.remove();
             const parentId = this.parent.id.replace('row-', '');
             index_14.pageObject.removeElement(parentId, this.element.id);
-            for (let columnData of this.oldDataColumnMap) {
+            for (let columnData of [...this.oldDataColumnMap]) {
                 const { el, rowId, column, columnSpan } = columnData;
                 columnUtils_2.updateColumnData(el, rowId, column, columnSpan);
             }
@@ -3929,8 +3938,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         contentStack.height = newHeight;
                 }
             }
-            function updateClass(el, value) {
-            }
             document.addEventListener('mousemove', (e) => {
                 if (!this.isResizing || !toolbar)
                     return;
@@ -4188,21 +4195,27 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         }
                         self.isDragging = false;
                     }
-                    else if (pageRow && elementConfig && !self.isDragging) {
+                    else if (pageRow && !self.isDragging) {
                         self.isDragging = true;
-                        const parentId = pageRow === null || pageRow === void 0 ? void 0 : pageRow.id.replace('row-', '');
-                        const elements = parentId ? ((_a = index_43.pageObject.getRow(parentId)) === null || _a === void 0 ? void 0 : _a.elements) || [] : [];
-                        let dragCmd = null;
-                        if (elements.length) {
-                            let backBlocks = Array.from(document.getElementsByClassName('is-dragenter'));
-                            const activedBlock = backBlocks.find((block) => block.visible);
-                            if (!activedBlock)
-                                return;
-                            dragCmd = new index_44.AddElementCommand(self.getNewElementData(), activedBlock.classList.contains('back-block'), false, activedBlock);
+                        if (elementConfig) {
+                            const parentId = pageRow === null || pageRow === void 0 ? void 0 : pageRow.id.replace('row-', '');
+                            const elements = parentId ? ((_a = index_43.pageObject.getRow(parentId)) === null || _a === void 0 ? void 0 : _a.elements) || [] : [];
+                            let dragCmd = null;
+                            if (elements.length) {
+                                let backBlocks = Array.from(document.getElementsByClassName('is-dragenter'));
+                                const activedBlock = backBlocks.find((block) => block.visible);
+                                if (!activedBlock)
+                                    return;
+                                dragCmd = new index_44.AddElementCommand(self.getNewElementData(), activedBlock.classList.contains('back-block'), false, activedBlock);
+                            }
+                            else
+                                dragCmd = new index_44.AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
+                            await index_44.commandHistory.execute(dragCmd);
                         }
-                        else
-                            dragCmd = new index_44.AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
-                        await index_44.commandHistory.execute(dragCmd);
+                        else {
+                            const dragCmd = new index_44.DragElementCommand(self.currentElement, pageRow);
+                            index_44.commandHistory.execute(dragCmd);
+                        }
                         self.isDragging = false;
                     }
                 }
@@ -4673,7 +4686,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
             this.addEventListener('dragstart', function (event) {
                 event.stopPropagation();
                 const eventTarget = event.target;
-                if (eventTarget.nodeName === 'IMG' || !eventTarget.closest('.builder-item'))
+                if (eventTarget.nodeName === 'IMG' || !(eventTarget === null || eventTarget === void 0 ? void 0 : eventTarget.closest('.builder-item')))
                     event.preventDefault();
                 if (eventTarget.id === 'sectionStack')
                     components_29.application.EventBus.dispatch(index_53.EVENT.ON_ADD_SECTION);

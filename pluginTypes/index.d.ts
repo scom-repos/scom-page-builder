@@ -563,7 +563,7 @@ declare module "@scom/scom-page-builder/command/columnUtils.ts" {
         column: number;
         columnSpan: number;
     };
-    const getAppendColumnData: (dropElm: HTMLElement, sortedSections: HTMLElement[], updateData: any, element?: Control, isAppend?: boolean) => {
+    const getAppendColumnData: (dropElm: Control, sortedSections: HTMLElement[], updateData: any, element?: Control, isAppend?: boolean) => {
         column: number;
         columnSpan: number;
     };
@@ -1096,7 +1096,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         constructor(parent?: any);
         get data(): any;
         init(): void;
-        private toggleUI;
+        toggleUI(value: boolean): void;
         private createNewElement;
         private createElementFn;
         addElement(data: IPageElement): Promise<PageSection>;

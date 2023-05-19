@@ -170,7 +170,7 @@ export class PageSidebar extends Module {
         this.addEventListener('dragstart', function (event) {
             event.stopPropagation();
             const eventTarget = event.target as Control;
-            if (eventTarget.nodeName === 'IMG' || !eventTarget.closest('.builder-item'))
+            if (eventTarget.nodeName === 'IMG' || !eventTarget?.closest('.builder-item'))
                 event.preventDefault();
             if (eventTarget.id === 'sectionStack')
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION);

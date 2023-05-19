@@ -84,7 +84,7 @@ export class PageRow extends Module {
         application.EventBus.register(this, EVENT.ON_SET_DRAG_ELEMENT, async (el: any) => this.currentElement = el)
     }
 
-    private toggleUI(value: boolean) {
+    toggleUI(value: boolean) {
         if (this.pnlWrap) this.pnlWrap.opacity = value ? 1 : 0;
         if (this.pnlEmty) this.pnlEmty.visible = !value;
     }
@@ -286,10 +286,6 @@ export class PageRow extends Module {
                 if (newWidth !== undefined) contentStack.width = newWidth;
                 if (newHeight !== undefined) contentStack.height = newHeight;
             }
-        }
-
-        function updateClass(el: Control, value: boolean) {
-
         }
 
         document.addEventListener('mousemove', (e) => {
@@ -537,20 +533,25 @@ export class PageRow extends Module {
                         await commandHistory.execute(dragCmd);
                     }
                     self.isDragging = false;
-                } else if (pageRow && elementConfig && !self.isDragging) {
+                } else if (pageRow && !self.isDragging) {
                     self.isDragging = true;
-                    const parentId = pageRow?.id.replace('row-', '');
-                    const elements = parentId ? pageObject.getRow(parentId)?.elements || [] : [];
-                    let dragCmd = null;
-                    if (elements.length) {
-                        let backBlocks = Array.from(document.getElementsByClassName('is-dragenter'));
-                        const activedBlock = backBlocks.find((block: Control) => block.visible) as Control;
-                        if (!activedBlock) return;
-                        dragCmd = new AddElementCommand(self.getNewElementData(), activedBlock.classList.contains('back-block'), false, activedBlock);
+                    if (elementConfig) {
+                        const parentId = pageRow?.id.replace('row-', '');
+                        const elements = parentId ? pageObject.getRow(parentId)?.elements || [] : [];
+                        let dragCmd = null;
+                        if (elements.length) {
+                            let backBlocks = Array.from(document.getElementsByClassName('is-dragenter'));
+                            const activedBlock = backBlocks.find((block: Control) => block.visible) as Control;
+                            if (!activedBlock) return;
+                            dragCmd = new AddElementCommand(self.getNewElementData(), activedBlock.classList.contains('back-block'), false, activedBlock);
+                        }
+                        else
+                            dragCmd = new AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
+                        await commandHistory.execute(dragCmd);
+                    } else {
+                        const dragCmd = new DragElementCommand(self.currentElement, pageRow);
+                        commandHistory.execute(dragCmd);
                     }
-                    else
-                        dragCmd = new AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
-                    await commandHistory.execute(dragCmd);
                     self.isDragging = false;
                 }
             }

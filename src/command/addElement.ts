@@ -24,7 +24,8 @@ export class AddElementCommand implements ICommand {
   private updateData(el: Control, rowId: string, column?: number, columnSpan?: number) {
     if (!column && !columnSpan) return;
     const oldColumnData = {el, rowId, column: getColumn(el), columnSpan: getColumnSpan(el)};
-    this.oldDataColumnMap.push(oldColumnData);
+    const hasItem = this.oldDataColumnMap.find(data => data.el.id === el.id);
+    !hasItem && this.oldDataColumnMap.push(oldColumnData);
     const col = column || getColumn(el);
     const colSpan = columnSpan || getColumnSpan(el);
     updateColumnData(el, rowId, col, colSpan);
@@ -35,7 +36,7 @@ export class AddElementCommand implements ICommand {
     const grid = this.dropElm.closest('.grid') || this.parent;
     const sections = grid ? Array.from(grid.querySelectorAll('ide-section')) : [];
     const sortedSections = sections.sort((a: HTMLElement, b: HTMLElement) => Number(b.dataset.column) - Number(a.dataset.column));
-    const dropElmCol = Number(this.dropElm.getAttribute('data-column'));
+    const dropElmCol = Number(this.dropElm.dataset.column);
     return isNaN(dropElmCol) ?
       getAppendColumnData(this.dropElm, sortedSections as HTMLElement[], this.updateData, null, this.isAppend) :
       getDropColumnData(this.dropElm, sortedSections as HTMLElement[]);
@@ -74,7 +75,7 @@ export class AddElementCommand implements ICommand {
     this.element.remove();
     const parentId = this.parent.id.replace('row-', '');
     pageObject.removeElement(parentId, this.element.id);
-    for (let columnData of this.oldDataColumnMap) {
+    for (let columnData of [...this.oldDataColumnMap]) {
       const { el, rowId, column, columnSpan } = columnData;
       updateColumnData(el, rowId, column, columnSpan);
     }
