@@ -5,13 +5,13 @@ import { ICommand } from "./interface";
 
 export class UpdateRowCommand implements ICommand {
   private element: any;
-  private parent: HTMLElement;
+  private parent: any;
   private data: any
   private rowId: string;
   private isDeleted: boolean = false;
   private prependId: string = '';
 
-  constructor(element: Control, parent: HTMLElement, data: any, isDeleted?: boolean, prependId?: string) {
+  constructor(element: Control, parent: any, data: any, isDeleted?: boolean, prependId?: string) {
     this.element = element;
     this.data = JSON.parse(JSON.stringify(data));
     this.rowId = data.id;
@@ -32,7 +32,12 @@ export class UpdateRowCommand implements ICommand {
         const prependRow = this.parent.querySelector(`#${this.prependId}`);
         prependRow && prependRow.insertAdjacentElement('afterend', this.element);
       }
+      console.log('add row', this.prependId)
       pageObject.addRow(this.data, this.rowId, this.prependId.replace('row-', ''));
+    }
+    if (this.element?.toggleUI) {
+      const hasData = this.data?.elements?.length;
+      this.element.toggleUI(hasData);
     }
   }
 
@@ -47,6 +52,10 @@ export class UpdateRowCommand implements ICommand {
     } else {
       this.element.remove();
       this.data && pageObject.removeRow(this.rowId);
+    }
+    if (this.element?.toggleUI) {
+      const hasData = this.data?.elements?.length;
+      this.element.toggleUI(hasData);
     }
   }
 

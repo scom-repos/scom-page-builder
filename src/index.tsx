@@ -4,7 +4,7 @@ import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
 import { IPageData, IElementConfig } from './interface/index';
 import { PageRows } from './page/index';
-import { pageObject } from './store/index';
+import { getDragData, pageObject } from './store/index';
 import { currentTheme } from './theme/index';
 import { generateUUID } from './utility/index';
 import { setRootDir as _setRootDir } from './store/index';
@@ -46,22 +46,32 @@ export default class Editor extends Module {
         if (rootDir) this.setRootDir(rootDir);
         super.init();
         const self = this;
+        const scrollThreshold = 80;
 
-        self.pnlWrap.addEventListener('dragenter', (event) => {
+        self.pnlWrap.addEventListener('dragover', (event) => {
             event.preventDefault();
-            const { height } = self.pnlWrap.getBoundingClientRect();
+
+            const { top, bottom } = self.pnlWrap.getBoundingClientRect();
             const mouseY = event.clientY;
-            const scrollThreshold = 30;
-            if (mouseY < scrollThreshold) {
-                self.pnlWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            } else if (mouseY > height - scrollThreshold) {
-                self.pnlWrap.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            if (mouseY < top + scrollThreshold) {
+                self.pnlWrap.scrollTo({ top: 0, behavior: 'smooth' });
+            } else if (mouseY > bottom - scrollThreshold) {
+                self.pnlWrap.scrollTo({ top: self.pnlWrap.scrollHeight, behavior: 'smooth' });
+            } else {
+                self.pnlWrap.scrollTo({ top: self.pnlWrap.scrollTop, behavior: 'auto' });
             }
         });
 
-        self.pnlWrap.addEventListener('dragleave', () => {
-            self.pnlWrap.scrollIntoView({ behavior: 'auto', block: 'nearest' });
-        });
+        // self.pnlWrap.addEventListener('dragleave', () => {
+        //    self.pnlWrap.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+        // });
+
+        self.pnlWrap.addEventListener('drop', (event) => {
+            const elementConfig = getDragData();
+            if (elementConfig?.module?.name === 'sectionStack') {
+                application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
+            }
+        })
     }
 
     setRootDir(value: string) {

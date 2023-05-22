@@ -481,7 +481,7 @@ declare module "@scom/scom-page-builder/command/updateRow.ts" {
         private rowId;
         private isDeleted;
         private prependId;
-        constructor(element: Control, parent: HTMLElement, data: any, isDeleted?: boolean, prependId?: string);
+        constructor(element: Control, parent: any, data: any, isDeleted?: boolean, prependId?: string);
         execute(): void;
         undo(): void;
         redo(): void;
@@ -1111,8 +1111,8 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private renderFixedGrid;
         private initEventListeners;
         private getNewElementData;
-        addDottedLines(): void;
-        removeDottedLines(): void;
+        private addDottedLines;
+        private removeDottedLines;
         private setActive;
         render(): any;
     }
