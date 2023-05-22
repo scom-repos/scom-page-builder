@@ -15,10 +15,10 @@ Styles.cssRule('ide-row', {
     display: 'block',
     position: 'relative',
     transition: 'translate .3s ease-in',
-    border: '2px solid transparent',
+    border: '3px solid transparent',
     $nest: {
         '&.dragenter': {
-            border: '2px solid #1976D2'
+            borderBottom: '3px solid #1976D2'
         },
         '.drag-stack': {
             visibility: 'hidden',

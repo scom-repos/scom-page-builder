@@ -249,7 +249,7 @@ export class PageRows extends Module {
         await this.appendRow({...clonedData, elements: newElements, id: newId}, id);
     }
 
-    private async onCreateSection() {
+    private async onCreateSection(prependId?: string) {
         const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
         if (!this._readonly) {
             pageRow.border = { top: { width: '1px', style: 'dashed', color: Theme.divider } };
@@ -260,7 +260,7 @@ export class PageRows extends Module {
             row: this.getRows().length,
             elements: []
         }
-        const addRowCmd = new UpdateRowCommand(pageRow, this.pnlRows, rowData, false);
+        const addRowCmd = new UpdateRowCommand(pageRow, this.pnlRows, rowData, false, prependId || '');
         commandHistory.execute(addRowCmd);
         await pageRow.setData(rowData);
         return pageRow;

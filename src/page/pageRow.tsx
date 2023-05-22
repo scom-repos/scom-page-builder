@@ -288,6 +288,14 @@ export class PageRow extends Module {
             }
         }
 
+        function updateClass(elm: Control, className: string) {
+            if (elm.visible) {
+                elm.classList.add(className);
+            } else {
+                elm.classList.remove(className);
+            }
+        }
+
         document.addEventListener('mousemove', (e) => {
             if (!this.isResizing || !toolbar) return;
             const deltaX = e.clientX - startX;
@@ -363,10 +371,19 @@ export class PageRow extends Module {
                 (block as Control).visible = false;
                 block.classList.remove('is-dragenter');
             }
+            let blocks = document.getElementsByClassName('dragenter');
+            for (const block of blocks) {
+                block.classList.remove('dragenter');
+            }
         });
 
         this.addEventListener('dragenter', function (event) {
             const eventTarget = event.target as Control;
+            const elementConfig = getDragData();
+            const pageRow = eventTarget.closest('ide-row') as PageRow;
+            if (pageRow && elementConfig?.module?.name === 'sectionStack') {
+                pageRow.classList.add('dragenter');
+            }
             if (!eventTarget || !self.currentElement) return;
             const target = eventTarget.closest('.fixed-grid-item') as Control;
             if (target) {
@@ -400,11 +417,7 @@ export class PageRow extends Module {
                         const bottomBlock = toolbar.querySelector('.bottom-block') as Control;
                         if (bottomBlock) {
                             bottomBlock.visible = Math.ceil(event.clientY) >= Math.ceil(y + height) - 2;
-                            if (bottomBlock.visible) {
-                                bottomBlock.classList.add('is-dragenter');
-                            } else {
-                                bottomBlock.classList.remove('is-dragenter');
-                            }
+                            updateClass(bottomBlock, 'is-dragenter');
                         }
                     }
 
@@ -425,20 +438,12 @@ export class PageRow extends Module {
 
                         if (backBlock) {
                             backBlock.visible = Math.abs(event.clientX - right) <= 15;
-                            if (backBlock.visible) {
-                                backBlock.classList.add('is-dragenter');
-                            } else {
-                                backBlock.classList.remove('is-dragenter');
-                            }
+                            updateClass(backBlock, 'is-dragenter');
                         }
 
                         if (frontBlock) {
                             frontBlock.visible = Math.abs(event.clientX - left) <= 15  && curElmCol === 1;
-                            if (frontBlock.visible) {
-                                frontBlock.classList.add('is-dragenter');
-                            } else {
-                                frontBlock.classList.remove('is-dragenter');
-                            }
+                            updateClass(frontBlock, 'is-dragenter');
                         }
                     }
                 }
@@ -469,17 +474,27 @@ export class PageRow extends Module {
                     block.classList.remove('is-dragenter');
                 }
             }
+
+            const pageRows = document.getElementsByClassName('dragenter');
+            for (const row of pageRows) {
+                const currentRow = eventTarget.closest('ide-row') as Control;
+                if (currentRow && row && currentRow.id === row.id)
+                    continue;
+                row.classList.remove('dragenter');
+            }
         });
 
         this.addEventListener('drop', async function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            if (!self.currentElement) return;
+            const elementConfig = getDragData();
             const eventTarget = event.target as Control;
             const pageRow = eventTarget.closest('ide-row') as PageRow;
-            const nearestFixedItem = eventTarget.closest('.fixed-grid-item') as Control;
-            const elementConfig = getDragData();
+            event.preventDefault();
+            event.stopPropagation();
+            if (pageRow && elementConfig?.module?.name === 'sectionStack')
+                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, pageRow.nextSibling ? pageRow.id : '');
+            if (!self.currentElement) return;
 
+            const nearestFixedItem = eventTarget.closest('.fixed-grid-item') as Control;
             if (nearestFixedItem) {
                 const column = Number(nearestFixedItem.dataset.column);
                 const columnSpan = self.currentElement.dataset.columnSpan ?
@@ -564,7 +579,7 @@ export class PageRow extends Module {
         return {...elementConfig, id};
     }
 
-    addDottedLines() {
+    private addDottedLines() {
         const fixedGridItems = document.getElementsByClassName('fixed-grid-item');
         for (let i = 0; i < fixedGridItems.length; i++) {
             fixedGridItems[i].classList.add('border-x-dotted');
@@ -575,7 +590,7 @@ export class PageRow extends Module {
         }
     }
 
-    removeDottedLines() {
+    private removeDottedLines() {
         const fixedGridItems = document.getElementsByClassName('fixed-grid-item');
         for (let i = 0; i < fixedGridItems.length; i++) {
             fixedGridItems[i].classList.remove('border-x-dotted');

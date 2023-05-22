@@ -1021,6 +1021,7 @@ define("@scom/scom-page-builder/command/updateRow.ts", ["require", "exports", "@
             this.prependId = prependId || '';
         }
         execute() {
+            var _a, _b, _c;
             this.element.parent = this.parent;
             if (this.isDeleted) {
                 this.parent.removeChild(this.element);
@@ -1033,10 +1034,16 @@ define("@scom/scom-page-builder/command/updateRow.ts", ["require", "exports", "@
                     const prependRow = this.parent.querySelector(`#${this.prependId}`);
                     prependRow && prependRow.insertAdjacentElement('afterend', this.element);
                 }
+                console.log('add row', this.prependId);
                 index_4.pageObject.addRow(this.data, this.rowId, this.prependId.replace('row-', ''));
+            }
+            if ((_a = this.element) === null || _a === void 0 ? void 0 : _a.toggleUI) {
+                const hasData = (_c = (_b = this.data) === null || _b === void 0 ? void 0 : _b.elements) === null || _c === void 0 ? void 0 : _c.length;
+                this.element.toggleUI(hasData);
             }
         }
         undo() {
+            var _a, _b, _c;
             if (this.isDeleted) {
                 this.parent.appendChild(this.element);
                 const sibling = this.parent.children[this.data.row];
@@ -1048,6 +1055,10 @@ define("@scom/scom-page-builder/command/updateRow.ts", ["require", "exports", "@
             else {
                 this.element.remove();
                 this.data && index_4.pageObject.removeRow(this.rowId);
+            }
+            if ((_a = this.element) === null || _a === void 0 ? void 0 : _a.toggleUI) {
+                const hasData = (_c = (_b = this.data) === null || _b === void 0 ? void 0 : _b.elements) === null || _c === void 0 ? void 0 : _c.length;
+                this.element.toggleUI(hasData);
             }
         }
         redo() { }
@@ -3619,10 +3630,10 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
         display: 'block',
         position: 'relative',
         transition: 'translate .3s ease-in',
-        border: '2px solid transparent',
+        border: '3px solid transparent',
         $nest: {
             '&.dragenter': {
-                border: '2px solid #1976D2'
+                borderBottom: '3px solid #1976D2'
             },
             '.drag-stack': {
                 visibility: 'hidden',
@@ -3938,6 +3949,14 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         contentStack.height = newHeight;
                 }
             }
+            function updateClass(elm, className) {
+                if (elm.visible) {
+                    elm.classList.add(className);
+                }
+                else {
+                    elm.classList.remove(className);
+                }
+            }
             document.addEventListener('mousemove', (e) => {
                 if (!this.isResizing || !toolbar)
                     return;
@@ -4019,10 +4038,19 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     block.visible = false;
                     block.classList.remove('is-dragenter');
                 }
+                let blocks = document.getElementsByClassName('dragenter');
+                for (const block of blocks) {
+                    block.classList.remove('dragenter');
+                }
             });
             this.addEventListener('dragenter', function (event) {
-                var _a, _b, _c;
+                var _a, _b, _c, _d;
                 const eventTarget = event.target;
+                const elementConfig = index_43.getDragData();
+                const pageRow = eventTarget.closest('ide-row');
+                if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
+                    pageRow.classList.add('dragenter');
+                }
                 if (!eventTarget || !self.currentElement)
                     return;
                 const target = eventTarget.closest('.fixed-grid-item');
@@ -4059,17 +4087,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             const bottomBlock = toolbar.querySelector('.bottom-block');
                             if (bottomBlock) {
                                 bottomBlock.visible = Math.ceil(event.clientY) >= Math.ceil(y + height) - 2;
-                                if (bottomBlock.visible) {
-                                    bottomBlock.classList.add('is-dragenter');
-                                }
-                                else {
-                                    bottomBlock.classList.remove('is-dragenter');
-                                }
+                                updateClass(bottomBlock, 'is-dragenter');
                             }
                         }
-                        const curElmCol = Number((_a = section === null || section === void 0 ? void 0 : section.dataset) === null || _a === void 0 ? void 0 : _a.column);
-                        const curElmColSpan = Number((_b = section === null || section === void 0 ? void 0 : section.dataset) === null || _b === void 0 ? void 0 : _b.columnSpan);
-                        const sections = Array.from((_c = section.closest('#pnlRow')) === null || _c === void 0 ? void 0 : _c.querySelectorAll('ide-section'));
+                        const curElmCol = Number((_b = section === null || section === void 0 ? void 0 : section.dataset) === null || _b === void 0 ? void 0 : _b.column);
+                        const curElmColSpan = Number((_c = section === null || section === void 0 ? void 0 : section.dataset) === null || _c === void 0 ? void 0 : _c.columnSpan);
+                        const sections = Array.from((_d = section.closest('#pnlRow')) === null || _d === void 0 ? void 0 : _d.querySelectorAll('ide-section'));
                         const nextElm = sections.find((el) => {
                             const column = Number(el.dataset.column);
                             return !isNaN(column) && (curElmCol + curElmColSpan === column);
@@ -4083,21 +4106,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             const frontBlock = section.querySelector('.front-block');
                             if (backBlock) {
                                 backBlock.visible = Math.abs(event.clientX - right) <= 15;
-                                if (backBlock.visible) {
-                                    backBlock.classList.add('is-dragenter');
-                                }
-                                else {
-                                    backBlock.classList.remove('is-dragenter');
-                                }
+                                updateClass(backBlock, 'is-dragenter');
                             }
                             if (frontBlock) {
                                 frontBlock.visible = Math.abs(event.clientX - left) <= 15 && curElmCol === 1;
-                                if (frontBlock.visible) {
-                                    frontBlock.classList.add('is-dragenter');
-                                }
-                                else {
-                                    frontBlock.classList.remove('is-dragenter');
-                                }
+                                updateClass(frontBlock, 'is-dragenter');
                             }
                         }
                     }
@@ -4127,17 +4140,26 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         block.classList.remove('is-dragenter');
                     }
                 }
+                const pageRows = document.getElementsByClassName('dragenter');
+                for (const row of pageRows) {
+                    const currentRow = eventTarget.closest('ide-row');
+                    if (currentRow && row && currentRow.id === row.id)
+                        continue;
+                    row.classList.remove('dragenter');
+                }
             });
             this.addEventListener('drop', async function (event) {
-                var _a;
-                event.preventDefault();
-                event.stopPropagation();
-                if (!self.currentElement)
-                    return;
+                var _a, _b;
+                const elementConfig = index_43.getDragData();
                 const eventTarget = event.target;
                 const pageRow = eventTarget.closest('ide-row');
+                event.preventDefault();
+                event.stopPropagation();
+                if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack')
+                    components_25.application.EventBus.dispatch(index_42.EVENT.ON_ADD_SECTION, pageRow.nextSibling ? pageRow.id : '');
+                if (!self.currentElement)
+                    return;
                 const nearestFixedItem = eventTarget.closest('.fixed-grid-item');
-                const elementConfig = index_43.getDragData();
                 if (nearestFixedItem) {
                     const column = Number(nearestFixedItem.dataset.column);
                     const columnSpan = self.currentElement.dataset.columnSpan ?
@@ -4199,7 +4221,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         self.isDragging = true;
                         if (elementConfig) {
                             const parentId = pageRow === null || pageRow === void 0 ? void 0 : pageRow.id.replace('row-', '');
-                            const elements = parentId ? ((_a = index_43.pageObject.getRow(parentId)) === null || _a === void 0 ? void 0 : _a.elements) || [] : [];
+                            const elements = parentId ? ((_b = index_43.pageObject.getRow(parentId)) === null || _b === void 0 ? void 0 : _b.elements) || [] : [];
                             let dragCmd = null;
                             if (elements.length) {
                                 let backBlocks = Array.from(document.getElementsByClassName('is-dragenter'));
@@ -4513,7 +4535,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
             });
             await this.appendRow(Object.assign(Object.assign({}, clonedData), { elements: newElements, id: newId }), id);
         }
-        async onCreateSection() {
+        async onCreateSection(prependId) {
             const pageRow = (this.$render("ide-row", { maxWidth: "100%", maxHeight: "100%" }));
             if (!this._readonly) {
                 pageRow.border = { top: { width: '1px', style: 'dashed', color: Theme.divider } };
@@ -4524,7 +4546,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
                 row: this.getRows().length,
                 elements: []
             };
-            const addRowCmd = new index_48.UpdateRowCommand(pageRow, this.pnlRows, rowData, false);
+            const addRowCmd = new index_48.UpdateRowCommand(pageRow, this.pnlRows, rowData, false, prependId || '');
             index_48.commandHistory.execute(addRowCmd);
             await pageRow.setData(rowData);
             return pageRow;
@@ -4686,10 +4708,10 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
             this.addEventListener('dragstart', function (event) {
                 event.stopPropagation();
                 const eventTarget = event.target;
-                if (eventTarget.nodeName === 'IMG' || !(eventTarget === null || eventTarget === void 0 ? void 0 : eventTarget.closest('.builder-item')))
+                if (eventTarget.nodeName === 'IMG' || ((eventTarget === null || eventTarget === void 0 ? void 0 : eventTarget.closest) && !eventTarget.closest('.builder-item')))
                     event.preventDefault();
                 if (eventTarget.id === 'sectionStack')
-                    components_29.application.EventBus.dispatch(index_53.EVENT.ON_ADD_SECTION);
+                    index_52.setDragData({ module: { name: 'sectionStack', path: '' }, type: index_54.ElementType.PRIMITIVE });
                 else {
                     const currentName = eventTarget.dataset.name;
                     const type = eventTarget.dataset.type;
@@ -5271,20 +5293,30 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 this.setRootDir(rootDir);
             super.init();
             const self = this;
-            self.pnlWrap.addEventListener('dragenter', (event) => {
+            const scrollThreshold = 80;
+            self.pnlWrap.addEventListener('dragover', (event) => {
                 event.preventDefault();
-                const { height } = self.pnlWrap.getBoundingClientRect();
+                const { top, bottom } = self.pnlWrap.getBoundingClientRect();
                 const mouseY = event.clientY;
-                const scrollThreshold = 30;
-                if (mouseY < scrollThreshold) {
-                    self.pnlWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if (mouseY < top + scrollThreshold) {
+                    self.pnlWrap.scrollTo({ top: 0, behavior: 'smooth' });
                 }
-                else if (mouseY > height - scrollThreshold) {
-                    self.pnlWrap.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                else if (mouseY > bottom - scrollThreshold) {
+                    self.pnlWrap.scrollTo({ top: self.pnlWrap.scrollHeight, behavior: 'smooth' });
+                }
+                else {
+                    self.pnlWrap.scrollTo({ top: self.pnlWrap.scrollTop, behavior: 'auto' });
                 }
             });
-            self.pnlWrap.addEventListener('dragleave', () => {
-                self.pnlWrap.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+            // self.pnlWrap.addEventListener('dragleave', () => {
+            //    self.pnlWrap.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+            // });
+            self.pnlWrap.addEventListener('drop', (event) => {
+                var _a;
+                const elementConfig = index_68.getDragData();
+                if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
+                    components_35.application.EventBus.dispatch(index_67.EVENT.ON_ADD_SECTION);
+                }
             });
         }
         setRootDir(value) {
