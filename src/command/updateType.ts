@@ -1,8 +1,8 @@
 import { ICommand } from "./interface";
-import { pageObject } from "../store/index";
+import { getDragData, pageObject } from "../store/index";
 import { Control } from "@ijstech/components";
 import { generateUUID } from "../utility/index";
-import { ElementType } from "../interface/index";
+import { ElementType, IElementConfig } from "../interface/index";
 
 export class UpdateTypeCommand implements ICommand {
   private element: any;
@@ -10,13 +10,15 @@ export class UpdateTypeCommand implements ICommand {
   private oldDataRow: string;
   private data: any;
   private oldDropData: any;
+  private config: any;
 
-  constructor(element: any, dropElm: Control) {
-    this.element = element;
+  constructor(dropElm: Control, element?: any, config?: IElementConfig) {
+    this.element = element || null;
     this.dropElm = dropElm;
-    const pageRow = element.closest('ide-row') as Control;
+    const pageRow = (element ? element.closest('ide-row') : dropElm.closest('ide-row')) as Control;
     this.oldDataRow = (pageRow?.id || '').replace('row-', '');
-    this.data = JSON.parse(JSON.stringify(element.data));
+    this.data = element ? JSON.parse(JSON.stringify(element.data)) : null;
+    this.config = config || null;
     const dropToolbar = this.dropElm.closest('ide-toolbar') as any;
     const dropRowId = dropToolbar?.rowId;
     const dropSection = this.dropElm.closest('ide-section');
@@ -25,10 +27,30 @@ export class UpdateTypeCommand implements ICommand {
   }
 
   private getElements() {
-    if (this.data?.type === ElementType.COMPOSITE)
-      return this.data?.elements || [];
-    else
-      return [this.data];
+    if (this.isNew) {
+      const isMicroDapps= this.config?.module?.category === 'micro-dapps';
+      const newElData = {
+        id: generateUUID(),
+        column: 1,
+        columnSpan: 6,
+        type: this.config?.type || ElementType.PRIMITIVE,
+        properties: {
+          showHeader: isMicroDapps,
+          showFooter: isMicroDapps
+        },
+        module: this.config?.module || {}
+      };
+      return [newElData];
+    } else {
+      if (this.data?.type === ElementType.COMPOSITE)
+        return this.data?.elements || [];
+      else
+        return [this.data];
+    }
+  }
+
+  private get isNew() {
+    return !this.element;
   }
 
   execute(): void {
@@ -36,15 +58,14 @@ export class UpdateTypeCommand implements ICommand {
     const dropToolbar = this.dropElm.closest('ide-toolbar') as any;
     if (!dropToolbar) return;
     const dropRowId = dropToolbar?.rowId;
-    const dropToolbarId = dropToolbar?.elementId;
-    const dropSection = dropToolbar.parent.closest('ide-section');
-    const dropSectionId = (dropSection?.id || '');
+    const dropSectionId = dropToolbar?.elementId;
+    const dropSection = document.getElementById(`${dropSectionId}`);
     const dropSectionData = pageObject.getElement(dropRowId, dropSectionId);
     const clonedDropSecData = JSON.parse(JSON.stringify(dropSectionData));
     if (!dropSectionId || !dropRowId || !dropSectionData) return;
 
     if (clonedDropSecData?.type === ElementType.COMPOSITE) {
-      const elementIndex = dropSectionData.elements.findIndex(elm => elm.id === dropToolbarId);
+      const elementIndex = dropSectionData.elements.findIndex(elm => elm.id === dropSectionId);
       const elementList = this.getElements();
       for (let i = 0; i < elementList.length; i++) {
         pageObject.addElement(dropRowId, elementList[i], dropSectionId, elementIndex + i + 1);
@@ -59,6 +80,7 @@ export class UpdateTypeCommand implements ICommand {
     }
 
     (dropSection as any).setData(dropRowId, pageObject.getElement(dropRowId, dropSectionId));
+    if (this.isNew) return;
 
     const elementRow = this.element.closest('ide-row') as Control;
     const elementRowId = (elementRow?.id || '').replace('row-', '');
@@ -75,6 +97,7 @@ export class UpdateTypeCommand implements ICommand {
     dropSection && (dropSection as any).setData(dropRowId, this.oldDropData);
     pageObject.setElement(dropRowId, this.oldDropData.id, this.oldDropData);
 
+    if (this.isNew) return;
     const oldElementRow = document.querySelector(`#row-${this.oldDataRow}`) as Control;
     pageObject.addElement(this.oldDataRow, this.data);
 

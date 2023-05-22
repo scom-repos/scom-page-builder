@@ -1,0 +1,85 @@
+import { Control } from "@ijstech/components";
+import { pageObject } from "../store/index";
+import { ICommand } from "./interface";
+import { getColumn, getColumnSpan, updateColumnData, getDropColumnData, getAppendColumnData } from "./columnUtils";
+
+export class AddElementCommand implements ICommand {
+  private element: any;
+  private parent: any;
+  private dropElm: Control;
+  private data: any
+  private isAppend: boolean = true;
+  private isNew: boolean = false;
+  private oldDataColumnMap: any[] = [];
+
+  constructor(data: any, isAppend: boolean = true, isNew: boolean = false, dropElm?: Control, parent?: any) {
+    this.data = JSON.parse(JSON.stringify(data));
+    this.dropElm = dropElm;
+    this.parent = parent || dropElm.closest('ide-row');
+    this.isAppend = isAppend;
+    this.isNew = isNew;
+    this.updateData = this.updateData.bind(this);
+  }
+
+  private updateData(el: Control, rowId: string, column?: number, columnSpan?: number) {
+    if (!column && !columnSpan) return;
+    const oldColumnData = {el, rowId, column: getColumn(el), columnSpan: getColumnSpan(el)};
+    const hasItem = this.oldDataColumnMap.find(data => data.el.id === el.id);
+    !hasItem && this.oldDataColumnMap.push(oldColumnData);
+    const col = column || getColumn(el);
+    const colSpan = columnSpan || getColumnSpan(el);
+    updateColumnData(el, rowId, col, colSpan);
+  }
+
+  private getColumnData() {
+    if (!this.dropElm) return null;
+    const grid = this.dropElm.closest('.grid') || this.parent;
+    const sections = grid ? Array.from(grid.querySelectorAll('ide-section')) : [];
+    const sortedSections = sections.sort((a: HTMLElement, b: HTMLElement) => Number(b.dataset.column) - Number(a.dataset.column));
+    const dropElmCol = Number(this.dropElm.dataset.column);
+    return isNaN(dropElmCol) ?
+      getAppendColumnData(this.dropElm, sortedSections as HTMLElement[], this.updateData, null, this.isAppend) :
+      getDropColumnData(this.dropElm, sortedSections as HTMLElement[]);
+  }
+
+  async execute() {
+    let column = 1;
+    let columnSpan = 6;
+
+    if (!this.isNew) {
+      const columnData = this.getColumnData();
+      if (!columnData) return;
+      column = columnData.column;
+      columnSpan = columnData.columnSpan;
+    }
+
+    const isMicroDapps= this.data?.module?.category === 'micro-dapps';
+    const newElData = {
+      id: this.data.id,
+      column,
+      columnSpan,
+      type: this.data.type,
+      properties: {
+        showHeader: isMicroDapps,
+        showFooter: isMicroDapps
+      },
+      module: this.data.module
+    };
+    this.element = await this.parent.addElement(newElData);
+    const parentId = this.parent.id.replace('row-', '');
+    pageObject.addElement(parentId, newElData);
+  }
+
+  undo(): void {
+    if (!this.element) return;
+    this.element.remove();
+    const parentId = this.parent.id.replace('row-', '');
+    pageObject.removeElement(parentId, this.element.id);
+    for (let columnData of [...this.oldDataColumnMap]) {
+      const { el, rowId, column, columnSpan } = columnData;
+      updateColumnData(el, rowId, column, columnSpan);
+    }
+  }
+
+  redo(): void {}
+}

@@ -2,7 +2,6 @@ import {
     Module,
     customElements,
     ControlElement,
-    Styles,
     Panel,
     application,
     Control,
@@ -14,7 +13,7 @@ import { PageRow } from './pageRow';
 import { PageFooter } from './pageFooter';
 import { EVENT } from '../const/index';
 import { generateUUID } from '../utility/index';
-import { ElementCommand, commandHistory, MoveElementCommand } from '../command/index';
+import { UpdateRowCommand, commandHistory, MoveElementCommand } from '../command/index';
 import { IDEToolbar } from '../common/index';
 import { pageObject } from '../store/index';
 import { currentTheme  } from '../theme/index';
@@ -60,6 +59,7 @@ export class PageRows extends Module {
 
     initEventBus() {
         application.EventBus.register(this, EVENT.ON_CLONE, this.onClone);
+        application.EventBus.register(this, EVENT.ON_ADD_SECTION, this.onCreateSection);
     }
 
     _handleClick(event: MouseEvent): boolean {
@@ -190,7 +190,7 @@ export class PageRows extends Module {
         this.updateCurrentRow(x - this.currentPosition.x, y - this.currentPosition.y);
     }
 
-    async getRows(): Promise<IPageSection[]> {
+    getRows(): IPageSection[] {
         // const rows = this.pnlRows.querySelectorAll('ide-row');
         // const rowDataList: IPageSection[] = [];
         // for (const row of rows) {
@@ -222,14 +222,14 @@ export class PageRows extends Module {
         }
     }
 
-    async appendRow(rowData: IPageSection) {
+    async appendRow(rowData: IPageSection, prependId?: string) {
         const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
         if (!this._readonly) {
             pageRow.border = { top: { width: '1px', style: 'dashed', color: Theme.divider } };
             this.initDragEvent(pageRow);
         }
         pageRow.visible = !!rowData?.elements?.length;
-        const addRowCmd = new ElementCommand(pageRow, this.pnlRows, rowData);
+        const addRowCmd = new UpdateRowCommand(pageRow, this.pnlRows, rowData, false, prependId);
         commandHistory.execute(addRowCmd);
         await pageRow.setData(rowData);
         return pageRow;
@@ -246,12 +246,28 @@ export class PageRows extends Module {
             return el;
         });
 
-        const newRow = await this.appendRow({...clonedData, elements: newElements, id: newId});
-        this.pnlRows.insertBefore(newRow, row);
+        await this.appendRow({...clonedData, elements: newElements, id: newId}, id);
+    }
+
+    private async onCreateSection() {
+        const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
+        if (!this._readonly) {
+            pageRow.border = { top: { width: '1px', style: 'dashed', color: Theme.divider } };
+            this.initDragEvent(pageRow);
+        }
+        const rowData = {
+            id: generateUUID(),
+            row: this.getRows().length,
+            elements: []
+        }
+        const addRowCmd = new UpdateRowCommand(pageRow, this.pnlRows, rowData, false);
+        commandHistory.execute(addRowCmd);
+        await pageRow.setData(rowData);
+        return pageRow;
     }
 
     clearRows() {
-        this.pnlRows.clearInnerHTML();
+        this.pnlRows?.clearInnerHTML();
     }
 
     set footerVisible(value: boolean) {
@@ -265,18 +281,6 @@ export class PageRows extends Module {
     set footerCopyright(value: string) {
         this.pageFooter.footer = value;
     }
-
-    // async setPaging(pages: IPageData[], currPage: IPageData) {
-    //     await this.pagePaging.setPaging(pages, currPage);
-    // }
-
-    // setPagingVisibility(pagingVisible: boolean) {
-    //     this.pagePaging.setVisible(pagingVisible);
-    // }
-
-    // updatePaging() {
-    //     this.pagePaging.renderUI();
-    // }
 
     render() {
         return (
@@ -296,7 +300,6 @@ export class PageRows extends Module {
                     background={{color: '#ddd'}}
                     class={'drag-overlay'}
                 ></i-panel>
-                {/* <scpage-page-paging id={'pagePaging'} visible={false}></scpage-page-paging> */}
                 <scpage-page-footer
                     id={'pageFooter'}
                     class={'boxed-style'}

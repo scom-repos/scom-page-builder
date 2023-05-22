@@ -397,7 +397,7 @@ export class IDEToolbar extends Module {
                 }
             }
         } else {
-            pageObject.setElement(this.rowId, this.data.id, { properties });
+            this.data && pageObject.setElement(this.rowId, this.data.id, { properties });
         }
     }
 
@@ -410,14 +410,6 @@ export class IDEToolbar extends Module {
             if (builderTarget?.setTag) await builderTarget.setTag(tag);
         }
         pageObject.setElement(this.rowId, this.data.id, { tag });
-        // const isContainer = this.data?.properties?.content && typeof this.data?.properties?.content === 'object';
-        // if (isContainer) {
-        //     const properties = this.data.properties;
-        //     properties.content.tag = tag;
-        //     pageObject.setElement(this.rowId, this.data.id, { properties });
-        // } else {
-        //     pageObject.setElement(this.rowId, this.data.id, { tag });
-        // }
     }
 
     async setProperties(data: any) {
