@@ -2,18 +2,18 @@ import { application, Container, ControlElement, customElements, customModule, M
 import { } from '@ijstech/eth-contract'
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
-import { IPageData, IElementConfig } from './interface/index';
-import { PageRows } from './page/index';
-import { getDragData, pageObject } from './store/index';
+import { IPageData, IElementConfig, IPageBlockData } from './interface/index';
+import { PageRows, PageSidebar } from './page/index';
+import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, getPageBlocks } from './store/index';
 import { currentTheme } from './theme/index';
 import { generateUUID } from './utility/index';
-import { setRootDir as _setRootDir } from './store/index';
 import './index.css';
 
 const Theme = currentTheme;
 
 interface PageBuilderElement extends ControlElement {
     rootDir?: string;
+    components?: IPageBlockData[];
 }
 
 declare global {
@@ -32,6 +32,7 @@ export default class Editor extends Module {
     private builderFooter: BuilderFooter;
     private editor: Panel;
     private pnlWrap: Panel;
+    private pageSidebar: PageSidebar;
     private events: any[] = [];
 
     constructor(parent?: Container, options?: any) {
@@ -41,9 +42,29 @@ export default class Editor extends Module {
         this.initEventBus();
     }
 
+    get rootDir() {
+        return getRootDir();
+    }
+
+    set rootDir(value: string) {
+        _setRootDir(value);
+    }
+
+    get components() {
+        return getPageBlocks();
+    }
+
+    set components(value: IPageBlockData[]) {
+        setPageBlocks(value);
+        this.pageSidebar.renderUI();
+    }
+
     init() {
         const rootDir = this.getAttribute('rootDir', true);
         if (rootDir) this.setRootDir(rootDir);
+        const components = this.getAttribute('components', true);
+        if (components) setPageBlocks(components);
+
         super.init();
         const self = this;
         const scrollThreshold = 80;

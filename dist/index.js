@@ -4650,33 +4650,19 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
         constructor(parent) {
             super(parent);
         }
+        get pageBlocks() {
+            return index_52.getPageBlocks();
+        }
         init() {
             super.init();
             this.renderUI();
             this.initEventListeners();
         }
         async renderUI() {
-            this.pageBlocks = await this.getPageBlocks();
-            index_52.setPageBlocks(this.pageBlocks);
             this.renderComponentList();
             this.renderMircoDAppList();
             this.renderChartList();
             this.sectionStack.setAttribute('draggable', 'true');
-        }
-        async getPageBlocks() {
-            let rootDir = index_52.getRootDir();
-            let path = rootDir ? rootDir + "/scconfig.json" : "scconfig.json";
-            let content = await components_29.application.getContent(path);
-            let pageBlocks = [];
-            try {
-                let scconfig = JSON.parse(content);
-                let components = (scconfig === null || scconfig === void 0 ? void 0 : scconfig.components) || {};
-                for (let key in components) {
-                    pageBlocks.push(components[key]);
-                }
-            }
-            catch (err) { }
-            return pageBlocks;
         }
         // private onAddComponent(module: IPageBlockData, type: ElementType) {
         //     application.EventBus.dispatch(EVENT.ON_ADD_ELEMENT, { type, module });
@@ -5295,7 +5281,7 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
         }
     });
 });
-define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/utility/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/index.css.ts"], function (require, exports, components_35, index_67, index_68, index_69, index_70, index_71) {
+define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/utility/index.ts", "@scom/scom-page-builder/index.css.ts"], function (require, exports, components_35, index_67, index_68, index_69, index_70) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const Theme = index_69.currentTheme;
@@ -5307,10 +5293,26 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.setData = this.setData.bind(this);
             this.initEventBus();
         }
+        get rootDir() {
+            return index_68.getRootDir();
+        }
+        set rootDir(value) {
+            index_68.setRootDir(value);
+        }
+        get components() {
+            return index_68.getPageBlocks();
+        }
+        set components(value) {
+            index_68.setPageBlocks(value);
+            this.pageSidebar.renderUI();
+        }
         init() {
             const rootDir = this.getAttribute('rootDir', true);
             if (rootDir)
                 this.setRootDir(rootDir);
+            const components = this.getAttribute('components', true);
+            if (components)
+                index_68.setPageBlocks(components);
             super.init();
             const self = this;
             const scrollThreshold = 80;
@@ -5340,7 +5342,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             });
         }
         setRootDir(value) {
-            index_71.setRootDir(value);
+            index_68.setRootDir(value);
         }
         getData() {
             return {

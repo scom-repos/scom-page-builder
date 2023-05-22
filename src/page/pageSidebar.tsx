@@ -8,7 +8,7 @@ import {
     VStack,
     application,
 } from '@ijstech/components';
-import { getRootDir, setDragData, setPageBlocks } from '../store/index';
+import { getPageBlocks, getRootDir, setDragData, setPageBlocks } from '../store/index';
 import { EVENT } from '../const/index';
 import { ElementType, IPageBlockData } from '../interface/index';
 // import { Collapse } from '../common/index';
@@ -35,7 +35,9 @@ export class PageSidebar extends Module {
     private componentsStack: GridLayout;
     private sectionStack: VStack;
 
-    private pageBlocks: IPageBlockData[];
+    private get pageBlocks(): IPageBlockData[] {
+        return getPageBlocks();
+    }
 
     constructor(parent?: any) {
         super(parent);
@@ -47,28 +49,11 @@ export class PageSidebar extends Module {
         this.initEventListeners();
     }
 
-    private async renderUI() {
-        this.pageBlocks = await this.getPageBlocks();
-        setPageBlocks(this.pageBlocks);
+    async renderUI() {
         this.renderComponentList();
         this.renderMircoDAppList();
         this.renderChartList();
         this.sectionStack.setAttribute('draggable', 'true');
-    }
-
-    async getPageBlocks() {
-        let rootDir = getRootDir();
-        let path = rootDir ? rootDir + "/scconfig.json" : "scconfig.json";
-        let content = await application.getContent(path);
-        let pageBlocks: IPageBlockData[] = [];
-        try {
-          let scconfig = JSON.parse(content);
-          let components = scconfig?.components || {};
-          for (let key in components) {
-            pageBlocks.push(components[key]);
-          }
-        } catch (err) {}
-        return pageBlocks;
     }
 
     // private onAddComponent(module: IPageBlockData, type: ElementType) {

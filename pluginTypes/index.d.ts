@@ -1183,7 +1183,6 @@ declare module "@scom/scom-page-builder/page/pageSidebar.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/page/pageSidebar.tsx" />
 declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
     import { Module, ControlElement } from '@ijstech/components';
-    import { IPageBlockData } from "@scom/scom-page-builder/interface/index.ts";
     import "@scom/scom-page-builder/page/pageSidebar.css.ts";
     global {
         namespace JSX {
@@ -1199,11 +1198,10 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
         private chartsStack;
         private componentsStack;
         private sectionStack;
-        private pageBlocks;
+        private get pageBlocks();
         constructor(parent?: any);
         init(): void;
-        private renderUI;
-        getPageBlocks(): Promise<IPageBlockData[]>;
+        renderUI(): Promise<void>;
         private renderComponentList;
         private renderMircoDAppList;
         private renderChartList;
@@ -1325,10 +1323,11 @@ declare module "@scom/scom-page-builder/index.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder" />
 declare module "@scom/scom-page-builder" {
     import { Container, ControlElement, Module } from '@ijstech/components';
-    import { IPageData } from "@scom/scom-page-builder/interface/index.ts";
+    import { IPageData, IPageBlockData } from "@scom/scom-page-builder/interface/index.ts";
     import "@scom/scom-page-builder/index.css.ts";
     interface PageBuilderElement extends ControlElement {
         rootDir?: string;
+        components?: IPageBlockData[];
     }
     global {
         namespace JSX {
@@ -1342,8 +1341,13 @@ declare module "@scom/scom-page-builder" {
         private builderFooter;
         private editor;
         private pnlWrap;
+        private pageSidebar;
         private events;
         constructor(parent?: Container, options?: any);
+        get rootDir(): string;
+        set rootDir(value: string);
+        get components(): IPageBlockData[];
+        set components(value: IPageBlockData[]);
         init(): void;
         setRootDir(value: string): void;
         getData(): {
