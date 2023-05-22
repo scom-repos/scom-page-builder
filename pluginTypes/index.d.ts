@@ -77,13 +77,13 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         get sections(): IPageSection[];
         set footer(value: IPageFooter);
         get footer(): IPageFooter;
-        addSection(value: IPageSection, prependId?: string): void;
+        addSection(value: IPageSection, index?: number): void;
         removeSection(id: string): void;
         getSection(id: string): IPageSection;
         updateSection(id: string, data: any): void;
         getRow(rowId: string): IPageSection | IPageFooter;
         removeRow(id: string): void;
-        addRow(data: any, id?: string, prependId?: string): void;
+        addRow(data: any, id?: string, index?: number): void;
         private findElement;
         getElement(sectionId: string, elementId: string): any;
         setElement(sectionId: string, elementId: string, value: any): void;
@@ -481,6 +481,7 @@ declare module "@scom/scom-page-builder/command/updateRow.ts" {
         private rowId;
         private isDeleted;
         private prependId;
+        private appendId;
         constructor(element: Control, parent: any, data: any, isDeleted?: boolean, prependId?: string);
         execute(): void;
         undo(): void;

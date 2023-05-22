@@ -1,4 +1,4 @@
-import { application, Control } from "@ijstech/components";
+import { application } from "@ijstech/components";
 import { EVENT } from "../const/index";
 import { pageObject } from "../store/index";
 import { ICommand } from "./interface";
@@ -36,10 +36,10 @@ export class RemoveToolbarCommand implements ICommand {
     const section = pageObject.getRow(this.rowId);
     if (this.pageRow) {
       if (!this.sectionId || this.sectionId === this.elementId) {
-        this.pageRow.visible = !!section?.elements?.length;
+        this.pageRow.toggleUI(!!section?.elements?.length);
       } else {
         const parentElement = (section?.elements || []).find(elm => elm.id === this.sectionId);
-        this.pageRow.visible = !!parentElement?.elements?.length;
+        this.pageRow.toggleUI(!!parentElement?.elements?.length);
       }
     }
     application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
@@ -51,7 +51,7 @@ export class RemoveToolbarCommand implements ICommand {
     const clonedSection = JSON.parse(JSON.stringify(section));
     if (this.pageRow && (this.rowId !== 'header' && this.rowId !== 'footer')) {
       this.pageRow.setData({...clonedSection, id: this.rowId});
-      this.pageRow.visible = true;
+      this.pageRow.toggleUI(true);
     }
     application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
   }
