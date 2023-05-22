@@ -139,6 +139,7 @@ export class PageRows extends Module {
             event.preventDefault();
             this.pnlRowOverlay.visible = false;
             this.pnlRowOverlay.zIndex = '-1';
+            this.isDragging = false;
             return;
         }
         dropElm.classList.remove("dragenter");
@@ -146,6 +147,7 @@ export class PageRows extends Module {
             event.preventDefault();
             this.pnlRowOverlay.visible = false;
             this.pnlRowOverlay.zIndex = '-1';
+            this.isDragging = false;
             return;
         }
         if (dropElm && !this.currentRow.isSameNode(dropElm)) {

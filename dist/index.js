@@ -139,12 +139,11 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports"], functio
         get footer() {
             return this._footer;
         }
-        addSection(value, prependId) {
-            const prependIndex = prependId ? this._sections.findIndex(section => section.id === prependId) : -1;
-            if (prependIndex === -1)
-                this._sections.push(value);
+        addSection(value, index) {
+            if (typeof index === 'number' && index >= 0)
+                this._sections.splice(index, 0, value);
             else
-                this._sections.splice(prependIndex + 1, 0, value);
+                this._sections.push(value);
         }
         removeSection(id) {
             const sectionIndex = this._sections.findIndex(section => section.id === id);
@@ -176,13 +175,13 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports"], functio
             else
                 this.removeSection(id);
         }
-        addRow(data, id, prependId) {
+        addRow(data, id, index) {
             if (id === 'header')
                 this.header = data;
             else if (id === 'footer')
                 this.footer = data;
             else
-                this.addSection(data, prependId);
+                this.addSection(data, index);
         }
         findElement(elements, elementId) {
             if (!elements || !elements.length)
@@ -1013,6 +1012,7 @@ define("@scom/scom-page-builder/command/updateRow.ts", ["require", "exports", "@
         constructor(element, parent, data, isDeleted, prependId) {
             this.isDeleted = false;
             this.prependId = '';
+            this.appendId = '';
             this.element = element;
             this.data = JSON.parse(JSON.stringify(data));
             this.rowId = data.id;
@@ -1024,6 +1024,8 @@ define("@scom/scom-page-builder/command/updateRow.ts", ["require", "exports", "@
             var _a, _b, _c;
             this.element.parent = this.parent;
             if (this.isDeleted) {
+                const appendRow = this.element.nextElementSibling;
+                this.appendId = (appendRow === null || appendRow === void 0 ? void 0 : appendRow.id) || '';
                 this.parent.removeChild(this.element);
                 index_4.pageObject.removeRow(this.rowId);
                 components_3.application.EventBus.dispatch(index_3.EVENT.ON_UPDATE_SECTIONS);
@@ -1034,8 +1036,9 @@ define("@scom/scom-page-builder/command/updateRow.ts", ["require", "exports", "@
                     const prependRow = this.parent.querySelector(`#${this.prependId}`);
                     prependRow && prependRow.insertAdjacentElement('afterend', this.element);
                 }
-                console.log('add row', this.prependId);
-                index_4.pageObject.addRow(this.data, this.rowId, this.prependId.replace('row-', ''));
+                const prependId = this.prependId.replace('row-', '');
+                const prependIndex = index_4.pageObject.sections.findIndex(section => section.id === prependId);
+                index_4.pageObject.addRow(this.data, this.rowId, prependIndex);
             }
             if ((_a = this.element) === null || _a === void 0 ? void 0 : _a.toggleUI) {
                 const hasData = (_c = (_b = this.data) === null || _b === void 0 ? void 0 : _b.elements) === null || _c === void 0 ? void 0 : _c.length;
@@ -1045,11 +1048,25 @@ define("@scom/scom-page-builder/command/updateRow.ts", ["require", "exports", "@
         undo() {
             var _a, _b, _c;
             if (this.isDeleted) {
+                this.element.parent = this.parent;
                 this.parent.appendChild(this.element);
-                const sibling = this.parent.children[this.data.row];
-                if (sibling)
-                    this.parent.insertBefore(this.element, sibling);
-                index_4.pageObject.addRow(this.data, this.rowId);
+                const prependRow = this.prependId && this.parent.querySelector(`#${this.prependId}`);
+                if (prependRow) {
+                    prependRow.insertAdjacentElement('afterend', this.element);
+                    const prependId = this.prependId.replace('row-', '');
+                    const prependIndex = prependId ? index_4.pageObject.sections.findIndex(section => section.id === prependId) : -1;
+                    index_4.pageObject.addRow(this.data, this.rowId, prependIndex + 1);
+                }
+                else {
+                    const appendId = this.appendId.replace('row-', '');
+                    const appendIndex = appendId ? index_4.pageObject.sections.findIndex(section => section.id === appendId) : -1;
+                    if (this.appendId) {
+                        const appendRow = this.parent.querySelector(`#${this.appendId}`);
+                        appendRow && appendRow.insertAdjacentElement('afterend', this.element);
+                        this.element.insertAdjacentElement('afterend', appendRow);
+                    }
+                    index_4.pageObject.addRow(this.data, this.rowId, appendIndex);
+                }
                 components_3.application.EventBus.dispatch(index_3.EVENT.ON_UPDATE_SECTIONS);
             }
             else {
@@ -1611,11 +1628,11 @@ define("@scom/scom-page-builder/command/removeToolbar.ts", ["require", "exports"
             const section = index_10.pageObject.getRow(this.rowId);
             if (this.pageRow) {
                 if (!this.sectionId || this.sectionId === this.elementId) {
-                    this.pageRow.visible = !!((_a = section === null || section === void 0 ? void 0 : section.elements) === null || _a === void 0 ? void 0 : _a.length);
+                    this.pageRow.toggleUI(!!((_a = section === null || section === void 0 ? void 0 : section.elements) === null || _a === void 0 ? void 0 : _a.length));
                 }
                 else {
                     const parentElement = ((section === null || section === void 0 ? void 0 : section.elements) || []).find(elm => elm.id === this.sectionId);
-                    this.pageRow.visible = !!((_b = parentElement === null || parentElement === void 0 ? void 0 : parentElement.elements) === null || _b === void 0 ? void 0 : _b.length);
+                    this.pageRow.toggleUI(!!((_b = parentElement === null || parentElement === void 0 ? void 0 : parentElement.elements) === null || _b === void 0 ? void 0 : _b.length));
                 }
             }
             components_4.application.EventBus.dispatch(index_9.EVENT.ON_UPDATE_SECTIONS);
@@ -1626,7 +1643,7 @@ define("@scom/scom-page-builder/command/removeToolbar.ts", ["require", "exports"
             const clonedSection = JSON.parse(JSON.stringify(section));
             if (this.pageRow && (this.rowId !== 'header' && this.rowId !== 'footer')) {
                 this.pageRow.setData(Object.assign(Object.assign({}, clonedSection), { id: this.rowId }));
-                this.pageRow.visible = true;
+                this.pageRow.toggleUI(true);
             }
             components_4.application.EventBus.dispatch(index_9.EVENT.ON_UPDATE_SECTIONS);
         }
@@ -3850,7 +3867,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             components_25.application.EventBus.dispatch(index_42.EVENT.ON_CLONE, { rowData, id: this.id });
         }
         onDeleteRow() {
-            const rowCmd = new index_44.UpdateRowCommand(this, this.parent, this.data, true);
+            const prependRow = this.previousElementSibling;
+            const rowCmd = new index_44.UpdateRowCommand(this, this.parent, this.data, true, prependRow ? prependRow.id : '');
             index_44.commandHistory.execute(rowCmd);
         }
         onMoveUp() {
@@ -4431,6 +4449,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
                 event.preventDefault();
                 this.pnlRowOverlay.visible = false;
                 this.pnlRowOverlay.zIndex = '-1';
+                this.isDragging = false;
                 return;
             }
             dropElm.classList.remove("dragenter");
@@ -4438,6 +4457,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
                 event.preventDefault();
                 this.pnlRowOverlay.visible = false;
                 this.pnlRowOverlay.zIndex = '-1';
+                this.isDragging = false;
                 return;
             }
             if (dropElm && !this.currentRow.isSameNode(dropElm)) {

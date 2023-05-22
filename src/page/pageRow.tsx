@@ -171,7 +171,8 @@ export class PageRow extends Module {
     }
 
     onDeleteRow() {
-        const rowCmd = new UpdateRowCommand(this, this.parent, this.data, true);
+        const prependRow = this.previousElementSibling;
+        const rowCmd = new UpdateRowCommand(this, this.parent, this.data, true, prependRow ? prependRow.id : '');
         commandHistory.execute(rowCmd);
     }
 

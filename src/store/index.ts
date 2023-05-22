@@ -33,12 +33,11 @@ export class PageObject {
     return this._footer;
   }
 
-  addSection(value: IPageSection, prependId?: string) {
-    const prependIndex = prependId ? this._sections.findIndex(section => section.id === prependId) : -1;
-    if (prependIndex === -1)
-      this._sections.push(value);
+  addSection(value: IPageSection, index?: number) {
+    if (typeof index === 'number' && index >= 0)
+      this._sections.splice(index, 0, value);
     else
-      this._sections.splice(prependIndex + 1, 0, value);
+      this._sections.push(value);
   }
 
   removeSection(id: string) {
@@ -74,13 +73,13 @@ export class PageObject {
       this.removeSection(id);
   }
 
-  addRow(data: any, id?: string, prependId?: string) {
+  addRow(data: any, id?: string, index?: number) {
     if (id === 'header')
       this.header = data;
     else if (id === 'footer')
       this.footer = data;
     else
-      this.addSection(data, prependId);
+      this.addSection(data, index);
   }
 
   private findElement(elements: IPageElement[], elementId: string) {
