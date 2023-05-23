@@ -68,14 +68,12 @@ export default class Editor extends Module {
         super.init();
         const self = this;
         const scrollThreshold = 80;
-
         self.pnlWrap.addEventListener('dragover', (event) => {
             event.preventDefault();
-
             const { top, bottom } = self.pnlWrap.getBoundingClientRect();
             const mouseY = event.clientY;
             if (mouseY < top + scrollThreshold) {
-                self.pnlWrap.scrollTo({ top: 0, behavior: 'smooth' });
+                self.pnlWrap.scrollTo({ top, behavior: 'smooth' });
             } else if (mouseY > bottom - scrollThreshold) {
                 self.pnlWrap.scrollTo({ top: self.pnlWrap.scrollHeight, behavior: 'smooth' });
             } else {

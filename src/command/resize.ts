@@ -71,7 +71,9 @@ export class ResizeElementCommand implements ICommand {
   }
 
   execute(): void {
-    this.element = document.getElementById(`${this.element.id}`) as Control;
+    const builder = document.getElementsByTagName(`i-scom-page-builder`)?.[0] as Element;
+    if (!builder) return;
+    this.element = builder.querySelector(`[id='${this.element.id}']`) as Control || this.element;
     this.toolbar = this.element.querySelector('ide-toolbar');
     const newColumnData = this.getColumnData();
     if (!newColumnData) return;

@@ -13,7 +13,7 @@ import {
     application
 } from '@ijstech/components';
 import { EVENT } from '../const/index';
-import { ELEMENT_NAME, IPageBlockAction, IPageElement } from '../interface/index';
+import { ELEMENT_NAME, IPageBlockAction, IPageBlockData, IPageElement } from '../interface/index';
 import { getRootDir, pageObject } from '../store/index';
 import { getEmbedElement, isEmpty } from '../utility/index';
 import { commandHistory, RemoveToolbarCommand } from '../command/index';
@@ -326,7 +326,7 @@ export class IDEToolbar extends Module {
         try {
             const module: any = await getEmbedElement(data?.module?.path || '');
             if (!module) throw new Error('not found');
-            await this.setModule(module);
+            await this.setModule(module, data?.module);
             if (this.isTexbox()) {
                 this.dragStack.visible = true;
                 this.contentStack.classList.remove('move');
@@ -349,7 +349,7 @@ export class IDEToolbar extends Module {
         }
     }
 
-    private async setModule(module: Module) {
+    private async setModule(module: Module, data: IPageBlockData) {
         this._component = module;
         this._component.parent = this.contentStack;
         const builderTarget = this._component?.getConfigurators ? this._component.getConfigurators().find((conf: any) => conf.target === 'Builders') : null;
@@ -361,9 +361,9 @@ export class IDEToolbar extends Module {
         this._component.maxHeight = '100%';
         this._component.overflow = 'hidden';
         this._component.style.display = 'block';
-        this.backdropStack.visible = this.data?.module?.shownBackdrop;
+        this.backdropStack.visible = data?.shownBackdrop;
         this._component.addEventListener('click', (event: Event) => {
-            if (this.data?.module?.disableClicked)
+            if (data?.disableClicked)
                 event.stopImmediatePropagation();
             event.preventDefault()
             this.showToolList();
