@@ -1273,8 +1273,11 @@ define("@scom/scom-page-builder/command/resize.ts", ["require", "exports", "@sco
             return { column: finalColumn, columnSpan: finalColumnSpan };
         }
         execute() {
-            var _a, _b;
-            this.element = document.getElementById(`${this.element.id}`);
+            var _a, _b, _c;
+            const builder = (_a = document.getElementsByTagName(`i-scom-page-builder`)) === null || _a === void 0 ? void 0 : _a[0];
+            if (!builder)
+                return;
+            this.element = builder.querySelector(`[id='${this.element.id}']`) || this.element;
             this.toolbar = this.element.querySelector('ide-toolbar');
             const newColumnData = this.getColumnData();
             if (!newColumnData)
@@ -1287,7 +1290,7 @@ define("@scom/scom-page-builder/command/resize.ts", ["require", "exports", "@sco
             if (this.toolbar) {
                 const rowId = this.toolbar.rowId;
                 const elementId = this.toolbar.elementId;
-                const currentTag = ((_b = (_a = this.toolbar) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.tag) || {};
+                const currentTag = ((_c = (_b = this.toolbar) === null || _b === void 0 ? void 0 : _b.data) === null || _c === void 0 ? void 0 : _c.tag) || {};
                 const tag = Object.assign(Object.assign({}, currentTag), { width: this.finalWidth || '100%', height: this.finalHeight || this.initialHeight });
                 this.toolbar.setTag(tag);
                 if (newColumnData.column !== this.oldDataColumn.column || newColumnData.columnSpan !== this.oldDataColumn.columnSpan)
@@ -3087,7 +3090,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 const module = await index_30.getEmbedElement(((_a = data === null || data === void 0 ? void 0 : data.module) === null || _a === void 0 ? void 0 : _a.path) || '');
                 if (!module)
                     throw new Error('not found');
-                await this.setModule(module);
+                await this.setModule(module, data === null || data === void 0 ? void 0 : data.module);
                 if (this.isTexbox()) {
                     this.dragStack.visible = true;
                     this.contentStack.classList.remove('move');
@@ -3112,8 +3115,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 index_31.commandHistory.undo();
             }
         }
-        async setModule(module) {
-            var _a, _b, _c;
+        async setModule(module, data) {
+            var _a;
             this._component = module;
             this._component.parent = this.contentStack;
             const builderTarget = ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) ? this._component.getConfigurators().find((conf) => conf.target === 'Builders') : null;
@@ -3128,10 +3131,9 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this._component.maxHeight = '100%';
             this._component.overflow = 'hidden';
             this._component.style.display = 'block';
-            this.backdropStack.visible = (_c = (_b = this.data) === null || _b === void 0 ? void 0 : _b.module) === null || _c === void 0 ? void 0 : _c.shownBackdrop;
+            this.backdropStack.visible = data === null || data === void 0 ? void 0 : data.shownBackdrop;
             this._component.addEventListener('click', (event) => {
-                var _a, _b;
-                if ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.module) === null || _b === void 0 ? void 0 : _b.disableClicked)
+                if (data === null || data === void 0 ? void 0 : data.disableClicked)
                     event.stopImmediatePropagation();
                 event.preventDefault();
                 this.showToolList();
@@ -5321,7 +5323,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 const { top, bottom } = self.pnlWrap.getBoundingClientRect();
                 const mouseY = event.clientY;
                 if (mouseY < top + scrollThreshold) {
-                    self.pnlWrap.scrollTo({ top: 0, behavior: 'smooth' });
+                    self.pnlWrap.scrollTo({ top, behavior: 'smooth' });
                 }
                 else if (mouseY > bottom - scrollThreshold) {
                     self.pnlWrap.scrollTo({ top: self.pnlWrap.scrollHeight, behavior: 'smooth' });
