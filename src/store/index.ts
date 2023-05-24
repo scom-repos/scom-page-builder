@@ -120,6 +120,7 @@ export class PageObject {
     if (value.columnSpan !== undefined) elm.columnSpan = value.columnSpan;
     if (value.tag !== undefined) elm.tag = value.tag;
     if (value.type !== undefined && elm.type !== value.type) {
+      if (value.dropId) this.removeElement(sectionId, value.dropId);
       if (value.type === 'primitive') {
         elm.type = value.type;
         elm.module = value.elements?.[0] || {};

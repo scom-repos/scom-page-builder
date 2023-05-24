@@ -12,10 +12,7 @@ Styles.cssRule('ide-sidebar', {
             overflow: 'hidden'
         },
         '.pointer': {
-            cursor: 'grab'
-        },
-        '.pointer:hover': {
-            background: Theme.action.hover
+            cursor: 'all-scroll'
         },
         '.insert-tabs': {
             $nest: {
@@ -40,6 +37,15 @@ Styles.cssRule('ide-sidebar', {
         },
         'i-tabs i-tab:not(.disabled).active': {
             borderColor: 'transparent'
+        },
+        '.builder-item': {
+            transition: 'opacity .2s ease-in-out, transform 0.2s ease-in-out',
+            width: 97,
+            height: '5rem',
+            opacity: 1
+        },
+        '.is-dragging': {
+            opacity: 0
         }
     }
 });

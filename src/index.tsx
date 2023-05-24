@@ -68,22 +68,25 @@ export default class Editor extends Module {
         super.init();
         const self = this;
         const scrollThreshold = 80;
-        self.pnlWrap.addEventListener('dragover', (event) => {
+        this.addEventListener('dragover', (event) => {
             event.preventDefault();
             const { top, bottom } = self.pnlWrap.getBoundingClientRect();
             const mouseY = event.clientY;
             if (mouseY < top + scrollThreshold) {
-                self.pnlWrap.scrollTo({ top, behavior: 'smooth' });
-            } else if (mouseY > bottom - scrollThreshold) {
-                self.pnlWrap.scrollTo({ top: self.pnlWrap.scrollHeight, behavior: 'smooth' });
+                // self.pnlWrap.scrollTo({ top: 0, behavior: 'smooth' });
+                self.pnlWrap.scrollTop -= 30;
+            } else if (mouseY > bottom - top - scrollThreshold) {
+                // self.pnlWrap.scrollTo({ top: self.pnlWrap.scrollHeight, behavior: 'smooth' });
+                self.pnlWrap.scrollTop += 30;
             } else {
-                self.pnlWrap.scrollTo({ top: self.pnlWrap.scrollTop, behavior: 'auto' });
+                self.pnlWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                // self.pnlWrap.scrollTo({ top: self.pnlWrap.scrollTop, behavior: 'smooth' });
             }
         });
 
-        // self.pnlWrap.addEventListener('dragleave', () => {
-        //    self.pnlWrap.scrollIntoView({ behavior: 'auto', block: 'nearest' });
-        // });
+        this.addEventListener('dragleave', () => {
+           self.pnlWrap.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+        });
 
         self.pnlWrap.addEventListener('drop', (event) => {
             const elementConfig = getDragData();
@@ -191,22 +194,21 @@ export default class Editor extends Module {
 
     render() {
         return (
-            <i-vstack id="editor" width={'100%'} height={'100%'} overflow={"hidden"}>
+            <i-vstack id="editor" width={'100%'} height={'100%'} maxHeight="100vh" overflow={"hidden"} stack={{grow: '1'}}>
                 <ide-header
                     id={'pageHeader'}
                     border={{ bottom: { width: 1, style: 'solid', color: '#dadce0' } }}
                 ></ide-header>
                 <i-grid-layout
-                    templateColumns={['auto', '400px']}
+                    templateColumns={['auto', 'minmax(auto, 235px)']}
                     autoFillInHoles={true}
                     height="calc(100% -64px)"
-                    overflow={{y: 'auto'}}
+                    overflow="hidden"
                 >
                     <i-panel
                         id="pnlWrap"
-                        class="main-content"
-                        height="100%"
-                        overflow={{ y: 'auto' }}
+                        height="100%" width="100%"
+                        overflow={{y: 'auto', x: 'hidden'}}
                         background={{ color: Theme.background.default }}
                         border={{ right: { width: 1, style: 'solid', color: Theme.divider } }}
                         padding={{ bottom: '1rem' }}
@@ -236,7 +238,7 @@ export default class Editor extends Module {
                             </i-panel>
                         </i-panel>
                     </i-panel>
-                    <i-panel class="main-sidebar" height="100%" overflow={{ y: 'auto' }}>
+                    <i-panel height="100%" overflow={{x: 'hidden', y: 'auto'}} class="pnl-scrollable">
                         <ide-sidebar id={'pageSidebar'} display={'block'} width="100%"></ide-sidebar>
                     </i-panel>
                 </i-grid-layout>

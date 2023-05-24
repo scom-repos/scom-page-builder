@@ -4,10 +4,10 @@ import { Control } from "@ijstech/components";
 import { getAppendColumnData, getColumn, getColumnSpan, getDropColumnData, updateColumnData } from "./columnUtils";
 
 export class DragElementCommand implements ICommand {
+  private parent: Control;
   private element: any;
   private dropElm: Control;
   private oldDataColumn: IDataColumn;
-  private oldDataRow: string;
   private data: any;
   private oldDataColumnMap: any[] = [];
 
@@ -19,7 +19,7 @@ export class DragElementCommand implements ICommand {
       columnSpan: Number(element.dataset.columnSpan)
     }
     const pageRow = element.closest('ide-row') as Control;
-    this.oldDataRow = (pageRow?.id || '').replace('row-', '');
+    this.parent = pageRow;
     this.data = JSON.parse(JSON.stringify(element.data));
     this.updateData = this.updateData.bind(this);
   }
@@ -45,7 +45,8 @@ export class DragElementCommand implements ICommand {
   }
 
   execute(): void {
-    this.element = document.getElementById(`${this.element.id}`) as Control;
+    if (!this.parent) return;
+    this.element = this.parent.querySelector(`[id='${this.element.id}']`) as Control;
     if (!this.element) return;
     this.dropElm.style.border = "";
     let column = 1;
@@ -64,13 +65,12 @@ export class DragElementCommand implements ICommand {
     this.element.setAttribute('data-column', `${column}`);
     this.element.setAttribute('data-column-span', `${columnSpan}`);
 
-    const elementRow = this.element.closest('ide-row') as Control;
     const dropRow = this.dropElm.closest('ide-row') as Control;
     const dropRowId = (dropRow?.id || '').replace('row-', '');
-    const elementRowId = (elementRow?.id || '').replace('row-', '');
+    const elementRowId = (this.parent?.id || '').replace('row-', '');
     pageObject.setElement(elementRowId, this.element.id, {column, columnSpan});
 
-    if (elementRow && !elementRow.isEqualNode(dropRow)) {
+    if (this.parent && !this.parent.isEqualNode(dropRow)) {
       pageObject.addElement(dropRowId, {...this.data, column, columnSpan});
       pageObject.removeElement(elementRowId, this.element.id);
       grid = grid || this.dropElm.querySelector('.grid');
@@ -81,8 +81,10 @@ export class DragElementCommand implements ICommand {
       this.element.parent = grid;
       (dropRow as any).toggleUI(true);
     }
-    const elementSection = pageObject.getRow(elementRowId);
-    elementRow.visible = !!elementSection?.elements?.length;
+    if (this.parent) {
+      const elementSection = pageObject.getRow(elementRowId);
+      this.parent.visible = !!elementSection?.elements?.length;
+    }
   }
 
   undo(): void {
@@ -91,26 +93,28 @@ export class DragElementCommand implements ICommand {
     this.element.setAttribute('data-column', `${this.oldDataColumn.column}`);
     this.element.setAttribute('data-column-span', `${this.oldDataColumn.columnSpan}`);
 
-    const elementRow = this.element.closest('ide-row') as Control;
+    const elementRow = this.element.parent.closest('ide-row') as Control;
     const elementRowId = (elementRow?.id || '').replace('row-', '');
     pageObject.setElement(elementRowId, this.element.id, {...this.oldDataColumn});
 
-    if (!this.oldDataRow) return;
-    const oldElementRow = document.querySelector(`#row-${this.oldDataRow}`) as Control;
-    if (oldElementRow && !elementRow.isEqualNode(oldElementRow)) {
-      pageObject.addElement(this.oldDataRow, {...this.data, ...this.oldDataColumn});
+    if (!this.parent.id) return;
+    const oldRowId = (this.parent?.id || '').replace('row-', '');
+    if (this.parent && elementRow && !elementRow.isEqualNode(this.parent)) {
+      pageObject.addElement(oldRowId, {...this.data, ...this.oldDataColumn});
       pageObject.removeElement(elementRowId, this.element.id);
-      const oldGrid = oldElementRow.querySelector('.grid');
+      const oldGrid = this.parent.querySelector('.grid');
       if (oldGrid) {
         oldGrid.appendChild(this.element);
         const toolbar = this.element.querySelector('ide-toolbar') as any;
-        if (toolbar) toolbar.rowId = this.oldDataRow;
-        this.element.rowId = this.oldDataRow;
+        if (toolbar) toolbar.rowId = oldRowId;
+        this.element.rowId = oldRowId;
         this.element.parent = oldGrid;
       }
     }
-    const oldElementSection = pageObject.getRow(this.oldDataRow);
-    oldElementRow && (oldElementRow.visible = !!oldElementSection?.elements?.length);
+    if (this.parent) {
+      const oldElementSection = pageObject.getRow(oldRowId);
+      this.parent.visible = !!oldElementSection?.elements?.length;
+    }
 
     for (let columnData of this.oldDataColumnMap) {
       const { el, rowId, column, columnSpan } = columnData;

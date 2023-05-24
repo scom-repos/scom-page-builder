@@ -3,6 +3,7 @@ import { pageObject } from "../store/index";
 import { ICommand, IDataColumn, MAX_COLUMN } from "./interface";
 
 export class ResizeElementCommand implements ICommand {
+  private parent: Control;
   private element: Control;
   private toolbar: any;
   private initialWidth: number;
@@ -16,15 +17,15 @@ export class ResizeElementCommand implements ICommand {
 
   constructor(element: Control, initialWidth: number, initialHeight: number, finalWidth: number, finalHeight: number) {
     this.element = element;
-    this.toolbar = element.querySelector('ide-toolbar');
+    this.parent = this.element.closest('ide-row');
     this.finalWidth = finalWidth || initialWidth;
     this.finalHeight = finalHeight || initialHeight;
     this.finalLeft = Number(this.element.left);
     this.initialWidth = initialWidth;
     this.initialHeight = initialHeight;
     this.oldDataColumn = {
-      column: Number(element.dataset.column),
-      columnSpan: Number(element.dataset.columnSpan)
+      column: Number(this.element.dataset.column),
+      columnSpan: Number(this.element.dataset.columnSpan)
     }
     const grid = this.element.parent.closest('.grid') as HTMLElement;
     if (grid)
@@ -71,9 +72,9 @@ export class ResizeElementCommand implements ICommand {
   }
 
   execute(): void {
-    const builder = document.getElementsByTagName(`i-scom-page-builder`)?.[0] as Element;
-    if (!builder) return;
-    this.element = builder.querySelector(`[id='${this.element.id}']`) as Control || this.element;
+    if (!this.parent) return;
+    this.element = this.parent.querySelector(`[id='${this.element.id}']`) as Control;
+    if (!this.element) return;
     this.toolbar = this.element.querySelector('ide-toolbar');
     const newColumnData = this.getColumnData();
     if (!newColumnData) return;

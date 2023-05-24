@@ -248,7 +248,7 @@ export class PageRows extends Module {
             return el;
         });
 
-        await this.appendRow({...clonedData, elements: newElements, id: newId}, id);
+        await this.appendRow({...clonedData, elements: newElements, id: newId, row: this.getRows().length}, id);
     }
 
     private async onCreateSection(prependId?: string) {

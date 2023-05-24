@@ -254,9 +254,9 @@ export class PageRow extends Module {
 
         document.addEventListener('mouseup', (e) => {
             e.preventDefault();
-            if (!toolbar) return;
-            this.isResizing = false;
             self.removeDottedLines();
+            this.isResizing = false;
+            if (!toolbar) return;
             toolbar.width = 'initial';
             toolbar.height = 'initial';
             const contentStack = toolbar.querySelector('#contentStack') as Control
@@ -376,6 +376,10 @@ export class PageRow extends Module {
             for (const block of blocks) {
                 block.classList.remove('dragenter');
             }
+            let components = document.getElementsByClassName('is-dragging');
+            for (const component of components) {
+                component.classList.remove('is-dragging');
+            }
         });
 
         this.addEventListener('dragenter', function (event) {
@@ -457,25 +461,19 @@ export class PageRow extends Module {
 
         document.addEventListener('dragleave', function (event) {
             const eventTarget = event.target as Control;
-            const target = eventTarget.closest('.fixed-grid-item') as Control;
-            if (target) {
-                target.style.border = '';
-                let rectangles = document.getElementsByClassName('rectangle');
-                for (const rectangle of rectangles) {
-                    (rectangle as Control).style.display = 'none';
-                }
-            } else {
-                const blocks = document.getElementsByClassName('is-dragenter')
-                for (const block of blocks) {
-                    const currentSection = eventTarget.closest('ide-section') as Control;
-                    const blockSection = block.closest('ide-section');
-                    if (currentSection && blockSection && currentSection.id === blockSection.id)
-                        continue;
-                    (block as Control).visible = false;
-                    block.classList.remove('is-dragenter');
-                }
+            let rectangles = document.getElementsByClassName('rectangle');
+            for (const rectangle of rectangles) {
+                (rectangle as Control).style.display = 'none';
             }
-
+            const blocks = document.getElementsByClassName('is-dragenter')
+            for (const block of blocks) {
+                const currentSection = eventTarget.closest('ide-section') as Control;
+                const blockSection = block.closest('ide-section');
+                if (currentSection && blockSection && currentSection.id === blockSection.id)
+                    continue;
+                (block as Control).visible = false;
+                block.classList.remove('is-dragenter');
+            }
             const pageRows = document.getElementsByClassName('dragenter');
             for (const row of pageRows) {
                 const currentRow = eventTarget.closest('ide-row') as Control;
@@ -489,6 +487,7 @@ export class PageRow extends Module {
             const elementConfig = getDragData();
             const eventTarget = event.target as Control;
             const pageRow = eventTarget.closest('ide-row') as PageRow;
+            self.removeDottedLines();
             event.preventDefault();
             event.stopPropagation();
             if (pageRow && elementConfig?.module?.name === 'sectionStack')
@@ -536,7 +535,8 @@ export class PageRow extends Module {
                     dropElm.classList.remove('is-dragenter');
                     const isBottomBlock = dropElm.classList.contains('bottom-block');
                     if (isBottomBlock) {
-                        const dragCmd = new UpdateTypeCommand(dropElm, getDragData() ? null : self.currentElement, getDragData());
+                        const config = getDragData();
+                        const dragCmd = new UpdateTypeCommand(dropElm, config ? null : self.currentElement, config);
                         commandHistory.execute(dragCmd);
                     } else {
                         let dragCmd = null;

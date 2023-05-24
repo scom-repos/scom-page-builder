@@ -198,10 +198,6 @@ export class IDEToolbar extends Module {
                 data: {...properties, ...tag}
             }
             if (action.userInputUISchema) options.jsonUISchema = action.userInputUISchema;
-            // console.log('schema: ', action.userInputDataSchema)
-            // console.log('data: ', data)
-            // renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data, options);
-    
             renderUI(this.pnlForm, options, this.onSave.bind(this));
         }
     }

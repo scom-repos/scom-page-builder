@@ -535,6 +535,7 @@ declare module "@scom/scom-page-builder/command/resize.ts" {
     import { Control } from "@ijstech/components";
     import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
     export class ResizeElementCommand implements ICommand {
+        private parent;
         private element;
         private toolbar;
         private initialWidth;
@@ -575,10 +576,10 @@ declare module "@scom/scom-page-builder/command/dragElement.ts" {
     import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
     import { Control } from "@ijstech/components";
     export class DragElementCommand implements ICommand {
+        private parent;
         private element;
         private dropElm;
         private oldDataColumn;
-        private oldDataRow;
         private data;
         private oldDataColumnMap;
         constructor(element: any, dropElm: Control);
@@ -613,14 +614,15 @@ declare module "@scom/scom-page-builder/command/updateType.ts" {
     import { IElementConfig } from "@scom/scom-page-builder/interface/index.ts";
     export class UpdateTypeCommand implements ICommand {
         private element;
-        private dropElm;
-        private oldDataRow;
+        private elementParent;
+        private dropParent;
         private data;
         private oldDropData;
         private config;
+        private dropSectionId;
+        private isNew;
         constructor(dropElm: Control, element?: any, config?: IElementConfig);
         private getElements;
-        private get isNew();
         execute(): void;
         undo(): void;
         redo(): void;
@@ -1198,13 +1200,12 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
         private chartsStack;
         private componentsStack;
         private sectionStack;
+        private pnlMainSidebar;
         private get pageBlocks();
         constructor(parent?: any);
         init(): void;
         renderUI(): Promise<void>;
-        private renderComponentList;
-        private renderMircoDAppList;
-        private renderChartList;
+        private renderList;
         private initDrag;
         private initEventListeners;
         render(): any;
