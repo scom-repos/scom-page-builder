@@ -358,7 +358,8 @@ export class PageRow extends Module {
         this.addEventListener('drag', function (event) {});
 
         document.addEventListener('dragend', function (event) {
-            if (self.currentElement) self.currentElement.opacity = 1;
+            if (self.currentElement && !self.currentElement.classList.contains('builder-item'))
+                self.currentElement.opacity = 1;
             self.currentElement = null;
             self.isDragging = false;
             setDragData(null);

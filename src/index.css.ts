@@ -30,10 +30,10 @@ Styles.cssRule('#editor', {
       background: 'transparent'
     },
     '.pnl-scrollable': {
-      maskImage: 'linear-gradient(to top, transparent, black),linear-gradient(to left, transparent 17px, black 17px)',
+      maskImage: 'linear-gradient(to top, transparent, black),linear-gradient(to left, transparent 7px, black 7px)',
       maskSize: '100% 20000px',
       maskPosition: 'left bottom',
-      '-webkit-mask-image': 'linear-gradient(to top, transparent, black),linear-gradient(to left, transparent 17px, black 17px)',
+      '-webkit-mask-image': 'linear-gradient(to top, transparent, black),linear-gradient(to left, transparent 7px, black 7px)',
       '-webkit-mask-size': '100% 20000px',
       '-webkit-mask-position': 'left bottom',
       transition: 'mask-position 0.3s, -webkit-mask-position 0.3s',
@@ -42,7 +42,7 @@ Styles.cssRule('#editor', {
           background: 'var(--action-focus)'
         },
         '::-webkit-scrollbar-track': {
-          background: 'var(--background-default)'
+          background: 'transparent'
         },
         '&:hover': {
           '-webkit-mask-position': 'left top',

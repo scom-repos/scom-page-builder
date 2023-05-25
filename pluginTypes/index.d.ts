@@ -1323,7 +1323,7 @@ declare module "@scom/scom-page-builder/builder/index.ts" {
 declare module "@scom/scom-page-builder/index.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder" />
 declare module "@scom/scom-page-builder" {
-    import { Container, ControlElement, Module } from '@ijstech/components';
+    import { Container, Control, ControlElement, Module } from '@ijstech/components';
     import { IPageData, IPageBlockData } from "@scom/scom-page-builder/interface/index.ts";
     import "@scom/scom-page-builder/index.css.ts";
     interface PageBuilderElement extends ControlElement {
@@ -1340,7 +1340,6 @@ declare module "@scom/scom-page-builder" {
     export default class Editor extends Module {
         private pageRows;
         private builderFooter;
-        private editor;
         private pnlWrap;
         private pageSidebar;
         private events;
@@ -1349,6 +1348,7 @@ declare module "@scom/scom-page-builder" {
         set rootDir(value: string);
         get components(): IPageBlockData[];
         set components(value: IPageBlockData[]);
+        enableDragAndScroll(containerElement: Control): void;
         init(): void;
         setRootDir(value: string): void;
         getData(): {

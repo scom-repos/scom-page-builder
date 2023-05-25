@@ -4060,7 +4060,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             });
             this.addEventListener('drag', function (event) { });
             document.addEventListener('dragend', function (event) {
-                if (self.currentElement)
+                if (self.currentElement && !self.currentElement.classList.contains('builder-item'))
                     self.currentElement.opacity = 1;
                 self.currentElement = null;
                 self.isDragging = false;
@@ -5296,10 +5296,10 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
                 background: 'transparent'
             },
             '.pnl-scrollable': {
-                maskImage: 'linear-gradient(to top, transparent, black),linear-gradient(to left, transparent 17px, black 17px)',
+                maskImage: 'linear-gradient(to top, transparent, black),linear-gradient(to left, transparent 7px, black 7px)',
                 maskSize: '100% 20000px',
                 maskPosition: 'left bottom',
-                '-webkit-mask-image': 'linear-gradient(to top, transparent, black),linear-gradient(to left, transparent 17px, black 17px)',
+                '-webkit-mask-image': 'linear-gradient(to top, transparent, black),linear-gradient(to left, transparent 7px, black 7px)',
                 '-webkit-mask-size': '100% 20000px',
                 '-webkit-mask-position': 'left bottom',
                 transition: 'mask-position 0.3s, -webkit-mask-position 0.3s',
@@ -5308,7 +5308,7 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
                         background: 'var(--action-focus)'
                     },
                     '::-webkit-scrollbar-track': {
-                        background: 'var(--background-default)'
+                        background: 'transparent'
                     },
                     '&:hover': {
                         '-webkit-mask-position': 'left top',
@@ -5348,6 +5348,54 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             index_68.setPageBlocks(value);
             this.pageSidebar.renderUI();
         }
+        enableDragAndScroll(containerElement) {
+            let isDragging = false;
+            let initialMouseY = 0;
+            let initialScrollTop = 0;
+            const scrollSpeed = 50;
+            containerElement.addEventListener('mousedown', (event) => {
+                isDragging = true;
+                initialMouseY = event.clientY;
+                initialScrollTop = containerElement.scrollTop;
+            });
+            containerElement.addEventListener('mousemove', onMouseMove);
+            containerElement.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+            containerElement.addEventListener('mouseleave', () => {
+                isDragging = false;
+            });
+            containerElement.addEventListener('wheel', (event) => {
+                event.preventDefault();
+                containerElement.scrollTo({
+                    top: containerElement.scrollTop + (event.deltaY * 10),
+                    behavior: 'smooth',
+                });
+            });
+            function onMouseMove(event) {
+                if (!isDragging)
+                    return;
+                const deltaY = event.clientY - initialMouseY;
+                containerElement.scrollTop = initialScrollTop - deltaY;
+                adjustScrollSpeed(event.clientY);
+            }
+            function adjustScrollSpeed(mouseY) {
+                const { top, height } = containerElement.getBoundingClientRect();
+                const scrollThreshold = 80;
+                const distanceFromTop = mouseY - top;
+                const distanceFromBottom = top + height - mouseY;
+                if (distanceFromTop < scrollThreshold) {
+                    const scrollFactor = 1 + (scrollThreshold - distanceFromTop) / scrollThreshold;
+                    containerElement.scrollTop -= scrollSpeed * scrollFactor;
+                    console.log('distanceFromTop', containerElement.scrollTop);
+                }
+                else if (distanceFromBottom < scrollThreshold) {
+                    const scrollFactor = 1 + (scrollThreshold - distanceFromBottom) / scrollThreshold;
+                    containerElement.scrollTop += scrollSpeed * scrollFactor;
+                    console.log('distanceFromBottom', containerElement.scrollTop);
+                }
+            }
+        }
         init() {
             const rootDir = this.getAttribute('rootDir', true);
             if (rootDir)
@@ -5356,35 +5404,14 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             if (components)
                 index_68.setPageBlocks(components);
             super.init();
-            const self = this;
-            const scrollThreshold = 80;
-            this.addEventListener('dragover', (event) => {
-                event.preventDefault();
-                const { top, bottom } = self.pnlWrap.getBoundingClientRect();
-                const mouseY = event.clientY;
-                if (mouseY < top + scrollThreshold) {
-                    // self.pnlWrap.scrollTo({ top: 0, behavior: 'smooth' });
-                    self.pnlWrap.scrollTop -= 30;
-                }
-                else if (mouseY > bottom - top - scrollThreshold) {
-                    // self.pnlWrap.scrollTo({ top: self.pnlWrap.scrollHeight, behavior: 'smooth' });
-                    self.pnlWrap.scrollTop += 30;
-                }
-                else {
-                    self.pnlWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    // self.pnlWrap.scrollTo({ top: self.pnlWrap.scrollTop, behavior: 'smooth' });
-                }
-            });
-            this.addEventListener('dragleave', () => {
-                self.pnlWrap.scrollIntoView({ behavior: 'auto', block: 'nearest' });
-            });
-            self.pnlWrap.addEventListener('drop', (event) => {
+            this.pnlWrap.addEventListener('drop', (event) => {
                 var _a;
                 const elementConfig = index_68.getDragData();
                 if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
                     components_35.application.EventBus.dispatch(index_67.EVENT.ON_ADD_SECTION);
                 }
             });
+            this.enableDragAndScroll(this);
         }
         setRootDir(value) {
             index_68.setRootDir(value);
@@ -5393,7 +5420,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             return {
                 // header: pageObject.header,
                 sections: index_68.pageObject.sections,
-                footer: index_68.pageObject.footer
+                footer: index_68.pageObject.footer,
             };
         }
         async setData(value) {
@@ -5415,7 +5442,6 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             }
             this.events = [];
         }
-        ;
         initEventBus() {
             this.events.push(components_35.application.EventBus.register(this, index_67.EVENT.ON_ADD_ELEMENT, (data) => {
                 if (!data)
@@ -5435,38 +5461,42 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 module,
                 properties: {
                     showHeader: false,
-                    showFooter: false
-                }
+                    showFooter: false,
+                },
             };
             if (module.category === 'components') {
                 element.properties = {
                     showHeader: false,
-                    showFooter: false
+                    showFooter: false,
                 };
             }
             else if (module.category === 'micro-dapps') {
                 element.properties = {
                     showHeader: true,
-                    showFooter: true
+                    showFooter: true,
                 };
             }
             let rowData = {
                 id: index_70.generateUUID(),
                 row: index_68.pageObject.sections.length + 1,
-                elements: [element]
+                elements: [element],
             };
             //FIXME: remove this
             if (module.path === 'scom-nft-minter' || module.path === 'scom-gem-token') {
                 element.module = module;
                 element.columnSpan = 6;
                 element.properties = {
-                    networks: [{
-                            chainId: 43113
-                        }],
-                    wallets: [{
-                            name: "metamask"
-                        }],
-                    width: '100%'
+                    networks: [
+                        {
+                            chainId: 43113,
+                        },
+                    ],
+                    wallets: [
+                        {
+                            name: 'metamask',
+                        },
+                    ],
+                    width: '100%',
                 };
             }
             return await this.pageRows.appendRow(rowData, prependId);
@@ -5476,7 +5506,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             //     this.contentWrapper.padding = {bottom: this.builderFooter.offsetHeight};
         }
         render() {
-            return (this.$render("i-vstack", { id: "editor", width: '100%', height: '100%', maxHeight: "100vh", overflow: "hidden", stack: { grow: '1' } },
+            return (this.$render("i-vstack", { id: "editor", width: '100%', height: '100%', maxHeight: "100vh", overflow: 'hidden', stack: { grow: '1' } },
                 this.$render("ide-header", { id: 'pageHeader', border: { bottom: { width: 1, style: 'solid', color: '#dadce0' } } }),
                 this.$render("i-grid-layout", { templateColumns: ['auto', 'minmax(auto, 235px)'], autoFillInHoles: true, height: "calc(100% -64px)", overflow: "hidden" },
                     this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } }, padding: { bottom: '1rem' } },
@@ -5490,7 +5520,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         }
     };
     Editor = __decorate([
-        components_35.customElements("i-scom-page-builder"),
+        components_35.customElements('i-scom-page-builder'),
         components_35.customModule
     ], Editor);
     exports.default = Editor;
