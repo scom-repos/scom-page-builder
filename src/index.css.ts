@@ -29,6 +29,9 @@ Styles.cssRule('#editor', {
       border: 'none',
       background: 'transparent'
     },
+    '#pnlWrap': {
+      scrollBehavior: 'smooth'
+    },
     '.pnl-scrollable': {
       maskImage: 'linear-gradient(to top, transparent, black),linear-gradient(to left, transparent 7px, black 7px)',
       maskSize: '100% 20000px',

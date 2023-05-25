@@ -532,12 +532,10 @@ declare module "@scom/scom-page-builder/command/moveRow.ts" {
 }
 /// <amd-module name="@scom/scom-page-builder/command/resize.ts" />
 declare module "@scom/scom-page-builder/command/resize.ts" {
-    import { Control } from "@ijstech/components";
     import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
     export class ResizeElementCommand implements ICommand {
         private parent;
         private element;
-        private toolbar;
         private initialWidth;
         private initialHeight;
         private finalWidth;
@@ -546,7 +544,7 @@ declare module "@scom/scom-page-builder/command/resize.ts" {
         private gapWidth;
         private gridColumnWidth;
         private finalLeft;
-        constructor(element: Control, initialWidth: number, initialHeight: number, finalWidth: number, finalHeight: number);
+        constructor(element: any, initialWidth: number, initialHeight: number, finalWidth: number, finalHeight: number);
         private getColumnData;
         execute(): void;
         undo(): void;
@@ -565,7 +563,7 @@ declare module "@scom/scom-page-builder/command/columnUtils.ts" {
         column: number;
         columnSpan: number;
     };
-    const getAppendColumnData: (dropElm: Control, sortedSections: HTMLElement[], updateData: any, element?: Control, isAppend?: boolean) => {
+    const getAppendColumnData: (grid: Control, dropElm: Control, sortedSections: HTMLElement[], updateData: any, element?: Control, isAppend?: boolean) => {
         column: number;
         columnSpan: number;
     };
@@ -933,26 +931,6 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         render(): any;
     }
 }
-/// <amd-module name="@scom/scom-page-builder/common/dragger.tsx" />
-declare module "@scom/scom-page-builder/common/dragger.tsx" {
-    import { Control, Module } from '@ijstech/components';
-    export class ContainerDragger<T extends Module> {
-        private target;
-        private stack;
-        private pnlOverlay;
-        private dragger;
-        private currentPosition;
-        private dataList;
-        private isDragging;
-        constructor(target: T, stack: Control, dragger?: Control, dataList?: any[]);
-        private initDragEvent;
-        private mouseDownHandler;
-        private mouseUpHandler;
-        private resetTarget;
-        private updateTarget;
-        private mouseMoveHandler;
-    }
-}
 /// <amd-module name="@scom/scom-page-builder/common/collapse.css.ts" />
 declare module "@scom/scom-page-builder/common/collapse.css.ts" {
     export const collapseStyle: string;
@@ -992,9 +970,8 @@ declare module "@scom/scom-page-builder/common/collapse.tsx" {
 /// <amd-module name="@scom/scom-page-builder/common/index.ts" />
 declare module "@scom/scom-page-builder/common/index.ts" {
     import { IDEToolbar } from "@scom/scom-page-builder/common/toolbar.tsx";
-    import { ContainerDragger } from "@scom/scom-page-builder/common/dragger.tsx";
     import { Collapse } from "@scom/scom-page-builder/common/collapse.tsx";
-    export { IDEToolbar, ContainerDragger, Collapse, };
+    export { IDEToolbar, Collapse, };
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageSection.tsx" />
 declare module "@scom/scom-page-builder/page/pageSection.tsx" {
@@ -1348,7 +1325,8 @@ declare module "@scom/scom-page-builder" {
         set rootDir(value: string);
         get components(): IPageBlockData[];
         set components(value: IPageBlockData[]);
-        enableDragAndScroll(containerElement: Control): void;
+        initEvent(containerElement: Control): void;
+        private initEventListeners;
         init(): void;
         setRootDir(value: string): void;
         getData(): {

@@ -392,6 +392,7 @@ export class PageRow extends Module {
             }
             if (!eventTarget || !self.currentElement) return;
             const target = eventTarget.closest('.fixed-grid-item') as Control;
+            self.addDottedLines();
             if (target) {
                 const column = Number(target.dataset.column);
                 const columnSpan = self.currentElement.dataset.columnSpan ? Number(self.currentElement.dataset.columnSpan) : MIN_COLUMN ;
@@ -462,18 +463,22 @@ export class PageRow extends Module {
 
         document.addEventListener('dragleave', function (event) {
             const eventTarget = event.target as Control;
-            let rectangles = document.getElementsByClassName('rectangle');
-            for (const rectangle of rectangles) {
-                (rectangle as Control).style.display = 'none';
-            }
-            const blocks = document.getElementsByClassName('is-dragenter')
-            for (const block of blocks) {
-                const currentSection = eventTarget.closest('ide-section') as Control;
-                const blockSection = block.closest('ide-section');
-                if (currentSection && blockSection && currentSection.id === blockSection.id)
-                    continue;
-                (block as Control).visible = false;
-                block.classList.remove('is-dragenter');
+            const target = eventTarget.closest('.fixed-grid-item') as Control;
+            if (target) {
+                let rectangles = document.getElementsByClassName('rectangle');
+                for (const rectangle of rectangles) {
+                    (rectangle as Control).style.display = 'none';
+                }
+            } else {
+                const blocks = document.getElementsByClassName('is-dragenter')
+                for (const block of blocks) {
+                    const currentSection = eventTarget.closest('ide-section') as Control;
+                    const blockSection = block.closest('ide-section');
+                    if (currentSection && blockSection && currentSection.id === blockSection.id)
+                        continue;
+                    (block as Control).visible = false;
+                    block.classList.remove('is-dragenter');
+                }
             }
             const pageRows = document.getElementsByClassName('dragenter');
             for (const row of pageRows) {
@@ -488,7 +493,6 @@ export class PageRow extends Module {
             const elementConfig = getDragData();
             const eventTarget = event.target as Control;
             const pageRow = eventTarget.closest('ide-row') as PageRow;
-            self.removeDottedLines();
             event.preventDefault();
             event.stopPropagation();
             if (pageRow && elementConfig?.module?.name === 'sectionStack')
@@ -571,6 +575,7 @@ export class PageRow extends Module {
                     }
                     self.isDragging = false;
                 }
+                self.removeDottedLines();
             }
         });
     }

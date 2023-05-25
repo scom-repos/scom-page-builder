@@ -58,56 +58,49 @@ export default class Editor extends Module {
         this.pageSidebar.renderUI();
     }
 
-    enableDragAndScroll(containerElement: Control) {
-        let isDragging = false;
-        let initialMouseY = 0;
-        let initialScrollTop = 0;
-        const scrollSpeed = 50;
-
-        containerElement.addEventListener('mousedown', (event) => {
-            isDragging = true;
-            initialMouseY = event.clientY;
-            initialScrollTop = containerElement.scrollTop;
-        });
-
-        containerElement.addEventListener('mousemove', onMouseMove);
-
-        containerElement.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
-
-        containerElement.addEventListener('mouseleave', () => {
-            isDragging = false;
-        });
-
+    initEvent(containerElement: Control) {
         containerElement.addEventListener('wheel', (event) => {
             event.preventDefault();
             containerElement.scrollTo({
-                top: containerElement.scrollTop + (event.deltaY * 10),
+                top: containerElement.scrollTop + (event.deltaY * 1.5),
                 behavior: 'smooth',
             });
         });
 
-        function onMouseMove(event: MouseEvent) {
-            if (!isDragging) return;
-            const deltaY = event.clientY - initialMouseY;
-            containerElement.scrollTop = initialScrollTop - deltaY;
+        containerElement.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            if (!getDragData()) return;
             adjustScrollSpeed(event.clientY);
-        }
+        });
 
         function adjustScrollSpeed(mouseY: number) {
             const { top, height } = containerElement.getBoundingClientRect();
-            const scrollThreshold = 80;
+            const scrollSpeed = 800;
+            const scrollThreshold = 100;
             const distanceFromTop = mouseY - top;
             const distanceFromBottom = top + height - mouseY;
+
             if (distanceFromTop < scrollThreshold) {
                 const scrollFactor = 1 + (scrollThreshold - distanceFromTop) / scrollThreshold;
                 containerElement.scrollTop -= scrollSpeed * scrollFactor;
             } else if (distanceFromBottom < scrollThreshold) {
                 const scrollFactor = 1 + (scrollThreshold - distanceFromBottom) / scrollThreshold;
                 containerElement.scrollTop += scrollSpeed * scrollFactor;
+            } else {
+                // containerElement.scrollIntoView({ behavior: "smooth", inline: "nearest" })
+                containerElement.scrollTo({ behavior: "auto", top: containerElement.scrollTop });
             }
         }
+    }
+
+    private initEventListeners() {
+        this.pnlWrap.addEventListener('drop', (event) => {
+            const elementConfig = getDragData();
+            if (elementConfig?.module?.name === 'sectionStack') {
+                application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
+            }
+        });
+        this.initEvent(this.pnlWrap);
     }
 
     init() {
@@ -116,13 +109,7 @@ export default class Editor extends Module {
         const components = this.getAttribute('components', true);
         if (components) setPageBlocks(components);
         super.init();
-        this.pnlWrap.addEventListener('drop', (event) => {
-            const elementConfig = getDragData();
-            if (elementConfig?.module?.name === 'sectionStack') {
-                application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
-            }
-        });
-        this.enableDragAndScroll(this);
+        this.initEventListeners();
     }
 
     setRootDir(value: string) {
@@ -287,6 +274,7 @@ export default class Editor extends Module {
                         </i-panel>
                     </i-panel>
                     <i-panel
+                        id="pnlSidebar"
                         height="100%"
                         overflow={{ x: 'hidden', y: 'auto' }}
                         class="pnl-scrollable"
