@@ -7,8 +7,9 @@ import {
     Control,
     VStack,
     application,
+    Panel,
 } from '@ijstech/components';
-import { getPageBlocks, getRootDir, setDragData, setPageBlocks } from '../store/index';
+import { getPageBlocks, setDragData } from '../store/index';
 import { EVENT } from '../const/index';
 import { ElementType, IPageBlockData } from '../interface/index';
 // import { Collapse } from '../common/index';
@@ -30,10 +31,11 @@ export interface PageSidebarElement extends ControlElement {
 
 @customElements('ide-sidebar')
 export class PageSidebar extends Module {
-    private microDAppsStack: VStack;
-    private chartsStack: VStack;
+    private microDAppsStack: GridLayout;
+    private chartsStack: GridLayout;
     private componentsStack: GridLayout;
     private sectionStack: VStack;
+    private pnlMainSidebar: Panel;
 
     private get pageBlocks(): IPageBlockData[] {
         return getPageBlocks();
@@ -50,19 +52,58 @@ export class PageSidebar extends Module {
     }
 
     async renderUI() {
-        this.renderComponentList();
-        this.renderMircoDAppList();
-        this.renderChartList();
+        const stacks = [
+            {
+                title: 'Components',
+                id: 'componentsStack'
+            },
+            {
+                title: 'Micro DApps',
+                id: 'microDAppsStack'
+            },
+            {
+                title: 'Charts',
+                id: 'chartsStack'
+            }
+        ]
+        this.pnlMainSidebar.clearInnerHTML();
+        this.pnlMainSidebar.appendChild(
+            <i-vstack padding={{top: '1rem', bottom: '0.5rem', left: '1rem', right: '1rem'}} border={{ bottom: { width: 1, style: 'solid', color: Theme.divider } }}>
+                <i-vstack
+                    id="sectionStack"
+                    class="text-center pointer builder-item"
+                    verticalAlignment="center"
+                    horizontalAlignment="center"
+                    height="68px" width="100%"
+                    background={{color: Theme.action.hover}}
+                    gap="0.5rem"
+                >
+                    <i-image url={assets.icons.logo} width={24} height={24} display="block"></i-image>
+                    <i-label caption="Section" font={{size: '0.813rem'}} maxHeight={34} overflow={"hidden"} opacity={0.7}></i-label>
+                </i-vstack>
+            </i-vstack>
+        )
+        for (const stack of stacks) {
+            this.pnlMainSidebar.appendChild(
+                <i-scom-page-builder-collapse title={stack.title} border={{ bottom: { width: 1, style: 'solid', color: Theme.divider } }} expanded={true}>
+                    <i-grid-layout
+                        id={stack.id}
+                        templateColumns={['repeat(2, 1fr)']}
+                        gap={{column: '0.5rem', row: '0.75rem'}}
+                        padding={{ top: '0.5rem', bottom: '0.5rem', left: '1rem', right: '1rem' }}
+                    ></i-grid-layout>
+                </i-scom-page-builder-collapse>
+            )
+        }
+        this.renderList(this.componentsStack, 'components');
+        this.renderList(this.microDAppsStack, 'micro-dapps');
+        this.renderList(this.chartsStack, 'charts');
         this.sectionStack.setAttribute('draggable', 'true');
     }
 
-    // private onAddComponent(module: IPageBlockData, type: ElementType) {
-    //     application.EventBus.dispatch(EVENT.ON_ADD_ELEMENT, { type, module });
-    // }
-
-    private async renderComponentList() {
-        this.componentsStack.clearInnerHTML();
-        let components = this.pageBlocks.filter(p => p.category === 'components');
+    private async renderList(parent: Control, category: string) {
+        parent.clearInnerHTML();
+        let components = this.pageBlocks.filter(p => p.category === category);
         let matchedModules = components;
         for (const module of matchedModules) {
             const moduleCard = (
@@ -70,9 +111,10 @@ export class PageSidebar extends Module {
                     class="text-center pointer builder-item"
                     verticalAlignment="center"
                     horizontalAlignment="center"
-                    minWidth={88}
-                    height="5rem"
                     gap="0.5rem"
+                    overflow={'hidden'}
+                    background={{color: Theme.action.hover}}
+                    border={{radius: 5}}
                 >
                     <i-image
                         url={module.imgUrl || assets.icons.logo}
@@ -80,66 +122,14 @@ export class PageSidebar extends Module {
                         height={24}
                         display="block"
                     ></i-image>
-                    <i-label caption={module.name}></i-label>
+                    <i-label
+                        caption={module.name}
+                        font={{size: '0.813rem'}} opacity={0.7}
+                        maxHeight={34} overflow={"hidden"}
+                    ></i-label>
                 </i-vstack>
             );
-            this.componentsStack.append(moduleCard);
-            this.initDrag(moduleCard, module);
-        }
-    }
-
-    private async renderMircoDAppList() {
-        this.microDAppsStack.clearInnerHTML();
-        let components = this.pageBlocks.filter(p => p.category === 'micro-dapps');
-        let matchedModules = components;
-        for (const module of matchedModules) {
-            const moduleCard = (
-                <i-hstack
-                    height={48}
-                    verticalAlignment="center"
-                    gap="1rem"
-                    padding={{ left: '1rem', right: '1rem' }}
-                    class="pointer builder-item"
-                >
-                    <i-image
-                        url={module.imgUrl || assets.icons.logo}
-                        width={24}
-                        height={24}
-                        display="block"
-                    ></i-image>
-                    <i-label caption={module.name} font={{ weight: 600 }}></i-label>
-                </i-hstack>
-            );
-            this.microDAppsStack.append(moduleCard);
-            this.initDrag(moduleCard, module);
-        }
-    }
-
-    private async renderChartList() {
-        this.chartsStack.clearInnerHTML();
-        let components = this.pageBlocks.filter(p => p.category === 'charts');
-        let matchedModules = components;
-        for (const module of matchedModules) {
-            const moduleCard = (
-                <i-hstack
-                    height={48}
-                    verticalAlignment="center"
-                    gap="1rem"
-                    padding={{ left: '1rem', right: '1rem' }}
-                    class="pointer builder-item"
-                >
-                    <i-panel>
-                        <i-image
-                            url={module.imgUrl || assets.icons.logo}
-                            width={24}
-                            height={24}
-                            display="block"
-                        />
-                    </i-panel>
-                    <i-label caption={module.name} font={{ weight: 600 }} />
-                </i-hstack>
-            );
-            this.chartsStack.append(moduleCard);
+            parent.append(moduleCard);
             this.initDrag(moduleCard, module);
         }
     }
@@ -157,63 +147,28 @@ export class PageSidebar extends Module {
             const eventTarget = event.target as Control;
             if (eventTarget.nodeName === 'IMG' || (eventTarget?.closest && !eventTarget.closest('.builder-item')))
                 event.preventDefault();
-            if (eventTarget.id === 'sectionStack')
+            if (eventTarget.id === 'sectionStack') {
                 setDragData({ module: {name: 'sectionStack', path: ''}, type: ElementType.PRIMITIVE });
-            else {
+                eventTarget.classList.add('is-dragging');
+            }
+            else if (eventTarget?.dataset?.name) {
                 const currentName = eventTarget.dataset.name;
                 const type = eventTarget.dataset.type as ElementType;
                 const module = self.pageBlocks.find(block => block.name === currentName);
                 if (module && type) {
                     application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, eventTarget);
                     setDragData({ module, type });
+                    eventTarget.classList.add('is-dragging');
                 }
+            } else {
+                event.preventDefault();
             }
         })
     }
 
     render() {
         return (
-            <i-panel class="navigator" height={'100%'} maxWidth="100%">
-                <i-vstack
-                    padding={{top: '1rem', bottom: '1rem', left: '1rem', right: '1rem'}}
-                >
-                    <i-vstack
-                        id="sectionStack"
-                        class="text-center pointer builder-item"
-                        verticalAlignment="center"
-                        horizontalAlignment="center"
-                        height="5rem" width="100%"
-                        gap="0.5rem"
-                    >
-                        <i-image
-                            url={assets.icons.logo}
-                            width={24}
-                            height={24}
-                            display="block"
-                        ></i-image>
-                        <i-label caption="Section"></i-label>
-                    </i-vstack>
-                </i-vstack>
-                <i-scom-page-builder-collapse title="Components" border={{ bottom: { width: 1, style: 'solid', color: Theme.divider } }} expanded={true}>
-                    <i-grid-layout
-                        id="componentsStack"
-                        templateColumns={['repeat(2, 1fr)']}
-                        margin={{ top: 6 }}
-                    ></i-grid-layout>
-                </i-scom-page-builder-collapse>
-                <i-scom-page-builder-collapse title="Micro DApps" border={{ bottom: { width: 1, style: 'solid', color: Theme.divider } }} expanded={true}>
-                    <i-vstack
-                        id="microDAppsStack"
-                        padding={{ top: '8px', bottom: '8px' }}
-                    ></i-vstack>
-                </i-scom-page-builder-collapse>
-                <i-scom-page-builder-collapse title="Charts" border={{ bottom: { width: 1, style: 'solid', color: Theme.divider } }} expanded={true}>
-                    <i-vstack
-                        id="chartsStack"
-                        padding={{ top: '8px', bottom: '8px' }}
-                    />
-                </i-scom-page-builder-collapse>
-            </i-panel>
+            <i-panel id="pnlMainSidebar" class="navigator" height={'100%'} maxWidth="100%"></i-panel>
         );
     }
 }

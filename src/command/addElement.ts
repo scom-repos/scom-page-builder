@@ -68,6 +68,11 @@ export class AddElementCommand implements ICommand {
     this.element = await this.parent.addElement(newElData);
     const parentId = this.parent.id.replace('row-', '');
     pageObject.addElement(parentId, newElData);
+    if (this.parent) {
+      const elementRowId = (this.parent?.id || '').replace('row-', '');
+      const elementSection = pageObject.getRow(elementRowId);
+      this.parent.toggleUI(!!elementSection?.elements?.length);
+    }
   }
 
   undo(): void {
@@ -78,6 +83,11 @@ export class AddElementCommand implements ICommand {
     for (let columnData of [...this.oldDataColumnMap]) {
       const { el, rowId, column, columnSpan } = columnData;
       updateColumnData(el, rowId, column, columnSpan);
+    }
+    if (this.parent) {
+      const elementRowId = (this.parent?.id || '').replace('row-', '');
+      const elementSection = pageObject.getRow(elementRowId);
+      this.parent.toggleUI(!!elementSection?.elements?.length);
     }
   }
 

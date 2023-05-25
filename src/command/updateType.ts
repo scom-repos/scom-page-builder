@@ -1,29 +1,30 @@
 import { ICommand } from "./interface";
-import { getDragData, pageObject } from "../store/index";
+import { pageObject } from "../store/index";
 import { Control } from "@ijstech/components";
 import { generateUUID } from "../utility/index";
 import { ElementType, IElementConfig } from "../interface/index";
 
 export class UpdateTypeCommand implements ICommand {
   private element: any;
-  private dropElm: Control;
-  private oldDataRow: string;
+  private elementParent: any;
+  private dropParent: Control;
   private data: any;
   private oldDropData: any;
   private config: any;
+  private dropSectionId: string;
+  private isNew: boolean;
 
   constructor(dropElm: Control, element?: any, config?: IElementConfig) {
     this.element = element || null;
-    this.dropElm = dropElm;
-    const pageRow = (element ? element.closest('ide-row') : dropElm.closest('ide-row')) as Control;
-    this.oldDataRow = (pageRow?.id || '').replace('row-', '');
+    this.elementParent = (element ? element.closest('ide-row') : dropElm.closest('ide-row')) as Control;
+    this.dropParent = dropElm.closest('ide-row') as Control;
     this.data = element ? JSON.parse(JSON.stringify(element.data)) : null;
     this.config = config || null;
-    const dropToolbar = this.dropElm.closest('ide-toolbar') as any;
-    const dropRowId = dropToolbar?.rowId;
-    const dropSection = this.dropElm.closest('ide-section');
-    const dropSectionId = (dropSection?.id || '');
-    this.oldDropData = JSON.parse(JSON.stringify(pageObject.getElement(dropRowId, dropSectionId)));
+    const dropRowId = this.dropParent?.id.replace('row-', '');
+    const dropSection = dropElm.closest('ide-section');
+    this.dropSectionId = (dropSection?.id || '');
+    this.oldDropData = JSON.parse(JSON.stringify(pageObject.getElement(dropRowId, this.dropSectionId)));
+    this.isNew = !this.element;
   }
 
   private getElements() {
@@ -49,60 +50,56 @@ export class UpdateTypeCommand implements ICommand {
     }
   }
 
-  private get isNew() {
-    return !this.element;
-  }
-
   execute(): void {
-    this.dropElm.style.border = "";
-    const dropToolbar = this.dropElm.closest('ide-toolbar') as any;
-    if (!dropToolbar) return;
-    const dropRowId = dropToolbar?.rowId;
-    const dropSectionId = dropToolbar?.elementId;
-    const dropSection = document.getElementById(`${dropSectionId}`);
-    const dropSectionData = pageObject.getElement(dropRowId, dropSectionId);
-    const clonedDropSecData = JSON.parse(JSON.stringify(dropSectionData));
-    if (!dropSectionId || !dropRowId || !dropSectionData) return;
+    if (this.element && this.elementParent) {
+      this.element = this.elementParent.querySelector(`[id='${this.element.id}']`) as Control;
+    }
+    const dropRowId = this.dropParent?.id.replace('row-', '');
+    const dropSection = this.dropParent.querySelector(`[id='${this.dropSectionId}']`) as Control;
 
+    const dropSectionData = pageObject.getElement(dropRowId, this.dropSectionId);
+    const clonedDropSecData = JSON.parse(JSON.stringify(dropSectionData));
+    if (!this.dropSectionId || !dropRowId || !dropSectionData) return;
+
+    const elementList = this.getElements();
     if (clonedDropSecData?.type === ElementType.COMPOSITE) {
-      const elementIndex = dropSectionData.elements.findIndex(elm => elm.id === dropSectionId);
-      const elementList = this.getElements();
+      const elementIndex = dropSectionData.elements.findIndex(elm => elm.id === this.dropSectionId);
       for (let i = 0; i < elementList.length; i++) {
-        pageObject.addElement(dropRowId, elementList[i], dropSectionId, elementIndex + i + 1);
+        pageObject.addElement(dropRowId, elementList[i], this.dropSectionId, elementIndex + i + 1);
       }
     } else if (clonedDropSecData?.type === ElementType.PRIMITIVE) {
-      const elementList = this.getElements();
       clonedDropSecData.id = generateUUID();
-      pageObject.setElement(dropRowId, dropSectionId, {
+      pageObject.setElement(dropRowId, this.dropSectionId, {
         type: ElementType.COMPOSITE,
-        elements: [clonedDropSecData, ...elementList]
+        elements: [clonedDropSecData, ...elementList],
+        dropId: this.data?.id || ''
       })
     }
-
-    (dropSection as any).setData(dropRowId, pageObject.getElement(dropRowId, dropSectionId));
+    const newDropData = pageObject.getElement(dropRowId, this.dropSectionId);
+    (dropSection as any).setData(dropRowId, newDropData);
     if (this.isNew) return;
-
-    const elementRow = this.element.closest('ide-row') as Control;
-    const elementRowId = (elementRow?.id || '').replace('row-', '');
-    pageObject.removeElement(elementRowId, this.element.id);
-
-    const elementSection = pageObject.getRow(elementRowId);
-    elementRow.visible = !!elementSection?.elements?.length;
+    if (this.elementParent) {
+      const elementRowId = (this.elementParent?.id || '').replace('row-', '');
+      const elementSection = pageObject.getRow(elementRowId);
+      if (elementRowId !== dropRowId)
+        pageObject.removeElement(elementRowId, this.element.id);
+      this.elementParent.visible = !!elementSection?.elements?.length;
+    }
+    if (this.element) this.element.remove();
   }
 
   undo(): void {
-    const dropToolbar = this.dropElm.closest('ide-toolbar') as any;
-    const dropRowId = dropToolbar?.rowId;
-    const dropSection = dropToolbar.parent.closest('ide-section');
-    dropSection && (dropSection as any).setData(dropRowId, this.oldDropData);
+    const dropRowId = this.dropParent?.id.replace('row-', '');
+    const dropSection: any = this.dropParent.querySelector(`[id='${this.dropSectionId}']`);
+    dropSection && dropSection.setData(dropRowId, this.oldDropData);
     pageObject.setElement(dropRowId, this.oldDropData.id, this.oldDropData);
-
     if (this.isNew) return;
-    const oldElementRow = document.querySelector(`#row-${this.oldDataRow}`) as Control;
-    pageObject.addElement(this.oldDataRow, this.data);
-
-    const oldElementSection = pageObject.getRow(this.oldDataRow);
-    oldElementRow && (oldElementRow.visible = !!oldElementSection?.elements?.length);
+    const rowId = (this.elementParent?.id || '').replace('row-', '');
+    pageObject.addElement(rowId, this.data);
+    if (this.elementParent) {
+      const oldElementSection = pageObject.getRow(rowId);
+      this.elementParent.visible = !!oldElementSection?.elements?.length;
+    }
   }
 
   redo(): void {}

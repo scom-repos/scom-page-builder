@@ -230,6 +230,8 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports"], functio
             if (value.tag !== undefined)
                 elm.tag = value.tag;
             if (value.type !== undefined && elm.type !== value.type) {
+                if (value.dropId)
+                    this.removeElement(sectionId, value.dropId);
                 if (value.type === 'primitive') {
                     elm.type = value.type;
                     elm.module = ((_a = value.elements) === null || _a === void 0 ? void 0 : _a[0]) || {};
@@ -1037,8 +1039,8 @@ define("@scom/scom-page-builder/command/updateRow.ts", ["require", "exports", "@
                     prependRow && prependRow.insertAdjacentElement('afterend', this.element);
                 }
                 const prependId = this.prependId.replace('row-', '');
-                const prependIndex = index_4.pageObject.sections.findIndex(section => section.id === prependId);
-                index_4.pageObject.addRow(this.data, this.rowId, prependIndex);
+                const prependIndex = prependId ? index_4.pageObject.sections.findIndex(section => section.id === prependId) : -1;
+                index_4.pageObject.addRow(this.data, this.rowId, prependIndex + 1);
             }
             if ((_a = this.element) === null || _a === void 0 ? void 0 : _a.toggleUI) {
                 const hasData = (_c = (_b = this.data) === null || _b === void 0 ? void 0 : _b.elements) === null || _c === void 0 ? void 0 : _c.length;
@@ -1221,15 +1223,15 @@ define("@scom/scom-page-builder/command/resize.ts", ["require", "exports", "@sco
             this.gapWidth = 15;
             this.gridColumnWidth = 0;
             this.element = element;
-            this.toolbar = element.querySelector('ide-toolbar');
+            this.parent = this.element.closest('ide-row');
             this.finalWidth = finalWidth || initialWidth;
             this.finalHeight = finalHeight || initialHeight;
             this.finalLeft = Number(this.element.left);
             this.initialWidth = initialWidth;
             this.initialHeight = initialHeight;
             this.oldDataColumn = {
-                column: Number(element.dataset.column),
-                columnSpan: Number(element.dataset.columnSpan)
+                column: Number(this.element.dataset.column),
+                columnSpan: Number(this.element.dataset.columnSpan)
             };
             const grid = this.element.parent.closest('.grid');
             if (grid)
@@ -1273,11 +1275,12 @@ define("@scom/scom-page-builder/command/resize.ts", ["require", "exports", "@sco
             return { column: finalColumn, columnSpan: finalColumnSpan };
         }
         execute() {
-            var _a, _b, _c;
-            const builder = (_a = document.getElementsByTagName(`i-scom-page-builder`)) === null || _a === void 0 ? void 0 : _a[0];
-            if (!builder)
+            var _a, _b;
+            if (!this.parent)
                 return;
-            this.element = builder.querySelector(`[id='${this.element.id}']`) || this.element;
+            this.element = this.parent.querySelector(`[id='${this.element.id}']`);
+            if (!this.element)
+                return;
             this.toolbar = this.element.querySelector('ide-toolbar');
             const newColumnData = this.getColumnData();
             if (!newColumnData)
@@ -1290,7 +1293,7 @@ define("@scom/scom-page-builder/command/resize.ts", ["require", "exports", "@sco
             if (this.toolbar) {
                 const rowId = this.toolbar.rowId;
                 const elementId = this.toolbar.elementId;
-                const currentTag = ((_c = (_b = this.toolbar) === null || _b === void 0 ? void 0 : _b.data) === null || _c === void 0 ? void 0 : _c.tag) || {};
+                const currentTag = ((_b = (_a = this.toolbar) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.tag) || {};
                 const tag = Object.assign(Object.assign({}, currentTag), { width: this.finalWidth || '100%', height: this.finalHeight || this.initialHeight });
                 this.toolbar.setTag(tag);
                 if (newColumnData.column !== this.oldDataColumn.column || newColumnData.columnSpan !== this.oldDataColumn.columnSpan)
@@ -1501,7 +1504,7 @@ define("@scom/scom-page-builder/command/dragElement.ts", ["require", "exports", 
                 columnSpan: Number(element.dataset.columnSpan)
             };
             const pageRow = element.closest('ide-row');
-            this.oldDataRow = ((pageRow === null || pageRow === void 0 ? void 0 : pageRow.id) || '').replace('row-', '');
+            this.parent = pageRow;
             this.data = JSON.parse(JSON.stringify(element.data));
             this.updateData = this.updateData.bind(this);
         }
@@ -1525,8 +1528,10 @@ define("@scom/scom-page-builder/command/dragElement.ts", ["require", "exports", 
                 columnUtils_1.getDropColumnData(this.dropElm, sortedSections, this.element);
         }
         execute() {
-            var _a;
-            this.element = document.getElementById(`${this.element.id}`);
+            var _a, _b;
+            if (!this.parent)
+                return;
+            this.element = this.parent.querySelector(`[id='${this.element.id}']`);
             if (!this.element)
                 return;
             this.dropElm.style.border = "";
@@ -1544,12 +1549,11 @@ define("@scom/scom-page-builder/command/dragElement.ts", ["require", "exports", 
             this.element.style.gridColumn = `${column} / span ${columnSpan}`;
             this.element.setAttribute('data-column', `${column}`);
             this.element.setAttribute('data-column-span', `${columnSpan}`);
-            const elementRow = this.element.closest('ide-row');
             const dropRow = this.dropElm.closest('ide-row');
             const dropRowId = ((dropRow === null || dropRow === void 0 ? void 0 : dropRow.id) || '').replace('row-', '');
-            const elementRowId = ((elementRow === null || elementRow === void 0 ? void 0 : elementRow.id) || '').replace('row-', '');
+            const elementRowId = (((_a = this.parent) === null || _a === void 0 ? void 0 : _a.id) || '').replace('row-', '');
             index_8.pageObject.setElement(elementRowId, this.element.id, { column, columnSpan });
-            if (elementRow && !elementRow.isEqualNode(dropRow)) {
+            if (this.parent && !this.parent.isEqualNode(dropRow)) {
                 index_8.pageObject.addElement(dropRowId, Object.assign(Object.assign({}, this.data), { column, columnSpan }));
                 index_8.pageObject.removeElement(elementRowId, this.element.id);
                 grid = grid || this.dropElm.querySelector('.grid');
@@ -1561,36 +1565,40 @@ define("@scom/scom-page-builder/command/dragElement.ts", ["require", "exports", 
                 this.element.parent = grid;
                 dropRow.toggleUI(true);
             }
-            const elementSection = index_8.pageObject.getRow(elementRowId);
-            elementRow.visible = !!((_a = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _a === void 0 ? void 0 : _a.length);
+            if (this.parent) {
+                const elementSection = index_8.pageObject.getRow(elementRowId);
+                this.parent.visible = !!((_b = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _b === void 0 ? void 0 : _b.length);
+            }
         }
         undo() {
-            var _a;
+            var _a, _b;
             this.element.style.gridRow = '1';
             this.element.style.gridColumn = `${this.oldDataColumn.column} / span ${this.oldDataColumn.columnSpan}`;
             this.element.setAttribute('data-column', `${this.oldDataColumn.column}`);
             this.element.setAttribute('data-column-span', `${this.oldDataColumn.columnSpan}`);
-            const elementRow = this.element.closest('ide-row');
+            const elementRow = this.element.parent.closest('ide-row');
             const elementRowId = ((elementRow === null || elementRow === void 0 ? void 0 : elementRow.id) || '').replace('row-', '');
             index_8.pageObject.setElement(elementRowId, this.element.id, Object.assign({}, this.oldDataColumn));
-            if (!this.oldDataRow)
+            if (!this.parent.id)
                 return;
-            const oldElementRow = document.querySelector(`#row-${this.oldDataRow}`);
-            if (oldElementRow && !elementRow.isEqualNode(oldElementRow)) {
-                index_8.pageObject.addElement(this.oldDataRow, Object.assign(Object.assign({}, this.data), this.oldDataColumn));
+            const oldRowId = (((_a = this.parent) === null || _a === void 0 ? void 0 : _a.id) || '').replace('row-', '');
+            if (this.parent && elementRow && !elementRow.isEqualNode(this.parent)) {
+                index_8.pageObject.addElement(oldRowId, Object.assign(Object.assign({}, this.data), this.oldDataColumn));
                 index_8.pageObject.removeElement(elementRowId, this.element.id);
-                const oldGrid = oldElementRow.querySelector('.grid');
+                const oldGrid = this.parent.querySelector('.grid');
                 if (oldGrid) {
                     oldGrid.appendChild(this.element);
                     const toolbar = this.element.querySelector('ide-toolbar');
                     if (toolbar)
-                        toolbar.rowId = this.oldDataRow;
-                    this.element.rowId = this.oldDataRow;
+                        toolbar.rowId = oldRowId;
+                    this.element.rowId = oldRowId;
                     this.element.parent = oldGrid;
                 }
             }
-            const oldElementSection = index_8.pageObject.getRow(this.oldDataRow);
-            oldElementRow && (oldElementRow.visible = !!((_a = oldElementSection === null || oldElementSection === void 0 ? void 0 : oldElementSection.elements) === null || _a === void 0 ? void 0 : _a.length));
+            if (this.parent) {
+                const oldElementSection = index_8.pageObject.getRow(oldRowId);
+                this.parent.visible = !!((_b = oldElementSection === null || oldElementSection === void 0 ? void 0 : oldElementSection.elements) === null || _b === void 0 ? void 0 : _b.length);
+            }
             for (let columnData of this.oldDataColumnMap) {
                 const { el, rowId, column, columnSpan } = columnData;
                 columnUtils_1.updateColumnData(el, rowId, column, columnSpan);
@@ -1660,17 +1668,17 @@ define("@scom/scom-page-builder/command/updateType.ts", ["require", "exports", "
     exports.UpdateTypeCommand = void 0;
     class UpdateTypeCommand {
         constructor(dropElm, element, config) {
+            var _a;
             this.element = element || null;
-            this.dropElm = dropElm;
-            const pageRow = (element ? element.closest('ide-row') : dropElm.closest('ide-row'));
-            this.oldDataRow = ((pageRow === null || pageRow === void 0 ? void 0 : pageRow.id) || '').replace('row-', '');
+            this.elementParent = (element ? element.closest('ide-row') : dropElm.closest('ide-row'));
+            this.dropParent = dropElm.closest('ide-row');
             this.data = element ? JSON.parse(JSON.stringify(element.data)) : null;
             this.config = config || null;
-            const dropToolbar = this.dropElm.closest('ide-toolbar');
-            const dropRowId = dropToolbar === null || dropToolbar === void 0 ? void 0 : dropToolbar.rowId;
-            const dropSection = this.dropElm.closest('ide-section');
-            const dropSectionId = ((dropSection === null || dropSection === void 0 ? void 0 : dropSection.id) || '');
-            this.oldDropData = JSON.parse(JSON.stringify(index_11.pageObject.getElement(dropRowId, dropSectionId)));
+            const dropRowId = (_a = this.dropParent) === null || _a === void 0 ? void 0 : _a.id.replace('row-', '');
+            const dropSection = dropElm.closest('ide-section');
+            this.dropSectionId = ((dropSection === null || dropSection === void 0 ? void 0 : dropSection.id) || '');
+            this.oldDropData = JSON.parse(JSON.stringify(index_11.pageObject.getElement(dropRowId, this.dropSectionId)));
+            this.isNew = !this.element;
         }
         getElements() {
             var _a, _b, _c, _d, _e, _f;
@@ -1696,59 +1704,60 @@ define("@scom/scom-page-builder/command/updateType.ts", ["require", "exports", "
                     return [this.data];
             }
         }
-        get isNew() {
-            return !this.element;
-        }
         execute() {
-            var _a;
-            this.dropElm.style.border = "";
-            const dropToolbar = this.dropElm.closest('ide-toolbar');
-            if (!dropToolbar)
-                return;
-            const dropRowId = dropToolbar === null || dropToolbar === void 0 ? void 0 : dropToolbar.rowId;
-            const dropSectionId = dropToolbar === null || dropToolbar === void 0 ? void 0 : dropToolbar.elementId;
-            const dropSection = document.getElementById(`${dropSectionId}`);
-            const dropSectionData = index_11.pageObject.getElement(dropRowId, dropSectionId);
+            var _a, _b, _c, _d;
+            if (this.element && this.elementParent) {
+                this.element = this.elementParent.querySelector(`[id='${this.element.id}']`);
+            }
+            const dropRowId = (_a = this.dropParent) === null || _a === void 0 ? void 0 : _a.id.replace('row-', '');
+            const dropSection = this.dropParent.querySelector(`[id='${this.dropSectionId}']`);
+            const dropSectionData = index_11.pageObject.getElement(dropRowId, this.dropSectionId);
             const clonedDropSecData = JSON.parse(JSON.stringify(dropSectionData));
-            if (!dropSectionId || !dropRowId || !dropSectionData)
+            if (!this.dropSectionId || !dropRowId || !dropSectionData)
                 return;
+            const elementList = this.getElements();
             if ((clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.type) === index_13.ElementType.COMPOSITE) {
-                const elementIndex = dropSectionData.elements.findIndex(elm => elm.id === dropSectionId);
-                const elementList = this.getElements();
+                const elementIndex = dropSectionData.elements.findIndex(elm => elm.id === this.dropSectionId);
                 for (let i = 0; i < elementList.length; i++) {
-                    index_11.pageObject.addElement(dropRowId, elementList[i], dropSectionId, elementIndex + i + 1);
+                    index_11.pageObject.addElement(dropRowId, elementList[i], this.dropSectionId, elementIndex + i + 1);
                 }
             }
             else if ((clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.type) === index_13.ElementType.PRIMITIVE) {
-                const elementList = this.getElements();
                 clonedDropSecData.id = index_12.generateUUID();
-                index_11.pageObject.setElement(dropRowId, dropSectionId, {
+                index_11.pageObject.setElement(dropRowId, this.dropSectionId, {
                     type: index_13.ElementType.COMPOSITE,
-                    elements: [clonedDropSecData, ...elementList]
+                    elements: [clonedDropSecData, ...elementList],
+                    dropId: ((_b = this.data) === null || _b === void 0 ? void 0 : _b.id) || ''
                 });
             }
-            dropSection.setData(dropRowId, index_11.pageObject.getElement(dropRowId, dropSectionId));
+            const newDropData = index_11.pageObject.getElement(dropRowId, this.dropSectionId);
+            dropSection.setData(dropRowId, newDropData);
             if (this.isNew)
                 return;
-            const elementRow = this.element.closest('ide-row');
-            const elementRowId = ((elementRow === null || elementRow === void 0 ? void 0 : elementRow.id) || '').replace('row-', '');
-            index_11.pageObject.removeElement(elementRowId, this.element.id);
-            const elementSection = index_11.pageObject.getRow(elementRowId);
-            elementRow.visible = !!((_a = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _a === void 0 ? void 0 : _a.length);
+            if (this.elementParent) {
+                const elementRowId = (((_c = this.elementParent) === null || _c === void 0 ? void 0 : _c.id) || '').replace('row-', '');
+                const elementSection = index_11.pageObject.getRow(elementRowId);
+                if (elementRowId !== dropRowId)
+                    index_11.pageObject.removeElement(elementRowId, this.element.id);
+                this.elementParent.visible = !!((_d = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _d === void 0 ? void 0 : _d.length);
+            }
+            if (this.element)
+                this.element.remove();
         }
         undo() {
-            var _a;
-            const dropToolbar = this.dropElm.closest('ide-toolbar');
-            const dropRowId = dropToolbar === null || dropToolbar === void 0 ? void 0 : dropToolbar.rowId;
-            const dropSection = dropToolbar.parent.closest('ide-section');
+            var _a, _b, _c;
+            const dropRowId = (_a = this.dropParent) === null || _a === void 0 ? void 0 : _a.id.replace('row-', '');
+            const dropSection = this.dropParent.querySelector(`[id='${this.dropSectionId}']`);
             dropSection && dropSection.setData(dropRowId, this.oldDropData);
             index_11.pageObject.setElement(dropRowId, this.oldDropData.id, this.oldDropData);
             if (this.isNew)
                 return;
-            const oldElementRow = document.querySelector(`#row-${this.oldDataRow}`);
-            index_11.pageObject.addElement(this.oldDataRow, this.data);
-            const oldElementSection = index_11.pageObject.getRow(this.oldDataRow);
-            oldElementRow && (oldElementRow.visible = !!((_a = oldElementSection === null || oldElementSection === void 0 ? void 0 : oldElementSection.elements) === null || _a === void 0 ? void 0 : _a.length));
+            const rowId = (((_b = this.elementParent) === null || _b === void 0 ? void 0 : _b.id) || '').replace('row-', '');
+            index_11.pageObject.addElement(rowId, this.data);
+            if (this.elementParent) {
+                const oldElementSection = index_11.pageObject.getRow(rowId);
+                this.elementParent.visible = !!((_c = oldElementSection === null || oldElementSection === void 0 ? void 0 : oldElementSection.elements) === null || _c === void 0 ? void 0 : _c.length);
+            }
         }
         redo() { }
     }
@@ -1792,7 +1801,7 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
                 columnUtils_2.getDropColumnData(this.dropElm, sortedSections);
         }
         async execute() {
-            var _a, _b;
+            var _a, _b, _c, _d;
             let column = 1;
             let columnSpan = 6;
             if (!this.isNew) {
@@ -1817,8 +1826,14 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
             this.element = await this.parent.addElement(newElData);
             const parentId = this.parent.id.replace('row-', '');
             index_14.pageObject.addElement(parentId, newElData);
+            if (this.parent) {
+                const elementRowId = (((_c = this.parent) === null || _c === void 0 ? void 0 : _c.id) || '').replace('row-', '');
+                const elementSection = index_14.pageObject.getRow(elementRowId);
+                this.parent.toggleUI(!!((_d = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _d === void 0 ? void 0 : _d.length));
+            }
         }
         undo() {
+            var _a, _b;
             if (!this.element)
                 return;
             this.element.remove();
@@ -1827,6 +1842,11 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
             for (let columnData of [...this.oldDataColumnMap]) {
                 const { el, rowId, column, columnSpan } = columnData;
                 columnUtils_2.updateColumnData(el, rowId, column, columnSpan);
+            }
+            if (this.parent) {
+                const elementRowId = (((_a = this.parent) === null || _a === void 0 ? void 0 : _a.id) || '').replace('row-', '');
+                const elementSection = index_14.pageObject.getRow(elementRowId);
+                this.parent.toggleUI(!!((_b = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _b === void 0 ? void 0 : _b.length));
             }
         }
         redo() { }
@@ -2972,9 +2992,6 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 };
                 if (action.userInputUISchema)
                     options.jsonUISchema = action.userInputUISchema;
-                // console.log('schema: ', action.userInputDataSchema)
-                // console.log('data: ', data)
-                // renderUI(this.pnlForm, action.userInputDataSchema, this.onSave.bind(this), data, options);
                 components_17.renderUI(this.pnlForm, options, this.onSave.bind(this));
             }
         }
@@ -3937,10 +3954,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             });
             document.addEventListener('mouseup', (e) => {
                 e.preventDefault();
+                self.removeDottedLines();
+                this.isResizing = false;
                 if (!toolbar)
                     return;
-                this.isResizing = false;
-                self.removeDottedLines();
                 toolbar.width = 'initial';
                 toolbar.height = 'initial';
                 const contentStack = toolbar.querySelector('#contentStack');
@@ -4062,6 +4079,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 for (const block of blocks) {
                     block.classList.remove('dragenter');
                 }
+                let components = document.getElementsByClassName('is-dragging');
+                for (const component of components) {
+                    component.classList.remove('is-dragging');
+                }
             });
             this.addEventListener('dragenter', function (event) {
                 var _a, _b, _c, _d;
@@ -4141,24 +4162,18 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             });
             document.addEventListener('dragleave', function (event) {
                 const eventTarget = event.target;
-                const target = eventTarget.closest('.fixed-grid-item');
-                if (target) {
-                    target.style.border = '';
-                    let rectangles = document.getElementsByClassName('rectangle');
-                    for (const rectangle of rectangles) {
-                        rectangle.style.display = 'none';
-                    }
+                let rectangles = document.getElementsByClassName('rectangle');
+                for (const rectangle of rectangles) {
+                    rectangle.style.display = 'none';
                 }
-                else {
-                    const blocks = document.getElementsByClassName('is-dragenter');
-                    for (const block of blocks) {
-                        const currentSection = eventTarget.closest('ide-section');
-                        const blockSection = block.closest('ide-section');
-                        if (currentSection && blockSection && currentSection.id === blockSection.id)
-                            continue;
-                        block.visible = false;
-                        block.classList.remove('is-dragenter');
-                    }
+                const blocks = document.getElementsByClassName('is-dragenter');
+                for (const block of blocks) {
+                    const currentSection = eventTarget.closest('ide-section');
+                    const blockSection = block.closest('ide-section');
+                    if (currentSection && blockSection && currentSection.id === blockSection.id)
+                        continue;
+                    block.visible = false;
+                    block.classList.remove('is-dragenter');
                 }
                 const pageRows = document.getElementsByClassName('dragenter');
                 for (const row of pageRows) {
@@ -4173,6 +4188,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const elementConfig = index_43.getDragData();
                 const eventTarget = event.target;
                 const pageRow = eventTarget.closest('ide-row');
+                self.removeDottedLines();
                 event.preventDefault();
                 event.stopPropagation();
                 if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack')
@@ -4221,7 +4237,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         dropElm.classList.remove('is-dragenter');
                         const isBottomBlock = dropElm.classList.contains('bottom-block');
                         if (isBottomBlock) {
-                            const dragCmd = new index_44.UpdateTypeCommand(dropElm, index_43.getDragData() ? null : self.currentElement, index_43.getDragData());
+                            const config = index_43.getDragData();
+                            const dragCmd = new index_44.UpdateTypeCommand(dropElm, config ? null : self.currentElement, config);
                             index_44.commandHistory.execute(dragCmd);
                         }
                         else {
@@ -4555,7 +4572,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
                 el.id = index_47.generateUUID();
                 return el;
             });
-            await this.appendRow(Object.assign(Object.assign({}, clonedData), { elements: newElements, id: newId }), id);
+            await this.appendRow(Object.assign(Object.assign({}, clonedData), { elements: newElements, id: newId, row: this.getRows().length }), id);
         }
         async onCreateSection(prependId) {
             const pageRow = (this.$render("ide-row", { maxWidth: "100%", maxHeight: "100%" }));
@@ -4611,10 +4628,7 @@ define("@scom/scom-page-builder/page/pageSidebar.css.ts", ["require", "exports",
                 overflow: 'hidden'
             },
             '.pointer': {
-                cursor: 'grab'
-            },
-            '.pointer:hover': {
-                background: Theme.action.hover
+                cursor: 'all-scroll'
             },
             '.insert-tabs': {
                 $nest: {
@@ -4639,6 +4653,15 @@ define("@scom/scom-page-builder/page/pageSidebar.css.ts", ["require", "exports",
             },
             'i-tabs i-tab:not(.disabled).active': {
                 borderColor: 'transparent'
+            },
+            '.builder-item': {
+                transition: 'opacity .2s ease-in-out, transform 0.2s ease-in-out',
+                width: 97,
+                height: '5rem',
+                opacity: 1
+            },
+            '.is-dragging': {
+                opacity: 0
             }
         }
     });
@@ -4661,48 +4684,43 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
             this.initEventListeners();
         }
         async renderUI() {
-            this.renderComponentList();
-            this.renderMircoDAppList();
-            this.renderChartList();
+            const stacks = [
+                {
+                    title: 'Components',
+                    id: 'componentsStack'
+                },
+                {
+                    title: 'Micro DApps',
+                    id: 'microDAppsStack'
+                },
+                {
+                    title: 'Charts',
+                    id: 'chartsStack'
+                }
+            ];
+            this.pnlMainSidebar.clearInnerHTML();
+            this.pnlMainSidebar.appendChild(this.$render("i-vstack", { padding: { top: '1rem', bottom: '0.5rem', left: '1rem', right: '1rem' }, border: { bottom: { width: 1, style: 'solid', color: Theme.divider } } },
+                this.$render("i-vstack", { id: "sectionStack", class: "text-center pointer builder-item", verticalAlignment: "center", horizontalAlignment: "center", height: "68px", width: "100%", background: { color: Theme.action.hover }, gap: "0.5rem" },
+                    this.$render("i-image", { url: assets_2.default.icons.logo, width: 24, height: 24, display: "block" }),
+                    this.$render("i-label", { caption: "Section", font: { size: '0.813rem' }, maxHeight: 34, overflow: "hidden", opacity: 0.7 }))));
+            for (const stack of stacks) {
+                this.pnlMainSidebar.appendChild(this.$render("i-scom-page-builder-collapse", { title: stack.title, border: { bottom: { width: 1, style: 'solid', color: Theme.divider } }, expanded: true },
+                    this.$render("i-grid-layout", { id: stack.id, templateColumns: ['repeat(2, 1fr)'], gap: { column: '0.5rem', row: '0.75rem' }, padding: { top: '0.5rem', bottom: '0.5rem', left: '1rem', right: '1rem' } })));
+            }
+            this.renderList(this.componentsStack, 'components');
+            this.renderList(this.microDAppsStack, 'micro-dapps');
+            this.renderList(this.chartsStack, 'charts');
             this.sectionStack.setAttribute('draggable', 'true');
         }
-        // private onAddComponent(module: IPageBlockData, type: ElementType) {
-        //     application.EventBus.dispatch(EVENT.ON_ADD_ELEMENT, { type, module });
-        // }
-        async renderComponentList() {
-            this.componentsStack.clearInnerHTML();
-            let components = this.pageBlocks.filter(p => p.category === 'components');
+        async renderList(parent, category) {
+            parent.clearInnerHTML();
+            let components = this.pageBlocks.filter(p => p.category === category);
             let matchedModules = components;
             for (const module of matchedModules) {
-                const moduleCard = (this.$render("i-vstack", { class: "text-center pointer builder-item", verticalAlignment: "center", horizontalAlignment: "center", minWidth: 88, height: "5rem", gap: "0.5rem" },
+                const moduleCard = (this.$render("i-vstack", { class: "text-center pointer builder-item", verticalAlignment: "center", horizontalAlignment: "center", gap: "0.5rem", overflow: 'hidden', background: { color: Theme.action.hover }, border: { radius: 5 } },
                     this.$render("i-image", { url: module.imgUrl || assets_2.default.icons.logo, width: 24, height: 24, display: "block" }),
-                    this.$render("i-label", { caption: module.name })));
-                this.componentsStack.append(moduleCard);
-                this.initDrag(moduleCard, module);
-            }
-        }
-        async renderMircoDAppList() {
-            this.microDAppsStack.clearInnerHTML();
-            let components = this.pageBlocks.filter(p => p.category === 'micro-dapps');
-            let matchedModules = components;
-            for (const module of matchedModules) {
-                const moduleCard = (this.$render("i-hstack", { height: 48, verticalAlignment: "center", gap: "1rem", padding: { left: '1rem', right: '1rem' }, class: "pointer builder-item" },
-                    this.$render("i-image", { url: module.imgUrl || assets_2.default.icons.logo, width: 24, height: 24, display: "block" }),
-                    this.$render("i-label", { caption: module.name, font: { weight: 600 } })));
-                this.microDAppsStack.append(moduleCard);
-                this.initDrag(moduleCard, module);
-            }
-        }
-        async renderChartList() {
-            this.chartsStack.clearInnerHTML();
-            let components = this.pageBlocks.filter(p => p.category === 'charts');
-            let matchedModules = components;
-            for (const module of matchedModules) {
-                const moduleCard = (this.$render("i-hstack", { height: 48, verticalAlignment: "center", gap: "1rem", padding: { left: '1rem', right: '1rem' }, class: "pointer builder-item" },
-                    this.$render("i-panel", null,
-                        this.$render("i-image", { url: module.imgUrl || assets_2.default.icons.logo, width: 24, height: 24, display: "block" })),
-                    this.$render("i-label", { caption: module.name, font: { weight: 600 } })));
-                this.chartsStack.append(moduleCard);
+                    this.$render("i-label", { caption: module.name, font: { size: '0.813rem' }, opacity: 0.7, maxHeight: 34, overflow: "hidden" })));
+                parent.append(moduleCard);
                 this.initDrag(moduleCard, module);
             }
         }
@@ -4714,35 +4732,32 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
         initEventListeners() {
             const self = this;
             this.addEventListener('dragstart', function (event) {
+                var _a;
                 event.stopPropagation();
                 const eventTarget = event.target;
                 if (eventTarget.nodeName === 'IMG' || ((eventTarget === null || eventTarget === void 0 ? void 0 : eventTarget.closest) && !eventTarget.closest('.builder-item')))
                     event.preventDefault();
-                if (eventTarget.id === 'sectionStack')
+                if (eventTarget.id === 'sectionStack') {
                     index_52.setDragData({ module: { name: 'sectionStack', path: '' }, type: index_54.ElementType.PRIMITIVE });
-                else {
+                    eventTarget.classList.add('is-dragging');
+                }
+                else if ((_a = eventTarget === null || eventTarget === void 0 ? void 0 : eventTarget.dataset) === null || _a === void 0 ? void 0 : _a.name) {
                     const currentName = eventTarget.dataset.name;
                     const type = eventTarget.dataset.type;
                     const module = self.pageBlocks.find(block => block.name === currentName);
                     if (module && type) {
                         components_29.application.EventBus.dispatch(index_53.EVENT.ON_SET_DRAG_ELEMENT, eventTarget);
                         index_52.setDragData({ module, type });
+                        eventTarget.classList.add('is-dragging');
                     }
+                }
+                else {
+                    event.preventDefault();
                 }
             });
         }
         render() {
-            return (this.$render("i-panel", { class: "navigator", height: '100%', maxWidth: "100%" },
-                this.$render("i-vstack", { padding: { top: '1rem', bottom: '1rem', left: '1rem', right: '1rem' } },
-                    this.$render("i-vstack", { id: "sectionStack", class: "text-center pointer builder-item", verticalAlignment: "center", horizontalAlignment: "center", height: "5rem", width: "100%", gap: "0.5rem" },
-                        this.$render("i-image", { url: assets_2.default.icons.logo, width: 24, height: 24, display: "block" }),
-                        this.$render("i-label", { caption: "Section" }))),
-                this.$render("i-scom-page-builder-collapse", { title: "Components", border: { bottom: { width: 1, style: 'solid', color: Theme.divider } }, expanded: true },
-                    this.$render("i-grid-layout", { id: "componentsStack", templateColumns: ['repeat(2, 1fr)'], margin: { top: 6 } })),
-                this.$render("i-scom-page-builder-collapse", { title: "Micro DApps", border: { bottom: { width: 1, style: 'solid', color: Theme.divider } }, expanded: true },
-                    this.$render("i-vstack", { id: "microDAppsStack", padding: { top: '8px', bottom: '8px' } })),
-                this.$render("i-scom-page-builder-collapse", { title: "Charts", border: { bottom: { width: 1, style: 'solid', color: Theme.divider } }, expanded: true },
-                    this.$render("i-vstack", { id: "chartsStack", padding: { top: '8px', bottom: '8px' } }))));
+            return (this.$render("i-panel", { id: "pnlMainSidebar", class: "navigator", height: '100%', maxWidth: "100%" }));
         }
     };
     PageSidebar = __decorate([
@@ -5279,6 +5294,31 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
                 boxShadow: 'none',
                 border: 'none',
                 background: 'transparent'
+            },
+            '.pnl-scrollable': {
+                maskImage: 'linear-gradient(to top, transparent, black),linear-gradient(to left, transparent 17px, black 17px)',
+                maskSize: '100% 20000px',
+                maskPosition: 'left bottom',
+                '-webkit-mask-image': 'linear-gradient(to top, transparent, black),linear-gradient(to left, transparent 17px, black 17px)',
+                '-webkit-mask-size': '100% 20000px',
+                '-webkit-mask-position': 'left bottom',
+                transition: 'mask-position 0.3s, -webkit-mask-position 0.3s',
+                $nest: {
+                    '&::-webkit-scrollbar-thumb': {
+                        background: 'var(--action-focus)'
+                    },
+                    '::-webkit-scrollbar-track': {
+                        background: 'var(--background-default)'
+                    },
+                    '&:hover': {
+                        '-webkit-mask-position': 'left top',
+                        $nest: {
+                            'ide-sidebar': {
+                                borderRightStyle: 'none'
+                            }
+                        }
+                    }
+                }
             }
         }
     });
@@ -5318,23 +5358,26 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             super.init();
             const self = this;
             const scrollThreshold = 80;
-            self.pnlWrap.addEventListener('dragover', (event) => {
+            this.addEventListener('dragover', (event) => {
                 event.preventDefault();
                 const { top, bottom } = self.pnlWrap.getBoundingClientRect();
                 const mouseY = event.clientY;
                 if (mouseY < top + scrollThreshold) {
-                    self.pnlWrap.scrollTo({ top, behavior: 'smooth' });
+                    // self.pnlWrap.scrollTo({ top: 0, behavior: 'smooth' });
+                    self.pnlWrap.scrollTop -= 30;
                 }
-                else if (mouseY > bottom - scrollThreshold) {
-                    self.pnlWrap.scrollTo({ top: self.pnlWrap.scrollHeight, behavior: 'smooth' });
+                else if (mouseY > bottom - top - scrollThreshold) {
+                    // self.pnlWrap.scrollTo({ top: self.pnlWrap.scrollHeight, behavior: 'smooth' });
+                    self.pnlWrap.scrollTop += 30;
                 }
                 else {
-                    self.pnlWrap.scrollTo({ top: self.pnlWrap.scrollTop, behavior: 'auto' });
+                    self.pnlWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    // self.pnlWrap.scrollTo({ top: self.pnlWrap.scrollTop, behavior: 'smooth' });
                 }
             });
-            // self.pnlWrap.addEventListener('dragleave', () => {
-            //    self.pnlWrap.scrollIntoView({ behavior: 'auto', block: 'nearest' });
-            // });
+            this.addEventListener('dragleave', () => {
+                self.pnlWrap.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+            });
             self.pnlWrap.addEventListener('drop', (event) => {
                 var _a;
                 const elementConfig = index_68.getDragData();
@@ -5433,16 +5476,16 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             //     this.contentWrapper.padding = {bottom: this.builderFooter.offsetHeight};
         }
         render() {
-            return (this.$render("i-vstack", { id: "editor", width: '100%', height: '100%', overflow: "hidden" },
+            return (this.$render("i-vstack", { id: "editor", width: '100%', height: '100%', maxHeight: "100vh", overflow: "hidden", stack: { grow: '1' } },
                 this.$render("ide-header", { id: 'pageHeader', border: { bottom: { width: 1, style: 'solid', color: '#dadce0' } } }),
-                this.$render("i-grid-layout", { templateColumns: ['auto', '400px'], autoFillInHoles: true, height: "calc(100% -64px)", overflow: { y: 'auto' } },
-                    this.$render("i-panel", { id: "pnlWrap", class: "main-content", height: "100%", overflow: { y: 'auto' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } }, padding: { bottom: '1rem' } },
+                this.$render("i-grid-layout", { templateColumns: ['auto', 'minmax(auto, 235px)'], autoFillInHoles: true, height: "calc(100% -64px)", overflow: "hidden" },
+                    this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } }, padding: { bottom: '1rem' } },
                         this.$render("i-panel", { id: "pageContent", maxWidth: 1400, width: "100%", margin: { left: 'auto', right: 'auto' } },
                             this.$render("i-panel", { maxWidth: 1280, minHeight: "100vh", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: '#fff' }, class: "pnl-editor-wrapper" },
                                 this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
                                     this.$render("ide-rows", { id: "pageRows", draggable: true })),
                                 this.$render("builder-footer", { id: "builderFooter" })))),
-                    this.$render("i-panel", { class: "main-sidebar", height: "100%", overflow: { y: 'auto' } },
+                    this.$render("i-panel", { height: "100%", overflow: { x: 'hidden', y: 'auto' }, class: "pnl-scrollable" },
                         this.$render("ide-sidebar", { id: 'pageSidebar', display: 'block', width: "100%" })))));
         }
     };

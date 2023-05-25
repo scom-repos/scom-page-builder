@@ -36,8 +36,8 @@ export class UpdateRowCommand implements ICommand {
         prependRow && prependRow.insertAdjacentElement('afterend', this.element);
       }
       const prependId = this.prependId.replace('row-', '');
-      const prependIndex = pageObject.sections.findIndex(section => section.id === prependId);
-      pageObject.addRow(this.data, this.rowId, prependIndex);
+      const prependIndex = prependId ? pageObject.sections.findIndex(section => section.id === prependId) : -1;
+      pageObject.addRow(this.data, this.rowId, prependIndex + 1);
     }
     if (this.element?.toggleUI) {
       const hasData = this.data?.elements?.length;
