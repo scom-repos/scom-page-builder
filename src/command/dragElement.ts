@@ -7,20 +7,25 @@ export class DragElementCommand implements ICommand {
   private parent: Control;
   private element: any;
   private dropElm: Control;
+  private dropRow: Control;
+  private dropGrid: Control;
   private oldDataColumn: IDataColumn;
   private data: any;
   private oldDataColumnMap: any[] = [];
+  private isAppend: boolean = true;
 
-  constructor(element: any, dropElm: Control) {
+  constructor(element: any, dropElm: Control, isAppend: boolean = true) {
     this.element = element;
     this.dropElm = dropElm;
+    this.dropRow = dropElm.closest('ide-row');
+    this.dropGrid = this.dropRow ? this.dropRow.querySelector('.grid') : null;
     this.oldDataColumn = {
       column: Number(element.dataset.column),
       columnSpan: Number(element.dataset.columnSpan)
     }
-    const pageRow = element.closest('ide-row') as Control;
-    this.parent = pageRow;
+    this.parent = element.closest('ide-row') as Control;
     this.data = JSON.parse(JSON.stringify(element.data));
+    this.isAppend = isAppend;
     this.updateData = this.updateData.bind(this);
   }
 
@@ -35,25 +40,22 @@ export class DragElementCommand implements ICommand {
   }
 
   private getColumnData() {
-    const grid = this.dropElm.closest('.grid') as Control;
-    const sections = grid ? Array.from(grid.querySelectorAll('ide-section')) : [];
+    const sections = this.dropGrid ? Array.from(this.dropGrid.querySelectorAll('ide-section')) : [];
     const sortedSections = sections.sort((a: HTMLElement, b: HTMLElement) => Number(b.dataset.column) - Number(a.dataset.column));
     const dropElmCol = Number(this.dropElm.dataset.column);
     return isNaN(dropElmCol) ?
-      getAppendColumnData(grid, this.dropElm, sortedSections as HTMLElement[], this.updateData, this.element) :
+      getAppendColumnData(this.dropGrid, this.dropElm, sortedSections as HTMLElement[], this.updateData, this.element, this.isAppend) :
       getDropColumnData(this.dropElm, sortedSections as HTMLElement[], this.element);
   }
 
   execute(): void {
-    if (!this.parent) return;
-    this.element = this.parent.querySelector(`[id='${this.element.id}']`) as Control;
+    if (!this.parent || !this.dropRow) return;
+    this.element = this.parent.querySelector(`[id='${this.data.id}']`) as Control;
     if (!this.element) return;
-    this.dropElm.style.border = "";
     let column = 1;
     let columnSpan = Number(this.element.dataset.columnSpan);
 
-    let grid = this.dropElm.closest('.grid') as Control;
-    if (grid) {
+    if (this.dropGrid) {
       const columnData = this.getColumnData();
       if (!columnData) return;
       column = columnData.column;
@@ -65,21 +67,19 @@ export class DragElementCommand implements ICommand {
     this.element.setAttribute('data-column', `${column}`);
     this.element.setAttribute('data-column-span', `${columnSpan}`);
 
-    const dropRow = this.dropElm.closest('ide-row') as Control;
-    const dropRowId = (dropRow?.id || '').replace('row-', '');
+    const dropRowId = this.dropRow.id.replace('row-', '');
     const elementRowId = (this.parent?.id || '').replace('row-', '');
     pageObject.setElement(elementRowId, this.element.id, {column, columnSpan});
 
-    if (this.parent && !this.parent.isEqualNode(dropRow)) {
+    if (this.parent && !this.parent.isEqualNode(this.dropRow)) {
       pageObject.addElement(dropRowId, {...this.data, column, columnSpan});
       pageObject.removeElement(elementRowId, this.element.id);
-      grid = grid || this.dropElm.querySelector('.grid');
-      grid.appendChild(this.element);
+      if (this.dropGrid) this.dropGrid.appendChild(this.element);
       const toolbar = this.element.querySelector('ide-toolbar') as any;
       if (toolbar) toolbar.rowId = dropRowId;
       this.element.rowId = dropRowId;
-      this.element.parent = grid;
-      (dropRow as any).toggleUI(true);
+      this.element.parent = this.dropGrid;
+      (this.dropRow as any).toggleUI(true);
     }
     if (this.parent) {
       const elementSection = pageObject.getRow(elementRowId);
@@ -88,6 +88,7 @@ export class DragElementCommand implements ICommand {
   }
 
   undo(): void {
+    if (!this.parent || !this.element) return;
     this.element.style.gridRow = '1';
     this.element.style.gridColumn = `${this.oldDataColumn.column} / span ${this.oldDataColumn.columnSpan}`;
     this.element.setAttribute('data-column', `${this.oldDataColumn.column}`);

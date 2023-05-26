@@ -37,7 +37,7 @@ export class UpdateRowCommand implements ICommand {
       }
       const prependId = this.prependId.replace('row-', '');
       const prependIndex = prependId ? pageObject.sections.findIndex(section => section.id === prependId) : -1;
-      pageObject.addRow(this.data, this.rowId, prependIndex + 1);
+      pageObject.addRow(this.data, this.rowId, prependIndex === -1 ? -1 : prependIndex + 1);
     }
     if (this.element?.toggleUI) {
       const hasData = this.data?.elements?.length;
@@ -54,7 +54,7 @@ export class UpdateRowCommand implements ICommand {
         prependRow.insertAdjacentElement('afterend', this.element);
         const prependId = this.prependId.replace('row-', '');
         const prependIndex = prependId ? pageObject.sections.findIndex(section => section.id === prependId) : -1;
-        pageObject.addRow(this.data, this.rowId, prependIndex + 1);
+        pageObject.addRow(this.data, this.rowId, prependIndex === -1 ? -1 : prependIndex + 1);
       } else {
         const appendId = this.appendId.replace('row-', '');
         const appendIndex = appendId ? pageObject.sections.findIndex(section => section.id === appendId) : -1;
@@ -71,8 +71,8 @@ export class UpdateRowCommand implements ICommand {
       this.data && pageObject.removeRow(this.rowId);
     }
     if (this.element?.toggleUI) {
-      const hasData = this.data?.elements?.length;
-      this.element.toggleUI(hasData);
+      const isEmpty = !this.data?.elements?.length || this.data?.elements.every(el => el.type === "composite" && !el.elements?.length);
+      this.element.toggleUI(!isEmpty);
     }
   }
 

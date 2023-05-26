@@ -33,6 +33,7 @@ export default class Editor extends Module {
     private pnlWrap: Panel;
     private pageSidebar: PageSidebar;
     private events: any[] = [];
+    private currentElement: any;
 
     constructor(parent?: Container, options?: any) {
         super(parent, options);
@@ -59,17 +60,17 @@ export default class Editor extends Module {
     }
 
     initEvent(containerElement: Control) {
-        containerElement.addEventListener('wheel', (event) => {
-            event.preventDefault();
-            containerElement.scrollTo({
-                top: containerElement.scrollTop + (event.deltaY * 1.5),
-                behavior: 'smooth',
-            });
-        });
+        // containerElement.addEventListener('wheel', (event) => {
+        //     event.preventDefault();
+        //     containerElement.scrollTo({
+        //         top: containerElement.scrollTop + (event.deltaY * 1.5),
+        //         behavior: 'smooth',
+        //     });
+        // });
 
         containerElement.addEventListener('dragover', (event) => {
             event.preventDefault();
-            if (!getDragData()) return;
+            if (!this.currentElement && !getDragData()) return;
             adjustScrollSpeed(event.clientY);
         });
 
@@ -160,6 +161,7 @@ export default class Editor extends Module {
                 this.onUpdateWrapper()
             )
         );
+        application.EventBus.register(this, EVENT.ON_SET_DRAG_ELEMENT, async (el: any) => this.currentElement = el)
     }
 
     private async onAddRow(data: IElementConfig) {
@@ -227,7 +229,6 @@ export default class Editor extends Module {
                 height={'100%'}
                 maxHeight="100vh"
                 overflow={'hidden'}
-                stack={{ grow: '1' }}
             >
                 <ide-header
                     id={'pageHeader'}

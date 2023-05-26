@@ -71,7 +71,7 @@ const getNewColumn = (dropSection: Control, oldDropColumn: number, isAppend: boo
 const getAppendColumnData = (grid: Control, dropElm: Control, sortedSections: HTMLElement[], updateData: any, element?: Control, isAppend: boolean = true) => {
   let dropSection = dropElm.closest('ide-section') as Control;
   if (!dropSection?.id) return null;
-  dropSection = grid.querySelector(`#${dropSection.id}`) as Control;
+  dropSection = grid.querySelector(`[id='${dropSection.id}']`) as Control;
   const pageRow = dropSection.closest('ide-row') as Control;
   const pageRowId = (pageRow?.id || '').replace('row-', '');
   const oldDropColumn = getColumn(dropSection);
@@ -89,6 +89,9 @@ const getAppendColumnData = (grid: Control, dropElm: Control, sortedSections: HT
         const elm = sortedSections[j] as Control;
         updateData(elm, pageRowId, getColumn(elm) - getColumnSpan(element));
       }
+    }
+    if (!isAppend) {
+      updateData(dropSection, pageRowId, oldDropColumn + getColumnSpan(element));
     }
     newColumn = getNewColumn(dropSection, oldDropColumn, isAppend);
     return {column: newColumn, columnSpan: getColumnSpan(element)};

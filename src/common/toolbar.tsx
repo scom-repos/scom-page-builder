@@ -5,12 +5,12 @@ import {
     ControlElement,
     HStack,
     Button,
-    renderUI,
     Modal,
     IRenderUIOptions,
     IDataSchema,
     VStack,
-    application
+    application,
+    Form
 } from '@ijstech/components';
 import { EVENT } from '../const/index';
 import { ELEMENT_NAME, IPageBlockAction, IPageBlockData, IPageElement } from '../interface/index';
@@ -56,6 +56,7 @@ export class IDEToolbar extends Module {
     private pnlFormMsg: Panel;
     private mdActions: Modal;
     private backdropStack: VStack
+    private form: Form;
 
     private _rowId: string;
     private _elementId: string;
@@ -166,20 +167,18 @@ export class IDEToolbar extends Module {
         if (data.height === 'auto') data.height = this.offsetHeight;
         if (data.width === 'auto') data.width = this.offsetWidth;
         let properties;
-        //FIXME: used temporarily for container type
-        if (data.content && data.content.properties) {
-            properties = data.content.properties;
-        } else if (this.isContentBlock()) {
+        if (this.isContentBlock()) {
             properties = this._currentSingleContentBlockId ? data[this._currentSingleContentBlockId].properties : data
         } else {
             properties = data;
         }
-        let tag = data?.content?.tag || this.data.tag || {};
+        let tag = this.data.tag || {};
         this.mdActions.title = action.name || 'Update Settings';
         if (action.customUI) {
             const customUI = action.customUI;
             const element = customUI.render({...properties, ...tag}, this.onSave.bind(this));
             this.pnlForm.append(element);
+            this.form.visible = false
         }
         else {
             if (typeof tag.width === 'number' && (action.userInputDataSchema.properties?.width as IDataSchema)?.type === 'string') {
@@ -198,8 +197,39 @@ export class IDEToolbar extends Module {
                 data: {...properties, ...tag}
             }
             if (action.userInputUISchema) options.jsonUISchema = action.userInputUISchema;
-            renderUI(this.pnlForm, options, this.onSave.bind(this));
+            // renderUI(this.pnlForm, options, this.onSave.bind(this));
+
+            console.log('form x', options.data, this.data);
+            this.form.uiSchema = action.userInputUISchema;
+            this.form.jsonSchema = action.userInputDataSchema;
+            this.form.formOptions = {
+                columnWidth: '100%',
+                columnsPerRow: 1,
+                confirmButtonOptions: {
+                    caption: 'Confirm',
+                    backgroundColor: Theme.colors.primary.main,
+                    fontColor: Theme.colors.primary.contrastText,
+                    hide: false,
+                    onClick: async () => {
+                        const data = await this.form.getFormData();
+                        const commandIns = this.currentAction.command(this, data);
+                        commandHistory.execute(commandIns);
+                        this.mdActions.visible = false;
+                    }
+                },                
+                dateTimeFormat: {
+                    date: 'YYYY-MM-DD',
+                    time: 'HH:mm:ss',
+                    dateTime: 'MM/DD/YYYY HH:mm'
+                },
+            };
+            this.form.renderForm();
+            this.form.clearFormData();
+            const formData = action.name === 'Theme Settings' ? (tag || {}) : (properties || {})
+            this.form.setFormData({...formData});
+            this.form.visible = true;
         }
+        this.mdActions.refresh();
     }
 
     private onSave(result: boolean, data: any) {
@@ -537,23 +567,21 @@ export class IDEToolbar extends Module {
                     title='Update Settings'
                     closeIcon={{ name: 'times' }}
                     minWidth={400}
-                    maxWidth={500}
+                    maxWidth='900px'
                     closeOnBackdropClick={false}
                     onOpen={this.onShowModal.bind(this)}
                     onClose={this.onCloseModal.bind(this)}
                     class="setting-modal"
                 >
-                    <i-panel>
+                    <i-panel padding={{left: '1rem', right: '1rem', top: '1rem', bottom: '1rem'}}>
                         <i-vstack
                             id="pnlFormMsg"
                             padding={{left: '1.5rem', right: '1.5rem', top: '1rem'}}
                             gap="0.5rem"
                             visible={false}
                         ></i-vstack>
-                        <i-panel
-                            id="pnlForm"
-                            padding={{left: '1rem', right: '1rem', top: '1rem', bottom: '1rem'}}
-                        ></i-panel>
+                        <i-panel id="pnlForm" />
+                        <i-form id="form" />
                     </i-panel>
                 </i-modal>
             </i-vstack>

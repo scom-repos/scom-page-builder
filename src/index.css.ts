@@ -17,7 +17,7 @@ Styles.cssRule('#editor', {
     '::-webkit-scrollbar-track': {
       borderRadius: '10px',
       border: '1px solid transparent',
-      background: Theme.divider
+      // background: Theme.divider
     },
     '::-webkit-scrollbar-thumb': {
       background: Theme.action.focus,
@@ -44,9 +44,9 @@ Styles.cssRule('#editor', {
         '&::-webkit-scrollbar-thumb': {
           background: 'var(--action-focus)'
         },
-        '::-webkit-scrollbar-track': {
-          background: 'transparent'
-        },
+        // '::-webkit-scrollbar-track': {
+        //   background: 'transparent'
+        // },
         '&:hover': {
           '-webkit-mask-position': 'left top',
           $nest: {
