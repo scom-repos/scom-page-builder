@@ -68,10 +68,10 @@ const getNewColumn = (dropSection: Control, oldDropColumn: number, isAppend: boo
   return isAppend ? getNextColumn(dropSection) : oldDropColumn;
 }
 
-const getAppendColumnData = (dropElm: Control, sortedSections: HTMLElement[], updateData: any, element?: Control, isAppend: boolean = true) => {
+const getAppendColumnData = (grid: Control, dropElm: Control, sortedSections: HTMLElement[], updateData: any, element?: Control, isAppend: boolean = true) => {
   let dropSection = dropElm.closest('ide-section') as Control;
   if (!dropSection?.id) return null;
-  dropSection = document.getElementById(`${dropSection.id}`) as Control;
+  dropSection = grid.querySelector(`#${dropSection.id}`) as Control;
   const pageRow = dropSection.closest('ide-row') as Control;
   const pageRowId = (pageRow?.id || '').replace('row-', '');
   const oldDropColumn = getColumn(dropSection);

@@ -38,7 +38,7 @@ export class AddElementCommand implements ICommand {
     const sortedSections = sections.sort((a: HTMLElement, b: HTMLElement) => Number(b.dataset.column) - Number(a.dataset.column));
     const dropElmCol = Number(this.dropElm.dataset.column);
     return isNaN(dropElmCol) ?
-      getAppendColumnData(this.dropElm, sortedSections as HTMLElement[], this.updateData, null, this.isAppend) :
+      getAppendColumnData(grid, this.dropElm, sortedSections as HTMLElement[], this.updateData, null, this.isAppend) :
       getDropColumnData(this.dropElm, sortedSections as HTMLElement[]);
   }
 

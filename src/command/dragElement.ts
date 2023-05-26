@@ -40,7 +40,7 @@ export class DragElementCommand implements ICommand {
     const sortedSections = sections.sort((a: HTMLElement, b: HTMLElement) => Number(b.dataset.column) - Number(a.dataset.column));
     const dropElmCol = Number(this.dropElm.dataset.column);
     return isNaN(dropElmCol) ?
-      getAppendColumnData(this.dropElm, sortedSections as HTMLElement[], this.updateData, this.element) :
+      getAppendColumnData(grid, this.dropElm, sortedSections as HTMLElement[], this.updateData, this.element) :
       getDropColumnData(this.dropElm, sortedSections as HTMLElement[], this.element);
   }
 

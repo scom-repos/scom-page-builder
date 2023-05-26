@@ -1,4 +1,4 @@
-import { application, Container, ControlElement, customElements, customModule, Module, Panel } from '@ijstech/components';
+import { application, Container, Control, ControlElement, customElements, customModule, Module, Panel } from '@ijstech/components';
 import { } from '@ijstech/eth-contract'
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
@@ -24,13 +24,12 @@ declare global {
     }
 }
 
-@customElements("i-scom-page-builder")
+@customElements('i-scom-page-builder')
 @customModule
 export default class Editor extends Module {
     private pageRows: PageRows;
     // private builderHeader: BuilderHeader;
     private builderFooter: BuilderFooter;
-    private editor: Panel;
     private pnlWrap: Panel;
     private pageSidebar: PageSidebar;
     private events: any[] = [];
@@ -59,41 +58,58 @@ export default class Editor extends Module {
         this.pageSidebar.renderUI();
     }
 
+    initEvent(containerElement: Control) {
+        containerElement.addEventListener('wheel', (event) => {
+            event.preventDefault();
+            containerElement.scrollTo({
+                top: containerElement.scrollTop + (event.deltaY * 1.5),
+                behavior: 'smooth',
+            });
+        });
+
+        containerElement.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            if (!getDragData()) return;
+            adjustScrollSpeed(event.clientY);
+        });
+
+        function adjustScrollSpeed(mouseY: number) {
+            const { top, height } = containerElement.getBoundingClientRect();
+            const scrollSpeed = 800;
+            const scrollThreshold = 100;
+            const distanceFromTop = mouseY - top;
+            const distanceFromBottom = top + height - mouseY;
+
+            if (distanceFromTop < scrollThreshold) {
+                const scrollFactor = 1 + (scrollThreshold - distanceFromTop) / scrollThreshold;
+                containerElement.scrollTop -= scrollSpeed * scrollFactor;
+            } else if (distanceFromBottom < scrollThreshold) {
+                const scrollFactor = 1 + (scrollThreshold - distanceFromBottom) / scrollThreshold;
+                containerElement.scrollTop += scrollSpeed * scrollFactor;
+            } else {
+                // containerElement.scrollIntoView({ behavior: "smooth", inline: "nearest" })
+                containerElement.scrollTo({ behavior: "auto", top: containerElement.scrollTop });
+            }
+        }
+    }
+
+    private initEventListeners() {
+        this.pnlWrap.addEventListener('drop', (event) => {
+            const elementConfig = getDragData();
+            if (elementConfig?.module?.name === 'sectionStack') {
+                application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
+            }
+        });
+        this.initEvent(this.pnlWrap);
+    }
+
     init() {
         const rootDir = this.getAttribute('rootDir', true);
         if (rootDir) this.setRootDir(rootDir);
         const components = this.getAttribute('components', true);
         if (components) setPageBlocks(components);
-
         super.init();
-        const self = this;
-        const scrollThreshold = 80;
-        this.addEventListener('dragover', (event) => {
-            event.preventDefault();
-            const { top, bottom } = self.pnlWrap.getBoundingClientRect();
-            const mouseY = event.clientY;
-            if (mouseY < top + scrollThreshold) {
-                // self.pnlWrap.scrollTo({ top: 0, behavior: 'smooth' });
-                self.pnlWrap.scrollTop -= 30;
-            } else if (mouseY > bottom - top - scrollThreshold) {
-                // self.pnlWrap.scrollTo({ top: self.pnlWrap.scrollHeight, behavior: 'smooth' });
-                self.pnlWrap.scrollTop += 30;
-            } else {
-                self.pnlWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                // self.pnlWrap.scrollTo({ top: self.pnlWrap.scrollTop, behavior: 'smooth' });
-            }
-        });
-
-        this.addEventListener('dragleave', () => {
-           self.pnlWrap.scrollIntoView({ behavior: 'auto', block: 'nearest' });
-        });
-
-        self.pnlWrap.addEventListener('drop', (event) => {
-            const elementConfig = getDragData();
-            if (elementConfig?.module?.name === 'sectionStack') {
-                application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
-            }
-        })
+        this.initEventListeners();
     }
 
     setRootDir(value: string) {
@@ -104,8 +120,8 @@ export default class Editor extends Module {
         return {
             // header: pageObject.header,
             sections: pageObject.sections, // TODO: filter(section => section.elements && section.elements.length),
-            footer: pageObject.footer
-        }
+            footer: pageObject.footer,
+        };
     }
 
     async setData(value: IPageData) {
@@ -118,7 +134,7 @@ export default class Editor extends Module {
             await this.pageRows.setRows(value?.sections || []);
             await this.builderFooter.setData(value?.footer);
         } catch (error) {
-            console.log('setdata', error)
+            console.log('setdata', error);
         }
     }
 
@@ -127,15 +143,23 @@ export default class Editor extends Module {
             event.unregister();
         }
         this.events = [];
-    };
+    }
 
     initEventBus() {
-        this.events.push(application.EventBus.register(this, EVENT.ON_ADD_ELEMENT, (data: IElementConfig) => {
-            if (!data) return;
-            this.onAddRow(data);
-        }));
-        this.events.push(application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => { }))
-        this.events.push(application.EventBus.register(this, EVENT.ON_UPDATE_FOOTER, async () => this.onUpdateWrapper()));
+        this.events.push(
+            application.EventBus.register(this, EVENT.ON_ADD_ELEMENT, (data: IElementConfig) => {
+                if (!data) return;
+                this.onAddRow(data);
+            })
+        );
+        this.events.push(
+            application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => {})
+        );
+        this.events.push(
+            application.EventBus.register(this, EVENT.ON_UPDATE_FOOTER, async () =>
+                this.onUpdateWrapper()
+            )
+        );
     }
 
     private async onAddRow(data: IElementConfig) {
@@ -148,41 +172,44 @@ export default class Editor extends Module {
             module,
             properties: {
                 showHeader: false,
-                showFooter: false
-            } as any
-        }
+                showFooter: false,
+            } as any,
+        };
 
         if (module.category === 'components') {
             element.properties = {
                 showHeader: false,
-                showFooter: false
-            }     
-        }
-        else if (module.category === 'micro-dapps') {
+                showFooter: false,
+            };
+        } else if (module.category === 'micro-dapps') {
             element.properties = {
                 showHeader: true,
-                showFooter: true
-            }    
+                showFooter: true,
+            };
         }
 
         let rowData = {
             id: generateUUID(),
             row: pageObject.sections.length + 1,
-            elements: [element]
+            elements: [element],
         };
         //FIXME: remove this
         if (module.path === 'scom-nft-minter' || module.path === 'scom-gem-token') {
             element.module = module;
             element.columnSpan = 6;
             element.properties = {
-                networks: [{
-                    chainId: 43113
-                }],
-                wallets: [{
-                    name: "metamask"
-                }],
-                width: '100%'
-            }
+                networks: [
+                    {
+                        chainId: 43113,
+                    },
+                ],
+                wallets: [
+                    {
+                        name: 'metamask',
+                    },
+                ],
+                width: '100%',
+            };
         }
         return await this.pageRows.appendRow(rowData, prependId);
     }
@@ -194,7 +221,14 @@ export default class Editor extends Module {
 
     render() {
         return (
-            <i-vstack id="editor" width={'100%'} height={'100%'} maxHeight="100vh" overflow={"hidden"} stack={{grow: '1'}}>
+            <i-vstack
+                id="editor"
+                width={'100%'}
+                height={'100%'}
+                maxHeight="100vh"
+                overflow={'hidden'}
+                stack={{ grow: '1' }}
+            >
                 <ide-header
                     id={'pageHeader'}
                     border={{ bottom: { width: 1, style: 'solid', color: '#dadce0' } }}
@@ -207,8 +241,9 @@ export default class Editor extends Module {
                 >
                     <i-panel
                         id="pnlWrap"
-                        height="100%" width="100%"
-                        overflow={{y: 'auto', x: 'hidden'}}
+                        height="100%"
+                        width="100%"
+                        overflow={{ y: 'auto', x: 'hidden' }}
                         background={{ color: Theme.background.default }}
                         border={{ right: { width: 1, style: 'solid', color: Theme.divider } }}
                         padding={{ bottom: '1rem' }}
@@ -238,8 +273,17 @@ export default class Editor extends Module {
                             </i-panel>
                         </i-panel>
                     </i-panel>
-                    <i-panel height="100%" overflow={{x: 'hidden', y: 'auto'}} class="pnl-scrollable">
-                        <ide-sidebar id={'pageSidebar'} display={'block'} width="100%"></ide-sidebar>
+                    <i-panel
+                        id="pnlSidebar"
+                        height="100%"
+                        overflow={{ x: 'hidden', y: 'auto' }}
+                        class="pnl-scrollable"
+                    >
+                        <ide-sidebar
+                            id={'pageSidebar'}
+                            display={'block'}
+                            width="100%"
+                        ></ide-sidebar>
                     </i-panel>
                 </i-grid-layout>
             </i-vstack>
