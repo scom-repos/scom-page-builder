@@ -892,6 +892,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private dragStack;
         private pnlForm;
         private pnlFormMsg;
+        private formElm;
         private mdActions;
         private backdropStack;
         private _rowId;

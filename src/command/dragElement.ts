@@ -46,7 +46,7 @@ export class DragElementCommand implements ICommand {
 
   execute(): void {
     if (!this.parent) return;
-    this.element = this.parent.querySelector(`[id='${this.element.id}']`) as Control;
+    this.element = this.parent.querySelector(`[id='${this.data.id}']`) as Control;
     if (!this.element) return;
     this.dropElm.style.border = "";
     let column = 1;
@@ -88,6 +88,9 @@ export class DragElementCommand implements ICommand {
   }
 
   undo(): void {
+    if (!this.parent) return;
+    this.element = this.parent.querySelector(`[id='${this.data.id}']`) as Control;
+    if (!this.element) return;
     this.element.style.gridRow = '1';
     this.element.style.gridColumn = `${this.oldDataColumn.column} / span ${this.oldDataColumn.columnSpan}`;
     this.element.setAttribute('data-column', `${this.oldDataColumn.column}`);

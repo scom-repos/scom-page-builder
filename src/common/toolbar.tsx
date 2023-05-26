@@ -10,7 +10,8 @@ import {
     IRenderUIOptions,
     IDataSchema,
     VStack,
-    application
+    application,
+    Form
 } from '@ijstech/components';
 import { EVENT } from '../const/index';
 import { ELEMENT_NAME, IPageBlockAction, IPageBlockData, IPageElement } from '../interface/index';
@@ -54,6 +55,7 @@ export class IDEToolbar extends Module {
     private dragStack: Panel;
     private pnlForm: Panel;
     private pnlFormMsg: Panel;
+    private formElm: Form;
     private mdActions: Modal;
     private backdropStack: VStack
 
@@ -165,7 +167,7 @@ export class IDEToolbar extends Module {
         const data = builderTarget?.getData ? await builderTarget.getData() : this.data.properties;
         if (data.height === 'auto') data.height = this.offsetHeight;
         if (data.width === 'auto') data.width = this.offsetWidth;
-        let properties;
+        let properties = {};
         //FIXME: used temporarily for container type
         if (data.content && data.content.properties) {
             properties = data.content.properties;
@@ -188,29 +190,40 @@ export class IDEToolbar extends Module {
             if (typeof tag.height === 'number' && (action.userInputDataSchema.properties?.height as IDataSchema)?.type === 'string') {
                 tag.height = "" + tag.height;
             }
-            const options: IRenderUIOptions = {
-                columnWidth: '100%',
+            const formOptions = {
                 columnsPerRow: 1,
-                confirmButtonBackgroundColor: Theme.colors.primary.main,
-                confirmButtonFontColor: Theme.colors.primary.contrastText,
-                jsonSchema: action.userInputDataSchema,
-                dateTimeFormat: 'MM/DD/YYYY HH:mm',
-                data: {...properties, ...tag}
+                confirmButtonOptions: {
+                    backgroundColor: Theme.colors.primary.main,
+                    fontColor: Theme.colors.primary.contrastText,
+                    onClick: this.onSave.bind(this)
+                },
+                clearButtonOptions: {
+                    hide: true
+                },
+                columnWidth: '100%',
+                dateTimeFormat: {
+                    dateTime: 'MM/DD/YYYY HH:mm'
+                }
             }
-            if (action.userInputUISchema) options.jsonUISchema = action.userInputUISchema;
-            renderUI(this.pnlForm, options, this.onSave.bind(this));
+
+            if (action.userInputUISchema)
+                this.formElm.uiSchema = action.userInputUISchema;
+            this.formElm.jsonSchema = action.userInputDataSchema;
+            this.formElm.formOptions = formOptions;
+            this.formElm.clearFormData();
+            this.formElm.setFormData({...properties, ...tag});
+            this.formElm.renderForm();
+            this.pnlForm.appendChild(this.formElm);
         }
     }
 
-    private onSave(result: boolean, data: any) {
-        if (result) {
-            const commandIns = this.currentAction.command(this, data);
-            commandHistory.execute(commandIns);
-            this.mdActions.visible = false;
-        } else if (data?.errors) {
-            // this.pnlFormMsg.visible = true;
-            // this.renderError(data.errors || []);
-        }
+    private async onSave() {
+        const data = await this.formElm.getFormData();
+        const commandIns = this.currentAction.command(this, data);
+        commandHistory.execute(commandIns);
+        this.mdActions.visible = false;
+        // this.pnlFormMsg.visible = true;
+        // this.renderError(data.errors || []);
     }
 
     private isTexbox() {
@@ -553,7 +566,9 @@ export class IDEToolbar extends Module {
                         <i-panel
                             id="pnlForm"
                             padding={{left: '1rem', right: '1rem', top: '1rem', bottom: '1rem'}}
-                        ></i-panel>
+                        >
+                            <i-form id="formElm"></i-form>
+                        </i-panel>
                     </i-panel>
                 </i-modal>
             </i-vstack>

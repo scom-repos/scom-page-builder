@@ -97,6 +97,7 @@ export class PageRow extends Module {
     private async createElementFn(data: IPageElement) {
         const pageSection = (
             <ide-section
+                id={data.id}
                 readonly={this._readonly}
                 display="block"
                 maxWidth="100%"

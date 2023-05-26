@@ -43,6 +43,7 @@ export class AddElementCommand implements ICommand {
   }
 
   async execute() {
+    if (!this.parent) return;
     let column = 1;
     let columnSpan = 6;
 
@@ -68,27 +69,23 @@ export class AddElementCommand implements ICommand {
     this.element = await this.parent.addElement(newElData);
     const parentId = this.parent.id.replace('row-', '');
     pageObject.addElement(parentId, newElData);
-    if (this.parent) {
-      const elementRowId = (this.parent?.id || '').replace('row-', '');
-      const elementSection = pageObject.getRow(elementRowId);
-      this.parent.toggleUI(!!elementSection?.elements?.length);
-    }
+    const elementRowId = (this.parent?.id || '').replace('row-', '');
+    const elementSection = pageObject.getRow(elementRowId);
+    this.parent.toggleUI(!!elementSection?.elements?.length);
   }
 
   undo(): void {
-    if (!this.element) return;
-    this.element.remove();
+    if (!this.element || !this.parent) return;
+    this.element = this.parent.querySelector(`[id='${this.element.id}']`);
+    this.element && this.element.remove();
     const parentId = this.parent.id.replace('row-', '');
     pageObject.removeElement(parentId, this.element.id);
     for (let columnData of [...this.oldDataColumnMap]) {
       const { el, rowId, column, columnSpan } = columnData;
       updateColumnData(el, rowId, column, columnSpan);
     }
-    if (this.parent) {
-      const elementRowId = (this.parent?.id || '').replace('row-', '');
-      const elementSection = pageObject.getRow(elementRowId);
-      this.parent.toggleUI(!!elementSection?.elements?.length);
-    }
+    const elementSection = pageObject.getRow(parentId);
+    this.parent.toggleUI(!!elementSection?.elements?.length);
   }
 
   redo(): void {}
