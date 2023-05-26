@@ -536,7 +536,7 @@ declare module "@scom/scom-page-builder/command/resize.ts" {
     export class ResizeElementCommand implements ICommand {
         private parent;
         private element;
-        private initialWidth;
+        private toolbar;
         private initialHeight;
         private finalWidth;
         private finalHeight;
@@ -544,8 +544,10 @@ declare module "@scom/scom-page-builder/command/resize.ts" {
         private gapWidth;
         private gridColumnWidth;
         private finalLeft;
-        constructor(element: any, initialWidth: number, initialHeight: number, finalWidth: number, finalHeight: number);
+        constructor(element: any, toolbar: any, initialWidth: number, initialHeight: number, finalWidth: number, finalHeight: number);
         private getColumnData;
+        private updateElement;
+        private updateToolbars;
         execute(): void;
         undo(): void;
         redo(): void;
@@ -1062,7 +1064,6 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private pnlRow;
         private mdRowSetting;
         private pnlEmty;
-        private pnlWrap;
         private _readonly;
         private isResizing;
         private currentWidth;
@@ -1071,6 +1072,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private rowId;
         private rowData;
         private isDragging;
+        private gridColumnWidth;
         private isCloned;
         private isChanged;
         constructor(parent?: any);
@@ -1089,7 +1091,10 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         onMoveUp(): void;
         onMoveDown(): void;
         private renderFixedGrid;
+        private updateGrids;
+        private updateGridColumn;
         private initEventListeners;
+        private initEventBus;
         private getNewElementData;
         private addDottedLines;
         private removeDottedLines;

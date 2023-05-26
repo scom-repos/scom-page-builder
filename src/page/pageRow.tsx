@@ -7,8 +7,7 @@ import {
     VStack,
     observable,
     GridLayout,
-    Styles,
-    Panel
+    Styles
 } from '@ijstech/components';
 import { PageSection, RowSettingsDialog } from './pageSection';
 import './pageRow.css';
@@ -29,6 +28,7 @@ import {
 import { IDEToolbar } from '../common/index';
 import { generateUUID } from '../utility/index';
 const Theme = Styles.Theme.ThemeVars;
+const GAP_WIDTH = 15;
 
 declare global {
     namespace JSX {
@@ -49,7 +49,6 @@ export class PageRow extends Module {
     private pnlRow: GridLayout;
     private mdRowSetting: RowSettingsDialog;
     private pnlEmty: VStack;
-    private pnlWrap: Panel;
 
     private _readonly: boolean;
     private isResizing: boolean = false;
@@ -59,6 +58,7 @@ export class PageRow extends Module {
     private rowId: string = '';
     private rowData: IPageSection;
     private isDragging: boolean = false;
+    private gridColumnWidth: number = 0;
 
     @observable()
     private isCloned: boolean = true;
@@ -77,15 +77,15 @@ export class PageRow extends Module {
     init() {
         this._readonly = this.getAttribute('readonly', true, false);
         super.init();
-        this.renderFixedGrid();
-        this.initEventListeners();
         const hasData = this.data?.elements?.length;
         this.toggleUI(hasData);
-        application.EventBus.register(this, EVENT.ON_SET_DRAG_ELEMENT, async (el: any) => this.currentElement = el)
+        this.renderFixedGrid();
+        this.initEventListeners();
+        this.initEventBus();
     }
 
     toggleUI(value: boolean) {
-        if (this.pnlWrap) this.pnlWrap.opacity = value ? 1 : 0;
+        if (this.pnlRow) this.pnlRow.opacity = value ? 1 : 0;
         if (this.pnlEmty) this.pnlEmty.visible = !value;
     }
 
@@ -153,6 +153,10 @@ export class PageRow extends Module {
         this.actionsBar.minHeight = '100%';
         const hasData = this.data?.elements?.length;
         this.toggleUI(hasData);
+        this.gridColumnWidth = (this.pnlRow.offsetWidth - GAP_WIDTH * (MAX_COLUMN - 1)) / MAX_COLUMN;
+        const fixedGrid = this.pnlRow.querySelector('.fixed-grid');
+        fixedGrid && this.updateGridColumn(fixedGrid as GridLayout);
+        this.updateGridColumn(this.pnlRow);
     }
 
     private onOpenRowSettingsDialog() {
@@ -201,13 +205,31 @@ export class PageRow extends Module {
                 class="fixed-grid"
             ></i-grid-layout>
         );
-        for (let i = 0; i < 12; i++) {
+        for (let i = 0; i < MAX_COLUMN; i++) {
             const elm = <i-panel class="fixed-grid-item"></i-panel>;
             elm.setAttribute('data-column', `${i + 1}`);
             elm.style.gridColumn = `${i + 1}`;
             grid.append(elm);
         }
         this.pnlRow.appendChild(grid);
+    }
+
+    private updateGrids() {
+        this.gridColumnWidth = (this.pnlRow.offsetWidth - GAP_WIDTH * (MAX_COLUMN - 1)) / MAX_COLUMN;
+        let grids = document.getElementsByClassName('grid');
+        for (const grid of grids) {
+            this.updateGridColumn(grid as GridLayout);
+        }
+        let fixedGrids = document.getElementsByClassName('fixed-grid');
+        for (const fixedGrid of fixedGrids) {
+            this.updateGridColumn(fixedGrid as GridLayout);
+        }
+
+    }
+
+    private updateGridColumn(grid: GridLayout) {
+        grid.templateColumns = [`repeat(${MAX_COLUMN}, ${this.gridColumnWidth}px)`];
+        grid.gap = { column: `${GAP_WIDTH}px` };
     }
 
     private initEventListeners() {
@@ -219,22 +241,8 @@ export class PageRow extends Module {
         let startX: number = 0;
         let startY: number = 0;
         let toolbar: Control;
-        let grids = document.getElementsByClassName('grid');
-        const gapWidth = 15;
-        const gridColumnWidth = (this.pnlRow.offsetWidth - gapWidth * 11) / 12;
-        for (const grid of grids) {
-            const gridElm = grid as GridLayout;
-            gridElm.templateColumns = [`repeat(12, ${gridColumnWidth}px)`];
-            gridElm.gap = { column: `${gapWidth}px` };
-        }
 
-        let fixedGrids = document.getElementsByClassName('fixed-grid');
-        for (const fixedGrid of fixedGrids) {
-            const fixedGridElm = fixedGrid as GridLayout;
-            fixedGridElm.templateColumns = [`repeat(12, ${gridColumnWidth}px)`];
-            fixedGridElm.gap = { column: `${gapWidth}px` };
-        }
-
+        this.updateGrids();
         this.addEventListener('mousedown', (e) => {
             const target = e.target as Control;
             const parent = target.closest('.resize-stack') as Control;
@@ -242,7 +250,7 @@ export class PageRow extends Module {
             e.preventDefault();
             const resizableElm = target.closest('ide-section') as PageSection;
             self.currentElement = resizableElm;
-            toolbar = self.currentElement.querySelector('ide-toolbar');
+            toolbar = target.closest('ide-toolbar') as Control;
             self.addDottedLines();
             this.isResizing = true;
             currentDot = parent;
@@ -268,6 +276,7 @@ export class PageRow extends Module {
             self.currentElement.height = 'initial';
             const resizeCmd = new ResizeElementCommand(
                 self.currentElement,
+                toolbar,
                 this.currentWidth,
                 this.currentHeight,
                 newWidth,
@@ -396,8 +405,8 @@ export class PageRow extends Module {
             if (target) {
                 const column = Number(target.dataset.column);
                 const columnSpan = self.currentElement.dataset.columnSpan ? Number(self.currentElement.dataset.columnSpan) : MIN_COLUMN ;
-                const colSpan = Math.min(columnSpan, 12);
-                const colStart = Math.min(column, 12 - colSpan + 1);
+                const colSpan = Math.min(columnSpan, MAX_COLUMN);
+                const colStart = Math.min(column, MAX_COLUMN - colSpan + 1);
                 const grid = target.closest('.grid');
                 const sections = Array.from(grid?.querySelectorAll('ide-section'));
                 const sortedSections = sections.sort((a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column));
@@ -412,9 +421,9 @@ export class PageRow extends Module {
                     .closest('.fixed-grid')
                     .parentNode.querySelector(`.rectangle`) as Control;
                 rectangle.style.display = 'block';
-                rectangle.style.left = (gridColumnWidth + gapWidth) * (colStart - 1) + 'px';
+                rectangle.style.left = (self.gridColumnWidth + GAP_WIDTH) * (colStart - 1) + 'px';
                 rectangle.style.width =
-                    gridColumnWidth * columnSpan + gapWidth * (columnSpan - 1) + 'px';
+                   self.gridColumnWidth * columnSpan + GAP_WIDTH * (columnSpan - 1) + 'px';
             } else {
                 const section = eventTarget.closest('ide-section') as Control;
                 if (section && !section.isSameNode(self.currentElement)) {
@@ -496,7 +505,7 @@ export class PageRow extends Module {
             event.preventDefault();
             event.stopPropagation();
             if (pageRow && elementConfig?.module?.name === 'sectionStack')
-                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, pageRow.nextSibling ? pageRow.id : '');
+                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, pageRow.id);
             if (!self.currentElement) return;
 
             const nearestFixedItem = eventTarget.closest('.fixed-grid-item') as Control;
@@ -504,8 +513,8 @@ export class PageRow extends Module {
                 const column = Number(nearestFixedItem.dataset.column);
                 const columnSpan = self.currentElement.dataset.columnSpan ?
                     Number(self.currentElement.dataset.columnSpan) : MIN_COLUMN;
-                const colSpan = Math.min(columnSpan, 12);
-                const colStart = Math.min(column, 12 - colSpan + 1);
+                const colSpan = Math.min(columnSpan, MAX_COLUMN);
+                const colStart = Math.min(column, MAX_COLUMN - colSpan + 1);
                 const grid = nearestFixedItem.closest('.grid');
                 const sections = Array.from(grid?.querySelectorAll('ide-section'));
                 const sortedSections = sections.sort((a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column));
@@ -578,6 +587,10 @@ export class PageRow extends Module {
                 self.removeDottedLines();
             }
         });
+    }
+
+    private initEventBus() {
+        application.EventBus.register(this, EVENT.ON_SET_DRAG_ELEMENT, async (el: any) => this.currentElement = el)
     }
 
     private getNewElementData() {
@@ -710,17 +723,16 @@ export class PageRow extends Module {
                         ></i-label>
                     </i-panel>
                 </i-vstack>
-                <i-panel id="pnlWrap" opacity={0}>
-                    <i-grid-layout
-                        id="pnlRow"
-                        width="100%"
-                        height="100%"
-                        maxWidth="100%"
-                        maxHeight="100%"
-                        position="relative"
-                        class="grid"
-                    ></i-grid-layout>
-                </i-panel>
+                <i-grid-layout
+                    id="pnlRow"
+                    width="100%"
+                    height="100%"
+                    maxWidth="100%"
+                    maxHeight="100%"
+                    position="relative"
+                    class="grid"
+                    opacity={0}
+                ></i-grid-layout>
                 <ide-row-settings-dialog
                     id="mdRowSetting"
                     onSave={this.onSaveRowSettings.bind(this)}

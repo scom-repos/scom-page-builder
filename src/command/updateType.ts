@@ -81,7 +81,7 @@ export class UpdateTypeCommand implements ICommand {
     if (this.elementParent) {
       const elementRowId = (this.elementParent?.id || '').replace('row-', '');
       const elementSection = pageObject.getRow(elementRowId);
-      if (elementRowId !== dropRowId)
+      if (elementRowId !== dropRowId && this.element)
         pageObject.removeElement(elementRowId, this.element.id);
       this.elementParent.visible = !!elementSection?.elements?.length;
     }

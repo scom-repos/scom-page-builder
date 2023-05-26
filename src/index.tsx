@@ -227,7 +227,6 @@ export default class Editor extends Module {
                 height={'100%'}
                 maxHeight="100vh"
                 overflow={'hidden'}
-                stack={{ grow: '1' }}
             >
                 <ide-header
                     id={'pageHeader'}
