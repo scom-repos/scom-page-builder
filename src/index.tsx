@@ -59,37 +59,38 @@ export default class Editor extends Module {
         this.pageSidebar.renderUI();
     }
 
-    initEvent(containerElement: Control) {
-        // containerElement.addEventListener('wheel', (event) => {
-        //     event.preventDefault();
-        //     containerElement.scrollTo({
-        //         top: containerElement.scrollTop + (event.deltaY * 1.5),
-        //         behavior: 'smooth',
-        //     });
-        // });
-
-        containerElement.addEventListener('dragover', (event) => {
+    initScrollEvent(containerElement: Control) {
+        let scrollPos = 0;
+        let ticking = false;
+        const scrollSpeed = 1000;
+        const scrollThreshold = 100;
+        containerElement.addEventListener("dragover", (event) => {
             event.preventDefault();
             if (!this.currentElement && !getDragData()) return;
-            adjustScrollSpeed(event.clientY);
+            scrollPos = event.clientY;
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    adjustScrollSpeed(scrollPos);
+                    ticking = false;
+                });
+                ticking = true;
+            }
         });
 
         function adjustScrollSpeed(mouseY: number) {
             const { top, height } = containerElement.getBoundingClientRect();
-            const scrollSpeed = 800;
-            const scrollThreshold = 100;
-            const distanceFromTop = mouseY - top;
-            const distanceFromBottom = top + height - mouseY;
-
+            const temp = top - window.scrollY;
+            const scrollDistance = temp < 0 ? 0 : temp;
+            const distanceFromTop = mouseY - (top - scrollDistance);
+            const distanceFromBottom = (top + height) - (scrollDistance + mouseY);
             if (distanceFromTop < scrollThreshold) {
                 const scrollFactor = 1 + (scrollThreshold - distanceFromTop) / scrollThreshold;
-                containerElement.scrollTop -= scrollSpeed * scrollFactor;
+                containerElement.scrollTop -= scrollSpeed * scrollFactor + scrollDistance;
             } else if (distanceFromBottom < scrollThreshold) {
                 const scrollFactor = 1 + (scrollThreshold - distanceFromBottom) / scrollThreshold;
-                containerElement.scrollTop += scrollSpeed * scrollFactor;
+                containerElement.scrollTop += scrollSpeed * scrollFactor + scrollDistance;
             } else {
-                // containerElement.scrollIntoView({ behavior: "smooth", inline: "nearest" })
-                containerElement.scrollTo({ behavior: "auto", top: containerElement.scrollTop });
+                containerElement.scrollTo({ behavior: 'auto', top: containerElement.scrollTop });
             }
         }
     }
@@ -101,7 +102,7 @@ export default class Editor extends Module {
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
             }
         });
-        this.initEvent(this.pnlWrap);
+        this.initScrollEvent(this.pnlWrap);
     }
 
     init() {

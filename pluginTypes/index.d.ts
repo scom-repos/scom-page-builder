@@ -1336,7 +1336,7 @@ declare module "@scom/scom-page-builder" {
         set rootDir(value: string);
         get components(): IPageBlockData[];
         set components(value: IPageBlockData[]);
-        initEvent(containerElement: Control): void;
+        initScrollEvent(containerElement: Control): void;
         private initEventListeners;
         init(): void;
         setRootDir(value: string): void;
