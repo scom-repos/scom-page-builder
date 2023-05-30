@@ -5,7 +5,7 @@ import {
     Panel,
     application,
     Control,
-    VStack
+    VStack,
 } from '@ijstech/components';
 import { IPageSection } from '../interface/index';
 import { PageSection } from './pageSection';
@@ -16,7 +16,7 @@ import { generateUUID } from '../utility/index';
 import { UpdateRowCommand, commandHistory, MoveElementCommand } from '../command/index';
 import { IDEToolbar } from '../common/index';
 import { pageObject } from '../store/index';
-import { currentTheme  } from '../theme/index';
+import { currentTheme } from '../theme/index';
 import './pageRows.css';
 
 declare global {
@@ -40,6 +40,7 @@ export class PageRows extends Module {
     // private pagePaging: PagePaging;
     private pageFooter: PageFooter;
     private currentRow: PageRow;
+    private enteredRow: PageRow;
     private pnlRowOverlay: Panel;
 
     private currentPosition: any;
@@ -51,7 +52,7 @@ export class PageRows extends Module {
         super(parent);
         this.mouseDownHandler = this.mouseDownHandler.bind(this);
         this.mouseUpHandler = this.mouseUpHandler.bind(this);
-        this.onMoveHandler = this.onMoveHandler.bind(this);
+        this.mouseMoveHandler = this.mouseMoveHandler.bind(this);
         this.initEventBus();
         this.getRows = this.getRows.bind(this);
         this.setRows = this.setRows.bind(this);
@@ -104,7 +105,7 @@ export class PageRows extends Module {
         } else {
             dragStack.removeEventListener('mousedown', this.mouseDownHandler, false);
         }
-        dragStack.ondragstart = function() {
+        dragStack.ondragstart = function () {
             return false;
         };
     }
@@ -112,94 +113,99 @@ export class PageRows extends Module {
     private mouseDownHandler(event: MouseEvent) {
         event.stopPropagation();
         const target = event.target as HTMLElement;
-        const currentDragEl = target instanceof PageRow ? target : target.closest('ide-row') as PageRow;
+        const currentDragEl =
+            target instanceof PageRow ? target : (target.closest('ide-row') as PageRow);
         if (currentDragEl && !this.isDragging) {
             this.isDragging = true;
             this.currentRow = currentDragEl;
             const data = this.currentRow.getBoundingClientRect();
+            const parentData = this.pnlRows.getBoundingClientRect();
             this.currentPosition = data;
             this.pnlRowOverlay.width = this.currentPosition.width;
             this.pnlRowOverlay.height = this.currentPosition.height;
             this.pnlRowOverlay.zIndex = '1';
-            this.pnlRowOverlay.left = this.currentPosition.left;
-            this.pnlRowOverlay.top = this.currentPosition.top;
-            document.addEventListener('mousemove', this.onMoveHandler);
+            this.pnlRowOverlay.left = 0;
+            this.pnlRowOverlay.top = this.currentPosition.top - parentData.top;
+            this.currentRow.classList.add('row-dragged');
+            document.addEventListener('mousemove', this.mouseMoveHandler);
             document.addEventListener('mouseup', this.mouseUpHandler);
             this.click();
         }
     }
 
     private mouseUpHandler(event: MouseEvent) {
-        document.removeEventListener('mousemove', this.onMoveHandler);
+        document.removeEventListener('mousemove', this.mouseMoveHandler);
         document.removeEventListener('mouseup', this.mouseUpHandler);
+        this.currentRow.classList.remove('row-dragged');
         this.resetCurrentRow();
-        const target = event.target as HTMLElement;
-        const dropElm = target instanceof PageRow ? target : target.closest('ide-row') as PageRow;
-        if (!dropElm || !dropElm.classList.contains('dropzone')) {
-            event.preventDefault();
-            this.pnlRowOverlay.visible = false;
-            this.pnlRowOverlay.zIndex = '-1';
-            this.isDragging = false;
-            return;
+
+        this.isDragging = false;
+        const rows = this.pnlRows.querySelectorAll('ide-row');
+        for (let row of rows) {
+            row.classList.remove('row-entered');
         }
-        dropElm.classList.remove("dragenter");
-        if (!this.currentRow) {
-            event.preventDefault();
-            this.pnlRowOverlay.visible = false;
-            this.pnlRowOverlay.zIndex = '-1';
-            this.isDragging = false;
-            return;
-        }
-        if (dropElm && !this.currentRow.isSameNode(dropElm)) {
-            const moveRowCmd = new MoveElementCommand(this.currentRow, dropElm, this.pnlRows, pageObject.sections);
+        const canDrop = this.currentRow && this.enteredRow && this.enteredRow.classList.contains('dropzone');
+        if (canDrop && !this.currentRow.isSameNode(this.enteredRow)) {
+            const moveRowCmd = new MoveElementCommand(
+                this.currentRow,
+                this.enteredRow,
+                this.pnlRows,
+                pageObject.sections
+            );
             commandHistory.execute(moveRowCmd);
         }
+        this.pnlRowOverlay.visible = false;
+        this.pnlRowOverlay.zIndex = '-1';
         this.currentRow = null;
+        this.enteredRow = null;
         this.currentPosition = null;
-        this.isDragging = false;
+    }
+
+    private mouseMoveHandler(event: MouseEvent) {
+        let mouseX = event.clientX;
+        let mouseY = event.clientY;
+        const dropzones = this.querySelectorAll('.dropzone');
+        let nearestElement = null;
+        let shortestDistance = Infinity;
+        
+        dropzones.forEach((dropzone) => {
+          const rect = dropzone.getBoundingClientRect();
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          
+          const distance = Math.sqrt((mouseX - centerX) ** 2 + (mouseY - centerY) ** 2);
+          if (distance < shortestDistance) {
+            shortestDistance = distance;
+            nearestElement = dropzone;
+          }
+        });
+        if (nearestElement && !nearestElement.isSameNode(this.currentRow)) {
+            nearestElement.classList.add('row-entered');
+            this.enteredRow = nearestElement as PageRow;
+            this.pnlRowOverlay.visible = true;
+            this.pnlRowOverlay.zIndex = '1';
+            this.updateCurrentRow(mouseX - this.currentPosition.x, mouseY - this.currentPosition.y);
+        } else {
+            this.enteredRow = null;
+        }
     }
 
     private resetCurrentRow() {
         if (!this.currentRow) return;
         this.currentRow.style.transform = 'none';
-        this.currentRow.classList.remove('dragging');
         this.pnlRowOverlay.visible = false;
         this.pnlRowOverlay.zIndex = '-1';
         this.currentRow.onMoveDown();
     }
 
     private updateCurrentRow(x: number, y: number) {
-        this.currentRow.classList.add('dragging');
         this.currentRow.style.transform = `translate(${x}px, ${y}px)`;
         this.currentRow.style.width = this.currentPosition.width;
         this.currentRow.style.height = this.currentPosition.height;
         this.currentRow.onMoveUp();
     }
 
-    private onMoveHandler(event: MouseEvent) {
-        let x = event.clientX;
-        let y = event.clientY;
-        const target = event.target as HTMLElement;
-        const dropZone = target instanceof PageRow ? target : target.closest('ide-row') as PageRow;
-        const rows = this.pnlRows.querySelectorAll('ide-row');
-        rows.forEach(row => {
-            row.classList.remove("dragenter");
-        })
-        if (dropZone && !dropZone.isEqualNode(this.currentRow) && dropZone.classList.contains('dropzone'))
-            dropZone.classList.add('dragenter')
-        this.pnlRowOverlay.visible = true;
-        this.pnlRowOverlay.zIndex = '1';
-        this.updateCurrentRow(x - this.currentPosition.x, y - this.currentPosition.y);
-    }
-
     getRows(): IPageSection[] {
-        // const rows = this.pnlRows.querySelectorAll('ide-row');
-        // const rowDataList: IPageSection[] = [];
-        // for (const row of rows) {
-        //     const rowData = await (row as PageRow).getData();
-        //     rowDataList.push(rowData);
-        // }
-        // return rowDataList;
         return pageObject.sections;
     }
 
@@ -237,9 +243,9 @@ export class PageRows extends Module {
         return pageRow;
     }
 
-    async onClone(data: { rowData: IPageSection, id: string }) {
+    async onClone(data: { rowData: IPageSection; id: string }) {
         const { rowData, id } = data;
-        const row = this.pnlRows.querySelector(`#${id}`)
+        const row = this.pnlRows.querySelector(`#${id}`);
         if (!row) return;
         const clonedData = JSON.parse(JSON.stringify(rowData));
         const newId = generateUUID();
@@ -248,7 +254,10 @@ export class PageRows extends Module {
             return el;
         });
 
-        await this.appendRow({...clonedData, elements: newElements, id: newId, row: this.getRows().length}, id);
+        await this.appendRow(
+            { ...clonedData, elements: newElements, id: newId, row: this.getRows().length },
+            id
+        );
     }
 
     private async onCreateSection(prependId?: string) {
@@ -260,9 +269,15 @@ export class PageRows extends Module {
         const rowData = {
             id: generateUUID(),
             row: this.getRows().length,
-            elements: []
-        }
-        const addRowCmd = new UpdateRowCommand(pageRow, this.pnlRows, rowData, false, prependId || '');
+            elements: [],
+        };
+        const addRowCmd = new UpdateRowCommand(
+            pageRow,
+            this.pnlRows,
+            rowData,
+            false,
+            prependId || ''
+        );
         commandHistory.execute(addRowCmd);
         await pageRow.setData(rowData);
         return pageRow;
@@ -291,7 +306,8 @@ export class PageRows extends Module {
                     id={'pnlRows'}
                     class={'container'}
                     verticalAlignment="center"
-                    maxWidth="100%" height="100%"
+                    maxWidth="100%"
+                    height="100%"
                 ></i-vstack>
                 <i-panel
                     id="pnlRowOverlay"
@@ -299,7 +315,7 @@ export class PageRows extends Module {
                     zIndex={-1}
                     visible={false}
                     opacity={0.4}
-                    background={{color: '#ddd'}}
+                    background={{ color: '#ddd' }}
                     class={'drag-overlay'}
                 ></i-panel>
                 <scpage-page-footer

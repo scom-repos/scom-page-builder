@@ -536,7 +536,7 @@ declare module "@scom/scom-page-builder/command/resize.ts" {
     export class ResizeElementCommand implements ICommand {
         private parent;
         private element;
-        private initialWidth;
+        private toolbar;
         private initialHeight;
         private finalWidth;
         private finalHeight;
@@ -544,8 +544,10 @@ declare module "@scom/scom-page-builder/command/resize.ts" {
         private gapWidth;
         private gridColumnWidth;
         private finalLeft;
-        constructor(element: any, initialWidth: number, initialHeight: number, finalWidth: number, finalHeight: number);
+        constructor(element: any, toolbar: any, initialWidth: number, initialHeight: number, finalWidth: number, finalHeight: number);
         private getColumnData;
+        private updateElement;
+        private updateToolbars;
         execute(): void;
         undo(): void;
         redo(): void;
@@ -577,10 +579,13 @@ declare module "@scom/scom-page-builder/command/dragElement.ts" {
         private parent;
         private element;
         private dropElm;
+        private dropRow;
+        private dropGrid;
         private oldDataColumn;
         private data;
         private oldDataColumnMap;
-        constructor(element: any, dropElm: Control);
+        private isAppend;
+        constructor(element: any, dropElm: Control, isAppend?: boolean);
         private updateData;
         private getColumnData;
         execute(): void;
@@ -892,6 +897,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private pnlFormMsg;
         private mdActions;
         private backdropStack;
+        private form;
         private _rowId;
         private _elementId;
         private _currentSingleContentBlockId;
@@ -1062,7 +1068,6 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private pnlRow;
         private mdRowSetting;
         private pnlEmty;
-        private pnlWrap;
         private _readonly;
         private isResizing;
         private currentWidth;
@@ -1071,6 +1076,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private rowId;
         private rowData;
         private isDragging;
+        private gridColumnWidth;
         private isCloned;
         private isChanged;
         constructor(parent?: any);
@@ -1089,7 +1095,10 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         onMoveUp(): void;
         onMoveDown(): void;
         private renderFixedGrid;
+        private updateGrids;
+        private updateGridColumn;
         private initEventListeners;
+        private initEventBus;
         private getNewElementData;
         private addDottedLines;
         private removeDottedLines;
@@ -1122,6 +1131,7 @@ declare module "@scom/scom-page-builder/page/pageRows.tsx" {
         private pnlRows;
         private pageFooter;
         private currentRow;
+        private enteredRow;
         private pnlRowOverlay;
         private currentPosition;
         private _readonly;
@@ -1137,9 +1147,9 @@ declare module "@scom/scom-page-builder/page/pageRows.tsx" {
         private initDragEvent;
         private mouseDownHandler;
         private mouseUpHandler;
+        private mouseMoveHandler;
         private resetCurrentRow;
         private updateCurrentRow;
-        private onMoveHandler;
         getRows(): IPageSection[];
         setRows(rows: IPageSection[]): Promise<void>;
         renderRows(): Promise<void>;
@@ -1320,6 +1330,7 @@ declare module "@scom/scom-page-builder" {
         private pnlWrap;
         private pageSidebar;
         private events;
+        private currentElement;
         constructor(parent?: Container, options?: any);
         get rootDir(): string;
         set rootDir(value: string);

@@ -5,7 +5,8 @@ import { ICommand, IDataColumn, MAX_COLUMN } from "./interface";
 export class ResizeElementCommand implements ICommand {
   private parent: Control;
   private element: any;
-  private initialWidth: number;
+  private toolbar: any;
+  // private initialWidth: number;
   private initialHeight: number;
   private finalWidth: number;
   private finalHeight: number;
@@ -14,13 +15,14 @@ export class ResizeElementCommand implements ICommand {
   private gridColumnWidth: number = 0;
   private finalLeft: number;
 
-  constructor(element: any, initialWidth: number, initialHeight: number, finalWidth: number, finalHeight: number) {
+  constructor(element: any, toolbar: any, initialWidth: number, initialHeight: number, finalWidth: number, finalHeight: number) {
     this.element = element;
+    this.toolbar = toolbar;
     this.parent = this.element.closest('ide-row');
     this.finalWidth = finalWidth || initialWidth;
     this.finalHeight = finalHeight || initialHeight;
     this.finalLeft = Number(this.element.left);
-    this.initialWidth = initialWidth;
+    // this.initialWidth = initialWidth;
     this.initialHeight = initialHeight;
     this.oldDataColumn = {
       column: Number(this.element.dataset.column),
@@ -70,48 +72,47 @@ export class ResizeElementCommand implements ICommand {
     return { column: finalColumn, columnSpan: finalColumnSpan };
   }
 
-  execute(): void {
-    this.element = this.parent && this.parent.querySelector(`[id='${this.element.id}']`) as Control;
-    if (!this.element) return;
-    const newColumnData = this.getColumnData();
-    if (!newColumnData) return;
-    this.element.setAttribute('data-column-span', `${newColumnData.columnSpan}`);
-    this.element.setAttribute('data-column', `${newColumnData.column}`);
-    this.element.style.gridColumn = `${newColumnData.column} / span ${newColumnData.columnSpan}`;
+  private updateElement(columnData: IDataColumn) {
+    const {column, columnSpan} = columnData;
+    this.element.setAttribute('data-column-span', `${columnSpan}`);
+    this.element.setAttribute('data-column', `${column}`);
+    this.element.style.gridColumn = `${column} / span ${columnSpan}`;
+  }
 
-    const rowId = this.parent?.id.replace('row-', '');
-    const elementId = this.element.id;
-    if (newColumnData.column !== this.oldDataColumn.column || newColumnData.columnSpan !== this.oldDataColumn.columnSpan)
-      pageObject.setElement(rowId, elementId, {...newColumnData});
-
+  private updateToolbars(isChangedColumn: boolean, rowId: string, columnData: IDataColumn, changedHeight: number) {
+    const {column, columnSpan} = columnData;
     const toolbars = this.element.querySelectorAll('ide-toolbar');
     for (const toolbar of toolbars) {
       const currentTag = toolbar?.data?.tag || {};
-      const tag = {...currentTag, width: '100%', height: '100%'};
+      const height = toolbar.id === this.toolbar.id ? changedHeight : '100%';
+      const tag = {...currentTag, width: '100%', height};
       toolbar.setTag(tag);
       const elementId = toolbar.elementId;
-      pageObject.setElement(rowId, elementId, {...newColumnData});
+      if (isChangedColumn && elementId !== this.element.id)
+        pageObject.setElement(rowId, elementId, {column, columnSpan});
     }
+  }
+
+  execute(): void {
+    this.element = this.parent && this.parent.querySelector(`[id='${this.element.id}']`) as Control;
+    if (!this.element) return;
+    const columnData = this.getColumnData();
+    if (!columnData) return;
+    this.updateElement(columnData);
+    const rowId = this.parent?.id.replace('row-', '');
+    const elementId = this.element.id;
+    const isChangedColumn = columnData.column !== this.oldDataColumn.column || columnData.columnSpan !== this.oldDataColumn.columnSpan;
+    if (isChangedColumn) pageObject.setElement(rowId, elementId, {...columnData});
+    this.updateToolbars(isChangedColumn, rowId, columnData, this.finalHeight);
   }
 
   undo(): void {
     const {column, columnSpan} = this.oldDataColumn;
-    this.element.style.gridColumn = `${column} / span ${columnSpan}`;
-    this.element.setAttribute('data-column', `${column}`);
-    this.element.setAttribute('data-column-span', `${columnSpan}`);
-
+    this.updateElement({column, columnSpan});
     const rowId = this.parent?.id.replace('row-', '');
     const elementId = this.element.id;
-    pageObject.setElement(rowId, elementId, {...this.oldDataColumn});
-
-    const toolbars = this.element.querySelectorAll('ide-toolbar');
-    for (const toolbar of toolbars) {
-      const currentTag = toolbar?.data?.tag || {};
-      const tag = {...currentTag, width: '100%', height: '100%'};
-      toolbar.setTag(tag);
-      const elementId = toolbar.elementId;
-      pageObject.setElement(rowId, elementId, {column, columnSpan});
-    }
+    pageObject.setElement(rowId, elementId, {column, columnSpan});
+    this.updateToolbars(true, rowId, {column, columnSpan}, this.initialHeight);
   }
 
   redo(): void {}
