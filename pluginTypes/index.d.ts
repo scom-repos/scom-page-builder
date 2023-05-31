@@ -482,7 +482,7 @@ declare module "@scom/scom-page-builder/command/updateRow.ts" {
         private isDeleted;
         private prependId;
         private appendId;
-        constructor(element: Control, parent: any, data: any, isDeleted?: boolean, prependId?: string);
+        constructor(element: Control, parent: any, data: any, isDeleted?: boolean, prependId?: string, appendId?: string);
         execute(): void;
         undo(): void;
         redo(): void;
@@ -585,7 +585,8 @@ declare module "@scom/scom-page-builder/command/dragElement.ts" {
         private data;
         private oldDataColumnMap;
         private isAppend;
-        constructor(element: any, dropElm: Control, isAppend?: boolean);
+        private isNew;
+        constructor(element: any, dropElm: Control, isAppend?: boolean, isNew?: boolean);
         private updateData;
         private getColumnData;
         execute(): void;
@@ -1103,6 +1104,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private addDottedLines;
         private removeDottedLines;
         private setActive;
+        private onAddSection;
         render(): any;
     }
 }
