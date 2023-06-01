@@ -211,7 +211,7 @@ export class MainModule extends Module {
   render() {
     return (
       <i-panel width="100%" height="100%">
-        <i-button caption="Get data" margin={{top: '1rem', left: '1rem', bottom: '50vh'}} onClick={() => this.onGetData()}></i-button>
+        <i-button caption="Get data" margin={{top: '1rem', left: '1rem', bottom: '1rem'}} onClick={() => this.onGetData()}></i-button>
         <i-scom-page-builder id="pageBuilder"></i-scom-page-builder>
       </i-panel>
     )

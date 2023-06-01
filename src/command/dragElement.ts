@@ -13,8 +13,9 @@ export class DragElementCommand implements ICommand {
   private data: any;
   private oldDataColumnMap: any[] = [];
   private isAppend: boolean = true;
+  private isNew: boolean = false;
 
-  constructor(element: any, dropElm: Control, isAppend: boolean = true) {
+  constructor(element: any, dropElm: Control, isAppend: boolean = true, isNew: boolean = false) {
     this.element = element;
     this.dropElm = dropElm;
     this.dropRow = dropElm.closest('ide-row');
@@ -26,6 +27,7 @@ export class DragElementCommand implements ICommand {
     this.parent = element.closest('ide-row') as Control;
     this.data = JSON.parse(JSON.stringify(element.data));
     this.isAppend = isAppend;
+    this.isNew = isNew;
     this.updateData = this.updateData.bind(this);
   }
 
@@ -55,7 +57,7 @@ export class DragElementCommand implements ICommand {
     let column = 1;
     let columnSpan = Number(this.element.dataset.columnSpan);
 
-    if (this.dropGrid) {
+    if (this.dropGrid && !this.isNew) {
       const columnData = this.getColumnData();
       if (!columnData) return;
       column = columnData.column;

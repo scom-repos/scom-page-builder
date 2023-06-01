@@ -177,7 +177,8 @@ export class PageRow extends Module {
 
     onDeleteRow() {
         const prependRow = this.previousElementSibling;
-        const rowCmd = new UpdateRowCommand(this, this.parent, this.data, true, prependRow ? prependRow.id : '');
+        const appendRow = this.nextElementSibling;
+        const rowCmd = new UpdateRowCommand(this, this.parent, this.data, true, prependRow?.id || '', appendRow?.id || '');
         commandHistory.execute(rowCmd);
     }
 
@@ -507,7 +508,7 @@ export class PageRow extends Module {
             event.preventDefault();
             event.stopPropagation();
             if (pageRow && elementConfig?.module?.name === 'sectionStack')
-                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, pageRow.id);
+                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
             if (!self.currentElement) return;
 
             const nearestFixedItem = eventTarget.closest('.fixed-grid-item') as Control;
@@ -558,10 +559,10 @@ export class PageRow extends Module {
                         commandHistory.execute(dragCmd);
                     } else {
                         const isAppend = dropElm.classList.contains('back-block');
-                        let dragCmd = getDragData() ?
+                        const dragCmd = getDragData() ?
                             new AddElementCommand(self.getNewElementData(), isAppend, false, dropElm, null) :
                             new DragElementCommand(self.currentElement, dropElm, isAppend);
-                        await commandHistory.execute(dragCmd);
+                        dragCmd && await commandHistory.execute(dragCmd);
                     }
                     self.isDragging = false;
                 } else if (pageRow && !self.isDragging) {
@@ -569,18 +570,12 @@ export class PageRow extends Module {
                     if (elementConfig) {
                         const parentId = pageRow?.id.replace('row-', '');
                         const elements = parentId ? pageObject.getRow(parentId)?.elements || [] : [];
-                        let dragCmd = null;
-                        if (elements.length) {
-                            // let backBlocks = Array.from(document.getElementsByClassName('is-dragenter'));
-                            // const activedBlock = backBlocks.find((block: Control) => block.visible) as Control;
-                            if (!activedBlock) return;
-                            dragCmd = new AddElementCommand(self.getNewElementData(), activedBlock.classList.contains('back-block'), false, activedBlock);
-                        }
-                        else
-                            dragCmd = new AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
-                        await commandHistory.execute(dragCmd);
+                        const dragCmd = elements.length && activedBlock ?
+                            new AddElementCommand(self.getNewElementData(), activedBlock.classList.contains('back-block'), false, activedBlock) :
+                            !elements.length && new AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
+                        dragCmd && await commandHistory.execute(dragCmd);
                     } else {
-                        const dragCmd = new DragElementCommand(self.currentElement, pageRow);
+                        const dragCmd = new DragElementCommand(self.currentElement, pageRow, true, true);
                         commandHistory.execute(dragCmd);
                     }
                     self.isDragging = false;
@@ -634,6 +629,12 @@ export class PageRow extends Module {
         this.classList.add('active');
     }
 
+    private onAddSection(type: number) {
+        const prependId = type === 1 ? this.id : '';
+        const appendId = type === -1 ? this.id : '';
+        application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId, appendId });
+    }
+
     render() {
         return (
             <i-panel
@@ -643,6 +644,15 @@ export class PageRow extends Module {
                 height="100%"
                 padding={{ left: '3rem', right: '3rem' }}
             >
+                <i-button
+                    caption=''
+                    icon={{name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText}}
+                    background={{color: Theme.colors.primary.main}}
+                    padding={{top: 5, bottom: 5, left: 5, right: 5}}
+                    top="-10px" left="50%" zIndex={100}
+                    class="btn-add"
+                    onClick={() => this.onAddSection(-1)}
+                ></i-button>
                 <i-vstack id={'actionsBar'} class="row-actions-bar" verticalAlignment="center">
                     <i-vstack
                         background={{ color: '#fff' }}
@@ -738,6 +748,15 @@ export class PageRow extends Module {
                     id="mdRowSetting"
                     onSave={this.onSaveRowSettings.bind(this)}
                 ></ide-row-settings-dialog>
+                <i-button
+                    caption=''
+                    icon={{name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText}}
+                    background={{color: Theme.colors.primary.main}}
+                    padding={{top: 5, bottom: 5, left: 5, right: 5}}
+                    bottom="-12px" left="50%" zIndex={100}
+                    class="btn-add"
+                    onClick={() => this.onAddSection(1)}
+                ></i-button>
             </i-panel>
         );
     }

@@ -87,6 +87,16 @@ Styles.cssRule('ide-row', {
                 }
             }
         },
+        '.btn-add': {
+            visibility: 'hidden',
+            opacity: 0,
+            transition: 'opacity .3s .3s cubic-bezier(0.4,0,0.2,1), visibility 0s .2s',
+            $nest: {
+                'i-icon svg': {
+                    fill: Theme.colors.primary.contrastText
+                }
+            }
+        },
         '&:hover': {
             $nest: {
                 '.row-actions-bar': {
@@ -97,6 +107,10 @@ Styles.cssRule('ide-row', {
                             boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)'
                         }
                     }
+                },
+                '.btn-add': {
+                    visibility: 'visible',
+                    opacity: 1
                 }
             }
         },

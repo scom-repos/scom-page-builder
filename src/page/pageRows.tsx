@@ -260,7 +260,8 @@ export class PageRows extends Module {
         );
     }
 
-    private async onCreateSection(prependId?: string) {
+    private async onCreateSection(params?: {prependId?: string, appendId?: string}) {
+        const { prependId = '', appendId = '' } = params || {};
         const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
         if (!this._readonly) {
             pageRow.border = { top: { width: '1px', style: 'dashed', color: Theme.divider } };
@@ -276,7 +277,8 @@ export class PageRows extends Module {
             this.pnlRows,
             rowData,
             false,
-            prependId || ''
+            prependId || '',
+            appendId || ''
         );
         commandHistory.execute(addRowCmd);
         await pageRow.setData(rowData);

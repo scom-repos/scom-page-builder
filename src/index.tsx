@@ -78,30 +78,34 @@ export default class Editor extends Module {
         });
 
         function adjustScrollSpeed(mouseY: number) {
-            const { top, height } = containerElement.getBoundingClientRect();
-            const temp = top - window.scrollY;
-            const scrollDistance = temp < 0 ? 0 : temp;
-            const distanceFromTop = mouseY - (top - scrollDistance);
-            const distanceFromBottom = (top + height) - (scrollDistance + mouseY);
-            if (distanceFromTop < scrollThreshold) {
-                const scrollFactor = 1 + (scrollThreshold - distanceFromTop) / scrollThreshold;
-                containerElement.scrollTop -= scrollSpeed * scrollFactor + scrollDistance;
-            } else if (distanceFromBottom < scrollThreshold) {
-                const scrollFactor = 1 + (scrollThreshold - distanceFromBottom) / scrollThreshold;
-                containerElement.scrollTop += scrollSpeed * scrollFactor + scrollDistance;
+            const { top, bottom } = containerElement.getBoundingClientRect();
+            const isNearTop = mouseY < top + scrollThreshold;
+            const isNearBottom = mouseY > bottom - scrollThreshold;
+            const isNearWindowTop = mouseY <= scrollThreshold;
+            const isNearWindowBottom = mouseY > window.innerHeight - scrollThreshold;
+            const scrollAmountTop = Math.max(scrollThreshold - (mouseY - top), 0);
+            const scrollAmountBottom = Math.max(scrollThreshold - (bottom - mouseY), 0);
+
+            if (isNearTop || isNearWindowTop) {
+                const scrollFactor = 1 + (scrollThreshold - scrollAmountTop) / scrollThreshold;
+                containerElement.scrollTop -= scrollSpeed * scrollFactor;
+            } else if (isNearBottom || (isNearWindowBottom && bottom > window.innerHeight)) {
+                const scrollFactor = 1 + (scrollThreshold - scrollAmountBottom) / scrollThreshold;
+                containerElement.scrollTop += scrollSpeed * scrollFactor;
             } else {
                 containerElement.scrollTo({ behavior: 'auto', top: containerElement.scrollTop });
             }
         }
-    }
 
-    private initEventListeners() {
-        this.pnlWrap.addEventListener('drop', (event) => {
+        containerElement.addEventListener('drop', (event) => {
             const elementConfig = getDragData();
             if (elementConfig?.module?.name === 'sectionStack') {
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
             }
         });
+    }
+
+    private initEventListeners() {
         this.initScrollEvent(this.pnlWrap);
     }
 
