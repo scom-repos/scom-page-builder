@@ -557,9 +557,10 @@ export class PageRow extends Module {
                     if (elementConfig) {
                         const parentId = pageRow?.id.replace('row-', '');
                         const elements = parentId ? pageObject.getRow(parentId)?.elements || [] : [];
-                        const dragCmd = elements.length && activedBlock ?
+                        const hasData = elements.find(el => el.type === 'primitive' || (el.type === 'composite' && el.elements?.length));
+                        const dragCmd = hasData && activedBlock ?
                             new AddElementCommand(self.getNewElementData(), activedBlock.classList.contains('back-block'), false, activedBlock) :
-                            !elements.length && new AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
+                            !hasData && new AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
                         dragCmd && await commandHistory.execute(dragCmd);
                     } else {
                         const dragCmd = new DragElementCommand(self.currentElement, pageRow, true, true);

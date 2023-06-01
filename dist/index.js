@@ -4207,9 +4207,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         if (elementConfig) {
                             const parentId = pageRow === null || pageRow === void 0 ? void 0 : pageRow.id.replace('row-', '');
                             const elements = parentId ? ((_b = index_42.pageObject.getRow(parentId)) === null || _b === void 0 ? void 0 : _b.elements) || [] : [];
-                            const dragCmd = elements.length && activedBlock ?
+                            const hasData = elements.find(el => { var _a; return el.type === 'primitive' || (el.type === 'composite' && ((_a = el.elements) === null || _a === void 0 ? void 0 : _a.length)); });
+                            const dragCmd = hasData && activedBlock ?
                                 new index_43.AddElementCommand(self.getNewElementData(), activedBlock.classList.contains('back-block'), false, activedBlock) :
-                                !elements.length && new index_43.AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
+                                !hasData && new index_43.AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
                             dragCmd && await index_43.commandHistory.execute(dragCmd);
                         }
                         else {
