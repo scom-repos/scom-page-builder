@@ -11,7 +11,8 @@
     "@scom/scom-token-list": "*",
     "@scom/scom-page-builder": "*",
     "@scom/scom-network-picker": "*",
-    "@scom/scom-dapp-container": "*"
+    "@scom/scom-dapp-container": "*",
+    "@scom/scom-configurator-settings": "*"
   },
   "components": {
     "@scom/scom-markdown-editor": {
@@ -87,6 +88,11 @@
     "@scom/scom-pie-chart": {
       "name": "Pie Chart",
       "path": "scom-pie-chart",
+      "category": "charts"
+    },
+    "@scom/scom-dune": {
+      "name": "Dune Blocks",
+      "path": "scom-dune",
       "category": "charts"
     }
   }

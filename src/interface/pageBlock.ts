@@ -22,6 +22,7 @@ export interface IPageBlockAction {
 	userInputDataSchema: IDataSchema;
     userInputUISchema: IUISchema;
     customUI?: any;
+    useRenderUI?: boolean;
 }
 
 export interface IPageBlock {
