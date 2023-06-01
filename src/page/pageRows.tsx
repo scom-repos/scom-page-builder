@@ -103,6 +103,7 @@ export class PageRows extends Module {
             row.classList.add('dropzone');
             dragStack.addEventListener('mousedown', this.mouseDownHandler, false);
         } else {
+            row.classList.remove('dropzone');
             dragStack.removeEventListener('mousedown', this.mouseDownHandler, false);
         }
         dragStack.ondragstart = function () {
@@ -119,13 +120,13 @@ export class PageRows extends Module {
             this.isDragging = true;
             this.currentRow = currentDragEl;
             const data = this.currentRow.getBoundingClientRect();
-            const parentData = this.pnlRows.getBoundingClientRect();
+            const { top, left } = this.pnlRows.getBoundingClientRect();
             this.currentPosition = data;
             this.pnlRowOverlay.width = this.currentPosition.width;
             this.pnlRowOverlay.height = this.currentPosition.height;
             this.pnlRowOverlay.zIndex = '1';
-            this.pnlRowOverlay.left = 0;
-            this.pnlRowOverlay.top = this.currentPosition.top - parentData.top;
+            this.pnlRowOverlay.left = this.currentPosition.left - left;
+            this.pnlRowOverlay.top = this.currentPosition.top - top;
             this.currentRow.classList.add('row-dragged');
             document.addEventListener('mousemove', this.mouseMoveHandler);
             document.addEventListener('mouseup', this.mouseUpHandler);
@@ -138,7 +139,6 @@ export class PageRows extends Module {
         document.removeEventListener('mouseup', this.mouseUpHandler);
         this.currentRow.classList.remove('row-dragged');
         this.resetCurrentRow();
-
         this.isDragging = false;
         const rows = this.pnlRows.querySelectorAll('ide-row');
         for (let row of rows) {
@@ -164,21 +164,22 @@ export class PageRows extends Module {
     private mouseMoveHandler(event: MouseEvent) {
         let mouseX = event.clientX;
         let mouseY = event.clientY;
-        const dropzones = this.querySelectorAll('.dropzone');
+        const dropzones = (this.querySelectorAll('.dropzone') || []) as PageRow[];
+        const centerPoints = this.getDropzoneCenterPoints(dropzones);
         let nearestElement = null;
         let shortestDistance = Infinity;
         
-        dropzones.forEach((dropzone) => {
-          const rect = dropzone.getBoundingClientRect();
-          const centerX = rect.left + rect.width / 2;
-          const centerY = rect.top + rect.height / 2;
-          
-          const distance = Math.sqrt((mouseX - centerX) ** 2 + (mouseY - centerY) ** 2);
-          if (distance < shortestDistance) {
-            shortestDistance = distance;
-            nearestElement = dropzone;
-          }
-        });
+        for (let data of centerPoints) {
+            const { centerX, centerY, dropzone } = data;
+            const dx = centerX - mouseX;
+            const dy = centerY - mouseY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < shortestDistance) {
+                shortestDistance = distance;
+                nearestElement = dropzone;
+            }
+            dropzone.classList.remove('row-entered');
+        }
         if (nearestElement && !nearestElement.isSameNode(this.currentRow)) {
             nearestElement.classList.add('row-entered');
             this.enteredRow = nearestElement as PageRow;
@@ -188,6 +189,17 @@ export class PageRows extends Module {
         } else {
             this.enteredRow = null;
         }
+    }
+
+    private getDropzoneCenterPoints(dropzones: PageRow[]) {
+        const centerPoints = [];
+        for (let dropzone of dropzones) {
+            const rect = dropzone.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            centerPoints.push({ centerX, centerY, dropzone });
+        }
+        return centerPoints;
     }
 
     private resetCurrentRow() {

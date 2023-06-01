@@ -17,9 +17,6 @@ Styles.cssRule('ide-row', {
     transition: 'translate .3s ease-in',
     border: '3px solid transparent',
     $nest: {
-        '&.dragenter': {
-            borderBottom: '3px solid #1976D2'
-        },
         '.drag-stack': {
             visibility: 'hidden',
             opacity: 0,
@@ -143,6 +140,9 @@ Styles.cssRule('ide-row', {
         },
         '.border-dotted': {
             border: 'dotted 1px black'
+        },
+        '.pnl-empty': {
+            userSelect: 'none'
         }
     }
 });
