@@ -44,7 +44,13 @@ Styles.cssRule('ide-toolbar', {
           marginBottom: '1rem'
         },
         '.modal': {
-          padding: 0
+          padding: 0,
+          $nest: {
+            '#pnlForm': {
+              maxHeight: 'calc(100vh - 100px)',
+              overflowY: 'auto'
+            }
+          }
         }
       }
     },

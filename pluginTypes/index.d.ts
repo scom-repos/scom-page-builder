@@ -342,6 +342,7 @@ declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
         userInputDataSchema: IDataSchema;
         userInputUISchema: IUISchema;
         customUI?: any;
+        useRenderUI?: boolean;
     }
     export interface IPageBlock {
         getActions: () => IPageBlockAction[];

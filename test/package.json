@@ -27,7 +27,8 @@
         "@scom/scom-content-block": "https://github.com/scom-repos/scom-content-block",
         "@scom/scom-network-picker": "^0.1.0",
         "@scom/scom-network-list": "^0.1.0",
-        "@scom/scom-token-list": "https://github.com/scom-repos/scom-token-list"
+        "@scom/scom-token-list": "https://github.com/scom-repos/scom-token-list",
+        "@scom/scom-dune": "https://github.com/scom-repos/scom-dune"
     },
     "scripts": {
         "cp:builder": "rm -rf ref && mkdir ref && cp ../package.json ref/package.json && cp -r ../dist ref/dist && cp -r ../pluginTypes ref/pluginTypes",

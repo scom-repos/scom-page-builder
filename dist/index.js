@@ -2798,7 +2798,13 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                         marginBottom: '1rem'
                     },
                     '.modal': {
-                        padding: 0
+                        padding: 0,
+                        $nest: {
+                            '#pnlForm': {
+                                maxHeight: 'calc(100vh - 100px)',
+                                overflowY: 'auto'
+                            }
+                        }
                     }
                 }
             },
@@ -2950,6 +2956,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                     }
                 });
                 elm.classList.add('toolbar');
+                if (tool.name)
+                    elm.setAttribute('tool-name', tool.name);
                 this.toolbar.appendChild(elm);
             }
             const removeBtn = await components_17.Button.create({
@@ -3019,7 +3027,12 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 };
                 if (action.userInputUISchema)
                     options.jsonUISchema = action.userInputUISchema;
-                // renderUI(this.pnlForm, options, this.onSave.bind(this));
+                if (action.useRenderUI || action.name === 'Advanced') {
+                    components_17.renderUI(this.pnlForm, options, this.onSave.bind(this));
+                    this.form.visible = false;
+                    this.mdActions.refresh();
+                    return;
+                }
                 console.log('form x', options.data, this.data);
                 this.form.uiSchema = action.userInputUISchema;
                 this.form.jsonSchema = action.userInputDataSchema;

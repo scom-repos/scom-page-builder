@@ -10,7 +10,8 @@ import {
     IDataSchema,
     VStack,
     application,
-    Form
+    Form,
+    renderUI
 } from '@ijstech/components';
 import { EVENT } from '../const/index';
 import { ELEMENT_NAME, IPageBlockAction, IPageBlockData, IPageElement } from '../interface/index';
@@ -130,6 +131,7 @@ export class IDEToolbar extends Module {
                 }
             });
             elm.classList.add('toolbar');
+            if (tool.name) elm.setAttribute('tool-name', tool.name);
             this.toolbar.appendChild(elm);
         }
         const removeBtn = await Button.create({
@@ -197,8 +199,12 @@ export class IDEToolbar extends Module {
                 data: {...properties, ...tag}
             }
             if (action.userInputUISchema) options.jsonUISchema = action.userInputUISchema;
-            // renderUI(this.pnlForm, options, this.onSave.bind(this));
-
+            if (action.useRenderUI || action.name === 'Advanced') {
+                renderUI(this.pnlForm, options, this.onSave.bind(this));
+                this.form.visible = false;
+                this.mdActions.refresh();
+                return;
+            }
             console.log('form x', options.data, this.data);
             this.form.uiSchema = action.userInputUISchema;
             this.form.jsonSchema = action.userInputDataSchema;

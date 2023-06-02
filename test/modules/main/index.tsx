@@ -68,6 +68,11 @@ export class MainModule extends Module {
       "@scom/scom-dapp-container": {
         "name": "DApp Container",
         "path": "scom-dapp-container"
+      },
+      "@scom/scom-dune": {
+        "name": "Dune Blocks",
+        "path": "scom-dune",
+        "category": "charts"
       }
     }
   }
