@@ -116,8 +116,8 @@ export class PageObject {
     if (!elm) return;
     console.log('set elm', sectionId, elementId, value)
     if (value.properties !== undefined) elm.properties = value.properties;
-    if (value.column !== undefined) elm.column = value.column;
-    if (value.columnSpan !== undefined) elm.columnSpan = value.columnSpan;
+    if (value.columnSpan !== undefined  && value.columnSpan !== elm.columnSpan)
+      elm.columnSpan = value.columnSpan;
     if (value.tag !== undefined) elm.tag = value.tag;
     if (value.type !== undefined && elm.type !== value.type) {
       if (value.dropId) this.removeElement(sectionId, value.dropId);
@@ -135,6 +135,17 @@ export class PageObject {
     }
     if (value.module !== undefined) elm.module = value.module;
     if (value.elements !== undefined) elm.elements = value.elements;
+    if (value.column !== undefined && value.column !== elm.column) {
+      elm.column = value.column;
+      if (elm.type === 'primitive') {
+        const section = this.getRow(sectionId);
+        if (section?.elements) section.elements = this.sortFn([...section.elements]);
+      }
+    }
+  }
+
+  private sortFn(elements: IPageElement[]) {
+    return [...elements].sort((a: IPageElement, b: IPageElement) => Number(a.column) - Number(b.column));
   }
 
   private removeElementFn(elements: IPageElement[], elementId: string) {
@@ -173,6 +184,7 @@ export class PageObject {
       if (!section) return;
       if (!parentElmId || parentElmId === value.id) {
         section.elements.push(value);
+        section.elements = this.sortFn([...section.elements]);
       } else {
         const parentElement = section.elements.find(elm => elm.id === parentElmId);
         if (parentElement) {

@@ -223,9 +223,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports"], functio
             console.log('set elm', sectionId, elementId, value);
             if (value.properties !== undefined)
                 elm.properties = value.properties;
-            if (value.column !== undefined)
-                elm.column = value.column;
-            if (value.columnSpan !== undefined)
+            if (value.columnSpan !== undefined && value.columnSpan !== elm.columnSpan)
                 elm.columnSpan = value.columnSpan;
             if (value.tag !== undefined)
                 elm.tag = value.tag;
@@ -249,6 +247,17 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports"], functio
                 elm.module = value.module;
             if (value.elements !== undefined)
                 elm.elements = value.elements;
+            if (value.column !== undefined && value.column !== elm.column) {
+                elm.column = value.column;
+                if (elm.type === 'primitive') {
+                    const section = this.getRow(sectionId);
+                    if (section === null || section === void 0 ? void 0 : section.elements)
+                        section.elements = this.sortFn([...section.elements]);
+                }
+            }
+        }
+        sortFn(elements) {
+            return [...elements].sort((a, b) => Number(a.column) - Number(b.column));
         }
         removeElementFn(elements, elementId) {
             if (!elements || !elements.length)
@@ -291,6 +300,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports"], functio
                     return;
                 if (!parentElmId || parentElmId === value.id) {
                     section.elements.push(value);
+                    section.elements = this.sortFn([...section.elements]);
                 }
                 else {
                     const parentElement = section.elements.find(elm => elm.id === parentElmId);
@@ -953,7 +963,7 @@ define("@scom/scom-page-builder/interface/pageBlock.ts", ["require", "exports"],
 define("@scom/scom-page-builder/interface/siteData.ts", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.ElementType = exports.HeaderType = void 0;
+    exports.IColumnLayoutType = exports.ElementType = exports.HeaderType = void 0;
     var HeaderType;
     (function (HeaderType) {
         HeaderType["COVER"] = "cover";
@@ -967,6 +977,11 @@ define("@scom/scom-page-builder/interface/siteData.ts", ["require", "exports"], 
         ElementType["PRIMITIVE"] = "primitive";
         ElementType["COMPOSITE"] = "composite";
     })(ElementType = exports.ElementType || (exports.ElementType = {}));
+    var IColumnLayoutType;
+    (function (IColumnLayoutType) {
+        IColumnLayoutType["FIXED"] = "Fixed";
+        IColumnLayoutType["AUTOMATIC"] = "Automatic";
+    })(IColumnLayoutType = exports.IColumnLayoutType || (exports.IColumnLayoutType = {}));
 });
 define("@scom/scom-page-builder/interface/component.ts", ["require", "exports"], function (require, exports) {
     "use strict";

@@ -87,6 +87,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         private findElement;
         getElement(sectionId: string, elementId: string): any;
         setElement(sectionId: string, elementId: string, value: any): void;
+        private sortFn;
         private removeElementFn;
         removeElement(sectionId: string, elementId: string): void;
         addElement(sectionId: string, value: IPageElement, parentElmId?: string, elementIndex?: number): void;
@@ -383,6 +384,7 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         image?: string;
         backgroundColor?: string;
         elements: IPageElement[];
+        config?: IConfigData;
     }
     export interface IPageFooter {
         image: string;
@@ -403,6 +405,16 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         elements?: IPageElement[];
         visibleOn?: string;
         invisibleOn?: string;
+    }
+    export enum IColumnLayoutType {
+        FIXED = "Fixed",
+        AUTOMATIC = "Automatic"
+    }
+    export interface IConfigData {
+        columnLayout?: IColumnLayoutType;
+        columnsNumber?: number;
+        maxColumnsPerRow?: number;
+        columnMinWidth?: number | string;
     }
 }
 /// <amd-module name="@scom/scom-page-builder/interface/component.ts" />

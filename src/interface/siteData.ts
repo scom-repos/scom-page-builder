@@ -31,6 +31,7 @@ export interface IPageSection {
 	image?: string;
     backgroundColor?: string;
 	elements: IPageElement[];
+    config?: IConfigData;
 }
 
 export interface IPageFooter {
@@ -55,6 +56,18 @@ export interface IPageElement {
 
     visibleOn?: string;
     invisibleOn?: string;
+}
+
+export enum IColumnLayoutType {
+    FIXED = 'Fixed',
+    AUTOMATIC = 'Automatic'
+}
+
+export interface IConfigData {
+    columnLayout?: IColumnLayoutType;
+    columnsNumber?: number;
+    maxColumnsPerRow?: number;
+    columnMinWidth?: number|string;
 }
 
 
