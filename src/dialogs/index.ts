@@ -1,6 +1,6 @@
 import {ConfirmDialog} from "./confirmDialog";
 import {LoadingDialog} from "./loadingDialog";
 import {RowSettingsDialog} from "./rowSettingsDialog";
-import {PageBlockSettingsDialog} from './pageBlockSettingsDialog';
+import {SectionSettingsDialog} from './sectionSettingsDialog';
 
-export { ConfirmDialog, LoadingDialog, RowSettingsDialog, PageBlockSettingsDialog }
+export { ConfirmDialog, LoadingDialog, RowSettingsDialog, SectionSettingsDialog }

@@ -12,7 +12,6 @@ export {
 };
 
 export * from './pageBlock';
-export * from './component';
 export * from './siteData';
 export * from './jsonSchema';
 export enum ELEMENT_NAME {
@@ -34,3 +33,4 @@ export interface IElementConfig {
   prependId?: string;
   appendId?: string;
 }
+export const TEXTBOX_PATH = 'scom-markdown-editor';

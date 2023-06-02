@@ -23,6 +23,7 @@ export interface IPageHeader {
 	headerType: HeaderType;
 	image: string;
 	elements: IPageElement[];
+    config?: IConfigData;
 }
 
 export interface IPageSection {
@@ -37,6 +38,7 @@ export interface IPageSection {
 export interface IPageFooter {
 	image: string;
 	elements: IPageElement[];
+    config?: IConfigData;
 }
 
 export enum ElementType {
@@ -70,4 +72,7 @@ export interface IConfigData {
     columnMinWidth?: number|string;
 }
 
-
+export interface IRowSettings {
+    backgroundColor?: string;
+    config?: IConfigData;
+}

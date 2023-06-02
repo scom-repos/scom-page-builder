@@ -53,6 +53,7 @@ export class PageObject {
     const section = this.getSection(id);
     if (section) {
       if (data.backgroundColor !== undefined) section.backgroundColor = data.backgroundColor;
+      if (data.config) section.config = data.config;
     }
   }
 

@@ -143,12 +143,12 @@ export class MainModule extends Module {
       "sections": [
         {
           "id": "6876b0ab-a29c-4ed8-905e-51cd515fa26c",
-          "row": 2,
+          "row": 1,
           "elements": [
             {
               "id": "ff69df4f-ebb0-4446-adde-9bcb8a07f25d",
               "column": 1,
-              "columnSpan": 3,
+              "columnSpan": 12,
               "type": "composite",
               "properties": {
                 "url": "https://placehold.co/600x400.png",
