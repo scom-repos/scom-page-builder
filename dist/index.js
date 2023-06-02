@@ -3601,9 +3601,6 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
         transition: 'translate .3s ease-in',
         border: '3px solid transparent',
         $nest: {
-            '&.dragenter': {
-                borderBottom: '3px solid #1976D2'
-            },
             '.drag-stack': {
                 visibility: 'hidden',
                 opacity: 0,
@@ -3726,6 +3723,9 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
             },
             '.border-dotted': {
                 border: 'dotted 1px black'
+            },
+            '.pnl-empty': {
+                userSelect: 'none'
             }
         }
     });
@@ -3901,17 +3901,66 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.currentElement = resizableElm;
                 toolbar = target.closest('ide-toolbar');
                 self.addDottedLines();
-                this.isResizing = true;
+                self.isResizing = true;
                 currentDot = parent;
                 startX = e.clientX;
                 startY = e.clientY;
-                this.currentWidth = toolbar.offsetWidth;
-                this.currentHeight = toolbar.offsetHeight;
+                self.currentWidth = toolbar.offsetWidth;
+                self.currentHeight = toolbar.offsetHeight;
+                document.addEventListener('mousemove', mouseMoveHandler);
+                document.addEventListener('mouseup', mouseUpHandler);
             });
-            document.addEventListener('mouseup', (e) => {
+            function mouseMoveHandler(e) {
+                if (!self.isResizing || !toolbar)
+                    return;
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                if (currentDot.classList.contains('topLeft')) {
+                    newWidth = self.currentWidth - deltaX;
+                    newHeight = self.currentHeight - deltaY;
+                    self.currentElement.style.left = deltaX + 'px';
+                    updateDimension(newWidth, newHeight);
+                }
+                else if (currentDot.classList.contains('topRight')) {
+                    newWidth = self.currentWidth + deltaX;
+                    newHeight = self.currentHeight - deltaY;
+                    updateDimension(newWidth, newHeight);
+                }
+                else if (currentDot.classList.contains('bottomLeft')) {
+                    newWidth = self.currentWidth - deltaX;
+                    newHeight = self.currentHeight + deltaY;
+                    self.currentElement.style.left = deltaX + 'px';
+                    updateDimension(newWidth, newHeight);
+                }
+                else if (currentDot.classList.contains('bottomRight')) {
+                    newWidth = self.currentWidth + deltaX;
+                    newHeight = self.currentHeight + deltaY;
+                    updateDimension(newWidth, newHeight);
+                }
+                else if (currentDot.classList.contains('top')) {
+                    newHeight = self.currentHeight - deltaY;
+                    updateDimension(undefined, newHeight);
+                }
+                else if (currentDot.classList.contains('bottom')) {
+                    newHeight = self.currentHeight + deltaY;
+                    updateDimension(undefined, newHeight);
+                }
+                else if (currentDot.classList.contains('left')) {
+                    newWidth = self.currentWidth - deltaX;
+                    self.currentElement.style.left = deltaX + 'px';
+                    updateDimension(newWidth, undefined);
+                }
+                else if (currentDot.classList.contains('right')) {
+                    newWidth = self.currentWidth + deltaX;
+                    updateDimension(newWidth, undefined);
+                }
+            }
+            function mouseUpHandler(e) {
                 e.preventDefault();
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
                 self.removeDottedLines();
-                this.isResizing = false;
+                self.isResizing = false;
                 if (!toolbar)
                     return;
                 toolbar.width = 'initial';
@@ -3923,12 +3972,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
                 self.currentElement.width = 'initial';
                 self.currentElement.height = 'initial';
-                const resizeCmd = new index_43.ResizeElementCommand(self.currentElement, toolbar, this.currentWidth, this.currentHeight, newWidth, newHeight);
+                const resizeCmd = new index_43.ResizeElementCommand(self.currentElement, toolbar, self.currentWidth, self.currentHeight, newWidth, newHeight);
                 index_43.commandHistory.execute(resizeCmd);
                 self.currentElement.style.left = 'initial';
                 self.currentElement = null;
                 toolbar = null;
-            });
+            }
             function updateDimension(newWidth, newHeight) {
                 if (newWidth !== undefined)
                     toolbar.width = newWidth;
@@ -3950,51 +3999,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     elm.classList.remove(className);
                 }
             }
-            document.addEventListener('mousemove', (e) => {
-                if (!this.isResizing || !toolbar)
-                    return;
-                const deltaX = e.clientX - startX;
-                const deltaY = e.clientY - startY;
-                if (currentDot.classList.contains('topLeft')) {
-                    newWidth = this.currentWidth - deltaX;
-                    newHeight = this.currentHeight - deltaY;
-                    self.currentElement.style.left = deltaX + 'px';
-                    updateDimension(newWidth, newHeight);
-                }
-                else if (currentDot.classList.contains('topRight')) {
-                    newWidth = this.currentWidth + deltaX;
-                    newHeight = this.currentHeight - deltaY;
-                    updateDimension(newWidth, newHeight);
-                }
-                else if (currentDot.classList.contains('bottomLeft')) {
-                    newWidth = this.currentWidth - deltaX;
-                    newHeight = this.currentHeight + deltaY;
-                    self.currentElement.style.left = deltaX + 'px';
-                    updateDimension(newWidth, newHeight);
-                }
-                else if (currentDot.classList.contains('bottomRight')) {
-                    newWidth = this.currentWidth + deltaX;
-                    newHeight = this.currentHeight + deltaY;
-                    updateDimension(newWidth, newHeight);
-                }
-                else if (currentDot.classList.contains('top')) {
-                    newHeight = this.currentHeight - deltaY;
-                    updateDimension(undefined, newHeight);
-                }
-                else if (currentDot.classList.contains('bottom')) {
-                    newHeight = this.currentHeight + deltaY;
-                    updateDimension(undefined, newHeight);
-                }
-                else if (currentDot.classList.contains('left')) {
-                    newWidth = this.currentWidth - deltaX;
-                    self.currentElement.style.left = deltaX + 'px';
-                    updateDimension(newWidth, undefined);
-                }
-                else if (currentDot.classList.contains('right')) {
-                    newWidth = this.currentWidth + deltaX;
-                    updateDimension(newWidth, undefined);
-                }
-            });
             this.addEventListener('dragstart', function (event) {
                 const eventTarget = event.target;
                 if (eventTarget instanceof PageRow_1)
@@ -4023,23 +4027,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.isDragging = false;
                 index_42.setDragData(null);
                 self.removeDottedLines();
-                let rectangles = document.getElementsByClassName('rectangle');
-                for (const rectangle of rectangles) {
-                    rectangle.style.display = 'none';
-                }
-                let backBlocks = document.getElementsByClassName('is-dragenter');
-                for (const block of backBlocks) {
-                    block.visible = false;
-                    block.classList.remove('is-dragenter');
-                }
-                let blocks = document.getElementsByClassName('dragenter');
-                for (const block of blocks) {
-                    block.classList.remove('dragenter');
-                }
-                let components = document.getElementsByClassName('is-dragging');
-                for (const component of components) {
-                    component.classList.remove('is-dragging');
-                }
+                updateRectangles();
+                removeClass('is-dragenter');
+                removeClass('row-entered');
+                removeClass('is-dragging');
             });
             this.addEventListener('dragenter', function (event) {
                 var _a, _b, _c, _d;
@@ -4047,7 +4038,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const elementConfig = index_42.getDragData();
                 const pageRow = eventTarget.closest('ide-row');
                 if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
-                    pageRow.classList.add('dragenter');
+                    pageRow.classList.add('row-entered');
                 }
                 if (!eventTarget || !self.currentElement)
                     return;
@@ -4121,12 +4112,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             document.addEventListener('dragleave', function (event) {
                 const eventTarget = event.target;
                 const target = eventTarget.closest('.fixed-grid-item');
-                if (target) {
-                    let rectangles = document.getElementsByClassName('rectangle');
-                    for (const rectangle of rectangles) {
-                        rectangle.style.display = 'none';
-                    }
-                }
+                if (target)
+                    updateRectangles();
                 else {
                     const blocks = document.getElementsByClassName('is-dragenter');
                     for (const block of blocks) {
@@ -4138,12 +4125,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         block.classList.remove('is-dragenter');
                     }
                 }
-                const pageRows = document.getElementsByClassName('dragenter');
+                const pageRows = document.getElementsByClassName('row-entered');
                 for (const row of pageRows) {
                     const currentRow = eventTarget.closest('ide-row');
                     if (currentRow && row && currentRow.id === row.id)
                         continue;
-                    row.classList.remove('dragenter');
+                    row.classList.remove('row-entered');
                 }
             });
             this.addEventListener('drop', async function (event) {
@@ -4194,7 +4181,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         : eventTarget.closest('.is-dragenter'));
                     if (self.isDragging)
                         return;
-                    const blocks = Array.from(this.parentElement.getElementsByClassName('is-dragenter'));
+                    const blocks = Array.from(self.parentElement.getElementsByClassName('is-dragenter'));
                     const activedBlock = blocks.find((block) => block.visible);
                     dropElm = dropElm || activedBlock;
                     if (dropElm) {
@@ -4220,9 +4207,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         if (elementConfig) {
                             const parentId = pageRow === null || pageRow === void 0 ? void 0 : pageRow.id.replace('row-', '');
                             const elements = parentId ? ((_b = index_42.pageObject.getRow(parentId)) === null || _b === void 0 ? void 0 : _b.elements) || [] : [];
-                            const dragCmd = elements.length && activedBlock ?
+                            const hasData = elements.find(el => { var _a; return el.type === 'primitive' || (el.type === 'composite' && ((_a = el.elements) === null || _a === void 0 ? void 0 : _a.length)); });
+                            const dragCmd = hasData && activedBlock ?
                                 new index_43.AddElementCommand(self.getNewElementData(), activedBlock.classList.contains('back-block'), false, activedBlock) :
-                                !elements.length && new index_43.AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
+                                !hasData && new index_43.AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
                             dragCmd && await index_43.commandHistory.execute(dragCmd);
                         }
                         else {
@@ -4234,6 +4222,21 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     self.removeDottedLines();
                 }
             });
+            function removeClass(className) {
+                const elements = document.getElementsByClassName(className);
+                for (const element of elements) {
+                    if (className === 'is-dragenter') {
+                        element.visible = false;
+                    }
+                    element.classList.remove(className);
+                }
+            }
+            function updateRectangles() {
+                const rectangles = document.getElementsByClassName('rectangle');
+                for (const rectangle of rectangles) {
+                    rectangle.style.display = 'none';
+                }
+            }
         }
         initEventBus() {
             components_24.application.EventBus.register(this, index_41.EVENT.ON_SET_DRAG_ELEMENT, async (el) => this.currentElement = el);
@@ -4281,7 +4284,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         }
         render() {
             return (this.$render("i-panel", { id: "pnlRowWrap", class: 'page-row', width: "100%", height: "100%", padding: { left: '3rem', right: '3rem' } },
-                this.$render("i-button", { caption: '', icon: { name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, top: "-10px", left: "50%", zIndex: 100, class: "btn-add", onClick: () => this.onAddSection(-1) }),
+                this.$render("i-button", { caption: '', icon: { name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, top: "-12px", left: "50%", zIndex: 100, class: "btn-add", onClick: () => this.onAddSection(-1) }),
                 this.$render("i-vstack", { id: 'actionsBar', class: "row-actions-bar", verticalAlignment: "center" },
                     this.$render("i-vstack", { background: { color: '#fff' }, border: { radius: '20px' }, maxWidth: "100%", maxHeight: "100%", horizontalAlignment: "center", padding: { top: 5, bottom: 5 } },
                         this.$render("i-panel", { id: "btnSetting", class: "actions", tooltip: { content: 'Section colors', placement: 'right' }, visible: this.isChanged, onClick: this.onOpenRowSettingsDialog },
@@ -4300,7 +4303,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
                         this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
                         this.$render("i-icon", { name: "circle", width: 3, height: 3 }))),
-                this.$render("i-vstack", { id: "pnlEmty", width: "100%", visible: false, verticalAlignment: 'center', horizontalAlignment: 'center' },
+                this.$render("i-vstack", { id: "pnlEmty", width: "100%", visible: false, verticalAlignment: 'center', horizontalAlignment: 'center', class: "pnl-empty" },
                     this.$render("i-panel", { padding: { top: '3rem', bottom: '3rem' }, margin: { top: '3rem', bottom: '3rem' }, width: "100%", border: { width: '1px', style: 'dashed', color: Theme.divider }, class: "text-center" },
                         this.$render("i-label", { caption: 'Drag Elements Here', font: { transform: 'uppercase', color: Theme.divider, size: '1.25rem' } }))),
                 this.$render("i-grid-layout", { id: "pnlRow", width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%", position: "relative", class: "grid", opacity: 0 }),
@@ -4327,8 +4330,8 @@ define("@scom/scom-page-builder/page/pageRows.css.ts", ["require", "exports", "@
             '.drag-overlay': {
                 zIndex: '-1',
                 display: 'none',
-                // boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)',
-                transition: 'all .5s ease-in'
+                transition: 'all .5s ease-in',
+                boxShadow: 'inset 0 2px 0 #686565, inset 0 -2px 0 #686565'
             },
             '.row-dragged': {
                 position: 'relative',
@@ -4404,6 +4407,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
                 dragStack.addEventListener('mousedown', this.mouseDownHandler, false);
             }
             else {
+                row.classList.remove('dropzone');
                 dragStack.removeEventListener('mousedown', this.mouseDownHandler, false);
             }
             dragStack.ondragstart = function () {
@@ -4418,13 +4422,13 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
                 this.isDragging = true;
                 this.currentRow = currentDragEl;
                 const data = this.currentRow.getBoundingClientRect();
-                const parentData = this.pnlRows.getBoundingClientRect();
+                const { top, left } = this.pnlRows.getBoundingClientRect();
                 this.currentPosition = data;
                 this.pnlRowOverlay.width = this.currentPosition.width;
                 this.pnlRowOverlay.height = this.currentPosition.height;
                 this.pnlRowOverlay.zIndex = '1';
-                this.pnlRowOverlay.left = 0;
-                this.pnlRowOverlay.top = this.currentPosition.top - parentData.top;
+                this.pnlRowOverlay.left = this.currentPosition.left - left;
+                this.pnlRowOverlay.top = this.currentPosition.top - top;
                 this.currentRow.classList.add('row-dragged');
                 document.addEventListener('mousemove', this.mouseMoveHandler);
                 document.addEventListener('mouseup', this.mouseUpHandler);
@@ -4455,19 +4459,21 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
         mouseMoveHandler(event) {
             let mouseX = event.clientX;
             let mouseY = event.clientY;
-            const dropzones = this.querySelectorAll('.dropzone');
+            const dropzones = (this.querySelectorAll('.dropzone') || []);
+            const centerPoints = this.getDropzoneCenterPoints(dropzones);
             let nearestElement = null;
             let shortestDistance = Infinity;
-            dropzones.forEach((dropzone) => {
-                const rect = dropzone.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                const distance = Math.sqrt((mouseX - centerX) ** 2 + (mouseY - centerY) ** 2);
+            for (let data of centerPoints) {
+                const { centerX, centerY, dropzone } = data;
+                const dx = centerX - mouseX;
+                const dy = centerY - mouseY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
                 if (distance < shortestDistance) {
                     shortestDistance = distance;
                     nearestElement = dropzone;
                 }
-            });
+                dropzone.classList.remove('row-entered');
+            }
             if (nearestElement && !nearestElement.isSameNode(this.currentRow)) {
                 nearestElement.classList.add('row-entered');
                 this.enteredRow = nearestElement;
@@ -4478,6 +4484,16 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
             else {
                 this.enteredRow = null;
             }
+        }
+        getDropzoneCenterPoints(dropzones) {
+            const centerPoints = [];
+            for (let dropzone of dropzones) {
+                const rect = dropzone.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                centerPoints.push({ centerX, centerY, dropzone });
+            }
+            return centerPoints;
         }
         resetCurrentRow() {
             if (!this.currentRow)

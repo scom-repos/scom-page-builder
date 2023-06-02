@@ -1150,6 +1150,7 @@ declare module "@scom/scom-page-builder/page/pageRows.tsx" {
         private mouseDownHandler;
         private mouseUpHandler;
         private mouseMoveHandler;
+        private getDropzoneCenterPoints;
         private resetCurrentRow;
         private updateCurrentRow;
         getRows(): IPageSection[];

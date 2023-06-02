@@ -254,18 +254,60 @@ export class PageRow extends Module {
             self.currentElement = resizableElm;
             toolbar = target.closest('ide-toolbar') as Control;
             self.addDottedLines();
-            this.isResizing = true;
+            self.isResizing = true;
             currentDot = parent;
             startX = e.clientX;
             startY = e.clientY;
-            this.currentWidth = toolbar.offsetWidth;
-            this.currentHeight = toolbar.offsetHeight;
+            self.currentWidth = toolbar.offsetWidth;
+            self.currentHeight = toolbar.offsetHeight;
+            document.addEventListener('mousemove', mouseMoveHandler);
+            document.addEventListener('mouseup', mouseUpHandler);
         });
 
-        document.addEventListener('mouseup', (e) => {
+        function mouseMoveHandler(e: MouseEvent) {
+            if (!self.isResizing || !toolbar) return;
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            if (currentDot.classList.contains('topLeft')) {
+                newWidth = self.currentWidth - deltaX;
+                newHeight = self.currentHeight - deltaY;
+                self.currentElement.style.left = deltaX + 'px';
+                updateDimension(newWidth, newHeight)
+            } else if (currentDot.classList.contains('topRight')) {
+                newWidth = self.currentWidth + deltaX;
+                newHeight = self.currentHeight - deltaY;
+                updateDimension(newWidth, newHeight)
+            } else if (currentDot.classList.contains('bottomLeft')) {
+                newWidth = self.currentWidth - deltaX;
+                newHeight = self.currentHeight + deltaY;
+                self.currentElement.style.left = deltaX + 'px';
+                updateDimension(newWidth, newHeight)
+            } else if (currentDot.classList.contains('bottomRight')) {
+                newWidth = self.currentWidth + deltaX;
+                newHeight = self.currentHeight + deltaY;
+                updateDimension(newWidth, newHeight)
+            } else if (currentDot.classList.contains('top')) {
+                newHeight = self.currentHeight - deltaY;
+                updateDimension(undefined, newHeight)
+            } else if (currentDot.classList.contains('bottom')) {
+                newHeight = self.currentHeight + deltaY;
+                updateDimension(undefined, newHeight)
+            } else if (currentDot.classList.contains('left')) {
+                newWidth = self.currentWidth - deltaX;
+                self.currentElement.style.left = deltaX + 'px';
+                updateDimension(newWidth, undefined)
+            } else if (currentDot.classList.contains('right')) {
+                newWidth = self.currentWidth + deltaX;
+                updateDimension(newWidth, undefined)
+            }
+        }
+
+        function mouseUpHandler(e: MouseEvent) {
             e.preventDefault();
+            document.removeEventListener('mousemove', mouseMoveHandler);
+            document.removeEventListener('mouseup', mouseUpHandler);
             self.removeDottedLines();
-            this.isResizing = false;
+            self.isResizing = false;
             if (!toolbar) return;
             toolbar.width = 'initial';
             toolbar.height = 'initial';
@@ -279,8 +321,8 @@ export class PageRow extends Module {
             const resizeCmd = new ResizeElementCommand(
                 self.currentElement,
                 toolbar,
-                this.currentWidth,
-                this.currentHeight,
+                self.currentWidth,
+                self.currentHeight,
                 newWidth,
                 newHeight
             );
@@ -288,7 +330,7 @@ export class PageRow extends Module {
             self.currentElement.style.left = 'initial';
             self.currentElement = null;
             toolbar = null;
-        });
+        }
 
         function updateDimension(newWidth?: number, newHeight?: number) {
             if (newWidth !== undefined) toolbar.width = newWidth;
@@ -307,45 +349,6 @@ export class PageRow extends Module {
                 elm.classList.remove(className);
             }
         }
-
-        document.addEventListener('mousemove', (e) => {
-            if (!this.isResizing || !toolbar) return;
-            const deltaX = e.clientX - startX;
-            const deltaY = e.clientY - startY;
-
-            if (currentDot.classList.contains('topLeft')) {
-                newWidth = this.currentWidth - deltaX;
-                newHeight = this.currentHeight - deltaY;
-                self.currentElement.style.left = deltaX + 'px';
-                updateDimension(newWidth, newHeight)
-            } else if (currentDot.classList.contains('topRight')) {
-                newWidth = this.currentWidth + deltaX;
-                newHeight = this.currentHeight - deltaY;
-                updateDimension(newWidth, newHeight)
-            } else if (currentDot.classList.contains('bottomLeft')) {
-                newWidth = this.currentWidth - deltaX;
-                newHeight = this.currentHeight + deltaY;
-                self.currentElement.style.left = deltaX + 'px';
-                updateDimension(newWidth, newHeight)
-            } else if (currentDot.classList.contains('bottomRight')) {
-                newWidth = this.currentWidth + deltaX;
-                newHeight = this.currentHeight + deltaY;
-                updateDimension(newWidth, newHeight)
-            } else if (currentDot.classList.contains('top')) {
-                newHeight = this.currentHeight - deltaY;
-                updateDimension(undefined, newHeight)
-            } else if (currentDot.classList.contains('bottom')) {
-                newHeight = this.currentHeight + deltaY;
-                updateDimension(undefined, newHeight)
-            } else if (currentDot.classList.contains('left')) {
-                newWidth = this.currentWidth - deltaX;
-                self.currentElement.style.left = deltaX + 'px';
-                updateDimension(newWidth, undefined)
-            } else if (currentDot.classList.contains('right')) {
-                newWidth = this.currentWidth + deltaX;
-                updateDimension(newWidth, undefined)
-            }
-        });
 
         this.addEventListener('dragstart', function (event) {
             const eventTarget = event.target as Control;
@@ -376,23 +379,10 @@ export class PageRow extends Module {
             self.isDragging = false;
             setDragData(null);
             self.removeDottedLines();
-            let rectangles = document.getElementsByClassName('rectangle');
-            for (const rectangle of rectangles) {
-                (rectangle as Control).style.display = 'none';
-            }
-            let backBlocks = document.getElementsByClassName('is-dragenter');
-            for (const block of backBlocks) {
-                (block as Control).visible = false;
-                block.classList.remove('is-dragenter');
-            }
-            let blocks = document.getElementsByClassName('dragenter');
-            for (const block of blocks) {
-                block.classList.remove('dragenter');
-            }
-            let components = document.getElementsByClassName('is-dragging');
-            for (const component of components) {
-                component.classList.remove('is-dragging');
-            }
+            updateRectangles();
+            removeClass('is-dragenter');
+            removeClass('row-entered');
+            removeClass('is-dragging');
         });
 
         this.addEventListener('dragenter', function (event) {
@@ -400,7 +390,7 @@ export class PageRow extends Module {
             const elementConfig = getDragData();
             const pageRow = eventTarget.closest('ide-row') as PageRow;
             if (pageRow && elementConfig?.module?.name === 'sectionStack') {
-                pageRow.classList.add('dragenter');
+                pageRow.classList.add('row-entered');
             }
             if (!eventTarget || !self.currentElement) return;
             const target = eventTarget.closest('.fixed-grid-item') as Control;
@@ -476,12 +466,9 @@ export class PageRow extends Module {
         document.addEventListener('dragleave', function (event) {
             const eventTarget = event.target as Control;
             const target = eventTarget.closest('.fixed-grid-item') as Control;
-            if (target) {
-                let rectangles = document.getElementsByClassName('rectangle');
-                for (const rectangle of rectangles) {
-                    (rectangle as Control).style.display = 'none';
-                }
-            } else {
+            if (target)
+                updateRectangles();
+            else {
                 const blocks = document.getElementsByClassName('is-dragenter')
                 for (const block of blocks) {
                     const currentSection = eventTarget.closest('ide-section') as Control;
@@ -492,12 +479,12 @@ export class PageRow extends Module {
                     block.classList.remove('is-dragenter');
                 }
             }
-            const pageRows = document.getElementsByClassName('dragenter');
+            const pageRows = document.getElementsByClassName('row-entered');
             for (const row of pageRows) {
                 const currentRow = eventTarget.closest('ide-row') as Control;
                 if (currentRow && row && currentRow.id === row.id)
                     continue;
-                row.classList.remove('dragenter');
+                row.classList.remove('row-entered');
             }
         });
 
@@ -546,7 +533,7 @@ export class PageRow extends Module {
                         : eventTarget.closest('.is-dragenter')
                 ) as Control;
                 if (self.isDragging) return;
-                const blocks = Array.from(this.parentElement.getElementsByClassName('is-dragenter'));
+                const blocks = Array.from(self.parentElement.getElementsByClassName('is-dragenter'));
                 const activedBlock = blocks.find((block: Control) => block.visible) as Control;
                 dropElm = dropElm || activedBlock;
                 if (dropElm) {
@@ -570,9 +557,10 @@ export class PageRow extends Module {
                     if (elementConfig) {
                         const parentId = pageRow?.id.replace('row-', '');
                         const elements = parentId ? pageObject.getRow(parentId)?.elements || [] : [];
-                        const dragCmd = elements.length && activedBlock ?
+                        const hasData = elements.find(el => el.type === 'primitive' || (el.type === 'composite' && el.elements?.length));
+                        const dragCmd = hasData && activedBlock ?
                             new AddElementCommand(self.getNewElementData(), activedBlock.classList.contains('back-block'), false, activedBlock) :
-                            !elements.length && new AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
+                            !hasData && new AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
                         dragCmd && await commandHistory.execute(dragCmd);
                     } else {
                         const dragCmd = new DragElementCommand(self.currentElement, pageRow, true, true);
@@ -583,6 +571,23 @@ export class PageRow extends Module {
                 self.removeDottedLines();
             }
         });
+
+        function removeClass(className: string) {
+            const elements = document.getElementsByClassName(className);
+            for (const element of elements) {
+                if (className === 'is-dragenter') {
+                    (element as Control).visible = false;
+                }
+                element.classList.remove(className);
+            }
+        }
+
+        function updateRectangles() {
+            const rectangles = document.getElementsByClassName('rectangle');
+            for (const rectangle of rectangles) {
+                (rectangle as Control).style.display = 'none';
+            }
+        }
     }
 
     private initEventBus() {
@@ -649,7 +654,7 @@ export class PageRow extends Module {
                     icon={{name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText}}
                     background={{color: Theme.colors.primary.main}}
                     padding={{top: 5, bottom: 5, left: 5, right: 5}}
-                    top="-10px" left="50%" zIndex={100}
+                    top="-12px" left="50%" zIndex={100}
                     class="btn-add"
                     onClick={() => this.onAddSection(-1)}
                 ></i-button>
@@ -720,6 +725,7 @@ export class PageRow extends Module {
                     width="100%"
                     visible={false}
                     verticalAlignment='center' horizontalAlignment='center'
+                    class="pnl-empty"
                 >
                     <i-panel
                         padding={{top: '3rem', bottom: '3rem'}}

@@ -5,8 +5,8 @@ Styles.cssRule('ide-rows', {
         '.drag-overlay': {
             zIndex: '-1',
             display: 'none',
-            // boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)',
-            transition: 'all .5s ease-in'
+            transition: 'all .5s ease-in',
+            boxShadow: 'inset 0 2px 0 #686565, inset 0 -2px 0 #686565'
         },
         '.row-dragged': {
             position: 'relative',
