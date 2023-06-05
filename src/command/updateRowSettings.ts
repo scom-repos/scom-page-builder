@@ -1,7 +1,7 @@
 import { Control } from "@ijstech/components";
 import { pageObject } from "../store/index";
 import { ICommand } from "./interface";
-import { IRowSettings } from '../interface/index';
+import { IColumnLayoutType, IRowSettings } from '../interface/index';
 
 export class UpdateRowSettingsCommand implements ICommand {
   private element: any;
@@ -24,7 +24,6 @@ export class UpdateRowSettingsCommand implements ICommand {
     }
     pageObject.updateSection(id, { backgroundColor, config });
     if (config) {
-      this.element.updateColumn();
       this.element.setData(pageObject.getRow(id));
     }
   }
@@ -33,8 +32,7 @@ export class UpdateRowSettingsCommand implements ICommand {
     const { backgroundColor = '', config } = this.oldSettings;
     const id = this.element.id.replace('row-', '');
     this.element.style.backgroundColor = backgroundColor;
-    pageObject.updateSection(id, { backgroundColor, config });
-    this.element.updateColumn();
+    pageObject.updateSection(id, { backgroundColor, config: config || {columnLayout: IColumnLayoutType.FIXED} });
     this.element.setData(pageObject.getRow(id));
   }
 

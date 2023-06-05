@@ -984,8 +984,10 @@ declare module "@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts" { }
 declare module "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx" {
     import { Module, ControlElement } from '@ijstech/components';
     import "@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts";
+    export type ISettingType = 'color' | 'column';
     export interface RowSettingsDialogElement extends ControlElement {
-        onSave: () => Promise<void>;
+        type: ISettingType;
+        onSave: (data: any) => void;
     }
     global {
         namespace JSX {
@@ -996,45 +998,17 @@ declare module "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx" {
     }
     export class RowSettingsDialog extends Module {
         private dialog;
-        private txtRowBackgroundColor;
-        private onSave;
-        private rowId;
-        constructor(parent?: any);
-        get data(): any;
-        show(id: string): void;
-        hide(): void;
-        setConfig(config: string): void;
-        getConfig(): any;
-        confirm(): Promise<void>;
-        cancel(): void;
-        render(): any;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/dialogs/sectionSettingsDialog.css.ts" />
-declare module "@scom/scom-page-builder/dialogs/sectionSettingsDialog.css.ts" { }
-/// <amd-module name="@scom/scom-page-builder/dialogs/sectionSettingsDialog.tsx" />
-declare module "@scom/scom-page-builder/dialogs/sectionSettingsDialog.tsx" {
-    import { Module, ControlElement } from '@ijstech/components';
-    import "@scom/scom-page-builder/dialogs/sectionSettingsDialog.css.ts";
-    export interface SectionSettingsDialogElement extends ControlElement {
-        onSave: (data: any) => void;
-    }
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ['ide-section-settings-dialog']: SectionSettingsDialogElement;
-            }
-        }
-    }
-    export class SectionSettingsDialog extends Module {
-        private dialog;
         private formElm;
         private onSave;
         private rowId;
+        private _type;
         constructor(parent?: any, options?: any);
         get data(): any;
+        get type(): ISettingType;
+        set type(value: ISettingType);
         init(): void;
         show(id: string): void;
+        private getSchema;
         private renderForm;
         close(): void;
         reset(): void;
@@ -1045,9 +1019,8 @@ declare module "@scom/scom-page-builder/dialogs/sectionSettingsDialog.tsx" {
 declare module "@scom/scom-page-builder/dialogs/index.ts" {
     import { ConfirmDialog } from "@scom/scom-page-builder/dialogs/confirmDialog.tsx";
     import { LoadingDialog } from "@scom/scom-page-builder/dialogs/loadingDialog.tsx";
-    import { RowSettingsDialog } from "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx";
-    import { SectionSettingsDialog } from "@scom/scom-page-builder/dialogs/sectionSettingsDialog.tsx";
-    export { ConfirmDialog, LoadingDialog, RowSettingsDialog, SectionSettingsDialog };
+    import { RowSettingsDialog, ISettingType } from "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx";
+    export { ConfirmDialog, LoadingDialog, RowSettingsDialog, ISettingType };
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageRow.css.ts" />
 declare module "@scom/scom-page-builder/page/pageRow.css.ts" { }
@@ -1071,8 +1044,8 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private actionsBar;
         private dragStack;
         private pnlRow;
-        private mdRowSetting;
-        private mdSectionSetting;
+        private mdRowColorSetting;
+        private mdRowColumnSetting;
         private pnlEmty;
         private _readonly;
         private isResizing;
@@ -1095,8 +1068,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         addElement(data: IPageElement): Promise<PageSection>;
         private clearData;
         setData(rowData: IPageSection): Promise<void>;
-        private onOpenSectionSettingsDialog;
-        private onOpenColorSettingsDialog;
+        private onOpenRowSettingsDialog;
         private onSaveRowSettings;
         updateColumn(): void;
         private updateGrid;

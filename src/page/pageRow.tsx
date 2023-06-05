@@ -10,10 +10,10 @@ import {
     Styles
 } from '@ijstech/components';
 import { PageSection } from './pageSection';
-import { RowSettingsDialog, SectionSettingsDialog } from '../dialogs/index';
+import { ISettingType, RowSettingsDialog } from '../dialogs/index';
 import './pageRow.css';
 import { EVENT } from '../const/index';
-import { IPageElement, IPageSection, GAP_WIDTH, MIN_COLUMN } from '../interface/index';
+import { IPageElement, IPageSection, GAP_WIDTH, MIN_COLUMN, IRowSettings } from '../interface/index';
 import { getDragData, pageObject, setDragData } from '../store/index';
 import {
     commandHistory,
@@ -45,8 +45,8 @@ export class PageRow extends Module {
     private actionsBar: VStack;
     private dragStack: VStack;
     private pnlRow: GridLayout;
-    private mdRowSetting: RowSettingsDialog;
-    private mdSectionSetting: SectionSettingsDialog;
+    private mdRowColorSetting: RowSettingsDialog;
+    private mdRowColumnSetting: RowSettingsDialog;
     private pnlEmty: VStack;
 
     private _readonly: boolean;
@@ -161,15 +161,14 @@ export class PageRow extends Module {
         this.updateColumn();
     }
 
-    private onOpenSectionSettingsDialog() {
-        this.mdSectionSetting.show(this.rowId);
+    private onOpenRowSettingsDialog(type: ISettingType) {
+        if (type === 'color')
+            this.mdRowColorSetting.show(this.rowId);
+        else
+            this.mdRowColumnSetting.show(this.rowId);
     }
 
-    private onOpenColorSettingsDialog() {
-        this.mdRowSetting.show(this.rowId);
-    }
-
-    private onSaveRowSettings(data: any) {
+    private onSaveRowSettings(data: IRowSettings) {
         const updateCmd = new UpdateRowSettingsCommand(this, data);
         commandHistory.execute(updateCmd);
     }
@@ -244,19 +243,6 @@ export class PageRow extends Module {
             grid.append(elm);
         }
     }
-
-    // private updateGrids() {
-    //     this.gridColumnWidth = (this.pnlRow.offsetWidth - GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
-    //     let grids = document.getElementsByClassName('grid');
-    //     for (const grid of grids) {
-    //         this.updateGridColumn(grid as GridLayout);
-    //     }
-    //     let fixedGrids = document.getElementsByClassName('fixed-grid');
-    //     for (const fixedGrid of fixedGrids) {
-    //         this.updateGridColumn(fixedGrid as GridLayout);
-    //     }
-
-    // }
 
     private updateGridColumn(grid: GridLayout) {
         grid.templateColumns = [`repeat(${this.maxColumn}, ${this.gridColumnWidth}px)`];
@@ -700,7 +686,7 @@ export class PageRow extends Module {
                             class="actions"
                             tooltip={{ content: 'Section settings', placement: 'right' }}
                             visible={this.isChanged}
-                            onClick={this.onOpenSectionSettingsDialog}
+                            onClick={() => this.onOpenRowSettingsDialog('column')}
                         >
                             <i-icon name="cog" width={16} height={16} fill="#80868b"></i-icon>
                         </i-panel>
@@ -709,7 +695,7 @@ export class PageRow extends Module {
                             class="actions"
                             tooltip={{ content: 'Section colors', placement: 'right' }}
                             visible={this.isChanged}
-                            onClick={this.onOpenColorSettingsDialog}
+                            onClick={() => this.onOpenRowSettingsDialog('color')}
                         >
                             <i-icon name="palette" width={16} height={16} fill="#80868b"></i-icon>
                         </i-panel>
@@ -788,13 +774,15 @@ export class PageRow extends Module {
                     opacity={0}
                 ></i-grid-layout>
                 <ide-row-settings-dialog
-                    id="mdRowSetting"
+                    id="mdRowColorSetting"
+                    type="color"
                     onSave={this.onSaveRowSettings.bind(this)}
                 ></ide-row-settings-dialog>
-                <ide-section-settings-dialog
-                    id="mdSectionSetting"
+                <ide-row-settings-dialog
+                    id="mdRowColumnSetting"
+                    type="column"
                     onSave={this.onSaveRowSettings.bind(this)}
-                ></ide-section-settings-dialog>
+                ></ide-row-settings-dialog>
                 <i-button
                     caption=''
                     icon={{name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText}}

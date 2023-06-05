@@ -1,28 +1,22 @@
 import { Styles } from '@ijstech/components';
-import { currentTheme  } from '../theme/index';
-const Theme = currentTheme;
 
-Styles.cssRule('ide-row-settings-dialog', {
-    $nest: {
-        '.setting-modal': {
-            $nest: {
-                '.i-modal_header': {
-                    padding: '1rem 1rem 0.5rem',
-                    fontSize: '1rem',
-                    fontWeight: 600
-                },
-                'i-button': {
-                    padding: '1rem'
-                },
-                'i-input': {
-                    border: `1px solid ${Theme.divider}`,
-                    marginBottom: '1rem'
-                },
-                '.modal': {
-                    maxHeight: 'calc(100vh - 48px)',
-                    padding: 0
-                }
-            }
+Styles.cssRule('ide-section-settings-dialog', {
+  $nest: {
+    '.custom-modal': {
+      $nest: {
+        '.i-modal_header': {
+          padding: '1rem 1rem 0.5rem',
+          fontSize: '1rem',
+          fontWeight: 600
         },
+        'i-button': {
+          padding: '0.5rem 1rem'
+        },
+        '.modal': {
+          maxHeight: 'calc(100vh - 48px)',
+          padding: 0
+        }
+      }
     }
-});
+  }
+})
