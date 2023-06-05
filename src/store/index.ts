@@ -1,5 +1,6 @@
 import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig } from "../interface/index";
 
+const MAX_COLUMN = 12;
 export class PageObject {
   private _header: IPageHeader = {
     headerType: 'banner' as any,
@@ -50,10 +51,21 @@ export class PageObject {
   }
 
   updateSection(id: string, data: any) {
-    const section = this.getSection(id);
+    const section = this.getRow(id);
     if (section) {
-      if (data.backgroundColor !== undefined) section.backgroundColor = data.backgroundColor;
-      if (data.config) section.config = data.config;
+      if (data.backgroundColor !== undefined)
+        (section as any).backgroundColor = data.backgroundColor;
+      const oldColumnsNumber = this.getColumnsNumber(id);
+      const elements = this.getRow(id)?.elements || [];
+      section.config = data.config || {};
+      const newColumnsNumber = this.getColumnsNumberFn(section);
+      if (oldColumnsNumber !== newColumnsNumber) {
+        for (let element of elements) {
+          const oldColumnSpan = element.columnSpan;
+          const newColumnSpan = Math.floor(newColumnsNumber / oldColumnsNumber * oldColumnSpan);
+          this.setElement(id, element.id, { columnSpan: newColumnSpan });
+        }
+      }
     }
   }
 
@@ -196,6 +208,23 @@ export class PageObject {
         }
       }
     }
+  }
+
+  getConfig(sectionId: string) {
+    const section = this.getRow(sectionId);
+    return section?.config || {};
+  }
+
+  getColumnsNumber(sectionId: string) {
+    if (!sectionId) return MAX_COLUMN;
+    const section = this.getRow(sectionId);
+    return this.getColumnsNumberFn(section);
+  }
+
+  getColumnsNumberFn(section: IPageSection|IPageFooter) {
+    if (!section) return MAX_COLUMN;
+    const { columnsNumber, columnLayout } = section?.config || {};
+    return (columnLayout === 'Fixed' && columnsNumber) ? columnsNumber : MAX_COLUMN;
   }
 }
 

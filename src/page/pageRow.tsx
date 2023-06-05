@@ -13,23 +13,20 @@ import { PageSection } from './pageSection';
 import { RowSettingsDialog, SectionSettingsDialog } from '../dialogs/index';
 import './pageRow.css';
 import { EVENT } from '../const/index';
-import { IPageElement, IPageSection } from '../interface/index';
+import { IPageElement, IPageSection, GAP_WIDTH, MIN_COLUMN } from '../interface/index';
 import { getDragData, pageObject, setDragData } from '../store/index';
 import {
     commandHistory,
     UpdateRowCommand,
     ResizeElementCommand,
     DragElementCommand,
-    MAX_COLUMN,
     UpdateRowSettingsCommand,
     UpdateTypeCommand,
-    AddElementCommand,
-    MIN_COLUMN
+    AddElementCommand
 } from '../command/index';
 import { IDEToolbar } from '../common/index';
 import { generateUUID } from '../utility/index';
 const Theme = Styles.Theme.ThemeVars;
-const GAP_WIDTH = 15;
 
 declare global {
     namespace JSX {
@@ -74,6 +71,11 @@ export class PageRow extends Module {
 
     get data(): any {
         return this.rowId ? pageObject.getRow(this.rowId) : this.rowData;
+    }
+
+    private get maxColumn() {
+        const rowId = this.id?.replace('row-', '');
+        return pageObject.getColumnsNumber(rowId);
     }
 
     init() {
@@ -156,10 +158,7 @@ export class PageRow extends Module {
         this.actionsBar.minHeight = '100%';
         const hasData = this.data?.elements?.length;
         this.toggleUI(hasData);
-        this.gridColumnWidth = (this.pnlRow.offsetWidth - GAP_WIDTH * (MAX_COLUMN - 1)) / MAX_COLUMN;
-        const fixedGrid = this.pnlRow.querySelector('.fixed-grid');
-        fixedGrid && this.updateGridColumn(fixedGrid as GridLayout);
-        this.updateGridColumn(this.pnlRow);
+        this.updateColumn();
     }
 
     private onOpenSectionSettingsDialog() {
@@ -173,6 +172,18 @@ export class PageRow extends Module {
     private onSaveRowSettings(data: any) {
         const updateCmd = new UpdateRowSettingsCommand(this, data);
         commandHistory.execute(updateCmd);
+    }
+
+    updateColumn() {
+        this.updateFixedGrid();
+        this.updateGrid();
+    }
+
+    private updateGrid() {
+        this.gridColumnWidth = (this.pnlRow.offsetWidth - GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
+        const fixedGrid = this.pnlRow.querySelector('.fixed-grid');
+        fixedGrid && this.updateGridColumn(fixedGrid as GridLayout);
+        this.updateGridColumn(this.pnlRow);
     }
 
     private async onClone() {
@@ -213,7 +224,7 @@ export class PageRow extends Module {
                 class="fixed-grid"
             ></i-grid-layout>
         );
-        for (let i = 0; i < MAX_COLUMN; i++) {
+        for (let i = 0; i < this.maxColumn; i++) {
             const elm = <i-panel class="fixed-grid-item"></i-panel>;
             elm.setAttribute('data-column', `${i + 1}`);
             elm.style.gridColumn = `${i + 1}`;
@@ -222,21 +233,33 @@ export class PageRow extends Module {
         this.pnlRow.appendChild(grid);
     }
 
-    private updateGrids() {
-        this.gridColumnWidth = (this.pnlRow.offsetWidth - GAP_WIDTH * (MAX_COLUMN - 1)) / MAX_COLUMN;
-        let grids = document.getElementsByClassName('grid');
-        for (const grid of grids) {
-            this.updateGridColumn(grid as GridLayout);
+    private updateFixedGrid() {
+        const grid = this.pnlRow.querySelector('.fixed-grid') as Control;
+        if (!grid) return;
+        grid.clearInnerHTML();
+        for (let i = 0; i < this.maxColumn; i++) {
+            const elm = <i-panel class="fixed-grid-item"></i-panel>;
+            elm.setAttribute('data-column', `${i + 1}`);
+            elm.style.gridColumn = `${i + 1}`;
+            grid.append(elm);
         }
-        let fixedGrids = document.getElementsByClassName('fixed-grid');
-        for (const fixedGrid of fixedGrids) {
-            this.updateGridColumn(fixedGrid as GridLayout);
-        }
-
     }
 
+    // private updateGrids() {
+    //     this.gridColumnWidth = (this.pnlRow.offsetWidth - GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
+    //     let grids = document.getElementsByClassName('grid');
+    //     for (const grid of grids) {
+    //         this.updateGridColumn(grid as GridLayout);
+    //     }
+    //     let fixedGrids = document.getElementsByClassName('fixed-grid');
+    //     for (const fixedGrid of fixedGrids) {
+    //         this.updateGridColumn(fixedGrid as GridLayout);
+    //     }
+
+    // }
+
     private updateGridColumn(grid: GridLayout) {
-        grid.templateColumns = [`repeat(${MAX_COLUMN}, ${this.gridColumnWidth}px)`];
+        grid.templateColumns = [`repeat(${this.maxColumn}, ${this.gridColumnWidth}px)`];
         grid.gap = { column: `${GAP_WIDTH}px` };
     }
 
@@ -250,7 +273,7 @@ export class PageRow extends Module {
         let startY: number = 0;
         let toolbar: Control;
 
-        this.updateGrids();
+        // this.updateGrid();
         this.addEventListener('mousedown', (e) => {
             const target = e.target as Control;
             const parent = target.closest('.resize-stack') as Control;
@@ -404,8 +427,8 @@ export class PageRow extends Module {
             if (target) {
                 const column = Number(target.dataset.column);
                 const columnSpan = self.currentElement.dataset.columnSpan ? Number(self.currentElement.dataset.columnSpan) : MIN_COLUMN ;
-                const colSpan = Math.min(columnSpan, MAX_COLUMN);
-                const colStart = Math.min(column, MAX_COLUMN - colSpan + 1);
+                const colSpan = Math.min(columnSpan, self.maxColumn);
+                const colStart = Math.min(column, self.maxColumn - colSpan + 1);
                 const grid = target.closest('.grid');
                 const sections = Array.from(grid?.querySelectorAll('ide-section'));
                 const sortedSections = sections.sort((a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column));
@@ -443,9 +466,9 @@ export class PageRow extends Module {
                         const column = Number(el.dataset.column);
                         return !isNaN(column) && (curElmCol + curElmColSpan === column);
                     }) as Control;
-                    const showHiddenBlock = curElmCol === 1 && (curElmCol + curElmColSpan === MAX_COLUMN + 1) ||
+                    const showHiddenBlock = curElmCol === 1 && (curElmCol + curElmColSpan === self.maxColumn + 1) ||
                         (nextElm) ||
-                        (curElmCol + curElmColSpan === MAX_COLUMN + 1);
+                        (curElmCol + curElmColSpan === self.maxColumn + 1);
                     if (showHiddenBlock) {
                         const { left, right } = section.getBoundingClientRect();
                         const backBlock = section.querySelector('.back-block') as Control;
@@ -509,8 +532,8 @@ export class PageRow extends Module {
                 const column = Number(nearestFixedItem.dataset.column);
                 const columnSpan = self.currentElement.dataset.columnSpan ?
                     Number(self.currentElement.dataset.columnSpan) : MIN_COLUMN;
-                const colSpan = Math.min(columnSpan, MAX_COLUMN);
-                const colStart = Math.min(column, MAX_COLUMN - colSpan + 1);
+                const colSpan = Math.min(columnSpan, self.maxColumn);
+                const colStart = Math.min(column, self.maxColumn - colSpan + 1);
                 const grid = nearestFixedItem.closest('.grid');
                 const sections = Array.from(grid?.querySelectorAll('ide-section'));
                 const sortedSections = sections.sort((a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column));

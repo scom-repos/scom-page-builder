@@ -1,6 +1,6 @@
 import { Control } from "@ijstech/components";
 import { pageObject } from "../store/index";
-import { MAX_COLUMN, MIN_COLUMN } from "./interface";
+import { MIN_COLUMN } from "../interface/index";
 
 const updateColumnData = (el: Control, rowId: string, column: number, columnSpan: number) => {
   const newColumnData: any = {column, columnSpan};
@@ -27,8 +27,11 @@ const getPrevColumn = (el: Control) => {
 }
 
 const getDropColumnData = (dropElm: Control, sortedSections: HTMLElement[], element?: Control) => {
+  const dropRow = dropElm.closest('ide-row') as Control;
   const dropElmCol = getColumn(dropElm);
   let columnSpan = element ? getColumnSpan(element) : MIN_COLUMN;
+  const dropRowId = (dropRow?.id || '').replace('row-', '');
+  const MAX_COLUMN = pageObject.getColumnsNumber(dropRowId);
   const maxColumn = (MAX_COLUMN - columnSpan) + 1;
   let newColumn = (columnSpan > 1 && dropElmCol > maxColumn) ? maxColumn : dropElmCol;
   let newColumnSpan = columnSpan;
@@ -52,7 +55,7 @@ const getDropColumnData = (dropElm: Control, sortedSections: HTMLElement[], elem
     const prevColumn = getColumn(prevDropElm);
     const prevColumnSpan = getColumnSpan(prevDropElm);
     const columnData = prevColumn + prevColumnSpan;
-    if (columnData <= 13 && newColumn < columnData)
+    if (columnData <= MAX_COLUMN + 1 && newColumn < columnData)
       newColumn = columnData;
   }
   if (afterDropElm) {
@@ -74,6 +77,7 @@ const getAppendColumnData = (grid: Control, dropElm: Control, sortedSections: HT
   dropSection = grid.querySelector(`[id='${dropSection.id}']`) as Control;
   const pageRow = dropSection.closest('ide-row') as Control;
   const pageRowId = (pageRow?.id || '').replace('row-', '');
+  const MAX_COLUMN = pageObject.getColumnsNumber(pageRowId);
   const oldDropColumn = getColumn(dropSection);
   let newColumn = getNewColumn(dropSection, oldDropColumn, isAppend);
   if (element && pageRow.contains(element)) {
@@ -98,7 +102,7 @@ const getAppendColumnData = (grid: Control, dropElm: Control, sortedSections: HT
   }
 
   const hasSpace = sortedSections.find((section: Control) => getColumnSpan(section) > MIN_COLUMN);
-  if (!hasSpace && sortedSections.length >= 6) return null;
+  if (!hasSpace && sortedSections.length >= Math.ceil(MAX_COLUMN / MIN_COLUMN)) return null;
 
   const columnSpan = element ? Math.min(getColumnSpan(element), MIN_COLUMN) : MIN_COLUMN;
   for (let i = 0; i < sortedSections.length; i++) {

@@ -33,16 +33,15 @@ export class RemoveToolbarCommand implements ICommand {
     const sectionEl = this.element.closest('ide-section');
     this.element.remove();
     const section = pageObject.getRow(this.rowId);
+    const isEmpty = !section?.elements?.length || section?.elements.every(el => el.type === "composite" && !el.elements?.length);
+    this.pageRow && this.pageRow.toggleUI(!isEmpty);
     if (!this.sectionId || this.sectionId === this.elementId) {
-      const hasData = !!section?.elements?.length;
-      this.pageRow && this.pageRow.toggleUI(hasData);
       const hasSectionData = !!section?.elements?.find(elm => elm.id === sectionEl.id);
       if (sectionEl && !hasSectionData) sectionEl.remove();
     } else {
       const parentElement = (section?.elements || []).find(elm => elm.id === this.sectionId);
-      const hasData = !!parentElement?.elements?.length;
-      this.pageRow && this.pageRow.toggleUI(hasData);
-      if (sectionEl && !hasData) sectionEl.remove();
+      const hasSectionData = !!parentElement?.elements?.length;
+      if (sectionEl && !hasSectionData) sectionEl.remove();
     }
     application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
   }
