@@ -1,6 +1,6 @@
 import { Styles } from '@ijstech/components';
 
-Styles.cssRule('ide-section-settings-dialog', {
+Styles.cssRule('ide-row-settings-dialog', {
   $nest: {
     '.custom-modal': {
       $nest: {

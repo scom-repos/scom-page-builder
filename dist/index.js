@@ -3257,7 +3257,7 @@ define("@scom/scom-page-builder/dialogs/loadingDialog.tsx", ["require", "exports
 define("@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_20) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    components_20.Styles.cssRule('ide-section-settings-dialog', {
+    components_20.Styles.cssRule('ide-row-settings-dialog', {
         $nest: {
             '.custom-modal': {
                 $nest: {
