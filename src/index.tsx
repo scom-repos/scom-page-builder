@@ -2,7 +2,7 @@ import { application, Container, Control, ControlElement, customElements, custom
 import { } from '@ijstech/eth-contract'
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
-import { IPageData, IElementConfig, IPageBlockData } from './interface/index';
+import { IPageData, IElementConfig, IPageBlockData, IPageElement } from './interface/index';
 import { PageRows, PageSidebar } from './page/index';
 import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, getPageBlocks } from './store/index';
 import { currentTheme } from './theme/index';
@@ -123,10 +123,18 @@ export default class Editor extends Module {
     }
 
     getData() {
+        const hasData = (el: IPageElement) => el.type === 'primitive' || (el.type === 'composite' && el.elements?.length);
         return {
             // header: pageObject.header,
-            sections: pageObject.sections, // TODO: filter(section => section.elements && section.elements.length),
-            footer: pageObject.footer,
+            sections: pageObject.sections.filter(section => {
+                const hasElements = !!section.elements?.length;
+                if (hasElements) {
+                    const elements = [...section.elements].filter(hasData);
+                    section.elements = elements;
+                }
+                return !!section.elements.length;
+            }),
+            footer: pageObject.footer
         };
     }
 

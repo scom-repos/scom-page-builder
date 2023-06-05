@@ -1,6 +1,7 @@
 import { Control } from "@ijstech/components";
 import { pageObject } from "../store/index";
-import { ICommand, IDataColumn, MAX_COLUMN } from "./interface";
+import { ICommand, IDataColumn } from "./interface";
+import { GAP_WIDTH } from "../interface/index";
 
 export class ResizeElementCommand implements ICommand {
   private parent: Control;
@@ -11,9 +12,14 @@ export class ResizeElementCommand implements ICommand {
   private finalWidth: number;
   private finalHeight: number;
   private oldDataColumn: IDataColumn;
-  private gapWidth: number = 15;
+  private gapWidth: number = GAP_WIDTH;
   private gridColumnWidth: number = 0;
   private finalLeft: number;
+
+  private get maxColumn() {
+    const rowId = this.parent?.id.replace('row-', '');
+    return pageObject.getColumnsNumber(rowId);
+  }
 
   constructor(element: any, toolbar: any, initialWidth: number, initialHeight: number, finalWidth: number, finalHeight: number) {
     this.element = element;
@@ -30,7 +36,7 @@ export class ResizeElementCommand implements ICommand {
     }
     const grid = this.element.parent.closest('.grid') as HTMLElement;
     if (grid)
-      this.gridColumnWidth = (grid.offsetWidth - this.gapWidth * (MAX_COLUMN - 1)) / MAX_COLUMN;
+      this.gridColumnWidth = (grid.offsetWidth - this.gapWidth * (this.maxColumn - 1)) / this.maxColumn;
   }
 
   private getColumnData() {
@@ -55,9 +61,9 @@ export class ResizeElementCommand implements ICommand {
     }, 0);
 
     const numberOfColumns = Math.ceil((this.finalWidth + this.gapWidth) / (this.gridColumnWidth + this.gapWidth));
-    const finalColumnSpan = Math.max(Math.min(numberOfColumns, MAX_COLUMN - currentSpan), 1);
+    const finalColumnSpan = Math.max(Math.min(numberOfColumns, this.maxColumn - currentSpan), 1);
     const column = Math.ceil((this.finalLeft + this.gapWidth) / (this.gridColumnWidth + this.gapWidth));
-    let finalColumn = Math.max(Math.min(column, (MAX_COLUMN - finalColumnSpan) + 1), 1);
+    let finalColumn = Math.max(Math.min(column, (this.maxColumn - finalColumnSpan) + 1), 1);
     if (prevElm) {
       const prevColumn = Number(prevElm.dataset.column);
       const prevColumnSpan = Number(prevElm.dataset.columnSpan);

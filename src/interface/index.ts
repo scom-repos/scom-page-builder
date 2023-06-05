@@ -34,3 +34,6 @@ export interface IElementConfig {
   appendId?: string;
 }
 export const TEXTBOX_PATH = 'scom-markdown-editor';
+export const GAP_WIDTH = 15;
+export const MAX_COLUMN = 12;
+export const MIN_COLUMN = 2;

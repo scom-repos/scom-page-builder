@@ -91,6 +91,9 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         private removeElementFn;
         removeElement(sectionId: string, elementId: string): void;
         addElement(sectionId: string, value: IPageElement, parentElmId?: string, elementIndex?: number): void;
+        getConfig(sectionId: string): import("@scom/scom-page-builder/interface/siteData.ts").IConfigData;
+        getColumnsNumber(sectionId: string): number;
+        getColumnsNumberFn(section: IPageSection | IPageFooter): number;
     }
     export const pageObject: PageObject;
     export const state: {
@@ -463,6 +466,9 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
         appendId?: string;
     }
     export const TEXTBOX_PATH = "scom-markdown-editor";
+    export const GAP_WIDTH = 15;
+    export const MAX_COLUMN = 12;
+    export const MIN_COLUMN = 2;
 }
 /// <amd-module name="@scom/scom-page-builder/command/interface.ts" />
 declare module "@scom/scom-page-builder/command/interface.ts" {
@@ -475,8 +481,6 @@ declare module "@scom/scom-page-builder/command/interface.ts" {
         column: number;
         columnSpan: number;
     }
-    export const MAX_COLUMN = 12;
-    export const MIN_COLUMN = 2;
 }
 /// <amd-module name="@scom/scom-page-builder/command/updateRow.ts" />
 declare module "@scom/scom-page-builder/command/updateRow.ts" {
@@ -553,6 +557,7 @@ declare module "@scom/scom-page-builder/command/resize.ts" {
         private gapWidth;
         private gridColumnWidth;
         private finalLeft;
+        private get maxColumn();
         constructor(element: any, toolbar: any, initialWidth: number, initialHeight: number, finalWidth: number, finalHeight: number);
         private getColumnData;
         private updateElement;
@@ -672,7 +677,7 @@ declare module "@scom/scom-page-builder/command/index.ts" {
     export { RemoveToolbarCommand } from "@scom/scom-page-builder/command/removeToolbar.ts";
     export { UpdateTypeCommand } from "@scom/scom-page-builder/command/updateType.ts";
     export { AddElementCommand } from "@scom/scom-page-builder/command/addElement.ts";
-    export { ICommand, IDataColumn, MAX_COLUMN, MIN_COLUMN } from "@scom/scom-page-builder/command/interface.ts";
+    export { ICommand, IDataColumn } from "@scom/scom-page-builder/command/interface.ts";
 }
 /// <amd-module name="@scom/scom-page-builder/theme/light.theme.ts" />
 declare module "@scom/scom-page-builder/theme/light.theme.ts" {
@@ -1082,6 +1087,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private isChanged;
         constructor(parent?: any);
         get data(): any;
+        private get maxColumn();
         init(): void;
         toggleUI(value: boolean): void;
         private createNewElement;
@@ -1092,12 +1098,14 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private onOpenSectionSettingsDialog;
         private onOpenColorSettingsDialog;
         private onSaveRowSettings;
+        updateColumn(): void;
+        private updateGrid;
         private onClone;
         onDeleteRow(): void;
         onMoveUp(): void;
         onMoveDown(): void;
         private renderFixedGrid;
-        private updateGrids;
+        private updateFixedGrid;
         private updateGridColumn;
         private initEventListeners;
         private initEventBus;
