@@ -87,6 +87,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         private findElement;
         getElement(sectionId: string, elementId: string): any;
         setElement(sectionId: string, elementId: string, value: any): void;
+        private sortFn;
         private removeElementFn;
         removeElement(sectionId: string, elementId: string): void;
         addElement(sectionId: string, value: IPageElement, parentElmId?: string, elementIndex?: number): void;
@@ -376,6 +377,7 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         headerType: HeaderType;
         image: string;
         elements: IPageElement[];
+        config?: IConfigData;
     }
     export interface IPageSection {
         id: string;
@@ -383,10 +385,12 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         image?: string;
         backgroundColor?: string;
         elements: IPageElement[];
+        config?: IConfigData;
     }
     export interface IPageFooter {
         image: string;
         elements: IPageElement[];
+        config?: IConfigData;
     }
     export enum ElementType {
         PRIMITIVE = "primitive",
@@ -404,16 +408,19 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         visibleOn?: string;
         invisibleOn?: string;
     }
-}
-/// <amd-module name="@scom/scom-page-builder/interface/component.ts" />
-declare module "@scom/scom-page-builder/interface/component.ts" {
-    export interface IImage {
-        url: string;
-        altText: string;
-        backgroundColor: string;
-        height: number;
-        width: number;
-        link: string;
+    export enum IColumnLayoutType {
+        FIXED = "Fixed",
+        AUTOMATIC = "Automatic"
+    }
+    export interface IConfigData {
+        columnLayout?: IColumnLayoutType;
+        columnsNumber?: number;
+        maxColumnsPerRow?: number;
+        columnMinWidth?: number | string;
+    }
+    export interface IRowSettings {
+        backgroundColor?: string;
+        config?: IConfigData;
     }
 }
 /// <amd-module name="@scom/scom-page-builder/interface/jsonSchema.ts" />
@@ -434,7 +441,6 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
     import { ElementType } from "@scom/scom-page-builder/interface/siteData.ts";
     export { IMenu, INetwork, IRoute, ITheme, ISCConfig, IBreakpoints };
     export * from "@scom/scom-page-builder/interface/pageBlock.ts";
-    export * from "@scom/scom-page-builder/interface/component.ts";
     export * from "@scom/scom-page-builder/interface/siteData.ts";
     export * from "@scom/scom-page-builder/interface/jsonSchema.ts";
     export enum ELEMENT_NAME {
@@ -456,6 +462,7 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
         prependId?: string;
         appendId?: string;
     }
+    export const TEXTBOX_PATH = "scom-markdown-editor";
 }
 /// <amd-module name="@scom/scom-page-builder/command/interface.ts" />
 declare module "@scom/scom-page-builder/command/interface.ts" {
@@ -489,15 +496,16 @@ declare module "@scom/scom-page-builder/command/updateRow.ts" {
         redo(): void;
     }
 }
-/// <amd-module name="@scom/scom-page-builder/command/updateColor.ts" />
-declare module "@scom/scom-page-builder/command/updateColor.ts" {
+/// <amd-module name="@scom/scom-page-builder/command/updateRowSettings.ts" />
+declare module "@scom/scom-page-builder/command/updateRowSettings.ts" {
     import { Control } from "@ijstech/components";
     import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
-    export class UpdateColorCommand implements ICommand {
+    import { IRowSettings } from "@scom/scom-page-builder/interface/index.ts";
+    export class UpdateRowSettingsCommand implements ICommand {
         private element;
-        private color;
-        private oldColor;
-        constructor(element: Control, color: string);
+        private settings;
+        private oldSettings;
+        constructor(element: Control, settings: IRowSettings);
         execute(): void;
         undo(): void;
         redo(): void;
@@ -656,7 +664,7 @@ declare module "@scom/scom-page-builder/command/addElement.ts" {
 /// <amd-module name="@scom/scom-page-builder/command/index.ts" />
 declare module "@scom/scom-page-builder/command/index.ts" {
     export { UpdateRowCommand } from "@scom/scom-page-builder/command/updateRow.ts";
-    export { UpdateColorCommand } from "@scom/scom-page-builder/command/updateColor.ts";
+    export { UpdateRowSettingsCommand } from "@scom/scom-page-builder/command/updateRowSettings.ts";
     export { CommandHistory, commandHistory } from "@scom/scom-page-builder/command/history.ts";
     export { MoveElementCommand } from "@scom/scom-page-builder/command/moveRow.ts";
     export { ResizeElementCommand } from "@scom/scom-page-builder/command/resize.ts";
@@ -719,151 +727,6 @@ declare module "@scom/scom-page-builder/page/pageHeader.tsx" {
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageSection.css.ts" />
 declare module "@scom/scom-page-builder/page/pageSection.css.ts" { }
-/// <amd-module name="@scom/scom-page-builder/dialogs/confirmDialog.tsx" />
-declare module "@scom/scom-page-builder/dialogs/confirmDialog.tsx" {
-    import { Module, ControlElement, Container } from '@ijstech/components';
-    export interface ConfirmDialogElement extends ControlElement {
-        message: string;
-        cancelButtonText?: string;
-        confirmButtonText?: string;
-        showCancelButton?: boolean;
-        showConfirmButton?: boolean;
-        onCancel?: () => Promise<void>;
-        onConfirm?: () => Promise<void>;
-    }
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ["scpage-confirm-dialog"]: ConfirmDialogElement;
-            }
-        }
-    }
-    export class ConfirmDialog extends Module {
-        message: string;
-        cancelButtonText: string;
-        confirmButtonText: string;
-        showCancelButton: boolean;
-        showConfirmButton: boolean;
-        onCancel: () => Promise<void>;
-        onConfirm: () => Promise<void>;
-        private dialog;
-        private lbMessage;
-        private btnCancel;
-        private btnConfirm;
-        constructor(parent?: Container, options?: any);
-        init(): Promise<void>;
-        confirm(): Promise<void>;
-        cancel(): Promise<void>;
-        show(): void;
-        hide(): void;
-        render(): any;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/dialogs/loadingDialog.css.ts" />
-declare module "@scom/scom-page-builder/dialogs/loadingDialog.css.ts" { }
-/// <amd-module name="@scom/scom-page-builder/dialogs/loadingDialog.tsx" />
-declare module "@scom/scom-page-builder/dialogs/loadingDialog.tsx" {
-    import { Module, ControlElement } from '@ijstech/components';
-    import "@scom/scom-page-builder/dialogs/loadingDialog.css.ts";
-    export interface LoadingDialogElement extends ControlElement {
-    }
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ['scpage-loading-dialog']: LoadingDialogElement;
-            }
-        }
-    }
-    export class LoadingDialog extends Module {
-        private lbMessage;
-        private mdLoading;
-        constructor(parent?: any, options?: any);
-        init(): Promise<void>;
-        show(): void;
-        hide(): void;
-        updateMessage(message: string): void;
-        render(): any;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts" />
-declare module "@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts" { }
-/// <amd-module name="@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx" />
-declare module "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx" {
-    import { Module, ControlElement } from '@ijstech/components';
-    import "@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts";
-    export interface RowSettingsDialogElement extends ControlElement {
-        onSave: () => Promise<void>;
-    }
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ['ide-row-settings-dialog']: RowSettingsDialogElement;
-            }
-        }
-    }
-    export class RowSettingsDialog extends Module {
-        private dialog;
-        private txtRowBackgroundColor;
-        private onSave;
-        constructor(parent?: any);
-        show(): void;
-        hide(): void;
-        setConfig(config: string): void;
-        getConfig(): any;
-        confirm(): Promise<void>;
-        cancel(): void;
-        render(): any;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/dialogs/pageBlockSettingsDialog.tsx" />
-declare module "@scom/scom-page-builder/dialogs/pageBlockSettingsDialog.tsx" {
-    import { Module, ControlElement } from '@ijstech/components';
-    export interface PageBlockSettingsDialogElement extends ControlElement {
-        onSave: (data: any) => void;
-    }
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ['scpage-pageblock-settings-dialog']: PageBlockSettingsDialogElement;
-            }
-        }
-    }
-    export class PageBlockSettingsDialog extends Module {
-        private dialog;
-        private pnlConfig;
-        private pnlEvents;
-        private txtVisibleOn;
-        private txtInvisibleOn;
-        private form;
-        private schema;
-        private onSave;
-        private configData;
-        constructor(parent?: any, options?: any);
-        init(): Promise<void>;
-        show(data: {
-            schema: any;
-            configData: any;
-            events: any[];
-            visibleOn: string;
-            invisibleOn: string;
-        }): void;
-        close(): void;
-        handleSaveClick(): Promise<void>;
-        getFormData(object: any, name: string): Promise<any>;
-        reset(): void;
-        renderForm(object: any, name: string, nameBuilder?: string, data?: any, required?: string[]): any;
-        private convertFieldNameToLabel;
-        render(): Promise<any>;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/dialogs/index.ts" />
-declare module "@scom/scom-page-builder/dialogs/index.ts" {
-    import { ConfirmDialog } from "@scom/scom-page-builder/dialogs/confirmDialog.tsx";
-    import { LoadingDialog } from "@scom/scom-page-builder/dialogs/loadingDialog.tsx";
-    import { RowSettingsDialog } from "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx";
-    import { PageBlockSettingsDialog } from "@scom/scom-page-builder/dialogs/pageBlockSettingsDialog.tsx";
-    export { ConfirmDialog, LoadingDialog, RowSettingsDialog, PageBlockSettingsDialog };
-}
 /// <amd-module name="@scom/scom-page-builder/common/toolbar.css.ts" />
 declare module "@scom/scom-page-builder/common/toolbar.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/common/toolbar.tsx" />
@@ -986,7 +849,6 @@ declare module "@scom/scom-page-builder/page/pageSection.tsx" {
     import { Module, ControlElement, Container } from '@ijstech/components';
     import "@scom/scom-page-builder/page/pageSection.css.ts";
     import { IPageElement } from "@scom/scom-page-builder/interface/index.ts";
-    import { RowSettingsDialog } from "@scom/scom-page-builder/dialogs/index.ts";
     global {
         namespace JSX {
             interface IntrinsicElements {
@@ -1016,7 +878,6 @@ declare module "@scom/scom-page-builder/page/pageSection.tsx" {
         setData(rowId: string, value: IPageElement): Promise<void>;
         render(): any;
     }
-    export { RowSettingsDialog };
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageFooter.css.ts" />
 declare module "@scom/scom-page-builder/page/pageFooter.css.ts" { }
@@ -1046,6 +907,143 @@ declare module "@scom/scom-page-builder/page/pageFooter.tsx" {
         render(): any;
     }
 }
+/// <amd-module name="@scom/scom-page-builder/dialogs/confirmDialog.tsx" />
+declare module "@scom/scom-page-builder/dialogs/confirmDialog.tsx" {
+    import { Module, ControlElement, Container } from '@ijstech/components';
+    export interface ConfirmDialogElement extends ControlElement {
+        message: string;
+        cancelButtonText?: string;
+        confirmButtonText?: string;
+        showCancelButton?: boolean;
+        showConfirmButton?: boolean;
+        onCancel?: () => Promise<void>;
+        onConfirm?: () => Promise<void>;
+    }
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ["scpage-confirm-dialog"]: ConfirmDialogElement;
+            }
+        }
+    }
+    export class ConfirmDialog extends Module {
+        message: string;
+        cancelButtonText: string;
+        confirmButtonText: string;
+        showCancelButton: boolean;
+        showConfirmButton: boolean;
+        onCancel: () => Promise<void>;
+        onConfirm: () => Promise<void>;
+        private dialog;
+        private lbMessage;
+        private btnCancel;
+        private btnConfirm;
+        constructor(parent?: Container, options?: any);
+        init(): Promise<void>;
+        confirm(): Promise<void>;
+        cancel(): Promise<void>;
+        show(): void;
+        hide(): void;
+        render(): any;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/dialogs/loadingDialog.css.ts" />
+declare module "@scom/scom-page-builder/dialogs/loadingDialog.css.ts" { }
+/// <amd-module name="@scom/scom-page-builder/dialogs/loadingDialog.tsx" />
+declare module "@scom/scom-page-builder/dialogs/loadingDialog.tsx" {
+    import { Module, ControlElement } from '@ijstech/components';
+    import "@scom/scom-page-builder/dialogs/loadingDialog.css.ts";
+    export interface LoadingDialogElement extends ControlElement {
+    }
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ['scpage-loading-dialog']: LoadingDialogElement;
+            }
+        }
+    }
+    export class LoadingDialog extends Module {
+        private lbMessage;
+        private mdLoading;
+        constructor(parent?: any, options?: any);
+        init(): Promise<void>;
+        show(): void;
+        hide(): void;
+        updateMessage(message: string): void;
+        render(): any;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts" />
+declare module "@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts" { }
+/// <amd-module name="@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx" />
+declare module "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx" {
+    import { Module, ControlElement } from '@ijstech/components';
+    import "@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts";
+    export interface RowSettingsDialogElement extends ControlElement {
+        onSave: () => Promise<void>;
+    }
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ['ide-row-settings-dialog']: RowSettingsDialogElement;
+            }
+        }
+    }
+    export class RowSettingsDialog extends Module {
+        private dialog;
+        private txtRowBackgroundColor;
+        private onSave;
+        private rowId;
+        constructor(parent?: any);
+        get data(): any;
+        show(id: string): void;
+        hide(): void;
+        setConfig(config: string): void;
+        getConfig(): any;
+        confirm(): Promise<void>;
+        cancel(): void;
+        render(): any;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/dialogs/sectionSettingsDialog.css.ts" />
+declare module "@scom/scom-page-builder/dialogs/sectionSettingsDialog.css.ts" { }
+/// <amd-module name="@scom/scom-page-builder/dialogs/sectionSettingsDialog.tsx" />
+declare module "@scom/scom-page-builder/dialogs/sectionSettingsDialog.tsx" {
+    import { Module, ControlElement } from '@ijstech/components';
+    import "@scom/scom-page-builder/dialogs/sectionSettingsDialog.css.ts";
+    export interface SectionSettingsDialogElement extends ControlElement {
+        onSave: (data: any) => void;
+    }
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ['ide-section-settings-dialog']: SectionSettingsDialogElement;
+            }
+        }
+    }
+    export class SectionSettingsDialog extends Module {
+        private dialog;
+        private formElm;
+        private onSave;
+        private rowId;
+        constructor(parent?: any, options?: any);
+        get data(): any;
+        init(): void;
+        show(id: string): void;
+        private renderForm;
+        close(): void;
+        reset(): void;
+        render(): any;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/dialogs/index.ts" />
+declare module "@scom/scom-page-builder/dialogs/index.ts" {
+    import { ConfirmDialog } from "@scom/scom-page-builder/dialogs/confirmDialog.tsx";
+    import { LoadingDialog } from "@scom/scom-page-builder/dialogs/loadingDialog.tsx";
+    import { RowSettingsDialog } from "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx";
+    import { SectionSettingsDialog } from "@scom/scom-page-builder/dialogs/sectionSettingsDialog.tsx";
+    export { ConfirmDialog, LoadingDialog, RowSettingsDialog, SectionSettingsDialog };
+}
 /// <amd-module name="@scom/scom-page-builder/page/pageRow.css.ts" />
 declare module "@scom/scom-page-builder/page/pageRow.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/page/pageRow.tsx" />
@@ -1069,6 +1067,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private dragStack;
         private pnlRow;
         private mdRowSetting;
+        private mdSectionSetting;
         private pnlEmty;
         private _readonly;
         private isResizing;
@@ -1090,7 +1089,8 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         addElement(data: IPageElement): Promise<PageSection>;
         private clearData;
         setData(rowData: IPageSection): Promise<void>;
-        private onOpenRowSettingsDialog;
+        private onOpenSectionSettingsDialog;
+        private onOpenColorSettingsDialog;
         private onSaveRowSettings;
         private onClone;
         onDeleteRow(): void;

@@ -1,5 +1,5 @@
 export { UpdateRowCommand } from './updateRow';
-export { UpdateColorCommand } from './updateColor';
+export { UpdateRowSettingsCommand } from './updateRowSettings';
 export { CommandHistory, commandHistory } from './history';
 export { MoveElementCommand } from './moveRow';
 export { ResizeElementCommand } from './resize';

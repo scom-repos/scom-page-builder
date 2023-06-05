@@ -2,7 +2,6 @@ import {
     Module,
     customElements,
     ControlElement,
-    Styles,
     Panel,
     observable,
     application,
@@ -10,7 +9,7 @@ import {
     Upload
 } from '@ijstech/components';
 import { EVENT } from '../const/index';
-import { ElementType, ELEMENT_NAME, IPageFooter } from '../interface/index';
+import { ElementType, ELEMENT_NAME, IPageFooter, TEXTBOX_PATH } from '../interface/index';
 import { PageRow } from '../page/index';
 import { generateUUID } from '../utility/index';
 import { getPageBlocks, pageObject } from '../store/index';
@@ -97,7 +96,7 @@ export class BuilderFooter extends Module {
 
     private addFooter() {
         const pageBlocks = getPageBlocks();
-        const textBlock = pageBlocks.find((v) => v.name === ELEMENT_NAME.TEXTBOX);
+        const textBlock = pageBlocks.find((v) => v.path === TEXTBOX_PATH);
         this.setData({
             image: '',
             elements: [{

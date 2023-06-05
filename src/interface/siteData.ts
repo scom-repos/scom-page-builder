@@ -23,6 +23,7 @@ export interface IPageHeader {
 	headerType: HeaderType;
 	image: string;
 	elements: IPageElement[];
+    config?: IConfigData;
 }
 
 export interface IPageSection {
@@ -31,11 +32,13 @@ export interface IPageSection {
 	image?: string;
     backgroundColor?: string;
 	elements: IPageElement[];
+    config?: IConfigData;
 }
 
 export interface IPageFooter {
 	image: string;
 	elements: IPageElement[];
+    config?: IConfigData;
 }
 
 export enum ElementType {
@@ -57,4 +60,19 @@ export interface IPageElement {
     invisibleOn?: string;
 }
 
+export enum IColumnLayoutType {
+    FIXED = 'Fixed',
+    AUTOMATIC = 'Automatic'
+}
 
+export interface IConfigData {
+    columnLayout?: IColumnLayoutType;
+    columnsNumber?: number;
+    maxColumnsPerRow?: number;
+    columnMinWidth?: number|string;
+}
+
+export interface IRowSettings {
+    backgroundColor?: string;
+    config?: IConfigData;
+}

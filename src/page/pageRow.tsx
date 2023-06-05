@@ -9,7 +9,8 @@ import {
     GridLayout,
     Styles
 } from '@ijstech/components';
-import { PageSection, RowSettingsDialog } from './pageSection';
+import { PageSection } from './pageSection';
+import { RowSettingsDialog, SectionSettingsDialog } from '../dialogs/index';
 import './pageRow.css';
 import { EVENT } from '../const/index';
 import { IPageElement, IPageSection } from '../interface/index';
@@ -20,7 +21,7 @@ import {
     ResizeElementCommand,
     DragElementCommand,
     MAX_COLUMN,
-    UpdateColorCommand,
+    UpdateRowSettingsCommand,
     UpdateTypeCommand,
     AddElementCommand,
     MIN_COLUMN
@@ -48,6 +49,7 @@ export class PageRow extends Module {
     private dragStack: VStack;
     private pnlRow: GridLayout;
     private mdRowSetting: RowSettingsDialog;
+    private mdSectionSetting: SectionSettingsDialog;
     private pnlEmty: VStack;
 
     private _readonly: boolean;
@@ -160,12 +162,16 @@ export class PageRow extends Module {
         this.updateGridColumn(this.pnlRow);
     }
 
-    private onOpenRowSettingsDialog() {
-        this.mdRowSetting.show();
+    private onOpenSectionSettingsDialog() {
+        this.mdSectionSetting.show(this.rowId);
     }
 
-    private onSaveRowSettings(color: string) {
-        const updateCmd = new UpdateColorCommand(this, color);
+    private onOpenColorSettingsDialog() {
+        this.mdRowSetting.show(this.rowId);
+    }
+
+    private onSaveRowSettings(data: any) {
+        const updateCmd = new UpdateRowSettingsCommand(this, data);
         commandHistory.execute(updateCmd);
     }
 
@@ -668,11 +674,19 @@ export class PageRow extends Module {
                         padding={{top: 5, bottom: 5}}
                     >
                         <i-panel
+                            class="actions"
+                            tooltip={{ content: 'Section settings', placement: 'right' }}
+                            visible={this.isChanged}
+                            onClick={this.onOpenSectionSettingsDialog}
+                        >
+                            <i-icon name="cog" width={16} height={16} fill="#80868b"></i-icon>
+                        </i-panel>
+                        <i-panel
                             id="btnSetting"
                             class="actions"
                             tooltip={{ content: 'Section colors', placement: 'right' }}
                             visible={this.isChanged}
-                            onClick={this.onOpenRowSettingsDialog}
+                            onClick={this.onOpenColorSettingsDialog}
                         >
                             <i-icon name="palette" width={16} height={16} fill="#80868b"></i-icon>
                         </i-panel>
@@ -754,6 +768,10 @@ export class PageRow extends Module {
                     id="mdRowSetting"
                     onSave={this.onSaveRowSettings.bind(this)}
                 ></ide-row-settings-dialog>
+                <ide-section-settings-dialog
+                    id="mdSectionSetting"
+                    onSave={this.onSaveRowSettings.bind(this)}
+                ></ide-section-settings-dialog>
                 <i-button
                     caption=''
                     icon={{name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText}}

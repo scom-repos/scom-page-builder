@@ -7,7 +7,6 @@ import {
 } from '@ijstech/components';
 import './pageSection.css';
 import { ElementType, IPageElement } from '../interface/index';
-import { RowSettingsDialog } from '../dialogs/index';
 import { IDEToolbar } from '../common/index';
 import { isEmpty } from '../utility/index';
 import { pageObject } from '../store/index';
@@ -125,5 +124,3 @@ export class PageSection extends Module {
         );
     }
 }
-
-export { RowSettingsDialog };

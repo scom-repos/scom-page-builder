@@ -3,12 +3,13 @@ import {
     customElements,
     Modal,
     ControlElement,
-    Input,
-    Styles
+    Input
 } from '@ijstech/components';
 import { assignAttr } from '../utility/index';
 import './rowSettingsDialog.css';
 import { currentTheme  } from '../theme/index';
+import { IRowSettings } from '../interface/index';
+import { pageObject } from '../store/index';
 
 const Theme = currentTheme;
 
@@ -28,14 +29,22 @@ declare global {
 export class RowSettingsDialog extends Module {
     private dialog: Modal;
     private txtRowBackgroundColor: Input;
-    private onSave: (config: string) => Promise<void>;
+    private onSave: (data: IRowSettings) => Promise<void>;
+
+    private rowId: string = '';
 
     constructor(parent?: any) {
         super(parent);
         assignAttr(this);
     }
 
-    show() {
+    get data(): any {
+        return pageObject.getRow(this.rowId) || {};
+    }
+
+    show(id: string) {
+        this.rowId = id || '';
+        this.txtRowBackgroundColor.value = this.data?.backgroundColor || '';
         this.dialog.visible = true;
     }
 
@@ -53,8 +62,8 @@ export class RowSettingsDialog extends Module {
     }
 
     async confirm() {
-        const config = this.getConfig();
-        if (this.onSave) await this.onSave(config);
+        const backgroundColor = this.getConfig();
+        if (this.onSave) await this.onSave({ backgroundColor });
         this.dialog.visible = false;
     }
 
