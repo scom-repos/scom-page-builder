@@ -4,18 +4,19 @@ import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
 import { IPageData, IPageBlockData, IPageElement, IOnFetchComponentsOptions, IOnFetchComponentsResult } from './interface/index';
 import { PageRows, PageSidebar } from './page/index';
-import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData } from './store/index';
+import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData, getPageBlocks } from './store/index';
 import { currentTheme } from './theme/index';
 import './index.css';
 import { SearchComponentsDialog } from './dialogs/index';
-
 export { IOnFetchComponentsOptions, IOnFetchComponentsResult };
 
 const Theme = currentTheme;
+type onFetchComponentsCallback = (options: IOnFetchComponentsOptions) => Promise<IOnFetchComponentsResult>
 
 interface PageBuilderElement extends ControlElement {
     rootDir?: string;
     components?: IPageBlockData[];
+    onFetchComponents?: onFetchComponentsCallback;
 }
 
 declare global {
@@ -55,14 +56,14 @@ export default class Editor extends Module {
         _setRootDir(value);
     }
 
-    // get components() {
-    //     return getPageBlocks();
-    // }
+    get components() {
+        return getPageBlocks();
+    }
 
-    // set components(value: IPageBlockData[]) {
-    //     setPageBlocks(value);
-    //     this.pageSidebar.renderUI();
-    // }
+    set components(value: IPageBlockData[]) {
+        setPageBlocks(value);
+        this.pageSidebar.renderUI();
+    }
 
     async onFetchComponents(options: IOnFetchComponentsOptions): Promise<IOnFetchComponentsResult> {
         return { items: [], total: 0 };
@@ -121,8 +122,10 @@ export default class Editor extends Module {
     init() {
         const rootDir = this.getAttribute('rootDir', true);
         if (rootDir) this.setRootDir(rootDir);
-        // const components = this.getAttribute('components', true);
-        // if (components) setPageBlocks(components);
+        const components = this.getAttribute('components', true);
+        if (components) setPageBlocks(components);
+        const onFetchComponents = this.getAttribute('onFetchComponents', true);
+        if (onFetchComponents) this.onFetchComponents = onFetchComponents.bind(this);
         super.init();
         this.initEventListeners();
         this.initData();
@@ -169,16 +172,7 @@ export default class Editor extends Module {
         this.events = [];
     }
 
-    initEventBus() {
-        // this.events.push(
-        //     application.EventBus.register(this, EVENT.ON_ADD_ELEMENT, (data: IElementConfig) => {
-        //         if (!data) return;
-        //         this.onAddRow(data);
-        //     })
-        // );
-        this.events.push(
-            application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => {})
-        );
+    private initEventBus() {
         this.events.push(
             application.EventBus.register(this, EVENT.ON_UPDATE_FOOTER, async () => this.onUpdateWrapper())
         );
@@ -192,58 +186,6 @@ export default class Editor extends Module {
             application.EventBus.register(this, EVENT.ON_FETCH_COMPONENTS, this.onSearch)
         )
     }
-
-    // private async onAddRow(data: IElementConfig) {
-    //     const { type, module, prependId } = data;
-    //     let element = {
-    //         id: generateUUID(),
-    //         column: 1,
-    //         columnSpan: module.category === 'components' ? 12 : 3,
-    //         type,
-    //         module,
-    //         properties: {
-    //             showHeader: false,
-    //             showFooter: false,
-    //         } as any,
-    //     };
-
-    //     if (module.category === 'components') {
-    //         element.properties = {
-    //             showHeader: false,
-    //             showFooter: false,
-    //         };
-    //     } else if (module.category === 'micro-dapps') {
-    //         element.properties = {
-    //             showHeader: true,
-    //             showFooter: true,
-    //         };
-    //     }
-
-    //     let rowData = {
-    //         id: generateUUID(),
-    //         row: pageObject.sections.length + 1,
-    //         elements: [element],
-    //     };
-    //     //FIXME: remove this
-    //     if (module.path === 'scom-nft-minter' || module.path === 'scom-gem-token') {
-    //         element.module = module;
-    //         element.columnSpan = 6;
-    //         element.properties = {
-    //             networks: [
-    //                 {
-    //                     chainId: 43113,
-    //                 },
-    //             ],
-    //             wallets: [
-    //                 {
-    //                     name: 'metamask',
-    //                 },
-    //             ],
-    //             width: '100%',
-    //         };
-    //     }
-    //     return await this.pageRows.appendRow(rowData, prependId);
-    // }
 
     private onUpdateWrapper() {
         //     this.contentWrapper.minHeight = `calc((100vh - 6rem) - ${this.builderFooter.offsetHeight}px)`;
@@ -272,8 +214,7 @@ export default class Editor extends Module {
     private async initData() {
         if (this.isFirstLoad) return;
         await this.onSearch();
-        setPageBlocks(getSearchData()?.items || []);
-        this.pageSidebar.renderUI();
+        this.components = getSearchData()?.items || [];
         this.isFirstLoad = true;
     }
 

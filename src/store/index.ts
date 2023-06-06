@@ -270,7 +270,8 @@ export const getPageBlocks = () => {
 }
 
 export const addPageBlock = (value: IPageBlockData) => {
-  state.pageBlocks.push(value);
+  const hasPageblock = state.pageBlocks.find(item => item.path === value.path);
+  if (!hasPageblock) state.pageBlocks.push(value);
 }
 
 export const setRootDir = (value: string) => {

@@ -66,10 +66,6 @@ export class MainModule extends Module {
         "shownBackdrop": true
       },
       {
-        "name": "DApp Container",
-        "path": "scom-dapp-container"
-      },
-      {
         "name": "Dune Blocks",
         "path": "scom-dune",
         "category": "charts"
@@ -79,6 +75,25 @@ export class MainModule extends Module {
 
   onGetData() {
     console.log(this.pageBuilder.getData()?.sections)
+  }
+
+  private async onFetchComponentsFn(options: IOnFetchComponentsOptions) {
+    const { category, pageNumber, pageSize, keyword = '' } = options;
+    let filteredComponents = [...this._components];
+    let total  = 0;
+    if (category) {
+      filteredComponents = filteredComponents.filter(cp => cp.category === category);
+    }
+    if (keyword) {
+      filteredComponents = filteredComponents.filter(cp => cp.name.toLowerCase().includes(keyword.toLowerCase()));
+    }
+    total = filteredComponents.length;
+    if (pageSize && pageNumber) {
+      const itemStart = (pageNumber - 1) * pageSize;
+      const itemEnd = itemStart + pageSize;
+      filteredComponents = filteredComponents.slice(itemStart, itemEnd);
+    }
+    return { items: filteredComponents, total };
   }
 
   init() {
@@ -140,21 +155,6 @@ export class MainModule extends Module {
     //   }
     // }
 
-    this.pageBuilder.onFetchComponents = async (options: IOnFetchComponentsOptions) => {
-      const { category, pageNumber, pageSize } = options;
-      let filteredComponents = [...this._components];
-      let total  = 0;
-      if (category) {
-        filteredComponents = filteredComponents.filter(cp => cp.category === category);
-      }
-      total = filteredComponents.length;
-      if (pageSize && pageNumber) {
-        const itemStart = (pageNumber - 1) * pageSize;
-        const itemEnd = itemStart + pageSize;
-        filteredComponents = filteredComponents.slice(itemStart, itemEnd);
-      }
-      return { items: filteredComponents, total };
-    }
     const data: any = {
       "sections": [
         {
@@ -232,8 +232,17 @@ export class MainModule extends Module {
   render() {
     return (
       <i-panel width="100%" height="100%">
-        <i-button caption="Get data" margin={{top: '1rem', left: '1rem', bottom: '1rem'}} onClick={() => this.onGetData()}></i-button>
-        <i-scom-page-builder id="pageBuilder"></i-scom-page-builder>
+        <i-button
+          caption="Get data"
+          margin={{top: '1rem', left: '1rem', bottom: '1rem'}}
+          padding={{top: '0.5rem', left: '1rem', bottom: '0.5rem', right: '1rem'}}
+          font={{color: '#fff'}}
+          onClick={() => this.onGetData()}
+        ></i-button>
+        <i-scom-page-builder
+          id="pageBuilder"
+          onFetchComponents={this.onFetchComponentsFn.bind(this)}
+        ></i-scom-page-builder>
       </i-panel>
     )
   }

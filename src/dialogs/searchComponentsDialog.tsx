@@ -7,13 +7,14 @@ import {
     Pagination,
     observable,
     HStack,
-    application
+    application,
+    Input
 } from '@ijstech/components';
 import { assignAttr } from '../utility/index';
 import './searchComponentsDialog.css';
 import { addPageBlock, getSearchData, getSearchOptions } from '../store/index';
 import assets from '../assets';
-import { IPageBlockData, PAGE_SIZE } from '../interface/index';
+import { IOnFetchComponentsOptions, IPageBlockData, PAGE_SIZE } from '../interface/index';
 import { EVENT } from '../const/index';
 const Theme = Styles.Theme.ThemeVars;
 
@@ -32,6 +33,7 @@ export class SearchComponentsDialog extends Module {
     private mdSearch: Modal;
     private paginationElm: Pagination;
     private pnlComponents: HStack;
+    private inputSearch: Input;
 
     @observable()
     private totalPage: number = 0;
@@ -60,16 +62,13 @@ export class SearchComponentsDialog extends Module {
     }
 
     private onSelectIndex = () => {
-        const pageNumber = this.paginationElm.currentPage;
-        this.pageNumber = pageNumber;
+        this.pageNumber = this.paginationElm.currentPage;
         this.onFetchData();
     };
 
     private resetPaging = () => {
         this.pageNumber = 1;
-        if (this.paginationElm) {
-            this.paginationElm.currentPage = 1;
-        }
+        if (this.paginationElm) this.paginationElm.currentPage = 1;
     };
 
     renderUI = () => {
@@ -124,18 +123,19 @@ export class SearchComponentsDialog extends Module {
     };
 
     private onFetchData() {
-        const oldOptions = getSearchOptions();
+        const oldOptions: IOnFetchComponentsOptions = getSearchOptions();
         application.EventBus.dispatch(EVENT.ON_FETCH_COMPONENTS, {
             category: oldOptions.category || '',
             pageNumber: this.pageNumber,
-            pageSize: oldOptions.pageSize
+            pageSize: oldOptions.pageSize,
+            keyword: this.inputSearch.value.trim()
         });
     }
 
     private onSelected(item: IPageBlockData) {
         this.mdSearch.visible = false;
         addPageBlock(item);
-        application.EventBus.dispatch(EVENT.ON_UPDATE_SIDEBAR);
+        application.EventBus.dispatch(EVENT.ON_UPDATE_SIDEBAR, {category: item.category});
     }
 
     render() {

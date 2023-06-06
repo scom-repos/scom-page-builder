@@ -155,7 +155,19 @@ export class PageSidebar extends Module {
     }
 
     private initEventBus() {
-        application.EventBus.register(this, EVENT.ON_UPDATE_SIDEBAR, this.renderUI)
+        application.EventBus.register(this, EVENT.ON_UPDATE_SIDEBAR, (category: string) => {
+            switch (category) {
+                case 'micro-dapps':
+                    this.renderList(this.microdappsStack, category);
+                    break;
+                case 'charts':
+                    this.renderList(this.chartsStack, category);
+                    break;
+                case 'components':
+                    this.renderList(this.componentsStack, category);
+                    break;
+            }
+        })
     }
 
     render() {

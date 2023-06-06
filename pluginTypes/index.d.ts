@@ -450,6 +450,7 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         category?: string;
         pageNumber?: number;
         pageSize?: number;
+        keyword?: string;
     }
     export interface IOnFetchComponentsResult {
         items?: IPageBlockData[];
@@ -1092,6 +1093,7 @@ declare module "@scom/scom-page-builder/dialogs/searchComponentsDialog.tsx" {
         private mdSearch;
         private paginationElm;
         private pnlComponents;
+        private inputSearch;
         private totalPage;
         private pageNumber;
         init(): void;
@@ -1395,9 +1397,11 @@ declare module "@scom/scom-page-builder" {
     import { IPageData, IPageBlockData, IOnFetchComponentsOptions, IOnFetchComponentsResult } from "@scom/scom-page-builder/interface/index.ts";
     import "@scom/scom-page-builder/index.css.ts";
     export { IOnFetchComponentsOptions, IOnFetchComponentsResult };
+    type onFetchComponentsCallback = (options: IOnFetchComponentsOptions) => Promise<IOnFetchComponentsResult>;
     interface PageBuilderElement extends ControlElement {
         rootDir?: string;
         components?: IPageBlockData[];
+        onFetchComponents?: onFetchComponentsCallback;
     }
     global {
         namespace JSX {
@@ -1418,6 +1422,8 @@ declare module "@scom/scom-page-builder" {
         constructor(parent?: Container, options?: any);
         get rootDir(): string;
         set rootDir(value: string);
+        get components(): IPageBlockData[];
+        set components(value: IPageBlockData[]);
         onFetchComponents(options: IOnFetchComponentsOptions): Promise<IOnFetchComponentsResult>;
         private initScrollEvent;
         private initEventListeners;
@@ -1429,7 +1435,7 @@ declare module "@scom/scom-page-builder" {
         };
         setData(value: IPageData): Promise<void>;
         onHide(): void;
-        initEventBus(): void;
+        private initEventBus;
         private onUpdateWrapper;
         private onToggleSearch;
         private onSearch;

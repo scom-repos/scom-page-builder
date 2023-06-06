@@ -81,6 +81,7 @@ export interface IOnFetchComponentsOptions {
     category?: string;
     pageNumber?: number;
     pageSize?: number;
+    keyword?: string;
 }
 export interface IOnFetchComponentsResult {
     items?: IPageBlockData[];

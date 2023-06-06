@@ -386,7 +386,9 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports"], functio
     };
     exports.getPageBlocks = getPageBlocks;
     const addPageBlock = (value) => {
-        exports.state.pageBlocks.push(value);
+        const hasPageblock = exports.state.pageBlocks.find(item => item.path === value.path);
+        if (!hasPageblock)
+            exports.state.pageBlocks.push(value);
     };
     exports.addPageBlock = addPageBlock;
     const setRootDir = (value) => {
@@ -3541,15 +3543,13 @@ define("@scom/scom-page-builder/dialogs/searchComponentsDialog.tsx", ["require",
             this.totalPage = 0;
             this.pageNumber = 0;
             this.onSelectIndex = () => {
-                const pageNumber = this.paginationElm.currentPage;
-                this.pageNumber = pageNumber;
+                this.pageNumber = this.paginationElm.currentPage;
                 this.onFetchData();
             };
             this.resetPaging = () => {
                 this.pageNumber = 1;
-                if (this.paginationElm) {
+                if (this.paginationElm)
                     this.paginationElm.currentPage = 1;
-                }
             };
             this.renderUI = () => {
                 let nodes = [];
@@ -3591,19 +3591,21 @@ define("@scom/scom-page-builder/dialogs/searchComponentsDialog.tsx", ["require",
         }
         show() {
             this.mdSearch.visible = true;
+            this.resetPaging();
         }
         onFetchData() {
             const oldOptions = index_49.getSearchOptions();
             components_25.application.EventBus.dispatch(index_51.EVENT.ON_FETCH_COMPONENTS, {
                 category: oldOptions.category || '',
                 pageNumber: this.pageNumber,
-                pageSize: oldOptions.pageSize
+                pageSize: oldOptions.pageSize,
+                keyword: this.inputSearch.value.trim()
             });
         }
         onSelected(item) {
             this.mdSearch.visible = false;
             index_49.addPageBlock(item);
-            components_25.application.EventBus.dispatch(index_51.EVENT.ON_UPDATE_SIDEBAR);
+            components_25.application.EventBus.dispatch(index_51.EVENT.ON_UPDATE_SIDEBAR, { category: item.category });
         }
         render() {
             return (this.$render("i-modal", { id: 'mdSearch', minWidth: 400, maxWidth: 900, title: "Search", closeOnBackdropClick: false, closeIcon: { name: 'times' }, class: "search-modal" },
@@ -4807,7 +4809,19 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
             });
         }
         initEventBus() {
-            components_31.application.EventBus.register(this, index_65.EVENT.ON_UPDATE_SIDEBAR, this.renderUI);
+            components_31.application.EventBus.register(this, index_65.EVENT.ON_UPDATE_SIDEBAR, (category) => {
+                switch (category) {
+                    case 'micro-dapps':
+                        this.renderList(this.microdappsStack, category);
+                        break;
+                    case 'charts':
+                        this.renderList(this.chartsStack, category);
+                        break;
+                    case 'components':
+                        this.renderList(this.componentsStack, category);
+                        break;
+                }
+            });
         }
         render() {
             return (this.$render("i-panel", { id: "pnlMainSidebar", class: "navigator", height: '100%', maxWidth: "100%" }));
@@ -5398,13 +5412,13 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         set rootDir(value) {
             index_80.setRootDir(value);
         }
-        // get components() {
-        //     return getPageBlocks();
-        // }
-        // set components(value: IPageBlockData[]) {
-        //     setPageBlocks(value);
-        //     this.pageSidebar.renderUI();
-        // }
+        get components() {
+            return index_80.getPageBlocks();
+        }
+        set components(value) {
+            index_80.setPageBlocks(value);
+            this.pageSidebar.renderUI();
+        }
         async onFetchComponents(options) {
             return { items: [], total: 0 };
         }
@@ -5461,8 +5475,12 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             const rootDir = this.getAttribute('rootDir', true);
             if (rootDir)
                 this.setRootDir(rootDir);
-            // const components = this.getAttribute('components', true);
-            // if (components) setPageBlocks(components);
+            const components = this.getAttribute('components', true);
+            if (components)
+                index_80.setPageBlocks(components);
+            const onFetchComponents = this.getAttribute('onFetchComponents', true);
+            if (onFetchComponents)
+                this.onFetchComponents = onFetchComponents.bind(this);
             super.init();
             this.initEventListeners();
             this.initData();
@@ -5506,67 +5524,11 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.events = [];
         }
         initEventBus() {
-            // this.events.push(
-            //     application.EventBus.register(this, EVENT.ON_ADD_ELEMENT, (data: IElementConfig) => {
-            //         if (!data) return;
-            //         this.onAddRow(data);
-            //     })
-            // );
-            this.events.push(components_37.application.EventBus.register(this, index_79.EVENT.ON_UPDATE_SECTIONS, async () => { }));
             this.events.push(components_37.application.EventBus.register(this, index_79.EVENT.ON_UPDATE_FOOTER, async () => this.onUpdateWrapper()));
             this.events.push(components_37.application.EventBus.register(this, index_79.EVENT.ON_SET_DRAG_ELEMENT, async (el) => this.currentElement = el));
             this.events.push(components_37.application.EventBus.register(this, index_79.EVENT.ON_TOGGLE_SEARCH_MODAL, this.onToggleSearch));
             this.events.push(components_37.application.EventBus.register(this, index_79.EVENT.ON_FETCH_COMPONENTS, this.onSearch));
         }
-        // private async onAddRow(data: IElementConfig) {
-        //     const { type, module, prependId } = data;
-        //     let element = {
-        //         id: generateUUID(),
-        //         column: 1,
-        //         columnSpan: module.category === 'components' ? 12 : 3,
-        //         type,
-        //         module,
-        //         properties: {
-        //             showHeader: false,
-        //             showFooter: false,
-        //         } as any,
-        //     };
-        //     if (module.category === 'components') {
-        //         element.properties = {
-        //             showHeader: false,
-        //             showFooter: false,
-        //         };
-        //     } else if (module.category === 'micro-dapps') {
-        //         element.properties = {
-        //             showHeader: true,
-        //             showFooter: true,
-        //         };
-        //     }
-        //     let rowData = {
-        //         id: generateUUID(),
-        //         row: pageObject.sections.length + 1,
-        //         elements: [element],
-        //     };
-        //     //FIXME: remove this
-        //     if (module.path === 'scom-nft-minter' || module.path === 'scom-gem-token') {
-        //         element.module = module;
-        //         element.columnSpan = 6;
-        //         element.properties = {
-        //             networks: [
-        //                 {
-        //                     chainId: 43113,
-        //                 },
-        //             ],
-        //             wallets: [
-        //                 {
-        //                     name: 'metamask',
-        //                 },
-        //             ],
-        //             width: '100%',
-        //         };
-        //     }
-        //     return await this.pageRows.appendRow(rowData, prependId);
-        // }
         onUpdateWrapper() {
             //     this.contentWrapper.minHeight = `calc((100vh - 6rem) - ${this.builderFooter.offsetHeight}px)`;
             //     this.contentWrapper.padding = {bottom: this.builderFooter.offsetHeight};
@@ -5593,8 +5555,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             if (this.isFirstLoad)
                 return;
             await this.onSearch();
-            index_80.setPageBlocks(((_a = index_80.getSearchData()) === null || _a === void 0 ? void 0 : _a.items) || []);
-            this.pageSidebar.renderUI();
+            this.components = ((_a = index_80.getSearchData()) === null || _a === void 0 ? void 0 : _a.items) || [];
             this.isFirstLoad = true;
         }
         render() {
