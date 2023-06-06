@@ -500,7 +500,7 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
     export const GAP_WIDTH = 15;
     export const MAX_COLUMN = 12;
     export const MIN_COLUMN = 2;
-    export const PAGE_SIZE = 2;
+    export const PAGE_SIZE = 6;
 }
 /// <amd-module name="@scom/scom-page-builder/command/interface.ts" />
 declare module "@scom/scom-page-builder/command/interface.ts" {

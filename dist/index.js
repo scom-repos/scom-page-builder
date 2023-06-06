@@ -1090,7 +1090,7 @@ define("@scom/scom-page-builder/interface/index.ts", ["require", "exports", "@sc
     exports.GAP_WIDTH = 15;
     exports.MAX_COLUMN = 12;
     exports.MIN_COLUMN = 2;
-    exports.PAGE_SIZE = 2;
+    exports.PAGE_SIZE = 6;
 });
 define("@scom/scom-page-builder/command/interface.ts", ["require", "exports"], function (require, exports) {
     "use strict";
