@@ -175,8 +175,8 @@ export class PageRow extends Module {
     }
 
     updateColumn() {
-        this.updateFixedGrid();
         this.updateGrid();
+        this.updateFixedGrid();
     }
 
     private updateGrid() {

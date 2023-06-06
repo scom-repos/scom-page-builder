@@ -2,12 +2,14 @@ import { application, Container, Control, ControlElement, customElements, custom
 import { } from '@ijstech/eth-contract'
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
-import { IPageData, IElementConfig, IPageBlockData, IPageElement } from './interface/index';
+import { IPageData, IPageBlockData, IPageElement, IOnFetchComponentsOptions, IOnFetchComponentsResult } from './interface/index';
 import { PageRows, PageSidebar } from './page/index';
-import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, getPageBlocks } from './store/index';
+import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData } from './store/index';
 import { currentTheme } from './theme/index';
-import { generateUUID } from './utility/index';
 import './index.css';
+import { SearchComponentsDialog } from './dialogs/index';
+
+export { IOnFetchComponentsOptions, IOnFetchComponentsResult };
 
 const Theme = currentTheme;
 
@@ -32,8 +34,11 @@ export default class Editor extends Module {
     private builderFooter: BuilderFooter;
     private pnlWrap: Panel;
     private pageSidebar: PageSidebar;
+    private mdComponentsSearch: SearchComponentsDialog;
+
     private events: any[] = [];
     private currentElement: any;
+    private isFirstLoad: boolean = false;
 
     constructor(parent?: Container, options?: any) {
         super(parent, options);
@@ -50,16 +55,20 @@ export default class Editor extends Module {
         _setRootDir(value);
     }
 
-    get components() {
-        return getPageBlocks();
+    // get components() {
+    //     return getPageBlocks();
+    // }
+
+    // set components(value: IPageBlockData[]) {
+    //     setPageBlocks(value);
+    //     this.pageSidebar.renderUI();
+    // }
+
+    async onFetchComponents(options: IOnFetchComponentsOptions): Promise<IOnFetchComponentsResult> {
+        return { items: [], total: 0 };
     }
 
-    set components(value: IPageBlockData[]) {
-        setPageBlocks(value);
-        this.pageSidebar.renderUI();
-    }
-
-    initScrollEvent(containerElement: Control) {
+    private initScrollEvent(containerElement: Control) {
         let scrollPos = 0;
         let ticking = false;
         const scrollSpeed = 1000;
@@ -112,10 +121,11 @@ export default class Editor extends Module {
     init() {
         const rootDir = this.getAttribute('rootDir', true);
         if (rootDir) this.setRootDir(rootDir);
-        const components = this.getAttribute('components', true);
-        if (components) setPageBlocks(components);
+        // const components = this.getAttribute('components', true);
+        // if (components) setPageBlocks(components);
         super.init();
         this.initEventListeners();
+        this.initData();
     }
 
     setRootDir(value: string) {
@@ -160,78 +170,111 @@ export default class Editor extends Module {
     }
 
     initEventBus() {
-        this.events.push(
-            application.EventBus.register(this, EVENT.ON_ADD_ELEMENT, (data: IElementConfig) => {
-                if (!data) return;
-                this.onAddRow(data);
-            })
-        );
+        // this.events.push(
+        //     application.EventBus.register(this, EVENT.ON_ADD_ELEMENT, (data: IElementConfig) => {
+        //         if (!data) return;
+        //         this.onAddRow(data);
+        //     })
+        // );
         this.events.push(
             application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => {})
         );
         this.events.push(
-            application.EventBus.register(this, EVENT.ON_UPDATE_FOOTER, async () =>
-                this.onUpdateWrapper()
-            )
+            application.EventBus.register(this, EVENT.ON_UPDATE_FOOTER, async () => this.onUpdateWrapper())
         );
-        application.EventBus.register(this, EVENT.ON_SET_DRAG_ELEMENT, async (el: any) => this.currentElement = el)
+        this.events.push(
+            application.EventBus.register(this, EVENT.ON_SET_DRAG_ELEMENT, async (el: any) => this.currentElement = el)
+        )
+        this.events.push(
+            application.EventBus.register(this, EVENT.ON_TOGGLE_SEARCH_MODAL, this.onToggleSearch)
+        )
+        this.events.push(
+            application.EventBus.register(this, EVENT.ON_FETCH_COMPONENTS, this.onSearch)
+        )
     }
 
-    private async onAddRow(data: IElementConfig) {
-        const { type, module, prependId } = data;
-        let element = {
-            id: generateUUID(),
-            column: 1,
-            columnSpan: module.category === 'components' ? 12 : 3,
-            type,
-            module,
-            properties: {
-                showHeader: false,
-                showFooter: false,
-            } as any,
-        };
+    // private async onAddRow(data: IElementConfig) {
+    //     const { type, module, prependId } = data;
+    //     let element = {
+    //         id: generateUUID(),
+    //         column: 1,
+    //         columnSpan: module.category === 'components' ? 12 : 3,
+    //         type,
+    //         module,
+    //         properties: {
+    //             showHeader: false,
+    //             showFooter: false,
+    //         } as any,
+    //     };
 
-        if (module.category === 'components') {
-            element.properties = {
-                showHeader: false,
-                showFooter: false,
-            };
-        } else if (module.category === 'micro-dapps') {
-            element.properties = {
-                showHeader: true,
-                showFooter: true,
-            };
-        }
+    //     if (module.category === 'components') {
+    //         element.properties = {
+    //             showHeader: false,
+    //             showFooter: false,
+    //         };
+    //     } else if (module.category === 'micro-dapps') {
+    //         element.properties = {
+    //             showHeader: true,
+    //             showFooter: true,
+    //         };
+    //     }
 
-        let rowData = {
-            id: generateUUID(),
-            row: pageObject.sections.length + 1,
-            elements: [element],
-        };
-        //FIXME: remove this
-        if (module.path === 'scom-nft-minter' || module.path === 'scom-gem-token') {
-            element.module = module;
-            element.columnSpan = 6;
-            element.properties = {
-                networks: [
-                    {
-                        chainId: 43113,
-                    },
-                ],
-                wallets: [
-                    {
-                        name: 'metamask',
-                    },
-                ],
-                width: '100%',
-            };
-        }
-        return await this.pageRows.appendRow(rowData, prependId);
-    }
+    //     let rowData = {
+    //         id: generateUUID(),
+    //         row: pageObject.sections.length + 1,
+    //         elements: [element],
+    //     };
+    //     //FIXME: remove this
+    //     if (module.path === 'scom-nft-minter' || module.path === 'scom-gem-token') {
+    //         element.module = module;
+    //         element.columnSpan = 6;
+    //         element.properties = {
+    //             networks: [
+    //                 {
+    //                     chainId: 43113,
+    //                 },
+    //             ],
+    //             wallets: [
+    //                 {
+    //                     name: 'metamask',
+    //                 },
+    //             ],
+    //             width: '100%',
+    //         };
+    //     }
+    //     return await this.pageRows.appendRow(rowData, prependId);
+    // }
 
     private onUpdateWrapper() {
         //     this.contentWrapper.minHeight = `calc((100vh - 6rem) - ${this.builderFooter.offsetHeight}px)`;
         //     this.contentWrapper.padding = {bottom: this.builderFooter.offsetHeight};
+    }
+
+    private async onToggleSearch(visible: boolean) {
+        if (visible)
+            this.mdComponentsSearch.show();
+        else
+            this.mdComponentsSearch.hide();
+    }
+
+    private async onSearch(options?: IOnFetchComponentsOptions) {
+        const params = {...options } || {
+            category: undefined,
+            pageNumber: undefined,
+            pageSize: undefined
+        };
+        const { items = [], total = 0 } = await this.onFetchComponents(params);
+        setSearchData({ items, total })
+        setSearchOptions(params);
+        this.mdComponentsSearch.renderUI();
+    }
+
+    private async initData() {
+        if (this.isFirstLoad) return;
+        await this.onSearch();
+        setPageBlocks(getSearchData()?.items || []);
+        this.pageSidebar.renderUI();
+        this.isFirstLoad = true;
     }
 
     render() {
@@ -300,6 +343,9 @@ export default class Editor extends Module {
                         ></ide-sidebar>
                     </i-panel>
                 </i-grid-layout>
+                <ide-search-components-dialog
+                    id="mdComponentsSearch"
+                ></ide-search-components-dialog>
             </i-vstack>
         );
     }

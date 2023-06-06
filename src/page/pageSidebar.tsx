@@ -9,7 +9,7 @@ import {
     application,
     Panel,
 } from '@ijstech/components';
-import { getPageBlocks, setDragData } from '../store/index';
+import { getCategories, getPageBlocks, setDragData } from '../store/index';
 import { EVENT } from '../const/index';
 import { ElementType, IPageBlockData } from '../interface/index';
 // import { Collapse } from '../common/index';
@@ -31,7 +31,7 @@ export interface PageSidebarElement extends ControlElement {
 
 @customElements('ide-sidebar')
 export class PageSidebar extends Module {
-    private microDAppsStack: GridLayout;
+    private microdappsStack: GridLayout;
     private chartsStack: GridLayout;
     private componentsStack: GridLayout;
     private sectionStack: VStack;
@@ -49,23 +49,11 @@ export class PageSidebar extends Module {
         super.init();
         this.renderUI();
         this.initEventListeners();
+        this.initEventBus();
     }
 
     async renderUI() {
-        const stacks = [
-            {
-                title: 'Components',
-                id: 'componentsStack'
-            },
-            {
-                title: 'Micro DApps',
-                id: 'microDAppsStack'
-            },
-            {
-                title: 'Charts',
-                id: 'chartsStack'
-            }
-        ]
+        const categories = getCategories();
         this.pnlMainSidebar.clearInnerHTML();
         this.pnlMainSidebar.appendChild(
             <i-vstack padding={{top: '1rem', bottom: '0.5rem', left: '1rem', right: '1rem'}} border={{ bottom: { width: 1, style: 'solid', color: Theme.divider } }}>
@@ -83,11 +71,11 @@ export class PageSidebar extends Module {
                 </i-vstack>
             </i-vstack>
         )
-        for (const stack of stacks) {
+        for (const stack of categories) {
             this.pnlMainSidebar.appendChild(
                 <i-scom-page-builder-collapse title={stack.title} border={{ bottom: { width: 1, style: 'solid', color: Theme.divider } }} expanded={true}>
                     <i-grid-layout
-                        id={stack.id}
+                        id={`${stack.id.replace('-', '')}Stack`}
                         templateColumns={['repeat(2, 1fr)']}
                         gap={{column: '0.5rem', row: '0.75rem'}}
                         padding={{ top: '0.5rem', bottom: '0.5rem', left: '1rem', right: '1rem' }}
@@ -96,7 +84,7 @@ export class PageSidebar extends Module {
             )
         }
         this.renderList(this.componentsStack, 'components');
-        this.renderList(this.microDAppsStack, 'micro-dapps');
+        this.renderList(this.microdappsStack, 'micro-dapps');
         this.renderList(this.chartsStack, 'charts');
         this.sectionStack.setAttribute('draggable', 'true');
     }
@@ -164,6 +152,10 @@ export class PageSidebar extends Module {
                 event.preventDefault();
             }
         })
+    }
+
+    private initEventBus() {
+        application.EventBus.register(this, EVENT.ON_UPDATE_SIDEBAR, this.renderUI)
     }
 
     render() {

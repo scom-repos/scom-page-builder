@@ -76,3 +76,13 @@ export interface IRowSettings {
     backgroundColor?: string;
     config?: IConfigData;
 }
+
+export interface IOnFetchComponentsOptions {
+    category?: string;
+    pageNumber?: number;
+    pageSize?: number;
+}
+export interface IOnFetchComponentsResult {
+    items?: IPageBlockData[];
+    total?: number
+}
