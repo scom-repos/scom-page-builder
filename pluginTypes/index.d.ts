@@ -54,6 +54,9 @@ declare module "@scom/scom-page-builder/const/index.ts" {
         ON_SET_ACTION_BLOCK: string;
         ON_SET_DRAG_ELEMENT: string;
         ON_ADD_SECTION: string;
+        ON_TOGGLE_SEARCH_MODAL: string;
+        ON_FETCH_COMPONENTS: string;
+        ON_UPDATE_SIDEBAR: string;
     };
     export const DEFAULT_BOXED_LAYOUT_WIDTH = "1200px";
     export const DEFAULT_SCROLLBAR_WIDTH = 17;
@@ -66,7 +69,7 @@ declare module "@scom/scom-page-builder/const/index.ts" {
 }
 /// <amd-module name="@scom/scom-page-builder/store/index.ts" />
 declare module "@scom/scom-page-builder/store/index.ts" {
-    import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig } from "@scom/scom-page-builder/interface/index.ts";
+    import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig, IOnFetchComponentsResult, IOnFetchComponentsOptions } from "@scom/scom-page-builder/interface/index.ts";
     export class PageObject {
         private _header;
         private _sections;
@@ -100,14 +103,32 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         pageBlocks: any[];
         rootDir: string;
         dragData: any;
+        searchData: IOnFetchComponentsResult;
+        searchOptions: IOnFetchComponentsOptions;
+        categories: {
+            id: string;
+            title: string;
+        }[];
     };
     export const setPageBlocks: (value: IPageBlockData[]) => void;
     export const getPageBlocks: () => any[];
-    export const getDappContainer: () => any;
+    export const addPageBlock: (value: IPageBlockData) => void;
     export const setRootDir: (value: string) => void;
     export const getRootDir: () => string;
     export const setDragData: (value: IElementConfig | null) => void;
     export const getDragData: () => any;
+    export const setSearchData: (value: IOnFetchComponentsResult) => void;
+    export const getSearchData: () => IOnFetchComponentsResult;
+    export const setSearchOptions: (value: IOnFetchComponentsOptions) => void;
+    export const getSearchOptions: () => {
+        category: any;
+        pageNumber: any;
+        pageSize: any;
+    } | IOnFetchComponentsOptions;
+    export const getCategories: () => {
+        id: string;
+        title: string;
+    }[];
 }
 /// <amd-module name="@scom/scom-page-builder/utility/pathToRegexp.ts" />
 declare module "@scom/scom-page-builder/utility/pathToRegexp.ts" {
@@ -425,6 +446,16 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         backgroundColor?: string;
         config?: IConfigData;
     }
+    export interface IOnFetchComponentsOptions {
+        category?: string;
+        pageNumber?: number;
+        pageSize?: number;
+        keyword?: string;
+    }
+    export interface IOnFetchComponentsResult {
+        items?: IPageBlockData[];
+        total?: number;
+    }
 }
 /// <amd-module name="@scom/scom-page-builder/interface/jsonSchema.ts" />
 declare module "@scom/scom-page-builder/interface/jsonSchema.ts" {
@@ -469,6 +500,7 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
     export const GAP_WIDTH = 15;
     export const MAX_COLUMN = 12;
     export const MIN_COLUMN = 2;
+    export const PAGE_SIZE = 6;
 }
 /// <amd-module name="@scom/scom-page-builder/command/interface.ts" />
 declare module "@scom/scom-page-builder/command/interface.ts" {
@@ -840,6 +872,7 @@ declare module "@scom/scom-page-builder/common/collapse.tsx" {
         set expanded(value: boolean);
         init(): void;
         onCollapse(): void;
+        onShowSearch(): void;
         render(): any;
     }
 }
@@ -978,6 +1011,42 @@ declare module "@scom/scom-page-builder/dialogs/loadingDialog.tsx" {
         render(): any;
     }
 }
+/// <amd-module name="@scom/scom-page-builder/dialogs/searchComponentsDialog.css.ts" />
+declare module "@scom/scom-page-builder/dialogs/searchComponentsDialog.css.ts" { }
+/// <amd-module name="@scom/scom-page-builder/dialogs/searchComponentsDialog.tsx" />
+declare module "@scom/scom-page-builder/dialogs/searchComponentsDialog.tsx" {
+    import { Module, ControlElement } from '@ijstech/components';
+    import "@scom/scom-page-builder/dialogs/searchComponentsDialog.css.ts";
+    export interface SearchComponentsDialogElement extends ControlElement {
+    }
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ['ide-search-components-dialog']: SearchComponentsDialogElement;
+            }
+        }
+    }
+    export class SearchComponentsDialog extends Module {
+        private mdSearch;
+        private paginationElm;
+        private pnlComponents;
+        private inputSearch;
+        private totalPage;
+        private pageNumber;
+        init(): void;
+        private get components();
+        private get total();
+        hide(): void;
+        show(): void;
+        private onSelectIndex;
+        private resetPaging;
+        renderUI: () => void;
+        private onSearch;
+        private onFetchData;
+        private onSelected;
+        render(): any;
+    }
+}
 /// <amd-module name="@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts" />
 declare module "@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx" />
@@ -1019,8 +1088,9 @@ declare module "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx" {
 declare module "@scom/scom-page-builder/dialogs/index.ts" {
     import { ConfirmDialog } from "@scom/scom-page-builder/dialogs/confirmDialog.tsx";
     import { LoadingDialog } from "@scom/scom-page-builder/dialogs/loadingDialog.tsx";
+    import { SearchComponentsDialog } from "@scom/scom-page-builder/dialogs/searchComponentsDialog.tsx";
     import { RowSettingsDialog, ISettingType } from "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx";
-    export { ConfirmDialog, LoadingDialog, RowSettingsDialog, ISettingType };
+    export { ConfirmDialog, LoadingDialog, RowSettingsDialog, SearchComponentsDialog, ISettingType };
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageRow.css.ts" />
 declare module "@scom/scom-page-builder/page/pageRow.css.ts" { }
@@ -1167,7 +1237,7 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
     export interface PageSidebarElement extends ControlElement {
     }
     export class PageSidebar extends Module {
-        private microDAppsStack;
+        private microdappsStack;
         private chartsStack;
         private componentsStack;
         private sectionStack;
@@ -1179,6 +1249,7 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
         private renderList;
         private initDrag;
         private initEventListeners;
+        private initEventBus;
         render(): any;
     }
 }
@@ -1294,12 +1365,15 @@ declare module "@scom/scom-page-builder/builder/index.ts" {
 declare module "@scom/scom-page-builder/index.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder" />
 declare module "@scom/scom-page-builder" {
-    import { Container, Control, ControlElement, Module } from '@ijstech/components';
-    import { IPageData, IPageBlockData } from "@scom/scom-page-builder/interface/index.ts";
+    import { Container, ControlElement, Module } from '@ijstech/components';
+    import { IPageData, IPageBlockData, IOnFetchComponentsOptions, IOnFetchComponentsResult } from "@scom/scom-page-builder/interface/index.ts";
     import "@scom/scom-page-builder/index.css.ts";
+    export { IOnFetchComponentsOptions, IOnFetchComponentsResult };
+    type onFetchComponentsCallback = (options: IOnFetchComponentsOptions) => Promise<IOnFetchComponentsResult>;
     interface PageBuilderElement extends ControlElement {
         rootDir?: string;
         components?: IPageBlockData[];
+        onFetchComponents?: onFetchComponentsCallback;
     }
     global {
         namespace JSX {
@@ -1313,14 +1387,17 @@ declare module "@scom/scom-page-builder" {
         private builderFooter;
         private pnlWrap;
         private pageSidebar;
+        private mdComponentsSearch;
         private events;
         private currentElement;
+        private isFirstLoad;
         constructor(parent?: Container, options?: any);
         get rootDir(): string;
         set rootDir(value: string);
         get components(): IPageBlockData[];
         set components(value: IPageBlockData[]);
-        initScrollEvent(containerElement: Control): void;
+        onFetchComponents(options: IOnFetchComponentsOptions): Promise<IOnFetchComponentsResult>;
+        private initScrollEvent;
         private initEventListeners;
         init(): void;
         setRootDir(value: string): void;
@@ -1330,9 +1407,11 @@ declare module "@scom/scom-page-builder" {
         };
         setData(value: IPageData): Promise<void>;
         onHide(): void;
-        initEventBus(): void;
-        private onAddRow;
+        private initEventBus;
         private onUpdateWrapper;
+        private onToggleSearch;
+        private onSearch;
+        private initData;
         render(): any;
     }
 }

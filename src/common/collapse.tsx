@@ -1,5 +1,9 @@
-import { Container, ControlElement, customElements, Icon, Label, Module, Panel } from "@ijstech/components";
+import { application, Container, ControlElement, customElements, Icon, Label, Module, Panel, Styles } from "@ijstech/components";
 import { collapseStyle } from "./collapse.css";
+import { EVENT } from "../const/index";
+import { getCategories } from "../store/index";
+import { PAGE_SIZE } from "../interface/index";
+const Theme = Styles.Theme.ThemeVars;
 
 export interface CollapseElement extends ControlElement {
   title?: string;
@@ -20,6 +24,7 @@ export class Collapse extends Module {
   private lblTitle: Label;
   private iconCollapse: Icon;
   private pnlContent: Panel;
+
   private _expanded: boolean;
   
   constructor(parent?: Container, options?: any) {
@@ -76,6 +81,12 @@ export class Collapse extends Module {
     this.expanded = !this.expanded;
   }
 
+  onShowSearch() {
+    const category = getCategories().find(item => item.title === this.title)?.id || '';
+    application.EventBus.dispatch(EVENT.ON_FETCH_COMPONENTS, { category, pageNumber: 1, pageSize: PAGE_SIZE });
+    application.EventBus.dispatch(EVENT.ON_TOGGLE_SEARCH_MODAL, true);
+  }
+
   render() {
     return (
       <i-vstack gap="1rem">
@@ -88,9 +99,15 @@ export class Collapse extends Module {
             gap="0.5rem"
             onClick={this.onCollapse}
           >
-            <i-panel>
+            <i-hstack gap={5} verticalAlignment="center">
               <i-label id="lblTitle" font={{ bold: true }}></i-label>
-            </i-panel>
+              <i-icon
+                name="search" fill={Theme.text.primary}
+                width={16} height={16}
+                class="pointer"
+                onClick={() => this.onShowSearch()}
+              ></i-icon>
+            </i-hstack>
             <i-icon id="iconCollapse" class="collapsible-icon" width={16} height={16} name="angle-down"></i-icon>
           </i-hstack>
           <i-panel id="pnlContent" class="collapsible-content"></i-panel>

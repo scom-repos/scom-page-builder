@@ -1,4 +1,4 @@
-import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig } from "../interface/index";
+import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig, IOnFetchComponentsResult, IOnFetchComponentsOptions } from "../interface/index";
 
 const MAX_COLUMN = 12;
 export class PageObject {
@@ -235,10 +235,35 @@ export class PageObject {
 
 export const pageObject = new PageObject();
 
+const defaultSearchOptions = {
+  category: undefined,
+  pageNumber: undefined,
+  pageSize: undefined
+}
+
 export const state = {
   pageBlocks: [],
   rootDir: '',
-  dragData: null
+  dragData: null,
+  searchData: {
+    items: [],
+    total: 0
+  } as IOnFetchComponentsResult,
+  searchOptions: defaultSearchOptions as IOnFetchComponentsOptions,
+  categories: [
+    {
+      id: 'components',
+      title: 'Components',
+    },
+    {
+      id: 'micro-dapps',
+      title: 'Micro DApps'
+    },
+    {
+      id: 'charts',
+      title: 'Charts'
+    }
+  ]
 }
 
 export const setPageBlocks = (value: IPageBlockData[]) => {
@@ -249,8 +274,9 @@ export const getPageBlocks = () => {
   return state.pageBlocks || [];
 }
 
-export const getDappContainer = () => {
-  return (state.pageBlocks || []).find(pageblock => pageblock.path === 'scom-dapp-container');
+export const addPageBlock = (value: IPageBlockData) => {
+  const hasPageblock = state.pageBlocks.find(item => item.path === value.path);
+  if (!hasPageblock) state.pageBlocks.push(value);
 }
 
 export const setRootDir = (value: string) => {
@@ -267,6 +293,26 @@ export const setDragData = (value: IElementConfig | null) => {
 
 export const getDragData = () => {
   return state.dragData || null;
+}
+
+export const setSearchData = (value: IOnFetchComponentsResult) => {
+  state.searchData = value;
+}
+
+export const getSearchData = () => {
+  return state.searchData || {};
+}
+
+export const setSearchOptions = (value: IOnFetchComponentsOptions) => {
+  state.searchOptions = value || defaultSearchOptions;
+}
+
+export const getSearchOptions = () => {
+  return state.searchOptions || defaultSearchOptions;
+}
+
+export const getCategories = () => {
+  return state.categories || [];
 }
 
 const generateUUID = () => {

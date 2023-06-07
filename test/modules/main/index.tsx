@@ -1,5 +1,5 @@
 import { Container, customModule, Module } from "@ijstech/components";
-import Editor from '@scom/scom-page-builder';
+import Editor, { IOnFetchComponentsOptions } from '@scom/scom-page-builder';
 
 @customModule
 export class MainModule extends Module {
@@ -8,82 +8,97 @@ export class MainModule extends Module {
 
   constructor(parent?: Container, options?: any) {
     super(parent, options);
-    this._components = {
-      "@scom/scom-markdown-editor": {
+    this._components = [
+      {
         "name": "Text box",
         "path": "scom-markdown-editor",
         "category": "components"
       },
-      "@scom/scom-image": {
+      {
         "name": "Image",
         "path": "scom-image",
         "category": "components",
         "disableClicked": true
       },
-      "@scom/scom-carousel": {
+      {
         "name": "Carousel",
         "path": "scom-carousel",
         "category": "components"
       },
-      "@scom/scom-banner": {
+      {
         "name": "Banner",
         "path": "scom-banner",
         "category": "components"
       },
-      "@scom/scom-blog": {
+      {
         "name": "Blog",
         "path": "scom-blog",
         "category": "components",
         "disableClicked": true
       },
-      "@scom/scom-nft-minter": {
+      {
         "name": "NFT Minter DApp",
         "path": "scom-nft-minter",
         "category": "micro-dapps"
       },
-      "@scom/scom-gem-token": {
+      {
         "name": "Gem Token DApp",
         "path": "scom-gem-token",
         "category": "micro-dapps"
       },
-      "@scom/scom-randomizer": {
+      {
         "name": "Randomizer",
         "path": "scom-randomizer",
         "category": "micro-dapps"
       },
-      "@scom/scom-video": {
+      {
         "name": "Video",
         "path": "scom-video",
         "category": "micro-dapps",
         "disableClicked": true,
         "shownBackdrop": true
       },
-      "@scom/scom-map": {
+      {
         "name": "Map",
         "path": "scom-map",
         "category": "micro-dapps",
         "disableClicked": true,
         "shownBackdrop": true
       },
-      "@scom/scom-dapp-container": {
-        "name": "DApp Container",
-        "path": "scom-dapp-container"
-      },
-      "@scom/scom-dune": {
+      {
         "name": "Dune Blocks",
         "path": "scom-dune",
         "category": "charts"
       }
-    }
+    ]
   }
 
   onGetData() {
     console.log(this.pageBuilder.getData()?.sections)
   }
 
+  private async onFetchComponentsFn(options: IOnFetchComponentsOptions) {
+    const { category, pageNumber, pageSize, keyword = '' } = options;
+    let filteredComponents = [...this._components];
+    let total  = 0;
+    if (category) {
+      filteredComponents = filteredComponents.filter(cp => cp.category === category);
+    }
+    if (keyword) {
+      filteredComponents = filteredComponents.filter(cp => cp.name.toLowerCase().includes(keyword.toLowerCase()));
+    }
+    total = filteredComponents.length;
+    if (pageSize && pageNumber) {
+      const itemStart = (pageNumber - 1) * pageSize;
+      const itemEnd = itemStart + pageSize;
+      filteredComponents = filteredComponents.slice(itemStart, itemEnd);
+    }
+    return { items: filteredComponents, total };
+  }
+
   init() {
     super.init();
-    this.pageBuilder.components = Object.values(this._components);
+    // this.pageBuilder.components = Object.values(this._components);
     // const data: any = {
     //   "header": {
     //     "image": "",
@@ -139,6 +154,7 @@ export class MainModule extends Module {
     //     "elements": []
     //   }
     // }
+
     const data: any = {
       "sections": [
         {
@@ -216,8 +232,17 @@ export class MainModule extends Module {
   render() {
     return (
       <i-panel width="100%" height="100%">
-        <i-button caption="Get data" margin={{top: '1rem', left: '1rem', bottom: '1rem'}} onClick={() => this.onGetData()}></i-button>
-        <i-scom-page-builder id="pageBuilder"></i-scom-page-builder>
+        <i-button
+          caption="Get data"
+          margin={{top: '1rem', left: '1rem', bottom: '1rem'}}
+          padding={{top: '0.5rem', left: '1rem', bottom: '0.5rem', right: '1rem'}}
+          font={{color: '#fff'}}
+          onClick={() => this.onGetData()}
+        ></i-button>
+        <i-scom-page-builder
+          id="pageBuilder"
+          onFetchComponents={this.onFetchComponentsFn.bind(this)}
+        ></i-scom-page-builder>
       </i-panel>
     )
   }
