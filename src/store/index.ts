@@ -53,17 +53,22 @@ export class PageObject {
   updateSection(id: string, data: any) {
     const section = this.getRow(id);
     if (section) {
-      if (data.backgroundColor !== undefined)
-        (section as any).backgroundColor = data.backgroundColor;
-      const oldColumnsNumber = this.getColumnsNumber(id);
-      const elements = this.getRow(id)?.elements || [];
-      section.config = data.config || {};
-      const newColumnsNumber = this.getColumnsNumberFn(section);
-      if (oldColumnsNumber !== newColumnsNumber) {
-        for (let element of elements) {
-          const oldColumnSpan = element.columnSpan;
-          const newColumnSpan = Math.floor(newColumnsNumber / oldColumnsNumber * oldColumnSpan);
-          this.setElement(id, element.id, { columnSpan: newColumnSpan });
+      const { backgroundColor, config } = data;
+      if (backgroundColor !== undefined)
+        (section as any).backgroundColor = backgroundColor;
+      if (config !== undefined) {
+        const oldColumnsNumber = this.getColumnsNumber(id);
+        const elements = this.getRow(id)?.elements || [];
+        section.config = data.config;
+        const newColumnsNumber = this.getColumnsNumberFn(section);
+        if (oldColumnsNumber !== newColumnsNumber) {
+          for (let element of elements) {
+            const oldColumnSpan = element.columnSpan;
+            const oldColumn = element.column;
+            const newColumnSpan = Math.floor(newColumnsNumber / oldColumnsNumber * oldColumnSpan);
+            const newColumn = Math.ceil(newColumnsNumber / oldColumnsNumber * oldColumn);
+            this.setElement(id, element.id, { column: newColumn, columnSpan: newColumnSpan });
+          }
         }
       }
     }
