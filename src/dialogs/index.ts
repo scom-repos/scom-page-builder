@@ -1,7 +1,6 @@
 import {ConfirmDialog} from "./confirmDialog";
 import {LoadingDialog} from "./loadingDialog";
-import {RowSettingsDialog} from "./rowSettingsDialog";
-import {SectionSettingsDialog} from './sectionSettingsDialog';
 import {SearchComponentsDialog} from './searchComponentsDialog';
+import {RowSettingsDialog, ISettingType} from './rowSettingsDialog';
 
-export { ConfirmDialog, LoadingDialog, RowSettingsDialog, SectionSettingsDialog, SearchComponentsDialog }
+export { ConfirmDialog, LoadingDialog, RowSettingsDialog, SearchComponentsDialog, ISettingType }
