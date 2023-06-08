@@ -99,6 +99,14 @@ export class RowSettingsDialog extends Module {
                   },
                   "columnMinWidth": {
                     type: 'number'
+                  },
+                  align: {
+                    type: 'string',
+                    enum: [
+                      'left',
+                      'center',
+                      'right'
+                    ]
                   }
                 }
             };
@@ -128,8 +136,11 @@ export class RowSettingsDialog extends Module {
         this.formElm.formOptions = formOptions;
         this.formElm.renderForm();
         const config = this.type === 'column' ?
-            this.data?.config || {columnLayout: IColumnLayoutType.FIXED} :
-            {backgroundColor: this.data?.backgroundColor || ''}
+            this.data?.config || {
+                columnLayout: IColumnLayoutType.FIXED,
+                columnsNumber: 12,
+                align: 'left'
+            } : {backgroundColor: this.data?.backgroundColor || ''}
         this.formElm.setFormData({...config});
     }
 

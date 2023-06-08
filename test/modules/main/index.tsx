@@ -12,28 +12,28 @@ export class MainModule extends Module {
       {
         "name": "Text box",
         "path": "scom-markdown-editor",
-        "category": "components"
+        "category": "composables"
       },
       {
         "name": "Image",
         "path": "scom-image",
-        "category": "components",
+        "category": "composables",
         "disableClicked": true
       },
       {
         "name": "Carousel",
         "path": "scom-carousel",
-        "category": "components"
+        "category": "composables"
       },
       {
         "name": "Banner",
         "path": "scom-banner",
-        "category": "components"
+        "category": "composables"
       },
       {
         "name": "Blog",
         "path": "scom-blog",
-        "category": "components",
+        "category": "composables",
         "disableClicked": true
       },
       {
@@ -118,7 +118,7 @@ export class MainModule extends Module {
     //           "module": {
     //             "name": "Image",
     //             "path": "scom-image",
-    //             "category": "components",
+    //             "category": "composables",
     //             "disableClicked": true
     //           },
     //           "properties": {
@@ -141,7 +141,7 @@ export class MainModule extends Module {
     //           "module": {
     //             "name": "Text box",
     //             "path": "scom-markdown-editor",
-    //             "category": "components"
+    //             "category": "composables"
     //           },
     //           "properties": {
     //             "content": "<span class='frame' style='box-sizing: border-box; margin: 0px; padding: 0px; border: 0px; font: inherit; vertical-align: top; backface-visibility: hidden; transform: translate3d(0px, 0px, 0px); display: inline-block; max-width: 100%; overflow: hidden; width: 7rem; border-radius: 100%; transition: none 0s ease 0s;'>![](https://8614b9d4b51242cf.demo.carrd.co/assets/images/image01.jpg?v=40c6bc31)</span>\n\n# Cayce Pollard\n\nHi there, my name is Cayce Pollard and I'm a full-time video creator. My focus is on creating educational content about science and technology with the goal of making complex topics accessible and interesting to everyone. I've been creating videos for over five years now, and it's been an incredible journey so far. I'm deeply passionate about all things science and technology, and I take great joy in sharing my knowledge and experiences with others.</span>"
@@ -190,7 +190,7 @@ export class MainModule extends Module {
                   "module": {
                     "name": "Image",
                     "path": "scom-image",
-                    "category": "components",
+                    "category": "composables",
                     "disableClicked": true
                   },
                   "tag": {
@@ -209,7 +209,7 @@ export class MainModule extends Module {
                   "module": {
                     "name": "Text box",
                     "path": "scom-markdown-editor",
-                    "category": "components"
+                    "category": "composables"
                   },
                   "tag": {
                     "width": 803,

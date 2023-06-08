@@ -32,10 +32,12 @@ export interface PageSidebarElement extends ControlElement {
 @customElements('ide-sidebar')
 export class PageSidebar extends Module {
     private microdappsStack: GridLayout;
+    private projectmicrodappsStack: GridLayout;
     private chartsStack: GridLayout;
     private componentsStack: GridLayout;
     private sectionStack: VStack;
-    private pnlMainSidebar: Panel;
+    private pnlLayouts: Panel;
+    private pnlEmbeddables: Panel;
 
     private get pageBlocks(): IPageBlockData[] {
         return getPageBlocks();
@@ -54,8 +56,8 @@ export class PageSidebar extends Module {
 
     async renderUI() {
         const categories = getCategories();
-        this.pnlMainSidebar.clearInnerHTML();
-        this.pnlMainSidebar.appendChild(
+        this.pnlLayouts.clearInnerHTML();
+        this.pnlLayouts.appendChild(
             <i-vstack padding={{top: '1rem', bottom: '0.5rem', left: '1rem', right: '1rem'}} border={{ bottom: { width: 1, style: 'solid', color: Theme.divider } }}>
                 <i-vstack
                     id="sectionStack"
@@ -71,8 +73,9 @@ export class PageSidebar extends Module {
                 </i-vstack>
             </i-vstack>
         )
+        this.pnlEmbeddables.clearInnerHTML();
         for (const stack of categories) {
-            this.pnlMainSidebar.appendChild(
+            this.pnlEmbeddables.appendChild(
                 <i-scom-page-builder-collapse title={stack.title} border={{ bottom: { width: 1, style: 'solid', color: Theme.divider } }} expanded={true}>
                     <i-grid-layout
                         id={`${stack.id.replace('-', '')}Stack`}
@@ -82,10 +85,8 @@ export class PageSidebar extends Module {
                     ></i-grid-layout>
                 </i-scom-page-builder-collapse>
             )
+            this.renderList(this[`${stack.id.replace('-', '')}Stack`], stack.id);
         }
-        this.renderList(this.componentsStack, 'components');
-        this.renderList(this.microdappsStack, 'micro-dapps');
-        this.renderList(this.chartsStack, 'charts');
         this.sectionStack.setAttribute('draggable', 'true');
     }
 
@@ -156,23 +157,34 @@ export class PageSidebar extends Module {
 
     private initEventBus() {
         application.EventBus.register(this, EVENT.ON_UPDATE_SIDEBAR, (category: string) => {
-            switch (category) {
-                case 'micro-dapps':
-                    this.renderList(this.microdappsStack, category);
-                    break;
-                case 'charts':
-                    this.renderList(this.chartsStack, category);
-                    break;
-                case 'components':
-                    this.renderList(this.componentsStack, category);
-                    break;
-            }
+            const categoryStack = category && this[`${category.replace('-', '')}Stack`];
+            if (categoryStack)
+                this.renderList(this[`${category.replace('-', '')}Stack`], category);
         })
     }
 
     render() {
         return (
-            <i-panel id="pnlMainSidebar" class="navigator" height={'100%'} maxWidth="100%"></i-panel>
+            <i-panel class="navigator" height={'100%'} maxWidth="100%">
+                <i-vstack padding={{top: '1rem', bottom: '0.5rem'}}>
+                    <i-label
+                        caption="Layouts"
+                        font={{size: '1rem', weight: 600}}
+                        maxHeight={34} overflow={"hidden"}
+                        margin={{left: '0.5rem', bottom: '0.5rem'}}
+                    ></i-label>
+                    <i-panel id="pnlLayouts"></i-panel>
+                </i-vstack>
+                <i-vstack padding={{top: '1rem', bottom: '0.5rem'}}>
+                    <i-label
+                        caption="Embeddables"
+                        font={{size: '1rem', weight: 600}}
+                        maxHeight={34} overflow={"hidden"}
+                        margin={{left: '0.5rem', bottom: '0.5rem'}}
+                    ></i-label>
+                    <i-panel id="pnlEmbeddables"></i-panel>
+                </i-vstack>
+            </i-panel>
         );
     }
 }

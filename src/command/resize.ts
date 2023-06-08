@@ -4,7 +4,7 @@ import { ICommand, IDataColumn } from "./interface";
 import { GAP_WIDTH } from "../interface/index";
 
 export class ResizeElementCommand implements ICommand {
-  private parent: Control;
+  private parent: any;
   private element: any;
   private toolbar: any;
   // private initialWidth: number;
@@ -34,9 +34,11 @@ export class ResizeElementCommand implements ICommand {
       column: Number(this.element.dataset.column),
       columnSpan: Number(this.element.dataset.columnSpan)
     }
-    const grid = this.element.parentElement.closest('.grid') as HTMLElement;
-    if (grid)
+    const grid = this.element?.parentElement?.closest('.grid') as HTMLElement;
+    if (grid) {
       this.gridColumnWidth = (grid.offsetWidth - this.gapWidth * (this.maxColumn - 1)) / this.maxColumn;
+      (grid as any).templateColumns = [`repeat(${this.maxColumn}, ${this.gridColumnWidth}px)`];
+    }
   }
 
   private getColumnData() {
@@ -110,6 +112,7 @@ export class ResizeElementCommand implements ICommand {
     const isChangedColumn = columnData.column !== this.oldDataColumn.column || columnData.columnSpan !== this.oldDataColumn.columnSpan;
     if (isChangedColumn) pageObject.setElement(rowId, elementId, {...columnData});
     this.updateToolbars(isChangedColumn, rowId, columnData, this.finalHeight);
+    if (this.parent?.toggleUI) this.parent.toggleUI(true);
   }
 
   undo(): void {
@@ -119,6 +122,7 @@ export class ResizeElementCommand implements ICommand {
     const elementId = this.element.id;
     pageObject.setElement(rowId, elementId, {column, columnSpan});
     this.updateToolbars(true, rowId, {column, columnSpan}, this.initialHeight);
+    if (this.parent?.toggleUI) this.parent.toggleUI(true);
   }
 
   redo(): void {}
