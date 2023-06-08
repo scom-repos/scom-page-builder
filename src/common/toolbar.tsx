@@ -168,13 +168,11 @@ export class IDEToolbar extends Module {
         const data = builderTarget?.getData ? await builderTarget.getData() : this.data.properties;
         if (data.height === 'auto') data.height = this.offsetHeight;
         if (data.width === 'auto') data.width = this.offsetWidth;
-        let properties;
+        let properties = data;
         if (this.isContentBlock()) {
             properties = this._currentSingleContentBlockId ? data[this._currentSingleContentBlockId].properties : data
-        } else {
-            properties = data;
         }
-        let tag = this.data.tag || {};
+        const tag = builderTarget?.getTag ? builderTarget.getTag() : (this.data.tag || {});
         this.mdActions.title = action.name || 'Update Settings';
         if (action.customUI) {
             const customUI = action.customUI;
@@ -289,7 +287,7 @@ export class IDEToolbar extends Module {
         this._nResizer = this.renderResizer('bottom');
         this._neResizer = this.renderResizer('bottomLeft');
         this._nwResizer = this.renderResizer('bottomRight');
-        const showFull = data?.module?.disableClicked;
+        const showFull = true; // data?.module?.disableClicked;
         if (this._nResizer) this._nResizer.visible = showFull;
         if (this._neResizer) this._neResizer.visible = showFull;
         if (this._nwResizer) this._nwResizer.visible = showFull;
@@ -441,7 +439,7 @@ export class IDEToolbar extends Module {
             const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
             if (builderTarget?.setTag) await builderTarget.setTag(tag);
         }
-        pageObject.setElement(this.rowId, this.data.id, { tag });
+        this.data && pageObject.setElement(this.rowId, this.data.id, { tag });
     }
 
     async setProperties(data: any) {

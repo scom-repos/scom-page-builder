@@ -34,7 +34,7 @@ export class ResizeElementCommand implements ICommand {
       column: Number(this.element.dataset.column),
       columnSpan: Number(this.element.dataset.columnSpan)
     }
-    const grid = this.element.parent.closest('.grid') as HTMLElement;
+    const grid = this.element.parentElement.closest('.grid') as HTMLElement;
     if (grid)
       this.gridColumnWidth = (grid.offsetWidth - this.gapWidth * (this.maxColumn - 1)) / this.maxColumn;
   }

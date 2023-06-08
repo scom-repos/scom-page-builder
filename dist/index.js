@@ -1346,7 +1346,7 @@ define("@scom/scom-page-builder/command/resize.ts", ["require", "exports", "@sco
                 column: Number(this.element.dataset.column),
                 columnSpan: Number(this.element.dataset.columnSpan)
             };
-            const grid = this.element.parent.closest('.grid');
+            const grid = this.element.parentElement.closest('.grid');
             if (grid)
                 this.gridColumnWidth = (grid.offsetWidth - this.gapWidth * (this.maxColumn - 1)) / this.maxColumn;
         }
@@ -2581,14 +2581,11 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 data.height = this.offsetHeight;
             if (data.width === 'auto')
                 data.width = this.offsetWidth;
-            let properties;
+            let properties = data;
             if (this.isContentBlock()) {
                 properties = this._currentSingleContentBlockId ? data[this._currentSingleContentBlockId].properties : data;
             }
-            else {
-                properties = data;
-            }
-            let tag = this.data.tag || {};
+            const tag = (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getTag) ? builderTarget.getTag() : (this.data.tag || {});
             this.mdActions.title = action.name || 'Update Settings';
             if (action.customUI) {
                 const customUI = action.customUI;
@@ -2696,13 +2693,12 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this.toolList = this.getActions() || [];
         }
         renderResizeStack(data) {
-            var _a;
             this._eResizer = this.renderResizer('left');
             this._wResizer = this.renderResizer('right');
             this._nResizer = this.renderResizer('bottom');
             this._neResizer = this.renderResizer('bottomLeft');
             this._nwResizer = this.renderResizer('bottomRight');
-            const showFull = (_a = data === null || data === void 0 ? void 0 : data.module) === null || _a === void 0 ? void 0 : _a.disableClicked;
+            const showFull = true; // data?.module?.disableClicked;
             if (this._nResizer)
                 this._nResizer.visible = showFull;
             if (this._neResizer)
@@ -2858,7 +2854,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setTag)
                     await builderTarget.setTag(tag);
             }
-            index_24.pageObject.setElement(this.rowId, this.data.id, { tag });
+            this.data && index_24.pageObject.setElement(this.rowId, this.data.id, { tag });
         }
         async setProperties(data) {
             var _a;
