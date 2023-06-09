@@ -39,7 +39,7 @@ export default class Editor extends Module {
 
     private events: any[] = [];
     private currentElement: any;
-    private isFirstLoad: boolean = false;
+    private isFirstLoad: boolean = true;
 
     constructor(parent?: Container, options?: any) {
         super(parent, options);
@@ -212,10 +212,11 @@ export default class Editor extends Module {
     }
 
     private async initData() {
-        if (this.isFirstLoad) return;
+        if (!this.isFirstLoad) return
+        application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
         await this.onSearch();
         this.components = getSearchData()?.items || [];
-        this.isFirstLoad = true;
+        this.isFirstLoad = false;
     }
 
     render() {
