@@ -226,7 +226,7 @@ export class MainModule extends Module {
         "elements": []
       }
     }
-    this.pageBuilder.setData(data);
+    // this.pageBuilder.setData(data);
   }
 
   render() {

@@ -179,7 +179,7 @@ export class PageRow extends Module {
     }
 
     private updateGrid() {
-        this.gridColumnWidth = (this.pnlRow.offsetWidth - GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
+        // this.gridColumnWidth = (this.pnlRow.offsetWidth - GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
         const fixedGrid = this.pnlRow.querySelector('.fixed-grid');
         fixedGrid && this.updateGridColumn(fixedGrid as GridLayout);
         this.updateGridColumn(this.pnlRow);
@@ -245,7 +245,7 @@ export class PageRow extends Module {
     }
 
     private updateGridColumn(grid: GridLayout) {
-        grid.templateColumns = [`repeat(${this.maxColumn}, ${this.gridColumnWidth}px)`];
+        grid.templateColumns = [`repeat(${this.maxColumn}, 1fr)`];
         grid.gap = { column: `${GAP_WIDTH}px` };
     }
 
