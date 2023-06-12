@@ -41,7 +41,7 @@ Styles.cssRule('ide-toolbar', {
         },
         'i-input': {
           border: `1px solid ${Theme.divider}`,
-          marginBottom: '1rem'
+          // marginBottom: '1rem'
         },
         '.modal': {
           padding: 0,
