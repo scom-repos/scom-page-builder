@@ -436,11 +436,13 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         FIXED = "Fixed",
         AUTOMATIC = "Automatic"
     }
+    export type AlignType = 'left' | 'center' | 'right';
     export interface IConfigData {
         columnLayout?: IColumnLayoutType;
         columnsNumber?: number;
         maxColumnsPerRow?: number;
         columnMinWidth?: number | string;
+        align?: AlignType;
     }
     export interface IRowSettings {
         backgroundColor?: string;
@@ -1131,6 +1133,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         constructor(parent?: any);
         get data(): any;
         private get maxColumn();
+        private get align();
         init(): void;
         toggleUI(value: boolean): void;
         private createNewElement;
@@ -1142,6 +1145,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private onSaveRowSettings;
         updateColumn(): void;
         private updateGrid;
+        private updateAlign;
         private onClone;
         onDeleteRow(): void;
         onMoveUp(): void;
@@ -1238,10 +1242,12 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
     }
     export class PageSidebar extends Module {
         private microdappsStack;
+        private projectmicrodappsStack;
         private chartsStack;
         private componentsStack;
         private sectionStack;
-        private pnlMainSidebar;
+        private pnlLayouts;
+        private pnlEmbeddables;
         private get pageBlocks();
         constructor(parent?: any);
         init(): void;

@@ -25,6 +25,17 @@ export class UpdateRowSettingsCommand implements ICommand {
     pageObject.updateSection(id, { backgroundColor, config });
     if (config) {
       this.element.setData(pageObject.getRow(id));
+      const align = config.align || 'left';
+      let alignValue = 'start';
+      switch(align) {
+        case 'right':
+          alignValue = 'end';
+          break;
+        case 'center':
+          alignValue = 'center';
+          break;
+      }
+      this.element.style.justifyContent = alignValue;
     }
   }
 
@@ -32,7 +43,13 @@ export class UpdateRowSettingsCommand implements ICommand {
     const { backgroundColor = '', config } = this.oldSettings;
     const id = this.element.id.replace('row-', '');
     this.element.style.backgroundColor = backgroundColor;
-    pageObject.updateSection(id, { backgroundColor, config: config || {columnLayout: IColumnLayoutType.FIXED} });
+    pageObject.updateSection(id, {
+      backgroundColor,
+      config: config || {
+        columnLayout: IColumnLayoutType.FIXED,
+        columnsNumber: 12,
+        align: 'left'
+    }});
     this.element.setData(pageObject.getRow(id));
   }
 

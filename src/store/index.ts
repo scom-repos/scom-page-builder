@@ -252,16 +252,20 @@ export const state = {
   searchOptions: defaultSearchOptions as IOnFetchComponentsOptions,
   categories: [
     {
-      id: 'components',
-      title: 'Components',
+      id: 'composables',
+      title: 'Composables',
     },
     {
       id: 'micro-dapps',
-      title: 'Micro DApps'
+      title: 'MicroDApps'
     },
     {
       id: 'charts',
       title: 'Charts'
+    },
+    {
+      id: 'project-micro-dapps',
+      title: 'Project MicroDApps'
     }
   ]
 }

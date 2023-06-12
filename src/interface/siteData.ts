@@ -65,11 +65,14 @@ export enum IColumnLayoutType {
     AUTOMATIC = 'Automatic'
 }
 
+export type AlignType = 'left' | 'center' | 'right';
+
 export interface IConfigData {
     columnLayout?: IColumnLayoutType;
     columnsNumber?: number;
     maxColumnsPerRow?: number;
     columnMinWidth?: number|string;
+    align?: AlignType;
 }
 
 export interface IRowSettings {

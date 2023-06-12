@@ -172,7 +172,7 @@ export class IDEToolbar extends Module {
         if (this.isContentBlock()) {
             properties = this._currentSingleContentBlockId ? data[this._currentSingleContentBlockId].properties : data
         }
-        const tag = builderTarget?.getTag ? builderTarget.getTag() : (this.data.tag || {});
+        const tag = builderTarget?.getTag ? await builderTarget.getTag() : (this.data.tag || {});
         this.mdActions.title = action.name || 'Update Settings';
         if (action.customUI) {
             const customUI = action.customUI;

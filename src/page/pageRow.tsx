@@ -77,6 +77,12 @@ export class PageRow extends Module {
         const rowId = this.id?.replace('row-', '');
         return pageObject.getColumnsNumber(rowId);
     }
+    
+    private get align() {
+        const rowId = this.id?.replace('row-', '');
+        const config = pageObject.getConfig(rowId);
+        return config?.align || 'left';
+    }
 
     init() {
         this._readonly = this.getAttribute('readonly', true, false);
@@ -91,6 +97,7 @@ export class PageRow extends Module {
     toggleUI(value: boolean) {
         if (this.pnlRow) this.pnlRow.opacity = value ? 1 : 0;
         if (this.pnlEmty) this.pnlEmty.visible = !value;
+        this.updateAlign(); // TODO: check
     }
 
     private async createNewElement(i: number) {
@@ -176,6 +183,7 @@ export class PageRow extends Module {
     updateColumn() {
         this.updateGrid();
         this.updateFixedGrid();
+        this.updateAlign();
     }
 
     private updateGrid() {
@@ -183,6 +191,38 @@ export class PageRow extends Module {
         const fixedGrid = this.pnlRow.querySelector('.fixed-grid');
         fixedGrid && this.updateGridColumn(fixedGrid as GridLayout);
         this.updateGridColumn(this.pnlRow);
+    }
+
+    private updateAlign() {
+        let alignValue = 'start';
+         switch(this.align) {
+            case 'right':
+                alignValue = 'end';
+                break;
+            case 'center':
+                alignValue = 'center';
+                break;
+        }
+        this.pnlRow.grid = { horizontalAlignment: alignValue as any };
+        this.pnlRow.style.maxWidth = '100%';
+        if (alignValue === 'start') {
+            this.pnlRow.templateColumns = [`repeat(${this.maxColumn}, 1fr)`];
+        } else {
+            this.pnlRow.templateColumns = ['min-content'];
+            const sections = Array.from(this.pnlRow.querySelectorAll('ide-section'));
+            for (let section of sections) {
+                const sectionId = section.id;
+                const rowId = this.id?.replace('row-', '');
+                const element = pageObject.getElement(rowId, sectionId);
+                let width = element?.tag?.width;
+                if (!width) {
+                    const columnSpan = Number((section as HTMLElement).dataset.columnSpan);
+                    const widthNumber = columnSpan * this.gridColumnWidth - ((columnSpan - 1) * GAP_WIDTH);
+                    width = `${widthNumber}px`;
+                }
+                (section as Control).width = width;
+            }
+        }
     }
 
     private async onClone() {
@@ -259,7 +299,6 @@ export class PageRow extends Module {
         let startY: number = 0;
         let toolbar: Control;
 
-        // this.updateGrid();
         this.addEventListener('mousedown', (e) => {
             const target = e.target as Control;
             const parent = target.closest('.resize-stack') as Control;
@@ -375,6 +414,7 @@ export class PageRow extends Module {
                 (toolbar.classList.contains('is-editing') ||
                     toolbar.classList.contains('is-setting'));
             if (target && !cannotDrag) {
+                self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
                 self.currentElement = target;
                 self.currentElement.opacity = 0;
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, target);
@@ -398,6 +438,7 @@ export class PageRow extends Module {
             removeClass('is-dragenter');
             removeClass('row-entered');
             removeClass('is-dragging');
+            // self.updateAlign();
         });
 
         this.addEventListener('dragenter', function (event) {
