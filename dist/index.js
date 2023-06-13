@@ -3985,6 +3985,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             let startX = 0;
             let startY = 0;
             let toolbar;
+            let dragStartTarget;
+            let dragOverTarget;
             this.addEventListener('mousedown', (e) => {
                 const target = e.target;
                 const parent = target.closest('.resize-stack');
@@ -4112,6 +4114,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 else {
                     event.preventDefault();
                 }
+                dragStartTarget = eventTarget;
             });
             this.addEventListener('drag', function (event) { });
             document.addEventListener('dragend', function (event) {
@@ -4128,17 +4131,20 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 removeClass('is-dragging');
                 // self.updateAlign();
             });
-            this.addEventListener('dragenter', function (event) {
+            function dragEnter(enterTarget, clientX, clientY, isOverlap = false) {
                 var _a, _b, _c, _d;
-                const eventTarget = event.target;
                 const elementConfig = (0, index_52.getDragData)();
-                const pageRow = eventTarget.closest('ide-row');
+                const pageRow = enterTarget.closest('ide-row');
                 if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
                     pageRow.classList.add('row-entered');
                 }
-                if (!eventTarget || !self.currentElement)
+                if (!enterTarget || !self.currentElement)
                     return;
-                const target = eventTarget.closest('.fixed-grid-item');
+                let target;
+                if (isOverlap)
+                    target = findNearestFixedGridInRow(clientX);
+                else
+                    target = enterTarget.closest('.fixed-grid-item');
                 self.addDottedLines();
                 if (target) {
                     const column = Number(target.dataset.column);
@@ -4154,7 +4160,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         const colData = colStart + colSpan;
                         return colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan;
                     });
-                    if (findedSection)
+                    if (findedSection && findedSection != self.currentElement)
                         return;
                     const rectangle = target
                         .closest('.fixed-grid')
@@ -4165,14 +4171,14 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         self.gridColumnWidth * columnSpan + index_51.GAP_WIDTH * (columnSpan - 1) + 'px';
                 }
                 else {
-                    const section = eventTarget.closest('ide-section');
+                    const section = enterTarget.closest('ide-section');
                     if (section && !section.isSameNode(self.currentElement)) {
-                        const toolbar = eventTarget.closest('ide-toolbar');
+                        const toolbar = enterTarget.closest('ide-toolbar');
                         if (toolbar) {
                             const { y, height } = toolbar.getBoundingClientRect();
                             const bottomBlock = toolbar.querySelector('.bottom-block');
                             if (bottomBlock) {
-                                bottomBlock.visible = Math.ceil(event.clientY) >= Math.ceil(y + height) - 2;
+                                bottomBlock.visible = Math.ceil(clientY) >= Math.ceil(y + height) - 2;
                                 updateClass(bottomBlock, 'is-dragenter');
                             }
                         }
@@ -4191,29 +4197,29 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             const backBlock = section.querySelector('.back-block');
                             const frontBlock = section.querySelector('.front-block');
                             if (backBlock) {
-                                backBlock.visible = Math.abs(event.clientX - right) <= 15;
+                                backBlock.visible = Math.abs(clientX - right) <= 15;
                                 updateClass(backBlock, 'is-dragenter');
                             }
                             if (frontBlock) {
-                                frontBlock.visible = Math.abs(event.clientX - left) <= 15 && curElmCol === 1;
+                                frontBlock.visible = Math.abs(clientX - left) <= 15 && curElmCol === 1;
                                 updateClass(frontBlock, 'is-dragenter');
                             }
                         }
                     }
                 }
-            });
-            document.addEventListener('dragover', function (event) {
-                event.preventDefault();
-            });
-            document.addEventListener('dragleave', function (event) {
-                const eventTarget = event.target;
-                const target = eventTarget.closest('.fixed-grid-item');
+            }
+            function dragLeave(leaveTarget, clientX, isOverlap = false) {
+                let target;
+                if (isOverlap)
+                    target = findNearestFixedGridInRow(clientX);
+                else
+                    target = leaveTarget.closest('.fixed-grid-item');
                 if (target)
                     updateRectangles();
                 else {
                     const blocks = document.getElementsByClassName('is-dragenter');
                     for (const block of blocks) {
-                        const currentSection = eventTarget.closest('ide-section');
+                        const currentSection = leaveTarget.closest('ide-section');
                         const blockSection = block.closest('ide-section');
                         if (currentSection && blockSection && currentSection.id === blockSection.id)
                             continue;
@@ -4223,12 +4229,79 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
                 const pageRows = document.getElementsByClassName('row-entered');
                 for (const row of pageRows) {
-                    const currentRow = eventTarget.closest('ide-row');
+                    const currentRow = leaveTarget.closest('ide-row');
                     if (currentRow && row && currentRow.id === row.id)
                         continue;
                     row.classList.remove('row-entered');
                 }
+            }
+            this.addEventListener('dragenter', function (event) {
+                const eventTarget = event.target;
+                if (dragStartTarget && (dragStartTarget == eventTarget || dragStartTarget.contains(eventTarget)))
+                    dragEnter(eventTarget, event.clientX, event.clientY, true);
+                else
+                    dragEnter(eventTarget, event.clientX, event.clientY);
             });
+            document.addEventListener('dragover', function (event) {
+                event.preventDefault();
+                const eventTarget = event.target;
+                let enterTarget;
+                // if target overlap
+                if (dragStartTarget && (dragStartTarget == eventTarget || dragStartTarget.contains(eventTarget))) {
+                    const cursorPosition = { x: event.clientX, y: event.clientY };
+                    const elements = self.pnlRow.querySelectorAll('.fixed-grid-item');
+                    let nearestElement = null;
+                    let minDistance = Number.MAX_VALUE;
+                    // time complexity = O(columnSpan)
+                    elements.forEach((element) => {
+                        const bounds = element.getBoundingClientRect();
+                        const distanceLeft = Math.abs(bounds.left - cursorPosition.x);
+                        const distanceRight = Math.abs(bounds.right - cursorPosition.x);
+                        if (distanceLeft < minDistance) {
+                            minDistance = distanceLeft;
+                            nearestElement = element;
+                        }
+                        if (distanceRight < minDistance) {
+                            minDistance = distanceRight;
+                            nearestElement = element;
+                        }
+                    });
+                    enterTarget = nearestElement;
+                }
+                else
+                    return;
+                if (enterTarget == dragOverTarget)
+                    return;
+                // leave previous element: dragOverTarget
+                dragLeave(dragOverTarget, event.clientX, true);
+                // enter current element: enterTarget
+                dragEnter(enterTarget, event.clientX, event.clientY, true);
+                dragOverTarget = enterTarget;
+            });
+            document.addEventListener('dragleave', function (event) {
+                const eventTarget = event.target;
+                dragLeave(eventTarget, event.clientX);
+            });
+            function findNearestFixedGridInRow(clientX) {
+                const elements = self.pnlRow.querySelectorAll('.fixed-grid-item');
+                let nearestElement = null;
+                let minDistance = Number.MAX_VALUE;
+                // time complexity = O(columnSpan)
+                elements.forEach((element) => {
+                    const bounds = element.getBoundingClientRect();
+                    const distanceLeft = Math.abs(bounds.left - clientX);
+                    const distanceRight = Math.abs(bounds.right - clientX);
+                    if (distanceLeft < minDistance) {
+                        minDistance = distanceLeft;
+                        nearestElement = element;
+                    }
+                    if (distanceRight < minDistance) {
+                        minDistance = distanceRight;
+                        nearestElement = element;
+                    }
+                });
+                return nearestElement;
+            }
             this.addEventListener('drop', async function (event) {
                 var _a, _b;
                 const elementConfig = (0, index_52.getDragData)();
@@ -4240,7 +4313,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     components_25.application.EventBus.dispatch(index_50.EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
                 if (!self.currentElement)
                     return;
-                const nearestFixedItem = eventTarget.closest('.fixed-grid-item');
+                let nearestFixedItem = eventTarget.closest('.fixed-grid-item');
+                // if target overlap
+                if (dragStartTarget && (dragStartTarget == eventTarget || dragStartTarget.contains(eventTarget))) {
+                    nearestFixedItem = findNearestFixedGridInRow(event.clientX);
+                }
                 if (nearestFixedItem) {
                     const column = Number(nearestFixedItem.dataset.column);
                     const columnSpan = self.currentElement.dataset.columnSpan ?
