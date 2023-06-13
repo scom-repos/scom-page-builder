@@ -298,6 +298,8 @@ export class PageRow extends Module {
         let startX: number = 0;
         let startY: number = 0;
         let toolbar: Control;
+        let dragStartTarget: Control;
+        let dragOverTarget: Control;
 
         this.addEventListener('mousedown', (e) => {
             const target = e.target as Control;
@@ -422,6 +424,7 @@ export class PageRow extends Module {
             } else {
                 event.preventDefault();
             }
+            dragStartTarget = eventTarget;
         });
 
         this.addEventListener('drag', function (event) {});
@@ -441,15 +444,18 @@ export class PageRow extends Module {
             // self.updateAlign();
         });
 
-        this.addEventListener('dragenter', function (event) {
-            const eventTarget = event.target as Control;
+        function dragEnter(enterTarget: Control, clientX: number, clientY: number, isOverlap: boolean = false) {
             const elementConfig = getDragData();
-            const pageRow = eventTarget.closest('ide-row') as PageRow;
+            const pageRow = enterTarget.closest('ide-row') as PageRow;
             if (pageRow && elementConfig?.module?.name === 'sectionStack') {
                 pageRow.classList.add('row-entered');
             }
-            if (!eventTarget || !self.currentElement) return;
-            const target = eventTarget.closest('.fixed-grid-item') as Control;
+            if (!enterTarget || !self.currentElement) return;
+            let target: Control;
+            if (isOverlap)
+                target = findNearestFixedGridInRow(clientX);
+            else
+                target = enterTarget.closest('.fixed-grid-item') as Control;
             self.addDottedLines();
             if (target) {
                 const column = Number(target.dataset.column);
@@ -465,7 +471,7 @@ export class PageRow extends Module {
                     const colData = colStart + colSpan;
                     return colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan;
                 });
-                if (findedSection) return;
+                if (findedSection && findedSection!=self.currentElement) return;
                 const rectangle = target
                     .closest('.fixed-grid')
                     .parentNode.querySelector(`.rectangle`) as Control;
@@ -474,14 +480,14 @@ export class PageRow extends Module {
                 rectangle.style.width =
                    self.gridColumnWidth * columnSpan + GAP_WIDTH * (columnSpan - 1) + 'px';
             } else {
-                const section = eventTarget.closest('ide-section') as Control;
+                const section = enterTarget.closest('ide-section') as Control;
                 if (section && !section.isSameNode(self.currentElement)) {
-                    const toolbar = eventTarget.closest('ide-toolbar') as Control;
+                    const toolbar = enterTarget.closest('ide-toolbar') as Control;
                     if (toolbar) {
                         const { y, height} = toolbar.getBoundingClientRect();
                         const bottomBlock = toolbar.querySelector('.bottom-block') as Control;
                         if (bottomBlock) {
-                            bottomBlock.visible = Math.ceil(event.clientY) >= Math.ceil(y + height) - 2;
+                            bottomBlock.visible = Math.ceil(clientY) >= Math.ceil(y + height) - 2;
                             updateClass(bottomBlock, 'is-dragenter');
                         }
                     }
@@ -502,32 +508,32 @@ export class PageRow extends Module {
                         const frontBlock = section.querySelector('.front-block') as Control;
 
                         if (backBlock) {
-                            backBlock.visible = Math.abs(event.clientX - right) <= 15;
+                            backBlock.visible = Math.abs(clientX - right) <= 15;
                             updateClass(backBlock, 'is-dragenter');
                         }
 
                         if (frontBlock) {
-                            frontBlock.visible = Math.abs(event.clientX - left) <= 15  && curElmCol === 1;
+                            frontBlock.visible = Math.abs(clientX - left) <= 15  && curElmCol === 1;
                             updateClass(frontBlock, 'is-dragenter');
                         }
                     }
                 }
             }
-        });
+        }
 
-        document.addEventListener('dragover', function (event) {
-            event.preventDefault();
-        });
+        function dragLeave(leaveTarget: Control, clientX: number, isOverlap: boolean = false) {
+            let target: Control;
+            if (isOverlap)
+                target = findNearestFixedGridInRow(clientX);
+            else
+                target = leaveTarget.closest('.fixed-grid-item') as Control;
 
-        document.addEventListener('dragleave', function (event) {
-            const eventTarget = event.target as Control;
-            const target = eventTarget.closest('.fixed-grid-item') as Control;
             if (target)
                 updateRectangles();
             else {
                 const blocks = document.getElementsByClassName('is-dragenter')
                 for (const block of blocks) {
-                    const currentSection = eventTarget.closest('ide-section') as Control;
+                    const currentSection = leaveTarget.closest('ide-section') as Control;
                     const blockSection = block.closest('ide-section');
                     if (currentSection && blockSection && currentSection.id === blockSection.id)
                         continue;
@@ -537,12 +543,90 @@ export class PageRow extends Module {
             }
             const pageRows = document.getElementsByClassName('row-entered');
             for (const row of pageRows) {
-                const currentRow = eventTarget.closest('ide-row') as Control;
+                const currentRow = leaveTarget.closest('ide-row') as Control;
                 if (currentRow && row && currentRow.id === row.id)
                     continue;
                 row.classList.remove('row-entered');
             }
+        }
+
+        this.addEventListener('dragenter', function (event) {
+            const eventTarget = event.target as Control;
+            if (dragStartTarget && (dragStartTarget == eventTarget || dragStartTarget.contains(eventTarget)))
+                dragEnter(eventTarget, event.clientX, event.clientY, true);
+            else 
+                dragEnter(eventTarget, event.clientX, event.clientY);
         });
+
+        document.addEventListener('dragover', function (event) {
+            event.preventDefault();
+
+            const eventTarget = event.target as Control;
+            let enterTarget: Control;
+            // if target overlap
+            if (dragStartTarget && (dragStartTarget == eventTarget || dragStartTarget.contains(eventTarget))) {
+                const cursorPosition = { x: event.clientX, y: event.clientY };
+                const elements = self.pnlRow.querySelectorAll('.fixed-grid-item');
+
+                let nearestElement = null;
+                let minDistance = Number.MAX_VALUE;
+
+                // time complexity = O(columnSpan)
+                elements.forEach((element) => {
+                    const bounds = element.getBoundingClientRect();
+                    const distanceLeft = Math.abs(bounds.left - cursorPosition.x);
+                    const distanceRight = Math.abs(bounds.right - cursorPosition.x);
+                    if (distanceLeft < minDistance) {
+                        minDistance = distanceLeft;
+                        nearestElement = element;
+                    }
+                    if (distanceRight < minDistance) {
+                        minDistance = distanceRight;
+                        nearestElement = element;
+                    }
+                });
+                enterTarget = nearestElement;
+                
+            } else return
+
+            if (enterTarget == dragOverTarget) return
+
+            // leave previous element: dragOverTarget
+            dragLeave(dragOverTarget, event.clientX, true);
+
+            // enter current element: enterTarget
+            dragEnter(enterTarget, event.clientX, event.clientY, true)
+
+            dragOverTarget = enterTarget;
+        });
+
+        document.addEventListener('dragleave', function (event) {
+            const eventTarget = event.target as Control;
+            dragLeave(eventTarget, event.clientX);
+        });
+
+        function findNearestFixedGridInRow(clientX: number) {
+            const elements = self.pnlRow.querySelectorAll('.fixed-grid-item');
+
+            let nearestElement = null;
+            let minDistance = Number.MAX_VALUE;
+
+            // time complexity = O(columnSpan)
+            elements.forEach((element) => {
+                const bounds = element.getBoundingClientRect();
+                const distanceLeft = Math.abs(bounds.left - clientX);
+                const distanceRight = Math.abs(bounds.right - clientX);
+                if (distanceLeft < minDistance) {
+                    minDistance = distanceLeft;
+                    nearestElement = element;
+                }
+                if (distanceRight < minDistance) {
+                    minDistance = distanceRight;
+                    nearestElement = element;
+                }
+            });
+            return nearestElement;
+        }
 
         this.addEventListener('drop', async function (event) {
             const elementConfig = getDragData();
@@ -554,7 +638,13 @@ export class PageRow extends Module {
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
             if (!self.currentElement) return;
 
-            const nearestFixedItem = eventTarget.closest('.fixed-grid-item') as Control;
+            let nearestFixedItem = eventTarget.closest('.fixed-grid-item') as Control;
+
+            // if target overlap
+            if (dragStartTarget && (dragStartTarget == eventTarget || dragStartTarget.contains(eventTarget))) {
+                nearestFixedItem = findNearestFixedGridInRow(event.clientX);
+            }
+
             if (nearestFixedItem) {
                 const column = Number(nearestFixedItem.dataset.column);
                 const columnSpan = self.currentElement.dataset.columnSpan ?
