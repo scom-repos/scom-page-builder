@@ -90,3 +90,8 @@ export interface IOnFetchComponentsResult {
     items?: IPageBlockData[];
     total?: number
 }
+
+export interface ICategory {
+    id: string;
+    title: string;
+}

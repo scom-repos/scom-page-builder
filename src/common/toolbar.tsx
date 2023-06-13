@@ -389,7 +389,7 @@ export class IDEToolbar extends Module {
         if (this._component.ready) await this._component.ready();
         this._component.maxWidth = '100%';
         this._component.maxHeight = '100%';
-        this._component.overflow = 'hidden';
+        // this._component.overflow = 'hidden';
         this._component.style.display = 'block';
         this.backdropStack.visible = data?.shownBackdrop;
         this._component.addEventListener('click', (event: Event) => {

@@ -114,7 +114,7 @@ define("@scom/scom-page-builder/const/index.ts", ["require", "exports", "@scom/s
 define("@scom/scom-page-builder/store/index.ts", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.getCategories = exports.getSearchOptions = exports.setSearchOptions = exports.getSearchData = exports.setSearchData = exports.getDragData = exports.setDragData = exports.getRootDir = exports.setRootDir = exports.addPageBlock = exports.getPageBlocks = exports.setPageBlocks = exports.state = exports.pageObject = exports.PageObject = void 0;
+    exports.setCategories = exports.getCategories = exports.getSearchOptions = exports.setSearchOptions = exports.getSearchData = exports.setSearchData = exports.getDragData = exports.setDragData = exports.getRootDir = exports.setRootDir = exports.addPageBlock = exports.getPageBlocks = exports.setPageBlocks = exports.state = exports.pageObject = exports.PageObject = void 0;
     const MAX_COLUMN = 12;
     class PageObject {
         constructor() {
@@ -440,6 +440,10 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports"], functio
         return exports.state.categories || [];
     };
     exports.getCategories = getCategories;
+    const setCategories = (value) => {
+        exports.state.categories = value || [];
+    };
+    exports.setCategories = setCategories;
     const generateUUID = () => {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
             var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -2415,7 +2419,7 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                     },
                     'i-input': {
                         border: `1px solid ${Theme.divider}`,
-                        marginBottom: '1rem'
+                        // marginBottom: '1rem'
                     },
                     '.modal': {
                         padding: 0,
@@ -2832,7 +2836,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 await this._component.ready();
             this._component.maxWidth = '100%';
             this._component.maxHeight = '100%';
-            this._component.overflow = 'hidden';
+            // this._component.overflow = 'hidden';
             this._component.style.display = 'block';
             this.backdropStack.visible = data === null || data === void 0 ? void 0 : data.shownBackdrop;
             this._component.addEventListener('click', (event) => {
@@ -4129,7 +4133,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             });
             function dragEnter(enterTarget, clientX, clientY, isOverlap = false) {
                 var _a, _b, _c, _d;
-                console.log("### dragEnter, enterTarget:", enterTarget, isOverlap);
                 const elementConfig = (0, index_52.getDragData)();
                 const pageRow = enterTarget.closest('ide-row');
                 if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
@@ -4144,7 +4147,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     target = enterTarget.closest('.fixed-grid-item');
                 self.addDottedLines();
                 if (target) {
-                    console.log("cp1");
                     const column = Number(target.dataset.column);
                     const columnSpan = self.currentElement.dataset.columnSpan ? Number(self.currentElement.dataset.columnSpan) : index_51.MIN_COLUMN;
                     const colSpan = Math.min(columnSpan, self.maxColumn);
@@ -4158,11 +4160,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         const colData = colStart + colSpan;
                         return colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan;
                     });
-                    console.log("sortedSections", sortedSections);
-                    console.log("findedSection", findedSection);
                     if (findedSection && findedSection != self.currentElement)
                         return;
-                    console.log("cp2");
                     const rectangle = target
                         .closest('.fixed-grid')
                         .parentNode.querySelector(`.rectangle`);
@@ -4172,17 +4171,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         self.gridColumnWidth * columnSpan + index_51.GAP_WIDTH * (columnSpan - 1) + 'px';
                 }
                 else {
-                    console.log("cp3");
                     const section = enterTarget.closest('ide-section');
                     if (section && !section.isSameNode(self.currentElement)) {
-                        console.log("cp4");
                         const toolbar = enterTarget.closest('ide-toolbar');
                         if (toolbar) {
-                            console.log("cp5");
                             const { y, height } = toolbar.getBoundingClientRect();
                             const bottomBlock = toolbar.querySelector('.bottom-block');
                             if (bottomBlock) {
-                                console.log("cp6");
                                 bottomBlock.visible = Math.ceil(clientY) >= Math.ceil(y + height) - 2;
                                 updateClass(bottomBlock, 'is-dragenter');
                             }
@@ -4198,17 +4193,14 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             (nextElm) ||
                             (curElmCol + curElmColSpan === self.maxColumn + 1);
                         if (showHiddenBlock) {
-                            console.log("cp7");
                             const { left, right } = section.getBoundingClientRect();
                             const backBlock = section.querySelector('.back-block');
                             const frontBlock = section.querySelector('.front-block');
                             if (backBlock) {
-                                console.log("cp8");
                                 backBlock.visible = Math.abs(clientX - right) <= 15;
                                 updateClass(backBlock, 'is-dragenter');
                             }
                             if (frontBlock) {
-                                console.log("cp9");
                                 frontBlock.visible = Math.abs(clientX - left) <= 15 && curElmCol === 1;
                                 updateClass(frontBlock, 'is-dragenter');
                             }
@@ -4217,7 +4209,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
             }
             function dragLeave(leaveTarget, clientX, isOverlap = false) {
-                console.log("### dragLeave, leaveTarget:", leaveTarget);
                 let target;
                 if (isOverlap)
                     target = findNearestFixedGridInRow(clientX);
@@ -5522,6 +5513,13 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             (0, index_77.setPageBlocks)(value);
             this.pageSidebar.renderUI();
         }
+        get categories() {
+            return (0, index_77.getCategories)();
+        }
+        set categories(value) {
+            (0, index_77.setCategories)(value);
+            this.pageSidebar.renderUI();
+        }
         async onFetchComponents(options) {
             return { items: [], total: 0 };
         }
@@ -5581,6 +5579,9 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             const components = this.getAttribute('components', true);
             if (components)
                 (0, index_77.setPageBlocks)(components);
+            const categories = this.getAttribute('categories', true);
+            if (categories)
+                (0, index_77.setCategories)(categories);
             const onFetchComponents = this.getAttribute('onFetchComponents', true);
             if (onFetchComponents)
                 this.onFetchComponents = onFetchComponents.bind(this);
