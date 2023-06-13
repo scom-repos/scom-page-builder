@@ -2,9 +2,9 @@ import { application, Container, Control, ControlElement, customElements, custom
 import { } from '@ijstech/eth-contract'
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
-import { IPageData, IPageBlockData, IPageElement, IOnFetchComponentsOptions, IOnFetchComponentsResult } from './interface/index';
+import { IPageData, IPageBlockData, IPageElement, IOnFetchComponentsOptions, IOnFetchComponentsResult, ICategory } from './interface/index';
 import { PageRows, PageSidebar } from './page/index';
-import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData, getPageBlocks } from './store/index';
+import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData, getPageBlocks, getCategories, setCategories } from './store/index';
 import { currentTheme } from './theme/index';
 import './index.css';
 import { SearchComponentsDialog } from './dialogs/index';
@@ -16,6 +16,7 @@ type onFetchComponentsCallback = (options: IOnFetchComponentsOptions) => Promise
 interface PageBuilderElement extends ControlElement {
     rootDir?: string;
     components?: IPageBlockData[];
+    categories?: ICategory[];
     onFetchComponents?: onFetchComponentsCallback;
 }
 
@@ -62,6 +63,15 @@ export default class Editor extends Module {
 
     set components(value: IPageBlockData[]) {
         setPageBlocks(value);
+        this.pageSidebar.renderUI();
+    }
+
+    get categories() {
+        return getCategories();
+    }
+
+    set categories(value: ICategory[]) {
+        setCategories(value);
         this.pageSidebar.renderUI();
     }
 
@@ -124,6 +134,8 @@ export default class Editor extends Module {
         if (rootDir) this.setRootDir(rootDir);
         const components = this.getAttribute('components', true);
         if (components) setPageBlocks(components);
+        const categories = this.getAttribute('categories', true);
+        if (categories) setCategories(categories);
         const onFetchComponents = this.getAttribute('onFetchComponents', true);
         if (onFetchComponents) this.onFetchComponents = onFetchComponents.bind(this);
         super.init();

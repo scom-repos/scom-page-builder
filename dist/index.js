@@ -114,7 +114,7 @@ define("@scom/scom-page-builder/const/index.ts", ["require", "exports", "@scom/s
 define("@scom/scom-page-builder/store/index.ts", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.getCategories = exports.getSearchOptions = exports.setSearchOptions = exports.getSearchData = exports.setSearchData = exports.getDragData = exports.setDragData = exports.getRootDir = exports.setRootDir = exports.addPageBlock = exports.getPageBlocks = exports.setPageBlocks = exports.state = exports.pageObject = exports.PageObject = void 0;
+    exports.setCategories = exports.getCategories = exports.getSearchOptions = exports.setSearchOptions = exports.getSearchData = exports.setSearchData = exports.getDragData = exports.setDragData = exports.getRootDir = exports.setRootDir = exports.addPageBlock = exports.getPageBlocks = exports.setPageBlocks = exports.state = exports.pageObject = exports.PageObject = void 0;
     const MAX_COLUMN = 12;
     class PageObject {
         constructor() {
@@ -440,6 +440,10 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports"], functio
         return exports.state.categories || [];
     };
     exports.getCategories = getCategories;
+    const setCategories = (value) => {
+        exports.state.categories = value || [];
+    };
+    exports.setCategories = setCategories;
     const generateUUID = () => {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
             var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -5432,6 +5436,13 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             (0, index_77.setPageBlocks)(value);
             this.pageSidebar.renderUI();
         }
+        get categories() {
+            return (0, index_77.getCategories)();
+        }
+        set categories(value) {
+            (0, index_77.setCategories)(value);
+            this.pageSidebar.renderUI();
+        }
         async onFetchComponents(options) {
             return { items: [], total: 0 };
         }
@@ -5491,6 +5502,9 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             const components = this.getAttribute('components', true);
             if (components)
                 (0, index_77.setPageBlocks)(components);
+            const categories = this.getAttribute('categories', true);
+            if (categories)
+                (0, index_77.setCategories)(categories);
             const onFetchComponents = this.getAttribute('onFetchComponents', true);
             if (onFetchComponents)
                 this.onFetchComponents = onFetchComponents.bind(this);

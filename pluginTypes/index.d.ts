@@ -69,7 +69,7 @@ declare module "@scom/scom-page-builder/const/index.ts" {
 }
 /// <amd-module name="@scom/scom-page-builder/store/index.ts" />
 declare module "@scom/scom-page-builder/store/index.ts" {
-    import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig, IOnFetchComponentsResult, IOnFetchComponentsOptions } from "@scom/scom-page-builder/interface/index.ts";
+    import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig, IOnFetchComponentsResult, IOnFetchComponentsOptions, ICategory } from "@scom/scom-page-builder/interface/index.ts";
     export class PageObject {
         private _header;
         private _sections;
@@ -105,10 +105,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         dragData: any;
         searchData: IOnFetchComponentsResult;
         searchOptions: IOnFetchComponentsOptions;
-        categories: {
-            id: string;
-            title: string;
-        }[];
+        categories: ICategory[];
     };
     export const setPageBlocks: (value: IPageBlockData[]) => void;
     export const getPageBlocks: () => any[];
@@ -125,10 +122,8 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         pageNumber: any;
         pageSize: any;
     } | IOnFetchComponentsOptions;
-    export const getCategories: () => {
-        id: string;
-        title: string;
-    }[];
+    export const getCategories: () => ICategory[];
+    export const setCategories: (value: ICategory[]) => void;
 }
 /// <amd-module name="@scom/scom-page-builder/utility/pathToRegexp.ts" />
 declare module "@scom/scom-page-builder/utility/pathToRegexp.ts" {
@@ -457,6 +452,10 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
     export interface IOnFetchComponentsResult {
         items?: IPageBlockData[];
         total?: number;
+    }
+    export interface ICategory {
+        id: string;
+        title: string;
     }
 }
 /// <amd-module name="@scom/scom-page-builder/interface/jsonSchema.ts" />
@@ -1372,13 +1371,14 @@ declare module "@scom/scom-page-builder/index.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder" />
 declare module "@scom/scom-page-builder" {
     import { Container, ControlElement, Module } from '@ijstech/components';
-    import { IPageData, IPageBlockData, IOnFetchComponentsOptions, IOnFetchComponentsResult } from "@scom/scom-page-builder/interface/index.ts";
+    import { IPageData, IPageBlockData, IOnFetchComponentsOptions, IOnFetchComponentsResult, ICategory } from "@scom/scom-page-builder/interface/index.ts";
     import "@scom/scom-page-builder/index.css.ts";
     export { IOnFetchComponentsOptions, IOnFetchComponentsResult };
     type onFetchComponentsCallback = (options: IOnFetchComponentsOptions) => Promise<IOnFetchComponentsResult>;
     interface PageBuilderElement extends ControlElement {
         rootDir?: string;
         components?: IPageBlockData[];
+        categories?: ICategory[];
         onFetchComponents?: onFetchComponentsCallback;
     }
     global {
@@ -1402,6 +1402,8 @@ declare module "@scom/scom-page-builder" {
         set rootDir(value: string);
         get components(): IPageBlockData[];
         set components(value: IPageBlockData[]);
+        get categories(): ICategory[];
+        set categories(value: ICategory[]);
         onFetchComponents(options: IOnFetchComponentsOptions): Promise<IOnFetchComponentsResult>;
         private initScrollEvent;
         private initEventListeners;
