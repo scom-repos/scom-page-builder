@@ -2557,6 +2557,12 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
         set readonly(value) {
             this._readonly = value;
         }
+        adjustCursorByAction() {
+            if (this.currentAction.name == "Edit")
+                this.contentStack.classList.remove('move');
+            else
+                this.contentStack.classList.add('move');
+        }
         async renderToolbars() {
             this.toolbar.clearInnerHTML();
             for (let i = 0; i < this.toolList.length; i++) {
@@ -2579,6 +2585,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                         else {
                             this.mdActions.visible = true;
                         }
+                        this.adjustCursorByAction();
                         this.hideToolbars();
                     }
                 });
@@ -2805,7 +2812,6 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 await this.setModule(module, data === null || data === void 0 ? void 0 : data.module);
                 if (this.isTexbox(data.module)) {
                     this.dragStack.visible = true;
-                    this.contentStack.classList.remove('move');
                 }
                 else if (this.isContentBlock()) {
                     const allSingleContentBlockId = Object.keys(data.properties).filter(prop => prop.includes(SINGLE_CONTENT_BLOCK_ID));
@@ -2814,12 +2820,11 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                         singleContentBlock.fetchModule(data.properties[singleContentBlockId]);
                     }
                     this.dragStack.visible = false;
-                    this.contentStack.classList.add('move');
                 }
                 else {
                     this.dragStack.visible = false;
-                    this.contentStack.classList.add('move');
                 }
+                this.contentStack.classList.add('move');
                 this.renderResizeStack(data);
             }
             catch (error) {
