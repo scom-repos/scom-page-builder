@@ -2407,6 +2407,9 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                 boxShadow: '0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 3px 1px -2px rgb(0 0 0 / 12%), 0px 1px 5px 0px rgb(0 0 0 / 20%)',
                 animation: `${tileToolbarFadeIn} 125ms cubic-bezier(0.4,0,1,1)`
             },
+            '#form > i-vstack > i-panel': {
+                width: '100%'
+            },
             '.setting-modal': {
                 $nest: {
                     '.i-modal_header': {
