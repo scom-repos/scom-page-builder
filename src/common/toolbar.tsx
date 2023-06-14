@@ -197,13 +197,13 @@ export class IDEToolbar extends Module {
                 data: {...properties, ...tag}
             }
             if (action.userInputUISchema) options.jsonUISchema = action.userInputUISchema;
-            if (action.useRenderUI || action.name === 'Advanced') {
-                renderUI(this.pnlForm, options, this.onSave.bind(this));
-                this.form.visible = false;
-                this.mdActions.refresh();
-                return;
-            }
-            console.log('form x', options.data, this.data);
+            // if (action.useRenderUI || action.name === 'Advanced') {
+            //     renderUI(this.pnlForm, options, this.onSave.bind(this));
+            //     this.form.visible = false;
+            //     this.mdActions.refresh();
+            //     return;
+            // }
+            // console.log('form x', options.data, this.data);
             this.form.uiSchema = action.userInputUISchema;
             this.form.jsonSchema = action.userInputDataSchema;
             this.form.formOptions = {
