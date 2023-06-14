@@ -1040,6 +1040,7 @@ define("@scom/scom-page-builder/utility/index.ts", ["require", "exports", "@ijst
             return null;
         const elementName = `i-${path.split('/').pop()}`;
         const element = document.createElement(elementName);
+        element.setAttribute('lazyLoad', 'true');
         return element;
     };
     exports.getEmbedElement = getEmbedElement;

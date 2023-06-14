@@ -166,6 +166,7 @@ const getEmbedElement = async (path: string) => {
     if (!result) return null;
     const elementName = `i-${path.split('/').pop()}`;
     const element = document.createElement(elementName);
+    element.setAttribute('lazyLoad', 'true');
     return element;
 }
 
