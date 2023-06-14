@@ -2900,11 +2900,6 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
             if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setData) {
                 await builderTarget.setData(data);
-                //FIXME: need to check if this is needed
-                if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getData) {
-                    const data = await builderTarget.getData();
-                    await this.setData(data);
-                }
             }
             if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setRootDir)
                 builderTarget.setRootDir((0, index_24.getRootDir)());
@@ -3102,6 +3097,25 @@ define("@scom/scom-page-builder/page/pageSection.tsx", ["require", "exports", "@
     let PageSection = class PageSection extends components_14.Module {
         constructor(parent, options) {
             super(parent, options);
+            this.pageElementMap = new WeakMap();
+            this.observerOptions = {
+                root: null,
+                rootMargin: "0px"
+            };
+            this.observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const pageElement = this.pageElementMap.get(entry.target);
+                        if (!pageElement)
+                            return;
+                        this.pageElementMap.delete(entry.target);
+                        if (!(0, index_33.isEmpty)(pageElement.properties))
+                            entry.target.setProperties(pageElement.properties);
+                        pageElement.tag && entry.target.setTag(pageElement.tag);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, this.observerOptions);
             this.rowId = '';
             this.setData = this.setData.bind(this);
         }
@@ -3129,9 +3143,8 @@ define("@scom/scom-page-builder/page/pageSection.tsx", ["require", "exports", "@
             toolbar.parent = this.pnlMain;
             this.pnlMain.appendChild(toolbar);
             await toolbar.fetchModule(value);
-            if (!(0, index_33.isEmpty)(value.properties))
-                toolbar.setProperties(value.properties);
-            value.tag && toolbar.setTag(value.tag);
+            this.pageElementMap.set(toolbar, value);
+            this.observer.observe(toolbar);
         }
         async clearData() {
             const children = this.pnlMain.querySelectorAll('ide-toolbar');

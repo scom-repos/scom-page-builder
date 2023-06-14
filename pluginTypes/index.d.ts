@@ -904,6 +904,9 @@ declare module "@scom/scom-page-builder/page/pageSection.tsx" {
     }
     export class PageSection extends Module {
         private pnlMain;
+        private pageElementMap;
+        private observerOptions;
+        private observer;
         private _readonly;
         private rowId;
         constructor(parent?: Container, options?: any);

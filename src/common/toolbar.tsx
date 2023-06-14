@@ -447,11 +447,6 @@ export class IDEToolbar extends Module {
         const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
         if (builderTarget?.setData) {
             await builderTarget.setData(data);
-            //FIXME: need to check if this is needed
-            if (builderTarget?.getData) {
-                const data = await builderTarget.getData();
-                await this.setData(data);
-            }
         }
         if (builderTarget?.setRootDir) builderTarget.setRootDir(getRootDir());
     }
