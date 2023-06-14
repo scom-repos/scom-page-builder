@@ -2399,6 +2399,9 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
             'i-button': {
                 boxShadow: 'none'
             },
+            'i-scom-markdown-editor i-markdown-editor': {
+                width: 'auto !important'
+            },
             '.ide-toolbar': {
                 position: 'absolute',
                 zIndex: 99,
