@@ -30,6 +30,23 @@ export interface PageSectionElement extends ControlElement {
 @customElements('ide-section')
 export class PageSection extends Module {
     private pnlMain: Panel;
+    private pageElementMap: WeakMap<any, IPageElement> = new WeakMap();
+    private observerOptions = {
+        root: null,
+        rootMargin: "0px"
+    };
+    private observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const pageElement = this.pageElementMap.get(entry.target);
+                if (!pageElement) return;
+                this.pageElementMap.delete(entry.target);
+                if (!isEmpty(pageElement.properties)) (entry.target as any).setProperties(pageElement.properties);
+                pageElement.tag && (entry.target as any).setTag(pageElement.tag);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, this.observerOptions);
 
     private _readonly: boolean;
     private rowId: string = '';
@@ -67,8 +84,8 @@ export class PageSection extends Module {
         toolbar.parent = this.pnlMain;
         this.pnlMain.appendChild(toolbar);
         await toolbar.fetchModule(value);
-        if (!isEmpty(value.properties)) toolbar.setProperties(value.properties);
-        value.tag && toolbar.setTag(value.tag);
+        this.pageElementMap.set(toolbar, value);
+        this.observer.observe(toolbar);
     }
 
     private async clearData() {
