@@ -247,8 +247,11 @@ export class IDEToolbar extends Module {
         }
     }
 
-    private isTexbox() {
-        return this.data?.module?.name === ELEMENT_NAME.TEXTBOX;
+    private isTexbox(data: IPageBlockData | undefined) {
+        if (data)
+            return data.name.toLowerCase() === ELEMENT_NAME.TEXTBOX.toLowerCase();
+        else
+            return false;
     }
 
     private isContentBlock() {
@@ -357,7 +360,7 @@ export class IDEToolbar extends Module {
             const module: any = await getEmbedElement(data?.module?.path || '');
             if (!module) throw new Error('not found');
             await this.setModule(module, data?.module);
-            if (this.isTexbox()) {
+            if (this.isTexbox(data.module)) {
                 this.dragStack.visible = true;
                 this.contentStack.classList.remove('move');
             } else if (this.isContentBlock()) {

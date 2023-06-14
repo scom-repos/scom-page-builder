@@ -2697,9 +2697,11 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 // this.renderError(data.errors || []);
             }
         }
-        isTexbox() {
-            var _a, _b;
-            return ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.module) === null || _b === void 0 ? void 0 : _b.name) === index_23.ELEMENT_NAME.TEXTBOX;
+        isTexbox(data) {
+            if (data)
+                return data.name.toLowerCase() === index_23.ELEMENT_NAME.TEXTBOX.toLowerCase();
+            else
+                return false;
         }
         isContentBlock() {
             var _a, _b;
@@ -2798,7 +2800,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 if (!module)
                     throw new Error('not found');
                 await this.setModule(module, data === null || data === void 0 ? void 0 : data.module);
-                if (this.isTexbox()) {
+                if (this.isTexbox(data.module)) {
                     this.dragStack.visible = true;
                     this.contentStack.classList.remove('move');
                 }
