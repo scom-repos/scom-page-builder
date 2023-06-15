@@ -498,6 +498,7 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
         appendId?: string;
     }
     export const TEXTBOX_PATH = "scom-markdown-editor";
+    export const IMAGE_PATH = "scom-image";
     export const GAP_WIDTH = 15;
     export const MAX_COLUMN = 12;
     export const MIN_COLUMN = 2;
@@ -671,6 +672,7 @@ declare module "@scom/scom-page-builder/command/updateType.ts" {
         private oldDropData;
         private config;
         private dropSectionId;
+        private dropElementId;
         private isNew;
         constructor(dropElm: Control, element?: any, config?: IElementConfig);
         private getElements;
@@ -833,7 +835,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private setModule;
         private showToolList;
         setData(properties: any): Promise<void>;
-        setTag(tag: any): Promise<void>;
+        setTag(tag: any, init?: boolean): Promise<void>;
         setProperties(data: any): Promise<void>;
         private checkToolbar;
         _handleClick(event: MouseEvent): boolean;

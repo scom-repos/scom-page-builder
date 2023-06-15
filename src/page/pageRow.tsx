@@ -97,7 +97,7 @@ export class PageRow extends Module {
     toggleUI(value: boolean) {
         if (this.pnlRow) this.pnlRow.opacity = value ? 1 : 0;
         if (this.pnlEmty) this.pnlEmty.visible = !value;
-        this.updateAlign(); // TODO: check
+        this.updateAlign();
     }
 
     private async createNewElement(i: number) {
@@ -211,16 +211,13 @@ export class PageRow extends Module {
             this.pnlRow.templateColumns = ['min-content'];
             const sections = Array.from(this.pnlRow.querySelectorAll('ide-section'));
             for (let section of sections) {
-                const sectionId = section.id;
-                const rowId = this.id?.replace('row-', '');
-                const element = pageObject.getElement(rowId, sectionId);
-                let width = element?.tag?.width;
-                if (!width) {
-                    const columnSpan = Number((section as HTMLElement).dataset.columnSpan);
-                    const widthNumber = columnSpan * this.gridColumnWidth - ((columnSpan - 1) * GAP_WIDTH);
-                    width = `${widthNumber}px`;
-                }
-                (section as Control).width = width;
+                // const sectionId = section.id;
+                // const rowId = this.id?.replace('row-', '');
+                // const element = pageObject.getElement(rowId, sectionId);
+                // let width = element?.tag?.width;
+                const columnSpan = Number((section as HTMLElement).dataset.columnSpan);
+                const widthNumber = columnSpan * this.gridColumnWidth + ((columnSpan - 1) * GAP_WIDTH);
+                (section as Control).width = `${widthNumber}px`;
             }
         }
     }
@@ -410,11 +407,8 @@ export class PageRow extends Module {
             const eventTarget = event.target as Control;
             if (eventTarget instanceof PageRow) return;
             const target = eventTarget.closest && eventTarget.closest('ide-section') as PageSection;
-            const toolbar = target?.querySelector('ide-toolbar') as Control;
-            const cannotDrag =
-                toolbar &&
-                (toolbar.classList.contains('is-editing') ||
-                    toolbar.classList.contains('is-setting'));
+            const toolbars = target ? Array.from(target.querySelectorAll('ide-toolbar')) : [];
+            const cannotDrag = toolbars.find(toolbar => toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting'));
             if (target && !cannotDrag) {
                 self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
                 self.currentElement = target;
@@ -441,7 +435,6 @@ export class PageRow extends Module {
             removeClass('is-dragenter');
             removeClass('row-entered');
             removeClass('is-dragging');
-            // self.updateAlign();
         });
 
         function dragEnter(enterTarget: Control, clientX: number, clientY: number, isOverlap: boolean = false) {

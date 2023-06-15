@@ -12,6 +12,7 @@ export class UpdateTypeCommand implements ICommand {
   private oldDropData: any;
   private config: any;
   private dropSectionId: string;
+  private dropElementId: string;
   private isNew: boolean;
 
   constructor(dropElm: Control, element?: any, config?: IElementConfig) {
@@ -23,6 +24,7 @@ export class UpdateTypeCommand implements ICommand {
     const dropRowId = this.dropParent?.id.replace('row-', '');
     const dropSection = dropElm.closest('ide-section');
     this.dropSectionId = (dropSection?.id || '');
+    this.dropElementId = (dropElm.closest('ide-toolbar') as any)?.elementId;
     this.oldDropData = JSON.parse(JSON.stringify(pageObject.getElement(dropRowId, this.dropSectionId)));
     this.isNew = !this.element;
   }
@@ -64,7 +66,7 @@ export class UpdateTypeCommand implements ICommand {
 
     const elementList = this.getElements();
     if (clonedDropSecData?.type === ElementType.COMPOSITE) {
-      const elementIndex = dropSectionData.elements.findIndex(elm => elm.id === this.dropSectionId);
+      const elementIndex = this.dropElementId ? dropSectionData.elements.findIndex(elm => elm.id === this.dropElementId) : -1;
       for (let i = 0; i < elementList.length; i++) {
         pageObject.addElement(dropRowId, elementList[i], this.dropSectionId, elementIndex + i + 1);
       }
