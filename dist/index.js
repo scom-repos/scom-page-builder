@@ -2898,17 +2898,17 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             var _a;
             if (!this._component)
                 return;
-            // if (tag.width === '100%') tag.width = Number(this.width);
+            if (tag.width === '100%')
+                tag.width = Number(this.width);
             if (tag.height === '100%')
                 tag.height = Number(this.height);
             if ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) {
                 const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
-                if (init)
-                    tag.width = '100%';
                 if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setTag)
-                    await builderTarget.setTag(tag);
+                    await builderTarget.setTag(init ? Object.assign(Object.assign({}, tag), { width: '100%' }) : Object.assign({}, tag));
             }
-            this.data && index_24.pageObject.setElement(this.rowId, this.data.id, { tag });
+            if (this.data && !init)
+                index_24.pageObject.setElement(this.rowId, this.data.id, { tag });
         }
         async setProperties(data) {
             var _a;
@@ -3999,7 +3999,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             }
         }
         updateGridColumn(grid) {
-            grid.templateColumns = [`repeat(${this.maxColumn}, ${this.gridColumnWidth}px)`];
+            grid.templateColumns = [`repeat(${this.maxColumn}, 1fr)`];
+            // [`repeat(${this.maxColumn}, ${this.gridColumnWidth}px)`];
             grid.gap = { column: `${index_51.GAP_WIDTH}px` };
         }
         initEventListeners() {
@@ -4145,6 +4146,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 if (self.currentElement && !self.currentElement.classList.contains('builder-item'))
                     self.currentElement.opacity = 1;
                 self.currentElement = null;
+                dragStartTarget = null;
+                dragOverTarget = null;
                 components_25.application.EventBus.dispatch(index_50.EVENT.ON_SET_DRAG_ELEMENT, null);
                 self.isDragging = false;
                 (0, index_52.setDragData)(null);
