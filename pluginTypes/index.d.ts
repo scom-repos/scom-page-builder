@@ -815,6 +815,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         set elementId(value: string);
         get readonly(): boolean;
         set readonly(value: boolean);
+        private adjustCursorByAction;
         private renderToolbars;
         private onShowModal;
         private onCloseModal;

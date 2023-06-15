@@ -2400,6 +2400,9 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
             'i-button': {
                 boxShadow: 'none'
             },
+            'i-scom-markdown-editor i-markdown-editor': {
+                width: 'auto !important'
+            },
             '.ide-toolbar': {
                 position: 'absolute',
                 zIndex: 99,
@@ -2558,6 +2561,12 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
         set readonly(value) {
             this._readonly = value;
         }
+        adjustCursorByAction() {
+            if (this.currentAction.name == "Edit")
+                this.contentStack.classList.remove('move');
+            else
+                this.contentStack.classList.add('move');
+        }
         async renderToolbars() {
             this.toolbar.clearInnerHTML();
             for (let i = 0; i < this.toolList.length; i++) {
@@ -2580,6 +2589,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                         else {
                             this.mdActions.visible = true;
                         }
+                        this.adjustCursorByAction();
                         this.hideToolbars();
                     }
                 });
@@ -2701,9 +2711,11 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 // this.renderError(data.errors || []);
             }
         }
-        isTexbox() {
-            var _a, _b;
-            return ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.module) === null || _b === void 0 ? void 0 : _b.name) === index_23.ELEMENT_NAME.TEXTBOX;
+        isTexbox(data) {
+            if (data)
+                return data.name.toLowerCase() === index_23.ELEMENT_NAME.TEXTBOX.toLowerCase();
+            else
+                return false;
         }
         isContentBlock() {
             var _a, _b;
@@ -2802,9 +2814,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 if (!module)
                     throw new Error('not found');
                 await this.setModule(module, data === null || data === void 0 ? void 0 : data.module);
-                if (this.isTexbox()) {
+                if (this.isTexbox(data.module)) {
                     this.dragStack.visible = true;
-                    this.contentStack.classList.remove('move');
                 }
                 else if (this.isContentBlock()) {
                     const allSingleContentBlockId = Object.keys(data.properties).filter(prop => prop.includes(SINGLE_CONTENT_BLOCK_ID));
@@ -2813,12 +2824,11 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                         singleContentBlock.fetchModule(data.properties[singleContentBlockId]);
                     }
                     this.dragStack.visible = false;
-                    this.contentStack.classList.add('move');
                 }
                 else {
                     this.dragStack.visible = false;
-                    this.contentStack.classList.add('move');
                 }
+                this.contentStack.classList.add('move');
                 this.renderResizeStack(data);
             }
             catch (error) {

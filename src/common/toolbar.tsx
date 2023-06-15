@@ -106,6 +106,13 @@ export class IDEToolbar extends Module {
         this._readonly = value;
     }
 
+    private adjustCursorByAction() {
+        if (this.currentAction.name == "Edit")
+            this.contentStack.classList.remove('move'); 
+        else
+            this.contentStack.classList.add('move');
+    }
+
     private async renderToolbars() {
         this.toolbar.clearInnerHTML();
         for (let i = 0; i < this.toolList.length; i++) {
@@ -127,6 +134,7 @@ export class IDEToolbar extends Module {
                     } else {
                         this.mdActions.visible = true;
                     }
+                    this.adjustCursorByAction();
                     this.hideToolbars();
                 }
             });
@@ -247,8 +255,11 @@ export class IDEToolbar extends Module {
         }
     }
 
-    private isTexbox() {
-        return this.data?.module?.name === ELEMENT_NAME.TEXTBOX;
+    private isTexbox(data: IPageBlockData | undefined) {
+        if (data)
+            return data.name.toLowerCase() === ELEMENT_NAME.TEXTBOX.toLowerCase();
+        else
+            return false;
     }
 
     private isContentBlock() {
@@ -357,9 +368,8 @@ export class IDEToolbar extends Module {
             const module: any = await getEmbedElement(data?.module?.path || '');
             if (!module) throw new Error('not found');
             await this.setModule(module, data?.module);
-            if (this.isTexbox()) {
+            if (this.isTexbox(data.module)) {
                 this.dragStack.visible = true;
-                this.contentStack.classList.remove('move');
             } else if (this.isContentBlock()) {
                 const allSingleContentBlockId = Object.keys(data.properties).filter(prop => prop.includes(SINGLE_CONTENT_BLOCK_ID))
                 for (let singleContentBlockId of allSingleContentBlockId) {
@@ -367,11 +377,10 @@ export class IDEToolbar extends Module {
                     singleContentBlock.fetchModule(data.properties[singleContentBlockId])
                 }
                 this.dragStack.visible = false;
-                this.contentStack.classList.add('move');
-            }else {
+            } else {
                 this.dragStack.visible = false;
-                this.contentStack.classList.add('move');
             }
+            this.contentStack.classList.add('move');
             this.renderResizeStack(data);
         } catch(error) {
             console.log('fetch module error: ', error);
