@@ -67,6 +67,9 @@ export class IDEToolbar extends Module {
         super(parent);
         this.setData = this.setData.bind(this);
         this.fetchModule = this.fetchModule.bind(this);
+        application.EventBus.register(this, 'themeChanged', (value: string) => {
+            if (this.isTexbox(this.data?.module)) (this.module as any).theme = value
+        })
     }
 
     get data() {
@@ -370,6 +373,8 @@ export class IDEToolbar extends Module {
             await this.setModule(module, data?.module);
             if (this.isTexbox(data.module)) {
                 this.dragStack.visible = true;
+                const themeVar = document.body.style.getPropertyValue('--theme')
+                if (themeVar) (this.module as any).theme = themeVar
             } else if (this.isContentBlock()) {
                 const allSingleContentBlockId = Object.keys(data.properties).filter(prop => prop.includes(SINGLE_CONTENT_BLOCK_ID))
                 for (let singleContentBlockId of allSingleContentBlockId) {

@@ -43,7 +43,7 @@ Styles.cssRule('ide-toolbar', {
           fontWeight: 600
         },
         'i-button': {
-          padding: '1rem'
+          padding: '0.5rem 1rem'
         },
         'i-input': {
           border: `1px solid ${Theme.divider}`,

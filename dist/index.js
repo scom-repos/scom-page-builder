@@ -2424,7 +2424,7 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                         fontWeight: 600
                     },
                     'i-button': {
-                        padding: '1rem'
+                        padding: '0.5rem 1rem'
                     },
                     'i-input': {
                         border: `1px solid ${Theme.divider}`,
@@ -2531,6 +2531,10 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this._component = null;
             this.setData = this.setData.bind(this);
             this.fetchModule = this.fetchModule.bind(this);
+            components_11.application.EventBus.register(this, 'themeChanged', (value) => {
+                if (this.module)
+                    this.module.theme = value;
+            });
         }
         get data() {
             return index_24.pageObject.getElement(this.rowId, this.elementId);
@@ -2684,6 +2688,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                         onClick: async () => {
                             const data = await this.form.getFormData();
                             const commandIns = this.currentAction.command(this, data);
+                            console.log(index_26.commandHistory);
                             index_26.commandHistory.execute(commandIns);
                             this.mdActions.visible = false;
                         }
@@ -2816,6 +2821,10 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 if (!module)
                     throw new Error('not found');
                 await this.setModule(module, data === null || data === void 0 ? void 0 : data.module);
+                const themeVar = document.body.style.getPropertyValue('--theme');
+                if (themeVar)
+                    this.module.theme = themeVar;
+                console.log('_________', themeVar);
                 if (this.isTexbox(data.module)) {
                     this.dragStack.visible = true;
                 }
