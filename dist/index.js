@@ -1085,7 +1085,7 @@ define("@scom/scom-page-builder/interface/jsonSchema.ts", ["require", "exports"]
 define("@scom/scom-page-builder/interface/index.ts", ["require", "exports", "@scom/scom-page-builder/interface/pageBlock.ts", "@scom/scom-page-builder/interface/siteData.ts", "@scom/scom-page-builder/interface/jsonSchema.ts"], function (require, exports, pageBlock_1, siteData_1, jsonSchema_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.PAGE_SIZE = exports.MIN_COLUMN = exports.MAX_COLUMN = exports.GAP_WIDTH = exports.TEXTBOX_PATH = exports.ELEMENT_NAME = void 0;
+    exports.PAGE_SIZE = exports.MIN_COLUMN = exports.MAX_COLUMN = exports.GAP_WIDTH = exports.IMAGE_PATH = exports.TEXTBOX_PATH = exports.ELEMENT_NAME = void 0;
     __exportStar(pageBlock_1, exports);
     __exportStar(siteData_1, exports);
     __exportStar(jsonSchema_1, exports);
@@ -1104,6 +1104,7 @@ define("@scom/scom-page-builder/interface/index.ts", ["require", "exports", "@sc
         ELEMENT_NAME["CONTENT_BLOCK"] = "Content Block";
     })(ELEMENT_NAME = exports.ELEMENT_NAME || (exports.ELEMENT_NAME = {}));
     exports.TEXTBOX_PATH = 'scom-markdown-editor';
+    exports.IMAGE_PATH = 'scom-image';
     exports.GAP_WIDTH = 15;
     exports.MAX_COLUMN = 12;
     exports.MIN_COLUMN = 2;
@@ -1269,7 +1270,6 @@ define("@scom/scom-page-builder/command/history.ts", ["require", "exports"], fun
         undo() {
             if (this.currentCommandIndex >= 0) {
                 const command = this.commands[this.currentCommandIndex];
-                console.log('undo', command);
                 command.undo();
                 this.currentCommandIndex--;
             }
@@ -1278,7 +1278,6 @@ define("@scom/scom-page-builder/command/history.ts", ["require", "exports"], fun
             if (this.currentCommandIndex < this.commands.length - 1) {
                 this.currentCommandIndex++;
                 const command = this.commands[this.currentCommandIndex];
-                console.log('redo', command);
                 command.execute();
             }
         }
@@ -1847,7 +1846,7 @@ define("@scom/scom-page-builder/command/updateType.ts", ["require", "exports", "
     exports.UpdateTypeCommand = void 0;
     class UpdateTypeCommand {
         constructor(dropElm, element, config) {
-            var _a;
+            var _a, _b;
             this.element = element || null;
             this.elementParent = (element ? element.closest('ide-row') : dropElm.closest('ide-row'));
             this.dropParent = dropElm.closest('ide-row');
@@ -1856,6 +1855,7 @@ define("@scom/scom-page-builder/command/updateType.ts", ["require", "exports", "
             const dropRowId = (_a = this.dropParent) === null || _a === void 0 ? void 0 : _a.id.replace('row-', '');
             const dropSection = dropElm.closest('ide-section');
             this.dropSectionId = ((dropSection === null || dropSection === void 0 ? void 0 : dropSection.id) || '');
+            this.dropElementId = (_b = dropElm.closest('ide-toolbar')) === null || _b === void 0 ? void 0 : _b.elementId;
             this.oldDropData = JSON.parse(JSON.stringify(index_14.pageObject.getElement(dropRowId, this.dropSectionId)));
             this.isNew = !this.element;
         }
@@ -1897,7 +1897,7 @@ define("@scom/scom-page-builder/command/updateType.ts", ["require", "exports", "
                 return;
             const elementList = this.getElements();
             if ((clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.type) === index_16.ElementType.COMPOSITE) {
-                const elementIndex = dropSectionData.elements.findIndex(elm => elm.id === this.dropSectionId);
+                const elementIndex = this.dropElementId ? dropSectionData.elements.findIndex(elm => elm.id === this.dropElementId) : -1;
                 for (let i = 0; i < elementList.length; i++) {
                     index_14.pageObject.addElement(dropRowId, elementList[i], this.dropSectionId, elementIndex + i + 1);
                 }
@@ -3007,20 +3007,20 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 this.data && index_25.pageObject.setElement(this.rowId, this.data.id, { properties, module });
             }
         }
-        async setTag(tag) {
+        async setTag(tag, init) {
             var _a;
             if (!this._component)
                 return;
-            if (tag.width === '100%')
-                tag.width = Number(this.width);
+            // if (tag.width === '100%') tag.width = Number(this.width);
             if (tag.height === '100%')
                 tag.height = Number(this.height);
             if ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) {
                 this.updateComponent();
                 const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
-                if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setTag) {
+                if (init)
+                    tag.width = '100%';
+                if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setTag)
                     await builderTarget.setTag(tag);
-                }
             }
             this.data && index_25.pageObject.setElement(this.rowId, this.data.id, { tag });
         }
@@ -3080,7 +3080,6 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 if (componentId && rootParent) {
                     this._component = (_b = rootParent.querySelector(`#${componentId}`)) !== null && _b !== void 0 ? _b : this._component;
                     if (data) {
-                        console.log(1, data);
                         this.setProperties(data);
                     }
                 }
@@ -3276,7 +3275,7 @@ define("@scom/scom-page-builder/page/pageSection.tsx", ["require", "exports", "@
                         this.pageElementMap.delete(entry.target);
                         if (!(0, index_34.isEmpty)(pageElement.properties))
                             entry.target.setProperties(pageElement.properties);
-                        pageElement.tag && entry.target.setTag(pageElement.tag);
+                        pageElement.tag && entry.target.setTag(pageElement.tag, true);
                         observer.unobserve(entry.target);
                     }
                 });
@@ -3993,7 +3992,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 this.pnlRow.opacity = value ? 1 : 0;
             if (this.pnlEmty)
                 this.pnlEmty.visible = !value;
-            this.updateAlign(); // TODO: check
+            this.updateAlign();
         }
         async createNewElement(i) {
             const sectionData = this.data.elements[i];
@@ -4072,7 +4071,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.updateGridColumn(this.pnlRow);
         }
         updateAlign() {
-            var _a, _b;
             let alignValue = 'start';
             switch (this.align) {
                 case 'right':
@@ -4091,16 +4089,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 this.pnlRow.templateColumns = ['min-content'];
                 const sections = Array.from(this.pnlRow.querySelectorAll('ide-section'));
                 for (let section of sections) {
-                    const sectionId = section.id;
-                    const rowId = (_a = this.id) === null || _a === void 0 ? void 0 : _a.replace('row-', '');
-                    const element = index_53.pageObject.getElement(rowId, sectionId);
-                    let width = (_b = element === null || element === void 0 ? void 0 : element.tag) === null || _b === void 0 ? void 0 : _b.width;
-                    if (!width) {
-                        const columnSpan = Number(section.dataset.columnSpan);
-                        const widthNumber = columnSpan * this.gridColumnWidth - ((columnSpan - 1) * index_52.GAP_WIDTH);
-                        width = `${widthNumber}px`;
-                    }
-                    section.width = width;
+                    // const sectionId = section.id;
+                    // const rowId = this.id?.replace('row-', '');
+                    // const element = pageObject.getElement(rowId, sectionId);
+                    // let width = element?.tag?.width;
+                    const columnSpan = Number(section.dataset.columnSpan);
+                    const widthNumber = columnSpan * this.gridColumnWidth + ((columnSpan - 1) * index_52.GAP_WIDTH);
+                    section.width = `${widthNumber}px`;
                 }
             }
         }
@@ -4278,10 +4273,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 if (eventTarget instanceof PageRow_1)
                     return;
                 const target = eventTarget.closest && eventTarget.closest('ide-section');
-                const toolbar = target === null || target === void 0 ? void 0 : target.querySelector('ide-toolbar');
-                const cannotDrag = toolbar &&
-                    (toolbar.classList.contains('is-editing') ||
-                        toolbar.classList.contains('is-setting'));
+                const toolbars = target ? Array.from(target.querySelectorAll('ide-toolbar')) : [];
+                const cannotDrag = toolbars.find(toolbar => toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting'));
                 if (target && !cannotDrag) {
                     self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
                     self.currentElement = target;
@@ -4307,7 +4300,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 removeClass('is-dragenter');
                 removeClass('row-entered');
                 removeClass('is-dragging');
-                // self.updateAlign();
             });
             function dragEnter(enterTarget, clientX, clientY, isOverlap = false) {
                 var _a, _b, _c, _d;

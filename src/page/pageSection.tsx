@@ -42,7 +42,7 @@ export class PageSection extends Module {
                 if (!pageElement) return;
                 this.pageElementMap.delete(entry.target);
                 if (!isEmpty(pageElement.properties)) (entry.target as any).setProperties(pageElement.properties);
-                pageElement.tag && (entry.target as any).setTag(pageElement.tag);
+                pageElement.tag && (entry.target as any).setTag(pageElement.tag, true);
                 observer.unobserve(entry.target);
             }
         });
