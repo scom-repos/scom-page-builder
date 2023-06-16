@@ -29,6 +29,13 @@ export class RemoveToolbarCommand implements ICommand {
   }
 
   execute(): void {
+    const currentElm = this.pageRow?.querySelector(`ide-toolbar#${this.element.id}`);
+    if (currentElm?.data) {
+      this.data = JSON.parse(JSON.stringify(currentElm.data));
+    }
+    if (!this.element.closest('ide-row') && currentElm) {
+      this.element = currentElm;
+    }
     pageObject.removeElement(this.rowId, this.elementId);
     const sectionEl = this.element.closest('ide-section');
     this.element.remove();
@@ -36,7 +43,7 @@ export class RemoveToolbarCommand implements ICommand {
     const isEmpty = !section?.elements?.length || section?.elements.every(el => el.type === "composite" && !el.elements?.length);
     this.pageRow && this.pageRow.toggleUI(!isEmpty);
     if (!this.sectionId || this.sectionId === this.elementId) {
-      const hasSectionData = !!section?.elements?.find(elm => elm.id === sectionEl.id);
+      const hasSectionData = !!section?.elements?.find(elm => elm.id === sectionEl?.id);
       if (sectionEl && !hasSectionData) sectionEl.remove();
     } else {
       const parentElement = (section?.elements || []).find(elm => elm.id === this.sectionId);
@@ -51,11 +58,11 @@ export class RemoveToolbarCommand implements ICommand {
     const section = pageObject.getRow(this.rowId);
     const clonedSection = JSON.parse(JSON.stringify(section));
     if (this.pageRow && (this.rowId !== 'header' && this.rowId !== 'footer')) {
-      this.pageRow.setData({...clonedSection, id: this.rowId});
+      this.pageRow.setData({ ...clonedSection, id: this.rowId });
       this.pageRow.toggleUI(true);
     }
     application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
   }
 
-  redo(): void {}
+  redo(): void { }
 }

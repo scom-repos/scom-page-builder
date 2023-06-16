@@ -132,7 +132,6 @@ export class PageObject {
   setElement(sectionId: string, elementId: string, value: any) {
     let elm = this.getElement(sectionId, elementId);
     if (!elm) return;
-    console.log('set elm', sectionId, elementId, value)
     if (value.properties !== undefined) elm.properties = value.properties;
     if (value.columnSpan !== undefined  && value.columnSpan !== elm.columnSpan)
       elm.columnSpan = value.columnSpan;

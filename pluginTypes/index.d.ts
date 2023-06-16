@@ -362,7 +362,7 @@ declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
         userInputDataSchema: IDataSchema;
         userInputUISchema: IUISchema;
         customUI?: any;
-        useRenderUI?: boolean;
+        isReplacement?: boolean;
     }
     export interface IPageBlock {
         getActions: () => IPageBlockAction[];
@@ -699,6 +699,21 @@ declare module "@scom/scom-page-builder/command/addElement.ts" {
         redo(): void;
     }
 }
+/// <amd-module name="@scom/scom-page-builder/command/replaceElement.ts" />
+declare module "@scom/scom-page-builder/command/replaceElement.ts" {
+    import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
+    export class ReplaceElementCommand implements ICommand {
+        private element;
+        private pageRow;
+        private oldReplaceData;
+        private currentReplaceData;
+        private data;
+        constructor(element: any);
+        execute(): void;
+        undo(): void;
+        redo(): void;
+    }
+}
 /// <amd-module name="@scom/scom-page-builder/command/index.ts" />
 declare module "@scom/scom-page-builder/command/index.ts" {
     export { UpdateRowCommand } from "@scom/scom-page-builder/command/updateRow.ts";
@@ -710,6 +725,7 @@ declare module "@scom/scom-page-builder/command/index.ts" {
     export { RemoveToolbarCommand } from "@scom/scom-page-builder/command/removeToolbar.ts";
     export { UpdateTypeCommand } from "@scom/scom-page-builder/command/updateType.ts";
     export { AddElementCommand } from "@scom/scom-page-builder/command/addElement.ts";
+    export { ReplaceElementCommand } from "@scom/scom-page-builder/command/replaceElement.ts";
     export { ICommand, IDataColumn } from "@scom/scom-page-builder/command/interface.ts";
 }
 /// <amd-module name="@scom/scom-page-builder/theme/light.theme.ts" />
@@ -770,7 +786,7 @@ declare module "@scom/scom-page-builder/common/toolbar.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/common/toolbar.tsx" />
 declare module "@scom/scom-page-builder/common/toolbar.tsx" {
     import { Module, ControlElement } from '@ijstech/components';
-    import { IPageElement } from "@scom/scom-page-builder/interface/index.ts";
+    import { IPageBlockData, IPageElement } from "@scom/scom-page-builder/interface/index.ts";
     import "@scom/scom-page-builder/common/toolbar.css.ts";
     global {
         namespace JSX {
@@ -804,8 +820,10 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private _rowId;
         private _elementId;
         private _currentSingleContentBlockId;
+        private _currentReplaceData;
         constructor(parent?: any);
         get data(): any;
+        get currentReplaceData(): IPageElement;
         get module(): any;
         get toolList(): any[];
         set toolList(value: any[]);
@@ -832,11 +850,14 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         fetchModule(data: IPageElement): Promise<void>;
         private setModule;
         private showToolList;
-        setData(properties: any): Promise<void>;
+        setData(properties: any, module?: IPageBlockData): Promise<void>;
         setTag(tag: any): Promise<void>;
         setProperties(data: any): Promise<void>;
         private checkToolbar;
         _handleClick(event: MouseEvent): boolean;
+        clearComponent(): void;
+        updateComponent(data?: any): void;
+        private replaceComponent;
         init(): void;
         render(): any;
     }

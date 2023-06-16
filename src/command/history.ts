@@ -14,7 +14,6 @@ export class CommandHistory {
   undo(): void {
     if (this.currentCommandIndex >= 0) {
       const command = this.commands[this.currentCommandIndex];
-      console.log('undo', command)
       command.undo();
       this.currentCommandIndex--;
     }
@@ -24,7 +23,6 @@ export class CommandHistory {
     if (this.currentCommandIndex < this.commands.length - 1) {
       this.currentCommandIndex++;
       const command = this.commands[this.currentCommandIndex];
-      console.log('redo', command)
       command.execute();
     }
   }
