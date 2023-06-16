@@ -17,7 +17,7 @@ import { EVENT } from '../const/index';
 import { ELEMENT_NAME, IPageBlockAction, IPageBlockData, IPageElement } from '../interface/index';
 import { getRootDir, pageObject } from '../store/index';
 import { getEmbedElement, isEmpty } from '../utility/index';
-import { commandHistory, RemoveToolbarCommand } from '../command/index';
+import { commandHistory, RemoveToolbarCommand, ReplaceElementCommand } from '../command/index';
 import { currentTheme  } from '../theme/index';
 import './toolbar.css';
 
@@ -62,6 +62,7 @@ export class IDEToolbar extends Module {
     private _rowId: string;
     private _elementId: string;
     private _currentSingleContentBlockId: string;
+    private _currentReplaceData: IPageElement = null;
 
     constructor(parent?: any) {
         super(parent);
@@ -71,6 +72,10 @@ export class IDEToolbar extends Module {
 
     get data() {
         return pageObject.getElement(this.rowId, this.elementId);
+    }
+
+    get currentReplaceData() {
+        return this._currentReplaceData;
     }
 
     get module() {
@@ -133,6 +138,7 @@ export class IDEToolbar extends Module {
                         commandHistory.execute(commandIns);
                     } else {
                         this.mdActions.visible = true;
+                        this.pnlForm.visible = true;
                     }
                     this.adjustCursorByAction();
                     this.hideToolbars();
@@ -184,7 +190,12 @@ export class IDEToolbar extends Module {
         this.mdActions.title = action.name || 'Update Settings';
         if (action.customUI) {
             const customUI = action.customUI;
-            const element = customUI.render({...properties, ...tag}, this.onSave.bind(this));
+            let element = null;
+            if (action.isReplacement) {
+                element = customUI.render({...properties, ...tag}, this.replaceComponent.bind(this));
+            } else {
+                element = customUI.render({...properties, ...tag}, this.onSave.bind(this));
+            }
             this.pnlForm.append(element);
             this.form.visible = false
         }
@@ -390,6 +401,8 @@ export class IDEToolbar extends Module {
 
     private async setModule(module: Module, data: IPageBlockData) {
         this._component = module;
+        this._component.id = `component-${this.elementId}`;
+        this._component.rootParent = this.closest('ide-row');
         this._component.parent = this.contentStack;
         const builderTarget = this._component?.getConfigurators ? this._component.getConfigurators().find((conf: any) => conf.target === 'Builders') : null;
         if (builderTarget?.setElementId) builderTarget.setElementId(this.elementId);
@@ -416,27 +429,27 @@ export class IDEToolbar extends Module {
         this.showToolbars();
     }
 
-    async setData(properties: any) {
+    async setData(properties: any, module?: IPageBlockData) {
         // update data from pageblock
         if (!this._component) return;
+        this.updateComponent(module ? undefined : properties);
         if (this.isContentBlock()) {
             const isInitialization = Object.keys(properties)[0].includes(SINGLE_CONTENT_BLOCK_ID)
             const isContentBlockProps = Object.keys(properties).includes('numberOfBlocks')
 
             if (isInitialization) {
-                pageObject.setElement(this.rowId, this.data.id, { properties });
+                pageObject.setElement(this.rowId, this.data.id, { properties, module });
             } else {
                 if (isContentBlockProps) {
-                    pageObject.setElement(this.rowId, this.data.id, {properties: {...this.data.properties, ...properties }});
+                    pageObject.setElement(this.rowId, this.data.id, { properties: {...this.data.properties, ...properties }, module });
                 } else {
                     const element = this.data.properties[this._currentSingleContentBlockId]
                     if (element) element.properties = properties
-                    pageObject.setElement(this.rowId, this.data.id, {properties: {...this.data.properties, [this._currentSingleContentBlockId]: element}})
-            
+                    pageObject.setElement(this.rowId, this.data.id, { properties: {...this.data.properties, [this._currentSingleContentBlockId]: element}, module });
                 }
             }
         } else {
-            this.data && pageObject.setElement(this.rowId, this.data.id, { properties });
+            this.data && pageObject.setElement(this.rowId, this.data.id, { properties, module });
         }
     }
 
@@ -445,6 +458,7 @@ export class IDEToolbar extends Module {
         // if (tag.width === '100%') tag.width = Number(this.width);
         if (tag.height === '100%') tag.height = Number(this.height);
         if (this._component?.getConfigurators) {
+            this.updateComponent();
             const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
             if (init) tag.width = '100%';
             if (builderTarget?.setTag) await builderTarget.setTag(tag);
@@ -490,6 +504,40 @@ export class IDEToolbar extends Module {
         if (this._readonly) return super._handleClick(event, true);
         this.checkToolbar();
         return super._handleClick(event, true);
+    }
+
+    clearComponent() {
+        if (this._component) {
+            this._component.clearInnerHTML();
+            this.contentStack.removeChild(this._component);
+            this._component = null;
+        }
+    }
+
+    updateComponent(data?: any) {
+        if (!this._component?.closest('ide-row')) {
+            const componentId = this._component.id;
+            const rootParent = this._component.rootParent;
+            if (componentId && rootParent) {
+                this._component = rootParent.querySelector(`#${componentId}`) ?? this._component;
+                if (data) {
+                    this.setProperties(data);
+                }
+            }
+        } else if (this._component?.getConfigurators && data) {
+            const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
+            if (JSON.stringify(builderTarget?.getData()) !== JSON.stringify(data)) {
+                this.setProperties(data);
+            }
+        }
+    }
+
+    private replaceComponent(value: IPageElement) {
+        this._currentReplaceData = value;
+        const replaceCmd = new ReplaceElementCommand(this);
+        commandHistory.execute(replaceCmd);
+        this.pnlForm.visible = false;
+        this.mdActions.visible = false;
     }
 
     init() {
