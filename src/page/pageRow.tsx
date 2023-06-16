@@ -297,6 +297,7 @@ export class PageRow extends Module {
         let toolbar: Control;
         let dragStartTarget: Control;
         let dragOverTarget: Control;
+        type OverlapType = "none" | "self" | "mutual" | "border";
 
         this.addEventListener('mousedown', (e) => {
             const target = e.target as Control;
@@ -545,7 +546,8 @@ export class PageRow extends Module {
 
         this.addEventListener('dragenter', function (event) {
             const eventTarget = event.target as Control;
-            if (dragStartTarget && (dragStartTarget == eventTarget || dragStartTarget.contains(eventTarget)))
+            const overlap = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX)
+            if (overlap.overlapType == "self")
                 dragEnter(eventTarget, event.clientX, event.clientY, true);
             else 
                 dragEnter(eventTarget, event.clientX, event.clientY);
@@ -556,8 +558,9 @@ export class PageRow extends Module {
 
             const eventTarget = event.target as Control;
             let enterTarget: Control;
-            // if target overlap
-            if (dragStartTarget && (dragStartTarget == eventTarget || dragStartTarget.contains(eventTarget))) {
+            const overlap = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX)
+            // if target overlap with itself
+            if (overlap.overlapType == "self") {
                 const cursorPosition = { x: event.clientX, y: event.clientY };
                 const elements = self.pnlRow.querySelectorAll('.fixed-grid-item');
 
@@ -621,22 +624,74 @@ export class PageRow extends Module {
             return nearestElement;
         }
 
+        function isOverlapWithSection(dropTarget: HTMLElement, dragTarget: HTMLElement, clientX: number): {overlapType: OverlapType, section: HTMLElement|undefined} {
+            if (!dropTarget || !dragTarget) return {
+                overlapType: "none", section: undefined
+            }
+            const dragTargetSection = dragTarget.closest('ide-section') as HTMLElement;
+            const nearestCol = findNearestFixedGridInRow(clientX)
+            const dropColumn: number = parseInt(nearestCol.getAttribute("data-column"));
+            const grid = dropTarget.closest('.grid');
+            if (!grid) return {
+                overlapType: "none", section: undefined
+            }
+
+            const sections: HTMLElement[] = Array.from(grid?.querySelectorAll('ide-section'));
+            const sortedSections: HTMLElement[] = sections.sort((a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column));
+
+            const startOfDragingElm: number = dropColumn;
+            const endOfDragingElm: number = dropColumn + parseInt(dragTargetSection.dataset.columnSpan) - 1;
+
+            // overlap with border
+            if (endOfDragingElm >= self.maxColumn) return {
+                overlapType: "border", section: undefined
+            }
+
+            // overlap with other section
+            for (let i=0; i<sortedSections.length; i++) {
+                const element = sortedSections[i];
+                if (element!=dragTargetSection){
+
+                    const startOfDroppingElm: number = parseInt(element.dataset.column);
+                    const endOfDroppingElm: number = parseInt(element.dataset.column) + parseInt(element.dataset.columnSpan) - 1;
+                    const condition1: boolean = startOfDragingElm >= startOfDroppingElm && startOfDragingElm <= endOfDroppingElm;
+                    const condition2: boolean = startOfDroppingElm >= startOfDragingElm && startOfDroppingElm <= endOfDragingElm;
+
+                    if (condition1 || condition2) return {
+                        overlapType: "mutual", section: element
+                    }
+                }
+            }
+            // overlap with itself
+            if (dropTarget==dragTarget || dragTarget.contains(dropTarget)) return {
+                overlapType: "self", section: undefined
+            }
+            // no overlap
+            return {
+                overlapType: "none", section: undefined
+            }
+        }
+
         this.addEventListener('drop', async function (event) {
             const elementConfig = getDragData();
             const eventTarget = event.target as Control;
             const pageRow = eventTarget.closest('ide-row') as PageRow;
             event.preventDefault();
             event.stopPropagation();
+
+            // if target overlap with other section
+            const overlap = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX);
+            if (overlap.overlapType == "mutual" || overlap.overlapType == "border") return;
+
             if (pageRow && elementConfig?.module?.name === 'sectionStack')
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
             if (!self.currentElement) return;
 
             let nearestFixedItem = eventTarget.closest('.fixed-grid-item') as Control;
 
-            // if target overlap
-            if (dragStartTarget && (dragStartTarget == eventTarget || dragStartTarget.contains(eventTarget))) {
+            // if target overlap with itself
+            if (overlap.overlapType == "self")
                 nearestFixedItem = findNearestFixedGridInRow(event.clientX);
-            }
 
             if (nearestFixedItem) {
                 const column = Number(nearestFixedItem.dataset.column);
