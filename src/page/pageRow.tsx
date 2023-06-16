@@ -297,7 +297,7 @@ export class PageRow extends Module {
         let toolbar: Control;
         let dragStartTarget: Control;
         let dragOverTarget: Control;
-        type OverlapType = "none" | "self" | "mutual" | "border";
+        type OverlapType = "none" | "self" | "mutual"; // | "border";
 
         this.addEventListener('mousedown', (e) => {
             const target = e.target as Control;
@@ -642,12 +642,6 @@ export class PageRow extends Module {
             const startOfDragingElm: number = dropColumn;
             const endOfDragingElm: number = dropColumn + parseInt(dragTargetSection.dataset.columnSpan) - 1;
 
-            // overlap with border
-            if (endOfDragingElm >= self.maxColumn) return {
-                overlapType: "border", section: undefined
-            }
-
-            // overlap with other section
             for (let i=0; i<sortedSections.length; i++) {
                 const element = sortedSections[i];
                 if (element!=dragTargetSection){
@@ -657,11 +651,16 @@ export class PageRow extends Module {
                     const condition1: boolean = startOfDragingElm >= startOfDroppingElm && startOfDragingElm <= endOfDroppingElm;
                     const condition2: boolean = startOfDroppingElm >= startOfDragingElm && startOfDroppingElm <= endOfDragingElm;
 
+                    // overlap with other section
                     if (condition1 || condition2) return {
                         overlapType: "mutual", section: element
                     }
                 }
             }
+            // overlap with border
+            // if (endOfDragingElm >= self.maxColumn && (self.maxColumn - endOfLastElmInRow < parseInt(dragTargetSection.dataset.columnSpan))) return {
+            //     overlapType: "border", section: undefined
+            // }
             // overlap with itself
             if (dropTarget==dragTarget || dragTarget.contains(dropTarget)) return {
                 overlapType: "self", section: undefined
@@ -681,7 +680,7 @@ export class PageRow extends Module {
 
             // if target overlap with other section
             const overlap = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX);
-            if (overlap.overlapType == "mutual" || overlap.overlapType == "border") return;
+            if (overlap.overlapType == "mutual"/* || overlap.overlapType == "border"*/) return;
 
             if (pageRow && elementConfig?.module?.name === 'sectionStack')
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });

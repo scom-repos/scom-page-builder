@@ -4344,12 +4344,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const sortedSections = sections.sort((a, b) => Number(a.dataset.column) - Number(b.dataset.column));
                 const startOfDragingElm = dropColumn;
                 const endOfDragingElm = dropColumn + parseInt(dragTargetSection.dataset.columnSpan) - 1;
-                // overlap with border
-                if (endOfDragingElm >= self.maxColumn)
-                    return {
-                        overlapType: "border", section: undefined
-                    };
-                // overlap with other section
                 for (let i = 0; i < sortedSections.length; i++) {
                     const element = sortedSections[i];
                     if (element != dragTargetSection) {
@@ -4357,12 +4351,17 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         const endOfDroppingElm = parseInt(element.dataset.column) + parseInt(element.dataset.columnSpan) - 1;
                         const condition1 = startOfDragingElm >= startOfDroppingElm && startOfDragingElm <= endOfDroppingElm;
                         const condition2 = startOfDroppingElm >= startOfDragingElm && startOfDroppingElm <= endOfDragingElm;
+                        // overlap with other section
                         if (condition1 || condition2)
                             return {
                                 overlapType: "mutual", section: element
                             };
                     }
                 }
+                // overlap with border
+                // if (endOfDragingElm >= self.maxColumn && (self.maxColumn - endOfLastElmInRow < parseInt(dragTargetSection.dataset.columnSpan))) return {
+                //     overlapType: "border", section: undefined
+                // }
                 // overlap with itself
                 if (dropTarget == dragTarget || dragTarget.contains(dropTarget))
                     return {
@@ -4382,7 +4381,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 event.stopPropagation();
                 // if target overlap with other section
                 const overlap = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX);
-                if (overlap.overlapType == "mutual" || overlap.overlapType == "border")
+                if (overlap.overlapType == "mutual" /* || overlap.overlapType == "border"*/)
                     return;
                 if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack')
                     components_25.application.EventBus.dispatch(index_50.EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
