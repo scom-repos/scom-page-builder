@@ -68,7 +68,7 @@ export class MainModule extends Module {
       {
         "name": "Dune Blocks",
         "path": "scom-dune",
-        "category": "charts"
+        "category": "project-micro-dapps"
       }
     ]
   }

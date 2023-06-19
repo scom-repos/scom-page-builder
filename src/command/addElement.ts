@@ -23,7 +23,7 @@ export class AddElementCommand implements ICommand {
 
   private updateData(el: Control, rowId: string, column?: number, columnSpan?: number) {
     if (!column && !columnSpan) return;
-    const oldColumnData = {el, rowId, column: getColumn(el), columnSpan: getColumnSpan(el)};
+    const oldColumnData = { el, rowId, column: getColumn(el), columnSpan: getColumnSpan(el) };
     const hasItem = this.oldDataColumnMap.find(data => data.el.id === el.id);
     !hasItem && this.oldDataColumnMap.push(oldColumnData);
     const col = column || getColumn(el);
@@ -54,7 +54,7 @@ export class AddElementCommand implements ICommand {
       columnSpan = columnData.columnSpan;
     }
 
-    const isMicroDapps= this.data?.module?.category === 'micro-dapps';
+    const isMicroDapps = this.data?.module?.category === 'micro-dapps';
     const newElData = {
       id: this.data.id,
       column,
@@ -66,6 +66,17 @@ export class AddElementCommand implements ICommand {
       },
       module: this.data.module
     };
+    const parentData = this.parent?.data;
+    // Remove any elements that are not currently listed
+    if (parentData?.elements) {
+      const selections = this.parent.querySelectorAll('ide-section');
+      for (const section of selections) {
+        const elm = parentData.elements.find((f: any) => f.id === section.id);
+        if (!elm || Object.keys(elm.module).length === 0) {
+          section.remove();
+        }
+      }
+    }
     this.element = await this.parent.addElement(newElData);
     const parentId = this.parent.id.replace('row-', '');
     pageObject.addElement(parentId, newElData);
@@ -89,5 +100,5 @@ export class AddElementCommand implements ICommand {
     this.parent.toggleUI(!!elementSection?.elements?.length);
   }
 
-  redo(): void {}
+  redo(): void { }
 }
