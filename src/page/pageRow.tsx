@@ -638,6 +638,18 @@ export class PageRow extends Module {
                 overlapType: "none", section: undefined
             }
 
+            const isPageRow = dropTarget.classList.contains('page-row');
+            let dropElm = (
+                isPageRow
+                    ? dropTarget.querySelector('.is-dragenter')
+                    : dropTarget.closest('.is-dragenter')
+            ) as Control;
+            
+            // drop on the front-block, back-block or bottom block
+            if (dropElm) return {
+                overlapType: "none", section: undefined
+            }
+
             const sections: HTMLElement[] = Array.from(grid?.querySelectorAll('ide-section'));
             const sortedSections: HTMLElement[] = sections.sort((a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column));
 
