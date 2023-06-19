@@ -4340,6 +4340,15 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     return {
                         overlapType: "none", section: undefined
                     };
+                const isPageRow = dropTarget.classList.contains('page-row');
+                let dropElm = (isPageRow
+                    ? dropTarget.querySelector('.is-dragenter')
+                    : dropTarget.closest('.is-dragenter'));
+                // drop on the front-block, back-block or bottom block
+                if (dropElm)
+                    return {
+                        overlapType: "none", section: undefined
+                    };
                 const sections = Array.from(grid === null || grid === void 0 ? void 0 : grid.querySelectorAll('ide-section'));
                 const sortedSections = sections.sort((a, b) => Number(a.dataset.column) - Number(b.dataset.column));
                 const startOfDragingElm = dropColumn;
