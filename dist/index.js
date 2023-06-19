@@ -2523,7 +2523,7 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                         fontWeight: 600
                     },
                     'i-button': {
-                        padding: '1rem'
+                        padding: '0.5rem 1rem'
                     },
                     'i-input': {
                         border: `1px solid ${Theme.divider}`,
@@ -2631,6 +2631,9 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this._currentReplaceData = null;
             this.setData = this.setData.bind(this);
             this.fetchModule = this.fetchModule.bind(this);
+            // application.EventBus.register(this, 'themeChanged', (value: string) => {
+            //     if (this.isTexbox(this.data?.module)) (this.module as any).theme = value
+            // })
         }
         get data() {
             return index_25.pageObject.getElement(this.rowId, this.elementId);
@@ -2928,6 +2931,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 await this.setModule(module, data === null || data === void 0 ? void 0 : data.module);
                 if (this.isTexbox(data.module)) {
                     this.dragStack.visible = true;
+                    // const themeVar = document.body.style.getPropertyValue('--theme')
+                    // if (themeVar) (this.module as any).theme = themeVar
                 }
                 else if (this.isContentBlock()) {
                     const allSingleContentBlockId = Object.keys(data.properties).filter(prop => prop.includes(SINGLE_CONTENT_BLOCK_ID));
@@ -3011,18 +3016,18 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             var _a;
             if (!this._component)
                 return;
-            // if (tag.width === '100%') tag.width = Number(this.width);
+            if (tag.width === '100%')
+                tag.width = Number(this.width);
             if (tag.height === '100%')
                 tag.height = Number(this.height);
             if ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) {
                 this.updateComponent();
                 const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
-                if (init)
-                    tag.width = '100%';
                 if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setTag)
-                    await builderTarget.setTag(tag);
+                    await builderTarget.setTag(init ? Object.assign(Object.assign({}, tag), { width: '100%' }) : Object.assign({}, tag));
             }
-            this.data && index_25.pageObject.setElement(this.rowId, this.data.id, { tag });
+            if (this.data && !init)
+                index_25.pageObject.setElement(this.rowId, this.data.id, { tag });
         }
         async setProperties(data) {
             var _a;
@@ -4146,7 +4151,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             }
         }
         updateGridColumn(grid) {
-            grid.templateColumns = [`repeat(${this.maxColumn}, ${this.gridColumnWidth}px)`];
+            grid.templateColumns = [`repeat(${this.maxColumn}, 1fr)`];
+            // [`repeat(${this.maxColumn}, ${this.gridColumnWidth}px)`];
             grid.gap = { column: `${index_52.GAP_WIDTH}px` };
         }
         initEventListeners() {
@@ -4292,6 +4298,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 if (self.currentElement && !self.currentElement.classList.contains('builder-item'))
                     self.currentElement.opacity = 1;
                 self.currentElement = null;
+                dragStartTarget = null;
+                dragOverTarget = null;
                 components_26.application.EventBus.dispatch(index_51.EVENT.ON_SET_DRAG_ELEMENT, null);
                 self.isDragging = false;
                 (0, index_53.setDragData)(null);

@@ -68,6 +68,9 @@ export class IDEToolbar extends Module {
         super(parent);
         this.setData = this.setData.bind(this);
         this.fetchModule = this.fetchModule.bind(this);
+        // application.EventBus.register(this, 'themeChanged', (value: string) => {
+        //     if (this.isTexbox(this.data?.module)) (this.module as any).theme = value
+        // })
     }
 
     get data() {
@@ -381,6 +384,8 @@ export class IDEToolbar extends Module {
             await this.setModule(module, data?.module);
             if (this.isTexbox(data.module)) {
                 this.dragStack.visible = true;
+                // const themeVar = document.body.style.getPropertyValue('--theme')
+                // if (themeVar) (this.module as any).theme = themeVar
             } else if (this.isContentBlock()) {
                 const allSingleContentBlockId = Object.keys(data.properties).filter(prop => prop.includes(SINGLE_CONTENT_BLOCK_ID))
                 for (let singleContentBlockId of allSingleContentBlockId) {
@@ -455,15 +460,16 @@ export class IDEToolbar extends Module {
 
     async setTag(tag: any, init?: boolean) {
         if (!this._component) return;
-        // if (tag.width === '100%') tag.width = Number(this.width);
+        if (tag.width === '100%') tag.width = Number(this.width);
         if (tag.height === '100%') tag.height = Number(this.height);
         if (this._component?.getConfigurators) {
             this.updateComponent();
             const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
-            if (init) tag.width = '100%';
-            if (builderTarget?.setTag) await builderTarget.setTag(tag);
+            if (builderTarget?.setTag)
+                await builderTarget.setTag(init ? {...tag, width: '100%'} : {...tag});
         }
-        this.data && pageObject.setElement(this.rowId, this.data.id, { tag });
+        if (this.data && !init)
+            pageObject.setElement(this.rowId, this.data.id, { tag });
     }
 
     async setProperties(data: any) {

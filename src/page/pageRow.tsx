@@ -282,7 +282,8 @@ export class PageRow extends Module {
     }
 
     private updateGridColumn(grid: GridLayout) {
-        grid.templateColumns = [`repeat(${this.maxColumn}, ${this.gridColumnWidth}px)`];
+        grid.templateColumns = [`repeat(${this.maxColumn}, 1fr)`];
+        // [`repeat(${this.maxColumn}, ${this.gridColumnWidth}px)`];
         grid.gap = { column: `${GAP_WIDTH}px` };
     }
 
@@ -427,6 +428,8 @@ export class PageRow extends Module {
             if (self.currentElement && !self.currentElement.classList.contains('builder-item'))
                 self.currentElement.opacity = 1;
             self.currentElement = null;
+            dragStartTarget = null;
+            dragOverTarget = null;
             application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, null);
             self.isDragging = false;
             setDragData(null);
@@ -579,7 +582,6 @@ export class PageRow extends Module {
                     }
                 });
                 enterTarget = nearestElement;
-                
             } else return
 
             if (enterTarget == dragOverTarget) return
