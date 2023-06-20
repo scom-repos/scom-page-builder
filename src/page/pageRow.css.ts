@@ -16,6 +16,7 @@ Styles.cssRule('ide-row', {
     position: 'relative',
     transition: 'translate .3s ease-in',
     border: '3px solid transparent',
+    backgroundColor: '#fff',
     $nest: {
         '.drag-stack': {
             visibility: 'hidden',

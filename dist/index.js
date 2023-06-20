@@ -114,7 +114,7 @@ define("@scom/scom-page-builder/const/index.ts", ["require", "exports", "@scom/s
 define("@scom/scom-page-builder/store/index.ts", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.setCategories = exports.getCategories = exports.getSearchOptions = exports.setSearchOptions = exports.getSearchData = exports.setSearchData = exports.getDragData = exports.setDragData = exports.getRootDir = exports.setRootDir = exports.addPageBlock = exports.getPageBlocks = exports.setPageBlocks = exports.state = exports.pageObject = exports.PageObject = void 0;
+    exports.getTheme = exports.setTheme = exports.setCategories = exports.getCategories = exports.getSearchOptions = exports.setSearchOptions = exports.getSearchData = exports.setSearchData = exports.getDragData = exports.setDragData = exports.getRootDir = exports.setRootDir = exports.addPageBlock = exports.getPageBlocks = exports.setPageBlocks = exports.state = exports.pageObject = exports.PageObject = void 0;
     const MAX_COLUMN = 12;
     class PageObject {
         constructor() {
@@ -387,7 +387,8 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports"], functio
                 id: 'project-micro-dapps',
                 title: 'Project MicroDApps'
             }
-        ]
+        ],
+        theme: 'light'
     };
     const setPageBlocks = (value) => {
         exports.state.pageBlocks = value || [];
@@ -443,6 +444,15 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports"], functio
         exports.state.categories = value || [];
     };
     exports.setCategories = setCategories;
+    const setTheme = (value) => {
+        exports.state.theme = value !== null && value !== void 0 ? value : 'light';
+    };
+    exports.setTheme = setTheme;
+    const getTheme = () => {
+        var _a;
+        return (_a = exports.state.theme) !== null && _a !== void 0 ? _a : 'light';
+    };
+    exports.getTheme = getTheme;
     const generateUUID = () => {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
             var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -3821,6 +3831,7 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
         position: 'relative',
         transition: 'translate .3s ease-in',
         border: '3px solid transparent',
+        backgroundColor: '#fff',
         $nest: {
             '.drag-stack': {
                 visibility: 'hidden',
@@ -4119,12 +4130,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         onMoveUp() {
             this.actionsBar.classList.add('hidden');
             this.dragStack.classList.add('hidden');
-            this.background = { color: '#f2f2f2' };
         }
         onMoveDown() {
             this.actionsBar.classList.remove('hidden');
             this.dragStack.classList.remove('hidden');
-            this.background = { color: 'initial' };
         }
         renderFixedGrid() {
             this.pnlRow.clearInnerHTML();
@@ -5733,6 +5742,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             super(parent, options);
             this.events = [];
             this.isFirstLoad = false;
+            this._theme = 'light';
             this.getData = this.getData.bind(this);
             this.setData = this.setData.bind(this);
             this.initEventBus();
@@ -5756,6 +5766,18 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         set categories(value) {
             (0, index_78.setCategories)(value);
             this.pageSidebar.renderUI();
+        }
+        get theme() {
+            var _a;
+            return (_a = this._theme) !== null && _a !== void 0 ? _a : 'light';
+        }
+        set theme(value) {
+            this._theme = value !== null && value !== void 0 ? value : 'light';
+            (0, index_78.setTheme)(this._theme);
+            if (this.pnlEditor) {
+                const color = this.theme === 'light' ? '#ffffff' : '#1E1E1E';
+                this.pnlEditor.background = { color };
+            }
         }
         async onFetchComponents(options) {
             return { items: [], total: 0 };
@@ -5825,6 +5847,9 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             super.init();
             this.initEventListeners();
             this.initData();
+            const theme = this.getAttribute('theme', true);
+            if (theme)
+                this.theme = theme;
         }
         setRootDir(value) {
             (0, index_78.setRootDir)(value);
@@ -5905,7 +5930,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 this.$render("i-grid-layout", { templateColumns: ['auto', 'minmax(auto, 235px)'], autoFillInHoles: true, height: "calc(100% -64px)", overflow: "hidden" },
                     this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } }, padding: { bottom: '1rem' } },
                         this.$render("i-panel", { id: "pageContent", maxWidth: 1400, width: "100%", margin: { left: 'auto', right: 'auto' } },
-                            this.$render("i-panel", { maxWidth: 1280, minHeight: "100vh", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: '#fff' }, class: "pnl-editor-wrapper" },
+                            this.$render("i-panel", { id: "pnlEditor", maxWidth: 1280, minHeight: "100vh", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: '#fff' }, class: "pnl-editor-wrapper" },
                                 this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
                                     this.$render("ide-rows", { id: "pageRows", draggable: true })),
                                 this.$render("builder-footer", { id: "builderFooter" })))),

@@ -238,12 +238,10 @@ export class PageRow extends Module {
     onMoveUp() {
         this.actionsBar.classList.add('hidden');
         this.dragStack.classList.add('hidden');
-        this.background = { color: '#f2f2f2' };
     }
     onMoveDown() {
         this.actionsBar.classList.remove('hidden');
         this.dragStack.classList.remove('hidden');
-        this.background = { color: 'initial' };
     }
 
     private renderFixedGrid() {
