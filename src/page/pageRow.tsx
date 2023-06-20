@@ -522,7 +522,6 @@ export class PageRow extends Module {
                 target = findNearestFixedGridInRow(clientX);
             else
                 target = leaveTarget.closest('.fixed-grid-item') as Control;
-
             if (target)
                 updateRectangles();
             else {
@@ -774,6 +773,7 @@ export class PageRow extends Module {
                     self.isDragging = false;
                 }
                 self.removeDottedLines();
+                updateRectangles();
             }
         });
 

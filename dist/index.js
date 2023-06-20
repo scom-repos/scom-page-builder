@@ -4639,6 +4639,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         self.isDragging = false;
                     }
                     self.removeDottedLines();
+                    updateRectangles();
                 }
             });
             function removeClass(className) {
