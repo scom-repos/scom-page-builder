@@ -1,4 +1,4 @@
-import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig, IOnFetchComponentsResult, IOnFetchComponentsOptions, ICategory } from "../interface/index";
+import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig, IOnFetchComponentsResult, IOnFetchComponentsOptions, ICategory, ThemeType } from "../interface/index";
 
 const MAX_COLUMN = 12;
 export class PageObject {
@@ -266,7 +266,8 @@ export const state = {
       id: 'project-micro-dapps',
       title: 'Project MicroDApps'
     }
-  ] as ICategory[]
+  ] as ICategory[],
+  theme: 'light'
 }
 
 export const setPageBlocks = (value: IPageBlockData[]) => {
@@ -320,6 +321,14 @@ export const getCategories = () => {
 
 export const setCategories = (value: ICategory[]) => {
   state.categories = value || [];
+}
+
+export const setTheme = (value: ThemeType) => {
+  state.theme = value ?? 'light';
+}
+
+export const getTheme = () => {
+  return state.theme ?? 'light';
 }
 
 const generateUUID = () => {

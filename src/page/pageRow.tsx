@@ -238,12 +238,10 @@ export class PageRow extends Module {
     onMoveUp() {
         this.actionsBar.classList.add('hidden');
         this.dragStack.classList.add('hidden');
-        this.background = { color: '#f2f2f2' };
     }
     onMoveDown() {
         this.actionsBar.classList.remove('hidden');
         this.dragStack.classList.remove('hidden');
-        this.background = { color: 'initial' };
     }
 
     private renderFixedGrid() {
@@ -524,7 +522,6 @@ export class PageRow extends Module {
                 target = findNearestFixedGridInRow(clientX);
             else
                 target = leaveTarget.closest('.fixed-grid-item') as Control;
-
             if (target)
                 updateRectangles();
             else {
@@ -776,6 +773,7 @@ export class PageRow extends Module {
                     self.isDragging = false;
                 }
                 self.removeDottedLines();
+                updateRectangles();
             }
         });
 
