@@ -2,9 +2,9 @@ import { application, Container, Control, ControlElement, customElements, custom
 import { } from '@ijstech/eth-contract'
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
-import { IPageData, IPageBlockData, IPageElement, IOnFetchComponentsOptions, IOnFetchComponentsResult, ICategory } from './interface/index';
+import { IPageData, IPageBlockData, IPageElement, IOnFetchComponentsOptions, IOnFetchComponentsResult, ICategory, ThemeType } from './interface/index';
 import { PageRows, PageSidebar } from './page/index';
-import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData, getPageBlocks, getCategories, setCategories } from './store/index';
+import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData, getPageBlocks, getCategories, setCategories, setTheme } from './store/index';
 import { currentTheme } from './theme/index';
 import './index.css';
 import { SearchComponentsDialog } from './dialogs/index';
@@ -17,6 +17,7 @@ interface PageBuilderElement extends ControlElement {
     rootDir?: string;
     components?: IPageBlockData[];
     categories?: ICategory[];
+    theme?: ThemeType;
     onFetchComponents?: onFetchComponentsCallback;
 }
 
@@ -37,10 +38,12 @@ export default class Editor extends Module {
     private pnlWrap: Panel;
     private pageSidebar: PageSidebar;
     private mdComponentsSearch: SearchComponentsDialog;
+    private pnlEditor: Panel;
 
     private events: any[] = [];
     private currentElement: any;
     private isFirstLoad: boolean = false;
+    private _theme: ThemeType = 'light';
 
     constructor(parent?: Container, options?: any) {
         super(parent, options);
@@ -73,6 +76,19 @@ export default class Editor extends Module {
     set categories(value: ICategory[]) {
         setCategories(value);
         this.pageSidebar.renderUI();
+    }
+
+    get theme() {
+        return this._theme ?? 'light';
+    }
+
+    set theme(value: ThemeType) {
+        this._theme = value ?? 'light';
+        setTheme(this._theme);
+        if (this.pnlEditor) {
+            const color = this.theme === 'light' ? '#ffffff' : '#1E1E1E';
+            this.pnlEditor.background = {color};
+        }
     }
 
     async onFetchComponents(options: IOnFetchComponentsOptions): Promise<IOnFetchComponentsResult> {
@@ -141,6 +157,8 @@ export default class Editor extends Module {
         super.init();
         this.initEventListeners();
         this.initData();
+        const theme = this.getAttribute('theme', true);
+        if (theme) this.theme = theme;
     }
 
     setRootDir(value: string) {
@@ -265,6 +283,7 @@ export default class Editor extends Module {
                             margin={{ left: 'auto', right: 'auto' }}
                         >
                             <i-panel
+                                id="pnlEditor"
                                 maxWidth={1280}
                                 minHeight="100vh"
                                 margin={{ top: 8, bottom: 8, left: 60, right: 60 }}
