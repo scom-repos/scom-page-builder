@@ -871,6 +871,7 @@ export class PageRow extends Module {
                         maxHeight="100%"
                         horizontalAlignment="center"
                         padding={{top: 5, bottom: 5}}
+                        class="bar-shadow"
                     >
                         <i-panel
                             class="actions"
@@ -944,12 +945,13 @@ export class PageRow extends Module {
                         padding={{top: '3rem', bottom: '3rem'}}
                         margin={{top: '3rem', bottom: '3rem'}}
                         width="100%"
-                        border={{width: '1px', style: 'dashed', color: Theme.divider}}
+                        border={{width: '1px', style: 'dashed', color: 'var(--builder-divider)'}}
                         class="text-center"
                     >
                         <i-label
                             caption='Drag Elements Here'
-                            font={{transform: 'uppercase', color: Theme.divider, size: '1.25rem'}}
+                            font={{transform: 'uppercase', color: 'var(--builder-color)', size: '1.25rem'}}
+                            opacity={0.5}
                         ></i-label>
                     </i-panel>
                 </i-vstack>

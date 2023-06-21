@@ -14,7 +14,7 @@ import {
     renderUI
 } from '@ijstech/components';
 import { EVENT } from '../const/index';
-import { ELEMENT_NAME, IPageBlockAction, IPageBlockData, IPageElement } from '../interface/index';
+import { ELEMENT_NAME, IPageBlockAction, IPageBlockData, IPageElement, ThemeType } from '../interface/index';
 import { getRootDir, pageObject } from '../store/index';
 import { getEmbedElement, isEmpty } from '../utility/index';
 import { commandHistory, RemoveToolbarCommand, ReplaceElementCommand } from '../command/index';
@@ -68,9 +68,6 @@ export class IDEToolbar extends Module {
         super(parent);
         this.setData = this.setData.bind(this);
         this.fetchModule = this.fetchModule.bind(this);
-        // application.EventBus.register(this, 'themeChanged', (value: string) => {
-        //     if (this.isTexbox(this.data?.module)) (this.module as any).theme = value
-        // })
     }
 
     get data() {
@@ -384,8 +381,6 @@ export class IDEToolbar extends Module {
             await this.setModule(module, data?.module);
             if (this.isTexbox(data.module)) {
                 this.dragStack.visible = true;
-                // const themeVar = document.body.style.getPropertyValue('--theme')
-                // if (themeVar) (this.module as any).theme = themeVar
             } else if (this.isContentBlock()) {
                 const allSingleContentBlockId = Object.keys(data.properties).filter(prop => prop.includes(SINGLE_CONTENT_BLOCK_ID))
                 for (let singleContentBlockId of allSingleContentBlockId) {
@@ -479,6 +474,11 @@ export class IDEToolbar extends Module {
             await builderTarget.setData(data);
         }
         if (builderTarget?.setRootDir) builderTarget.setRootDir(getRootDir());
+    }
+
+    setTheme(value: ThemeType) {
+        if (value !== this.module?.theme)
+            this.module.theme = value;
     }
 
     private checkToolbar() {

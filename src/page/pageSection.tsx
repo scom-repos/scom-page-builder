@@ -9,7 +9,7 @@ import './pageSection.css';
 import { ElementType, IPageElement } from '../interface/index';
 import { IDEToolbar } from '../common/index';
 import { isEmpty } from '../utility/index';
-import { pageObject } from '../store/index';
+import { getTheme, pageObject } from '../store/index';
 
 declare global {
     namespace JSX {
@@ -43,6 +43,7 @@ export class PageSection extends Module {
                 this.pageElementMap.delete(entry.target);
                 if (!isEmpty(pageElement.properties)) (entry.target as any).setProperties(pageElement.properties);
                 pageElement.tag && (entry.target as any).setTag(pageElement.tag, true);
+                (entry.target as any).setTheme(getTheme());
                 observer.unobserve(entry.target);
             }
         });

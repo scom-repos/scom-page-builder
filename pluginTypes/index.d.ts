@@ -106,7 +106,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         searchData: IOnFetchComponentsResult;
         searchOptions: IOnFetchComponentsOptions;
         categories: ICategory[];
-        theme: string;
+        theme: ThemeType;
     };
     export const setPageBlocks: (value: IPageBlockData[]) => void;
     export const getPageBlocks: () => any[];
@@ -126,7 +126,10 @@ declare module "@scom/scom-page-builder/store/index.ts" {
     export const getCategories: () => ICategory[];
     export const setCategories: (value: ICategory[]) => void;
     export const setTheme: (value: ThemeType) => void;
-    export const getTheme: () => string;
+    export const getTheme: () => ThemeType;
+    export const getBackgroundColor: (theme?: ThemeType) => string;
+    export const getFontColor: (theme?: ThemeType) => string;
+    export const getDivider: (theme?: ThemeType) => string;
 }
 /// <amd-module name="@scom/scom-page-builder/utility/pathToRegexp.ts" />
 declare module "@scom/scom-page-builder/utility/pathToRegexp.ts" {
@@ -792,7 +795,7 @@ declare module "@scom/scom-page-builder/common/toolbar.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/common/toolbar.tsx" />
 declare module "@scom/scom-page-builder/common/toolbar.tsx" {
     import { Module, ControlElement } from '@ijstech/components';
-    import { IPageBlockData, IPageElement } from "@scom/scom-page-builder/interface/index.ts";
+    import { IPageBlockData, IPageElement, ThemeType } from "@scom/scom-page-builder/interface/index.ts";
     import "@scom/scom-page-builder/common/toolbar.css.ts";
     global {
         namespace JSX {
@@ -859,6 +862,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         setData(properties: any, module?: IPageBlockData): Promise<void>;
         setTag(tag: any, init?: boolean): Promise<void>;
         setProperties(data: any): Promise<void>;
+        setTheme(value: ThemeType): void;
         private checkToolbar;
         _handleClick(event: MouseEvent): boolean;
         clearComponent(): void;

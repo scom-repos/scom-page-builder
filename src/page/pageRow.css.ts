@@ -16,7 +16,7 @@ Styles.cssRule('ide-row', {
     position: 'relative',
     transition: 'translate .3s ease-in',
     border: '3px solid transparent',
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--builder-bg)',
     $nest: {
         '.drag-stack': {
             visibility: 'hidden',
@@ -82,6 +82,9 @@ Styles.cssRule('ide-row', {
                             boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)'
                         }
                     }
+                },
+                '.bar-shadow': {
+                    boxShadow: '0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 3px 1px -2px rgb(0 0 0 / 12%), 0px 1px 5px 0px rgb(0 0 0 / 20%)'
                 }
             }
         },

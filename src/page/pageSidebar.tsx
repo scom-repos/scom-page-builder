@@ -58,7 +58,7 @@ export class PageSidebar extends Module {
         const categories = getCategories();
         this.pnlLayouts.clearInnerHTML();
         this.pnlLayouts.appendChild(
-            <i-vstack padding={{top: '1rem', bottom: '0.5rem', left: '1rem', right: '1rem'}} border={{ bottom: { width: 1, style: 'solid', color: Theme.divider } }}>
+            <i-vstack padding={{top: '1rem', bottom: '0.5rem', left: '1rem', right: '1rem'}} border={{ bottom: { width: 1, style: 'solid', color: 'var(--builder-divider)' } }}>
                 <i-vstack
                     id="sectionStack"
                     class="text-center pointer builder-item"
@@ -76,7 +76,7 @@ export class PageSidebar extends Module {
         this.pnlEmbeddables.clearInnerHTML();
         for (const stack of categories) {
             this.pnlEmbeddables.appendChild(
-                <i-scom-page-builder-collapse title={stack.title} border={{ bottom: { width: 1, style: 'solid', color: Theme.divider } }} expanded={true}>
+                <i-scom-page-builder-collapse title={stack.title} border={{ bottom: { width: 1, style: 'solid', color: 'var(--builder-divider)' } }} expanded={true}>
                     <i-grid-layout
                         id={`${stack.id.replace('-', '')}Stack`}
                         templateColumns={['repeat(2, 1fr)']}
