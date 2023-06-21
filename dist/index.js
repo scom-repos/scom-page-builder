@@ -4577,6 +4577,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const overlap = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX);
                 if (overlap.overlapType == "mutual" /* || overlap.overlapType == "border"*/)
                     return;
+                if (overlap.overlapType == "none" && eventTarget.classList.contains('fixed-grid'))
+                    return;
                 if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack')
                     components_27.application.EventBus.dispatch(index_51.EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
                 if (!self.currentElement)

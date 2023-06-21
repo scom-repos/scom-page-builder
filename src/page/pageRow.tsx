@@ -692,6 +692,8 @@ export class PageRow extends Module {
             // if target overlap with other section
             const overlap = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX);
             if (overlap.overlapType == "mutual"/* || overlap.overlapType == "border"*/) return;
+            if (overlap.overlapType == "none" && eventTarget.classList.contains('fixed-grid'))
+                return;
 
             if (pageRow && elementConfig?.module?.name === 'sectionStack')
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
