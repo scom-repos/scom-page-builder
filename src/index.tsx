@@ -38,7 +38,6 @@ export default class Editor extends Module {
     private pnlWrap: Panel;
     private pageSidebar: PageSidebar;
     private mdComponentsSearch: SearchComponentsDialog;
-    private pnlEditor: Panel;
 
     private events: any[] = [];
     private currentElement: any;
@@ -178,7 +177,8 @@ export default class Editor extends Module {
                 }
                 return !!section.elements.length;
             }),
-            footer: pageObject.footer
+            footer: pageObject.footer,
+            config: pageObject.config
         };
     }
 
@@ -186,7 +186,7 @@ export default class Editor extends Module {
         // pageObject.header = value.header;
         pageObject.sections = value?.sections || [];
         pageObject.footer = value?.footer;
-
+        if (value.config) pageObject.config = value.config;
         try {
             // await this.builderHeader.setData(value.header);
             await this.pageRows.setRows(value?.sections || []);
@@ -284,7 +284,6 @@ export default class Editor extends Module {
                             margin={{ left: 'auto', right: 'auto' }}
                         >
                             <i-panel
-                                id="pnlEditor"
                                 maxWidth={1280}
                                 minHeight="100vh"
                                 margin={{ top: 8, bottom: 8, left: 60, right: 60 }}

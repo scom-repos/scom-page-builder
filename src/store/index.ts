@@ -1,5 +1,5 @@
 import { Styles } from "@ijstech/components";
-import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig, IOnFetchComponentsResult, IOnFetchComponentsOptions, ICategory, ThemeType } from "../interface/index";
+import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig, IOnFetchComponentsResult, IOnFetchComponentsOptions, ICategory, ThemeType, IPageConfig } from "../interface/index";
 
 const lightTheme = Styles.Theme.defaultTheme;
 const darkTheme = Styles.Theme.darkTheme;
@@ -16,6 +16,7 @@ export class PageObject {
     image: "",
     elements: []
   };
+  private _config: IPageConfig;
 
   set header(value: IPageHeader) {
     this._header = value;
@@ -36,6 +37,13 @@ export class PageObject {
   }
   get footer() {
     return this._footer;
+  }
+
+  set config(value: IPageConfig) {
+    this._config = value;
+  }
+  get config() {
+    return this._config;
   }
 
   addSection(value: IPageSection, index?: number) {
@@ -218,7 +226,7 @@ export class PageObject {
     }
   }
 
-  getConfig(sectionId: string) {
+  getRowConfig(sectionId: string) {
     const section = this.getRow(sectionId);
     return section?.config || {};
   }
@@ -229,7 +237,7 @@ export class PageObject {
     return this.getColumnsNumberFn(section);
   }
 
-  getColumnsNumberFn(section: IPageSection|IPageFooter) {
+  private getColumnsNumberFn(section: IPageSection|IPageFooter) {
     if (!section) return MAX_COLUMN;
     const { columnsNumber, columnLayout } = section?.config || {};
     return (columnLayout === 'Fixed' && columnsNumber) ? columnsNumber : MAX_COLUMN;

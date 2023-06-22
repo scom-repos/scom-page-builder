@@ -80,7 +80,7 @@ export class PageRow extends Module {
     
     private get align() {
         const rowId = this.id?.replace('row-', '');
-        const config = pageObject.getConfig(rowId);
+        const config = pageObject.getRowConfig(rowId);
         return config?.align || 'left';
     }
 
@@ -211,10 +211,6 @@ export class PageRow extends Module {
             this.pnlRow.templateColumns = ['min-content'];
             const sections = Array.from(this.pnlRow.querySelectorAll('ide-section'));
             for (let section of sections) {
-                // const sectionId = section.id;
-                // const rowId = this.id?.replace('row-', '');
-                // const element = pageObject.getElement(rowId, sectionId);
-                // let width = element?.tag?.width;
                 const columnSpan = Number((section as HTMLElement).dataset.columnSpan);
                 const widthNumber = columnSpan * this.gridColumnWidth + ((columnSpan - 1) * GAP_WIDTH);
                 (section as Control).width = `${widthNumber}px`;

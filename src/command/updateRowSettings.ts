@@ -20,7 +20,7 @@ export class UpdateRowSettingsCommand implements ICommand {
     const { backgroundColor, config } = this.settings;
     const id = this.element.id.replace('row-', '');
     if (backgroundColor !== undefined) {
-      this.element.style.backgroundColor = backgroundColor;
+      this.element.background = {color: backgroundColor};
     }
     pageObject.updateSection(id, { backgroundColor, config });
     if (config) {
@@ -42,7 +42,7 @@ export class UpdateRowSettingsCommand implements ICommand {
   undo(): void {
     const { backgroundColor = '', config } = this.oldSettings;
     const id = this.element.id.replace('row-', '');
-    this.element.style.backgroundColor = backgroundColor;
+    this.element.background = {color: backgroundColor};
     pageObject.updateSection(id, {
       backgroundColor,
       config: config || {

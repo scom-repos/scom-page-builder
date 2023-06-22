@@ -12,13 +12,13 @@ const Theme = Styles.Theme.ThemeVars;
 
 import { assignAttr } from '../utility/index';
 import { IColumnLayoutType, IRowSettings } from '../interface/index';
-import { pageObject } from '../store/index';
+import { getBackgroundColor, pageObject } from '../store/index';
 
 export type ISettingType = 'color' | 'column';
 
 export interface RowSettingsDialogElement extends ControlElement {
     type: ISettingType;
-    onSave: (data: any) => void;
+    onSave: (data: IRowSettings) => void;
 }
 
 declare global {
@@ -135,12 +135,13 @@ export class RowSettingsDialog extends Module {
         this.formElm.jsonSchema = jsonSchema;
         this.formElm.formOptions = formOptions;
         this.formElm.renderForm();
+        const defaultColor = pageObject.config?.backgroundColor || getBackgroundColor();
         const config = this.type === 'column' ?
             this.data?.config || {
                 columnLayout: IColumnLayoutType.FIXED,
                 columnsNumber: 12,
                 align: 'left'
-            } : {backgroundColor: this.data?.backgroundColor || ''}
+            } : {backgroundColor: this.data?.backgroundColor || defaultColor}
         this.formElm.setFormData({...config});
     }
 
