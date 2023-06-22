@@ -744,7 +744,7 @@ export class PageRow extends Module {
                     const isBottomBlock = dropElm.classList.contains('bottom-block');
                     if (isBottomBlock) {
                         const config = getDragData();
-                        const dragCmd = new UpdateTypeCommand(dropElm, config ? null : self.currentElement, config);
+                        const dragCmd = new UpdateTypeCommand(dropElm, config ? null : self.currentElement, self.getNewElementData());
                         commandHistory.execute(dragCmd);
                     } else {
                         const isAppend = dropElm.classList.contains('back-block');

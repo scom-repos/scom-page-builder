@@ -549,6 +549,10 @@ export class IDEToolbar extends Module {
     init() {
         super.init();
         this.readonly = this.getAttribute('readonly', true, false);
+        this.initEventBus();
+    }
+
+    private initEventBus() {
         application.EventBus.register(this, EVENT.ON_UPDATE_TOOLBAR, () => this.updateToolbar())
         application.EventBus.register(this, EVENT.ON_SET_ACTION_BLOCK,  (data: {id: string; element: IPageElement, elementId:string}) => {
             const {id, element, elementId} = data;
@@ -557,6 +561,15 @@ export class IDEToolbar extends Module {
                 this._currentSingleContentBlockId = id;
             }
         })
+        application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: {color: string}) => {
+            if (this._component?.getConfigurators) {
+                const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
+                if (builderTarget?.setTag) {
+                    const oldTag = builderTarget?.getTag ? await builderTarget.getTag() : {};
+                    await builderTarget.setTag({...oldTag, background: data?.color || ''}, true);
+                }
+            }
+        });
     }
 
     render() {
