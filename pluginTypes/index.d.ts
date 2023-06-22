@@ -999,6 +999,77 @@ declare module "@scom/scom-page-builder/page/pageHeader.tsx" {
 declare module "@scom/scom-page-builder/page/pageSection.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/common/toolbar.css.ts" />
 declare module "@scom/scom-page-builder/common/toolbar.css.ts" { }
+/// <amd-module name="@scom/scom-page-builder/page/pageRow.css.ts" />
+declare module "@scom/scom-page-builder/page/pageRow.css.ts" { }
+/// <amd-module name="@scom/scom-page-builder/page/pageRow.tsx" />
+declare module "@scom/scom-page-builder/page/pageRow.tsx" {
+    import { Module, ControlElement } from '@ijstech/components';
+    import { PageSection } from "@scom/scom-page-builder/page/pageSection.tsx";
+    import "@scom/scom-page-builder/page/pageRow.css.ts";
+    import { IPageElement, IPageSection } from "@scom/scom-page-builder/interface/index.ts";
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ['ide-row']: PageRowElement;
+            }
+        }
+    }
+    export interface PageRowElement extends ControlElement {
+        readonly?: boolean;
+    }
+    export class PageRow extends Module {
+        private actionsBar;
+        private dragStack;
+        private pnlRow;
+        private mdRowColorSetting;
+        private mdRowColumnSetting;
+        private pnlEmty;
+        private _readonly;
+        private isResizing;
+        private currentWidth;
+        private currentHeight;
+        private currentElement;
+        private rowId;
+        private rowData;
+        private isDragging;
+        private gridColumnWidth;
+        private _selectedSection;
+        private isCloned;
+        private isChanged;
+        constructor(parent?: any);
+        get data(): any;
+        get selectedElement(): PageSection;
+        private get maxColumn();
+        private get align();
+        init(): void;
+        toggleUI(value: boolean): void;
+        private createNewElement;
+        private createElementFn;
+        addElement(data: IPageElement): Promise<PageSection>;
+        private clearData;
+        setData(rowData: IPageSection): Promise<void>;
+        private onOpenRowSettingsDialog;
+        private onSaveRowSettings;
+        updateColumn(): void;
+        private updateGrid;
+        private updateAlign;
+        private onClone;
+        onDeleteRow(): void;
+        onMoveUp(): void;
+        onMoveDown(): void;
+        private renderFixedGrid;
+        private updateFixedGrid;
+        private updateGridColumn;
+        private initEventListeners;
+        private initEventBus;
+        private getNewElementData;
+        private addDottedLines;
+        private removeDottedLines;
+        private setActive;
+        private onAddSection;
+        render(): any;
+    }
+}
 /// <amd-module name="@scom/scom-page-builder/common/toolbar.tsx" />
 declare module "@scom/scom-page-builder/common/toolbar.tsx" {
     import { Module, ControlElement } from '@ijstech/components';
@@ -1075,8 +1146,9 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         clearComponent(): void;
         updateComponent(data?: any): void;
         private replaceComponent;
-        init(): void;
+        private initEventListener;
         private initEventBus;
+        init(): void;
         render(): any;
     }
 }
@@ -1186,75 +1258,6 @@ declare module "@scom/scom-page-builder/page/pageFooter.tsx" {
         set footer(value: string);
         get sticky(): boolean;
         set sticky(value: boolean);
-        render(): any;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/page/pageRow.css.ts" />
-declare module "@scom/scom-page-builder/page/pageRow.css.ts" { }
-/// <amd-module name="@scom/scom-page-builder/page/pageRow.tsx" />
-declare module "@scom/scom-page-builder/page/pageRow.tsx" {
-    import { Module, ControlElement } from '@ijstech/components';
-    import { PageSection } from "@scom/scom-page-builder/page/pageSection.tsx";
-    import "@scom/scom-page-builder/page/pageRow.css.ts";
-    import { IPageElement, IPageSection } from "@scom/scom-page-builder/interface/index.ts";
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ['ide-row']: PageRowElement;
-            }
-        }
-    }
-    export interface PageRowElement extends ControlElement {
-        readonly?: boolean;
-    }
-    export class PageRow extends Module {
-        private actionsBar;
-        private dragStack;
-        private pnlRow;
-        private mdRowColorSetting;
-        private mdRowColumnSetting;
-        private pnlEmty;
-        private _readonly;
-        private isResizing;
-        private currentWidth;
-        private currentHeight;
-        private currentElement;
-        private rowId;
-        private rowData;
-        private isDragging;
-        private gridColumnWidth;
-        private isCloned;
-        private isChanged;
-        constructor(parent?: any);
-        get data(): any;
-        private get maxColumn();
-        private get align();
-        init(): void;
-        toggleUI(value: boolean): void;
-        private createNewElement;
-        private createElementFn;
-        addElement(data: IPageElement): Promise<PageSection>;
-        private clearData;
-        setData(rowData: IPageSection): Promise<void>;
-        private onOpenRowSettingsDialog;
-        private onSaveRowSettings;
-        updateColumn(): void;
-        private updateGrid;
-        private updateAlign;
-        private onClone;
-        onDeleteRow(): void;
-        onMoveUp(): void;
-        onMoveDown(): void;
-        private renderFixedGrid;
-        private updateFixedGrid;
-        private updateGridColumn;
-        private initEventListeners;
-        private initEventBus;
-        private getNewElementData;
-        private addDottedLines;
-        private removeDottedLines;
-        private setActive;
-        private onAddSection;
         render(): any;
     }
 }
