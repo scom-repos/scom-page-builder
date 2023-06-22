@@ -789,194 +789,6 @@ declare module "@scom/scom-page-builder/page/pageHeader.tsx" {
 declare module "@scom/scom-page-builder/page/pageSection.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/common/toolbar.css.ts" />
 declare module "@scom/scom-page-builder/common/toolbar.css.ts" { }
-/// <amd-module name="@scom/scom-page-builder/common/toolbar.tsx" />
-declare module "@scom/scom-page-builder/common/toolbar.tsx" {
-    import { Module, ControlElement } from '@ijstech/components';
-    import { IPageBlockData, IPageElement } from "@scom/scom-page-builder/interface/index.ts";
-    import "@scom/scom-page-builder/common/toolbar.css.ts";
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ['ide-toolbar']: ToolbarElement;
-            }
-        }
-    }
-    export interface ToolbarElement extends ControlElement {
-        readonly?: boolean;
-    }
-    export class IDEToolbar extends Module {
-        private _toolList;
-        private _readonly;
-        private currentAction;
-        private contentStack;
-        private toolsStack;
-        private toolbar;
-        private _eResizer;
-        private _wResizer;
-        private _nResizer;
-        private _neResizer;
-        private _nwResizer;
-        private _component;
-        private dragStack;
-        private pnlForm;
-        private pnlFormMsg;
-        private mdActions;
-        private backdropStack;
-        private form;
-        private _rowId;
-        private _elementId;
-        private _currentSingleContentBlockId;
-        private _currentReplaceData;
-        constructor(parent?: any);
-        get data(): any;
-        get currentReplaceData(): IPageElement;
-        get module(): any;
-        get toolList(): any[];
-        set toolList(value: any[]);
-        get rowId(): string;
-        set rowId(value: string);
-        get elementId(): string;
-        set elementId(value: string);
-        get readonly(): boolean;
-        set readonly(value: boolean);
-        private adjustCursorByAction;
-        private renderToolbars;
-        private onShowModal;
-        private onCloseModal;
-        private renderToolbarAction;
-        private onSave;
-        private isTexbox;
-        private isContentBlock;
-        showToolbars(): void;
-        hideToolbars(): void;
-        private getActions;
-        updateToolbar(): void;
-        private renderResizeStack;
-        private renderResizer;
-        fetchModule(data: IPageElement): Promise<void>;
-        private setModule;
-        private showToolList;
-        setData(properties: any, module?: IPageBlockData): Promise<void>;
-        setTag(tag: any, init?: boolean): Promise<void>;
-        setProperties(data: any): Promise<void>;
-        private checkToolbar;
-        _handleClick(event: MouseEvent): boolean;
-        clearComponent(): void;
-        updateComponent(data?: any): void;
-        private replaceComponent;
-        init(): void;
-        render(): any;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/common/collapse.css.ts" />
-declare module "@scom/scom-page-builder/common/collapse.css.ts" {
-    export const collapseStyle: string;
-}
-/// <amd-module name="@scom/scom-page-builder/common/collapse.tsx" />
-declare module "@scom/scom-page-builder/common/collapse.tsx" {
-    import { Container, ControlElement, Module } from "@ijstech/components";
-    export interface CollapseElement extends ControlElement {
-        title?: string;
-        item?: Container;
-        expanded?: boolean;
-    }
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ['i-scom-page-builder-collapse']: CollapseElement;
-            }
-        }
-    }
-    export class Collapse extends Module {
-        private lblTitle;
-        private iconCollapse;
-        private pnlContent;
-        private _expanded;
-        constructor(parent?: Container, options?: any);
-        get title(): string;
-        set title(value: string);
-        get item(): Container;
-        set item(target: Container);
-        get expanded(): boolean;
-        set expanded(value: boolean);
-        init(): void;
-        onCollapse(): void;
-        onShowSearch(): void;
-        render(): any;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/common/index.ts" />
-declare module "@scom/scom-page-builder/common/index.ts" {
-    import { IDEToolbar } from "@scom/scom-page-builder/common/toolbar.tsx";
-    import { Collapse } from "@scom/scom-page-builder/common/collapse.tsx";
-    export { IDEToolbar, Collapse, };
-}
-/// <amd-module name="@scom/scom-page-builder/page/pageSection.tsx" />
-declare module "@scom/scom-page-builder/page/pageSection.tsx" {
-    import { Module, ControlElement, Container } from '@ijstech/components';
-    import "@scom/scom-page-builder/page/pageSection.css.ts";
-    import { IPageElement } from "@scom/scom-page-builder/interface/index.ts";
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ['ide-section']: PageSectionElement;
-            }
-        }
-    }
-    export interface PageSectionElement extends ControlElement {
-        readonly?: boolean;
-        containerSize?: {
-            width?: string;
-            height?: string;
-        };
-    }
-    export class PageSection extends Module {
-        private pnlMain;
-        private pageElementMap;
-        private observerOptions;
-        private observer;
-        private _readonly;
-        private rowId;
-        constructor(parent?: Container, options?: any);
-        get readonly(): boolean;
-        set readonly(value: boolean);
-        get data(): any;
-        init(): void;
-        clear(): void;
-        private createToolbar;
-        private clearData;
-        setData(rowId: string, value: IPageElement): Promise<void>;
-        render(): any;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/page/pageFooter.css.ts" />
-declare module "@scom/scom-page-builder/page/pageFooter.css.ts" { }
-/// <amd-module name="@scom/scom-page-builder/page/pageFooter.tsx" />
-declare module "@scom/scom-page-builder/page/pageFooter.tsx" {
-    import { Module, ControlElement } from '@ijstech/components';
-    import "@scom/scom-page-builder/page/pageFooter.css.ts";
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ['scpage-page-footer']: PageFooterElement;
-            }
-        }
-    }
-    export interface PageFooterElement extends ControlElement {
-    }
-    export class PageFooter extends Module {
-        private _footer;
-        private _sticky;
-        private lbFooter;
-        constructor(parent?: any);
-        init(): Promise<void>;
-        get footer(): string;
-        set footer(value: string);
-        get sticky(): boolean;
-        set sticky(value: boolean);
-        render(): any;
-    }
-}
 /// <amd-module name="@scom/scom-page-builder/dialogs/confirmDialog.tsx" />
 declare module "@scom/scom-page-builder/dialogs/confirmDialog.tsx" {
     import { Module, ControlElement, Container } from '@ijstech/components';
@@ -1158,10 +970,12 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private rowData;
         private isDragging;
         private gridColumnWidth;
+        private _selectedSection;
         private isCloned;
         private isChanged;
         constructor(parent?: any);
         get data(): any;
+        get selectedElement(): PageSection;
         private get maxColumn();
         private get align();
         init(): void;
@@ -1190,6 +1004,195 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private removeDottedLines;
         private setActive;
         private onAddSection;
+        render(): any;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/common/toolbar.tsx" />
+declare module "@scom/scom-page-builder/common/toolbar.tsx" {
+    import { Module, ControlElement } from '@ijstech/components';
+    import { IPageBlockData, IPageElement } from "@scom/scom-page-builder/interface/index.ts";
+    import "@scom/scom-page-builder/common/toolbar.css.ts";
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ['ide-toolbar']: ToolbarElement;
+            }
+        }
+    }
+    export interface ToolbarElement extends ControlElement {
+        readonly?: boolean;
+    }
+    export class IDEToolbar extends Module {
+        private _toolList;
+        private _readonly;
+        private currentAction;
+        private contentStack;
+        private toolsStack;
+        private toolbar;
+        private _eResizer;
+        private _wResizer;
+        private _nResizer;
+        private _neResizer;
+        private _nwResizer;
+        private _component;
+        private dragStack;
+        private pnlForm;
+        private pnlFormMsg;
+        private mdActions;
+        private backdropStack;
+        private form;
+        private _rowId;
+        private _elementId;
+        private _currentSingleContentBlockId;
+        private _currentReplaceData;
+        constructor(parent?: any);
+        get data(): any;
+        get currentReplaceData(): IPageElement;
+        get module(): any;
+        get toolList(): any[];
+        set toolList(value: any[]);
+        get rowId(): string;
+        set rowId(value: string);
+        get elementId(): string;
+        set elementId(value: string);
+        get readonly(): boolean;
+        set readonly(value: boolean);
+        private adjustCursorByAction;
+        private renderToolbars;
+        private onShowModal;
+        private onCloseModal;
+        private renderToolbarAction;
+        private onSave;
+        private isTexbox;
+        private isContentBlock;
+        showToolbars(): void;
+        hideToolbars(): void;
+        private getActions;
+        updateToolbar(): void;
+        private renderResizeStack;
+        private renderResizer;
+        fetchModule(data: IPageElement): Promise<void>;
+        private setModule;
+        private showToolList;
+        setData(properties: any, module?: IPageBlockData): Promise<void>;
+        setTag(tag: any, init?: boolean): Promise<void>;
+        setProperties(data: any): Promise<void>;
+        private checkToolbar;
+        _handleClick(event: MouseEvent): boolean;
+        clearComponent(): void;
+        updateComponent(data?: any): void;
+        private replaceComponent;
+        private initEventListener;
+        init(): void;
+        render(): any;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/common/collapse.css.ts" />
+declare module "@scom/scom-page-builder/common/collapse.css.ts" {
+    export const collapseStyle: string;
+}
+/// <amd-module name="@scom/scom-page-builder/common/collapse.tsx" />
+declare module "@scom/scom-page-builder/common/collapse.tsx" {
+    import { Container, ControlElement, Module } from "@ijstech/components";
+    export interface CollapseElement extends ControlElement {
+        title?: string;
+        item?: Container;
+        expanded?: boolean;
+    }
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ['i-scom-page-builder-collapse']: CollapseElement;
+            }
+        }
+    }
+    export class Collapse extends Module {
+        private lblTitle;
+        private iconCollapse;
+        private pnlContent;
+        private _expanded;
+        constructor(parent?: Container, options?: any);
+        get title(): string;
+        set title(value: string);
+        get item(): Container;
+        set item(target: Container);
+        get expanded(): boolean;
+        set expanded(value: boolean);
+        init(): void;
+        onCollapse(): void;
+        onShowSearch(): void;
+        render(): any;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/common/index.ts" />
+declare module "@scom/scom-page-builder/common/index.ts" {
+    import { IDEToolbar } from "@scom/scom-page-builder/common/toolbar.tsx";
+    import { Collapse } from "@scom/scom-page-builder/common/collapse.tsx";
+    export { IDEToolbar, Collapse, };
+}
+/// <amd-module name="@scom/scom-page-builder/page/pageSection.tsx" />
+declare module "@scom/scom-page-builder/page/pageSection.tsx" {
+    import { Module, ControlElement, Container } from '@ijstech/components';
+    import "@scom/scom-page-builder/page/pageSection.css.ts";
+    import { IPageElement } from "@scom/scom-page-builder/interface/index.ts";
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ['ide-section']: PageSectionElement;
+            }
+        }
+    }
+    export interface PageSectionElement extends ControlElement {
+        readonly?: boolean;
+        containerSize?: {
+            width?: string;
+            height?: string;
+        };
+    }
+    export class PageSection extends Module {
+        private pnlMain;
+        private pageElementMap;
+        private observerOptions;
+        private observer;
+        private _readonly;
+        private rowId;
+        constructor(parent?: Container, options?: any);
+        get readonly(): boolean;
+        set readonly(value: boolean);
+        get data(): any;
+        init(): void;
+        clear(): void;
+        private createToolbar;
+        private clearData;
+        setData(rowId: string, value: IPageElement): Promise<void>;
+        render(): any;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/page/pageFooter.css.ts" />
+declare module "@scom/scom-page-builder/page/pageFooter.css.ts" { }
+/// <amd-module name="@scom/scom-page-builder/page/pageFooter.tsx" />
+declare module "@scom/scom-page-builder/page/pageFooter.tsx" {
+    import { Module, ControlElement } from '@ijstech/components';
+    import "@scom/scom-page-builder/page/pageFooter.css.ts";
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ['scpage-page-footer']: PageFooterElement;
+            }
+        }
+    }
+    export interface PageFooterElement extends ControlElement {
+    }
+    export class PageFooter extends Module {
+        private _footer;
+        private _sticky;
+        private lbFooter;
+        constructor(parent?: any);
+        init(): Promise<void>;
+        get footer(): string;
+        set footer(value: string);
+        get sticky(): boolean;
+        set sticky(value: boolean);
         render(): any;
     }
 }

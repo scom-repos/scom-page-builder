@@ -58,6 +58,7 @@ export class PageRow extends Module {
     private rowData: IPageSection;
     private isDragging: boolean = false;
     private gridColumnWidth: number = 0;
+    private _selectedSection: PageSection;
 
     @observable()
     private isCloned: boolean = true;
@@ -71,6 +72,10 @@ export class PageRow extends Module {
 
     get data(): any {
         return this.rowId ? pageObject.getRow(this.rowId) : this.rowData;
+    }
+
+    get selectedElement(): PageSection {
+        return this._selectedSection;
     }
 
     private get maxColumn() {
@@ -300,10 +305,17 @@ export class PageRow extends Module {
 
         this.addEventListener('mousedown', (e) => {
             const target = e.target as Control;
+            const section = target.closest('ide-section') as PageSection;
+
+            if (section)
+                this._selectedSection = section;
+            else 
+                this._selectedSection = undefined;
+
             const parent = target.closest('.resize-stack') as Control;
             if (!parent) return;
             e.preventDefault();
-            const resizableElm = target.closest('ide-section') as PageSection;
+            const resizableElm = section;
             self.currentElement = resizableElm;
             toolbar = target.closest('ide-toolbar') as Control;
             self.addDottedLines();
@@ -555,7 +567,6 @@ export class PageRow extends Module {
 
         document.addEventListener('dragover', function (event) {
             event.preventDefault();
-
             const eventTarget = event.target as Control;
             let enterTarget: Control;
             const overlap = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX)

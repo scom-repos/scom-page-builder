@@ -20,6 +20,9 @@ import { getEmbedElement, isEmpty } from '../utility/index';
 import { commandHistory, RemoveToolbarCommand, ReplaceElementCommand } from '../command/index';
 import { currentTheme  } from '../theme/index';
 import './toolbar.css';
+import { PageSection } from '../page/pageSection';
+import { PageRow } from '../page/pageRow';
+import { ElementType } from '../interface/siteData'
 
 declare global {
     namespace JSX {
@@ -285,12 +288,18 @@ export class IDEToolbar extends Module {
             this.toolsStack.visible = true;
         this.contentStack && this.contentStack.classList.add('active');
         this.classList.add('active');
+        let pnl = this.closest('ide-section #pnlMain')
+        if (pnl)
+            pnl.classList.remove('section-border')
     }
 
     hideToolbars() {
         this.toolsStack.visible = false;
         this.contentStack && this.contentStack.classList.remove('active');
         this.classList.remove('active');
+        let pnl = this.closest('ide-section #pnlMain')
+        if (pnl)
+            pnl.classList.add('section-border')
     }
 
     private getActions() {
@@ -546,6 +555,33 @@ export class IDEToolbar extends Module {
         this.mdActions.visible = false;
     }
 
+    private initEventListener() {
+        let self = this;
+
+        this.contentStack.addEventListener('mouseover', function (event) {
+            let pageRow = (self.closest('ide-row') as PageRow)
+            let sectionSelected: boolean = pageRow.selectedElement? true : false;
+            let compositeSection: boolean = (self.closest('ide-section') as PageSection).data.type === ElementType.COMPOSITE;
+
+            if (!compositeSection || sectionSelected) {
+                // add section border
+                this.classList.add('hover-border');
+            }
+        })
+
+        this.contentStack.addEventListener('mouseleave', function (event) {
+
+            let pageRow = (self.closest('ide-row') as PageRow)
+            let sectionSelected: boolean = pageRow.selectedElement? true : false;
+            let compositeSection: boolean = (self.closest('ide-section') as PageSection).data.type === ElementType.COMPOSITE;
+
+            if (!compositeSection || sectionSelected) {
+                // remove section border
+                this.classList.remove('hover-border');
+            }
+        })
+    }
+
     init() {
         super.init();
         this.readonly = this.getAttribute('readonly', true, false);
@@ -557,6 +593,7 @@ export class IDEToolbar extends Module {
                 this._currentSingleContentBlockId = id;
             }
         })
+        this.initEventListener();
     }
 
     render() {
