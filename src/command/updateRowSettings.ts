@@ -1,7 +1,7 @@
 import { Control } from "@ijstech/components";
 import { pageObject } from "../store/index";
 import { ICommand } from "./interface";
-import { IColumnLayoutType, IRowSettings } from '../interface/index';
+import { IRowSettings } from '../interface/index';
 
 export class UpdateRowSettingsCommand implements ICommand {
   private element: any;
@@ -46,8 +46,8 @@ export class UpdateRowSettingsCommand implements ICommand {
     pageObject.updateSection(id, {
       backgroundColor,
       config: config || {
-        columnLayout: IColumnLayoutType.FIXED,
-        columnsNumber: 12,
+        // columnLayout: IColumnLayoutType.FIXED,
+        // columnsNumber: 12,
         align: 'left'
     }});
     this.element.setData(pageObject.getRow(id));
