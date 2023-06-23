@@ -1496,6 +1496,7 @@ declare module "@scom/scom-page-builder" {
         private pnlWrap;
         private pageSidebar;
         private mdComponentsSearch;
+        private pnlEditor;
         private events;
         private currentElement;
         private isFirstLoad;
@@ -1520,6 +1521,7 @@ declare module "@scom/scom-page-builder" {
             config: import("@scom/scom-page-builder/interface/siteData.ts").IPageConfig;
         };
         setData(value: IPageData): Promise<void>;
+        private updatePageConfig;
         onHide(): void;
         private initEventBus;
         private onUpdateWrapper;

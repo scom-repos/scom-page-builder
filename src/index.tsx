@@ -38,6 +38,7 @@ export default class Editor extends Module {
     private pnlWrap: Panel;
     private pageSidebar: PageSidebar;
     private mdComponentsSearch: SearchComponentsDialog;
+    private pnlEditor: Panel;
 
     private events: any[] = [];
     private currentElement: any;
@@ -191,10 +192,21 @@ export default class Editor extends Module {
             // await this.builderHeader.setData(value.header);
             await this.pageRows.setRows(value?.sections || []);
             await this.builderFooter.setData(value?.footer);
-            const hasBg = pageObject?.config?.backgroundColor || getBackgroundColor();
-            this.style.setProperty('--builder-bg', hasBg);
+            this.updatePageConfig();
         } catch (error) {
             console.log('setdata', error);
+        }
+    }
+
+    private updatePageConfig() {
+        if (pageObject?.config) {
+            const { backgroundColor = getBackgroundColor(), margin = {x: 60, y: 8}, maxWidth = 1280 } = pageObject.config || {};
+            this.style.setProperty('--builder-bg', backgroundColor);
+            if (this.pnlEditor) {
+                this.pnlEditor.maxWidth = maxWidth;
+                const { x, y } = margin;
+                this.pnlEditor.margin = {top: y, bottom: y, left: x, right: x};
+            }
         }
     }
 
@@ -287,6 +299,7 @@ export default class Editor extends Module {
                             margin={{ left: 'auto', right: 'auto' }}
                         >
                             <i-panel
+                                id="pnlEditor"
                                 maxWidth={1280}
                                 minHeight="100vh"
                                 margin={{ top: 8, bottom: 8, left: 60, right: 60 }}

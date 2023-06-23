@@ -6134,7 +6134,6 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             };
         }
         async setData(value) {
-            var _a;
             // pageObject.header = value.header;
             index_79.pageObject.sections = (value === null || value === void 0 ? void 0 : value.sections) || [];
             index_79.pageObject.footer = value === null || value === void 0 ? void 0 : value.footer;
@@ -6143,11 +6142,21 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 // await this.builderHeader.setData(value.header);
                 await this.pageRows.setRows((value === null || value === void 0 ? void 0 : value.sections) || []);
                 await this.builderFooter.setData(value === null || value === void 0 ? void 0 : value.footer);
-                const hasBg = ((_a = index_79.pageObject === null || index_79.pageObject === void 0 ? void 0 : index_79.pageObject.config) === null || _a === void 0 ? void 0 : _a.backgroundColor) || (0, index_79.getBackgroundColor)();
-                this.style.setProperty('--builder-bg', hasBg);
+                this.updatePageConfig();
             }
             catch (error) {
                 console.log('setdata', error);
+            }
+        }
+        updatePageConfig() {
+            if (index_79.pageObject === null || index_79.pageObject === void 0 ? void 0 : index_79.pageObject.config) {
+                const { backgroundColor = (0, index_79.getBackgroundColor)(), margin = { x: 60, y: 8 }, maxWidth = 1280 } = index_79.pageObject.config || {};
+                this.style.setProperty('--builder-bg', backgroundColor);
+                if (this.pnlEditor) {
+                    this.pnlEditor.maxWidth = maxWidth;
+                    const { x, y } = margin;
+                    this.pnlEditor.margin = { top: y, bottom: y, left: x, right: x };
+                }
             }
         }
         onHide() {
@@ -6198,7 +6207,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 this.$render("i-grid-layout", { templateColumns: ['auto', 'minmax(auto, 235px)'], autoFillInHoles: true, height: "calc(100% -64px)", overflow: "hidden" },
                     this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } }, padding: { bottom: '1rem' } },
                         this.$render("i-panel", { id: "pageContent", maxWidth: 1400, width: "100%", margin: { left: 'auto', right: 'auto' } },
-                            this.$render("i-panel", { maxWidth: 1280, minHeight: "100vh", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
+                            this.$render("i-panel", { id: "pnlEditor", maxWidth: 1280, minHeight: "100vh", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
                                 this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
                                     this.$render("ide-rows", { id: "pageRows", draggable: true })),
                                 this.$render("builder-footer", { id: "builderFooter" })))),
