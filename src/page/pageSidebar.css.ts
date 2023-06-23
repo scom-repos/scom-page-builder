@@ -45,7 +45,7 @@ Styles.cssRule('ide-sidebar', {
             opacity: 1
         },
         '.is-dragging': {
-            opacity: 0
+            opacity: 0.3
         }
     }
 });
