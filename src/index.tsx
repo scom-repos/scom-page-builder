@@ -186,11 +186,13 @@ export default class Editor extends Module {
         // pageObject.header = value.header;
         pageObject.sections = value?.sections || [];
         pageObject.footer = value?.footer;
-        if (value.config) pageObject.config = value.config;
+        pageObject.config = value?.config;
         try {
             // await this.builderHeader.setData(value.header);
             await this.pageRows.setRows(value?.sections || []);
             await this.builderFooter.setData(value?.footer);
+            const hasBg = pageObject?.config?.backgroundColor || getBackgroundColor();
+            this.style.setProperty('--builder-bg', hasBg);
         } catch (error) {
             console.log('setdata', error);
         }
@@ -201,6 +203,7 @@ export default class Editor extends Module {
             event.unregister();
         }
         this.events = [];
+        application.EventBus.dispatch(EVENT.ON_CLOSE_BUILDER);
     }
 
     private initEventBus() {

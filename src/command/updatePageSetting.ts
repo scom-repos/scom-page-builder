@@ -17,8 +17,8 @@ export class UpdatePageSettingsCommand implements ICommand {
 
   private updateConfig(config: IPageConfig) {
     const { backgroundColor = getBackgroundColor(), margin = {x: 60, y: 8}, maxWidth = 1280 } = config;
-    this.element.background = {color: backgroundColor};
-    this.element.style.setProperty('--builder-bg', backgroundColor);
+    const element = this.element.closest('i-scom-page-builder') || this.element;
+    element.style.setProperty('--builder-bg', backgroundColor);
     application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {color: backgroundColor});
     this.element.maxWidth = maxWidth;
     const { x, y } = margin;

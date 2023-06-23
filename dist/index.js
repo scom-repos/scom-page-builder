@@ -101,7 +101,8 @@ define("@scom/scom-page-builder/const/index.ts", ["require", "exports", "@scom/s
         ON_TOGGLE_SEARCH_MODAL: 'ON_TOGGLE_SEARCH_MODAL',
         ON_FETCH_COMPONENTS: 'ON_FETCH_COMPONENTS',
         ON_UPDATE_SIDEBAR: 'ON_UPDATE_SIDEBAR',
-        ON_UPDATE_PAGE_BG: 'ON_UPDATE_PAGE_BG'
+        ON_UPDATE_PAGE_BG: 'ON_UPDATE_PAGE_BG',
+        ON_CLOSE_BUILDER: 'ON_CLOSE_BUILDER'
     };
     exports.DEFAULT_BOXED_LAYOUT_WIDTH = '1200px';
     exports.DEFAULT_SCROLLBAR_WIDTH = 17;
@@ -2179,8 +2180,8 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
         }
         updateConfig(config) {
             const { backgroundColor = (0, index_17.getBackgroundColor)(), margin = { x: 60, y: 8 }, maxWidth = 1280 } = config;
-            this.element.background = { color: backgroundColor };
-            this.element.style.setProperty('--builder-bg', backgroundColor);
+            const element = this.element.closest('i-scom-page-builder') || this.element;
+            element.style.setProperty('--builder-bg', backgroundColor);
             components_7.application.EventBus.dispatch(index_18.EVENT.ON_UPDATE_PAGE_BG, { color: backgroundColor });
             this.element.maxWidth = maxWidth;
             const { x, y } = margin;
@@ -2724,7 +2725,7 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                         //         IColumnLayoutType.AUTOMATIC
                         //     ],
                         //     default: IColumnLayoutType.FIXED
-                        //   },              
+                        //   },        
                         //   "columnsNumber": {
                         //     type: 'number'
                         //   },
@@ -2877,10 +2878,10 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                     fontColor: Theme.colors.primary.contrastText,
                     hide: false,
                     onClick: async () => {
+                        this.settingsDialog.visible = false;
                         const config = await this.formElm.getFormData();
                         if (this.onSave)
                             await this.onSave(config);
-                        this.settingsDialog.visible = false;
                     },
                 },
             };
@@ -4170,6 +4171,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this.currentAction = null;
             this._component = null;
             this._currentReplaceData = null;
+            this.events = [];
             this.setData = this.setData.bind(this);
             this.fetchModule = this.fetchModule.bind(this);
         }
@@ -4502,6 +4504,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this._component.rootParent = this.closest('ide-row');
             this._component.parent = this.contentStack;
             const builderTarget = ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) ? this._component.getConfigurators().find((conf) => conf.target === 'Builders') : null;
+            if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setRootParent)
+                builderTarget.setRootParent(this.closest('ide-row'));
             if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setElementId)
                 builderTarget.setElementId(this.elementId);
             this.contentStack.append(this._component);
@@ -4672,15 +4676,15 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             });
         }
         initEventBus() {
-            components_25.application.EventBus.register(this, index_42.EVENT.ON_UPDATE_TOOLBAR, () => this.updateToolbar());
-            components_25.application.EventBus.register(this, index_42.EVENT.ON_SET_ACTION_BLOCK, (data) => {
+            this.events.push(components_25.application.EventBus.register(this, index_42.EVENT.ON_UPDATE_TOOLBAR, () => this.updateToolbar()));
+            this.events.push(components_25.application.EventBus.register(this, index_42.EVENT.ON_SET_ACTION_BLOCK, (data) => {
                 const { id, element, elementId } = data;
                 if (elementId && elementId === this.elementId) {
                     this.setData(Object.assign(Object.assign({}, this.data.properties), { [id]: element }));
                     this._currentSingleContentBlockId = id;
                 }
-            });
-            components_25.application.EventBus.register(this, index_42.EVENT.ON_UPDATE_PAGE_BG, async (data) => {
+            }));
+            this.events.push(components_25.application.EventBus.register(this, index_42.EVENT.ON_UPDATE_PAGE_BG, async (data) => {
                 var _a;
                 if ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) {
                     const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
@@ -4689,6 +4693,12 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                         await builderTarget.setTag(Object.assign(Object.assign({}, oldTag), { background: (data === null || data === void 0 ? void 0 : data.color) || '' }), true);
                     }
                 }
+            }));
+            components_25.application.EventBus.register(this, index_42.EVENT.ON_CLOSE_BUILDER, () => {
+                for (let event of this.events) {
+                    event.unregister();
+                }
+                this.events = [];
             });
         }
         init() {
@@ -6124,15 +6134,17 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             };
         }
         async setData(value) {
+            var _a;
             // pageObject.header = value.header;
             index_79.pageObject.sections = (value === null || value === void 0 ? void 0 : value.sections) || [];
             index_79.pageObject.footer = value === null || value === void 0 ? void 0 : value.footer;
-            if (value.config)
-                index_79.pageObject.config = value.config;
+            index_79.pageObject.config = value === null || value === void 0 ? void 0 : value.config;
             try {
                 // await this.builderHeader.setData(value.header);
                 await this.pageRows.setRows((value === null || value === void 0 ? void 0 : value.sections) || []);
                 await this.builderFooter.setData(value === null || value === void 0 ? void 0 : value.footer);
+                const hasBg = ((_a = index_79.pageObject === null || index_79.pageObject === void 0 ? void 0 : index_79.pageObject.config) === null || _a === void 0 ? void 0 : _a.backgroundColor) || (0, index_79.getBackgroundColor)();
+                this.style.setProperty('--builder-bg', hasBg);
             }
             catch (error) {
                 console.log('setdata', error);
@@ -6143,6 +6155,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 event.unregister();
             }
             this.events = [];
+            components_40.application.EventBus.dispatch(index_78.EVENT.ON_CLOSE_BUILDER);
         }
         initEventBus() {
             this.events.push(components_40.application.EventBus.register(this, index_78.EVENT.ON_UPDATE_FOOTER, async () => this.onUpdateWrapper()));

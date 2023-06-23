@@ -58,6 +58,7 @@ declare module "@scom/scom-page-builder/const/index.ts" {
         ON_FETCH_COMPONENTS: string;
         ON_UPDATE_SIDEBAR: string;
         ON_UPDATE_PAGE_BG: string;
+        ON_CLOSE_BUILDER: string;
     };
     export const DEFAULT_BOXED_LAYOUT_WIDTH = "1200px";
     export const DEFAULT_SCROLLBAR_WIDTH = 17;
@@ -1108,6 +1109,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private _elementId;
         private _currentSingleContentBlockId;
         private _currentReplaceData;
+        private events;
         constructor(parent?: any);
         get data(): any;
         get currentReplaceData(): IPageElement;

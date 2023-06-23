@@ -88,9 +88,9 @@ export class PageSettingsDialog extends Module {
                 fontColor: Theme.colors.primary.contrastText,
                 hide: false,
                 onClick: async () => {
+                    this.settingsDialog.visible = false;
                     const config = await this.formElm.getFormData();
                     if (this.onSave) await this.onSave(config);
-                    this.settingsDialog.visible = false;
                 },
             },
         };

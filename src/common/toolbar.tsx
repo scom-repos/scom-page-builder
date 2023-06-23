@@ -66,6 +66,7 @@ export class IDEToolbar extends Module {
     private _elementId: string;
     private _currentSingleContentBlockId: string;
     private _currentReplaceData: IPageElement = null;
+    private events: any[] = [];
 
     constructor(parent?: any) {
         super(parent);
@@ -414,6 +415,7 @@ export class IDEToolbar extends Module {
         this._component.rootParent = this.closest('ide-row');
         this._component.parent = this.contentStack;
         const builderTarget = this._component?.getConfigurators ? this._component.getConfigurators().find((conf: any) => conf.target === 'Builders') : null;
+        if (builderTarget?.setRootParent) builderTarget.setRootParent(this.closest('ide-row'));
         if (builderTarget?.setElementId) builderTarget.setElementId(this.elementId);
         this.contentStack.append(this._component);
         if (builderTarget?.setRootDir) builderTarget.setRootDir(getRootDir());
@@ -583,23 +585,35 @@ export class IDEToolbar extends Module {
     }
 
     private initEventBus() {
-        application.EventBus.register(this, EVENT.ON_UPDATE_TOOLBAR, () => this.updateToolbar())
-        application.EventBus.register(this, EVENT.ON_SET_ACTION_BLOCK,  (data: {id: string; element: IPageElement, elementId:string}) => {
-            const {id, element, elementId} = data;
-            if (elementId && elementId === this.elementId) {
-                this.setData({...this.data.properties, [id]: element})
-                this._currentSingleContentBlockId = id;
-            }
-        })
-        application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: {color: string}) => {
-            if (this._component?.getConfigurators) {
-                const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
-                if (builderTarget?.setTag) {
-                    const oldTag = builderTarget?.getTag ? await builderTarget.getTag() : {};
-                    await builderTarget.setTag({...oldTag, background: data?.color || ''}, true);
+        this.events.push(
+            application.EventBus.register(this, EVENT.ON_UPDATE_TOOLBAR, () => this.updateToolbar())
+        )
+        this.events.push(
+            application.EventBus.register(this, EVENT.ON_SET_ACTION_BLOCK,  (data: {id: string; element: IPageElement, elementId:string}) => {
+                const {id, element, elementId} = data;
+                if (elementId && elementId === this.elementId) {
+                    this.setData({...this.data.properties, [id]: element})
+                    this._currentSingleContentBlockId = id;
                 }
+            })
+        )
+        this.events.push(
+            application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: {color: string}) => {
+                if (this._component?.getConfigurators) {
+                    const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
+                    if (builderTarget?.setTag) {
+                        const oldTag = builderTarget?.getTag ? await builderTarget.getTag() : {};
+                        await builderTarget.setTag({...oldTag, background: data?.color || ''}, true);
+                    }
+                }
+            })
+        )
+        application.EventBus.register(this, EVENT.ON_CLOSE_BUILDER, () => {
+            for (let event of this.events) {
+                event.unregister();
             }
-        });
+            this.events = [];
+        })
     }
 
     init() {
