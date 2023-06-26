@@ -4729,6 +4729,7 @@ define("@scom/scom-page-builder/common/collapse.css.ts", ["require", "exports", 
     const Theme = index_47.currentTheme;
     exports.collapseStyle = components_25.Styles.style({
         display: 'block',
+        overflow: 'hidden',
         $nest: {
             '.collapsible-toggle': {
                 cursor: 'pointer',
@@ -4743,15 +4744,14 @@ define("@scom/scom-page-builder/common/collapse.css.ts", ["require", "exports", 
             'i-icon.collapsible-icon.--rotate': {
                 transform: 'rotate(-180deg)',
             },
-            '.collapsible-content': {
-                maxHeight: '0px',
-                opacity: 0,
-                overflow: 'hidden auto',
-                transition: 'all 0.25s ease-in-out',
+            '.collapsible-content.--hidden': {
+                display: 'none'
             },
-            '.collapsible-content.--expanded': {
-                maxHeight: '100vh',
-                opacity: 1
+            '.collapsible-content.--collapsing': {
+                height: 0,
+                opacity: 0,
+                overflow: 'hidden',
+                transition: 'height 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease-in-out',
             }
         }
     });
@@ -4764,6 +4764,7 @@ define("@scom/scom-page-builder/common/collapse.tsx", ["require", "exports", "@i
     let Collapse = class Collapse extends components_26.Module {
         constructor(parent, options) {
             super(parent, options);
+            this._speed = 250;
         }
         get title() {
             return this.lblTitle.caption;
@@ -4787,12 +4788,11 @@ define("@scom/scom-page-builder/common/collapse.tsx", ["require", "exports", "@i
             this._expanded = value;
             if (this._expanded) {
                 this.iconCollapse.classList.add('--rotate');
-                this.pnlContent.classList.add('--expanded');
             }
             else {
                 this.iconCollapse.classList.remove('--rotate');
-                this.pnlContent.classList.remove('--expanded');
             }
+            this.handleCollapse();
         }
         init() {
             this.classList.add(collapse_css_1.collapseStyle);
@@ -4803,7 +4803,42 @@ define("@scom/scom-page-builder/common/collapse.tsx", ["require", "exports", "@i
                 this.pnlContent.append(this.children[0]);
             }
             this.item = this.getAttribute('item', true);
-            this.expanded = this.getAttribute('expanded', true, false);
+            const expanded = this.getAttribute('expanded', true, false);
+            this._expanded = expanded;
+            if (!expanded) {
+                this.pnlContent.classList.add("--hidden");
+            }
+            else {
+                this.iconCollapse.classList.add('--rotate');
+            }
+        }
+        handleCollapse() {
+            const isExpanded = this._expanded;
+            const startTime = performance.now();
+            if (this.requestID)
+                cancelAnimationFrame(this.requestID);
+            this.pnlContent.style.height = this.pnlContent.scrollHeight + "px";
+            this.pnlContent.classList.add("--collapsing");
+            this.pnlContent.classList.remove("--hidden");
+            const animate = (time) => {
+                const runtime = time - startTime;
+                const relativeProgress = runtime / this._speed;
+                const progress = Math.min(relativeProgress, 1);
+                if (progress < 1) {
+                    this.pnlContent.style.opacity = isExpanded ? "1" : "0";
+                    this.pnlContent.style.height = isExpanded ? this.pnlContent.scrollHeight + "px" : "0px";
+                    this.requestID = requestAnimationFrame(animate);
+                }
+                if (progress === 1) {
+                    this.pnlContent.classList.remove("--collapsing");
+                    this.pnlContent.style.opacity = "";
+                    this.pnlContent.style.height = "";
+                    if (!isExpanded) {
+                        this.pnlContent.classList.add("--hidden");
+                    }
+                }
+            };
+            this.requestID = requestAnimationFrame(animate);
         }
         onCollapse() {
             this.expanded = !this.expanded;
