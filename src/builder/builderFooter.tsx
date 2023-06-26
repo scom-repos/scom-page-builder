@@ -75,7 +75,7 @@ export class BuilderFooter extends Module {
     private async updateFooter() {
         this.pnlFooterMain.clearInnerHTML();
         this.showAddStack = this._elements?.length === 0 && !this._image;
-        this.pnlFooter.background = this.showAddStack ? {color: '#fff', image: ''} : {image: this._image};
+        this.pnlFooter.background = this.showAddStack ? {color: 'var(--builder-bg)', image: ''} : {image: this._image};
         this.pnlEditOverlay.visible = !this.showAddStack;
         this.pnlEditOverlay.classList.remove('flex');
         this.pnlConfig.visible = !this.showAddStack;
@@ -155,7 +155,7 @@ export class BuilderFooter extends Module {
         this.width = '100%';
         this.display = 'block';
         this.bottom = '0px';
-        this.minHeight = 180;
+        this.minHeight = '12rem';
     }
 
     render() {
@@ -163,7 +163,7 @@ export class BuilderFooter extends Module {
             <i-vstack
                 id="pnlFooter"
                 width="100%" height="100%"
-                minHeight={180}
+                minHeight='12rem'
                 maxWidth="100%" maxHeight="40%"
             >
                 <i-panel

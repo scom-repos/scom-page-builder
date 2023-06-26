@@ -72,7 +72,7 @@ export class AddElementCommand implements ICommand {
       const selections = this.parent.querySelectorAll('ide-section');
       for (const section of selections) {
         const elm = parentData.elements.find((f: any) => f.id === section.id);
-        if (!elm || Object.keys(elm.module).length === 0) {
+        if (!elm || (Object.keys(elm.module || {}).length === 0 && !elm.elements?.length)) {
           section.remove();
         }
       }

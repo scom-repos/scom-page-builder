@@ -85,7 +85,7 @@ export class PageRow extends Module {
     
     private get align() {
         const rowId = this.id?.replace('row-', '');
-        const config = pageObject.getConfig(rowId);
+        const config = pageObject.getRowConfig(rowId);
         return config?.align || 'left';
     }
 
@@ -216,10 +216,6 @@ export class PageRow extends Module {
             this.pnlRow.templateColumns = ['min-content'];
             const sections = Array.from(this.pnlRow.querySelectorAll('ide-section'));
             for (let section of sections) {
-                // const sectionId = section.id;
-                // const rowId = this.id?.replace('row-', '');
-                // const element = pageObject.getElement(rowId, sectionId);
-                // let width = element?.tag?.width;
                 const columnSpan = Number((section as HTMLElement).dataset.columnSpan);
                 const widthNumber = columnSpan * this.gridColumnWidth + ((columnSpan - 1) * GAP_WIDTH);
                 (section as Control).width = `${widthNumber}px`;
@@ -703,6 +699,8 @@ export class PageRow extends Module {
             // if target overlap with other section
             const overlap = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX);
             if (overlap.overlapType == "mutual"/* || overlap.overlapType == "border"*/) return;
+            if (overlap.overlapType == "none" && eventTarget.classList.contains('fixed-grid'))
+                return;
 
             if (pageRow && elementConfig?.module?.name === 'sectionStack')
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
@@ -757,7 +755,7 @@ export class PageRow extends Module {
                     const isBottomBlock = dropElm.classList.contains('bottom-block');
                     if (isBottomBlock) {
                         const config = getDragData();
-                        const dragCmd = new UpdateTypeCommand(dropElm, config ? null : self.currentElement, config);
+                        const dragCmd = new UpdateTypeCommand(dropElm, config ? null : self.currentElement, self.getNewElementData());
                         commandHistory.execute(dragCmd);
                     } else {
                         const isAppend = dropElm.classList.contains('back-block');
@@ -882,6 +880,7 @@ export class PageRow extends Module {
                         maxHeight="100%"
                         horizontalAlignment="center"
                         padding={{top: 5, bottom: 5}}
+                        class="bar-shadow"
                     >
                         <i-panel
                             class="actions"
@@ -955,12 +954,13 @@ export class PageRow extends Module {
                         padding={{top: '3rem', bottom: '3rem'}}
                         margin={{top: '3rem', bottom: '3rem'}}
                         width="100%"
-                        border={{width: '1px', style: 'dashed', color: Theme.divider}}
+                        border={{width: '1px', style: 'dashed', color: 'var(--builder-divider)'}}
                         class="text-center"
                     >
                         <i-label
                             caption='Drag Elements Here'
-                            font={{transform: 'uppercase', color: Theme.divider, size: '1.25rem'}}
+                            font={{transform: 'uppercase', color: 'var(--builder-color)', size: '1.25rem'}}
+                            opacity={0.5}
                         ></i-label>
                     </i-panel>
                 </i-vstack>

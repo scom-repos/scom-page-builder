@@ -3,13 +3,14 @@ import {
     customElements,
     ControlElement,
     Image,
-    Styles,
     HStack,
-    Panel
+    Control
   } from '@ijstech/components';
-import { commandHistory } from '../command/index';
+import { UpdatePageSettingsCommand, commandHistory } from '../command/index';
 import { currentTheme  } from '../theme/index';
 import './pageHeader.css';
+import { PageSettingsDialog } from '../dialogs/index';
+import { IPageConfig } from '../interface/index';
   
   declare global {
     namespace JSX {
@@ -27,6 +28,7 @@ import './pageHeader.css';
   export class PageHeader extends Module {
     private iconList: any[] = [];
     private toolbars: HStack;
+    private mdPageSettings: PageSettingsDialog;
     // private publishDropdown: Panel;
   
     private imgLogo: Image;
@@ -50,6 +52,13 @@ import './pageHeader.css';
   
     hideLogo(hide?: boolean) {
       this.imgLogo.visible = !hide;
+    }
+
+    private onSavePageSettings(data: IPageConfig) {
+      const containerEl = this.parentElement?.querySelector('.pnl-editor-wrapper') as Control;
+      if (!containerEl) return;
+      const updateCmd = new UpdatePageSettingsCommand(containerEl, {...data});
+      commandHistory.execute(updateCmd);
     }
   
     private renderIconList() {
@@ -109,6 +118,13 @@ import './pageHeader.css';
       super.init();
       this.iconList = [
         {
+          name: 'cog',
+          tooltip: {content: 'Page settings', placement: 'bottom'},
+          onClick: () => {
+            this.mdPageSettings.show();
+          }
+        },
+        {
           name: 'undo',
           tooltip: {content: 'Undo last action', placement: 'bottom'},
           onClick: () => commandHistory.undo()
@@ -151,11 +167,9 @@ import './pageHeader.css';
     render() {
       return (
         <i-hstack
-          height={64}
-          justifyContent={'space-between'}
-          verticalAlignment="center"
-          alignItems={'center'}
-          padding={{ left: 10, right: 10 }}
+          horizontalAlignment='end'
+          verticalAlignment={'center'}
+          padding={{ left: '1rem', right: '1rem', top: '0.3rem', bottom: '0.3rem' }}
           class={'ide-header'}
         >
           <i-panel width={200}>
@@ -165,6 +179,10 @@ import './pageHeader.css';
             <i-hstack id="toolbars" gap="1rem" verticalAlignment="center"></i-hstack>
             {/* <i-panel id="publishDropdown" position='relative'></i-panel> */}
           </i-hstack>
+          <ide-page-settings-dialog
+            id="mdPageSettings"
+            onSave={this.onSavePageSettings.bind(this)}
+          ></ide-page-settings-dialog>
         </i-hstack>
       );
     }

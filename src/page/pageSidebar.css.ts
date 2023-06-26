@@ -4,7 +4,7 @@ import { currentTheme  } from '../theme/index';
 const Theme = currentTheme;
 
 Styles.cssRule('ide-sidebar', {
-    borderRight: `1px solid ${Theme.divider}`,
+    borderRight: `1px solid var(--builder-divider)`,
     $nest: {
         '.block-image': {
             maxHeight: 74,

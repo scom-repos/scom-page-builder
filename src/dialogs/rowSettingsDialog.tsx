@@ -11,14 +11,14 @@ import './rowSettingsDialog.css';
 const Theme = Styles.Theme.ThemeVars;
 
 import { assignAttr } from '../utility/index';
-import { IColumnLayoutType, IRowSettings } from '../interface/index';
-import { pageObject } from '../store/index';
+import { IRowSettings } from '../interface/index';
+import { getBackgroundColor, pageObject } from '../store/index';
 
 export type ISettingType = 'color' | 'column';
 
 export interface RowSettingsDialogElement extends ControlElement {
     type: ISettingType;
-    onSave: (data: any) => void;
+    onSave: (data: IRowSettings) => void;
 }
 
 declare global {
@@ -81,25 +81,25 @@ export class RowSettingsDialog extends Module {
         } else {
             jsonSchema = {
                 type: 'object',
-                required: ['columnLayout'],
+                // required: ['columnLayout'],
                 properties: {
-                  "columnLayout": {
-                    type: 'string',
-                    enum: [
-                        IColumnLayoutType.FIXED,
-                        IColumnLayoutType.AUTOMATIC
-                    ],
-                    default: IColumnLayoutType.FIXED
-                  },              
-                  "columnsNumber": {
-                    type: 'number'
-                  },
-                  "maxColumnsPerRow": {
-                    type: 'number'
-                  },
-                  "columnMinWidth": {
-                    type: 'number'
-                  },
+                //   "columnLayout": {
+                //     type: 'string',
+                //     enum: [
+                //         IColumnLayoutType.FIXED,
+                //         IColumnLayoutType.AUTOMATIC
+                //     ],
+                //     default: IColumnLayoutType.FIXED
+                //   },        
+                //   "columnsNumber": {
+                //     type: 'number'
+                //   },
+                //   "maxColumnsPerRow": {
+                //     type: 'number'
+                //   },
+                //   "columnMinWidth": {
+                //     type: 'number'
+                //   },
                   align: {
                     type: 'string',
                     enum: [
@@ -135,12 +135,13 @@ export class RowSettingsDialog extends Module {
         this.formElm.jsonSchema = jsonSchema;
         this.formElm.formOptions = formOptions;
         this.formElm.renderForm();
+        const defaultColor = pageObject.config?.backgroundColor || getBackgroundColor();
         const config = this.type === 'column' ?
             this.data?.config || {
-                columnLayout: IColumnLayoutType.FIXED,
-                columnsNumber: 12,
+                // columnLayout: IColumnLayoutType.FIXED,
+                // columnsNumber: 12,
                 align: 'left'
-            } : {backgroundColor: this.data?.backgroundColor || ''}
+            } : {backgroundColor: this.data?.backgroundColor || defaultColor}
         this.formElm.setFormData({...config});
     }
 
