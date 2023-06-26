@@ -16,7 +16,7 @@ import {
 import { EVENT } from '../const/index';
 import { ELEMENT_NAME, IPageBlockAction, IPageBlockData, IPageElement, ThemeType } from '../interface/index';
 import { getRootDir, pageObject } from '../store/index';
-import { getEmbedElement, isEmpty } from '../utility/index';
+import { isEmpty } from '../utility/index';
 import { commandHistory, RemoveToolbarCommand, ReplaceElementCommand } from '../command/index';
 import { currentTheme  } from '../theme/index';
 import './toolbar.css';
@@ -386,7 +386,7 @@ export class IDEToolbar extends Module {
     async fetchModule(data: IPageElement) {
         if (this._readonly) return;
         try {
-            const module: any = await getEmbedElement(data?.module?.path || '');
+            const module: any = await application.createElement(data?.module?.path || '');
             if (!module) throw new Error('not found');
             await this.setModule(module, data?.module);
             if (this.isTexbox(data.module)) {

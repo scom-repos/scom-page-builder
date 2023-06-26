@@ -1,6 +1,6 @@
-import { application, Module } from '@ijstech/components';
+// import { application, Module } from '@ijstech/components';
 import { BigNumber } from '@ijstech/eth-wallet';
-import { getRootDir } from '../store/index';
+// import { getRootDir } from '../store/index';
 import { IPFS_UPLOAD_END_POINT, IPFS_GATEWAY_IJS, IPFS_GATEWAY } from '../const/index';
 import { match, MatchFunction, compile } from './pathToRegexp';
 
@@ -157,18 +157,18 @@ const getSCConfigByCid = async (cid: string) => {
     return scConfig;
 };
 
-const getEmbedElement = async (path: string) => {
-    const rootDir = getRootDir();
-    let modulePath = rootDir ? `${rootDir}/libs/@scom/${path}` : `libs/@scom/${path}`;
-    application.currentModuleDir = modulePath;
-    const result = await application.loadScript(`${modulePath}/index.js`);
-    application.currentModuleDir = '';
-    if (!result) return null;
-    const elementName = `i-${path.split('/').pop()}`;
-    const element = document.createElement(elementName);
-    element.setAttribute('lazyLoad', 'true');
-    return element;
-}
+// const getEmbedElement = async (path: string) => {
+//     const rootDir = getRootDir();
+//     let modulePath = rootDir ? `${rootDir}/libs/@scom/${path}` : `libs/@scom/${path}`;
+//     application.currentModuleDir = modulePath;
+//     const result = await application.loadScript(`${modulePath}/index.js`);
+//     application.currentModuleDir = '';
+//     if (!result) return null;
+//     const elementName = `i-${path.split('/').pop()}`;
+//     const element = document.createElement(elementName);
+//     element.setAttribute('lazyLoad', 'true');
+//     return element;
+// }
 
 export {
     assignAttr,
@@ -184,6 +184,5 @@ export {
     getPagePath,
     updatePagePath,
     generateUUID,
-    isEmpty,
-    getEmbedElement
+    isEmpty
 };
