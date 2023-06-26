@@ -69,73 +69,6 @@ declare module "@scom/scom-page-builder/const/index.ts" {
     export const IPFS_GATEWAY = "https://ipfs.io/ipfs/";
     export * from "@scom/scom-page-builder/const/textbox.ts";
 }
-/// <amd-module name="@scom/scom-page-builder/store/index.ts" />
-declare module "@scom/scom-page-builder/store/index.ts" {
-    import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig, IOnFetchComponentsResult, IOnFetchComponentsOptions, ICategory, ThemeType, IPageConfig } from "@scom/scom-page-builder/interface/index.ts";
-    export class PageObject {
-        private _header;
-        private _sections;
-        private _footer;
-        private _config;
-        set header(value: IPageHeader);
-        get header(): IPageHeader;
-        set sections(value: IPageSection[]);
-        get sections(): IPageSection[];
-        set footer(value: IPageFooter);
-        get footer(): IPageFooter;
-        set config(value: IPageConfig);
-        get config(): IPageConfig;
-        addSection(value: IPageSection, index?: number): void;
-        removeSection(id: string): void;
-        getSection(id: string): IPageSection;
-        updateSection(id: string, data: any): void;
-        getRow(rowId: string): IPageSection | IPageFooter;
-        removeRow(id: string): void;
-        addRow(data: any, id?: string, index?: number): void;
-        private findElement;
-        getElement(sectionId: string, elementId: string): any;
-        setElement(sectionId: string, elementId: string, value: any): void;
-        private sortFn;
-        private removeElementFn;
-        removeElement(sectionId: string, elementId: string): void;
-        addElement(sectionId: string, value: IPageElement, parentElmId?: string, elementIndex?: number): void;
-        getRowConfig(sectionId: string): import("@scom/scom-page-builder/interface/siteData.ts").IConfigData;
-        getColumnsNumber(sectionId: string): number;
-        private getColumnsNumberFn;
-    }
-    export const pageObject: PageObject;
-    export const state: {
-        pageBlocks: any[];
-        rootDir: string;
-        dragData: any;
-        searchData: IOnFetchComponentsResult;
-        searchOptions: IOnFetchComponentsOptions;
-        categories: ICategory[];
-        theme: ThemeType;
-    };
-    export const setPageBlocks: (value: IPageBlockData[]) => void;
-    export const getPageBlocks: () => any[];
-    export const addPageBlock: (value: IPageBlockData) => void;
-    export const setRootDir: (value: string) => void;
-    export const getRootDir: () => string;
-    export const setDragData: (value: IElementConfig | null) => void;
-    export const getDragData: () => any;
-    export const setSearchData: (value: IOnFetchComponentsResult) => void;
-    export const getSearchData: () => IOnFetchComponentsResult;
-    export const setSearchOptions: (value: IOnFetchComponentsOptions) => void;
-    export const getSearchOptions: () => {
-        category: any;
-        pageNumber: any;
-        pageSize: any;
-    } | IOnFetchComponentsOptions;
-    export const getCategories: () => ICategory[];
-    export const setCategories: (value: ICategory[]) => void;
-    export const setTheme: (value: ThemeType) => void;
-    export const getTheme: () => ThemeType;
-    export const getBackgroundColor: (theme?: ThemeType) => string;
-    export const getFontColor: (theme?: ThemeType) => string;
-    export const getDivider: (theme?: ThemeType) => string;
-}
 /// <amd-module name="@scom/scom-page-builder/utility/pathToRegexp.ts" />
 declare module "@scom/scom-page-builder/utility/pathToRegexp.ts" {
     export interface ParseOptions {
@@ -280,8 +213,7 @@ declare module "@scom/scom-page-builder/utility/index.ts" {
     const updatePagePath: (pagePath: string) => void;
     const generateUUID: () => string;
     const isEmpty: (value: any) => boolean;
-    const getEmbedElement: (path: string) => Promise<HTMLElement>;
-    export { assignAttr, uploadToIPFS, fetchFromIPFS, match, MatchFunction, compile, formatNumber, formatNumberWithSeparators, isCID, getCID, getPagePath, updatePagePath, generateUUID, isEmpty, getEmbedElement };
+    export { assignAttr, uploadToIPFS, fetchFromIPFS, match, MatchFunction, compile, formatNumber, formatNumberWithSeparators, isCID, getCID, getPagePath, updatePagePath, generateUUID, isEmpty };
 }
 /// <amd-module name="@scom/scom-page-builder/interface/core.ts" />
 declare module "@scom/scom-page-builder/interface/core.ts" {
@@ -518,6 +450,73 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
     export const MIN_COLUMN = 2;
     export const PAGE_SIZE = 6;
     export type ThemeType = 'dark' | 'light';
+}
+/// <amd-module name="@scom/scom-page-builder/store/index.ts" />
+declare module "@scom/scom-page-builder/store/index.ts" {
+    import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig, IOnFetchComponentsResult, IOnFetchComponentsOptions, ICategory, ThemeType, IPageConfig } from "@scom/scom-page-builder/interface/index.ts";
+    export class PageObject {
+        private _header;
+        private _sections;
+        private _footer;
+        private _config;
+        set header(value: IPageHeader);
+        get header(): IPageHeader;
+        set sections(value: IPageSection[]);
+        get sections(): IPageSection[];
+        set footer(value: IPageFooter);
+        get footer(): IPageFooter;
+        set config(value: IPageConfig);
+        get config(): IPageConfig;
+        addSection(value: IPageSection, index?: number): void;
+        removeSection(id: string): void;
+        getSection(id: string): IPageSection;
+        updateSection(id: string, data: any): void;
+        getRow(rowId: string): IPageSection | IPageFooter;
+        removeRow(id: string): void;
+        addRow(data: any, id?: string, index?: number): void;
+        private findElement;
+        getElement(sectionId: string, elementId: string): any;
+        setElement(sectionId: string, elementId: string, value: any): void;
+        private sortFn;
+        private removeElementFn;
+        removeElement(sectionId: string, elementId: string): void;
+        addElement(sectionId: string, value: IPageElement, parentElmId?: string, elementIndex?: number): void;
+        getRowConfig(sectionId: string): import("@scom/scom-page-builder/interface/siteData.ts").IConfigData;
+        getColumnsNumber(sectionId: string): number;
+        private getColumnsNumberFn;
+    }
+    export const pageObject: PageObject;
+    export const state: {
+        pageBlocks: any[];
+        rootDir: string;
+        dragData: any;
+        searchData: IOnFetchComponentsResult;
+        searchOptions: IOnFetchComponentsOptions;
+        categories: ICategory[];
+        theme: ThemeType;
+    };
+    export const setPageBlocks: (value: IPageBlockData[]) => void;
+    export const getPageBlocks: () => any[];
+    export const addPageBlock: (value: IPageBlockData) => void;
+    export const setRootDir: (value: string) => void;
+    export const getRootDir: () => string;
+    export const setDragData: (value: IElementConfig | null) => void;
+    export const getDragData: () => any;
+    export const setSearchData: (value: IOnFetchComponentsResult) => void;
+    export const getSearchData: () => IOnFetchComponentsResult;
+    export const setSearchOptions: (value: IOnFetchComponentsOptions) => void;
+    export const getSearchOptions: () => IOnFetchComponentsOptions | {
+        category: any;
+        pageNumber: any;
+        pageSize: any;
+    };
+    export const getCategories: () => ICategory[];
+    export const setCategories: (value: ICategory[]) => void;
+    export const setTheme: (value: ThemeType) => void;
+    export const getTheme: () => ThemeType;
+    export const getBackgroundColor: (theme?: ThemeType) => string;
+    export const getFontColor: (theme?: ThemeType) => string;
+    export const getDivider: (theme?: ThemeType) => string;
 }
 /// <amd-module name="@scom/scom-page-builder/command/interface.ts" />
 declare module "@scom/scom-page-builder/command/interface.ts" {
