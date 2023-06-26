@@ -6,6 +6,7 @@ export { ResizeElementCommand } from './resize';
 export { DragElementCommand } from './dragElement';
 export { RemoveToolbarCommand } from './removeToolbar';
 export { UpdateTypeCommand } from './updateType';
+export { UngroupSectionCommand } from './ungroupSection';
 export { AddElementCommand } from './addElement';
 export { ReplaceElementCommand } from './replaceElement';
 export { ICommand, IDataColumn } from "./interface";

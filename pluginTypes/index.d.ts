@@ -695,6 +695,24 @@ declare module "@scom/scom-page-builder/command/updateType.ts" {
         redo(): void;
     }
 }
+/// <amd-module name="@scom/scom-page-builder/command/ungroupSection.ts" />
+declare module "@scom/scom-page-builder/command/ungroupSection.ts" {
+    import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
+    import { Control } from "@ijstech/components";
+    export class UngroupSectionCommand implements ICommand {
+        private element;
+        private parent;
+        private dropElm;
+        private data;
+        private oldDataColumnMap;
+        private isReGroup;
+        private prevSection;
+        constructor(data: any, isReGroup: boolean, elm: Control, dropElm: Control, prevSection: Control, parent?: any);
+        execute(): Promise<void>;
+        undo(): void;
+        redo(): void;
+    }
+}
 /// <amd-module name="@scom/scom-page-builder/command/addElement.ts" />
 declare module "@scom/scom-page-builder/command/addElement.ts" {
     import { Control } from "@ijstech/components";
@@ -756,6 +774,7 @@ declare module "@scom/scom-page-builder/command/index.ts" {
     export { DragElementCommand } from "@scom/scom-page-builder/command/dragElement.ts";
     export { RemoveToolbarCommand } from "@scom/scom-page-builder/command/removeToolbar.ts";
     export { UpdateTypeCommand } from "@scom/scom-page-builder/command/updateType.ts";
+    export { UngroupSectionCommand } from "@scom/scom-page-builder/command/ungroupSection.ts";
     export { AddElementCommand } from "@scom/scom-page-builder/command/addElement.ts";
     export { ReplaceElementCommand } from "@scom/scom-page-builder/command/replaceElement.ts";
     export { ICommand, IDataColumn } from "@scom/scom-page-builder/command/interface.ts";
@@ -1029,6 +1048,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private currentWidth;
         private currentHeight;
         private currentElement;
+        private currentToolbar;
         private rowId;
         private rowData;
         private isDragging;

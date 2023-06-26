@@ -22,9 +22,11 @@ import {
     DragElementCommand,
     UpdateRowSettingsCommand,
     UpdateTypeCommand,
-    AddElementCommand
+    AddElementCommand,
+    UngroupSectionCommand,
+    RemoveToolbarCommand
 } from '../command/index';
-import { IDEToolbar } from '../common/index';
+import { IDEToolbar } from '../common/toolbar';
 import { generateUUID } from '../utility/index';
 const Theme = Styles.Theme.ThemeVars;
 
@@ -54,6 +56,7 @@ export class PageRow extends Module {
     private currentWidth: number;
     private currentHeight: number;
     private currentElement: PageSection;
+    private currentToolbar: IDEToolbar;
     private rowId: string = '';
     private rowData: IPageSection;
     private isDragging: boolean = false;
@@ -414,14 +417,16 @@ export class PageRow extends Module {
         this.addEventListener('dragstart', function (event) {
             const eventTarget = event.target as Control;
             if (eventTarget instanceof PageRow) return;
-            const target = eventTarget.closest && eventTarget.closest('ide-section') as PageSection;
-            const toolbars = target ? Array.from(target.querySelectorAll('ide-toolbar')) : [];
+            const targetSection = eventTarget.closest && eventTarget.closest('ide-section') as PageSection;
+            const toolbars = targetSection ? Array.from(targetSection.querySelectorAll('ide-toolbar')) : [];
+            const targetToolbar = toolbars.find(elm => elm.classList.contains('active')) as IDEToolbar;
             const cannotDrag = toolbars.find(toolbar => toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting'));
-            if (target && !cannotDrag) {
+            if (targetSection && !cannotDrag) {
                 self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
-                self.currentElement = target;
+                self.currentElement = targetSection;
+                self.currentToolbar = targetToolbar;
                 self.currentElement.opacity = 0;
-                application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, target);
+                application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                 self.addDottedLines();
             } else {
                 event.preventDefault();
@@ -730,12 +735,38 @@ export class PageRow extends Module {
                 });
                 if (findedSection || self.isDragging) return;
                 self.isDragging = true;
-                if (self.currentElement.data) {
-                    const dragCmd = new DragElementCommand(self.currentElement, nearestFixedItem);
+
+                const numberOfToolbars = self.currentElement.querySelectorAll('ide-toolbar').length
+
+                // ungrouping elm
+                if (self.currentToolbar && numberOfToolbars > 1) {
+                    // const config = getDragData(); // null
+                    const dropElm = eventTarget;
+                    const dragCmd = new UngroupSectionCommand(self.currentToolbar.data, false, self.currentToolbar, dropElm, self.currentElement);
                     commandHistory.execute(dragCmd);
-                } else if (getDragData()) {
-                    const dragCmd = new AddElementCommand(self.getNewElementData(), true, false, nearestFixedItem);
-                    commandHistory.execute(dragCmd);
+                    
+                    self.currentElement.opacity = 1;
+                    self.currentElement = null;
+                    dragStartTarget = null;
+                    dragOverTarget = null;
+                    application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, null);
+                    self.isDragging = false;
+                    setDragData(null);
+                    self.removeDottedLines();
+                    updateRectangles();
+                    removeClass('is-dragenter');
+                    removeClass('row-entered');
+                    removeClass('is-dragging');
+
+                // dragging elm (no group/ungroup)
+                } else {
+                    if (self.currentElement.data) {
+                        const dragCmd = new DragElementCommand(self.currentElement, nearestFixedItem);
+                        commandHistory.execute(dragCmd);
+                    } else if (getDragData()) {
+                        const dragCmd = new AddElementCommand(self.getNewElementData(), true, false, nearestFixedItem);
+                        commandHistory.execute(dragCmd);
+                    }
                 }
                 self.isDragging = false;
             } else {
@@ -749,6 +780,8 @@ export class PageRow extends Module {
                 const blocks = Array.from(self.parentElement.getElementsByClassName('is-dragenter'));
                 const activedBlock = blocks.find((block: Control) => block.visible) as Control;
                 dropElm = dropElm || activedBlock;
+
+                // grouping elm
                 if (dropElm) {
                     self.isDragging = true;
                     dropElm.classList.remove('is-dragenter');
@@ -756,6 +789,7 @@ export class PageRow extends Module {
                     if (isBottomBlock) {
                         const config = getDragData();
                         const dragCmd = new UpdateTypeCommand(dropElm, config ? null : self.currentElement, self.getNewElementData());
+
                         commandHistory.execute(dragCmd);
                     } else {
                         const isAppend = dropElm.classList.contains('back-block');
