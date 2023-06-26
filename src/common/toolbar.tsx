@@ -14,7 +14,7 @@ import {
     renderUI
 } from '@ijstech/components';
 import { EVENT } from '../const/index';
-import { ELEMENT_NAME, IPageBlockAction, IPageBlockData, IPageElement } from '../interface/index';
+import { ELEMENT_NAME, IPageBlockAction, IPageBlockData, IPageElement, ThemeType } from '../interface/index';
 import { getRootDir, pageObject } from '../store/index';
 import { getEmbedElement, isEmpty } from '../utility/index';
 import { commandHistory, RemoveToolbarCommand, ReplaceElementCommand } from '../command/index';
@@ -66,14 +66,12 @@ export class IDEToolbar extends Module {
     private _elementId: string;
     private _currentSingleContentBlockId: string;
     private _currentReplaceData: IPageElement = null;
+    private events: any[] = [];
 
     constructor(parent?: any) {
         super(parent);
         this.setData = this.setData.bind(this);
         this.fetchModule = this.fetchModule.bind(this);
-        // application.EventBus.register(this, 'themeChanged', (value: string) => {
-        //     if (this.isTexbox(this.data?.module)) (this.module as any).theme = value
-        // })
     }
 
     get data() {
@@ -393,8 +391,6 @@ export class IDEToolbar extends Module {
             await this.setModule(module, data?.module);
             if (this.isTexbox(data.module)) {
                 this.dragStack.visible = true;
-                // const themeVar = document.body.style.getPropertyValue('--theme')
-                // if (themeVar) (this.module as any).theme = themeVar
             } else if (this.isContentBlock()) {
                 const allSingleContentBlockId = Object.keys(data.properties).filter(prop => prop.includes(SINGLE_CONTENT_BLOCK_ID))
                 for (let singleContentBlockId of allSingleContentBlockId) {
@@ -419,6 +415,7 @@ export class IDEToolbar extends Module {
         this._component.rootParent = this.closest('ide-row');
         this._component.parent = this.contentStack;
         const builderTarget = this._component?.getConfigurators ? this._component.getConfigurators().find((conf: any) => conf.target === 'Builders') : null;
+        if (builderTarget?.setRootParent) builderTarget.setRootParent(this.closest('ide-row'));
         if (builderTarget?.setElementId) builderTarget.setElementId(this.elementId);
         this.contentStack.append(this._component);
         if (builderTarget?.setRootDir) builderTarget.setRootDir(getRootDir());
@@ -488,6 +485,11 @@ export class IDEToolbar extends Module {
             await builderTarget.setData(data);
         }
         if (builderTarget?.setRootDir) builderTarget.setRootDir(getRootDir());
+    }
+
+    setTheme(value: ThemeType) {
+        if (value !== this.module?.theme)
+            this.module.theme = value;
     }
 
     private checkToolbar() {
@@ -582,17 +584,42 @@ export class IDEToolbar extends Module {
         })
     }
 
+    private initEventBus() {
+        this.events.push(
+            application.EventBus.register(this, EVENT.ON_UPDATE_TOOLBAR, () => this.updateToolbar())
+        )
+        this.events.push(
+            application.EventBus.register(this, EVENT.ON_SET_ACTION_BLOCK,  (data: {id: string; element: IPageElement, elementId:string}) => {
+                const {id, element, elementId} = data;
+                if (elementId && elementId === this.elementId) {
+                    this.setData({...this.data.properties, [id]: element})
+                    this._currentSingleContentBlockId = id;
+                }
+            })
+        )
+        this.events.push(
+            application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: {color: string}) => {
+                if (this._component?.getConfigurators) {
+                    const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
+                    if (builderTarget?.setTag) {
+                        const oldTag = builderTarget?.getTag ? await builderTarget.getTag() : {};
+                        await builderTarget.setTag({...oldTag, background: data?.color || ''}, true);
+                    }
+                }
+            })
+        )
+        application.EventBus.register(this, EVENT.ON_CLOSE_BUILDER, () => {
+            for (let event of this.events) {
+                event.unregister();
+            }
+            this.events = [];
+        })
+    }
+
     init() {
         super.init();
         this.readonly = this.getAttribute('readonly', true, false);
-        application.EventBus.register(this, EVENT.ON_UPDATE_TOOLBAR, () => this.updateToolbar())
-        application.EventBus.register(this, EVENT.ON_SET_ACTION_BLOCK,  (data: {id: string; element: IPageElement, elementId:string}) => {
-            const {id, element, elementId} = data;
-            if (elementId && elementId === this.elementId) {
-                this.setData({...this.data.properties, [id]: element})
-                this._currentSingleContentBlockId = id;
-            }
-        })
+        this.initEventBus();
         this.initEventListener();
     }
 

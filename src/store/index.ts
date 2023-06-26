@@ -1,6 +1,10 @@
-import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig, IOnFetchComponentsResult, IOnFetchComponentsOptions, ICategory, ThemeType } from "../interface/index";
+import { Styles } from "@ijstech/components";
+import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig, IOnFetchComponentsResult, IOnFetchComponentsOptions, ICategory, ThemeType, IPageConfig } from "../interface/index";
 
+const lightTheme = Styles.Theme.defaultTheme;
+const darkTheme = Styles.Theme.darkTheme;
 const MAX_COLUMN = 12;
+
 export class PageObject {
   private _header: IPageHeader = {
     headerType: 'banner' as any,
@@ -12,6 +16,7 @@ export class PageObject {
     image: "",
     elements: []
   };
+  private _config: IPageConfig;
 
   set header(value: IPageHeader) {
     this._header = value;
@@ -32,6 +37,13 @@ export class PageObject {
   }
   get footer() {
     return this._footer;
+  }
+
+  set config(value: IPageConfig) {
+    this._config = value;
+  }
+  get config() {
+    return this._config;
   }
 
   addSection(value: IPageSection, index?: number) {
@@ -214,7 +226,7 @@ export class PageObject {
     }
   }
 
-  getConfig(sectionId: string) {
+  getRowConfig(sectionId: string) {
     const section = this.getRow(sectionId);
     return section?.config || {};
   }
@@ -225,7 +237,7 @@ export class PageObject {
     return this.getColumnsNumberFn(section);
   }
 
-  getColumnsNumberFn(section: IPageSection|IPageFooter) {
+  private getColumnsNumberFn(section: IPageSection|IPageFooter) {
     if (!section) return MAX_COLUMN;
     const { columnsNumber, columnLayout } = section?.config || {};
     return (columnLayout === 'Fixed' && columnsNumber) ? columnsNumber : MAX_COLUMN;
@@ -267,7 +279,7 @@ export const state = {
       title: 'Project MicroDApps'
     }
   ] as ICategory[],
-  theme: 'light'
+  theme: 'light' as ThemeType
 }
 
 export const setPageBlocks = (value: IPageBlockData[]) => {
@@ -327,7 +339,7 @@ export const setTheme = (value: ThemeType) => {
   state.theme = value ?? 'light';
 }
 
-export const getTheme = () => {
+export const getTheme = (): ThemeType => {
   return state.theme ?? 'light';
 }
 
@@ -336,4 +348,19 @@ const generateUUID = () => {
     var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
+}
+
+export const getBackgroundColor = (theme?: ThemeType) => {
+  theme = theme ?? getTheme();
+  return theme === 'light' ? lightTheme.background.main : darkTheme.background.main;
+}
+
+export const getFontColor = (theme?: ThemeType) => {
+  theme = theme ?? getTheme();
+  return theme === 'light' ? lightTheme.text.primary : darkTheme.text.primary;
+}
+
+export const getDivider = (theme?: ThemeType) => {
+  theme = theme ?? getTheme();
+  return theme === 'light' ? lightTheme.divider : darkTheme.divider;
 }

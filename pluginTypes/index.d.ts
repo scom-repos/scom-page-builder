@@ -57,6 +57,8 @@ declare module "@scom/scom-page-builder/const/index.ts" {
         ON_TOGGLE_SEARCH_MODAL: string;
         ON_FETCH_COMPONENTS: string;
         ON_UPDATE_SIDEBAR: string;
+        ON_UPDATE_PAGE_BG: string;
+        ON_CLOSE_BUILDER: string;
     };
     export const DEFAULT_BOXED_LAYOUT_WIDTH = "1200px";
     export const DEFAULT_SCROLLBAR_WIDTH = 17;
@@ -69,17 +71,20 @@ declare module "@scom/scom-page-builder/const/index.ts" {
 }
 /// <amd-module name="@scom/scom-page-builder/store/index.ts" />
 declare module "@scom/scom-page-builder/store/index.ts" {
-    import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig, IOnFetchComponentsResult, IOnFetchComponentsOptions, ICategory, ThemeType } from "@scom/scom-page-builder/interface/index.ts";
+    import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig, IOnFetchComponentsResult, IOnFetchComponentsOptions, ICategory, ThemeType, IPageConfig } from "@scom/scom-page-builder/interface/index.ts";
     export class PageObject {
         private _header;
         private _sections;
         private _footer;
+        private _config;
         set header(value: IPageHeader);
         get header(): IPageHeader;
         set sections(value: IPageSection[]);
         get sections(): IPageSection[];
         set footer(value: IPageFooter);
         get footer(): IPageFooter;
+        set config(value: IPageConfig);
+        get config(): IPageConfig;
         addSection(value: IPageSection, index?: number): void;
         removeSection(id: string): void;
         getSection(id: string): IPageSection;
@@ -94,9 +99,9 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         private removeElementFn;
         removeElement(sectionId: string, elementId: string): void;
         addElement(sectionId: string, value: IPageElement, parentElmId?: string, elementIndex?: number): void;
-        getConfig(sectionId: string): import("@scom/scom-page-builder/interface/siteData.ts").IConfigData;
+        getRowConfig(sectionId: string): import("@scom/scom-page-builder/interface/siteData.ts").IConfigData;
         getColumnsNumber(sectionId: string): number;
-        getColumnsNumberFn(section: IPageSection | IPageFooter): number;
+        private getColumnsNumberFn;
     }
     export const pageObject: PageObject;
     export const state: {
@@ -106,7 +111,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         searchData: IOnFetchComponentsResult;
         searchOptions: IOnFetchComponentsOptions;
         categories: ICategory[];
-        theme: string;
+        theme: ThemeType;
     };
     export const setPageBlocks: (value: IPageBlockData[]) => void;
     export const getPageBlocks: () => any[];
@@ -126,7 +131,10 @@ declare module "@scom/scom-page-builder/store/index.ts" {
     export const getCategories: () => ICategory[];
     export const setCategories: (value: ICategory[]) => void;
     export const setTheme: (value: ThemeType) => void;
-    export const getTheme: () => string;
+    export const getTheme: () => ThemeType;
+    export const getBackgroundColor: (theme?: ThemeType) => string;
+    export const getFontColor: (theme?: ThemeType) => string;
+    export const getDivider: (theme?: ThemeType) => string;
 }
 /// <amd-module name="@scom/scom-page-builder/utility/pathToRegexp.ts" />
 declare module "@scom/scom-page-builder/utility/pathToRegexp.ts" {
@@ -379,15 +387,18 @@ declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
 declare module "@scom/scom-page-builder/interface/siteData.ts" {
     import { IPageBlockData } from "@scom/scom-page-builder/interface/pageBlock.ts";
     export interface IPageData {
-        cid?: string;
-        title?: string;
-        name: string;
-        path: string;
-        url: string;
-        visible: boolean;
         header: IPageHeader;
         sections: IPageSection[];
         footer: IPageFooter;
+        config?: IPageConfig;
+    }
+    export interface IPageConfig {
+        backgroundColor?: string;
+        maxWidth?: number | string;
+        margin?: {
+            x?: number | string;
+            y?: number | string;
+        };
     }
     export enum HeaderType {
         'COVER' = "cover",
@@ -720,6 +731,22 @@ declare module "@scom/scom-page-builder/command/replaceElement.ts" {
         redo(): void;
     }
 }
+/// <amd-module name="@scom/scom-page-builder/command/updatePageSetting.ts" />
+declare module "@scom/scom-page-builder/command/updatePageSetting.ts" {
+    import { Control } from "@ijstech/components";
+    import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
+    import { IPageConfig } from "@scom/scom-page-builder/interface/index.ts";
+    export class UpdatePageSettingsCommand implements ICommand {
+        private element;
+        private settings;
+        private oldSettings;
+        constructor(element: Control, settings: IPageConfig);
+        private updateConfig;
+        execute(): void;
+        undo(): void;
+        redo(): void;
+    }
+}
 /// <amd-module name="@scom/scom-page-builder/command/index.ts" />
 declare module "@scom/scom-page-builder/command/index.ts" {
     export { UpdateRowCommand } from "@scom/scom-page-builder/command/updateRow.ts";
@@ -733,6 +760,7 @@ declare module "@scom/scom-page-builder/command/index.ts" {
     export { AddElementCommand } from "@scom/scom-page-builder/command/addElement.ts";
     export { ReplaceElementCommand } from "@scom/scom-page-builder/command/replaceElement.ts";
     export { ICommand, IDataColumn } from "@scom/scom-page-builder/command/interface.ts";
+    export { UpdatePageSettingsCommand } from "@scom/scom-page-builder/command/updatePageSetting.ts";
 }
 /// <amd-module name="@scom/scom-page-builder/theme/light.theme.ts" />
 declare module "@scom/scom-page-builder/theme/light.theme.ts" {
@@ -756,39 +784,6 @@ declare module "@scom/scom-page-builder/theme/index.ts" {
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageHeader.css.ts" />
 declare module "@scom/scom-page-builder/page/pageHeader.css.ts" { }
-/// <amd-module name="@scom/scom-page-builder/page/pageHeader.tsx" />
-declare module "@scom/scom-page-builder/page/pageHeader.tsx" {
-    import { Module, ControlElement } from '@ijstech/components';
-    import "@scom/scom-page-builder/page/pageHeader.css.ts";
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ['ide-header']: PageHeaderElement;
-            }
-        }
-    }
-    export interface PageHeaderElement extends ControlElement {
-    }
-    export class PageHeader extends Module {
-        private iconList;
-        private toolbars;
-        private imgLogo;
-        private _logo;
-        constructor(parent?: any);
-        initEventBus(): void;
-        set logo(data: string);
-        get logo(): string;
-        hideLogo(hide?: boolean): void;
-        private renderIconList;
-        private renderDropdown;
-        init(): Promise<void>;
-        render(): any;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/page/pageSection.css.ts" />
-declare module "@scom/scom-page-builder/page/pageSection.css.ts" { }
-/// <amd-module name="@scom/scom-page-builder/common/toolbar.css.ts" />
-declare module "@scom/scom-page-builder/common/toolbar.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/dialogs/confirmDialog.tsx" />
 declare module "@scom/scom-page-builder/dialogs/confirmDialog.tsx" {
     import { Module, ControlElement, Container } from '@ijstech/components';
@@ -897,10 +892,11 @@ declare module "@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts" { }
 declare module "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx" {
     import { Module, ControlElement } from '@ijstech/components';
     import "@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts";
+    import { IRowSettings } from "@scom/scom-page-builder/interface/index.ts";
     export type ISettingType = 'color' | 'column';
     export interface RowSettingsDialogElement extends ControlElement {
         type: ISettingType;
-        onSave: (data: any) => void;
+        onSave: (data: IRowSettings) => void;
     }
     global {
         namespace JSX {
@@ -928,14 +924,82 @@ declare module "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx" {
         render(): any;
     }
 }
+/// <amd-module name="@scom/scom-page-builder/dialogs/pageSettingsDialog.css.ts" />
+declare module "@scom/scom-page-builder/dialogs/pageSettingsDialog.css.ts" { }
+/// <amd-module name="@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx" />
+declare module "@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx" {
+    import { Module, ControlElement } from '@ijstech/components';
+    import "@scom/scom-page-builder/dialogs/pageSettingsDialog.css.ts";
+    import { IPageConfig } from "@scom/scom-page-builder/interface/index.ts";
+    export interface PageSettingsDialogElement extends ControlElement {
+        onSave: (data: IPageConfig) => void;
+    }
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ['ide-page-settings-dialog']: PageSettingsDialogElement;
+            }
+        }
+    }
+    export class PageSettingsDialog extends Module {
+        private settingsDialog;
+        private formElm;
+        private defaultData;
+        private onSave;
+        constructor(parent?: any, options?: any);
+        init(): void;
+        show(): void;
+        private getSchema;
+        private renderForm;
+        close(): void;
+        reset(): void;
+        render(): any;
+    }
+}
 /// <amd-module name="@scom/scom-page-builder/dialogs/index.ts" />
 declare module "@scom/scom-page-builder/dialogs/index.ts" {
     import { ConfirmDialog } from "@scom/scom-page-builder/dialogs/confirmDialog.tsx";
     import { LoadingDialog } from "@scom/scom-page-builder/dialogs/loadingDialog.tsx";
     import { SearchComponentsDialog } from "@scom/scom-page-builder/dialogs/searchComponentsDialog.tsx";
     import { RowSettingsDialog, ISettingType } from "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx";
-    export { ConfirmDialog, LoadingDialog, RowSettingsDialog, SearchComponentsDialog, ISettingType };
+    import { PageSettingsDialog } from "@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx";
+    export { ConfirmDialog, LoadingDialog, RowSettingsDialog, SearchComponentsDialog, ISettingType, PageSettingsDialog };
 }
+/// <amd-module name="@scom/scom-page-builder/page/pageHeader.tsx" />
+declare module "@scom/scom-page-builder/page/pageHeader.tsx" {
+    import { Module, ControlElement } from '@ijstech/components';
+    import "@scom/scom-page-builder/page/pageHeader.css.ts";
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ['ide-header']: PageHeaderElement;
+            }
+        }
+    }
+    export interface PageHeaderElement extends ControlElement {
+    }
+    export class PageHeader extends Module {
+        private iconList;
+        private toolbars;
+        private mdPageSettings;
+        private imgLogo;
+        private _logo;
+        constructor(parent?: any);
+        initEventBus(): void;
+        set logo(data: string);
+        get logo(): string;
+        hideLogo(hide?: boolean): void;
+        private onSavePageSettings;
+        private renderIconList;
+        private renderDropdown;
+        init(): Promise<void>;
+        render(): any;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/page/pageSection.css.ts" />
+declare module "@scom/scom-page-builder/page/pageSection.css.ts" { }
+/// <amd-module name="@scom/scom-page-builder/common/toolbar.css.ts" />
+declare module "@scom/scom-page-builder/common/toolbar.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/page/pageRow.css.ts" />
 declare module "@scom/scom-page-builder/page/pageRow.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/page/pageRow.tsx" />
@@ -1010,7 +1074,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
 /// <amd-module name="@scom/scom-page-builder/common/toolbar.tsx" />
 declare module "@scom/scom-page-builder/common/toolbar.tsx" {
     import { Module, ControlElement } from '@ijstech/components';
-    import { IPageBlockData, IPageElement } from "@scom/scom-page-builder/interface/index.ts";
+    import { IPageBlockData, IPageElement, ThemeType } from "@scom/scom-page-builder/interface/index.ts";
     import "@scom/scom-page-builder/common/toolbar.css.ts";
     global {
         namespace JSX {
@@ -1045,6 +1109,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private _elementId;
         private _currentSingleContentBlockId;
         private _currentReplaceData;
+        private events;
         constructor(parent?: any);
         get data(): any;
         get currentReplaceData(): IPageElement;
@@ -1077,12 +1142,14 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         setData(properties: any, module?: IPageBlockData): Promise<void>;
         setTag(tag: any, init?: boolean): Promise<void>;
         setProperties(data: any): Promise<void>;
+        setTheme(value: ThemeType): void;
         private checkToolbar;
         _handleClick(event: MouseEvent): boolean;
         clearComponent(): void;
         updateComponent(data?: any): void;
         private replaceComponent;
         private initEventListener;
+        private initEventBus;
         init(): void;
         render(): any;
     }
@@ -1451,8 +1518,10 @@ declare module "@scom/scom-page-builder" {
         getData(): {
             sections: import("@scom/scom-page-builder/interface/siteData.ts").IPageSection[];
             footer: import("@scom/scom-page-builder/interface/siteData.ts").IPageFooter;
+            config: import("@scom/scom-page-builder/interface/siteData.ts").IPageConfig;
         };
         setData(value: IPageData): Promise<void>;
+        private updatePageConfig;
         onHide(): void;
         private initEventBus;
         private onUpdateWrapper;

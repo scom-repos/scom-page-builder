@@ -1,10 +1,10 @@
-import { application, Container, Control, ControlElement, customElements, customModule, Module, Panel } from '@ijstech/components';
+import { application, Container, Control, ControlElement, customElements, customModule, Module, Panel, Styles } from '@ijstech/components';
 import { } from '@ijstech/eth-contract'
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
 import { IPageData, IPageBlockData, IPageElement, IOnFetchComponentsOptions, IOnFetchComponentsResult, ICategory, ThemeType } from './interface/index';
 import { PageRows, PageSidebar } from './page/index';
-import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData, getPageBlocks, getCategories, setCategories, setTheme } from './store/index';
+import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData, getPageBlocks, getCategories, setCategories, setTheme, getBackgroundColor, getFontColor, getDivider } from './store/index';
 import { currentTheme } from './theme/index';
 import './index.css';
 import { SearchComponentsDialog } from './dialogs/index';
@@ -84,11 +84,13 @@ export default class Editor extends Module {
 
     set theme(value: ThemeType) {
         this._theme = value ?? 'light';
-        setTheme(this._theme);
-        if (this.pnlEditor) {
-            const color = this.theme === 'light' ? '#ffffff' : '#1E1E1E';
-            this.pnlEditor.background = {color};
-        }
+        setTheme(this.theme);
+        const bgColor = getBackgroundColor(this.theme);
+        const fontColor = getFontColor(this.theme);
+        const dividerColor = getDivider(this.theme);
+        this.style.setProperty('--builder-bg', bgColor);
+        this.style.setProperty('--builder-color', fontColor);
+        this.style.setProperty('--builder-divider', dividerColor);
     }
 
     async onFetchComponents(options: IOnFetchComponentsOptions): Promise<IOnFetchComponentsResult> {
@@ -157,8 +159,7 @@ export default class Editor extends Module {
         super.init();
         this.initEventListeners();
         this.initData();
-        const theme = this.getAttribute('theme', true);
-        if (theme) this.theme = theme;
+        this.theme = this.getAttribute('theme', true);
     }
 
     setRootDir(value: string) {
@@ -177,7 +178,8 @@ export default class Editor extends Module {
                 }
                 return !!section.elements.length;
             }),
-            footer: pageObject.footer
+            footer: pageObject.footer,
+            config: pageObject.config
         };
     }
 
@@ -185,13 +187,26 @@ export default class Editor extends Module {
         // pageObject.header = value.header;
         pageObject.sections = value?.sections || [];
         pageObject.footer = value?.footer;
-
+        pageObject.config = value?.config;
         try {
             // await this.builderHeader.setData(value.header);
             await this.pageRows.setRows(value?.sections || []);
             await this.builderFooter.setData(value?.footer);
+            this.updatePageConfig();
         } catch (error) {
             console.log('setdata', error);
+        }
+    }
+
+    private updatePageConfig() {
+        if (pageObject?.config) {
+            const { backgroundColor = getBackgroundColor(), margin = {x: 60, y: 8}, maxWidth = 1280 } = pageObject.config || {};
+            this.style.setProperty('--builder-bg', backgroundColor);
+            if (this.pnlEditor) {
+                this.pnlEditor.maxWidth = maxWidth;
+                const { x, y } = margin;
+                this.pnlEditor.margin = {top: y, bottom: y, left: x, right: x};
+            }
         }
     }
 
@@ -200,6 +215,7 @@ export default class Editor extends Module {
             event.unregister();
         }
         this.events = [];
+        application.EventBus.dispatch(EVENT.ON_CLOSE_BUILDER);
     }
 
     private initEventBus() {
@@ -287,7 +303,7 @@ export default class Editor extends Module {
                                 maxWidth={1280}
                                 minHeight="100vh"
                                 margin={{ top: 8, bottom: 8, left: 60, right: 60 }}
-                                background={{ color: '#fff' }}
+                                background={{ color: 'var(--builder-bg)' }}
                                 class="pnl-editor-wrapper"
                             >
                                 <i-panel

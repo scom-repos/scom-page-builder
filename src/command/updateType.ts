@@ -1,7 +1,6 @@
 import { ICommand } from "./interface";
 import { pageObject } from "../store/index";
 import { Control } from "@ijstech/components";
-import { generateUUID } from "../utility/index";
 import { ElementType, IElementConfig } from "../interface/index";
 
 export class UpdateTypeCommand implements ICommand {
@@ -20,7 +19,7 @@ export class UpdateTypeCommand implements ICommand {
     this.elementParent = (element ? element.closest('ide-row') : dropElm.closest('ide-row')) as Control;
     this.dropParent = dropElm.closest('ide-row') as Control;
     this.data = element ? JSON.parse(JSON.stringify(element.data)) : null;
-    this.config = config || null;
+    this.config = config ? JSON.parse(JSON.stringify(config)) : null;
     const dropRowId = this.dropParent?.id.replace('row-', '');
     const dropSection = dropElm.closest('ide-section');
     this.dropSectionId = (dropSection?.id || '');
@@ -33,7 +32,7 @@ export class UpdateTypeCommand implements ICommand {
     if (this.isNew) {
       const isMicroDapps= this.config?.module?.category === 'micro-dapps';
       const newElData = {
-        id: generateUUID(),
+        id: this.config.id,
         column: 1,
         columnSpan: 6,
         type: this.config?.type || ElementType.PRIMITIVE,
@@ -71,7 +70,7 @@ export class UpdateTypeCommand implements ICommand {
         pageObject.addElement(dropRowId, elementList[i], this.dropSectionId, elementIndex + i + 1);
       }
     } else if (clonedDropSecData?.type === ElementType.PRIMITIVE) {
-      clonedDropSecData.id = generateUUID();
+      // clonedDropSecData.id = generateUUID();
       const updatedList = [...elementList].map(elm => {
         elm.column = clonedDropSecData.column;
         elm.columnSpan = clonedDropSecData.columnSpan;

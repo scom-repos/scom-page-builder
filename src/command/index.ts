@@ -9,3 +9,4 @@ export { UpdateTypeCommand } from './updateType';
 export { AddElementCommand } from './addElement';
 export { ReplaceElementCommand } from './replaceElement';
 export { ICommand, IDataColumn } from "./interface";
+export { UpdatePageSettingsCommand } from "./updatePageSetting";

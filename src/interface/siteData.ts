@@ -1,16 +1,20 @@
+import { ISpace } from "@ijstech/components";
 import { IPageBlockData } from "./pageBlock";
 
 export interface IPageData {
-    cid?: string;
-    title?: string;
-    name: string;
-    path: string;
-    url: string;
-    visible: boolean;
-
     header: IPageHeader;
 	sections: IPageSection[];
 	footer: IPageFooter;
+    config?: IPageConfig;
+}
+
+export interface IPageConfig {
+    backgroundColor?: string;
+    maxWidth?: number|string;
+    margin?: {
+        x?: number|string;
+        y?: number|string;
+    };
 }
 
 export enum HeaderType {
