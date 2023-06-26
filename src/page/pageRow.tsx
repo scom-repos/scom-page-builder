@@ -39,6 +39,7 @@ declare global {
 export interface PageRowElement extends ControlElement {
     readonly?: boolean;
 }
+const ROW_BOTTOM_CLASS = 'row-bottom-block';
 
 @customElements('ide-row')
 export class PageRow extends Module {
@@ -97,6 +98,17 @@ export class PageRow extends Module {
         this.renderFixedGrid();
         this.initEventListeners();
         this.initEventBus();
+        this.appendChild(
+            <i-panel
+                position="absolute"
+                width="100%"
+                height="16px"
+                bottom="-8px"
+                zIndex={90}
+                border={{radius: '5px'}}
+                class={ROW_BOTTOM_CLASS}
+            ></i-panel>
+        )
     }
 
     toggleUI(value: boolean) {
@@ -298,6 +310,7 @@ export class PageRow extends Module {
         let dragStartTarget: Control;
         let dragOverTarget: Control;
         type OverlapType = "none" | "self" | "mutual"; // | "border";
+        const parentWrapper = self.closest('#editor') || document;
 
         this.addEventListener('mousedown', (e) => {
             const target = e.target as Control;
@@ -405,6 +418,12 @@ export class PageRow extends Module {
 
         function updateClass(elm: Control, className: string) {
             if (elm.visible) {
+                if (className === 'is-dragenter') {
+                    const blocks = parentWrapper.getElementsByClassName('is-dragenter');
+                    for (let block of blocks) {
+                        block.classList.remove('is-dragenter');
+                    }
+                }
                 elm.classList.add(className);
             } else {
                 elm.classList.remove(className);
@@ -454,6 +473,11 @@ export class PageRow extends Module {
                 pageRow.classList.add('row-entered');
             }
             if (!enterTarget || !self.currentElement) return;
+            const rowBottom = enterTarget.closest(`.${ROW_BOTTOM_CLASS}`) as Control;
+            if (rowBottom) {
+                updateClass(rowBottom, 'is-dragenter');
+                return;
+            }
             let target: Control;
             if (isOverlap)
                 target = findNearestFixedGridInRow(clientX);
@@ -533,17 +557,27 @@ export class PageRow extends Module {
             if (target)
                 updateRectangles();
             else {
-                const blocks = document.getElementsByClassName('is-dragenter')
+                const blocks = parentWrapper.getElementsByClassName('is-dragenter');
+                const currentSection = leaveTarget.closest('ide-section') as Control;
+                const currentRow = leaveTarget.closest('ide-row') as Control;
+                const isCurrentEnter = (block: Control) => {
+                    let result = false;
+                    if (block.classList.contains(ROW_BOTTOM_CLASS)) {
+                        const blockRow = block.closest('ide-row') as Control;
+                        result = currentRow && blockRow && currentRow.id === blockRow.id;
+                    } else {
+                        const blockSection = block.closest('ide-section') as Control;
+                        result = currentSection && blockSection && currentSection.id === blockSection.id;
+                    }
+                    return result;
+                }
                 for (const block of blocks) {
-                    const currentSection = leaveTarget.closest('ide-section') as Control;
-                    const blockSection = block.closest('ide-section');
-                    if (currentSection && blockSection && currentSection.id === blockSection.id)
-                        continue;
-                    (block as Control).visible = false;
+                    if (isCurrentEnter(block as Control)) continue;
+                    (block as Control).visible = block.classList.contains(ROW_BOTTOM_CLASS);
                     block.classList.remove('is-dragenter');
                 }
             }
-            const pageRows = document.getElementsByClassName('row-entered');
+            const pageRows = parentWrapper.getElementsByClassName('row-entered');
             for (const row of pageRows) {
                 const currentRow = leaveTarget.closest('ide-row') as Control;
                 if (currentRow && row && currentRow.id === row.id)
@@ -696,15 +730,18 @@ export class PageRow extends Module {
             event.preventDefault();
             event.stopPropagation();
 
+            if (pageRow && elementConfig?.module?.name === 'sectionStack') {
+                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
+                return;
+            }
+
+            if (!self.currentElement) return;
+
             // if target overlap with other section
             const overlap = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX);
             if (overlap.overlapType == "mutual"/* || overlap.overlapType == "border"*/) return;
             if (overlap.overlapType == "none" && eventTarget.classList.contains('fixed-grid'))
                 return;
-
-            if (pageRow && elementConfig?.module?.name === 'sectionStack')
-                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
-            if (!self.currentElement) return;
 
             let nearestFixedItem = eventTarget.closest('.fixed-grid-item') as Control;
 
@@ -733,36 +770,45 @@ export class PageRow extends Module {
                 if (self.currentElement.data) {
                     const dragCmd = new DragElementCommand(self.currentElement, nearestFixedItem);
                     commandHistory.execute(dragCmd);
-                } else if (getDragData()) {
+                } else if (elementConfig) {
                     const dragCmd = new AddElementCommand(self.getNewElementData(), true, false, nearestFixedItem);
                     commandHistory.execute(dragCmd);
                 }
                 self.isDragging = false;
             } else {
-                const isPageRow = eventTarget.classList.contains('page-row');
-                let dropElm = (
-                    isPageRow
-                        ? eventTarget.querySelector('.is-dragenter')
-                        : eventTarget.closest('.is-dragenter')
-                ) as Control;
+                // const isPageRow = eventTarget.classList.contains('page-row');
+                // let dropElm = (
+                //     isPageRow
+                //         ? eventTarget.querySelector('.is-dragenter')
+                //         : eventTarget.closest('.is-dragenter')
+                // ) as Control;
+                // const blocks = Array.from(self.parentElement.getElementsByClassName('is-dragenter'));
+                // const activedBlock = blocks.find((block: Control) => block.visible) as Control;
+                // dropElm = dropElm || activedBlock;
+                let dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
                 if (self.isDragging) return;
-                const blocks = Array.from(self.parentElement.getElementsByClassName('is-dragenter'));
-                const activedBlock = blocks.find((block: Control) => block.visible) as Control;
-                dropElm = dropElm || activedBlock;
+
                 if (dropElm) {
                     self.isDragging = true;
                     dropElm.classList.remove('is-dragenter');
-                    const isBottomBlock = dropElm.classList.contains('bottom-block');
-                    if (isBottomBlock) {
-                        const config = getDragData();
-                        const dragCmd = new UpdateTypeCommand(dropElm, config ? null : self.currentElement, self.getNewElementData());
+                    if (dropElm.classList.contains('bottom-block')) {
+                        const dragCmd = new UpdateTypeCommand(dropElm, elementConfig ? null : self.currentElement, self.getNewElementData());
                         commandHistory.execute(dragCmd);
+                    } else if (dropElm.classList.contains(ROW_BOTTOM_CLASS)) {
+                        application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
+                        const newPageRow = pageRow.nextElementSibling as PageRow;
+                        if (newPageRow) {
+                            const dragCmd = elementConfig ?
+                                new AddElementCommand(self.getNewElementData(), true, true, null, newPageRow) :
+                                new DragElementCommand(self.currentElement, newPageRow, true, true);
+                            await commandHistory.execute(dragCmd);
+                        }
                     } else {
                         const isAppend = dropElm.classList.contains('back-block');
-                        const dragCmd = getDragData() ?
+                        const dragCmd = elementConfig ?
                             new AddElementCommand(self.getNewElementData(), isAppend, false, dropElm, null) :
                             new DragElementCommand(self.currentElement, dropElm, isAppend);
-                        dragCmd && await commandHistory.execute(dragCmd);
+                        await commandHistory.execute(dragCmd);
                     }
                     self.isDragging = false;
                 } else if (pageRow && !self.isDragging) {
@@ -771,9 +817,7 @@ export class PageRow extends Module {
                         const parentId = pageRow?.id.replace('row-', '');
                         const elements = parentId ? pageObject.getRow(parentId)?.elements || [] : [];
                         const hasData = elements.find(el => el.type === 'primitive' || (el.type === 'composite' && el.elements?.length));
-                        const dragCmd = hasData && activedBlock ?
-                            new AddElementCommand(self.getNewElementData(), activedBlock.classList.contains('back-block'), false, activedBlock) :
-                            !hasData && new AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
+                        const dragCmd = !hasData && new AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
                         dragCmd && await commandHistory.execute(dragCmd);
                     } else {
                         const dragCmd = new DragElementCommand(self.currentElement, pageRow, true, true);
@@ -787,9 +831,9 @@ export class PageRow extends Module {
         });
 
         function removeClass(className: string) {
-            const elements = document.getElementsByClassName(className);
+            const elements = parentWrapper.getElementsByClassName(className);
             for (const element of elements) {
-                if (className === 'is-dragenter') {
+                if (className === 'is-dragenter' && !element.classList.contains(ROW_BOTTOM_CLASS)) {
                     (element as Control).visible = false;
                 }
                 element.classList.remove(className);
@@ -797,7 +841,7 @@ export class PageRow extends Module {
         }
 
         function updateRectangles() {
-            const rectangles = document.getElementsByClassName('rectangle');
+            const rectangles = parentWrapper.getElementsByClassName('rectangle');
             for (const rectangle of rectangles) {
                 (rectangle as Control).style.display = 'none';
             }

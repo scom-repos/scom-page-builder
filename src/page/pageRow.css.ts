@@ -126,9 +126,7 @@ Styles.cssRule('ide-row', {
             transition: 'border ease-in .2s'
         },
         '.is-dragenter': {
-            background: '#cae5fbc4',
-            border: `1px solid ${Theme.colors.primary.main}`,
-            height: '100%',
+            background: 'rgb(66,133,244)',
             opacity: 1
         },
         '.rectangle': {

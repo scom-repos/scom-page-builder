@@ -681,11 +681,12 @@ export class IDEToolbar extends Module {
 
                 <i-panel
                     position="absolute"
-                    width="100%"
-                    height="15px"
-                    bottom="-15px"
+                    width="90%"
+                    height="8px"
+                    left="5%"
+                    bottom="-8px"
                     zIndex={999}
-                    border={{radius: '50px'}}
+                    border={{radius: '4px'}}
                     visible={false}
                     class="bottom-block"
                 ></i-panel>
