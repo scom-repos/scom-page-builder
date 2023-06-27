@@ -58,6 +58,14 @@ export class UpdateTypeCommand implements ICommand {
     }
     const dropRowId = this.dropParent?.id.replace('row-', '');
     const dropSection = this.dropParent.querySelector(`[id='${this.dropSectionId}']`) as Control;
+    if (this.elementParent) {
+      const elementRowId = (this.elementParent?.id || '').replace('row-', '');
+      const elementSection = pageObject.getRow(elementRowId);
+      if (elementRowId && this.element)
+        pageObject.removeElement(elementRowId, this.element.id);
+      this.elementParent.visible = !!elementSection?.elements?.length;
+    }
+    if (this.element) this.element.remove();
 
     const dropSectionData = pageObject.getElement(dropRowId, this.dropSectionId);
     const clonedDropSecData = JSON.parse(JSON.stringify(dropSectionData));
@@ -84,15 +92,6 @@ export class UpdateTypeCommand implements ICommand {
     }
     const newDropData = pageObject.getElement(dropRowId, this.dropSectionId);
     (dropSection as any).setData(dropRowId, newDropData);
-    if (this.isNew) return;
-    if (this.elementParent) {
-      const elementRowId = (this.elementParent?.id || '').replace('row-', '');
-      const elementSection = pageObject.getRow(elementRowId);
-      if (elementRowId !== dropRowId && this.element)
-        pageObject.removeElement(elementRowId, this.element.id);
-      this.elementParent.visible = !!elementSection?.elements?.length;
-    }
-    if (this.element) this.element.remove();
   }
 
   undo(): void {
