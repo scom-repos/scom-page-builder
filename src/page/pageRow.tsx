@@ -738,10 +738,10 @@ export class PageRow extends Module {
 
                 const numberOfToolbars = self.currentElement.querySelectorAll('ide-toolbar').length
 
-                // ungrouping elm
                 const secId = self.currentElement.id;
-                const toolbarId = self.currentToolbar.id.replace("elm-", "");
+                const toolbarId = self.currentToolbar? self.currentToolbar.id.replace("elm-", "") : "";
 
+                // ungrouping elm
                 // FIX ME: dragging the 1st elm in section causes bug, which is disabled now (secId != toolbarId)
                 if (self.currentToolbar && numberOfToolbars > 1 && secId != toolbarId) {
                     // const config = getDragData(); // null

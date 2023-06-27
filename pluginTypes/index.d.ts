@@ -704,12 +704,14 @@ declare module "@scom/scom-page-builder/command/ungroupSection.ts" {
         private parent;
         private dropElm;
         private data;
-        private oldDataColumnMap;
         private isReGroup;
         private prevSection;
+        private oriCol;
+        private oriColSpan;
+        private oriElmIndex;
         constructor(data: any, isReGroup: boolean, elm: Control, dropElm: Control, prevSection: Control, parent?: any);
         execute(): Promise<void>;
-        undo(): void;
+        undo(): Promise<void>;
         redo(): void;
     }
 }
