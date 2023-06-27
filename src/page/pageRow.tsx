@@ -786,7 +786,8 @@ export class PageRow extends Module {
                         const dragCmd = new UpdateTypeCommand(dropElm, elementConfig ? null : self.currentElement, self.getNewElementData());
                         commandHistory.execute(dragCmd);
                     } else if (dropElm.classList.contains(ROW_BOTTOM_CLASS)) {
-                        self.onAppendRow(pageRow);
+                        const prependRow = dropElm.closest('ide-row') as PageRow;
+                        prependRow && self.onAppendRow(prependRow);
                     } else {
                         const isAppend = dropElm.classList.contains('back-block');
                         const dragCmd = elementConfig ?
