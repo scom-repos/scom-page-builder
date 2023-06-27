@@ -177,20 +177,22 @@ export class PageObject {
     return [...elements].sort((a: IPageElement, b: IPageElement) => Number(a.column) - Number(b.column));
   }
 
-  private removeElementFn(elements: IPageElement[], elementId: string) {
+  private removeElementFn(elements: IPageElement[], elementId: string, removeLeafOnly: boolean = false) {
     if (!elements || !elements.length) return;
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
       if (element && element.id === elementId) {
-        elements.splice(i, 1);
-        break;
+        if (removeLeafOnly && element.elements)
+          this.removeElementFn(element.elements, elementId);
+        else
+          elements.splice(i, 1); break;
       } else if (element && element.type === 'composite') {
         this.removeElementFn(element.elements, elementId);
       }
     }
   }
 
-  removeElement(sectionId: string, elementId: string) {
+  removeElement(sectionId: string, elementId: string, removeLeafOnly: boolean = false) {
     let elements = [];
     if (sectionId === 'header') {
       elements = this._header.elements;
@@ -200,7 +202,7 @@ export class PageObject {
       const section = this.getSection(sectionId);
       elements = section?.elements || [];
     }
-    this.removeElementFn(elements, elementId);
+    this.removeElementFn(elements, elementId, removeLeafOnly);
   }
 
   addElement(sectionId: string, value: IPageElement, parentElmId = '', elementIndex?: number) {
