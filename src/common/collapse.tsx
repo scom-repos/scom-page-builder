@@ -26,6 +26,8 @@ export class Collapse extends Module {
   private pnlContent: Panel;
 
   private _expanded: boolean;
+  private requestID: number;
+  private _speed: number = 250;
   
   constructor(parent?: Container, options?: any) {
     super(parent, options);
@@ -58,11 +60,10 @@ export class Collapse extends Module {
     this._expanded = value;
     if (this._expanded) {
       this.iconCollapse.classList.add('--rotate');
-      this.pnlContent.classList.add('--expanded');
     } else {
       this.iconCollapse.classList.remove('--rotate');
-      this.pnlContent.classList.remove('--expanded');
     }
+    this.handleCollapse();
   }
   
   init() {
@@ -74,7 +75,41 @@ export class Collapse extends Module {
       this.pnlContent.append(this.children[0]);
     }
     this.item = this.getAttribute('item', true);
-    this.expanded = this.getAttribute('expanded', true, false);
+    const expanded = this.getAttribute('expanded', true, false);
+    this._expanded = expanded;
+    if (!expanded) {
+      this.pnlContent.classList.add("--hidden");
+    } else {
+      this.iconCollapse.classList.add('--rotate');
+    }
+  }
+
+  private handleCollapse() {
+    const isExpanded = this._expanded;
+    const startTime = performance.now();
+    if (this.requestID) cancelAnimationFrame(this.requestID);
+    this.pnlContent.style.height = this.pnlContent.scrollHeight + "px";
+    this.pnlContent.classList.add("--collapsing");
+    this.pnlContent.classList.remove("--hidden");
+    const animate = (time: DOMHighResTimeStamp) => {
+      const runtime = time - startTime;
+      const relativeProgress = runtime / this._speed;
+      const progress = Math.min(relativeProgress, 1);
+      if (progress < 1) {
+        this.pnlContent.style.opacity = isExpanded ? "1" : "0";
+        this.pnlContent.style.height = isExpanded ? this.pnlContent.scrollHeight + "px" : "0px";
+        this.requestID = requestAnimationFrame(animate);
+      }
+      if (progress === 1) {
+        this.pnlContent.classList.remove("--collapsing");
+        this.pnlContent.style.opacity = "";
+        this.pnlContent.style.height = "";
+        if (!isExpanded) {
+          this.pnlContent.classList.add("--hidden");
+        }
+      }
+    };
+    this.requestID = requestAnimationFrame(animate);
   }
 
   onCollapse() {
