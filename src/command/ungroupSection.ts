@@ -3,7 +3,7 @@ import { pageObject } from "../store/index";
 import { Control } from "@ijstech/components";
 import { application } from "@ijstech/components";
 import { EVENT } from "../const/index";
-import { ElementType, IElementConfig } from "../interface/index";
+import { ElementType } from "../interface/index";
 
 export class UngroupSectionCommand implements ICommand {
     private element: any;

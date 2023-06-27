@@ -2000,7 +2000,6 @@ define("@scom/scom-page-builder/command/ungroupSection.ts", ["require", "exports
                 const prevRow = this.prevSection.closest && this.prevSection.closest('ide-row');
                 const rowId = prevRow.id.replace("row-", "");
                 const elmId = this.element.id.replace("elm-", "");
-                console.log("this.element", this.element);
                 const currentElm = prevRow === null || prevRow === void 0 ? void 0 : prevRow.querySelector(`ide-toolbar#${this.element.id}`);
                 if (currentElm === null || currentElm === void 0 ? void 0 : currentElm.data) {
                     this.data = JSON.parse(JSON.stringify(currentElm.data));
@@ -2028,10 +2027,9 @@ define("@scom/scom-page-builder/command/ungroupSection.ts", ["require", "exports
                 }
                 components_5.application.EventBus.dispatch(index_15.EVENT.ON_UPDATE_SECTIONS);
                 // create elm in a new section
-                console.log("this.data", this.data);
                 const isMicroDapps = ((_e = (_d = this.data) === null || _d === void 0 ? void 0 : _d.module) === null || _e === void 0 ? void 0 : _e.category) === 'micro-dapps';
                 const newElData = {
-                    id: `${this.data.id}`,
+                    id: this.data.id,
                     column: parseInt(this.dropElm.dataset.column),
                     columnSpan: this.data.columnSpan,
                     type: this.data.type,
@@ -2079,9 +2077,8 @@ define("@scom/scom-page-builder/command/ungroupSection.ts", ["require", "exports
                 components_5.application.EventBus.dispatch(index_15.EVENT.ON_UPDATE_SECTIONS);
                 // merge the elms
                 const isMicroDapps = ((_e = (_d = this.data) === null || _d === void 0 ? void 0 : _d.module) === null || _e === void 0 ? void 0 : _e.category) === 'micro-dapps';
-                console.log("this.data", this.data);
                 const newElData = {
-                    id: `${this.data.id}`,
+                    id: this.data.id,
                     column: this.oriCol,
                     columnSpan: this.oriColSpan,
                     type: this.data.type,
@@ -4122,9 +4119,14 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 event.stopPropagation();
                 // if target overlap with other section
                 const overlap = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX);
+                // collide with other section
                 if (overlap.overlapType == "mutual" /* || overlap.overlapType == "border"*/)
                     return;
+                // drag on the gap of fixed panel
                 if (overlap.overlapType == "none" && eventTarget.classList.contains('fixed-grid'))
+                    return;
+                // is ungrouping and draging on the original section
+                if (overlap.overlapType == "self" && self.currentToolbar)
                     return;
                 if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack')
                     components_24.application.EventBus.dispatch(index_39.EVENT.ON_ADD_SECTION, { prependId: pageRow.id });

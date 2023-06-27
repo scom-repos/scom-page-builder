@@ -703,9 +703,13 @@ export class PageRow extends Module {
 
             // if target overlap with other section
             const overlap = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX);
+
+            // collide with other section
             if (overlap.overlapType == "mutual"/* || overlap.overlapType == "border"*/) return;
-            if (overlap.overlapType == "none" && eventTarget.classList.contains('fixed-grid'))
-                return;
+            // drag on the gap of fixed panel
+            if (overlap.overlapType == "none" && eventTarget.classList.contains('fixed-grid')) return;
+            // is ungrouping and draging on the original section
+            if (overlap.overlapType == "self" && self.currentToolbar) return;
 
             if (pageRow && elementConfig?.module?.name === 'sectionStack')
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
