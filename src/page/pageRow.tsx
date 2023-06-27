@@ -10,11 +10,11 @@ import {
     Styles
 } from '@ijstech/components';
 import { PageSection } from './pageSection';
-import { ISettingType, RowSettingsDialog } from '../dialogs/index';
+import { RowSettingsDialog } from '../dialogs/index';
 import './pageRow.css';
 import { EVENT } from '../const/index';
-import { IPageElement, IPageSection, GAP_WIDTH, MIN_COLUMN, IRowSettings } from '../interface/index';
-import { getDragData, pageObject, setDragData } from '../store/index';
+import { IPageElement, IPageSection, GAP_WIDTH, MIN_COLUMN, IPageConfig, IPageSectionConfig } from '../interface/index';
+import { getDefaultPageConfig, getDragData, getMargin, pageObject, setDragData } from '../store/index';
 import {
     commandHistory,
     UpdateRowCommand,
@@ -46,8 +46,7 @@ export class PageRow extends Module {
     private actionsBar: VStack;
     private dragStack: VStack;
     private pnlRow: GridLayout;
-    private mdRowColorSetting: RowSettingsDialog;
-    private mdRowColumnSetting: RowSettingsDialog;
+    private mdRowSetting: RowSettingsDialog;
     private pnlEmty: VStack;
 
     private _readonly: boolean;
@@ -162,15 +161,13 @@ export class PageRow extends Module {
 
     async setData(rowData: IPageSection) {
         this.clearData();
-        const { id, row, image, elements, backgroundColor } = rowData;
+        const { id, row, elements, config } = rowData;
 
         this.id = `row-${id}`;
         this.rowId = id;
         this.rowData = rowData;
         this.setAttribute('data-row', `${row}`);
-        if (image) this.background.image = image;
-        else if (backgroundColor) this.background.color = backgroundColor;
-
+        this.updateRowConfig(config);
         this.isCloned = this.parentElement?.nodeName !== 'BUILDER-HEADER';
         this.isChanged = this.parentElement?.nodeName !== 'BUILDER-HEADER';
 
@@ -180,19 +177,25 @@ export class PageRow extends Module {
             }
         }
         this.actionsBar.minHeight = '100%';
+        this.updateColumn();
         const hasData = this.data?.elements?.length;
         this.toggleUI(hasData);
-        this.updateColumn();
     }
 
-    private onOpenRowSettingsDialog(type: ISettingType) {
-        if (type === 'color')
-            this.mdRowColorSetting.show(this.rowId);
-        else
-            this.mdRowColumnSetting.show(this.rowId);
+    private updateRowConfig(config: IPageSectionConfig) {
+        const { image = '', backgroundColor, maxWidth, margin } = config || {};
+        if (image) this.background.image = image;
+        else if (backgroundColor) this.background.color = backgroundColor;
+        this.maxWidth = maxWidth ?? '100%';
+        this.margin = getMargin(margin);
+        this.width = '100%';
     }
 
-    private onSaveRowSettings(data: IRowSettings) {
+    private onOpenRowSettingsDialog() {
+        this.mdRowSetting.show(this.rowId);
+    }
+
+    private onSaveRowSettings(data: IPageSectionConfig) {
         const updateCmd = new UpdateRowSettingsCommand(this, data);
         commandHistory.execute(updateCmd);
     }
@@ -200,7 +203,6 @@ export class PageRow extends Module {
     updateColumn() {
         this.updateGrid();
         this.updateFixedGrid();
-        this.updateAlign();
     }
 
     private updateGrid() {
@@ -845,7 +847,14 @@ export class PageRow extends Module {
     }
 
     private initEventBus() {
-        application.EventBus.register(this, EVENT.ON_SET_DRAG_ELEMENT, async (el: any) => this.currentElement = el)
+        application.EventBus.register(this, EVENT.ON_SET_DRAG_ELEMENT, async (el: any) => this.currentElement = el);
+        application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_CONFIG, async (config: IPageConfig) => {
+            if (!config) return;
+            const id = this.id.replace('row-', '');
+            console.log('update page config', config)
+            pageObject.updateSection(id, { config }); // TODO: only update the changed value
+            this.updateRowConfig(config);
+        });
     }
 
     private getNewElementData() {
@@ -926,18 +935,9 @@ export class PageRow extends Module {
                             class="actions"
                             tooltip={{ content: 'Section settings', placement: 'right' }}
                             visible={this.isChanged}
-                            onClick={() => this.onOpenRowSettingsDialog('column')}
+                            onClick={() => this.onOpenRowSettingsDialog()}
                         >
                             <i-icon name="cog" width={16} height={16} fill="#80868b"></i-icon>
-                        </i-panel>
-                        <i-panel
-                            id="btnSetting"
-                            class="actions"
-                            tooltip={{ content: 'Section colors', placement: 'right' }}
-                            visible={this.isChanged}
-                            onClick={() => this.onOpenRowSettingsDialog('color')}
-                        >
-                            <i-icon name="palette" width={16} height={16} fill="#80868b"></i-icon>
                         </i-panel>
                         <i-panel
                             id="btnClone"
@@ -1015,13 +1015,7 @@ export class PageRow extends Module {
                     opacity={0}
                 ></i-grid-layout>
                 <ide-row-settings-dialog
-                    id="mdRowColorSetting"
-                    type="color"
-                    onSave={this.onSaveRowSettings.bind(this)}
-                ></ide-row-settings-dialog>
-                <ide-row-settings-dialog
-                    id="mdRowColumnSetting"
-                    type="column"
+                    id="mdRowSetting"
                     onSave={this.onSaveRowSettings.bind(this)}
                 ></ide-row-settings-dialog>
                 <i-button

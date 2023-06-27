@@ -12,7 +12,7 @@ const Theme = Styles.Theme.ThemeVars;
 
 import { assignAttr } from '../utility/index';
 import { IPageConfig } from '../interface/index';
-import { getBackgroundColor, pageObject } from '../store/index';
+import { getDefaultPageConfig, pageObject } from '../store/index';
 
 export interface PageSettingsDialogElement extends ControlElement {
     onSave: (data: IPageConfig) => void;
@@ -31,7 +31,6 @@ export class PageSettingsDialog extends Module {
     private settingsDialog: Modal;
     private formElm: Form;
 
-    private defaultData: IPageConfig;
     private onSave: (data: IPageConfig) => void;
 
     constructor(parent?: any, options?: any) {
@@ -41,11 +40,6 @@ export class PageSettingsDialog extends Module {
 
     init() {
         super.init();
-        this.defaultData = {
-            backgroundColor: getBackgroundColor(),
-            maxWidth: 1280,
-            margin: {x: 60, y: 8}
-        }
     }
 
     show() {
@@ -102,8 +96,10 @@ export class PageSettingsDialog extends Module {
         this.formElm.jsonSchema = jsonSchema;
         this.formElm.formOptions = formOptions;
         this.formElm.renderForm();
+        const defaultConfig = getDefaultPageConfig();
         const config = pageObject.config || {};
-        this.formElm.setFormData({ ...this.defaultData, ...config });
+        config.margin = {...defaultConfig.margin, ...config.margin};
+        this.formElm.setFormData({ ...defaultConfig, ...config });
     }
 
     close() {

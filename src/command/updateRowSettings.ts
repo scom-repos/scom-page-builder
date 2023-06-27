@@ -1,59 +1,38 @@
 import { Control, application } from "@ijstech/components";
-import { pageObject } from "../store/index";
+import { getMargin, pageObject } from "../store/index";
 import { ICommand } from "./interface";
-import { IRowSettings } from '../interface/index';
+import { IPageSectionConfig } from '../interface/index';
 import { EVENT } from "../const/index";
 
 export class UpdateRowSettingsCommand implements ICommand {
   private element: any;
-  private settings: IRowSettings
+  private settings: IPageSectionConfig
   private oldSettings: any;
 
-  constructor(element: Control, settings: IRowSettings) {
+  constructor(element: Control, settings: IPageSectionConfig) {
     this.element = element;
-    this.settings = settings;
+    this.settings = {...settings};
     const id = this.element.id.replace('row-', '');
-    const data = pageObject.getRow(id) || {};
+    const data = pageObject.getRowConfig(id) || {};
     this.oldSettings = {...data};
   }
 
-  execute(): void {
-    const { backgroundColor, config } = this.settings;
+  private updateConfig(config: IPageSectionConfig) {
     const id = this.element.id.replace('row-', '');
-    if (backgroundColor !== undefined) {
-      this.element.background = {color: backgroundColor};
-      application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {color: backgroundColor});
-    }
-    pageObject.updateSection(id, { backgroundColor, config });
-    if (config) {
-      this.element.setData(pageObject.getRow(id));
-      const align = config.align || 'left';
-      let alignValue = 'start';
-      switch(align) {
-        case 'right':
-          alignValue = 'end';
-          break;
-        case 'center':
-          alignValue = 'center';
-          break;
-      }
-      this.element.style.justifyContent = alignValue;
-    }
+    const { backgroundColor, margin } = config;
+    this.element.background = {color: backgroundColor || ''};
+    application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {color: backgroundColor || ''});
+    const marginStyle = getMargin(margin);
+    pageObject.updateSection(id, { config: {...config, margin: {x: marginStyle.left , y: marginStyle.top}}});
+    this.element.setData(pageObject.getRow(id));
+  }
+
+  execute(): void {
+    this.updateConfig(this.settings);
   }
 
   undo(): void {
-    const { backgroundColor = '', config } = this.oldSettings;
-    const id = this.element.id.replace('row-', '');
-    this.element.background = {color: backgroundColor};
-    application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {color: backgroundColor});
-    pageObject.updateSection(id, {
-      backgroundColor,
-      config: config || {
-        // columnLayout: IColumnLayoutType.FIXED,
-        // columnsNumber: 12,
-        align: 'left'
-    }});
-    this.element.setData(pageObject.getRow(id));
+    this.updateConfig(this.oldSettings);
   }
 
   redo(): void {}

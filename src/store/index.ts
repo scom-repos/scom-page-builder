@@ -64,26 +64,25 @@ export class PageObject {
 
   updateSection(id: string, data: any) {
     const section = this.getRow(id);
-    if (section) {
-      const { backgroundColor, config } = data;
-      if (backgroundColor !== undefined)
-        (section as any).backgroundColor = backgroundColor;
-      if (config !== undefined) {
-        const oldColumnsNumber = this.getColumnsNumber(id);
-        const elements = this.getRow(id)?.elements || [];
-        section.config = data.config;
-        const newColumnsNumber = this.getColumnsNumberFn(section);
-        if (oldColumnsNumber !== newColumnsNumber) {
-          for (let element of elements) {
-            const oldColumnSpan = element.columnSpan;
-            const oldColumn = element.column;
-            const newColumnSpan = Math.floor(newColumnsNumber / oldColumnsNumber * oldColumnSpan);
-            const newColumn = Math.ceil(newColumnsNumber / oldColumnsNumber * oldColumn);
-            this.setElement(id, element.id, { column: newColumn, columnSpan: newColumnSpan });
-          }
-        }
-      }
-    }
+    if (!section) return;
+    if (data?.config) section.config = data.config;
+    // section.config = section.config || {align: 'left'};
+    // for (let prop in config) {
+    //   if (config.hasOwnProperty(prop)) {
+    //     section.config[prop] = config[prop];
+    //   }
+    // }
+    // const oldColumnsNumber = this.getColumnsNumber(id);
+    // const elements = this.getRow(id)?.elements || [];
+    // const newColumnsNumber = this.getColumnsNumberFn(section);
+    // if (oldColumnsNumber !== newColumnsNumber) {
+    //   for (let element of elements) {
+    //     const oldColumnSpan = element.columnSpan;
+    //     const oldColumn = element.column;
+    //     const newColumnSpan = Math.floor(newColumnsNumber / oldColumnsNumber * oldColumnSpan);
+    //     const newColumn = Math.ceil(newColumnsNumber / oldColumnsNumber * oldColumn);
+    //     this.setElement(id, element.id, { column: newColumn, columnSpan: newColumnSpan });
+    //   }
   }
 
   getRow(rowId: string) {
@@ -228,20 +227,21 @@ export class PageObject {
 
   getRowConfig(sectionId: string) {
     const section = this.getRow(sectionId);
-    return section?.config || {};
+    return section?.config;
   }
 
   getColumnsNumber(sectionId: string) {
-    if (!sectionId) return MAX_COLUMN;
-    const section = this.getRow(sectionId);
-    return this.getColumnsNumberFn(section);
+    return MAX_COLUMN
+    // if (!sectionId) return MAX_COLUMN;
+    // const section = this.getRow(sectionId);
+    // return this.getColumnsNumberFn(section);
   }
 
-  private getColumnsNumberFn(section: IPageSection|IPageFooter) {
-    if (!section) return MAX_COLUMN;
-    const { columnsNumber, columnLayout } = section?.config || {};
-    return (columnLayout === 'Fixed' && columnsNumber) ? columnsNumber : MAX_COLUMN;
-  }
+  // private getColumnsNumberFn(section: IPageSection|IPageFooter) {
+  //   if (!section) return MAX_COLUMN;
+  //   const { columnsNumber, columnLayout } = section?.config || {};
+  //   return (columnLayout === 'Fixed' && columnsNumber) ? columnsNumber : MAX_COLUMN;
+  // }
 }
 
 export const pageObject = new PageObject();
@@ -364,3 +364,29 @@ export const getDivider = (theme?: ThemeType) => {
   theme = theme ?? getTheme();
   return theme === 'light' ? lightTheme.divider : darkTheme.divider;
 }
+
+export const getDefaultPageConfig = () => {
+  return {
+    backgroundColor: getBackgroundColor(),
+    margin: {x: 'auto', y: 8},
+    maxWidth: 1280
+  }
+}
+
+export const getMargin = (margin: { x?: number|string, y?: number|string }) => {
+  const { margin: defaultMargin } = getDefaultPageConfig();
+  let { x, y } = margin || {};
+  x = x ?? defaultMargin.x;
+  y = y ?? defaultMargin.y;
+  const xNumber = Number(x);
+  const yNumber = Number(y);
+  x = isNaN(xNumber) ? x : xNumber;
+  y = isNaN(yNumber) ? y : yNumber;
+  return {
+    top: y,
+    left: x,
+    right: x,
+    bottom: y
+  }
+}
+
