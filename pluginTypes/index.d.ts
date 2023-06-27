@@ -709,6 +709,7 @@ declare module "@scom/scom-page-builder/command/ungroupSection.ts" {
         private oriCol;
         private oriColSpan;
         private oriElmIndex;
+        private appendElm;
         constructor(data: any, isReGroup: boolean, elm: Control, dropElm: Control, prevSection: Control, parent?: any);
         execute(): Promise<void>;
         undo(): Promise<void>;

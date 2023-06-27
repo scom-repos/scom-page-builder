@@ -2000,6 +2000,7 @@ define("@scom/scom-page-builder/command/ungroupSection.ts", ["require", "exports
                 const prevRow = this.prevSection.closest && this.prevSection.closest('ide-row');
                 const rowId = prevRow.id.replace("row-", "");
                 const elmId = this.element.id.replace("elm-", "");
+                console.log("this.element", this.element);
                 const currentElm = prevRow === null || prevRow === void 0 ? void 0 : prevRow.querySelector(`ide-toolbar#${this.element.id}`);
                 if (currentElm === null || currentElm === void 0 ? void 0 : currentElm.data) {
                     this.data = JSON.parse(JSON.stringify(currentElm.data));
@@ -2027,9 +2028,10 @@ define("@scom/scom-page-builder/command/ungroupSection.ts", ["require", "exports
                 }
                 components_5.application.EventBus.dispatch(index_15.EVENT.ON_UPDATE_SECTIONS);
                 // create elm in a new section
+                console.log("this.data", this.data);
                 const isMicroDapps = ((_e = (_d = this.data) === null || _d === void 0 ? void 0 : _d.module) === null || _e === void 0 ? void 0 : _e.category) === 'micro-dapps';
                 const newElData = {
-                    id: this.data.id,
+                    id: `${this.data.id}`,
                     column: parseInt(this.dropElm.dataset.column),
                     columnSpan: this.data.columnSpan,
                     type: this.data.type,
@@ -2039,7 +2041,7 @@ define("@scom/scom-page-builder/command/ungroupSection.ts", ["require", "exports
                     },
                     module: this.data.module
                 };
-                this.element = await this.parent.addElement(newElData);
+                this.appendElm = await this.parent.addElement(newElData);
                 const parentId = this.parent.id.replace('row-', '');
                 index_14.pageObject.addElement(parentId, newElData);
                 const elementRowId = (((_f = this.parent) === null || _f === void 0 ? void 0 : _f.id) || '').replace('row-', '');
@@ -2077,8 +2079,9 @@ define("@scom/scom-page-builder/command/ungroupSection.ts", ["require", "exports
                 components_5.application.EventBus.dispatch(index_15.EVENT.ON_UPDATE_SECTIONS);
                 // merge the elms
                 const isMicroDapps = ((_e = (_d = this.data) === null || _d === void 0 ? void 0 : _d.module) === null || _e === void 0 ? void 0 : _e.category) === 'micro-dapps';
+                console.log("this.data", this.data);
                 const newElData = {
-                    id: this.data.id,
+                    id: `${this.data.id}`,
                     column: this.oriCol,
                     columnSpan: this.oriColSpan,
                     type: this.data.type,
@@ -2088,11 +2091,11 @@ define("@scom/scom-page-builder/command/ungroupSection.ts", ["require", "exports
                     },
                     module: this.data.module
                 };
-                const elmParent = (this.element ? this.element.closest('ide-row') : this.dropElm.closest('ide-row'));
+                const elmParent = (this.appendElm ? this.appendElm.closest('ide-row') : this.dropElm.closest('ide-row'));
                 const newParent = this.prevSection.closest('ide-row');
                 const prevSectionId = this.prevSection.id;
-                if (this.element && elmParent) {
-                    this.element = elmParent.querySelector(`[id='${this.data.id}']`);
+                if (this.appendElm && elmParent) {
+                    this.appendElm = elmParent.querySelector(`[id='${this.data.id}']`);
                 }
                 const dropRowId = newParent === null || newParent === void 0 ? void 0 : newParent.id.replace('row-', '');
                 const dropSection = newParent.querySelector(`[id='${prevSectionId}']`);
@@ -2123,12 +2126,12 @@ define("@scom/scom-page-builder/command/ungroupSection.ts", ["require", "exports
                 if (elmParent) {
                     const elementRowId = ((elmParent === null || elmParent === void 0 ? void 0 : elmParent.id) || '').replace('row-', '');
                     const elementSection = index_14.pageObject.getRow(elementRowId);
-                    if (elementRowId !== dropRowId && this.element)
-                        index_14.pageObject.removeElement(elementRowId, this.element.id);
+                    if (elementRowId !== dropRowId && this.appendElm)
+                        index_14.pageObject.removeElement(elementRowId, this.appendElm.id);
                     elmParent.visible = !!((_g = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _g === void 0 ? void 0 : _g.length);
                 }
-                if (this.element)
-                    this.element.remove();
+                if (this.appendElm)
+                    this.appendElm.remove();
             }
         }
         redo() { }
