@@ -342,18 +342,18 @@ export class IDEToolbar extends Module {
         switch (position) {
             case 'left':
                 stack.top = 0;
-                stack.left = 0;
+                stack.left = -2;
                 stack.height = '100%';
                 iconEl.margin = {left: -8};
                 break;
             case 'right':
                 stack.top = 0;
-                stack.right = 0;
+                stack.right = -2;
                 stack.height = '100%';
                 iconEl.margin = {right: -8};
                 break;
             case 'bottom':
-                stack.bottom = -10;
+                stack.bottom = -12;
                 stack.left = '50%';
                 stack.style.transform = 'translateX(-50%)'
                 stack.height = 'auto';
@@ -681,11 +681,12 @@ export class IDEToolbar extends Module {
 
                 <i-panel
                     position="absolute"
-                    width="100%"
-                    height="15px"
-                    bottom="-15px"
+                    width="90%"
+                    height="8px"
+                    left="5%"
+                    bottom="-8px"
                     zIndex={999}
-                    border={{radius: '50px'}}
+                    border={{radius: '4px'}}
                     visible={false}
                     class="bottom-block"
                 ></i-panel>

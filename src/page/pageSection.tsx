@@ -112,13 +112,13 @@ export class PageSection extends Module {
             <i-panel id={'pnlPageSection'} maxWidth="100%" maxHeight="100%" height="100%">
                 <i-panel
                     position="absolute"
-                    width={15}
-                    height="100%"
-                    top="0px" left="-18px"
+                    width={8}
+                    height="90%"
+                    top="5%" left="-8px"
                     zIndex={999}
-                    border={{radius: '50px'}}
+                    border={{radius: '4px'}}
                     visible={false}
-                    class="front-block block"
+                    class="front-block"
                 ></i-panel>
                 <i-panel
                     id="pageSectionWrapper"
@@ -130,13 +130,13 @@ export class PageSection extends Module {
                 </i-panel>
                 <i-panel
                     position="absolute"
-                    width={15}
-                    height="100%"
-                    top="0px" right="-18px"
+                    width={8}
+                    height="90%"
+                    top="5%" right="-8px"
                     zIndex={999}
-                    border={{radius: '50px'}}
+                    border={{radius: '4px'}}
                     visible={false}
-                    class="back-block block"
+                    class="back-block"
                 ></i-panel>
             </i-panel>
         );

@@ -1084,6 +1084,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private updateFixedGrid;
         private updateGridColumn;
         private initEventListeners;
+        onAppendRow(pageRow: PageRow): Promise<void>;
         private initEventBus;
         private getNewElementData;
         private addDottedLines;
@@ -1200,6 +1201,8 @@ declare module "@scom/scom-page-builder/common/collapse.tsx" {
         private iconCollapse;
         private pnlContent;
         private _expanded;
+        private requestID;
+        private _speed;
         constructor(parent?: Container, options?: any);
         get title(): string;
         set title(value: string);
@@ -1208,6 +1211,7 @@ declare module "@scom/scom-page-builder/common/collapse.tsx" {
         get expanded(): boolean;
         set expanded(value: boolean);
         init(): void;
+        private handleCollapse;
         onCollapse(): void;
         onShowSearch(): void;
         render(): any;

@@ -1,7 +1,8 @@
-import { Control } from "@ijstech/components";
+import { Control, application } from "@ijstech/components";
 import { pageObject } from "../store/index";
 import { ICommand } from "./interface";
 import { IRowSettings } from '../interface/index';
+import { EVENT } from "../const/index";
 
 export class UpdateRowSettingsCommand implements ICommand {
   private element: any;
@@ -21,6 +22,7 @@ export class UpdateRowSettingsCommand implements ICommand {
     const id = this.element.id.replace('row-', '');
     if (backgroundColor !== undefined) {
       this.element.background = {color: backgroundColor};
+      application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {color: backgroundColor});
     }
     pageObject.updateSection(id, { backgroundColor, config });
     if (config) {
@@ -43,6 +45,7 @@ export class UpdateRowSettingsCommand implements ICommand {
     const { backgroundColor = '', config } = this.oldSettings;
     const id = this.element.id.replace('row-', '');
     this.element.background = {color: backgroundColor};
+    application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {color: backgroundColor});
     pageObject.updateSection(id, {
       backgroundColor,
       config: config || {
