@@ -13,7 +13,7 @@ Styles.cssRule('ide-rows', {
             zIndex: 999
         },
         '.row-entered': {
-            borderBottom: '3px solid #1976D2'
+            borderBottom: '3px solid rgb(66,133,244)'
         }
     }
 });

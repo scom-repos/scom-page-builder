@@ -10,10 +10,6 @@ Styles.cssRule('ide-section', {
     maxWidth: '100%',
     border: '2px solid transparent',
     $nest: {
-        // '&.active, &:focus': {
-        //     border: `2px solid ${Theme.colors.primary.main}`,
-        //     transition: 'border ease-in .2s'
-        // },
         '&:hover .section-border': {
             display: 'block',
             outline: `2px solid ${Theme.colors.primary.main}`,
