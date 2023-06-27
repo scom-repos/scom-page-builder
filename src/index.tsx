@@ -3,7 +3,7 @@ import { } from '@ijstech/eth-contract'
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
 import { IPageData, IPageBlockData, IPageElement, IOnFetchComponentsOptions, IOnFetchComponentsResult, ICategory, ThemeType } from './interface/index';
-import { PageRows, PageSidebar } from './page/index';
+import { PageRow, PageRows, PageSidebar } from './page/index';
 import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData, getPageBlocks, getCategories, setCategories, setTheme, getBackgroundColor, getFontColor, getDivider } from './store/index';
 import { currentTheme } from './theme/index';
 import './index.css';
@@ -139,6 +139,15 @@ export default class Editor extends Module {
             const elementConfig = getDragData();
             if (elementConfig?.module?.name === 'sectionStack') {
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
+            } else {
+                const eventTarget = event.target as Control;
+                if (eventTarget.id === 'pnlFooter') {
+                    const dropElm = this.pnlEditor.querySelector('.is-dragenter') as Control;
+                    const pageRow = dropElm && dropElm.closest('ide-row') as PageRow;
+                    if (pageRow && pageRow.onAppendRow) {
+                        pageRow.onAppendRow(pageRow);
+                    }
+                }
             }
         });
     }

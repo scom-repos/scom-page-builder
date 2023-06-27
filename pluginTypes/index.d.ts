@@ -1061,6 +1061,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private updateFixedGrid;
         private updateGridColumn;
         private initEventListeners;
+        onAppendRow(pageRow: PageRow): Promise<void>;
         private initEventBus;
         private getNewElementData;
         private addDottedLines;

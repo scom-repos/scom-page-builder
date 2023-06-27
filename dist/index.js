@@ -4017,15 +4017,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     self.isDragging = false;
                 }
                 else {
-                    // const isPageRow = eventTarget.classList.contains('page-row');
-                    // let dropElm = (
-                    //     isPageRow
-                    //         ? eventTarget.querySelector('.is-dragenter')
-                    //         : eventTarget.closest('.is-dragenter')
-                    // ) as Control;
-                    // const blocks = Array.from(self.parentElement.getElementsByClassName('is-dragenter'));
-                    // const activedBlock = blocks.find((block: Control) => block.visible) as Control;
-                    // dropElm = dropElm || activedBlock;
                     let dropElm = parentWrapper.querySelector('.is-dragenter');
                     if (self.isDragging)
                         return;
@@ -4037,14 +4028,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             index_40.commandHistory.execute(dragCmd);
                         }
                         else if (dropElm.classList.contains(ROW_BOTTOM_CLASS)) {
-                            components_24.application.EventBus.dispatch(index_37.EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
-                            const newPageRow = pageRow.nextElementSibling;
-                            if (newPageRow) {
-                                const dragCmd = elementConfig ?
-                                    new index_40.AddElementCommand(self.getNewElementData(), true, true, null, newPageRow) :
-                                    new index_40.DragElementCommand(self.currentElement, newPageRow, true, true);
-                                await index_40.commandHistory.execute(dragCmd);
-                            }
+                            self.onAppendRow(pageRow);
                         }
                         else {
                             const isAppend = dropElm.classList.contains('back-block');
@@ -4088,6 +4072,16 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 for (const rectangle of rectangles) {
                     rectangle.style.display = 'none';
                 }
+            }
+        }
+        async onAppendRow(pageRow) {
+            components_24.application.EventBus.dispatch(index_37.EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
+            const newPageRow = pageRow.nextElementSibling;
+            if (newPageRow) {
+                const dragCmd = (0, index_39.getDragData)() ?
+                    new index_40.AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) :
+                    new index_40.DragElementCommand(this.currentElement, newPageRow, true, true);
+                await index_40.commandHistory.execute(dragCmd);
             }
         }
         initEventBus() {
@@ -4445,18 +4439,18 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             switch (position) {
                 case 'left':
                     stack.top = 0;
-                    stack.left = 0;
+                    stack.left = -2;
                     stack.height = '100%';
                     iconEl.margin = { left: -8 };
                     break;
                 case 'right':
                     stack.top = 0;
-                    stack.right = 0;
+                    stack.right = -2;
                     stack.height = '100%';
                     iconEl.margin = { right: -8 };
                     break;
                 case 'bottom':
-                    stack.bottom = -10;
+                    stack.bottom = -12;
                     stack.left = '50%';
                     stack.style.transform = 'translateX(-50%)';
                     stack.height = 'auto';
@@ -6108,6 +6102,16 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 const elementConfig = (0, index_79.getDragData)();
                 if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
                     components_40.application.EventBus.dispatch(index_78.EVENT.ON_ADD_SECTION);
+                }
+                else {
+                    const eventTarget = event.target;
+                    if (eventTarget.id === 'pnlFooter') {
+                        const dropElm = this.pnlEditor.querySelector('.is-dragenter');
+                        const pageRow = dropElm && dropElm.closest('ide-row');
+                        if (pageRow && pageRow.onAppendRow) {
+                            pageRow.onAppendRow(pageRow);
+                        }
+                    }
                 }
             });
         }

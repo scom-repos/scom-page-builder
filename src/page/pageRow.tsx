@@ -776,15 +776,6 @@ export class PageRow extends Module {
                 }
                 self.isDragging = false;
             } else {
-                // const isPageRow = eventTarget.classList.contains('page-row');
-                // let dropElm = (
-                //     isPageRow
-                //         ? eventTarget.querySelector('.is-dragenter')
-                //         : eventTarget.closest('.is-dragenter')
-                // ) as Control;
-                // const blocks = Array.from(self.parentElement.getElementsByClassName('is-dragenter'));
-                // const activedBlock = blocks.find((block: Control) => block.visible) as Control;
-                // dropElm = dropElm || activedBlock;
                 let dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
                 if (self.isDragging) return;
 
@@ -795,14 +786,7 @@ export class PageRow extends Module {
                         const dragCmd = new UpdateTypeCommand(dropElm, elementConfig ? null : self.currentElement, self.getNewElementData());
                         commandHistory.execute(dragCmd);
                     } else if (dropElm.classList.contains(ROW_BOTTOM_CLASS)) {
-                        application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
-                        const newPageRow = pageRow.nextElementSibling as PageRow;
-                        if (newPageRow) {
-                            const dragCmd = elementConfig ?
-                                new AddElementCommand(self.getNewElementData(), true, true, null, newPageRow) :
-                                new DragElementCommand(self.currentElement, newPageRow, true, true);
-                            await commandHistory.execute(dragCmd);
-                        }
+                        self.onAppendRow(pageRow);
                     } else {
                         const isAppend = dropElm.classList.contains('back-block');
                         const dragCmd = elementConfig ?
@@ -845,6 +829,17 @@ export class PageRow extends Module {
             for (const rectangle of rectangles) {
                 (rectangle as Control).style.display = 'none';
             }
+        }
+    }
+
+    async onAppendRow(pageRow: PageRow) {
+        application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
+        const newPageRow = pageRow.nextElementSibling as PageRow;
+        if (newPageRow) {
+            const dragCmd = getDragData() ?
+                new AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) :
+                new DragElementCommand(this.currentElement, newPageRow, true, true);
+            await commandHistory.execute(dragCmd);
         }
     }
 

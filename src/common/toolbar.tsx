@@ -342,18 +342,18 @@ export class IDEToolbar extends Module {
         switch (position) {
             case 'left':
                 stack.top = 0;
-                stack.left = 0;
+                stack.left = -2;
                 stack.height = '100%';
                 iconEl.margin = {left: -8};
                 break;
             case 'right':
                 stack.top = 0;
-                stack.right = 0;
+                stack.right = -2;
                 stack.height = '100%';
                 iconEl.margin = {right: -8};
                 break;
             case 'bottom':
-                stack.bottom = -10;
+                stack.bottom = -12;
                 stack.left = '50%';
                 stack.style.transform = 'translateX(-50%)'
                 stack.height = 'auto';
