@@ -137,7 +137,7 @@ export default class Editor extends Module {
 
         containerElement.addEventListener('drop', (event) => {
             const elementConfig = getDragData();
-            if (elementConfig?.module?.name === 'sectionStack') {
+            if (elementConfig?.module?.title === 'sectionStack') {
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
             } else {
                 const eventTarget = event.target as Control;

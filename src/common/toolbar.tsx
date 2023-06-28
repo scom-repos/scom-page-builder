@@ -272,13 +272,13 @@ export class IDEToolbar extends Module {
 
     private isTexbox(data: IPageBlockData | undefined) {
         if (data)
-            return data.name.toLowerCase() === ELEMENT_NAME.TEXTBOX.toLowerCase();
+            return data.title.toLowerCase() === ELEMENT_NAME.TEXTBOX.toLowerCase();
         else
             return false;
     }
 
     private isContentBlock() {
-        return this.data?.module?.name === ELEMENT_NAME.CONTENT_BLOCK;
+        return this.data?.module?.title === ELEMENT_NAME.CONTENT_BLOCK;
     }
 
     showToolbars() {
@@ -386,7 +386,7 @@ export class IDEToolbar extends Module {
     async fetchModule(data: IPageElement) {
         if (this._readonly) return;
         try {
-            const module: any = await application.createElement(data?.module?.path || '');
+            const module: any = await application.createElement(data?.module?.name || '', false, undefined, data?.module?.path);
             if (!module) throw new Error('not found');
             await this.setModule(module, data?.module);
             if (this.isTexbox(data.module)) {

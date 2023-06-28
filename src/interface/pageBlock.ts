@@ -1,9 +1,10 @@
 import { IDataSchema, IUISchema } from "@ijstech/components";
 
 export interface IPageBlockData {
+    title: string;
     name: string;
-    path: string;
-    category?: "components" | "micro-dapps" | "charts";
+    path?: string;
+    category?: string;
     imgUrl?: string;
     disableClicked?: boolean;
     shownBackdrop?: boolean;

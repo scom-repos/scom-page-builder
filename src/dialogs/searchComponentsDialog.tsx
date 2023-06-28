@@ -105,7 +105,7 @@ export class SearchComponentsDialog extends Module {
                         display="block"
                     ></i-image>
                     <i-label
-                        caption={item.name}
+                        caption={item.title}
                         font={{size: '0.813rem'}} opacity={0.7}
                         maxHeight={34} overflow={"hidden"}
                     ></i-label>

@@ -93,7 +93,7 @@ export class BuilderHeader extends Module {
 
     private addHeader() {
         const pageBlocks = getPageBlocks();
-        const textBlock = pageBlocks.find((v) => v.name === ELEMENT_NAME.TEXTBOX);
+        const textBlock = pageBlocks.find((v) => v.title === ELEMENT_NAME.TEXTBOX);
         this.setData({
             image: '',
             headerType: HeaderType.NORMAL,

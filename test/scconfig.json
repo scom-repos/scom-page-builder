@@ -16,83 +16,84 @@
   },
   "components": {
     "@scom/scom-markdown-editor": {
-      "name": "Text Box",
-      "path": "scom-markdown-editor",
+      "title": "Text Box",
+      "name": "scom-markdown-editor",
+      "path": "https://ipfs.scom.dev/ipfs/bafybeieycyk24ssgsnfaanjfxg2kpmceu6cwrtf3cje4jwio2ldpl4o4hu/dist/index.js",
       "category": "components"
     },
     "@scom/scom-image": {
-      "name": "Image",
-      "path": "scom-image",
+      "title": "Image",
+      "name": "scom-image",
       "category": "components",
       "disableClicked": true
     },
     "@scom/scom-carousel": {
-      "name": "Carousel",
-      "path": "scom-carousel",
+      "title": "Carousel",
+      "name": "scom-carousel",
       "category": "components"
     },
     "@scom/scom-banner": {
-      "name": "Banner",
-      "path": "scom-banner",
+      "title": "Banner",
+      "name": "scom-banner",
       "category": "components"
     },
     "@scom/scom-blog": {
-      "name": "Blog",
-      "path": "scom-blog",
+      "title": "Blog",
+      "name": "scom-blog",
       "category": "components",
       "disableClicked": true
     },
     "@scom/scom-content-block": {
-      "name": "Content Block",
-      "path": "scom-content-block",
+      "title": "Content Block",
+      "name": "scom-content-block",
       "category": "components"
     },
     "@scom/scom-nft-minter": {
-      "name": "NFT Minter DApp",
-      "path": "scom-nft-minter",
+      "title": "NFT Minter DApp",
+      "name": "scom-nft-minter",
       "category": "micro-dapps"
     },
     "@scom/scom-gem-token": {
-      "name": "Gem Token DApp",
-      "path": "scom-gem-token",
+      "title": "Gem Token DApp",
+      "name": "scom-gem-token",
       "category": "micro-dapps"
     },
     "@scom/scom-randomizer": {
-      "name": "Randomizer",
-      "path": "scom-randomizer",
+      "title": "Randomizer",
+      "name": "scom-randomizer",
       "category": "micro-dapps"
     },
     "@scom/scom-video": {
-      "name": "Video",
-      "path": "scom-video",
+      "title": "Video",
+      "name": "scom-video",
       "category": "micro-dapps",
       "disableClicked": true,
       "shownBackdrop": true
     },
     "@scom/scom-map": {
-      "name": "Map",
-      "path": "scom-map",
+      "title": "Map",
+      "name": "scom-map",
       "category": "micro-dapps",
       "disableClicked": true,
       "shownBackdrop": true
     },
     "@scom/scom-dapp-container": {
-      "name": "DApp Container",
-      "path": "scom-dapp-container"
+      "title": "DApp Container",
+      "name": "scom-dapp-container"
     },
     "@scom/scom-table": {
-      "name": "Table",
-      "path": "scom-table",
+      "title": "Table",
+      "name": "scom-table",
       "category": "charts"
     },
     "@scom/scom-pie-chart": {
-      "name": "Pie Chart",
-      "path": "scom-pie-chart",
+      "title": "Pie Chart",
+      "name": "scom-pie-chart",
       "category": "charts"
     },
     "@scom/scom-dune": {
-      "name": "Dune Blocks",
-      "path": "scom-dune",
+      "title": "Dune Blocks",
+      "name": "scom-dune",
       "category": "charts"
     }
   }

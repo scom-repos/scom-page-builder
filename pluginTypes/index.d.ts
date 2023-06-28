@@ -286,9 +286,10 @@ declare module "@scom/scom-page-builder/interface/core.ts" {
 declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
     import { IDataSchema, IUISchema } from "@ijstech/components";
     export interface IPageBlockData {
+        title: string;
         name: string;
-        path: string;
-        category?: "components" | "micro-dapps" | "charts";
+        path?: string;
+        category?: string;
         imgUrl?: string;
         disableClicked?: boolean;
         shownBackdrop?: boolean;
