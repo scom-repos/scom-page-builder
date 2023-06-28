@@ -4082,6 +4082,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         overlapType: "none", section: undefined
                     };
                 const dragTargetSection = dragTarget.closest('ide-section');
+                const toolbars = dragTargetSection.querySelectorAll('ide-toolbar');
+                const isUngrouping = toolbars.length && toolbars.length > 1 && self.currentToolbar != undefined;
                 const nearestCol = findNearestFixedGridInRow(clientX);
                 const dropColumn = parseInt(nearestCol.getAttribute("data-column"));
                 const grid = dropTarget.closest('.grid');
@@ -4104,7 +4106,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const endOfDragingElm = dropColumn + parseInt(dragTargetSection.dataset.columnSpan) - 1;
                 for (let i = 0; i < sortedSections.length; i++) {
                     const element = sortedSections[i];
-                    if (element != dragTargetSection) {
+                    const condition = isUngrouping ? true : element != dragTargetSection;
+                    if (condition) {
                         const startOfDroppingElm = parseInt(element.dataset.column);
                         const endOfDroppingElm = parseInt(element.dataset.column) + parseInt(element.dataset.columnSpan) - 1;
                         const condition1 = startOfDragingElm >= startOfDroppingElm && startOfDragingElm <= endOfDroppingElm;
@@ -4143,6 +4146,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
                 if (!self.currentElement)
                     return;
+                const numberOfToolbars = self.currentElement.querySelectorAll('ide-toolbar').length;
+                const isUngrouping = self.currentToolbar && numberOfToolbars > 1;
                 // if target overlap with other section
                 const overlap = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX);
                 // collide with other section
@@ -4177,12 +4182,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     if (findedSection || self.isDragging)
                         return;
                     self.isDragging = true;
-                    const numberOfToolbars = self.currentElement.querySelectorAll('ide-toolbar').length;
                     const secId = self.currentElement.id;
                     const toolbarId = self.currentToolbar ? self.currentToolbar.id.replace("elm-", "") : "";
                     // ungrouping elm
                     // FIX ME: dragging the 1st elm in section causes bug, which is disabled now (secId != toolbarId)
-                    if (self.currentToolbar && numberOfToolbars > 1 && secId != toolbarId) {
+                    if (isUngrouping && secId != toolbarId) {
                         const dropElm = eventTarget;
                         const dragCmd = new index_43.UngroupSectionCommand(self.currentToolbar.data, false, self.currentToolbar, dropElm, self.currentElement);
                         index_43.commandHistory.execute(dragCmd);
