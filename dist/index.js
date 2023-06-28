@@ -1914,6 +1914,15 @@ define("@scom/scom-page-builder/command/updateType.ts", ["require", "exports", "
             }
             const dropRowId = (_a = this.dropParent) === null || _a === void 0 ? void 0 : _a.id.replace('row-', '');
             const dropSection = this.dropParent.querySelector(`[id='${this.dropSectionId}']`);
+            if (this.elementParent) {
+                const elementRowId = (((_b = this.elementParent) === null || _b === void 0 ? void 0 : _b.id) || '').replace('row-', '');
+                const elementSection = index_13.pageObject.getRow(elementRowId);
+                if (elementRowId && this.element)
+                    index_13.pageObject.removeElement(elementRowId, this.element.id);
+                this.elementParent.visible = !!((_c = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _c === void 0 ? void 0 : _c.length);
+            }
+            if (this.element)
+                this.element.remove();
             const dropSectionData = index_13.pageObject.getElement(dropRowId, this.dropSectionId);
             const clonedDropSecData = JSON.parse(JSON.stringify(dropSectionData));
             if (!this.dropSectionId || !dropRowId || !dropSectionData)
@@ -1935,22 +1944,11 @@ define("@scom/scom-page-builder/command/updateType.ts", ["require", "exports", "
                 index_13.pageObject.setElement(dropRowId, this.dropSectionId, {
                     type: index_14.ElementType.COMPOSITE,
                     elements: [clonedDropSecData, ...updatedList],
-                    dropId: ((_b = this.data) === null || _b === void 0 ? void 0 : _b.id) || ''
+                    dropId: ((_d = this.data) === null || _d === void 0 ? void 0 : _d.id) || ''
                 });
             }
             const newDropData = index_13.pageObject.getElement(dropRowId, this.dropSectionId);
             dropSection.setData(dropRowId, newDropData);
-            if (this.isNew)
-                return;
-            if (this.elementParent) {
-                const elementRowId = (((_c = this.elementParent) === null || _c === void 0 ? void 0 : _c.id) || '').replace('row-', '');
-                const elementSection = index_13.pageObject.getRow(elementRowId);
-                if (elementRowId !== dropRowId && this.element)
-                    index_13.pageObject.removeElement(elementRowId, this.element.id);
-                this.elementParent.visible = !!((_d = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _d === void 0 ? void 0 : _d.length);
-            }
-            if (this.element)
-                this.element.remove();
         }
         undo() {
             var _a, _b, _c;
@@ -4234,7 +4232,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             index_43.commandHistory.execute(dragCmd);
                         }
                         else if (dropElm.classList.contains(ROW_BOTTOM_CLASS)) {
-                            self.onAppendRow(pageRow);
+                            const prependRow = dropElm.closest('ide-row');
+                            prependRow && self.onAppendRow(prependRow);
                         }
                         else {
                             const isAppend = dropElm.classList.contains('back-block');
