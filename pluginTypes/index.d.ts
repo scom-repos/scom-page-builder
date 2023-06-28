@@ -480,7 +480,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         setElement(sectionId: string, elementId: string, value: any): void;
         private sortFn;
         private removeElementFn;
-        removeElement(sectionId: string, elementId: string): void;
+        removeElement(sectionId: string, elementId: string, removeLeafOnly?: boolean): void;
         addElement(sectionId: string, value: IPageElement, parentElmId?: string, elementIndex?: number): void;
         getRowConfig(sectionId: string): import("@scom/scom-page-builder/interface/siteData.ts").IConfigData;
         getColumnsNumber(sectionId: string): number;

@@ -940,13 +940,16 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         sortFn(elements) {
             return [...elements].sort((a, b) => Number(a.column) - Number(b.column));
         }
-        removeElementFn(elements, elementId) {
+        removeElementFn(elements, elementId, removeLeafOnly = false) {
             if (!elements || !elements.length)
                 return;
             for (let i = 0; i < elements.length; i++) {
                 const element = elements[i];
                 if (element && element.id === elementId) {
-                    elements.splice(i, 1);
+                    if (removeLeafOnly && element.elements)
+                        this.removeElementFn(element.elements, elementId);
+                    else
+                        elements.splice(i, 1);
                     break;
                 }
                 else if (element && element.type === 'composite') {
@@ -954,7 +957,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
                 }
             }
         }
-        removeElement(sectionId, elementId) {
+        removeElement(sectionId, elementId, removeLeafOnly = false) {
             let elements = [];
             if (sectionId === 'header') {
                 elements = this._header.elements;
@@ -966,7 +969,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
                 const section = this.getSection(sectionId);
                 elements = (section === null || section === void 0 ? void 0 : section.elements) || [];
             }
-            this.removeElementFn(elements, elementId);
+            this.removeElementFn(elements, elementId, removeLeafOnly);
         }
         addElement(sectionId, value, parentElmId = '', elementIndex) {
             if (sectionId === 'header') {
@@ -1831,7 +1834,7 @@ define("@scom/scom-page-builder/command/removeToolbar.ts", ["require", "exports"
             if (!this.element.closest('ide-row') && currentElm) {
                 this.element = currentElm;
             }
-            index_12.pageObject.removeElement(this.rowId, this.elementId);
+            index_12.pageObject.removeElement(this.rowId, this.elementId, true);
             const sectionEl = this.element.closest('ide-section');
             this.element.remove();
             const section = index_12.pageObject.getRow(this.rowId);
