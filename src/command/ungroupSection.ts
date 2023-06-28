@@ -6,7 +6,7 @@ import { EVENT } from "../const/index";
 import { ElementType } from "../interface/index";
 
 export class UngroupSectionCommand implements ICommand {
-    private element: any;
+    private draggingToolbar: any;
     private parent: any;
     private dropElm: Control;
     private data: any;
@@ -17,18 +17,20 @@ export class UngroupSectionCommand implements ICommand {
     private oriElmIndex: number;
     private appendElm: any;
 
-  constructor(data: any, isReGroup: boolean, elm: Control, dropElm: Control, prevSection: Control, parent?: any) {
-    const oriRowId = elm.closest('ide-row').id.replace("row-", "");
-    const oriSectionData = pageObject.getElement(oriRowId, prevSection.id);
+  constructor(data: any, isReGroup: boolean, dragElm: Control, dropElm: Control) {
+    const oriRowId = dragElm.closest('ide-row').id.replace("row-", "");
+    const dragSection = dragElm.closest('ide-section') as Control;
+
+    const oriSectionData = pageObject.getElement(oriRowId, dragSection.id);
     this.data = JSON.parse(JSON.stringify(data));
     this.dropElm = dropElm;
-    this.prevSection = prevSection;
-    this.parent = parent || dropElm.closest('ide-row');
+    this.prevSection = dragSection;
+    this.parent = dropElm.closest('ide-row');
     this.isReGroup = isReGroup;
-    this.element = elm.closest('ide-toolbar');
+    this.draggingToolbar = dragElm.closest('ide-toolbar');
     this.oriCol = parseInt(this.data.column);
     this.oriColSpan = this.data.columnSpan;
-    const elmId = elm.id.replace("elm-", "");
+    const elmId = dragElm.id.replace("elm-", "");
     this.oriElmIndex = oriSectionData.elements.findIndex(e => e.id === elmId);
   }
 
@@ -42,19 +44,19 @@ export class UngroupSectionCommand implements ICommand {
     } else {
         const prevRow = this.prevSection.closest && this.prevSection.closest('ide-row') as any;
         const rowId = prevRow.id.replace("row-", "")
-        const elmId = this.element.id.replace("elm-", "")
-        const currentElm = prevRow?.querySelector(`ide-toolbar#${this.element.id}`);
+        const elmId = this.draggingToolbar.id.replace("elm-", "")
+        const currentElm = prevRow?.querySelector(`ide-toolbar#${this.draggingToolbar.id}`);
         if (currentElm?.data) {
           this.data = JSON.parse(JSON.stringify(currentElm.data));
         }
-        if (!this.element.closest('ide-row') && currentElm) {
-          this.element = currentElm;
+        if (!this.draggingToolbar.closest('ide-row') && currentElm) {
+          this.draggingToolbar = currentElm;
         }
 
         // delete elm in the old section
         pageObject.removeElement(rowId, elmId);
-        const sectionEl = this.element.closest('ide-section');
-        this.element.remove();
+        const sectionEl = this.draggingToolbar.closest('ide-section');
+        this.draggingToolbar.remove();
         const section = pageObject.getRow(rowId);
         const isEmpty = !section?.elements?.length || section?.elements.every(el => el.type === "composite" && !el.elements?.length);
         prevRow && prevRow.toggleUI(!isEmpty);
@@ -102,11 +104,11 @@ export class UngroupSectionCommand implements ICommand {
       // delete the elm
       const row = this.dropElm.closest('ide-row') as any;
       const rowId = row? row.id.replace("row-", "") : undefined;
-      const elmId = this.element.id.replace("elm-", "");
+      const elmId = this.draggingToolbar.id.replace("elm-", "");
       pageObject.removeElement(rowId, elmId);
 
-      const sectionEl = this.element.closest('ide-section');
-      this.element.remove();
+      const sectionEl = this.draggingToolbar.closest('ide-section');
+      this.draggingToolbar.remove();
       const section = pageObject.getRow(rowId);
       const isEmpty = !section?.elements?.length || section?.elements.every(el => el.type === "composite" && !el.elements?.length);
       row && row.toggleUI(!isEmpty);

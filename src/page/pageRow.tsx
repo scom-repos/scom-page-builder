@@ -444,6 +444,7 @@ export class PageRow extends Module {
                 self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
                 self.currentElement = targetSection;
                 self.currentToolbar = targetToolbar;
+                application.EventBus.dispatch(EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
                 self.currentElement.opacity = 0;
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                 self.addDottedLines();
@@ -759,11 +760,11 @@ export class PageRow extends Module {
             if (overlap.overlapType == "self" && isUngrouping) return;
 
             let nearestFixedItem = eventTarget.closest('.fixed-grid-item') as Control;
-
             // if target overlap with itself
             if (overlap.overlapType == "self")
                 nearestFixedItem = findNearestFixedGridInRow(event.clientX);
 
+            // check if drop on a new row
             if (nearestFixedItem) {
                 const column = Number(nearestFixedItem.dataset.column);
                 const columnSpan = self.currentElement.dataset.columnSpan ?
@@ -790,7 +791,7 @@ export class PageRow extends Module {
                 // FIX ME: dragging the 1st elm in section causes bug, which is disabled now (secId != toolbarId)
                 if (isUngrouping && secId != toolbarId) {
                     const dropElm = eventTarget;
-                    const dragCmd = new UngroupSectionCommand(self.currentToolbar.data, false, self.currentToolbar, dropElm, self.currentElement);
+                    const dragCmd = new UngroupSectionCommand(self.currentToolbar.data, false, self.currentToolbar, dropElm);
                     commandHistory.execute(dragCmd);
                     self.currentElement.opacity = 1;
                     self.currentElement = null;
@@ -822,6 +823,8 @@ export class PageRow extends Module {
                     }
                 }
                 self.isDragging = false;
+            
+            // drop on a new row
             } else {
                 let dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
                 if (self.isDragging) return;
@@ -851,8 +854,29 @@ export class PageRow extends Module {
                         const dragCmd = !hasData && new AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
                         dragCmd && await commandHistory.execute(dragCmd);
                     } else {
-                        const dragCmd = new DragElementCommand(self.currentElement, pageRow, true, true);
-                        commandHistory.execute(dragCmd);
+                        const secId = self.currentElement.id;
+                        const toolbarId = self.currentToolbar? self.currentToolbar.id.replace("elm-", "") : "";
+                        if (isUngrouping && secId != toolbarId) {
+                            const dropElement = eventTarget;
+                            const dragCmd = new UngroupSectionCommand(self.currentToolbar.data, false, self.currentToolbar, dropElement);
+                            commandHistory.execute(dragCmd);
+                            self.currentElement.opacity = 1;
+                            self.currentElement = null;
+                            dragStartTarget = null;
+                            dragOverTarget = null;
+                            application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, null);
+                            self.isDragging = false;
+                            setDragData(null);
+                            self.removeDottedLines();
+                            updateRectangles();
+                            removeClass('is-dragenter');
+                            removeClass('row-entered');
+                            removeClass('is-dragging');
+                        } else {
+                            const dragCmd = new DragElementCommand(self.currentElement, pageRow, true, true);
+                            commandHistory.execute(dragCmd);
+                        }
+                        
                     }
                     self.isDragging = false;
                 }
@@ -892,6 +916,7 @@ export class PageRow extends Module {
 
     private initEventBus() {
         application.EventBus.register(this, EVENT.ON_SET_DRAG_ELEMENT, async (el: any) => this.currentElement = el)
+        application.EventBus.register(this, EVENT.ON_SET_DRAG_TOOLBAR, async (el: any) => this.currentToolbar = el)
     }
 
     private getNewElementData() {

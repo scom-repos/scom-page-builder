@@ -53,6 +53,7 @@ declare module "@scom/scom-page-builder/const/index.ts" {
         ON_UPDATE_TOOLBAR: string;
         ON_SET_ACTION_BLOCK: string;
         ON_SET_DRAG_ELEMENT: string;
+        ON_SET_DRAG_TOOLBAR: string;
         ON_ADD_SECTION: string;
         ON_TOGGLE_SEARCH_MODAL: string;
         ON_FETCH_COMPONENTS: string;
@@ -700,7 +701,7 @@ declare module "@scom/scom-page-builder/command/ungroupSection.ts" {
     import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
     import { Control } from "@ijstech/components";
     export class UngroupSectionCommand implements ICommand {
-        private element;
+        private draggingToolbar;
         private parent;
         private dropElm;
         private data;
@@ -710,7 +711,7 @@ declare module "@scom/scom-page-builder/command/ungroupSection.ts" {
         private oriColSpan;
         private oriElmIndex;
         private appendElm;
-        constructor(data: any, isReGroup: boolean, elm: Control, dropElm: Control, prevSection: Control, parent?: any);
+        constructor(data: any, isReGroup: boolean, dragElm: Control, dropElm: Control);
         execute(): Promise<void>;
         undo(): Promise<void>;
         redo(): void;

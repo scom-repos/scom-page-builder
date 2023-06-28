@@ -97,6 +97,7 @@ define("@scom/scom-page-builder/const/index.ts", ["require", "exports", "@scom/s
         ON_UPDATE_TOOLBAR: 'ON_UPDATE_TOOLBAR',
         ON_SET_ACTION_BLOCK: 'ON_SET_ACTION_BLOCK',
         ON_SET_DRAG_ELEMENT: 'ON_SET_DRAG_ELEMENT',
+        ON_SET_DRAG_TOOLBAR: 'ON_SET_DRAG_TOOLBAR',
         ON_ADD_SECTION: 'ON_ADD_SECTION',
         ON_TOGGLE_SEARCH_MODAL: 'ON_TOGGLE_SEARCH_MODAL',
         ON_FETCH_COMPONENTS: 'ON_FETCH_COMPONENTS',
@@ -1975,18 +1976,19 @@ define("@scom/scom-page-builder/command/ungroupSection.ts", ["require", "exports
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.UngroupSectionCommand = void 0;
     class UngroupSectionCommand {
-        constructor(data, isReGroup, elm, dropElm, prevSection, parent) {
-            const oriRowId = elm.closest('ide-row').id.replace("row-", "");
-            const oriSectionData = index_15.pageObject.getElement(oriRowId, prevSection.id);
+        constructor(data, isReGroup, dragElm, dropElm /*, prevSection: Control*/) {
+            const oriRowId = dragElm.closest('ide-row').id.replace("row-", "");
+            const dragSection = dragElm.closest('ide-section');
+            const oriSectionData = index_15.pageObject.getElement(oriRowId, dragSection.id);
             this.data = JSON.parse(JSON.stringify(data));
             this.dropElm = dropElm;
-            this.prevSection = prevSection;
-            this.parent = parent || dropElm.closest('ide-row');
+            this.prevSection = dragSection;
+            this.parent = dropElm.closest('ide-row');
             this.isReGroup = isReGroup;
-            this.element = elm.closest('ide-toolbar');
+            this.draggingToolbar = dragElm.closest('ide-toolbar');
             this.oriCol = parseInt(this.data.column);
             this.oriColSpan = this.data.columnSpan;
-            const elmId = elm.id.replace("elm-", "");
+            const elmId = dragElm.id.replace("elm-", "");
             this.oriElmIndex = oriSectionData.elements.findIndex(e => e.id === elmId);
         }
         async execute() {
@@ -1999,18 +2001,18 @@ define("@scom/scom-page-builder/command/ungroupSection.ts", ["require", "exports
             else {
                 const prevRow = this.prevSection.closest && this.prevSection.closest('ide-row');
                 const rowId = prevRow.id.replace("row-", "");
-                const elmId = this.element.id.replace("elm-", "");
-                const currentElm = prevRow === null || prevRow === void 0 ? void 0 : prevRow.querySelector(`ide-toolbar#${this.element.id}`);
+                const elmId = this.draggingToolbar.id.replace("elm-", "");
+                const currentElm = prevRow === null || prevRow === void 0 ? void 0 : prevRow.querySelector(`ide-toolbar#${this.draggingToolbar.id}`);
                 if (currentElm === null || currentElm === void 0 ? void 0 : currentElm.data) {
                     this.data = JSON.parse(JSON.stringify(currentElm.data));
                 }
-                if (!this.element.closest('ide-row') && currentElm) {
-                    this.element = currentElm;
+                if (!this.draggingToolbar.closest('ide-row') && currentElm) {
+                    this.draggingToolbar = currentElm;
                 }
                 // delete elm in the old section
                 index_15.pageObject.removeElement(rowId, elmId);
-                const sectionEl = this.element.closest('ide-section');
-                this.element.remove();
+                const sectionEl = this.draggingToolbar.closest('ide-section');
+                this.draggingToolbar.remove();
                 const section = index_15.pageObject.getRow(rowId);
                 const isEmpty = !((_a = section === null || section === void 0 ? void 0 : section.elements) === null || _a === void 0 ? void 0 : _a.length) || (section === null || section === void 0 ? void 0 : section.elements.every(el => { var _a; return el.type === "composite" && !((_a = el.elements) === null || _a === void 0 ? void 0 : _a.length); }));
                 prevRow && prevRow.toggleUI(!isEmpty);
@@ -2056,10 +2058,10 @@ define("@scom/scom-page-builder/command/ungroupSection.ts", ["require", "exports
                 // delete the elm
                 const row = this.dropElm.closest('ide-row');
                 const rowId = row ? row.id.replace("row-", "") : undefined;
-                const elmId = this.element.id.replace("elm-", "");
+                const elmId = this.draggingToolbar.id.replace("elm-", "");
                 index_15.pageObject.removeElement(rowId, elmId);
-                const sectionEl = this.element.closest('ide-section');
-                this.element.remove();
+                const sectionEl = this.draggingToolbar.closest('ide-section');
+                this.draggingToolbar.remove();
                 const section = index_15.pageObject.getRow(rowId);
                 const isEmpty = !((_a = section === null || section === void 0 ? void 0 : section.elements) === null || _a === void 0 ? void 0 : _a.length) || (section === null || section === void 0 ? void 0 : section.elements.every(el => { var _a; return el.type === "composite" && !((_a = el.elements) === null || _a === void 0 ? void 0 : _a.length); }));
                 row && row.toggleUI(!isEmpty);
@@ -3861,6 +3863,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
                     self.currentElement = targetSection;
                     self.currentToolbar = targetToolbar;
+                    components_25.application.EventBus.dispatch(index_40.EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
                     self.currentElement.opacity = 0;
                     components_25.application.EventBus.dispatch(index_40.EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                     self.addDottedLines();
@@ -4163,6 +4166,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 // if target overlap with itself
                 if (overlap.overlapType == "self")
                     nearestFixedItem = findNearestFixedGridInRow(event.clientX);
+                // check if drop on a new row
                 if (nearestFixedItem) {
                     const column = Number(nearestFixedItem.dataset.column);
                     const columnSpan = self.currentElement.dataset.columnSpan ?
@@ -4188,7 +4192,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     // FIX ME: dragging the 1st elm in section causes bug, which is disabled now (secId != toolbarId)
                     if (isUngrouping && secId != toolbarId) {
                         const dropElm = eventTarget;
-                        const dragCmd = new index_43.UngroupSectionCommand(self.currentToolbar.data, false, self.currentToolbar, dropElm, self.currentElement);
+                        const dragCmd = new index_43.UngroupSectionCommand(self.currentToolbar.data, false, self.currentToolbar, dropElm);
                         index_43.commandHistory.execute(dragCmd);
                         self.currentElement.opacity = 1;
                         self.currentElement = null;
@@ -4223,6 +4227,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         }
                     }
                     self.isDragging = false;
+                    // drop on a new row
                 }
                 else {
                     let dropElm = parentWrapper.querySelector('.is-dragenter');
@@ -4258,8 +4263,29 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             dragCmd && await index_43.commandHistory.execute(dragCmd);
                         }
                         else {
-                            const dragCmd = new index_43.DragElementCommand(self.currentElement, pageRow, true, true);
-                            index_43.commandHistory.execute(dragCmd);
+                            const secId = self.currentElement.id;
+                            const toolbarId = self.currentToolbar ? self.currentToolbar.id.replace("elm-", "") : "";
+                            if (isUngrouping && secId != toolbarId) {
+                                const dropElement = eventTarget;
+                                const dragCmd = new index_43.UngroupSectionCommand(self.currentToolbar.data, false, self.currentToolbar, dropElement);
+                                index_43.commandHistory.execute(dragCmd);
+                                self.currentElement.opacity = 1;
+                                self.currentElement = null;
+                                dragStartTarget = null;
+                                dragOverTarget = null;
+                                components_25.application.EventBus.dispatch(index_40.EVENT.ON_SET_DRAG_ELEMENT, null);
+                                self.isDragging = false;
+                                (0, index_42.setDragData)(null);
+                                self.removeDottedLines();
+                                updateRectangles();
+                                removeClass('is-dragenter');
+                                removeClass('row-entered');
+                                removeClass('is-dragging');
+                            }
+                            else {
+                                const dragCmd = new index_43.DragElementCommand(self.currentElement, pageRow, true, true);
+                                index_43.commandHistory.execute(dragCmd);
+                            }
                         }
                         self.isDragging = false;
                     }
@@ -4295,6 +4321,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         }
         initEventBus() {
             components_25.application.EventBus.register(this, index_40.EVENT.ON_SET_DRAG_ELEMENT, async (el) => this.currentElement = el);
+            components_25.application.EventBus.register(this, index_40.EVENT.ON_SET_DRAG_TOOLBAR, async (el) => this.currentToolbar = el);
         }
         getNewElementData() {
             const elementConfig = Object.assign({}, ((0, index_42.getDragData)() || {}));
