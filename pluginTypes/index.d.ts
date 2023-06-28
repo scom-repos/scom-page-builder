@@ -485,6 +485,10 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         searchOptions: IOnFetchComponentsOptions;
         categories: ICategory[];
         theme: ThemeType;
+        defaultPageConfig: any;
+        rowsConfig: {
+            [key: string]: string;
+        };
     };
     export const setPageBlocks: (value: IPageBlockData[]) => void;
     export const getPageBlocks: () => any[];
@@ -508,14 +512,9 @@ declare module "@scom/scom-page-builder/store/index.ts" {
     export const getBackgroundColor: (theme?: ThemeType) => string;
     export const getFontColor: (theme?: ThemeType) => string;
     export const getDivider: (theme?: ThemeType) => string;
-    export const getDefaultPageConfig: () => {
-        backgroundColor: string;
-        margin: {
-            x: string;
-            y: number;
-        };
-        maxWidth: number;
-    };
+    export const setDefaultPageConfig: (value: IPageConfig) => void;
+    export const getDefaultPageConfig: () => any;
+    export const getPageConfig: () => any;
     export const getMargin: (margin: {
         x?: number | string;
         y?: number | string;
@@ -525,6 +524,8 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         right: string | number;
         bottom: string | number;
     };
+    export const setRowConfig: (id: string, value: string) => void;
+    export const getRowConfig: (id: string) => string;
 }
 /// <amd-module name="@scom/scom-page-builder/command/interface.ts" />
 declare module "@scom/scom-page-builder/command/interface.ts" {
@@ -748,7 +749,9 @@ declare module "@scom/scom-page-builder/command/updatePageSetting.ts" {
         private element;
         private settings;
         private oldSettings;
+        private rowsConfig;
         constructor(element: Control, settings: IPageConfig);
+        private getChangedValues;
         private updateConfig;
         execute(): void;
         undo(): void;

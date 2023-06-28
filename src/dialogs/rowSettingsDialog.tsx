@@ -11,7 +11,7 @@ import './rowSettingsDialog.css';
 const Theme = Styles.Theme.ThemeVars;
 
 import { assignAttr } from '../utility/index';
-import { getDefaultPageConfig, pageObject } from '../store/index';
+import { getDefaultPageConfig, getPageConfig, pageObject } from '../store/index';
 import { IPageSectionConfig } from '../interface/index';
 
 export interface RowSettingsDialogElement extends ControlElement {
@@ -127,10 +127,7 @@ export class RowSettingsDialog extends Module {
         this.formElm.jsonSchema = jsonSchema;
         this.formElm.formOptions = formOptions;
         this.formElm.renderForm();
-        const defaultConfig = getDefaultPageConfig();
-        const pageConfig = pageObject.config || {};
-        pageConfig.margin = {...defaultConfig.margin, ...pageConfig.margin};
-        const { backgroundColor, margin, maxWidth } = { ...defaultConfig, ...pageConfig };
+        const { backgroundColor, margin, maxWidth } = getPageConfig();
         const config = { align: 'left', margin, maxWidth, backgroundColor, ...(this.data?.config || {}) };
         this.formElm.setFormData({...config});
     }

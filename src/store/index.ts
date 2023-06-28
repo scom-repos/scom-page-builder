@@ -66,12 +66,6 @@ export class PageObject {
     const section = this.getRow(id);
     if (!section) return;
     if (data?.config) section.config = data.config;
-    // section.config = section.config || {align: 'left'};
-    // for (let prop in config) {
-    //   if (config.hasOwnProperty(prop)) {
-    //     section.config[prop] = config[prop];
-    //   }
-    // }
     // const oldColumnsNumber = this.getColumnsNumber(id);
     // const elements = this.getRow(id)?.elements || [];
     // const newColumnsNumber = this.getColumnsNumberFn(section);
@@ -252,6 +246,12 @@ const defaultSearchOptions = {
   pageSize: undefined
 }
 
+const defaultPageConfig = {
+  backgroundColor: '',
+  margin: {x: 'auto', y: 8},
+  maxWidth: 1024
+}
+
 export const state = {
   pageBlocks: [],
   rootDir: '',
@@ -279,7 +279,9 @@ export const state = {
       title: 'Project MicroDApps'
     }
   ] as ICategory[],
-  theme: 'light' as ThemeType
+  theme: 'light' as ThemeType,
+  defaultPageConfig: null,
+  rowsConfig: {} as {[key: string]: string}
 }
 
 export const setPageBlocks = (value: IPageBlockData[]) => {
@@ -343,13 +345,6 @@ export const getTheme = (): ThemeType => {
   return state.theme ?? 'light';
 }
 
-const generateUUID = () => {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-}
-
 export const getBackgroundColor = (theme?: ThemeType) => {
   theme = theme ?? getTheme();
   return theme === 'light' ? lightTheme.background.main : darkTheme.background.main;
@@ -365,12 +360,27 @@ export const getDivider = (theme?: ThemeType) => {
   return theme === 'light' ? lightTheme.divider : darkTheme.divider;
 }
 
+const generateUUID = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+export const setDefaultPageConfig = (value: IPageConfig) => {
+  state.defaultPageConfig = {...defaultPageConfig, backgroundColor: getBackgroundColor(), ...(value || {})};
+}
+
 export const getDefaultPageConfig = () => {
-  return {
-    backgroundColor: getBackgroundColor(),
-    margin: {x: 'auto', y: 8},
-    maxWidth: 1280
-  }
+  const defaultValue = {...defaultPageConfig, backgroundColor: getBackgroundColor()};
+  return state.defaultPageConfig || defaultValue;
+}
+
+export const getPageConfig = () => {
+  const defaultConfig = getDefaultPageConfig();
+  const pageConfig = pageObject?.config || {};
+  pageConfig.margin = {...defaultConfig.margin, ...pageConfig.margin};
+  return {...defaultConfig, ...pageConfig};
 }
 
 export const getMargin = (margin: { x?: number|string, y?: number|string }) => {
@@ -390,3 +400,10 @@ export const getMargin = (margin: { x?: number|string, y?: number|string }) => {
   }
 }
 
+export const setRowConfig = (id: string, value: string) => {
+  state.rowsConfig[id] = value;
+}
+
+export const getRowConfig = (id: string) => {
+  return state.rowsConfig[id];
+}

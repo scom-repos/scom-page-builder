@@ -763,7 +763,7 @@ define("@scom/scom-page-builder/interface/index.ts", ["require", "exports", "@sc
 define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.getMargin = exports.getDefaultPageConfig = exports.getDivider = exports.getFontColor = exports.getBackgroundColor = exports.getTheme = exports.setTheme = exports.setCategories = exports.getCategories = exports.getSearchOptions = exports.setSearchOptions = exports.getSearchData = exports.setSearchData = exports.getDragData = exports.setDragData = exports.getRootDir = exports.setRootDir = exports.addPageBlock = exports.getPageBlocks = exports.setPageBlocks = exports.state = exports.pageObject = exports.PageObject = void 0;
+    exports.getRowConfig = exports.setRowConfig = exports.getMargin = exports.getPageConfig = exports.getDefaultPageConfig = exports.setDefaultPageConfig = exports.getDivider = exports.getFontColor = exports.getBackgroundColor = exports.getTheme = exports.setTheme = exports.setCategories = exports.getCategories = exports.getSearchOptions = exports.setSearchOptions = exports.getSearchData = exports.setSearchData = exports.getDragData = exports.setDragData = exports.getRootDir = exports.setRootDir = exports.addPageBlock = exports.getPageBlocks = exports.setPageBlocks = exports.state = exports.pageObject = exports.PageObject = void 0;
     const lightTheme = components_2.Styles.Theme.defaultTheme;
     const darkTheme = components_2.Styles.Theme.darkTheme;
     const MAX_COLUMN = 12;
@@ -829,12 +829,6 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
                 return;
             if (data === null || data === void 0 ? void 0 : data.config)
                 section.config = data.config;
-            // section.config = section.config || {align: 'left'};
-            // for (let prop in config) {
-            //   if (config.hasOwnProperty(prop)) {
-            //     section.config[prop] = config[prop];
-            //   }
-            // }
             // const oldColumnsNumber = this.getColumnsNumber(id);
             // const elements = this.getRow(id)?.elements || [];
             // const newColumnsNumber = this.getColumnsNumberFn(section);
@@ -1017,6 +1011,11 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         pageNumber: undefined,
         pageSize: undefined
     };
+    const defaultPageConfig = {
+        backgroundColor: '',
+        margin: { x: 'auto', y: 8 },
+        maxWidth: 1024
+    };
     exports.state = {
         pageBlocks: [],
         rootDir: '',
@@ -1044,7 +1043,9 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
                 title: 'Project MicroDApps'
             }
         ],
-        theme: 'light'
+        theme: 'light',
+        defaultPageConfig: null,
+        rowsConfig: {}
     };
     const setPageBlocks = (value) => {
         exports.state.pageBlocks = value || [];
@@ -1109,12 +1110,6 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         return (_a = exports.state.theme) !== null && _a !== void 0 ? _a : 'light';
     };
     exports.getTheme = getTheme;
-    const generateUUID = () => {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    };
     const getBackgroundColor = (theme) => {
         theme = theme !== null && theme !== void 0 ? theme : (0, exports.getTheme)();
         return theme === 'light' ? lightTheme.background.main : darkTheme.background.main;
@@ -1130,14 +1125,28 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         return theme === 'light' ? lightTheme.divider : darkTheme.divider;
     };
     exports.getDivider = getDivider;
+    const generateUUID = () => {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    };
+    const setDefaultPageConfig = (value) => {
+        exports.state.defaultPageConfig = Object.assign(Object.assign(Object.assign({}, defaultPageConfig), { backgroundColor: (0, exports.getBackgroundColor)() }), (value || {}));
+    };
+    exports.setDefaultPageConfig = setDefaultPageConfig;
     const getDefaultPageConfig = () => {
-        return {
-            backgroundColor: (0, exports.getBackgroundColor)(),
-            margin: { x: 'auto', y: 8 },
-            maxWidth: 1280
-        };
+        const defaultValue = Object.assign(Object.assign({}, defaultPageConfig), { backgroundColor: (0, exports.getBackgroundColor)() });
+        return exports.state.defaultPageConfig || defaultValue;
     };
     exports.getDefaultPageConfig = getDefaultPageConfig;
+    const getPageConfig = () => {
+        const defaultConfig = (0, exports.getDefaultPageConfig)();
+        const pageConfig = (exports.pageObject === null || exports.pageObject === void 0 ? void 0 : exports.pageObject.config) || {};
+        pageConfig.margin = Object.assign(Object.assign({}, defaultConfig.margin), pageConfig.margin);
+        return Object.assign(Object.assign({}, defaultConfig), pageConfig);
+    };
+    exports.getPageConfig = getPageConfig;
     const getMargin = (margin) => {
         const { margin: defaultMargin } = (0, exports.getDefaultPageConfig)();
         let { x, y } = margin || {};
@@ -1155,6 +1164,14 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         };
     };
     exports.getMargin = getMargin;
+    const setRowConfig = (id, value) => {
+        exports.state.rowsConfig[id] = value;
+    };
+    exports.setRowConfig = setRowConfig;
+    const getRowConfig = (id) => {
+        return exports.state.rowsConfig[id];
+    };
+    exports.getRowConfig = getRowConfig;
 });
 define("@scom/scom-page-builder/command/interface.ts", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -1255,7 +1272,7 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
             this.element = element;
             this.settings = Object.assign({}, settings);
             const id = this.element.id.replace('row-', '');
-            const data = index_4.pageObject.getRowConfig(id) || {};
+            const data = index_4.pageObject.getRowConfig(id) || (0, index_4.getPageConfig)();
             this.oldSettings = Object.assign({}, data);
         }
         updateConfig(config) {
@@ -1264,11 +1281,15 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
             this.element.background = { color: backgroundColor || '' };
             components_4.application.EventBus.dispatch(index_5.EVENT.ON_UPDATE_PAGE_BG, { color: backgroundColor || '' });
             const marginStyle = (0, index_4.getMargin)(margin);
-            index_4.pageObject.updateSection(id, { config: Object.assign(Object.assign({}, config), { margin: { x: marginStyle.left, y: marginStyle.top } }) });
+            const newConfig = Object.assign(Object.assign({}, config), { margin: { x: marginStyle.left, y: marginStyle.top } });
+            index_4.pageObject.updateSection(id, { config: Object.assign({}, newConfig) });
             this.element.setData(index_4.pageObject.getRow(id));
         }
         execute() {
+            const id = this.element.id.replace('row-', '');
+            (0, index_4.setRowConfig)(id, JSON.stringify(this.settings));
             this.updateConfig(this.settings);
+            console.log(JSON.stringify(this.settings));
         }
         undo() {
             this.updateConfig(this.oldSettings);
@@ -2162,26 +2183,59 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
     exports.UpdatePageSettingsCommand = void 0;
     class UpdatePageSettingsCommand {
         constructor(element, settings) {
+            this.rowsConfig = {};
             this.element = element;
-            this.settings = settings;
-            this.oldSettings = Object.assign({}, (index_17.pageObject.config || {}));
+            this.settings = Object.assign({}, settings);
+            const pageConfig = (index_17.pageObject === null || index_17.pageObject === void 0 ? void 0 : index_17.pageObject.config) || {};
+            this.oldSettings = Object.assign(Object.assign({}, (0, index_17.getDefaultPageConfig)()), pageConfig);
+            const rows = this.element.querySelectorAll('ide-row');
+            for (let row of rows) {
+                const id = row.id.replace('row-', '');
+                const oldConfig = (0, index_17.getRowConfig)(id);
+                if (oldConfig)
+                    this.rowsConfig[id] = oldConfig;
+            }
         }
-        updateConfig(config) {
-            config = config || {};
-            const { backgroundColor, margin, maxWidth } = Object.assign(Object.assign({}, (0, index_17.getDefaultPageConfig)()), config);
+        getChangedValues(newValue, oldValue) {
+            let result = [];
+            for (let prop in newValue) {
+                if (prop === 'margin') {
+                    const { x: newX, y: newY } = newValue.margin;
+                    const { x: oldX, y: oldY } = oldValue.margin;
+                    if (newX !== oldX || newY !== oldY)
+                        result.push(prop);
+                }
+                else {
+                    if (newValue[prop] !== oldValue[prop])
+                        result.push(prop);
+                }
+            }
+            return result;
+        }
+        updateConfig(config, updatedValues) {
+            const configData = Object.assign(Object.assign({}, (0, index_17.getDefaultPageConfig)()), config);
+            const { backgroundColor, margin, maxWidth } = configData;
+            let newConfig = {};
+            for (let prop of updatedValues) {
+                newConfig[prop] = configData[prop];
+            }
             const element = this.element.closest('i-scom-page-builder') || this.element;
             element.style.setProperty('--builder-bg', backgroundColor);
             components_7.application.EventBus.dispatch(index_18.EVENT.ON_UPDATE_PAGE_BG, { color: backgroundColor });
             this.element.maxWidth = maxWidth !== null && maxWidth !== void 0 ? maxWidth : '100%';
             this.element.margin = (0, index_17.getMargin)(margin);
             index_17.pageObject.config = { backgroundColor, margin, maxWidth };
-            components_7.application.EventBus.dispatch(index_18.EVENT.ON_UPDATE_PAGE_CONFIG, { backgroundColor, margin, maxWidth });
+            return newConfig;
         }
         execute() {
-            this.updateConfig(this.settings);
+            const updatedValues = this.getChangedValues(this.settings, this.oldSettings);
+            const newConfig = this.updateConfig(this.settings, updatedValues);
+            components_7.application.EventBus.dispatch(index_18.EVENT.ON_UPDATE_PAGE_CONFIG, { config: newConfig });
         }
         undo() {
-            this.updateConfig(this.oldSettings);
+            const updatedValues = this.getChangedValues(this.oldSettings, this.settings);
+            const newConfig = this.updateConfig(this.oldSettings, updatedValues);
+            components_7.application.EventBus.dispatch(index_18.EVENT.ON_UPDATE_PAGE_CONFIG, { config: newConfig, rowsConfig: this.rowsConfig });
         }
         redo() { }
     }
@@ -2757,10 +2811,7 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
             this.formElm.jsonSchema = jsonSchema;
             this.formElm.formOptions = formOptions;
             this.formElm.renderForm();
-            const defaultConfig = (0, index_29.getDefaultPageConfig)();
-            const pageConfig = index_29.pageObject.config || {};
-            pageConfig.margin = Object.assign(Object.assign({}, defaultConfig.margin), pageConfig.margin);
-            const { backgroundColor, margin, maxWidth } = Object.assign(Object.assign({}, defaultConfig), pageConfig);
+            const { backgroundColor, margin, maxWidth } = (0, index_29.getPageConfig)();
             const config = Object.assign({ align: 'left', margin, maxWidth, backgroundColor }, (((_a = this.data) === null || _a === void 0 ? void 0 : _a.config) || {}));
             this.formElm.setFormData(Object.assign({}, config));
         }
@@ -3445,19 +3496,20 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
             }
             this.actionsBar.minHeight = '100%';
-            this.updateColumn();
             const hasData = (_d = (_c = this.data) === null || _c === void 0 ? void 0 : _c.elements) === null || _d === void 0 ? void 0 : _d.length;
             this.toggleUI(hasData);
+            this.updateColumn();
         }
         updateRowConfig(config) {
             const { image = '', backgroundColor, maxWidth, margin } = config || {};
             if (image)
                 this.background.image = image;
-            else if (backgroundColor)
+            if (backgroundColor)
                 this.background.color = backgroundColor;
             this.maxWidth = maxWidth !== null && maxWidth !== void 0 ? maxWidth : '100%';
-            this.margin = (0, index_39.getMargin)(margin);
-            this.width = '100%';
+            if (margin)
+                this.margin = (0, index_39.getMargin)(margin);
+            this.width = (margin === null || margin === void 0 ? void 0 : margin.x) && (margin === null || margin === void 0 ? void 0 : margin.x) !== 'auto' ? 'auto' : '100%';
         }
         onOpenRowSettingsDialog() {
             this.mdRowSetting.show(this.rowId);
@@ -3469,6 +3521,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         updateColumn() {
             this.updateGrid();
             this.updateFixedGrid();
+            this.updateAlign();
         }
         updateGrid() {
             this.gridColumnWidth = (this.pnlRow.offsetWidth - index_38.GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
@@ -3494,10 +3547,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             else {
                 this.pnlRow.templateColumns = ['min-content'];
                 const sections = Array.from(this.pnlRow.querySelectorAll('ide-section'));
+                console.log('_section', sections);
                 for (let section of sections) {
                     const columnSpan = Number(section.dataset.columnSpan);
+                    console.log(this.gridColumnWidth);
                     const widthNumber = columnSpan * this.gridColumnWidth + ((columnSpan - 1) * index_38.GAP_WIDTH);
-                    section.width = `${widthNumber}px`;
+                    section.width = widthNumber ? `${widthNumber}px` : '100%';
                 }
             }
         }
@@ -4083,13 +4138,19 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         }
         initEventBus() {
             components_24.application.EventBus.register(this, index_37.EVENT.ON_SET_DRAG_ELEMENT, async (el) => this.currentElement = el);
-            components_24.application.EventBus.register(this, index_37.EVENT.ON_UPDATE_PAGE_CONFIG, async (config) => {
+            components_24.application.EventBus.register(this, index_37.EVENT.ON_UPDATE_PAGE_CONFIG, async (data) => {
+                const { config, rowsConfig } = data;
                 if (!config)
                     return;
                 const id = this.id.replace('row-', '');
-                console.log('update page config', config);
-                index_39.pageObject.updateSection(id, { config }); // TODO: only update the changed value
-                this.updateRowConfig(config);
+                const sectionConfig = index_39.pageObject.getRowConfig(id) || {};
+                let newConfig = Object.assign(Object.assign({}, sectionConfig), config);
+                if (rowsConfig) {
+                    const parsedData = rowsConfig[id] ? JSON.parse(rowsConfig[id]) : {};
+                    newConfig = Object.assign(Object.assign({}, newConfig), parsedData);
+                }
+                index_39.pageObject.updateSection(id, { config: newConfig });
+                this.updateRowConfig(newConfig);
             });
         }
         getNewElementData() {
@@ -6163,6 +6224,8 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             index_79.pageObject.sections = (value === null || value === void 0 ? void 0 : value.sections) || [];
             index_79.pageObject.footer = value === null || value === void 0 ? void 0 : value.footer;
             index_79.pageObject.config = value === null || value === void 0 ? void 0 : value.config;
+            if (value === null || value === void 0 ? void 0 : value.config)
+                (0, index_79.setDefaultPageConfig)(value.config);
             try {
                 // await this.builderHeader.setData(value.header);
                 await this.pageRows.setRows((value === null || value === void 0 ? void 0 : value.sections) || []);
@@ -6174,14 +6237,13 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             }
         }
         updatePageConfig() {
-            if (index_79.pageObject === null || index_79.pageObject === void 0 ? void 0 : index_79.pageObject.config) {
-                const config = Object.assign(Object.assign({}, (0, index_79.getDefaultPageConfig)()), index_79.pageObject.config);
-                const { backgroundColor, margin, maxWidth } = config;
-                this.style.setProperty('--builder-bg', backgroundColor);
-                if (this.pnlEditor) {
-                    this.pnlEditor.maxWidth = maxWidth !== null && maxWidth !== void 0 ? maxWidth : '100%';
-                    this.pnlEditor.margin = (0, index_79.getMargin)(margin);
-                }
+            const { backgroundColor, margin, maxWidth } = (0, index_79.getDefaultPageConfig)();
+            this.style.setProperty('--builder-bg', backgroundColor);
+            if (this.pnlEditor) {
+                this.pnlEditor.maxWidth = maxWidth !== null && maxWidth !== void 0 ? maxWidth : '100%';
+                const marginStyle = (0, index_79.getMargin)(margin);
+                this.pnlEditor.margin = marginStyle;
+                this.pnlEditor.style.width = `calc(100% - (2 * ${marginStyle.left}))`;
             }
         }
         onHide() {
@@ -6232,7 +6294,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 this.$render("i-grid-layout", { templateColumns: ['auto', 'minmax(auto, 235px)'], autoFillInHoles: true, height: "calc(100% -64px)", overflow: "hidden" },
                     this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } }, padding: { bottom: '1rem' } },
                         this.$render("i-panel", { id: "pageContent", maxWidth: 1400, width: "100%", margin: { left: 'auto', right: 'auto' } },
-                            this.$render("i-panel", { id: "pnlEditor", maxWidth: 1280, minHeight: "100vh", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
+                            this.$render("i-panel", { id: "pnlEditor", maxWidth: 1024, minHeight: "100vh", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
                                 this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
                                     this.$render("ide-rows", { id: "pageRows", draggable: true })),
                                 this.$render("builder-footer", { id: "builderFooter" })))),

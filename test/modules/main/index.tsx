@@ -224,9 +224,6 @@ export class MainModule extends Module {
       "footer": {
         "image": "",
         "elements": []
-      },
-      config: {
-        maxWidth: 1000
       }
     }
     this.pageBuilder.setData(data);

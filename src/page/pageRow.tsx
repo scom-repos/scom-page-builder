@@ -14,7 +14,7 @@ import { RowSettingsDialog } from '../dialogs/index';
 import './pageRow.css';
 import { EVENT } from '../const/index';
 import { IPageElement, IPageSection, GAP_WIDTH, MIN_COLUMN, IPageConfig, IPageSectionConfig } from '../interface/index';
-import { getDefaultPageConfig, getDragData, getMargin, pageObject, setDragData } from '../store/index';
+import { getDefaultPageConfig, getDragData, getMargin, getRowConfig, pageObject, setDragData } from '../store/index';
 import {
     commandHistory,
     UpdateRowCommand,
@@ -185,10 +185,10 @@ export class PageRow extends Module {
     private updateRowConfig(config: IPageSectionConfig) {
         const { image = '', backgroundColor, maxWidth, margin } = config || {};
         if (image) this.background.image = image;
-        else if (backgroundColor) this.background.color = backgroundColor;
+        if (backgroundColor) this.background.color = backgroundColor;
         this.maxWidth = maxWidth ?? '100%';
-        this.margin = getMargin(margin);
-        this.width = '100%';
+        if (margin) this.margin = getMargin(margin);
+        this.width = margin?.x && margin?.x !== 'auto' ? 'auto' : '100%';
     }
 
     private onOpenRowSettingsDialog() {
@@ -229,10 +229,12 @@ export class PageRow extends Module {
         } else {
             this.pnlRow.templateColumns = ['min-content'];
             const sections = Array.from(this.pnlRow.querySelectorAll('ide-section'));
+            console.log('_section', sections)
             for (let section of sections) {
                 const columnSpan = Number((section as HTMLElement).dataset.columnSpan);
+                console.log(this.gridColumnWidth)
                 const widthNumber = columnSpan * this.gridColumnWidth + ((columnSpan - 1) * GAP_WIDTH);
-                (section as Control).width = `${widthNumber}px`;
+                (section as Control).width = widthNumber ? `${widthNumber}px` : '100%';
             }
         }
     }
@@ -848,12 +850,18 @@ export class PageRow extends Module {
 
     private initEventBus() {
         application.EventBus.register(this, EVENT.ON_SET_DRAG_ELEMENT, async (el: any) => this.currentElement = el);
-        application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_CONFIG, async (config: IPageConfig) => {
+        application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_CONFIG, async (data: any) => {
+            const { config, rowsConfig } = data;
             if (!config) return;
             const id = this.id.replace('row-', '');
-            console.log('update page config', config)
-            pageObject.updateSection(id, { config }); // TODO: only update the changed value
-            this.updateRowConfig(config);
+            const sectionConfig = pageObject.getRowConfig(id) || {};
+            let newConfig = { ...sectionConfig, ...config };
+            if (rowsConfig) {
+                const parsedData = rowsConfig[id] ? JSON.parse(rowsConfig[id]) : {};
+                newConfig = {...newConfig, ...parsedData};
+            }
+            pageObject.updateSection(id, { config: newConfig });
+            this.updateRowConfig(newConfig);
         });
     }
 
