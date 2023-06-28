@@ -674,6 +674,8 @@ export class PageRow extends Module {
                 overlapType: "none", section: undefined
             }
             const dragTargetSection = dragTarget.closest('ide-section') as HTMLElement;
+            const toolbars = dragTargetSection.querySelectorAll('ide-toolbar');
+            const isUngrouping: boolean = toolbars.length && toolbars.length > 1 && self.currentToolbar!=undefined;
             const nearestCol = findNearestFixedGridInRow(clientX)
             const dropColumn: number = parseInt(nearestCol.getAttribute("data-column"));
             const grid = dropTarget.closest('.grid');
@@ -701,7 +703,8 @@ export class PageRow extends Module {
 
             for (let i=0; i<sortedSections.length; i++) {
                 const element = sortedSections[i];
-                if (element!=dragTargetSection){
+                const condition = isUngrouping? true : element!=dragTargetSection;
+                if (condition){
 
                     const startOfDroppingElm: number = parseInt(element.dataset.column);
                     const endOfDroppingElm: number = parseInt(element.dataset.column) + parseInt(element.dataset.columnSpan) - 1;
@@ -742,6 +745,9 @@ export class PageRow extends Module {
 
             if (!self.currentElement) return;
 
+            const numberOfToolbars = self.currentElement.querySelectorAll('ide-toolbar').length
+            const isUngrouping: boolean = self.currentToolbar && numberOfToolbars > 1
+
             // if target overlap with other section
             const overlap = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX);
 
@@ -750,7 +756,7 @@ export class PageRow extends Module {
             // drag on the gap of fixed panel
             if (overlap.overlapType == "none" && eventTarget.classList.contains('fixed-grid')) return;
             // is ungrouping and draging on the original section
-            if (overlap.overlapType == "self" && self.currentToolbar) return;
+            if (overlap.overlapType == "self" && isUngrouping) return;
 
             let nearestFixedItem = eventTarget.closest('.fixed-grid-item') as Control;
 
@@ -777,12 +783,12 @@ export class PageRow extends Module {
                 if (findedSection || self.isDragging) return;
                 self.isDragging = true;
 
-                const numberOfToolbars = self.currentElement.querySelectorAll('ide-toolbar').length
                 const secId = self.currentElement.id;
                 const toolbarId = self.currentToolbar? self.currentToolbar.id.replace("elm-", "") : "";
+
                 // ungrouping elm
                 // FIX ME: dragging the 1st elm in section causes bug, which is disabled now (secId != toolbarId)
-                if (self.currentToolbar && numberOfToolbars > 1 && secId != toolbarId) {
+                if (isUngrouping && secId != toolbarId) {
                     const dropElm = eventTarget;
                     const dragCmd = new UngroupSectionCommand(self.currentToolbar.data, false, self.currentToolbar, dropElm, self.currentElement);
                     commandHistory.execute(dragCmd);
