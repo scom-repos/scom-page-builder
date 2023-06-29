@@ -1,4 +1,3 @@
-import { ISpace } from "@ijstech/components";
 import { IPageBlockData } from "./pageBlock";
 
 export interface IPageData {
@@ -27,22 +26,20 @@ export interface IPageHeader {
 	headerType: HeaderType;
 	image: string;
 	elements: IPageElement[];
-    config?: IConfigData;
+    config?: IPageSectionConfig;
 }
 
 export interface IPageSection {
 	id: string; // uuid
 	row: number;
-	image?: string;
-    backgroundColor?: string;
 	elements: IPageElement[];
-    config?: IConfigData;
+    config?: IPageSectionConfig;
 }
 
 export interface IPageFooter {
 	image: string;
 	elements: IPageElement[];
-    config?: IConfigData;
+    config?: IPageSectionConfig;
 }
 
 export enum ElementType {
@@ -71,18 +68,14 @@ export enum IColumnLayoutType {
 
 export type AlignType = 'left' | 'center' | 'right';
 
-export interface IConfigData {
-    columnLayout?: IColumnLayoutType;
-    columnsNumber?: number;
-    maxColumnsPerRow?: number;
-    columnMinWidth?: number|string;
+export interface IPageSectionConfig extends IPageConfig {
     align?: AlignType;
+    image?: string;
 }
 
-export interface IRowSettings {
-    backgroundColor?: string;
-    config?: IConfigData;
-}
+// export interface IRowSettings {
+//     config?: IPageSectionConfig;
+// }
 
 export interface IOnFetchComponentsOptions {
     category?: string;
