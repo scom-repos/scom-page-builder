@@ -2638,8 +2638,12 @@ define("@scom/scom-page-builder/dialogs/searchComponentsDialog.tsx", ["require",
                 this.pnlComponents.append(...nodes);
             };
             this.onSearch = () => {
-                this.resetPaging();
-                this.onFetchData();
+                if (this.timer)
+                    clearTimeout(this.timer);
+                this.timer = setTimeout(async () => {
+                    this.resetPaging();
+                    this.onFetchData();
+                }, 300);
             };
         }
         init() {

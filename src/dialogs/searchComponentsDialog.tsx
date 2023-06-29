@@ -34,6 +34,7 @@ export class SearchComponentsDialog extends Module {
     private paginationElm: Pagination;
     private pnlComponents: HStack;
     private inputSearch: Input;
+    private timer: any;
 
     @observable()
     private totalPage: number = 0;
@@ -119,8 +120,11 @@ export class SearchComponentsDialog extends Module {
     };
 
     private onSearch = () => {
-        this.resetPaging();
-        this.onFetchData();
+        if (this.timer) clearTimeout(this.timer);
+        this.timer = setTimeout(async () => {
+            this.resetPaging();
+            this.onFetchData();
+        }, 300);
     };
 
     private onFetchData() {

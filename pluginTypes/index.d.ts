@@ -881,6 +881,7 @@ declare module "@scom/scom-page-builder/dialogs/searchComponentsDialog.tsx" {
         private paginationElm;
         private pnlComponents;
         private inputSearch;
+        private timer;
         private totalPage;
         private pageNumber;
         init(): void;
