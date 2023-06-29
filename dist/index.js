@@ -1055,7 +1055,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
     };
     exports.getPageBlocks = getPageBlocks;
     const addPageBlock = (value) => {
-        const hasPageblock = exports.state.pageBlocks.find(item => item.name === value.name);
+        const hasPageblock = exports.state.pageBlocks.find(item => item.path === value.path);
         if (!hasPageblock)
             exports.state.pageBlocks.push(value);
     };
@@ -2571,7 +2571,7 @@ define("@scom/scom-page-builder/dialogs/searchComponentsDialog.tsx", ["require",
                 for (const item of this.components) {
                     const pnl = (this.$render("i-vstack", { class: "text-center pointer pnl-component", verticalAlignment: "center", horizontalAlignment: "center", gap: "0.5rem", overflow: 'hidden', background: { color: Theme.action.hover }, border: { radius: 8, width: 1, style: 'solid', color: Theme.text.primary }, width: 'calc(33.33% - 7px)', minWidth: 200, minHeight: 100, padding: { top: 10, bottom: 10, left: 10, right: 10 }, onClick: () => this.onSelected(item) },
                         this.$render("i-image", { url: item.imgUrl || assets_1.default.icons.logo, width: 24, height: 24, display: "block" }),
-                        this.$render("i-label", { caption: item.title, font: { size: '0.813rem' }, opacity: 0.7, maxHeight: 34, overflow: "hidden" })));
+                        this.$render("i-label", { caption: item.name, font: { size: '0.813rem' }, opacity: 0.7, maxHeight: 34, overflow: "hidden" })));
                     nodes.push(pnl);
                 }
                 this.pnlComponents.clearInnerHTML();
@@ -3722,7 +3722,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 var _a, _b, _c, _d;
                 const elementConfig = (0, index_39.getDragData)();
                 const pageRow = enterTarget.closest('ide-row');
-                if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.title) === 'sectionStack') {
+                if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
                     pageRow.classList.add('row-entered');
                 }
                 if (!enterTarget || !self.currentElement)
@@ -3969,7 +3969,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const pageRow = eventTarget.closest('ide-row');
                 event.preventDefault();
                 event.stopPropagation();
-                if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.title) === 'sectionStack') {
+                if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
                     components_24.application.EventBus.dispatch(index_37.EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
                     return;
                 }
@@ -4380,13 +4380,13 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
         }
         isTexbox(data) {
             if (data)
-                return data.title.toLowerCase() === index_43.ELEMENT_NAME.TEXTBOX.toLowerCase();
+                return data.name.toLowerCase() === index_43.ELEMENT_NAME.TEXTBOX.toLowerCase();
             else
                 return false;
         }
         isContentBlock() {
             var _a, _b;
-            return ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.module) === null || _b === void 0 ? void 0 : _b.title) === index_43.ELEMENT_NAME.CONTENT_BLOCK;
+            return ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.module) === null || _b === void 0 ? void 0 : _b.name) === index_43.ELEMENT_NAME.CONTENT_BLOCK;
         }
         showToolbars() {
             if (this.toolList.length)
@@ -4479,11 +4479,11 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             return stack;
         }
         async fetchModule(data) {
-            var _a, _b;
+            var _a;
             if (this._readonly)
                 return;
             try {
-                const module = await components_25.application.createElement(((_a = data === null || data === void 0 ? void 0 : data.module) === null || _a === void 0 ? void 0 : _a.name) || '', false, undefined, (_b = data === null || data === void 0 ? void 0 : data.module) === null || _b === void 0 ? void 0 : _b.path);
+                const module = await components_25.application.createElement(((_a = data === null || data === void 0 ? void 0 : data.module) === null || _a === void 0 ? void 0 : _a.path) || '');
                 if (!module)
                     throw new Error('not found');
                 await this.setModule(module, data === null || data === void 0 ? void 0 : data.module);
@@ -5422,7 +5422,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
             for (const module of matchedModules) {
                 const moduleCard = (this.$render("i-vstack", { class: "text-center pointer builder-item", verticalAlignment: "center", horizontalAlignment: "center", gap: "0.5rem", overflow: 'hidden', background: { color: Theme.action.hover }, border: { radius: 5 } },
                     this.$render("i-image", { url: module.imgUrl || assets_3.default.icons.logo, width: 24, height: 24, display: "block" }),
-                    this.$render("i-label", { caption: module.title, font: { size: '0.813rem' }, opacity: 0.7, maxHeight: 34, overflow: "hidden" })));
+                    this.$render("i-label", { caption: module.name, font: { size: '0.813rem' }, opacity: 0.7, maxHeight: 34, overflow: "hidden" })));
                 parent.append(moduleCard);
                 this.initDrag(moduleCard, module);
             }
@@ -5430,7 +5430,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
         initDrag(module, data) {
             module.setAttribute('draggable', 'true');
             module.setAttribute('data-type', index_65.ElementType.PRIMITIVE);
-            module.setAttribute('data-name', data.title);
+            module.setAttribute('data-name', data.name);
         }
         initEventListeners() {
             const self = this;
@@ -5441,13 +5441,13 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                 if (eventTarget.nodeName === 'IMG' || ((eventTarget === null || eventTarget === void 0 ? void 0 : eventTarget.closest) && !eventTarget.closest('.builder-item')))
                     event.preventDefault();
                 if (eventTarget.id === 'sectionStack') {
-                    (0, index_63.setDragData)({ module: { title: 'sectionStack', name: '' }, type: index_65.ElementType.PRIMITIVE });
+                    (0, index_63.setDragData)({ module: { name: 'sectionStack', path: '' }, type: index_65.ElementType.PRIMITIVE });
                     eventTarget.classList.add('is-dragging');
                 }
                 else if ((_a = eventTarget === null || eventTarget === void 0 ? void 0 : eventTarget.dataset) === null || _a === void 0 ? void 0 : _a.name) {
                     const currentName = eventTarget.dataset.name;
                     const type = eventTarget.dataset.type;
-                    const module = self.pageBlocks.find(block => block.title === currentName);
+                    const module = self.pageBlocks.find(block => block.name === currentName);
                     if (module && type) {
                         components_34.application.EventBus.dispatch(index_64.EVENT.ON_SET_DRAG_ELEMENT, eventTarget);
                         (0, index_63.setDragData)({ module, type });
@@ -5636,7 +5636,7 @@ define("@scom/scom-page-builder/builder/builderHeader.tsx", ["require", "exports
         }
         addHeader() {
             const pageBlocks = (0, index_69.getPageBlocks)();
-            const textBlock = pageBlocks.find((v) => v.title === index_68.ELEMENT_NAME.TEXTBOX);
+            const textBlock = pageBlocks.find((v) => v.name === index_68.ELEMENT_NAME.TEXTBOX);
             this.setData({
                 image: '',
                 headerType: index_68.HeaderType.NORMAL,
@@ -5890,7 +5890,7 @@ define("@scom/scom-page-builder/builder/builderFooter.tsx", ["require", "exports
         }
         addFooter() {
             const pageBlocks = (0, index_75.getPageBlocks)();
-            const textBlock = pageBlocks.find((v) => v.name === index_73.TEXTBOX_PATH);
+            const textBlock = pageBlocks.find((v) => v.path === index_73.TEXTBOX_PATH);
             this.setData({
                 image: '',
                 elements: [{
@@ -6134,7 +6134,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             containerElement.addEventListener('drop', (event) => {
                 var _a;
                 const elementConfig = (0, index_79.getDragData)();
-                if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.title) === 'sectionStack') {
+                if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
                     components_40.application.EventBus.dispatch(index_78.EVENT.ON_ADD_SECTION);
                 }
                 else {

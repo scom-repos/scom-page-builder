@@ -469,7 +469,7 @@ export class PageRow extends Module {
         function dragEnter(enterTarget: Control, clientX: number, clientY: number, isOverlap: boolean = false) {
             const elementConfig = getDragData();
             const pageRow = enterTarget.closest('ide-row') as PageRow;
-            if (pageRow && elementConfig?.module?.title === 'sectionStack') {
+            if (pageRow && elementConfig?.module?.name === 'sectionStack') {
                 pageRow.classList.add('row-entered');
             }
             if (!enterTarget || !self.currentElement) return;
@@ -730,7 +730,7 @@ export class PageRow extends Module {
             event.preventDefault();
             event.stopPropagation();
 
-            if (pageRow && elementConfig?.module?.title === 'sectionStack') {
+            if (pageRow && elementConfig?.module?.name === 'sectionStack') {
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
                 return;
             }

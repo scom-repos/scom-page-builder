@@ -291,7 +291,7 @@ export const getPageBlocks = () => {
 }
 
 export const addPageBlock = (value: IPageBlockData) => {
-  const hasPageblock = state.pageBlocks.find(item => item.name === value.name);
+  const hasPageblock = state.pageBlocks.find(item => item.path === value.path);
   if (!hasPageblock) state.pageBlocks.push(value);
 }
 

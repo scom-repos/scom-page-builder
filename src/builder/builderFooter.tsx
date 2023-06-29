@@ -96,7 +96,7 @@ export class BuilderFooter extends Module {
 
     private addFooter() {
         const pageBlocks = getPageBlocks();
-        const textBlock = pageBlocks.find((v) => v.name === TEXTBOX_PATH);
+        const textBlock = pageBlocks.find((v) => v.path === TEXTBOX_PATH);
         this.setData({
             image: '',
             elements: [{

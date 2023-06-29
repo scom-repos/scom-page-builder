@@ -123,7 +123,7 @@ export class PageSidebar extends Module {
                         display="block"
                     ></i-image>
                     <i-label
-                        caption={module.title}
+                        caption={module.name}
                         font={{size: '0.813rem'}} opacity={0.7}
                         maxHeight={34} overflow={"hidden"}
                     ></i-label>
@@ -137,7 +137,7 @@ export class PageSidebar extends Module {
     private initDrag(module: Control, data: IPageBlockData) {
         module.setAttribute('draggable', 'true');
         module.setAttribute('data-type', ElementType.PRIMITIVE);
-        module.setAttribute('data-name', data.title);
+        module.setAttribute('data-name', data.name);
     }
 
     private initEventListeners() {
@@ -148,13 +148,13 @@ export class PageSidebar extends Module {
             if (eventTarget.nodeName === 'IMG' || (eventTarget?.closest && !eventTarget.closest('.builder-item')))
                 event.preventDefault();
             if (eventTarget.id === 'sectionStack') {
-                setDragData({ module: {title: 'sectionStack', name: ''}, type: ElementType.PRIMITIVE });
+                setDragData({ module: {name: 'sectionStack', path: ''}, type: ElementType.PRIMITIVE });
                 eventTarget.classList.add('is-dragging');
             }
             else if (eventTarget?.dataset?.name) {
                 const currentName = eventTarget.dataset.name;
                 const type = eventTarget.dataset.type as ElementType;
-                const module = self.pageBlocks.find(block => block.title === currentName);
+                const module = self.pageBlocks.find(block => block.name === currentName);
                 if (module && type) {
                     application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, eventTarget);
                     setDragData({ module, type });
