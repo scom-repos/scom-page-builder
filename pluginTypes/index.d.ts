@@ -707,6 +707,7 @@ declare module "@scom/scom-page-builder/command/ungroupSection.ts" {
         private data;
         private isReGroup;
         private prevSection;
+        private newSection;
         private oriCol;
         private oriColSpan;
         private oriElmIndex;

@@ -459,17 +459,7 @@ export class PageRow extends Module {
         document.addEventListener('dragend', function (event) {
             if (self.currentElement && !self.currentElement.classList.contains('builder-item'))
                 self.currentElement.opacity = 1;
-            self.currentElement = null;
-            dragStartTarget = null;
-            dragOverTarget = null;
-            application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, null);
-            self.isDragging = false;
-            setDragData(null);
-            self.removeDottedLines();
-            updateRectangles();
-            removeClass('is-dragenter');
-            removeClass('row-entered');
-            removeClass('is-dragging');
+            resetDragTarget();
         });
 
         function dragEnter(enterTarget: Control, clientX: number, clientY: number, isOverlap: boolean = false) {
@@ -675,6 +665,9 @@ export class PageRow extends Module {
                 overlapType: "none", section: undefined
             }
             const dragTargetSection = dragTarget.closest('ide-section') as HTMLElement;
+            if (!dragStartTarget) return {
+                overlapType: "mutual", section: undefined
+            }
             const toolbars = dragTargetSection.querySelectorAll('ide-toolbar');
             const isUngrouping: boolean = toolbars.length && toolbars.length > 1 && self.currentToolbar!=undefined;
             const nearestCol = findNearestFixedGridInRow(clientX)
@@ -794,17 +787,7 @@ export class PageRow extends Module {
                     const dragCmd = new UngroupSectionCommand(self.currentToolbar.data, false, self.currentToolbar, dropElm);
                     commandHistory.execute(dragCmd);
                     self.currentElement.opacity = 1;
-                    self.currentElement = null;
-                    dragStartTarget = null;
-                    dragOverTarget = null;
-                    application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, null);
-                    self.isDragging = false;
-                    setDragData(null);
-                    self.removeDottedLines();
                     updateRectangles();
-                    removeClass('is-dragenter');
-                    removeClass('row-entered');
-                    removeClass('is-dragging');
                 } else if (self.currentElement.data) {
                     const dragCmd = new DragElementCommand(self.currentElement, nearestFixedItem);
                     commandHistory.execute(dragCmd);
@@ -832,8 +815,18 @@ export class PageRow extends Module {
                     self.isDragging = true;
                     dropElm.classList.remove('is-dragenter');
                     if (dropElm.classList.contains('bottom-block')) {
-                        const dragCmd = new UpdateTypeCommand(dropElm, elementConfig ? null : self.currentElement, self.getNewElementData());
-                        commandHistory.execute(dragCmd);
+                        const secId = self.currentElement.id;
+                        const toolbarId = self.currentToolbar? self.currentToolbar.id.replace("elm-", "") : "";
+                        if (isUngrouping && secId != toolbarId) {
+                            const dropElement = eventTarget;
+                            const dragCmd = new UngroupSectionCommand(self.currentToolbar.data, true, self.currentToolbar, dropElement);
+                            commandHistory.execute(dragCmd);
+                            self.currentElement.opacity = 1;
+                            resetDragTarget();
+                        } else {
+                            const dragCmd = new UpdateTypeCommand(dropElm, elementConfig ? null : self.currentElement, self.getNewElementData());
+                            commandHistory.execute(dragCmd);
+                        }
                     } else if (dropElm.classList.contains(ROW_BOTTOM_CLASS)) {
                         const prependRow = dropElm.closest('ide-row') as PageRow;
                         prependRow && self.onAppendRow(prependRow);
@@ -861,17 +854,7 @@ export class PageRow extends Module {
                             const dragCmd = new UngroupSectionCommand(self.currentToolbar.data, false, self.currentToolbar, dropElement);
                             commandHistory.execute(dragCmd);
                             self.currentElement.opacity = 1;
-                            self.currentElement = null;
-                            dragStartTarget = null;
-                            dragOverTarget = null;
-                            application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, null);
-                            self.isDragging = false;
-                            setDragData(null);
-                            self.removeDottedLines();
-                            updateRectangles();
-                            removeClass('is-dragenter');
-                            removeClass('row-entered');
-                            removeClass('is-dragging');
+                            resetDragTarget();
                         } else {
                             const dragCmd = new DragElementCommand(self.currentElement, pageRow, true, true);
                             commandHistory.execute(dragCmd);
@@ -884,6 +867,20 @@ export class PageRow extends Module {
                 updateRectangles();
             }
         });
+
+        function resetDragTarget() {
+            self.currentElement = null;
+            dragStartTarget = null;
+            dragOverTarget = null;
+            application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, null);
+            self.isDragging = false;
+            setDragData(null);
+            self.removeDottedLines();
+            updateRectangles();
+            removeClass('is-dragenter');
+            removeClass('row-entered');
+            removeClass('is-dragging');
+        }
 
         function removeClass(className: string) {
             const elements = parentWrapper.getElementsByClassName(className);
