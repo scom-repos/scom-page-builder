@@ -250,7 +250,7 @@ const defaultSearchOptions = {
 
 const defaultPageConfig = {
   backgroundColor: '',
-  margin: {x: 'auto', y: 8},
+  margin: {x: 'auto', y: 0},
   maxWidth: 1024
 }
 

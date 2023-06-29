@@ -1016,7 +1016,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
     };
     const defaultPageConfig = {
         backgroundColor: '',
-        margin: { x: 'auto', y: 8 },
+        margin: { x: 'auto', y: 0 },
         maxWidth: 1024
     };
     exports.state = {
@@ -3499,9 +3499,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
             }
             this.actionsBar.minHeight = '100%';
+            this.updateColumn();
             const hasData = (_d = (_c = this.data) === null || _c === void 0 ? void 0 : _c.elements) === null || _d === void 0 ? void 0 : _d.length;
             this.toggleUI(hasData);
-            this.updateColumn();
         }
         updateRowConfig(config) {
             const { image = '', backgroundColor, maxWidth, margin } = config || {};
@@ -3524,7 +3524,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         updateColumn() {
             this.updateGrid();
             this.updateFixedGrid();
-            this.updateAlign();
         }
         updateGrid() {
             this.gridColumnWidth = (this.pnlRow.offsetWidth - index_38.GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
