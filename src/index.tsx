@@ -4,7 +4,7 @@ import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
 import { IPageData, IPageBlockData, IPageElement, IOnFetchComponentsOptions, IOnFetchComponentsResult, ICategory, ThemeType } from './interface/index';
 import { PageRow, PageRows, PageSidebar } from './page/index';
-import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData, getPageBlocks, getCategories, setCategories, setTheme, getBackgroundColor, getFontColor, getDivider } from './store/index';
+import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData, getPageBlocks, getCategories, setCategories, setTheme, getBackgroundColor, getFontColor, getDivider, getDefaultPageConfig, getMargin, setDefaultPageConfig } from './store/index';
 import { currentTheme } from './theme/index';
 import './index.css';
 import { SearchComponentsDialog } from './dialogs/index';
@@ -197,6 +197,7 @@ export default class Editor extends Module {
         pageObject.sections = value?.sections || [];
         pageObject.footer = value?.footer;
         pageObject.config = value?.config;
+        if (value?.config) setDefaultPageConfig(value.config);
         try {
             // await this.builderHeader.setData(value.header);
             await this.pageRows.setRows(value?.sections || []);
@@ -208,14 +209,13 @@ export default class Editor extends Module {
     }
 
     private updatePageConfig() {
-        if (pageObject?.config) {
-            const { backgroundColor = getBackgroundColor(), margin = {x: 60, y: 8}, maxWidth = 1280 } = pageObject.config || {};
-            this.style.setProperty('--builder-bg', backgroundColor);
-            if (this.pnlEditor) {
-                this.pnlEditor.maxWidth = maxWidth;
-                const { x, y } = margin;
-                this.pnlEditor.margin = {top: y, bottom: y, left: x, right: x};
-            }
+        const { backgroundColor, margin, maxWidth } = getDefaultPageConfig();
+        this.style.setProperty('--builder-bg', backgroundColor);
+        if (this.pnlEditor) {
+            this.pnlEditor.maxWidth = maxWidth ?? '100%';
+            const marginStyle = getMargin(margin);
+            this.pnlEditor.margin = marginStyle;
+            this.pnlEditor.style.width = `calc(100% - (2 * ${marginStyle.left}))`;
         }
     }
 
@@ -309,7 +309,7 @@ export default class Editor extends Module {
                         >
                             <i-panel
                                 id="pnlEditor"
-                                maxWidth={1280}
+                                maxWidth={1024}
                                 minHeight="100vh"
                                 margin={{ top: 8, bottom: 8, left: 60, right: 60 }}
                                 background={{ color: 'var(--builder-bg)' }}

@@ -36,7 +36,7 @@ export class RemoveToolbarCommand implements ICommand {
     if (!this.element.closest('ide-row') && currentElm) {
       this.element = currentElm;
     }
-    pageObject.removeElement(this.rowId, this.elementId);
+    pageObject.removeElement(this.rowId, this.elementId, true);
     const sectionEl = this.element.closest('ide-section');
     this.element.remove();
     const section = pageObject.getRow(this.rowId);
