@@ -11,7 +11,7 @@ export class UpdateTypeCommand implements ICommand {
   private oldDropData: any;
   private config: any;
   private dropSectionId: string;
-  private dropElementId: string;
+  private dropElementIndex: number;
   private isNew: boolean;
 
   constructor(dropElm: Control, element?: any, config?: IElementConfig) {
@@ -23,7 +23,9 @@ export class UpdateTypeCommand implements ICommand {
     const dropRowId = this.dropParent?.id.replace('row-', '');
     const dropSection = dropElm.closest('ide-section');
     this.dropSectionId = (dropSection?.id || '');
-    this.dropElementId = (dropElm.closest('ide-toolbar') as any)?.elementId;
+    const toolbars = dropSection.querySelectorAll('ide-toolbar');
+    const dropElementId = (dropElm.closest('ide-toolbar') as any)?.id.replace('elm-', '');
+    this.dropElementIndex = Array.from(toolbars).findIndex(toolbar => dropElementId && (toolbar as any).elementId === dropElementId);
     this.oldDropData = JSON.parse(JSON.stringify(pageObject.getElement(dropRowId, this.dropSectionId)));
     this.isNew = !this.element;
   }
@@ -55,6 +57,7 @@ export class UpdateTypeCommand implements ICommand {
   execute(): void {
     if (this.element && this.elementParent) {
       this.element = this.elementParent.querySelector(`[id='${this.data.id}']`) as Control;
+      this.data = JSON.parse(JSON.stringify(this.element.data));
     }
     const dropRowId = this.dropParent?.id.replace('row-', '');
     const dropSection = this.dropParent.querySelector(`[id='${this.dropSectionId}']`) as Control;
@@ -73,12 +76,11 @@ export class UpdateTypeCommand implements ICommand {
 
     const elementList = this.getElements();
     if (clonedDropSecData?.type === ElementType.COMPOSITE) {
-      const elementIndex = this.dropElementId ? dropSectionData.elements.findIndex(elm => elm.id === this.dropElementId) : -1;
       for (let i = 0; i < elementList.length; i++) {
-        pageObject.addElement(dropRowId, elementList[i], this.dropSectionId, elementIndex + i + 1);
+        pageObject.addElement(dropRowId, elementList[i], this.dropSectionId, this.dropElementIndex + i + 1);
       }
     } else if (clonedDropSecData?.type === ElementType.PRIMITIVE) {
-      // clonedDropSecData.id = generateUUID();
+      clonedDropSecData.id = this.config.id;
       const updatedList = [...elementList].map(elm => {
         elm.column = clonedDropSecData.column;
         elm.columnSpan = clonedDropSecData.columnSpan;
