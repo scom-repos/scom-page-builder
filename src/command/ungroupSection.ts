@@ -141,15 +141,15 @@ export class UngroupSectionCommand implements ICommand {
     newElm.remove();
     const section = pageObject.getRow(rowId);
     const isEmpty = !section?.elements?.length || section?.elements.every(el => el.type === "composite" && !el.elements?.length);
-    row && row.toggleUI(!isEmpty);
-    if (!this.prevSection.id || this.prevSection.id === elmId) {
-        const hasSectionData = !!section?.elements?.find(elm => elm.id === sectionEl?.id);
-        if (sectionEl && !hasSectionData) sectionEl.remove();
-    } else {
-        const parentElement = (section?.elements || []).find(elm => elm.id === this.prevSection.id);
-        const hasSectionData = !!parentElement?.elements?.length;
-        if (sectionEl && !hasSectionData) sectionEl.remove();
-    }
+    // row && row.toggleUI(!isEmpty);
+    // if (!this.prevSection.id || this.prevSection.id === elmId) {
+    //     const hasSectionData = !!section?.elements?.find(elm => elm.id === sectionEl?.id);
+    //     if (sectionEl && !hasSectionData) sectionEl.remove();
+    // } else {
+    //     const parentElement = (section?.elements || []).find(elm => elm.id === this.prevSection.id);
+    //     const hasSectionData = !!parentElement?.elements?.length;
+    //     if (sectionEl && !hasSectionData) sectionEl.remove();
+    // }
     application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
 
     // merge the elms
@@ -183,7 +183,7 @@ export class UngroupSectionCommand implements ICommand {
     const elementList = [newElData];
     if (clonedDropSecData?.type === ElementType.COMPOSITE) {
       for (let i = 0; i < elementList.length; i++) {
-        pageObject.addElement(dropRowId, elementList[i], prevSectionId, this.oriElmIndex + i + 1);
+        pageObject.addElement(dropRowId, elementList[i], prevSectionId, this.oriElmIndex + i);
       }
     } else if (clonedDropSecData?.type === ElementType.PRIMITIVE) {
       const updatedList = [...elementList].map(elm => {

@@ -665,11 +665,11 @@ export class PageRow extends Module {
                 overlapType: "none", section: undefined
             }
             const dragTargetSection = dragTarget.closest('ide-section') as HTMLElement;
-            if (!dragStartTarget) return {
-                overlapType: "mutual", section: undefined
+            if (dragStartTarget == null || dragStartTarget == undefined) return {
+                overlapType: "none", section: undefined
             }
-            const toolbars = dragTargetSection.querySelectorAll('ide-toolbar');
-            const isUngrouping: boolean = toolbars.length && toolbars.length > 1 && self.currentToolbar!=undefined;
+            const toolbars = dragTargetSection?.querySelectorAll('ide-toolbar');
+            const isUngrouping: boolean = toolbars && toolbars.length && toolbars.length > 1 && self.currentToolbar!=undefined;
             const nearestCol = findNearestFixedGridInRow(clientX)
             const dropColumn: number = parseInt(nearestCol.getAttribute("data-column"));
             const grid = dropTarget.closest('.grid');
