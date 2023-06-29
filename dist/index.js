@@ -3492,7 +3492,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.rowId = id;
             this.rowData = rowData;
             this.setAttribute('data-row', `${row}`);
-            this.updateRowConfig(config);
+            this.updateRowConfig(config || (0, index_39.getPageConfig)());
             this.isCloned = ((_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.nodeName) !== 'BUILDER-HEADER';
             this.isChanged = ((_b = this.parentElement) === null || _b === void 0 ? void 0 : _b.nodeName) !== 'BUILDER-HEADER';
             if (elements && elements.length > 0) {
@@ -3605,7 +3605,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         }
         updateGridColumn(grid) {
             grid.templateColumns = [`repeat(${this.maxColumn}, 1fr)`];
-            // [`repeat(${this.maxColumn}, ${this.gridColumnWidth}px)`];
             grid.gap = { column: `${index_38.GAP_WIDTH}px` };
         }
         initEventListeners() {
@@ -4147,13 +4146,14 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     return;
                 const id = this.id.replace('row-', '');
                 const sectionConfig = index_39.pageObject.getRowConfig(id) || {};
-                let newConfig = Object.assign(Object.assign({}, sectionConfig), config);
+                let newConfig = Object.assign(Object.assign(Object.assign({}, (0, index_39.getPageConfig)()), sectionConfig), config);
                 if (rowsConfig) {
                     const parsedData = rowsConfig[id] ? JSON.parse(rowsConfig[id]) : {};
                     newConfig = Object.assign(Object.assign({}, newConfig), parsedData);
                 }
                 index_39.pageObject.updateSection(id, { config: newConfig });
                 this.updateRowConfig(newConfig);
+                this.gridColumnWidth = (this.pnlRow.offsetWidth - index_38.GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
             });
         }
         getNewElementData() {
@@ -4666,8 +4666,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 builderTarget.setRootDir((0, index_44.getRootDir)());
         }
         setTheme(value) {
-            var _a;
-            if (value !== ((_a = this.module) === null || _a === void 0 ? void 0 : _a.theme))
+            if (this.module && value !== this.module.theme)
                 this.module.theme = value;
         }
         checkToolbar() {
@@ -6331,7 +6330,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 this.$render("ide-header", { id: 'pageHeader', border: { bottom: { width: 1, style: 'solid', color: '#dadce0' } } }),
                 this.$render("i-grid-layout", { templateColumns: ['auto', 'minmax(auto, 235px)'], autoFillInHoles: true, height: "calc(100% -64px)", overflow: "hidden" },
                     this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } }, padding: { bottom: '1rem' } },
-                        this.$render("i-panel", { id: "pageContent", maxWidth: 1400, width: "100%", margin: { left: 'auto', right: 'auto' } },
+                        this.$render("i-vstack", { id: "pageContent", maxWidth: "calc(100% - 6em)", horizontalAlignment: 'center', margin: { left: 'auto', right: 'auto' } },
                             this.$render("i-panel", { id: "pnlEditor", maxWidth: 1024, minHeight: "100vh", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
                                 this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
                                     this.$render("ide-rows", { id: "pageRows", draggable: true })),

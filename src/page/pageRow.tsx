@@ -13,8 +13,8 @@ import { PageSection } from './pageSection';
 import { RowSettingsDialog } from '../dialogs/index';
 import './pageRow.css';
 import { EVENT } from '../const/index';
-import { IPageElement, IPageSection, GAP_WIDTH, MIN_COLUMN, IPageConfig, IPageSectionConfig } from '../interface/index';
-import { getDefaultPageConfig, getDragData, getMargin, getRowConfig, pageObject, setDragData } from '../store/index';
+import { IPageElement, IPageSection, GAP_WIDTH, MIN_COLUMN, IPageSectionConfig } from '../interface/index';
+import { getDragData, getMargin, getPageConfig, pageObject, setDragData } from '../store/index';
 import {
     commandHistory,
     UpdateRowCommand,
@@ -167,7 +167,7 @@ export class PageRow extends Module {
         this.rowId = id;
         this.rowData = rowData;
         this.setAttribute('data-row', `${row}`);
-        this.updateRowConfig(config);
+        this.updateRowConfig(config || getPageConfig());
         this.isCloned = this.parentElement?.nodeName !== 'BUILDER-HEADER';
         this.isChanged = this.parentElement?.nodeName !== 'BUILDER-HEADER';
 
@@ -297,7 +297,6 @@ export class PageRow extends Module {
 
     private updateGridColumn(grid: GridLayout) {
         grid.templateColumns = [`repeat(${this.maxColumn}, 1fr)`];
-        // [`repeat(${this.maxColumn}, ${this.gridColumnWidth}px)`];
         grid.gap = { column: `${GAP_WIDTH}px` };
     }
 
@@ -854,13 +853,14 @@ export class PageRow extends Module {
             if (!config) return;
             const id = this.id.replace('row-', '');
             const sectionConfig = pageObject.getRowConfig(id) || {};
-            let newConfig = { ...sectionConfig, ...config };
+            let newConfig = { ...getPageConfig(), ...sectionConfig, ...config };
             if (rowsConfig) {
                 const parsedData = rowsConfig[id] ? JSON.parse(rowsConfig[id]) : {};
                 newConfig = {...newConfig, ...parsedData};
             }
             pageObject.updateSection(id, { config: newConfig });
             this.updateRowConfig(newConfig);
+            this.gridColumnWidth = (this.pnlRow.offsetWidth - GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
         });
     }
 
