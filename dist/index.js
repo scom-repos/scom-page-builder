@@ -1963,7 +1963,8 @@ define("@scom/scom-page-builder/command/updateType.ts", ["require", "exports", "
                 }
             }
             else if ((clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.type) === index_14.ElementType.PRIMITIVE) {
-                clonedDropSecData.id = this.config.id;
+                if (!this.isNew)
+                    clonedDropSecData.id = this.config.id;
                 const updatedList = [...elementList].map(elm => {
                     elm.column = clonedDropSecData.column;
                     elm.columnSpan = clonedDropSecData.columnSpan;
@@ -4024,17 +4025,15 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const pageRow = eventTarget.closest('ide-row');
                 event.preventDefault();
                 event.stopPropagation();
-                if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
-                    components_24.application.EventBus.dispatch(index_37.EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
-                    return;
-                }
-                if (!self.currentElement)
-                    return;
                 // if target overlap with other section
                 const overlap = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX);
                 if (overlap.overlapType == "mutual" /* || overlap.overlapType == "border"*/)
                     return;
                 if (overlap.overlapType == "none" && eventTarget.classList.contains('fixed-grid'))
+                    return;
+                if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack')
+                    components_24.application.EventBus.dispatch(index_37.EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
+                if (!self.currentElement)
                     return;
                 let nearestFixedItem = eventTarget.closest('.fixed-grid-item');
                 // if target overlap with itself
@@ -6330,8 +6329,8 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 this.$render("ide-header", { id: 'pageHeader', border: { bottom: { width: 1, style: 'solid', color: '#dadce0' } } }),
                 this.$render("i-grid-layout", { templateColumns: ['auto', 'minmax(auto, 235px)'], autoFillInHoles: true, height: "calc(100% -64px)", overflow: "hidden" },
                     this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } }, padding: { bottom: '1rem' } },
-                        this.$render("i-vstack", { id: "pageContent", maxWidth: "calc(100% - 6em)", horizontalAlignment: 'center', margin: { left: 'auto', right: 'auto' } },
-                            this.$render("i-panel", { id: "pnlEditor", maxWidth: 1024, minHeight: "100vh", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
+                        this.$render("i-vstack", { id: "pageContent", maxWidth: "calc(100% - 6em)", width: "100%", horizontalAlignment: 'center', margin: { left: 'auto', right: 'auto' } },
+                            this.$render("i-panel", { id: "pnlEditor", maxWidth: 1024, minHeight: "100vh", width: "100%", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
                                 this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
                                     this.$render("ide-rows", { id: "pageRows", draggable: true })),
                                 this.$render("builder-footer", { id: "builderFooter" })))),

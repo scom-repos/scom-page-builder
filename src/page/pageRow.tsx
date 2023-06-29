@@ -732,18 +732,15 @@ export class PageRow extends Module {
             event.preventDefault();
             event.stopPropagation();
 
-            if (pageRow && elementConfig?.module?.name === 'sectionStack') {
-                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
-                return;
-            }
-
-            if (!self.currentElement) return;
-
             // if target overlap with other section
             const overlap = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX);
             if (overlap.overlapType == "mutual"/* || overlap.overlapType == "border"*/) return;
             if (overlap.overlapType == "none" && eventTarget.classList.contains('fixed-grid'))
                 return;
+
+            if (pageRow && elementConfig?.module?.name === 'sectionStack')
+                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
+            if (!self.currentElement) return;
 
             let nearestFixedItem = eventTarget.closest('.fixed-grid-item') as Control;
 

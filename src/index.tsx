@@ -304,6 +304,7 @@ export default class Editor extends Module {
                         <i-vstack
                             id="pageContent"
                             maxWidth="calc(100% - 6em)"
+                            width="100%"
                             horizontalAlignment='center'
                             margin={{ left: 'auto', right: 'auto' }}
                         >
@@ -311,6 +312,7 @@ export default class Editor extends Module {
                                 id="pnlEditor"
                                 maxWidth={1024}
                                 minHeight="100vh"
+                                width="100%"
                                 margin={{ top: 8, bottom: 8, left: 60, right: 60 }}
                                 background={{ color: 'var(--builder-bg)' }}
                                 class="pnl-editor-wrapper"
