@@ -149,7 +149,7 @@ export class PageObject {
         elm.elements = [];
       } else if (value.type === 'composite') {
         const oldValue = JSON.parse(JSON.stringify(elm));
-        oldValue.id = generateUUID();
+        // oldValue.id = generateUUID();
         elm.elements = [oldValue];
         elm.module = {};
         elm.type = value.type;
@@ -212,8 +212,9 @@ export class PageObject {
       } else {
         const parentElement = section.elements.find(elm => elm.id === parentElmId);
         if (parentElement) {
-          if (typeof elementIndex === 'number' && elementIndex !== -1)
+          if (typeof elementIndex === 'number' && elementIndex !== -1) {
             parentElement.elements.splice(elementIndex, 0, value);
+          }
           else
             parentElement.elements.push(value);
         }

@@ -917,7 +917,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
                 }
                 else if (value.type === 'composite') {
                     const oldValue = JSON.parse(JSON.stringify(elm));
-                    oldValue.id = generateUUID();
+                    // oldValue.id = generateUUID();
                     elm.elements = [oldValue];
                     elm.module = {};
                     elm.type = value.type;
@@ -988,8 +988,9 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
                 else {
                     const parentElement = section.elements.find(elm => elm.id === parentElmId);
                     if (parentElement) {
-                        if (typeof elementIndex === 'number' && elementIndex !== -1)
+                        if (typeof elementIndex === 'number' && elementIndex !== -1) {
                             parentElement.elements.splice(elementIndex, 0, value);
+                        }
                         else
                             parentElement.elements.push(value);
                     }
@@ -1292,7 +1293,6 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
             const id = this.element.id.replace('row-', '');
             (0, index_4.setRowConfig)(id, JSON.stringify(this.settings));
             this.updateConfig(this.settings);
-            console.log(JSON.stringify(this.settings));
         }
         undo() {
             this.updateConfig(this.oldSettings);
@@ -1904,7 +1904,9 @@ define("@scom/scom-page-builder/command/updateType.ts", ["require", "exports", "
             const dropRowId = (_a = this.dropParent) === null || _a === void 0 ? void 0 : _a.id.replace('row-', '');
             const dropSection = dropElm.closest('ide-section');
             this.dropSectionId = ((dropSection === null || dropSection === void 0 ? void 0 : dropSection.id) || '');
-            this.dropElementId = (_b = dropElm.closest('ide-toolbar')) === null || _b === void 0 ? void 0 : _b.elementId;
+            const toolbars = dropSection.querySelectorAll('ide-toolbar');
+            const dropElementId = (_b = dropElm.closest('ide-toolbar')) === null || _b === void 0 ? void 0 : _b.id.replace('elm-', '');
+            this.dropElementIndex = Array.from(toolbars).findIndex(toolbar => dropElementId && toolbar.elementId === dropElementId);
             this.oldDropData = JSON.parse(JSON.stringify(index_13.pageObject.getElement(dropRowId, this.dropSectionId)));
             this.isNew = !this.element;
         }
@@ -1937,6 +1939,7 @@ define("@scom/scom-page-builder/command/updateType.ts", ["require", "exports", "
             var _a, _b, _c, _d;
             if (this.element && this.elementParent) {
                 this.element = this.elementParent.querySelector(`[id='${this.data.id}']`);
+                this.data = JSON.parse(JSON.stringify(this.element.data));
             }
             const dropRowId = (_a = this.dropParent) === null || _a === void 0 ? void 0 : _a.id.replace('row-', '');
             const dropSection = this.dropParent.querySelector(`[id='${this.dropSectionId}']`);
@@ -1955,13 +1958,12 @@ define("@scom/scom-page-builder/command/updateType.ts", ["require", "exports", "
                 return;
             const elementList = this.getElements();
             if ((clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.type) === index_14.ElementType.COMPOSITE) {
-                const elementIndex = this.dropElementId ? dropSectionData.elements.findIndex(elm => elm.id === this.dropElementId) : -1;
                 for (let i = 0; i < elementList.length; i++) {
-                    index_13.pageObject.addElement(dropRowId, elementList[i], this.dropSectionId, elementIndex + i + 1);
+                    index_13.pageObject.addElement(dropRowId, elementList[i], this.dropSectionId, this.dropElementIndex + i + 1);
                 }
             }
             else if ((clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.type) === index_14.ElementType.PRIMITIVE) {
-                // clonedDropSecData.id = generateUUID();
+                clonedDropSecData.id = this.config.id;
                 const updatedList = [...elementList].map(elm => {
                     elm.column = clonedDropSecData.column;
                     elm.columnSpan = clonedDropSecData.columnSpan;
@@ -3549,12 +3551,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             else {
                 this.pnlRow.templateColumns = ['min-content'];
                 const sections = Array.from(this.pnlRow.querySelectorAll('ide-section'));
-                console.log('_section', sections);
+                const unitWidth = Number((1 / this.maxColumn).toFixed(3)) * 100;
                 for (let section of sections) {
                     const columnSpan = Number(section.dataset.columnSpan);
-                    console.log(this.gridColumnWidth);
                     const widthNumber = columnSpan * this.gridColumnWidth + ((columnSpan - 1) * index_38.GAP_WIDTH);
-                    section.width = widthNumber ? `${widthNumber}px` : '100%';
+                    section.width = widthNumber ? `${widthNumber}px` : `${columnSpan * unitWidth}%`;
                 }
             }
         }

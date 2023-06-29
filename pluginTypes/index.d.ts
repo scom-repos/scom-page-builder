@@ -696,7 +696,7 @@ declare module "@scom/scom-page-builder/command/updateType.ts" {
         private oldDropData;
         private config;
         private dropSectionId;
-        private dropElementId;
+        private dropElementIndex;
         private isNew;
         constructor(dropElm: Control, element?: any, config?: IElementConfig);
         private getElements;

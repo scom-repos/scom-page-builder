@@ -229,12 +229,11 @@ export class PageRow extends Module {
         } else {
             this.pnlRow.templateColumns = ['min-content'];
             const sections = Array.from(this.pnlRow.querySelectorAll('ide-section'));
-            console.log('_section', sections)
+            const unitWidth = Number((1 / this.maxColumn).toFixed(3)) * 100;
             for (let section of sections) {
                 const columnSpan = Number((section as HTMLElement).dataset.columnSpan);
-                console.log(this.gridColumnWidth)
                 const widthNumber = columnSpan * this.gridColumnWidth + ((columnSpan - 1) * GAP_WIDTH);
-                (section as Control).width = widthNumber ? `${widthNumber}px` : '100%';
+                (section as Control).width = widthNumber ? `${widthNumber}px` : `${columnSpan * unitWidth}%`;
             }
         }
     }

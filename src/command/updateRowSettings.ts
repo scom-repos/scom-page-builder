@@ -32,7 +32,6 @@ export class UpdateRowSettingsCommand implements ICommand {
     const id = this.element.id.replace('row-', '');
     setRowConfig(id, JSON.stringify(this.settings));
     this.updateConfig(this.settings);
-    console.log(JSON.stringify(this.settings))
   }
 
   undo(): void {
