@@ -2640,12 +2640,17 @@ define("@scom/scom-page-builder/dialogs/searchComponentsDialog.tsx", ["require",
                 this.pnlComponents.append(...nodes);
             };
             this.onSearch = () => {
-                this.resetPaging();
-                this.onFetchData();
+                if (this.timer)
+                    clearTimeout(this.timer);
+                this.timer = setTimeout(async () => {
+                    this.resetPaging();
+                    this.onFetchData();
+                }, 300);
             };
         }
         init() {
             super.init();
+            this.paginationElm.onPageChanged = this.onSelectIndex.bind(this);
             (0, index_24.assignAttr)(this);
         }
         get components() {
@@ -2675,7 +2680,7 @@ define("@scom/scom-page-builder/dialogs/searchComponentsDialog.tsx", ["require",
         onSelected(item) {
             this.mdSearch.visible = false;
             (0, index_25.addPageBlock)(item);
-            components_15.application.EventBus.dispatch(index_27.EVENT.ON_UPDATE_SIDEBAR, { category: item.category });
+            components_15.application.EventBus.dispatch(index_27.EVENT.ON_UPDATE_SIDEBAR, item.category);
         }
         render() {
             return (this.$render("i-modal", { id: 'mdSearch', minWidth: 400, maxWidth: 900, title: "Search", closeOnBackdropClick: false, closeIcon: { name: 'times' }, class: "search-modal" },
@@ -2683,7 +2688,7 @@ define("@scom/scom-page-builder/dialogs/searchComponentsDialog.tsx", ["require",
                     this.$render("i-vstack", { id: "pnlMain", gap: '1rem' },
                         this.$render("i-input", { id: "inputSearch", width: 300, maxWidth: "100%", height: 32, border: { radius: 5, style: 'solid', width: 1, color: Theme.text.primary }, placeholder: "Search components", onChanged: this.onSearch }),
                         this.$render("i-hstack", { id: "pnlComponents", minHeight: 120, gap: 10, wrap: "wrap", horizontalAlignment: "center" }),
-                        this.$render("i-pagination", { id: "paginationElm", margin: { top: 16, bottom: 16, left: 'auto', right: 'auto' }, width: "auto", currentPage: this.pageNumber, totalPages: this.totalPage, onPageChanged: this.onSelectIndex })))));
+                        this.$render("i-pagination", { id: "paginationElm", margin: { top: 16, bottom: 16, left: 'auto', right: 'auto' }, width: "auto", currentPage: this.pageNumber, totalPages: this.totalPage })))));
         }
     };
     __decorate([

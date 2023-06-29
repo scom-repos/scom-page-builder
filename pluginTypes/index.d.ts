@@ -289,7 +289,7 @@ declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
     export interface IPageBlockData {
         name: string;
         path: string;
-        category?: "components" | "micro-dapps" | "charts";
+        category?: string;
         imgUrl?: string;
         disableClicked?: boolean;
         shownBackdrop?: boolean;
@@ -881,6 +881,7 @@ declare module "@scom/scom-page-builder/dialogs/searchComponentsDialog.tsx" {
         private paginationElm;
         private pnlComponents;
         private inputSearch;
+        private timer;
         private totalPage;
         private pageNumber;
         init(): void;
