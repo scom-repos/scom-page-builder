@@ -59,6 +59,7 @@ declare module "@scom/scom-page-builder/const/index.ts" {
         ON_UPDATE_SIDEBAR: string;
         ON_UPDATE_PAGE_BG: string;
         ON_CLOSE_BUILDER: string;
+        ON_UPDATE_PAGE_CONFIG: string;
     };
     export const DEFAULT_BOXED_LAYOUT_WIDTH = "1200px";
     export const DEFAULT_SCROLLBAR_WIDTH = 17;
@@ -342,20 +343,18 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         headerType: HeaderType;
         image: string;
         elements: IPageElement[];
-        config?: IConfigData;
+        config?: IPageSectionConfig;
     }
     export interface IPageSection {
         id: string;
         row: number;
-        image?: string;
-        backgroundColor?: string;
         elements: IPageElement[];
-        config?: IConfigData;
+        config?: IPageSectionConfig;
     }
     export interface IPageFooter {
         image: string;
         elements: IPageElement[];
-        config?: IConfigData;
+        config?: IPageSectionConfig;
     }
     export enum ElementType {
         PRIMITIVE = "primitive",
@@ -378,16 +377,9 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         AUTOMATIC = "Automatic"
     }
     export type AlignType = 'left' | 'center' | 'right';
-    export interface IConfigData {
-        columnLayout?: IColumnLayoutType;
-        columnsNumber?: number;
-        maxColumnsPerRow?: number;
-        columnMinWidth?: number | string;
+    export interface IPageSectionConfig extends IPageConfig {
         align?: AlignType;
-    }
-    export interface IRowSettings {
-        backgroundColor?: string;
-        config?: IConfigData;
+        image?: string;
     }
     export interface IOnFetchComponentsOptions {
         category?: string;
@@ -481,9 +473,8 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         private removeElementFn;
         removeElement(sectionId: string, elementId: string, removeLeafOnly?: boolean): void;
         addElement(sectionId: string, value: IPageElement, parentElmId?: string, elementIndex?: number): void;
-        getRowConfig(sectionId: string): import("@scom/scom-page-builder/interface/siteData.ts").IConfigData;
+        getRowConfig(sectionId: string): import("@scom/scom-page-builder/interface/siteData.ts").IPageSectionConfig;
         getColumnsNumber(sectionId: string): number;
-        private getColumnsNumberFn;
     }
     export const pageObject: PageObject;
     export const state: {
@@ -494,6 +485,10 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         searchOptions: IOnFetchComponentsOptions;
         categories: ICategory[];
         theme: ThemeType;
+        defaultPageConfig: any;
+        rowsConfig: {
+            [key: string]: string;
+        };
     };
     export const setPageBlocks: (value: IPageBlockData[]) => void;
     export const getPageBlocks: () => any[];
@@ -517,6 +512,20 @@ declare module "@scom/scom-page-builder/store/index.ts" {
     export const getBackgroundColor: (theme?: ThemeType) => string;
     export const getFontColor: (theme?: ThemeType) => string;
     export const getDivider: (theme?: ThemeType) => string;
+    export const setDefaultPageConfig: (value: IPageConfig) => void;
+    export const getDefaultPageConfig: () => any;
+    export const getPageConfig: () => any;
+    export const getMargin: (margin: {
+        x?: number | string;
+        y?: number | string;
+    }) => {
+        top: string | number;
+        left: string | number;
+        right: string | number;
+        bottom: string | number;
+    };
+    export const setRowConfig: (id: string, value: string) => void;
+    export const getRowConfig: (id: string) => string;
 }
 /// <amd-module name="@scom/scom-page-builder/command/interface.ts" />
 declare module "@scom/scom-page-builder/command/interface.ts" {
@@ -552,12 +561,13 @@ declare module "@scom/scom-page-builder/command/updateRow.ts" {
 declare module "@scom/scom-page-builder/command/updateRowSettings.ts" {
     import { Control } from "@ijstech/components";
     import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
-    import { IRowSettings } from "@scom/scom-page-builder/interface/index.ts";
+    import { IPageSectionConfig } from "@scom/scom-page-builder/interface/index.ts";
     export class UpdateRowSettingsCommand implements ICommand {
         private element;
         private settings;
         private oldSettings;
-        constructor(element: Control, settings: IRowSettings);
+        constructor(element: Control, settings: IPageSectionConfig);
+        private updateConfig;
         execute(): void;
         undo(): void;
         redo(): void;
@@ -739,7 +749,9 @@ declare module "@scom/scom-page-builder/command/updatePageSetting.ts" {
         private element;
         private settings;
         private oldSettings;
+        private rowsConfig;
         constructor(element: Control, settings: IPageConfig);
+        private getChangedValues;
         private updateConfig;
         execute(): void;
         undo(): void;
@@ -891,11 +903,9 @@ declare module "@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts" { }
 declare module "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx" {
     import { Module, ControlElement } from '@ijstech/components';
     import "@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts";
-    import { IRowSettings } from "@scom/scom-page-builder/interface/index.ts";
-    export type ISettingType = 'color' | 'column';
+    import { IPageSectionConfig } from "@scom/scom-page-builder/interface/index.ts";
     export interface RowSettingsDialogElement extends ControlElement {
-        type: ISettingType;
-        onSave: (data: IRowSettings) => void;
+        onSave: (data: IPageSectionConfig) => void;
     }
     global {
         namespace JSX {
@@ -909,11 +919,8 @@ declare module "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx" {
         private formElm;
         private onSave;
         private rowId;
-        private _type;
         constructor(parent?: any, options?: any);
         get data(): any;
-        get type(): ISettingType;
-        set type(value: ISettingType);
         init(): void;
         show(id: string): void;
         private getSchema;
@@ -943,7 +950,6 @@ declare module "@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx" {
     export class PageSettingsDialog extends Module {
         private settingsDialog;
         private formElm;
-        private defaultData;
         private onSave;
         constructor(parent?: any, options?: any);
         init(): void;
@@ -960,9 +966,9 @@ declare module "@scom/scom-page-builder/dialogs/index.ts" {
     import { ConfirmDialog } from "@scom/scom-page-builder/dialogs/confirmDialog.tsx";
     import { LoadingDialog } from "@scom/scom-page-builder/dialogs/loadingDialog.tsx";
     import { SearchComponentsDialog } from "@scom/scom-page-builder/dialogs/searchComponentsDialog.tsx";
-    import { RowSettingsDialog, ISettingType } from "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx";
+    import { RowSettingsDialog } from "@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx";
     import { PageSettingsDialog } from "@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx";
-    export { ConfirmDialog, LoadingDialog, RowSettingsDialog, SearchComponentsDialog, ISettingType, PageSettingsDialog };
+    export { ConfirmDialog, LoadingDialog, RowSettingsDialog, SearchComponentsDialog, PageSettingsDialog };
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageHeader.tsx" />
 declare module "@scom/scom-page-builder/page/pageHeader.tsx" {
@@ -1021,8 +1027,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private actionsBar;
         private dragStack;
         private pnlRow;
-        private mdRowColorSetting;
-        private mdRowColumnSetting;
+        private mdRowSetting;
         private pnlEmty;
         private _readonly;
         private isResizing;
@@ -1048,6 +1053,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         addElement(data: IPageElement): Promise<PageSection>;
         private clearData;
         setData(rowData: IPageSection): Promise<void>;
+        private updateRowConfig;
         private onOpenRowSettingsDialog;
         private onSaveRowSettings;
         updateColumn(): void;

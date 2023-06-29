@@ -102,7 +102,8 @@ define("@scom/scom-page-builder/const/index.ts", ["require", "exports", "@scom/s
         ON_FETCH_COMPONENTS: 'ON_FETCH_COMPONENTS',
         ON_UPDATE_SIDEBAR: 'ON_UPDATE_SIDEBAR',
         ON_UPDATE_PAGE_BG: 'ON_UPDATE_PAGE_BG',
-        ON_CLOSE_BUILDER: 'ON_CLOSE_BUILDER'
+        ON_CLOSE_BUILDER: 'ON_CLOSE_BUILDER',
+        ON_UPDATE_PAGE_CONFIG: 'ON_UPDATE_PAGE_CONFIG'
     };
     exports.DEFAULT_BOXED_LAYOUT_WIDTH = '1200px';
     exports.DEFAULT_SCROLLBAR_WIDTH = 17;
@@ -762,7 +763,7 @@ define("@scom/scom-page-builder/interface/index.ts", ["require", "exports", "@sc
 define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.getDivider = exports.getFontColor = exports.getBackgroundColor = exports.getTheme = exports.setTheme = exports.setCategories = exports.getCategories = exports.getSearchOptions = exports.setSearchOptions = exports.getSearchData = exports.setSearchData = exports.getDragData = exports.setDragData = exports.getRootDir = exports.setRootDir = exports.addPageBlock = exports.getPageBlocks = exports.setPageBlocks = exports.state = exports.pageObject = exports.PageObject = void 0;
+    exports.getRowConfig = exports.setRowConfig = exports.getMargin = exports.getPageConfig = exports.getDefaultPageConfig = exports.setDefaultPageConfig = exports.getDivider = exports.getFontColor = exports.getBackgroundColor = exports.getTheme = exports.setTheme = exports.setCategories = exports.getCategories = exports.getSearchOptions = exports.setSearchOptions = exports.getSearchData = exports.setSearchData = exports.getDragData = exports.setDragData = exports.getRootDir = exports.setRootDir = exports.addPageBlock = exports.getPageBlocks = exports.setPageBlocks = exports.state = exports.pageObject = exports.PageObject = void 0;
     const lightTheme = components_2.Styles.Theme.defaultTheme;
     const darkTheme = components_2.Styles.Theme.darkTheme;
     const MAX_COLUMN = 12;
@@ -778,6 +779,11 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
                 image: "",
                 elements: []
             };
+            // private getColumnsNumberFn(section: IPageSection|IPageFooter) {
+            //   if (!section) return MAX_COLUMN;
+            //   const { columnsNumber, columnLayout } = section?.config || {};
+            //   return (columnLayout === 'Fixed' && columnsNumber) ? columnsNumber : MAX_COLUMN;
+            // }
         }
         set header(value) {
             this._header = value;
@@ -818,28 +824,22 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
             return this._sections.find(section => section.id === id);
         }
         updateSection(id, data) {
-            var _a;
             const section = this.getRow(id);
-            if (section) {
-                const { backgroundColor, config } = data;
-                if (backgroundColor !== undefined)
-                    section.backgroundColor = backgroundColor;
-                if (config !== undefined) {
-                    const oldColumnsNumber = this.getColumnsNumber(id);
-                    const elements = ((_a = this.getRow(id)) === null || _a === void 0 ? void 0 : _a.elements) || [];
-                    section.config = data.config;
-                    const newColumnsNumber = this.getColumnsNumberFn(section);
-                    if (oldColumnsNumber !== newColumnsNumber) {
-                        for (let element of elements) {
-                            const oldColumnSpan = element.columnSpan;
-                            const oldColumn = element.column;
-                            const newColumnSpan = Math.floor(newColumnsNumber / oldColumnsNumber * oldColumnSpan);
-                            const newColumn = Math.ceil(newColumnsNumber / oldColumnsNumber * oldColumn);
-                            this.setElement(id, element.id, { column: newColumn, columnSpan: newColumnSpan });
-                        }
-                    }
-                }
-            }
+            if (!section)
+                return;
+            if (data === null || data === void 0 ? void 0 : data.config)
+                section.config = data.config;
+            // const oldColumnsNumber = this.getColumnsNumber(id);
+            // const elements = this.getRow(id)?.elements || [];
+            // const newColumnsNumber = this.getColumnsNumberFn(section);
+            // if (oldColumnsNumber !== newColumnsNumber) {
+            //   for (let element of elements) {
+            //     const oldColumnSpan = element.columnSpan;
+            //     const oldColumn = element.column;
+            //     const newColumnSpan = Math.floor(newColumnsNumber / oldColumnsNumber * oldColumnSpan);
+            //     const newColumn = Math.ceil(newColumnsNumber / oldColumnsNumber * oldColumn);
+            //     this.setElement(id, element.id, { column: newColumn, columnSpan: newColumnSpan });
+            //   }
         }
         getRow(rowId) {
             if (rowId === 'header')
@@ -998,19 +998,13 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         }
         getRowConfig(sectionId) {
             const section = this.getRow(sectionId);
-            return (section === null || section === void 0 ? void 0 : section.config) || {};
+            return section === null || section === void 0 ? void 0 : section.config;
         }
         getColumnsNumber(sectionId) {
-            if (!sectionId)
-                return MAX_COLUMN;
-            const section = this.getRow(sectionId);
-            return this.getColumnsNumberFn(section);
-        }
-        getColumnsNumberFn(section) {
-            if (!section)
-                return MAX_COLUMN;
-            const { columnsNumber, columnLayout } = (section === null || section === void 0 ? void 0 : section.config) || {};
-            return (columnLayout === 'Fixed' && columnsNumber) ? columnsNumber : MAX_COLUMN;
+            return MAX_COLUMN;
+            // if (!sectionId) return MAX_COLUMN;
+            // const section = this.getRow(sectionId);
+            // return this.getColumnsNumberFn(section);
         }
     }
     exports.PageObject = PageObject;
@@ -1019,6 +1013,11 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         category: undefined,
         pageNumber: undefined,
         pageSize: undefined
+    };
+    const defaultPageConfig = {
+        backgroundColor: '',
+        margin: { x: 'auto', y: 8 },
+        maxWidth: 1024
     };
     exports.state = {
         pageBlocks: [],
@@ -1047,7 +1046,9 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
                 title: 'Project MicroDApps'
             }
         ],
-        theme: 'light'
+        theme: 'light',
+        defaultPageConfig: null,
+        rowsConfig: {}
     };
     const setPageBlocks = (value) => {
         exports.state.pageBlocks = value || [];
@@ -1112,12 +1113,6 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         return (_a = exports.state.theme) !== null && _a !== void 0 ? _a : 'light';
     };
     exports.getTheme = getTheme;
-    const generateUUID = () => {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    };
     const getBackgroundColor = (theme) => {
         theme = theme !== null && theme !== void 0 ? theme : (0, exports.getTheme)();
         return theme === 'light' ? lightTheme.background.main : darkTheme.background.main;
@@ -1133,6 +1128,53 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         return theme === 'light' ? lightTheme.divider : darkTheme.divider;
     };
     exports.getDivider = getDivider;
+    const generateUUID = () => {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    };
+    const setDefaultPageConfig = (value) => {
+        exports.state.defaultPageConfig = Object.assign(Object.assign(Object.assign({}, defaultPageConfig), { backgroundColor: (0, exports.getBackgroundColor)() }), (value || {}));
+    };
+    exports.setDefaultPageConfig = setDefaultPageConfig;
+    const getDefaultPageConfig = () => {
+        const defaultValue = Object.assign(Object.assign({}, defaultPageConfig), { backgroundColor: (0, exports.getBackgroundColor)() });
+        return exports.state.defaultPageConfig || defaultValue;
+    };
+    exports.getDefaultPageConfig = getDefaultPageConfig;
+    const getPageConfig = () => {
+        const defaultConfig = (0, exports.getDefaultPageConfig)();
+        const pageConfig = (exports.pageObject === null || exports.pageObject === void 0 ? void 0 : exports.pageObject.config) || {};
+        pageConfig.margin = Object.assign(Object.assign({}, defaultConfig.margin), pageConfig.margin);
+        return Object.assign(Object.assign({}, defaultConfig), pageConfig);
+    };
+    exports.getPageConfig = getPageConfig;
+    const getMargin = (margin) => {
+        const { margin: defaultMargin } = (0, exports.getDefaultPageConfig)();
+        let { x, y } = margin || {};
+        x = x !== null && x !== void 0 ? x : defaultMargin.x;
+        y = y !== null && y !== void 0 ? y : defaultMargin.y;
+        const xNumber = Number(x);
+        const yNumber = Number(y);
+        x = isNaN(xNumber) ? x : xNumber;
+        y = isNaN(yNumber) ? y : yNumber;
+        return {
+            top: y,
+            left: x,
+            right: x,
+            bottom: y
+        };
+    };
+    exports.getMargin = getMargin;
+    const setRowConfig = (id, value) => {
+        exports.state.rowsConfig[id] = value;
+    };
+    exports.setRowConfig = setRowConfig;
+    const getRowConfig = (id) => {
+        return exports.state.rowsConfig[id];
+    };
+    exports.getRowConfig = getRowConfig;
 });
 define("@scom/scom-page-builder/command/interface.ts", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -1231,48 +1273,29 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
     class UpdateRowSettingsCommand {
         constructor(element, settings) {
             this.element = element;
-            this.settings = settings;
+            this.settings = Object.assign({}, settings);
             const id = this.element.id.replace('row-', '');
-            const data = index_4.pageObject.getRow(id) || {};
+            const data = index_4.pageObject.getRowConfig(id) || (0, index_4.getPageConfig)();
             this.oldSettings = Object.assign({}, data);
         }
-        execute() {
-            const { backgroundColor, config } = this.settings;
+        updateConfig(config) {
             const id = this.element.id.replace('row-', '');
-            if (backgroundColor !== undefined) {
-                this.element.background = { color: backgroundColor };
-                components_4.application.EventBus.dispatch(index_5.EVENT.ON_UPDATE_PAGE_BG, { color: backgroundColor });
-            }
-            index_4.pageObject.updateSection(id, { backgroundColor, config });
-            if (config) {
-                this.element.setData(index_4.pageObject.getRow(id));
-                const align = config.align || 'left';
-                let alignValue = 'start';
-                switch (align) {
-                    case 'right':
-                        alignValue = 'end';
-                        break;
-                    case 'center':
-                        alignValue = 'center';
-                        break;
-                }
-                this.element.style.justifyContent = alignValue;
-            }
+            const { backgroundColor, margin } = config;
+            this.element.background = { color: backgroundColor || '' };
+            components_4.application.EventBus.dispatch(index_5.EVENT.ON_UPDATE_PAGE_BG, { color: backgroundColor || '' });
+            const marginStyle = (0, index_4.getMargin)(margin);
+            const newConfig = Object.assign(Object.assign({}, config), { margin: { x: marginStyle.left, y: marginStyle.top } });
+            index_4.pageObject.updateSection(id, { config: Object.assign({}, newConfig) });
+            this.element.setData(index_4.pageObject.getRow(id));
+        }
+        execute() {
+            const id = this.element.id.replace('row-', '');
+            (0, index_4.setRowConfig)(id, JSON.stringify(this.settings));
+            this.updateConfig(this.settings);
+            console.log(JSON.stringify(this.settings));
         }
         undo() {
-            const { backgroundColor = '', config } = this.oldSettings;
-            const id = this.element.id.replace('row-', '');
-            this.element.background = { color: backgroundColor };
-            components_4.application.EventBus.dispatch(index_5.EVENT.ON_UPDATE_PAGE_BG, { color: backgroundColor });
-            index_4.pageObject.updateSection(id, {
-                backgroundColor,
-                config: config || {
-                    // columnLayout: IColumnLayoutType.FIXED,
-                    // columnsNumber: 12,
-                    align: 'left'
-                }
-            });
-            this.element.setData(index_4.pageObject.getRow(id));
+            this.updateConfig(this.oldSettings);
         }
         redo() { }
     }
@@ -2163,25 +2186,59 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
     exports.UpdatePageSettingsCommand = void 0;
     class UpdatePageSettingsCommand {
         constructor(element, settings) {
+            this.rowsConfig = {};
             this.element = element;
-            this.settings = settings;
-            this.oldSettings = Object.assign({}, (index_17.pageObject.config || {}));
+            this.settings = Object.assign({}, settings);
+            const pageConfig = (index_17.pageObject === null || index_17.pageObject === void 0 ? void 0 : index_17.pageObject.config) || {};
+            this.oldSettings = Object.assign(Object.assign({}, (0, index_17.getDefaultPageConfig)()), pageConfig);
+            const rows = this.element.querySelectorAll('ide-row');
+            for (let row of rows) {
+                const id = row.id.replace('row-', '');
+                const oldConfig = (0, index_17.getRowConfig)(id);
+                if (oldConfig)
+                    this.rowsConfig[id] = oldConfig;
+            }
         }
-        updateConfig(config) {
-            const { backgroundColor = (0, index_17.getBackgroundColor)(), margin = { x: 60, y: 8 }, maxWidth = 1280 } = config;
+        getChangedValues(newValue, oldValue) {
+            let result = [];
+            for (let prop in newValue) {
+                if (prop === 'margin') {
+                    const { x: newX, y: newY } = newValue.margin;
+                    const { x: oldX, y: oldY } = oldValue.margin;
+                    if (newX !== oldX || newY !== oldY)
+                        result.push(prop);
+                }
+                else {
+                    if (newValue[prop] !== oldValue[prop])
+                        result.push(prop);
+                }
+            }
+            return result;
+        }
+        updateConfig(config, updatedValues) {
+            const configData = Object.assign(Object.assign({}, (0, index_17.getDefaultPageConfig)()), config);
+            const { backgroundColor, margin, maxWidth } = configData;
+            let newConfig = {};
+            for (let prop of updatedValues) {
+                newConfig[prop] = configData[prop];
+            }
             const element = this.element.closest('i-scom-page-builder') || this.element;
             element.style.setProperty('--builder-bg', backgroundColor);
             components_7.application.EventBus.dispatch(index_18.EVENT.ON_UPDATE_PAGE_BG, { color: backgroundColor });
-            this.element.maxWidth = maxWidth;
-            const { x, y } = margin;
-            this.element.margin = { top: y, bottom: y, left: x, right: x };
+            this.element.maxWidth = maxWidth !== null && maxWidth !== void 0 ? maxWidth : '100%';
+            this.element.margin = (0, index_17.getMargin)(margin);
             index_17.pageObject.config = { backgroundColor, margin, maxWidth };
+            return newConfig;
         }
         execute() {
-            this.updateConfig(this.settings);
+            const updatedValues = this.getChangedValues(this.settings, this.oldSettings);
+            const newConfig = this.updateConfig(this.settings, updatedValues);
+            components_7.application.EventBus.dispatch(index_18.EVENT.ON_UPDATE_PAGE_CONFIG, { config: newConfig });
         }
         undo() {
-            this.updateConfig(this.oldSettings);
+            const updatedValues = this.getChangedValues(this.oldSettings, this.settings);
+            const newConfig = this.updateConfig(this.oldSettings, updatedValues);
+            components_7.application.EventBus.dispatch(index_18.EVENT.ON_UPDATE_PAGE_CONFIG, { config: newConfig, rowsConfig: this.rowsConfig });
         }
         redo() { }
     }
@@ -2673,15 +2730,8 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
         get data() {
             return index_29.pageObject.getRow(this.rowId) || {};
         }
-        get type() {
-            return this._type;
-        }
-        set type(value) {
-            this._type = value;
-        }
         init() {
             super.init();
-            this.type = this.getAttribute('type', true);
         }
         show(id) {
             this.rowId = id || '';
@@ -2690,51 +2740,56 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
             this.dialog.visible = true;
         }
         getSchema() {
-            let jsonSchema;
-            if (this.type === 'color') {
-                jsonSchema = {
-                    type: 'object',
-                    properties: {
-                        "backgroundColor": {
-                            type: 'string',
-                            format: 'color'
+            let jsonSchema = {
+                type: 'object',
+                // required: ['columnLayout'],
+                properties: {
+                    //   "columnLayout": {
+                    //     type: 'string',
+                    //     enum: [
+                    //         IColumnLayoutType.FIXED,
+                    //         IColumnLayoutType.AUTOMATIC
+                    //     ],
+                    //     default: IColumnLayoutType.FIXED
+                    //   },        
+                    //   "columnsNumber": {
+                    //     type: 'number'
+                    //   },
+                    //   "maxColumnsPerRow": {
+                    //     type: 'number'
+                    //   },
+                    //   "columnMinWidth": {
+                    //     type: 'number'
+                    //   },
+                    backgroundColor: {
+                        type: 'string',
+                        format: 'color'
+                    },
+                    maxWidth: {
+                        type: 'number',
+                        title: 'Maximum width'
+                    },
+                    margin: {
+                        type: 'object',
+                        properties: {
+                            x: {
+                                type: 'string'
+                            },
+                            y: {
+                                type: 'string'
+                            }
                         }
+                    },
+                    align: {
+                        type: 'string',
+                        enum: [
+                            'left',
+                            'center',
+                            'right'
+                        ]
                     }
-                };
-            }
-            else {
-                jsonSchema = {
-                    type: 'object',
-                    // required: ['columnLayout'],
-                    properties: {
-                        //   "columnLayout": {
-                        //     type: 'string',
-                        //     enum: [
-                        //         IColumnLayoutType.FIXED,
-                        //         IColumnLayoutType.AUTOMATIC
-                        //     ],
-                        //     default: IColumnLayoutType.FIXED
-                        //   },        
-                        //   "columnsNumber": {
-                        //     type: 'number'
-                        //   },
-                        //   "maxColumnsPerRow": {
-                        //     type: 'number'
-                        //   },
-                        //   "columnMinWidth": {
-                        //     type: 'number'
-                        //   },
-                        align: {
-                            type: 'string',
-                            enum: [
-                                'left',
-                                'center',
-                                'right'
-                            ]
-                        }
-                    }
-                };
-            }
+                }
+            };
             const formOptions = {
                 columnWidth: '100%',
                 columnsPerRow: 1,
@@ -2745,9 +2800,8 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                     hide: false,
                     onClick: async () => {
                         const config = await this.formElm.getFormData();
-                        const params = this.type === 'color' ? config : { config };
                         if (this.onSave)
-                            await this.onSave(params);
+                            await this.onSave(config);
                         this.dialog.visible = false;
                     }
                 }
@@ -2755,18 +2809,13 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
             return { jsonSchema, formOptions };
         }
         renderForm() {
-            var _a, _b, _c;
+            var _a;
             const { jsonSchema, formOptions } = this.getSchema();
             this.formElm.jsonSchema = jsonSchema;
             this.formElm.formOptions = formOptions;
             this.formElm.renderForm();
-            const defaultColor = ((_a = index_29.pageObject.config) === null || _a === void 0 ? void 0 : _a.backgroundColor) || (0, index_29.getBackgroundColor)();
-            const config = this.type === 'column' ?
-                ((_b = this.data) === null || _b === void 0 ? void 0 : _b.config) || {
-                    // columnLayout: IColumnLayoutType.FIXED,
-                    // columnsNumber: 12,
-                    align: 'left'
-                } : { backgroundColor: ((_c = this.data) === null || _c === void 0 ? void 0 : _c.backgroundColor) || defaultColor };
+            const { backgroundColor, margin, maxWidth } = (0, index_29.getPageConfig)();
+            const config = Object.assign({ align: 'left', margin, maxWidth, backgroundColor }, (((_a = this.data) === null || _a === void 0 ? void 0 : _a.config) || {}));
             this.formElm.setFormData(Object.assign({}, config));
         }
         close() {
@@ -2822,11 +2871,6 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
         }
         init() {
             super.init();
-            this.defaultData = {
-                backgroundColor: (0, index_31.getBackgroundColor)(),
-                maxWidth: 1280,
-                margin: { x: 60, y: 8 }
-            };
         }
         show() {
             this.reset();
@@ -2881,8 +2925,10 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
             this.formElm.jsonSchema = jsonSchema;
             this.formElm.formOptions = formOptions;
             this.formElm.renderForm();
+            const defaultConfig = (0, index_31.getDefaultPageConfig)();
             const config = index_31.pageObject.config || {};
-            this.formElm.setFormData(Object.assign(Object.assign({}, this.defaultData), config));
+            config.margin = Object.assign(Object.assign({}, defaultConfig.margin), config.margin);
+            this.formElm.setFormData(Object.assign(Object.assign({}, defaultConfig), config));
         }
         close() {
             this.settingsDialog.visible = false;
@@ -3439,15 +3485,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         async setData(rowData) {
             var _a, _b, _c, _d;
             this.clearData();
-            const { id, row, image, elements, backgroundColor } = rowData;
+            const { id, row, elements, config } = rowData;
             this.id = `row-${id}`;
             this.rowId = id;
             this.rowData = rowData;
             this.setAttribute('data-row', `${row}`);
-            if (image)
-                this.background.image = image;
-            else if (backgroundColor)
-                this.background.color = backgroundColor;
+            this.updateRowConfig(config);
             this.isCloned = ((_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.nodeName) !== 'BUILDER-HEADER';
             this.isChanged = ((_b = this.parentElement) === null || _b === void 0 ? void 0 : _b.nodeName) !== 'BUILDER-HEADER';
             if (elements && elements.length > 0) {
@@ -3460,11 +3503,19 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
             this.updateColumn();
         }
-        onOpenRowSettingsDialog(type) {
-            if (type === 'color')
-                this.mdRowColorSetting.show(this.rowId);
-            else
-                this.mdRowColumnSetting.show(this.rowId);
+        updateRowConfig(config) {
+            const { image = '', backgroundColor, maxWidth, margin } = config || {};
+            if (image)
+                this.background.image = image;
+            if (backgroundColor)
+                this.background.color = backgroundColor;
+            this.maxWidth = maxWidth !== null && maxWidth !== void 0 ? maxWidth : '100%';
+            if (margin)
+                this.margin = (0, index_39.getMargin)(margin);
+            this.width = (margin === null || margin === void 0 ? void 0 : margin.x) && (margin === null || margin === void 0 ? void 0 : margin.x) !== 'auto' ? 'auto' : '100%';
+        }
+        onOpenRowSettingsDialog() {
+            this.mdRowSetting.show(this.rowId);
         }
         onSaveRowSettings(data) {
             const updateCmd = new index_40.UpdateRowSettingsCommand(this, data);
@@ -3499,10 +3550,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             else {
                 this.pnlRow.templateColumns = ['min-content'];
                 const sections = Array.from(this.pnlRow.querySelectorAll('ide-section'));
+                console.log('_section', sections);
                 for (let section of sections) {
                     const columnSpan = Number(section.dataset.columnSpan);
+                    console.log(this.gridColumnWidth);
                     const widthNumber = columnSpan * this.gridColumnWidth + ((columnSpan - 1) * index_38.GAP_WIDTH);
-                    section.width = `${widthNumber}px`;
+                    section.width = widthNumber ? `${widthNumber}px` : '100%';
                 }
             }
         }
@@ -4088,6 +4141,20 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         }
         initEventBus() {
             components_24.application.EventBus.register(this, index_37.EVENT.ON_SET_DRAG_ELEMENT, async (el) => this.currentElement = el);
+            components_24.application.EventBus.register(this, index_37.EVENT.ON_UPDATE_PAGE_CONFIG, async (data) => {
+                const { config, rowsConfig } = data;
+                if (!config)
+                    return;
+                const id = this.id.replace('row-', '');
+                const sectionConfig = index_39.pageObject.getRowConfig(id) || {};
+                let newConfig = Object.assign(Object.assign({}, sectionConfig), config);
+                if (rowsConfig) {
+                    const parsedData = rowsConfig[id] ? JSON.parse(rowsConfig[id]) : {};
+                    newConfig = Object.assign(Object.assign({}, newConfig), parsedData);
+                }
+                index_39.pageObject.updateSection(id, { config: newConfig });
+                this.updateRowConfig(newConfig);
+            });
         }
         getNewElementData() {
             const elementConfig = Object.assign({}, ((0, index_39.getDragData)() || {}));
@@ -4135,10 +4202,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 this.$render("i-button", { caption: '', icon: { name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, top: "-12px", left: "50%", zIndex: 100, class: "btn-add", onClick: () => this.onAddSection(-1) }),
                 this.$render("i-vstack", { id: 'actionsBar', class: "row-actions-bar", verticalAlignment: "center" },
                     this.$render("i-vstack", { background: { color: '#fff' }, border: { radius: '20px' }, maxWidth: "100%", maxHeight: "100%", horizontalAlignment: "center", padding: { top: 5, bottom: 5 }, class: "bar-shadow" },
-                        this.$render("i-panel", { class: "actions", tooltip: { content: 'Section settings', placement: 'right' }, visible: this.isChanged, onClick: () => this.onOpenRowSettingsDialog('column') },
+                        this.$render("i-panel", { class: "actions", tooltip: { content: 'Section settings', placement: 'right' }, visible: this.isChanged, onClick: () => this.onOpenRowSettingsDialog() },
                             this.$render("i-icon", { name: "cog", width: 16, height: 16, fill: "#80868b" })),
-                        this.$render("i-panel", { id: "btnSetting", class: "actions", tooltip: { content: 'Section colors', placement: 'right' }, visible: this.isChanged, onClick: () => this.onOpenRowSettingsDialog('color') },
-                            this.$render("i-icon", { name: "palette", width: 16, height: 16, fill: "#80868b" })),
                         this.$render("i-panel", { id: "btnClone", class: "actions", tooltip: { content: 'Duplicate section', placement: 'right' }, visible: this.isCloned, onClick: this.onClone },
                             this.$render("i-icon", { name: "clone", width: 16, height: 16, fill: "#80868b" })),
                         this.$render("i-panel", { id: "btnDelete", class: "actions delete", tooltip: { content: 'Delete section', placement: 'right' }, onClick: this.onDeleteRow },
@@ -4157,8 +4222,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     this.$render("i-panel", { padding: { top: '3rem', bottom: '3rem' }, margin: { top: '3rem', bottom: '3rem' }, width: "100%", border: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' }, class: "text-center" },
                         this.$render("i-label", { caption: 'Drag Elements Here', font: { transform: 'uppercase', color: 'var(--builder-color)', size: '1.25rem' }, opacity: 0.5 }))),
                 this.$render("i-grid-layout", { id: "pnlRow", width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%", position: "relative", class: "grid", opacity: 0 }),
-                this.$render("ide-row-settings-dialog", { id: "mdRowColorSetting", type: "color", onSave: this.onSaveRowSettings.bind(this) }),
-                this.$render("ide-row-settings-dialog", { id: "mdRowColumnSetting", type: "column", onSave: this.onSaveRowSettings.bind(this) }),
+                this.$render("ide-row-settings-dialog", { id: "mdRowSetting", onSave: this.onSaveRowSettings.bind(this) }),
                 this.$render("i-button", { caption: '', icon: { name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, bottom: "-12px", left: "50%", zIndex: 100, class: "btn-add", onClick: () => this.onAddSection(1) })));
         }
     };
@@ -6198,6 +6262,8 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             index_79.pageObject.sections = (value === null || value === void 0 ? void 0 : value.sections) || [];
             index_79.pageObject.footer = value === null || value === void 0 ? void 0 : value.footer;
             index_79.pageObject.config = value === null || value === void 0 ? void 0 : value.config;
+            if (value === null || value === void 0 ? void 0 : value.config)
+                (0, index_79.setDefaultPageConfig)(value.config);
             try {
                 // await this.builderHeader.setData(value.header);
                 await this.pageRows.setRows((value === null || value === void 0 ? void 0 : value.sections) || []);
@@ -6209,14 +6275,13 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             }
         }
         updatePageConfig() {
-            if (index_79.pageObject === null || index_79.pageObject === void 0 ? void 0 : index_79.pageObject.config) {
-                const { backgroundColor = (0, index_79.getBackgroundColor)(), margin = { x: 60, y: 8 }, maxWidth = 1280 } = index_79.pageObject.config || {};
-                this.style.setProperty('--builder-bg', backgroundColor);
-                if (this.pnlEditor) {
-                    this.pnlEditor.maxWidth = maxWidth;
-                    const { x, y } = margin;
-                    this.pnlEditor.margin = { top: y, bottom: y, left: x, right: x };
-                }
+            const { backgroundColor, margin, maxWidth } = (0, index_79.getDefaultPageConfig)();
+            this.style.setProperty('--builder-bg', backgroundColor);
+            if (this.pnlEditor) {
+                this.pnlEditor.maxWidth = maxWidth !== null && maxWidth !== void 0 ? maxWidth : '100%';
+                const marginStyle = (0, index_79.getMargin)(margin);
+                this.pnlEditor.margin = marginStyle;
+                this.pnlEditor.style.width = `calc(100% - (2 * ${marginStyle.left}))`;
             }
         }
         onHide() {
@@ -6267,7 +6332,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 this.$render("i-grid-layout", { templateColumns: ['auto', 'minmax(auto, 235px)'], autoFillInHoles: true, height: "calc(100% -64px)", overflow: "hidden" },
                     this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } }, padding: { bottom: '1rem' } },
                         this.$render("i-panel", { id: "pageContent", maxWidth: 1400, width: "100%", margin: { left: 'auto', right: 'auto' } },
-                            this.$render("i-panel", { id: "pnlEditor", maxWidth: 1280, minHeight: "100vh", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
+                            this.$render("i-panel", { id: "pnlEditor", maxWidth: 1024, minHeight: "100vh", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
                                 this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
                                     this.$render("ide-rows", { id: "pageRows", draggable: true })),
                                 this.$render("builder-footer", { id: "builderFooter" })))),

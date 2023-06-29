@@ -64,26 +64,19 @@ export class PageObject {
 
   updateSection(id: string, data: any) {
     const section = this.getRow(id);
-    if (section) {
-      const { backgroundColor, config } = data;
-      if (backgroundColor !== undefined)
-        (section as any).backgroundColor = backgroundColor;
-      if (config !== undefined) {
-        const oldColumnsNumber = this.getColumnsNumber(id);
-        const elements = this.getRow(id)?.elements || [];
-        section.config = data.config;
-        const newColumnsNumber = this.getColumnsNumberFn(section);
-        if (oldColumnsNumber !== newColumnsNumber) {
-          for (let element of elements) {
-            const oldColumnSpan = element.columnSpan;
-            const oldColumn = element.column;
-            const newColumnSpan = Math.floor(newColumnsNumber / oldColumnsNumber * oldColumnSpan);
-            const newColumn = Math.ceil(newColumnsNumber / oldColumnsNumber * oldColumn);
-            this.setElement(id, element.id, { column: newColumn, columnSpan: newColumnSpan });
-          }
-        }
-      }
-    }
+    if (!section) return;
+    if (data?.config) section.config = data.config;
+    // const oldColumnsNumber = this.getColumnsNumber(id);
+    // const elements = this.getRow(id)?.elements || [];
+    // const newColumnsNumber = this.getColumnsNumberFn(section);
+    // if (oldColumnsNumber !== newColumnsNumber) {
+    //   for (let element of elements) {
+    //     const oldColumnSpan = element.columnSpan;
+    //     const oldColumn = element.column;
+    //     const newColumnSpan = Math.floor(newColumnsNumber / oldColumnsNumber * oldColumnSpan);
+    //     const newColumn = Math.ceil(newColumnsNumber / oldColumnsNumber * oldColumn);
+    //     this.setElement(id, element.id, { column: newColumn, columnSpan: newColumnSpan });
+    //   }
   }
 
   getRow(rowId: string) {
@@ -230,20 +223,21 @@ export class PageObject {
 
   getRowConfig(sectionId: string) {
     const section = this.getRow(sectionId);
-    return section?.config || {};
+    return section?.config;
   }
 
   getColumnsNumber(sectionId: string) {
-    if (!sectionId) return MAX_COLUMN;
-    const section = this.getRow(sectionId);
-    return this.getColumnsNumberFn(section);
+    return MAX_COLUMN
+    // if (!sectionId) return MAX_COLUMN;
+    // const section = this.getRow(sectionId);
+    // return this.getColumnsNumberFn(section);
   }
 
-  private getColumnsNumberFn(section: IPageSection|IPageFooter) {
-    if (!section) return MAX_COLUMN;
-    const { columnsNumber, columnLayout } = section?.config || {};
-    return (columnLayout === 'Fixed' && columnsNumber) ? columnsNumber : MAX_COLUMN;
-  }
+  // private getColumnsNumberFn(section: IPageSection|IPageFooter) {
+  //   if (!section) return MAX_COLUMN;
+  //   const { columnsNumber, columnLayout } = section?.config || {};
+  //   return (columnLayout === 'Fixed' && columnsNumber) ? columnsNumber : MAX_COLUMN;
+  // }
 }
 
 export const pageObject = new PageObject();
@@ -252,6 +246,12 @@ const defaultSearchOptions = {
   category: undefined,
   pageNumber: undefined,
   pageSize: undefined
+}
+
+const defaultPageConfig = {
+  backgroundColor: '',
+  margin: {x: 'auto', y: 8},
+  maxWidth: 1024
 }
 
 export const state = {
@@ -281,7 +281,9 @@ export const state = {
       title: 'Project MicroDApps'
     }
   ] as ICategory[],
-  theme: 'light' as ThemeType
+  theme: 'light' as ThemeType,
+  defaultPageConfig: null,
+  rowsConfig: {} as {[key: string]: string}
 }
 
 export const setPageBlocks = (value: IPageBlockData[]) => {
@@ -345,13 +347,6 @@ export const getTheme = (): ThemeType => {
   return state.theme ?? 'light';
 }
 
-const generateUUID = () => {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-}
-
 export const getBackgroundColor = (theme?: ThemeType) => {
   theme = theme ?? getTheme();
   return theme === 'light' ? lightTheme.background.main : darkTheme.background.main;
@@ -365,4 +360,52 @@ export const getFontColor = (theme?: ThemeType) => {
 export const getDivider = (theme?: ThemeType) => {
   theme = theme ?? getTheme();
   return theme === 'light' ? lightTheme.divider : darkTheme.divider;
+}
+
+const generateUUID = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+export const setDefaultPageConfig = (value: IPageConfig) => {
+  state.defaultPageConfig = {...defaultPageConfig, backgroundColor: getBackgroundColor(), ...(value || {})};
+}
+
+export const getDefaultPageConfig = () => {
+  const defaultValue = {...defaultPageConfig, backgroundColor: getBackgroundColor()};
+  return state.defaultPageConfig || defaultValue;
+}
+
+export const getPageConfig = () => {
+  const defaultConfig = getDefaultPageConfig();
+  const pageConfig = pageObject?.config || {};
+  pageConfig.margin = {...defaultConfig.margin, ...pageConfig.margin};
+  return {...defaultConfig, ...pageConfig};
+}
+
+export const getMargin = (margin: { x?: number|string, y?: number|string }) => {
+  const { margin: defaultMargin } = getDefaultPageConfig();
+  let { x, y } = margin || {};
+  x = x ?? defaultMargin.x;
+  y = y ?? defaultMargin.y;
+  const xNumber = Number(x);
+  const yNumber = Number(y);
+  x = isNaN(xNumber) ? x : xNumber;
+  y = isNaN(yNumber) ? y : yNumber;
+  return {
+    top: y,
+    left: x,
+    right: x,
+    bottom: y
+  }
+}
+
+export const setRowConfig = (id: string, value: string) => {
+  state.rowsConfig[id] = value;
+}
+
+export const getRowConfig = (id: string) => {
+  return state.rowsConfig[id];
 }
