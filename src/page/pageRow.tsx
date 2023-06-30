@@ -133,6 +133,7 @@ export class PageRow extends Module {
                 maxWidth="100%"
                 maxHeight="100%"
                 position="relative"
+                minWidth={0}
             ></ide-section>
         ) as PageSection;
         if (!this._readonly) {
@@ -209,13 +210,14 @@ export class PageRow extends Module {
     }
 
     private updateGrid() {
-        this.gridColumnWidth = (this.pnlRow.offsetWidth - GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
+        this.updateGridColumnWidth();
         const fixedGrid = this.pnlRow.querySelector('.fixed-grid');
         fixedGrid && this.updateGridColumn(fixedGrid as GridLayout);
         this.updateGridColumn(this.pnlRow);
     }
 
     private updateAlign() {
+        this.updateGridColumnWidth();
         let alignValue = 'start';
          switch(this.align) {
             case 'right':
@@ -228,7 +230,7 @@ export class PageRow extends Module {
         this.pnlRow.grid = { horizontalAlignment: alignValue as any };
         this.pnlRow.style.maxWidth = '100%';
         if (alignValue === 'start') {
-            this.pnlRow.templateColumns = [`repeat(${this.maxColumn}, 1fr)`];
+            this.pnlRow.templateColumns = [`repeat(${this.maxColumn}, minmax(${GAP_WIDTH}px, 1fr))`];
         } else {
             this.pnlRow.templateColumns = ['min-content'];
             const sections = Array.from(this.pnlRow.querySelectorAll('ide-section'));
@@ -239,6 +241,10 @@ export class PageRow extends Module {
                 (section as Control).width = widthNumber ? `${widthNumber}px` : `${columnSpan * unitWidth}%`;
             }
         }
+    }
+
+    private updateGridColumnWidth() {
+        this.gridColumnWidth = (this.pnlRow.offsetWidth - GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
     }
 
     private async onClone() {
@@ -299,7 +305,7 @@ export class PageRow extends Module {
     }
 
     private updateGridColumn(grid: GridLayout) {
-        grid.templateColumns = [`repeat(${this.maxColumn}, 1fr)`];
+        grid.templateColumns = [`repeat(${this.maxColumn}, minmax(${GAP_WIDTH}px, 1fr))`];
         grid.gap = { column: `${GAP_WIDTH}px` };
     }
 
@@ -475,6 +481,9 @@ export class PageRow extends Module {
             if (rowBottom) {
                 updateClass(rowBottom, 'is-dragenter');
                 return;
+            } else {
+                const dragEnter = parentWrapper.querySelector('.is-dragenter') as Control;
+                dragEnter && dragEnter.classList.remove('is-dragenter');
             }
             let target: Control;
             if (isOverlap)
@@ -497,6 +506,7 @@ export class PageRow extends Module {
                     return colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan;
                 });
                 if (findedSection && findedSection!=self.currentElement) return;
+                self.updateGridColumnWidth();
                 const rectangle = target
                     .closest('.fixed-grid')
                     .parentNode.querySelector(`.rectangle`) as Control;
@@ -811,9 +821,10 @@ export class PageRow extends Module {
             
             // drop on a new row
             } else {
-                let dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
+                const dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
                 if (self.isDragging) return;
-                if (dropElm) {
+                const inEmptyPnl = eventTarget.closest('#pnlEmty');
+                if (dropElm && !inEmptyPnl) {
                     self.isDragging = true;
                     dropElm.classList.remove('is-dragenter');
                     if (dropElm.classList.contains('bottom-block')) {
@@ -824,7 +835,8 @@ export class PageRow extends Module {
                             self.currentElement.opacity = 1;
                             resetDragTarget();
                         } else {
-                            const dragCmd = new GroupElementCommand(dropElm, elementConfig ? null : self.currentElement, self.getNewElementData());
+                            const newConfig = self.getNewElementData();
+                            const dragCmd = new GroupElementCommand(dropElm, elementConfig ? null : self.currentElement, {...newConfig, firstId: generateUUID()});
                             commandHistory.execute(dragCmd);
                         }
                     } else if (dropElm.classList.contains(ROW_BOTTOM_CLASS)) {
@@ -924,7 +936,7 @@ export class PageRow extends Module {
             }
             pageObject.updateSection(id, { config: newConfig });
             this.updateRowConfig(newConfig);
-            this.gridColumnWidth = (this.pnlRow.offsetWidth - GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
+            this.updateGridColumnWidth();
         });
     }
 

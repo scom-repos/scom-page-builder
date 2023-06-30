@@ -1085,6 +1085,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         updateColumn(): void;
         private updateGrid;
         private updateAlign;
+        private updateGridColumnWidth;
         private onClone;
         onDeleteRow(): void;
         onMoveUp(): void;
