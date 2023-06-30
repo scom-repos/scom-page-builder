@@ -788,7 +788,8 @@ export class PageRow extends Module {
                     self.isDragging = true;
                     dropElm.classList.remove('is-dragenter');
                     if (dropElm.classList.contains('bottom-block')) {
-                        const dragCmd = new UpdateTypeCommand(dropElm, elementConfig ? null : self.currentElement, self.getNewElementData());
+                        const newConfig = self.getNewElementData();
+                        const dragCmd = new UpdateTypeCommand(dropElm, elementConfig ? null : self.currentElement, {...newConfig, firstId: generateUUID()});
                         commandHistory.execute(dragCmd);
                     } else if (dropElm.classList.contains(ROW_BOTTOM_CLASS)) {
                         const prependRow = dropElm.closest('ide-row') as PageRow;

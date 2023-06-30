@@ -80,7 +80,7 @@ export class UpdateTypeCommand implements ICommand {
         pageObject.addElement(dropRowId, elementList[i], this.dropSectionId, this.dropElementIndex + i + 1);
       }
     } else if (clonedDropSecData?.type === ElementType.PRIMITIVE) {
-      if (!this.isNew) clonedDropSecData.id = this.config.id;
+      clonedDropSecData.id = this.isNew ? this.config.firstId : this.config.id;
       const updatedList = [...elementList].map(elm => {
         elm.column = clonedDropSecData.column;
         elm.columnSpan = clonedDropSecData.columnSpan;

@@ -1962,8 +1962,7 @@ define("@scom/scom-page-builder/command/updateType.ts", ["require", "exports", "
                 }
             }
             else if ((clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.type) === index_14.ElementType.PRIMITIVE) {
-                if (!this.isNew)
-                    clonedDropSecData.id = this.config.id;
+                clonedDropSecData.id = this.isNew ? this.config.firstId : this.config.id;
                 const updatedList = [...elementList].map(elm => {
                     elm.column = clonedDropSecData.column;
                     elm.columnSpan = clonedDropSecData.columnSpan;
@@ -4084,7 +4083,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         self.isDragging = true;
                         dropElm.classList.remove('is-dragenter');
                         if (dropElm.classList.contains('bottom-block')) {
-                            const dragCmd = new index_40.UpdateTypeCommand(dropElm, elementConfig ? null : self.currentElement, self.getNewElementData());
+                            const newConfig = self.getNewElementData();
+                            const dragCmd = new index_40.UpdateTypeCommand(dropElm, elementConfig ? null : self.currentElement, Object.assign(Object.assign({}, newConfig), { firstId: (0, index_41.generateUUID)() }));
                             index_40.commandHistory.execute(dragCmd);
                         }
                         else if (dropElm.classList.contains(ROW_BOTTOM_CLASS)) {
