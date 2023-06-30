@@ -484,6 +484,9 @@ export class PageRow extends Module {
             if (rowBottom) {
                 updateClass(rowBottom, 'is-dragenter');
                 return;
+            } else {
+                const dragEnter = parentWrapper.querySelector('.is-dragenter') as Control;
+                dragEnter && dragEnter.classList.remove('is-dragenter');
             }
             let target: Control;
             if (isOverlap)
@@ -781,10 +784,11 @@ export class PageRow extends Module {
                 }
                 self.isDragging = false;
             } else {
-                let dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
+                const dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
                 if (self.isDragging) return;
 
-                if (dropElm) {
+                const inEmptyPnl = eventTarget.closest('#pnlEmty');
+                if (dropElm && !inEmptyPnl) {
                     self.isDragging = true;
                     dropElm.classList.remove('is-dragenter');
                     if (dropElm.classList.contains('bottom-block')) {

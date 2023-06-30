@@ -3794,6 +3794,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     updateClass(rowBottom, 'is-dragenter');
                     return;
                 }
+                else {
+                    const dragEnter = parentWrapper.querySelector('.is-dragenter');
+                    dragEnter && dragEnter.classList.remove('is-dragenter');
+                }
                 let target;
                 if (isOverlap)
                     target = findNearestFixedGridInRow(clientX);
@@ -4076,10 +4080,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     self.isDragging = false;
                 }
                 else {
-                    let dropElm = parentWrapper.querySelector('.is-dragenter');
+                    const dropElm = parentWrapper.querySelector('.is-dragenter');
                     if (self.isDragging)
                         return;
-                    if (dropElm) {
+                    const inEmptyPnl = eventTarget.closest('#pnlEmty');
+                    if (dropElm && !inEmptyPnl) {
                         self.isDragging = true;
                         dropElm.classList.remove('is-dragenter');
                         if (dropElm.classList.contains('bottom-block')) {
