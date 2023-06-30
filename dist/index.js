@@ -1433,7 +1433,6 @@ define("@scom/scom-page-builder/command/resize.ts", ["require", "exports", "@sco
             const grid = (_b = (_a = this.element) === null || _a === void 0 ? void 0 : _a.parentElement) === null || _b === void 0 ? void 0 : _b.closest('.grid');
             if (grid) {
                 this.gridColumnWidth = (grid.offsetWidth - this.gapWidth * (this.maxColumn - 1)) / this.maxColumn;
-                grid.templateColumns = [`repeat(${this.maxColumn}, ${this.gridColumnWidth}px)`];
             }
         }
         getColumnData() {
@@ -3464,7 +3463,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             return this.createElementFn(sectionData);
         }
         async createElementFn(data) {
-            const pageSection = (this.$render("ide-section", { id: data.id, readonly: this._readonly, display: "block", maxWidth: "100%", maxHeight: "100%", position: "relative" }));
+            const pageSection = (this.$render("ide-section", { id: data.id, readonly: this._readonly, display: "block", maxWidth: "100%", maxHeight: "100%", position: "relative", minWidth: 0 }));
             if (!this._readonly) {
                 pageSection.setAttribute('draggable', 'true');
                 pageSection.style.gridRow = '1';
@@ -3534,12 +3533,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.updateFixedGrid();
         }
         updateGrid() {
-            this.gridColumnWidth = (this.pnlRow.offsetWidth - index_38.GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
+            this.updateGridColumnWidth();
             const fixedGrid = this.pnlRow.querySelector('.fixed-grid');
             fixedGrid && this.updateGridColumn(fixedGrid);
             this.updateGridColumn(this.pnlRow);
         }
         updateAlign() {
+            this.updateGridColumnWidth();
             let alignValue = 'start';
             switch (this.align) {
                 case 'right':
@@ -3552,7 +3552,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.pnlRow.grid = { horizontalAlignment: alignValue };
             this.pnlRow.style.maxWidth = '100%';
             if (alignValue === 'start') {
-                this.pnlRow.templateColumns = [`repeat(${this.maxColumn}, 1fr)`];
+                this.pnlRow.templateColumns = [`repeat(${this.maxColumn}, minmax(${index_38.GAP_WIDTH}px, 1fr))`];
             }
             else {
                 this.pnlRow.templateColumns = ['min-content'];
@@ -3564,6 +3564,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     section.width = widthNumber ? `${widthNumber}px` : `${columnSpan * unitWidth}%`;
                 }
             }
+        }
+        updateGridColumnWidth() {
+            this.gridColumnWidth = (this.pnlRow.offsetWidth - index_38.GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
         }
         async onClone() {
             const rowData = index_39.pageObject.getRow(this.rowId);
@@ -3610,7 +3613,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             }
         }
         updateGridColumn(grid) {
-            grid.templateColumns = [`repeat(${this.maxColumn}, 1fr)`];
+            grid.templateColumns = [`repeat(${this.maxColumn}, minmax(${index_38.GAP_WIDTH}px, 1fr))`];
             grid.gap = { column: `${index_38.GAP_WIDTH}px` };
         }
         initEventListeners() {
@@ -3752,7 +3755,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const toolbars = target ? Array.from(target.querySelectorAll('ide-toolbar')) : [];
                 const cannotDrag = toolbars.find(toolbar => toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting'));
                 if (target && !cannotDrag) {
-                    self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
                     self.currentElement = target;
                     self.currentElement.opacity = 0;
                     components_24.application.EventBus.dispatch(index_37.EVENT.ON_SET_DRAG_ELEMENT, target);
@@ -3815,6 +3817,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     });
                     if (findedSection && findedSection != self.currentElement)
                         return;
+                    self.updateGridColumnWidth();
                     const rectangle = target
                         .closest('.fixed-grid')
                         .parentNode.querySelector(`.rectangle`);
@@ -4157,7 +4160,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
                 index_39.pageObject.updateSection(id, { config: newConfig });
                 this.updateRowConfig(newConfig);
-                this.gridColumnWidth = (this.pnlRow.offsetWidth - index_38.GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
+                this.updateGridColumnWidth();
             });
         }
         getNewElementData() {

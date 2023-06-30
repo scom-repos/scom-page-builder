@@ -130,6 +130,7 @@ export class PageRow extends Module {
                 maxWidth="100%"
                 maxHeight="100%"
                 position="relative"
+                minWidth={0}
             ></ide-section>
         ) as PageSection;
         if (!this._readonly) {
@@ -206,13 +207,14 @@ export class PageRow extends Module {
     }
 
     private updateGrid() {
-        this.gridColumnWidth = (this.pnlRow.offsetWidth - GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
+        this.updateGridColumnWidth();
         const fixedGrid = this.pnlRow.querySelector('.fixed-grid');
         fixedGrid && this.updateGridColumn(fixedGrid as GridLayout);
         this.updateGridColumn(this.pnlRow);
     }
 
     private updateAlign() {
+        this.updateGridColumnWidth();
         let alignValue = 'start';
          switch(this.align) {
             case 'right':
@@ -225,7 +227,7 @@ export class PageRow extends Module {
         this.pnlRow.grid = { horizontalAlignment: alignValue as any };
         this.pnlRow.style.maxWidth = '100%';
         if (alignValue === 'start') {
-            this.pnlRow.templateColumns = [`repeat(${this.maxColumn}, 1fr)`];
+            this.pnlRow.templateColumns = [`repeat(${this.maxColumn}, minmax(${GAP_WIDTH}px, 1fr))`];
         } else {
             this.pnlRow.templateColumns = ['min-content'];
             const sections = Array.from(this.pnlRow.querySelectorAll('ide-section'));
@@ -236,6 +238,10 @@ export class PageRow extends Module {
                 (section as Control).width = widthNumber ? `${widthNumber}px` : `${columnSpan * unitWidth}%`;
             }
         }
+    }
+
+    private updateGridColumnWidth() {
+        this.gridColumnWidth = (this.pnlRow.offsetWidth - GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
     }
 
     private async onClone() {
@@ -296,7 +302,7 @@ export class PageRow extends Module {
     }
 
     private updateGridColumn(grid: GridLayout) {
-        grid.templateColumns = [`repeat(${this.maxColumn}, 1fr)`];
+        grid.templateColumns = [`repeat(${this.maxColumn}, minmax(${GAP_WIDTH}px, 1fr))`];
         grid.gap = { column: `${GAP_WIDTH}px` };
     }
 
@@ -439,7 +445,6 @@ export class PageRow extends Module {
             const toolbars = target ? Array.from(target.querySelectorAll('ide-toolbar')) : [];
             const cannotDrag = toolbars.find(toolbar => toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting'));
             if (target && !cannotDrag) {
-                self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
                 self.currentElement = target;
                 self.currentElement.opacity = 0;
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, target);
@@ -501,6 +506,7 @@ export class PageRow extends Module {
                     return colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan;
                 });
                 if (findedSection && findedSection!=self.currentElement) return;
+                self.updateGridColumnWidth();
                 const rectangle = target
                     .closest('.fixed-grid')
                     .parentNode.querySelector(`.rectangle`) as Control;
@@ -857,7 +863,7 @@ export class PageRow extends Module {
             }
             pageObject.updateSection(id, { config: newConfig });
             this.updateRowConfig(newConfig);
-            this.gridColumnWidth = (this.pnlRow.offsetWidth - GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
+            this.updateGridColumnWidth();
         });
     }
 
