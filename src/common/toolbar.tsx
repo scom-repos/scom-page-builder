@@ -488,7 +488,7 @@ export class IDEToolbar extends Module {
     }
 
     setTheme(value: ThemeType) {
-        if (value !== this.module?.theme)
+        if (this.module && value !== this.module.theme)
             this.module.theme = value;
     }
 

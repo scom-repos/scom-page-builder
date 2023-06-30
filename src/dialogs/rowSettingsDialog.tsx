@@ -11,14 +11,11 @@ import './rowSettingsDialog.css';
 const Theme = Styles.Theme.ThemeVars;
 
 import { assignAttr } from '../utility/index';
-import { IRowSettings } from '../interface/index';
-import { getBackgroundColor, pageObject } from '../store/index';
-
-export type ISettingType = 'color' | 'column';
+import { getPageConfig, pageObject } from '../store/index';
+import { IPageSectionConfig } from '../interface/index';
 
 export interface RowSettingsDialogElement extends ControlElement {
-    type: ISettingType;
-    onSave: (data: IRowSettings) => void;
+    onSave: (data: IPageSectionConfig) => void;
 }
 
 declare global {
@@ -33,9 +30,8 @@ declare global {
 export class RowSettingsDialog extends Module {
     private dialog: Modal;
     private formElm: Form;
-    private onSave: (data: IRowSettings) => void;
+    private onSave: (data: IPageSectionConfig) => void;
     private rowId: string = '';
-    private _type: ISettingType;
 
     constructor(parent?: any, options?: any) {
         super(parent, options);
@@ -46,16 +42,8 @@ export class RowSettingsDialog extends Module {
         return pageObject.getRow(this.rowId) || {};
     }
 
-    get type(): ISettingType {
-        return this._type;
-    }
-    set type(value: ISettingType) {
-        this._type = value;
-    }
-
     init() {
         super.init();
-        this.type = this.getAttribute('type', true);
     }
 
     show(id: string) {
@@ -66,23 +54,10 @@ export class RowSettingsDialog extends Module {
     }
 
     private getSchema() {
-        let jsonSchema: IDataSchema;
-        if (this.type === 'color') {
-            jsonSchema = {
-                type: 'object',
-                properties: {
-                    "backgroundColor": {
-                        type: 'string',
-                        format: 'color'
-                    }
-                }
-            }
-
-        } else {
-            jsonSchema = {
-                type: 'object',
-                // required: ['columnLayout'],
-                properties: {
+        let jsonSchema: IDataSchema = {
+            type: 'object',
+            // required: ['columnLayout'],
+            properties: {
                 //   "columnLayout": {
                 //     type: 'string',
                 //     enum: [
@@ -100,16 +75,34 @@ export class RowSettingsDialog extends Module {
                 //   "columnMinWidth": {
                 //     type: 'number'
                 //   },
-                  align: {
+                backgroundColor: {
+                    type: 'string',
+                    format: 'color'
+                },
+                maxWidth: {
+                    type: 'number',
+                    title: 'Maximum width'
+                },
+                margin: {
+                    type: 'object',
+                    properties: {
+                        x: {
+                            type: 'string'
+                        },
+                        y: {
+                            type: 'string'
+                        }
+                    }
+                },
+                align: {
                     type: 'string',
                     enum: [
-                      'left',
-                      'center',
-                      'right'
+                        'left',
+                        'center',
+                        'right'
                     ]
-                  }
                 }
-            };
+            }
         }
         const formOptions = {
             columnWidth: '100%',
@@ -121,8 +114,7 @@ export class RowSettingsDialog extends Module {
                 hide: false,
                 onClick: async () => {
                     const config = await this.formElm.getFormData();
-                    const params = this.type === 'color' ? config : { config }
-                    if (this.onSave) await this.onSave(params);
+                    if (this.onSave) await this.onSave(config);
                     this.dialog.visible = false;
                 }
             }
@@ -135,13 +127,8 @@ export class RowSettingsDialog extends Module {
         this.formElm.jsonSchema = jsonSchema;
         this.formElm.formOptions = formOptions;
         this.formElm.renderForm();
-        const defaultColor = pageObject.config?.backgroundColor || getBackgroundColor();
-        const config = this.type === 'column' ?
-            this.data?.config || {
-                // columnLayout: IColumnLayoutType.FIXED,
-                // columnsNumber: 12,
-                align: 'left'
-            } : {backgroundColor: this.data?.backgroundColor || defaultColor}
+        const { backgroundColor, margin, maxWidth } = getPageConfig();
+        const config = { align: 'left', margin, maxWidth, backgroundColor, ...(this.data?.config || {}) };
         this.formElm.setFormData({...config});
     }
 

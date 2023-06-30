@@ -34,6 +34,7 @@ export class SearchComponentsDialog extends Module {
     private paginationElm: Pagination;
     private pnlComponents: HStack;
     private inputSearch: Input;
+    private timer: any;
 
     @observable()
     private totalPage: number = 0;
@@ -41,6 +42,7 @@ export class SearchComponentsDialog extends Module {
 
     init() {
         super.init();
+        this.paginationElm.onPageChanged= this.onSelectIndex.bind(this);
         assignAttr(this);
     }
 
@@ -118,8 +120,11 @@ export class SearchComponentsDialog extends Module {
     };
 
     private onSearch = () => {
-        this.resetPaging();
-        this.onFetchData();
+        if (this.timer) clearTimeout(this.timer);
+        this.timer = setTimeout(async () => {
+            this.resetPaging();
+            this.onFetchData();
+        }, 300);
     };
 
     private onFetchData() {
@@ -135,7 +140,7 @@ export class SearchComponentsDialog extends Module {
     private onSelected(item: IPageBlockData) {
         this.mdSearch.visible = false;
         addPageBlock(item);
-        application.EventBus.dispatch(EVENT.ON_UPDATE_SIDEBAR, {category: item.category});
+        application.EventBus.dispatch(EVENT.ON_UPDATE_SIDEBAR, item.category);
     }
 
     render() {
@@ -173,7 +178,6 @@ export class SearchComponentsDialog extends Module {
                             width="auto"
                             currentPage={this.pageNumber}
                             totalPages={this.totalPage}
-                            onPageChanged={this.onSelectIndex}
                         />
                     </i-vstack>
                 </i-panel>
