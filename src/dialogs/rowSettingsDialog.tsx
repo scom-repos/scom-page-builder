@@ -11,7 +11,7 @@ import './rowSettingsDialog.css';
 const Theme = Styles.Theme.ThemeVars;
 
 import { assignAttr } from '../utility/index';
-import { getDefaultPageConfig, getPageConfig, pageObject } from '../store/index';
+import { getPageConfig, pageObject } from '../store/index';
 import { IPageSectionConfig } from '../interface/index';
 
 export interface RowSettingsDialogElement extends ControlElement {

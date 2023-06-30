@@ -301,16 +301,18 @@ export default class Editor extends Module {
                         border={{ right: { width: 1, style: 'solid', color: Theme.divider } }}
                         padding={{ bottom: '1rem' }}
                     >
-                        <i-panel
+                        <i-vstack
                             id="pageContent"
-                            maxWidth={1400}
+                            maxWidth="calc(100% - 6em)"
                             width="100%"
+                            horizontalAlignment='center'
                             margin={{ left: 'auto', right: 'auto' }}
                         >
                             <i-panel
                                 id="pnlEditor"
                                 maxWidth={1024}
                                 minHeight="100vh"
+                                width="100%"
                                 margin={{ top: 8, bottom: 8, left: 60, right: 60 }}
                                 background={{ color: 'var(--builder-bg)' }}
                                 class="pnl-editor-wrapper"
@@ -325,7 +327,7 @@ export default class Editor extends Module {
                                 </i-panel>
                                 <builder-footer id="builderFooter"></builder-footer>
                             </i-panel>
-                        </i-panel>
+                        </i-vstack>
                     </i-panel>
                     <i-panel
                         id="pnlSidebar"
