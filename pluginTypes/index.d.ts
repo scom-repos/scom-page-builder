@@ -684,12 +684,12 @@ declare module "@scom/scom-page-builder/command/removeToolbar.ts" {
         redo(): void;
     }
 }
-/// <amd-module name="@scom/scom-page-builder/command/updateType.ts" />
-declare module "@scom/scom-page-builder/command/updateType.ts" {
+/// <amd-module name="@scom/scom-page-builder/command/groupElement.ts" />
+declare module "@scom/scom-page-builder/command/groupElement.ts" {
     import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
     import { Control } from "@ijstech/components";
     import { IElementConfig } from "@scom/scom-page-builder/interface/index.ts";
-    export class UpdateTypeCommand implements ICommand {
+    export class GroupElementCommand implements ICommand {
         private element;
         private elementParent;
         private dropParent;
@@ -706,11 +706,11 @@ declare module "@scom/scom-page-builder/command/updateType.ts" {
         redo(): void;
     }
 }
-/// <amd-module name="@scom/scom-page-builder/command/ungroupSection.ts" />
-declare module "@scom/scom-page-builder/command/ungroupSection.ts" {
+/// <amd-module name="@scom/scom-page-builder/command/ungroupElement.ts" />
+declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
     import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
     import { Control } from "@ijstech/components";
-    export class UngroupSectionCommand implements ICommand {
+    export class UngroupElementCommand implements ICommand {
         private draggingToolbar;
         private parent;
         private dropElm;
@@ -790,8 +790,8 @@ declare module "@scom/scom-page-builder/command/index.ts" {
     export { ResizeElementCommand } from "@scom/scom-page-builder/command/resize.ts";
     export { DragElementCommand } from "@scom/scom-page-builder/command/dragElement.ts";
     export { RemoveToolbarCommand } from "@scom/scom-page-builder/command/removeToolbar.ts";
-    export { UpdateTypeCommand } from "@scom/scom-page-builder/command/updateType.ts";
-    export { UngroupSectionCommand } from "@scom/scom-page-builder/command/ungroupSection.ts";
+    export { GroupElementCommand } from "@scom/scom-page-builder/command/groupElement.ts";
+    export { UngroupElementCommand } from "@scom/scom-page-builder/command/ungroupElement.ts";
     export { AddElementCommand } from "@scom/scom-page-builder/command/addElement.ts";
     export { ReplaceElementCommand } from "@scom/scom-page-builder/command/replaceElement.ts";
     export { ICommand, IDataColumn } from "@scom/scom-page-builder/command/interface.ts";

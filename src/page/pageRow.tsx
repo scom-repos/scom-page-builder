@@ -21,9 +21,9 @@ import {
     ResizeElementCommand,
     DragElementCommand,
     UpdateRowSettingsCommand,
-    UpdateTypeCommand,
+    GroupElementCommand,
     AddElementCommand,
-    UngroupSectionCommand,
+    UngroupElementCommand,
     RemoveToolbarCommand
 } from '../command/index';
 import { IDEToolbar } from '../common/toolbar';
@@ -733,7 +733,7 @@ export class PageRow extends Module {
             const pageRow = eventTarget.closest('ide-row') as PageRow;
             event.preventDefault();
             event.stopPropagation();
-            
+
             if (pageRow && elementConfig?.module?.name === 'sectionStack') {
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
                 return;
@@ -783,14 +783,10 @@ export class PageRow extends Module {
                 if (findedSection || self.isDragging) return;
                 self.isDragging = true;
 
-                const secId = self.currentElement.id;
-                const toolbarId = self.currentToolbar? self.currentToolbar.id.replace("elm-", "") : "";
-
                 // ungrouping elm
-                // FIX ME: dragging the 1st elm in section causes bug, which is disabled now (secId != toolbarId)
-                if (isUngrouping && secId != toolbarId) {
+                if (isUngrouping /*secId != toolbarId*/) {
                     const dropElm = eventTarget;
-                    const dragCmd = new UngroupSectionCommand(self.currentToolbar.data, false, self.currentToolbar, dropElm);
+                    const dragCmd = new UngroupElementCommand(self.currentToolbar.data, false, self.currentToolbar, dropElm);
                     commandHistory.execute(dragCmd);
                     self.currentElement.opacity = 1;
                     updateRectangles();
@@ -821,16 +817,14 @@ export class PageRow extends Module {
                     self.isDragging = true;
                     dropElm.classList.remove('is-dragenter');
                     if (dropElm.classList.contains('bottom-block')) {
-                        const secId = self.currentElement.id;
-                        const toolbarId = self.currentToolbar? self.currentToolbar.id.replace("elm-", "") : "";
-                        if (isUngrouping && secId != toolbarId) {
+                        if (isUngrouping) {
                             const dropElement = eventTarget;
-                            const dragCmd = new UngroupSectionCommand(self.currentToolbar.data, true, self.currentToolbar, dropElement);
+                            const dragCmd = new UngroupElementCommand(self.currentToolbar.data, true, self.currentToolbar, dropElement);
                             commandHistory.execute(dragCmd);
                             self.currentElement.opacity = 1;
                             resetDragTarget();
                         } else {
-                            const dragCmd = new UpdateTypeCommand(dropElm, elementConfig ? null : self.currentElement, self.getNewElementData());
+                            const dragCmd = new GroupElementCommand(dropElm, elementConfig ? null : self.currentElement, self.getNewElementData());
                             commandHistory.execute(dragCmd);
                         }
                     } else if (dropElm.classList.contains(ROW_BOTTOM_CLASS)) {
@@ -853,11 +847,9 @@ export class PageRow extends Module {
                         const dragCmd = !hasData && new AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
                         dragCmd && await commandHistory.execute(dragCmd);
                     } else {
-                        const secId = self.currentElement.id;
-                        const toolbarId = self.currentToolbar? self.currentToolbar.id.replace("elm-", "") : "";
-                        if (isUngrouping && secId != toolbarId) {
+                        if (isUngrouping) {
                             const dropElement = eventTarget;
-                            const dragCmd = new UngroupSectionCommand(self.currentToolbar.data, false, self.currentToolbar, dropElement);
+                            const dragCmd = new UngroupElementCommand(self.currentToolbar.data, false, self.currentToolbar, dropElement);
                             commandHistory.execute(dragCmd);
                             self.currentElement.opacity = 1;
                             resetDragTarget();

@@ -4,9 +4,8 @@ import { Control } from "@ijstech/components";
 import { application } from "@ijstech/components";
 import { EVENT } from "../const/index";
 import { ElementType } from "../interface/index";
-import { generateUUID } from "../utility/index";
 
-export class UngroupSectionCommand implements ICommand {
+export class UngroupElementCommand implements ICommand {
     private draggingToolbar: any;
     private parent: any;
     private dropElm: Control;
@@ -118,6 +117,7 @@ export class UngroupSectionCommand implements ICommand {
             },
             module: this.data.module
         };
+        console.log("newElData", newElData)
 
         this.appendElm = await this.parent.addElement(newElData);
         const parentId = this.parent.id.replace('row-', '');

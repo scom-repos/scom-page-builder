@@ -3,7 +3,7 @@ import { pageObject } from "../store/index";
 import { Control } from "@ijstech/components";
 import { ElementType, IElementConfig } from "../interface/index";
 
-export class UpdateTypeCommand implements ICommand {
+export class GroupElementCommand implements ICommand {
   private element: any;
   private elementParent: any;
   private dropParent: any;
