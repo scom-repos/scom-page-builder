@@ -2812,12 +2812,65 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                     }
                 }
             };
-            return { jsonSchema, formOptions };
+            const jsonUISchema = {
+                type: 'VerticalLayout',
+                elements: [
+                    {
+                        type: 'HorizontalLayout',
+                        elements: [
+                            {
+                                type: 'Control',
+                                label: 'Background Color',
+                                scope: '#/properties/backgroundColor',
+                                options: {
+                                    color: true
+                                }
+                            },
+                            {
+                                type: 'Control',
+                                label: 'Maximum Width',
+                                scope: '#/properties/maxWidth',
+                            }
+                        ]
+                    },
+                    {
+                        "type": "Group",
+                        label: 'Margin',
+                        "elements": [
+                            {
+                                "type": "HorizontalLayout",
+                                "elements": [
+                                    {
+                                        "type": "Control",
+                                        "scope": "#/properties/margin/properties/x"
+                                    },
+                                    {
+                                        "type": "Control",
+                                        "scope": "#/properties/margin/properties/y"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        type: 'HorizontalLayout',
+                        elements: [
+                            {
+                                type: 'Control',
+                                label: 'Align',
+                                scope: '#/properties/align'
+                            }
+                        ]
+                    }
+                ]
+            };
+            return { jsonSchema, formOptions, jsonUISchema };
         }
         renderForm() {
             var _a;
-            const { jsonSchema, formOptions } = this.getSchema();
+            const { jsonSchema, formOptions, jsonUISchema } = this.getSchema();
             this.formElm.jsonSchema = jsonSchema;
+            this.formElm.uiSchema = jsonUISchema;
             this.formElm.formOptions = formOptions;
             this.formElm.renderForm();
             const { backgroundColor, margin, maxWidth } = (0, index_29.getPageConfig)();
@@ -2924,17 +2977,57 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                     },
                 },
             };
-            return { jsonSchema, formOptions };
+            const jsonUISchema = {
+                type: 'VerticalLayout',
+                elements: [
+                    {
+                        type: 'HorizontalLayout',
+                        elements: [
+                            {
+                                type: 'Control',
+                                label: 'Background Color',
+                                scope: '#/properties/backgroundColor',
+                                options: {
+                                    color: true
+                                }
+                            },
+                            {
+                                type: 'Control',
+                                label: 'Maximum Width',
+                                scope: '#/properties/maxWidth',
+                            }
+                        ]
+                    },
+                    {
+                        "type": "Group",
+                        label: 'Margin',
+                        "elements": [
+                            {
+                                "type": "HorizontalLayout",
+                                "elements": [
+                                    {
+                                        "type": "Control",
+                                        "scope": "#/properties/margin/properties/x"
+                                    },
+                                    {
+                                        "type": "Control",
+                                        "scope": "#/properties/margin/properties/y"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            };
+            return { jsonSchema, formOptions, jsonUISchema };
         }
         renderForm() {
-            const { jsonSchema, formOptions } = this.getSchema();
+            const { jsonSchema, formOptions, jsonUISchema } = this.getSchema();
             this.formElm.jsonSchema = jsonSchema;
+            this.formElm.uiSchema = jsonUISchema;
             this.formElm.formOptions = formOptions;
             this.formElm.renderForm();
-            const defaultConfig = (0, index_31.getDefaultPageConfig)();
-            const config = index_31.pageObject.config || {};
-            config.margin = Object.assign(Object.assign({}, defaultConfig.margin), config.margin);
-            this.formElm.setFormData(Object.assign(Object.assign({}, defaultConfig), config));
+            this.formElm.setFormData(Object.assign({}, (0, index_31.getPageConfig)()));
         }
         close() {
             this.settingsDialog.visible = false;
@@ -6341,8 +6434,8 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             return (this.$render("i-vstack", { id: "editor", width: '100%', height: '100%', maxHeight: "100vh", overflow: 'hidden' },
                 this.$render("ide-header", { id: 'pageHeader', border: { bottom: { width: 1, style: 'solid', color: '#dadce0' } } }),
                 this.$render("i-grid-layout", { templateColumns: ['auto', 'minmax(auto, 235px)'], autoFillInHoles: true, height: "calc(100% -64px)", overflow: "hidden" },
-                    this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } }, padding: { bottom: '1rem' } },
-                        this.$render("i-vstack", { id: "pageContent", maxWidth: "calc(100% - 6em)", width: "100%", horizontalAlignment: 'center', margin: { left: 'auto', right: 'auto' } },
+                    this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } } },
+                        this.$render("i-vstack", { id: "pageContent", maxWidth: "calc(100% - 6em)", width: "100%", horizontalAlignment: 'center', margin: { left: 'auto', right: 'auto' }, padding: { top: '1rem', bottom: '1rem' } },
                             this.$render("i-panel", { id: "pnlEditor", maxWidth: 1024, minHeight: "100vh", width: "100%", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
                                 this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
                                     this.$render("ide-rows", { id: "pageRows", draggable: true })),
