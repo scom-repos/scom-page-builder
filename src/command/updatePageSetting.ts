@@ -35,7 +35,7 @@ export class UpdatePageSettingsCommand implements ICommand {
       }
     }
     return result;
-}
+  }
 
   private updateConfig(config: IPageConfig, updatedValues: string[]) {
     const configData = {...getDefaultPageConfig(), ...config};

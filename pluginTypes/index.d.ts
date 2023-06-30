@@ -513,8 +513,15 @@ declare module "@scom/scom-page-builder/store/index.ts" {
     export const getFontColor: (theme?: ThemeType) => string;
     export const getDivider: (theme?: ThemeType) => string;
     export const setDefaultPageConfig: (value: IPageConfig) => void;
-    export const getDefaultPageConfig: () => any;
-    export const getPageConfig: () => any;
+    export const getDefaultPageConfig: () => IPageConfig;
+    export const getPageConfig: () => {
+        backgroundColor?: string;
+        maxWidth?: string | number;
+        margin?: {
+            x?: string | number;
+            y?: string | number;
+        };
+    };
     export const getMargin: (margin: {
         x?: number | string;
         y?: number | string;
@@ -567,6 +574,7 @@ declare module "@scom/scom-page-builder/command/updateRowSettings.ts" {
         private settings;
         private oldSettings;
         constructor(element: Control, settings: IPageSectionConfig);
+        private getChangedValues;
         private updateConfig;
         execute(): void;
         undo(): void;
@@ -1013,7 +1021,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
     import { Module, ControlElement } from '@ijstech/components';
     import { PageSection } from "@scom/scom-page-builder/page/pageSection.tsx";
     import "@scom/scom-page-builder/page/pageRow.css.ts";
-    import { IPageElement, IPageSection } from "@scom/scom-page-builder/interface/index.ts";
+    import { IPageElement, IPageSection, IPageSectionConfig } from "@scom/scom-page-builder/interface/index.ts";
     global {
         namespace JSX {
             interface IntrinsicElements {
@@ -1054,7 +1062,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         addElement(data: IPageElement): Promise<PageSection>;
         private clearData;
         setData(rowData: IPageSection): Promise<void>;
-        private updateRowConfig;
+        updateRowConfig(config: IPageSectionConfig): void;
         private onOpenRowSettingsDialog;
         private onSaveRowSettings;
         updateColumn(): void;
@@ -1158,6 +1166,8 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private replaceComponent;
         private initEventListener;
         private initEventBus;
+        onHide(): void;
+        private unRegisterEvents;
         init(): void;
         render(): any;
     }

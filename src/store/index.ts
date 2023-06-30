@@ -374,7 +374,7 @@ export const setDefaultPageConfig = (value: IPageConfig) => {
   state.defaultPageConfig = {...defaultPageConfig, backgroundColor: getBackgroundColor(), ...(value || {})};
 }
 
-export const getDefaultPageConfig = () => {
+export const getDefaultPageConfig = (): IPageConfig => {
   const defaultValue = {...defaultPageConfig, backgroundColor: getBackgroundColor()};
   return state.defaultPageConfig || defaultValue;
 }

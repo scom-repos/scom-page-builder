@@ -26,6 +26,10 @@ export class UpdateRowCommand implements ICommand {
     this.element.parent = this.parent as Control;
     if (this.isDeleted) {
       this.parent.removeChild(this.element);
+      const toolbars = this.element.querySelectorAll('ide-toolbar');
+      for (let toolbar of toolbars) {
+        toolbar && toolbar.onHide();
+      }
       pageObject.removeRow(this.rowId);
       application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
     } else {
@@ -74,6 +78,10 @@ export class UpdateRowCommand implements ICommand {
       }
       application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
     } else {
+      const toolbars = this.element.querySelectorAll('ide-toolbar');
+      for (let toolbar of toolbars) {
+        toolbar && toolbar.onHide();
+      }
       this.element.remove();
       this.data && pageObject.removeRow(this.rowId);
     }
