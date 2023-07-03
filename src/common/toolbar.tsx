@@ -465,13 +465,14 @@ export class IDEToolbar extends Module {
 
     async setTag(tag: any, init?: boolean) {
         if (!this._component) return;
-        if (tag.width === '100%') tag.width = Number(this.width);
+        // if (tag.width === '100%') tag.width = Number(this.width);
         if (tag.height === '100%') tag.height = Number(this.height);
         if (this._component?.getConfigurators) {
             this.updateComponent();
             const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
-            if (builderTarget?.setTag)
+            if (builderTarget?.setTag) {
                 await builderTarget.setTag(init ? {...tag, width: '100%'} : {...tag});
+            }
         }
         if (this.data && !init)
             pageObject.setElement(this.rowId, this.data.id, { tag });
@@ -598,18 +599,26 @@ export class IDEToolbar extends Module {
         )
         this.events.push(
             application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: {color: string}) => {
-                if (this._component?.getConfigurators) {
-                    const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
-                    if (builderTarget?.setTag) {
-                        const oldTag = builderTarget?.getTag ? await builderTarget.getTag() : {};
-                        await builderTarget.setTag({...oldTag, background: data?.color || ''}, true);
-                    }
-                }
+                await this.updateUI(data);
             })
         )
         application.EventBus.register(this, EVENT.ON_CLOSE_BUILDER, () => {
             this.unRegisterEvents();
         })
+    }
+
+    async updateUI(data: {color: string}) {
+        if (this._component?.getConfigurators) {
+            const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
+            if (builderTarget?.setTag) {
+                const oldTag = builderTarget?.getTag ? await builderTarget.getTag() : {};
+                await builderTarget.setTag({...oldTag, background: data?.color || ''}, true);
+            }
+        }
+    }
+
+    onShow(options?: any): void {
+        this.initEventBus();
     }
 
     onHide(): void {

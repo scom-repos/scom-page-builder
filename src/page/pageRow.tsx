@@ -14,7 +14,7 @@ import { RowSettingsDialog } from '../dialogs/index';
 import './pageRow.css';
 import { EVENT } from '../const/index';
 import { IPageElement, IPageSection, GAP_WIDTH, MIN_COLUMN, IPageSectionConfig } from '../interface/index';
-import { getDefaultPageConfig, getDragData, getMargin, getPageConfig, pageObject, setDragData } from '../store/index';
+import { getDragData, getMargin, getPageConfig, pageObject, setDragData } from '../store/index';
 import {
     commandHistory,
     UpdateRowCommand,
@@ -160,7 +160,12 @@ export class PageRow extends Module {
 
     private async clearData() {
         const children = this.pnlRow?.querySelectorAll('ide-section');
-        if (children?.length) children.forEach((item) => item.remove());
+        if (children?.length) {
+            children.forEach((item: PageSection) => {
+                item.onHide();
+                item.remove();
+            });
+        }
     }
 
     async setData(rowData: IPageSection) {
@@ -922,6 +927,13 @@ export class PageRow extends Module {
         }
     }
 
+    async onAddRow() {
+        const dragCmd = getDragData() ?
+            new AddElementCommand(this.getNewElementData(), true, true, null, this) :
+            new DragElementCommand(this.currentElement, this, true, true);
+        await commandHistory.execute(dragCmd);
+    }
+
     private initEventBus() {
         application.EventBus.register(this, EVENT.ON_SET_DRAG_ELEMENT, async (el: any) => this.currentElement = el);
         application.EventBus.register(this, EVENT.ON_SET_DRAG_TOOLBAR, async (el: any) => this.currentToolbar = el)
@@ -932,22 +944,7 @@ export class PageRow extends Module {
             const sectionConfig = pageObject.getRowConfig(id) || {};
             let newConfig = { ...getPageConfig(), ...sectionConfig, ...config };
             if (rowsConfig) {
-                // TODO: check again
-                const { backgroundColor, margin, maxWidth } = getDefaultPageConfig();
                 const parsedData = rowsConfig[id] ? JSON.parse(rowsConfig[id]) : {};
-                if (parsedData?.backgroundColor === backgroundColor && newConfig.backgroundColor) {
-                    parsedData.backgroundColor = newConfig.backgroundColor;
-                }
-                if (parsedData?.maxWidth === maxWidth && newConfig.maxWidth) {
-                    parsedData.maxWidth = newConfig.maxWidth;
-                }
-                if (newConfig.margin) {
-                    const { x, y } = newConfig.margin;
-                    if (parsedData?.margin?.x === margin?.x && x !== undefined)
-                        parsedData.margin.x = newConfig.margin.x;
-                    if (parsedData?.margin?.y === margin?.y && y !== undefined)
-                        parsedData.margin.y = newConfig.margin.y;
-                }
                 newConfig = {...newConfig, ...parsedData};
             }
             pageObject.updateSection(id, { config: newConfig });

@@ -1,5 +1,5 @@
 import { Control, application } from "@ijstech/components";
-import { getDefaultPageConfig, getMargin, getRowConfig, pageObject } from "../store/index";
+import { getMargin, getPageConfig, pageObject } from "../store/index";
 import { ICommand } from "./interface";
 import { IPageConfig, IPageSectionConfig } from '../interface/index';
 import { EVENT } from "../const/index";
@@ -12,14 +12,13 @@ export class UpdatePageSettingsCommand implements ICommand {
 
   constructor(element: Control, settings: IPageConfig) {
     this.element = element;
-    this.settings = {...settings};
-    const pageConfig = pageObject?.config || {};
-    this.oldSettings = {...getDefaultPageConfig(), ...pageConfig};
+    this.oldSettings = {...getPageConfig()};
+    this.settings = {...getPageConfig(), ...settings};
     const rows = this.element.querySelectorAll('ide-row');
     for (let row of rows) {
-      const id = row.id.replace('row-', '');
-      const oldConfig = getRowConfig(id);
-      if (oldConfig) this.rowsConfig[id] = oldConfig;
+      const id = (row?.id || '').replace('row-', '');
+      const oldConfig = pageObject.getRowConfig(id) || {};
+      this.rowsConfig[id] = JSON.stringify({...this.oldSettings, ...oldConfig});
     }
   }
 
@@ -38,15 +37,16 @@ export class UpdatePageSettingsCommand implements ICommand {
   }
 
   private updateConfig(config: IPageConfig, updatedValues: string[]) {
-    const configData = {...getDefaultPageConfig(), ...config};
-    const { backgroundColor, margin, maxWidth } = configData;
+    const { backgroundColor, margin, maxWidth } = config;
     let newConfig: IPageConfig = {};
     for (let prop of updatedValues) {
-      newConfig[prop] = configData[prop];
+      newConfig[prop] = config[prop];
     }
     const element = this.element.closest('i-scom-page-builder') || this.element;
     element.style.setProperty('--builder-bg', backgroundColor);
-    application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {color: backgroundColor});
+    if (updatedValues.includes('backgroundColor')) {
+      application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {color: backgroundColor});
+    }
     this.element.maxWidth = maxWidth ?? '100%';
     this.element.margin = getMargin(margin);
     pageObject.config = {backgroundColor, margin, maxWidth};

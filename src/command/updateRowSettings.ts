@@ -1,8 +1,7 @@
-import { Control, application } from "@ijstech/components";
-import { getMargin, getPageConfig, getRowConfig, pageObject, setRowConfig } from "../store/index";
+import { Control } from "@ijstech/components";
+import { getMargin, getPageConfig, pageObject } from "../store/index";
 import { ICommand } from "./interface";
 import { IPageSectionConfig } from '../interface/index';
-import { EVENT } from "../const/index";
 
 export class UpdateRowSettingsCommand implements ICommand {
   private element: any;
@@ -38,24 +37,17 @@ export class UpdateRowSettingsCommand implements ICommand {
     const newConfig = {...config, margin: {x: marginStyle.left , y: marginStyle.top}};
     pageObject.updateSection(id, {config: {...newConfig}});
     this.element.updateRowConfig(pageObject.getRowConfig(id));
-    // if (updatedValues.includes('backgroundColor')) {}
-    application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {color: newConfig?.backgroundColor || ''});
+    if (updatedValues.includes('backgroundColor')) {
+      const color = newConfig?.backgroundColor || '';
+      const toolbars = this.element.querySelectorAll('ide-toolbar');
+      for (let toolbar of toolbars) {
+        toolbar.updateUI({ color });
+      }
+    }
   }
 
   execute(): void {
     const updatedValues = this.getChangedValues(this.settings, this.oldSettings);
-    const id = this.element.id.replace('row-', '');
-    // const newConfig = {};
-    // const configStr = getRowConfig(id);
-    // const oldSavedConfig = configStr ? JSON.parse(configStr) : {};
-    // console.log(updatedValues, oldSavedConfig, this.settings)
-    // for (let prop in this.settings) {
-    //   if (updatedValues.includes(prop)) {
-    //     newConfig[prop] = this.settings[prop]
-    //   }
-    // }
-    // setRowConfig(id, JSON.stringify({...oldSavedConfig, newConfig}));
-    setRowConfig(id, JSON.stringify(this.settings));
     this.updateConfig(this.settings, updatedValues);
   }
 

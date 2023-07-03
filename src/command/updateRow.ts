@@ -22,18 +22,30 @@ export class UpdateRowCommand implements ICommand {
     this.appendId = appendId || '';
   }
 
+  private addEventBus() {
+    const toolbars = this.element.querySelectorAll('ide-toolbar');
+    for (let toolbar of toolbars) {
+      toolbar && toolbar.onShow();
+    }
+  }
+
+  private removeEventBus() {
+    const toolbars = this.element.querySelectorAll('ide-toolbar');
+    for (let toolbar of toolbars) {
+      toolbar && toolbar.onHide();
+    }
+  }
+
   execute(): void {
     this.element.parent = this.parent as Control;
     if (this.isDeleted) {
+      this.removeEventBus();
       this.parent.removeChild(this.element);
-      const toolbars = this.element.querySelectorAll('ide-toolbar');
-      for (let toolbar of toolbars) {
-        toolbar && toolbar.onHide();
-      }
       pageObject.removeRow(this.rowId);
       application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
     } else {
       this.parent.appendChild(this.element);
+      this.addEventBus();
       let index = -1;
       if (this.prependId) {
         const prependRow = this.parent.querySelector(`#${this.prependId}`);
@@ -60,6 +72,7 @@ export class UpdateRowCommand implements ICommand {
     if (this.isDeleted) {
       this.element.parent = this.parent;
       this.parent.appendChild(this.element);
+      this.addEventBus();
       const prependRow = this.prependId && this.parent.querySelector(`#${this.prependId}`);
       if (prependRow) {
         prependRow.insertAdjacentElement('afterend', this.element);
@@ -78,10 +91,7 @@ export class UpdateRowCommand implements ICommand {
       }
       application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
     } else {
-      const toolbars = this.element.querySelectorAll('ide-toolbar');
-      for (let toolbar of toolbars) {
-        toolbar && toolbar.onHide();
-      }
+      this.removeEventBus();
       this.element.remove();
       this.data && pageObject.removeRow(this.rowId);
     }

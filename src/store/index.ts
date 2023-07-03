@@ -287,8 +287,7 @@ export const state = {
     }
   ] as ICategory[],
   theme: 'light' as ThemeType,
-  defaultPageConfig: null,
-  rowsConfig: {} as {[key: string]: string}
+  defaultPageConfig: null
 }
 
 export const setPageBlocks = (value: IPageBlockData[]) => {
@@ -407,10 +406,3 @@ export const getMargin = (margin: { x?: number|string, y?: number|string }) => {
   }
 }
 
-export const setRowConfig = (id: string, value: string) => {
-  state.rowsConfig[id] = value;
-}
-
-export const getRowConfig = (id: string) => {
-  return state.rowsConfig[id];
-}

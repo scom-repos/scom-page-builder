@@ -140,13 +140,14 @@ export default class Editor extends Module {
             if (elementConfig?.module?.name === 'sectionStack') {
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
             } else {
-                const eventTarget = event.target as Control;
-                if (eventTarget.id === 'pnlFooter') {
-                    const dropElm = this.pnlEditor.querySelector('.is-dragenter') as Control;
-                    const pageRow = dropElm && dropElm.closest('ide-row') as PageRow;
-                    if (pageRow && pageRow.onAppendRow) {
-                        pageRow.onAppendRow(pageRow);
-                    }
+                const dragEnter = this.pnlEditor.querySelector('.is-dragenter') as Control;
+                const pageRow = dragEnter && dragEnter.closest('ide-row') as PageRow;
+                if (pageRow && pageRow.onAppendRow) {
+                    pageRow.onAppendRow(pageRow);
+                } else if (!pageObject.sections?.length) {
+                    application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
+                    const pageRow = this.pnlEditor.querySelector('ide-row') as PageRow;
+                    if (pageRow && pageRow.onAppendRow) pageRow.onAddRow();
                 }
             }
         });
