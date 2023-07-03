@@ -105,21 +105,25 @@ export class PageObject {
       this.addSection(data, index);
   }
 
-  private findElement(elements: IPageElement[], elementId: string) {
+  private findElement(elements: IPageElement[], elementId: string, findLeafOnly: boolean = false) {
     if (!elements || !elements.length) return null;
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
       if (element && element.id === elementId) {
-        return element;
+        if (findLeafOnly && element.elements){
+          const elm = this.findElement(element.elements, elementId, findLeafOnly);
+          if (elm) return elm;
+        } else
+          return element;
       } else if (element && element.type === 'composite') {
-        const elm = this.findElement(element.elements, elementId);
+        const elm = this.findElement(element.elements, elementId, findLeafOnly);
         if (elm) return elm;
       }
     }
     return null;
   }
 
-  getElement(sectionId: string, elementId: string) {
+  getElement(sectionId: string, elementId: string, getLeafOnly: boolean = false) {
     if (sectionId === 'header') {
       const elements = pageObject.header?.elements || [];
       return elements[0] || null;
@@ -130,7 +134,7 @@ export class PageObject {
     }
     const section = this.getSection(sectionId);
     if (!section) return null;
-    const elm = this.findElement(section.elements, elementId);
+    const elm = this.findElement(section.elements, elementId, getLeafOnly);
     return elm
   }
 
@@ -176,11 +180,11 @@ export class PageObject {
       const element = elements[i];
       if (element && element.id === elementId) {
         if (removeLeafOnly && element.elements)
-          this.removeElementFn(element.elements, elementId);
+          this.removeElementFn(element.elements, elementId, removeLeafOnly);
         else
           elements.splice(i, 1); break;
       } else if (element && element.type === 'composite') {
-        this.removeElementFn(element.elements, elementId);
+        this.removeElementFn(element.elements, elementId, removeLeafOnly);
       }
     }
   }
