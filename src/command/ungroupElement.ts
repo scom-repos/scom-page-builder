@@ -11,7 +11,7 @@ export class UngroupElementCommand implements ICommand {
     private dropElm: Control;
     private data: any;
     private isReGroup: boolean;
-    private prevSection: Control;
+    private prevSection: any;
     private newSection: Control;
     private oriCol: number;
     private oriColSpan: number;
@@ -65,11 +65,14 @@ export class UngroupElementCommand implements ICommand {
         const hasSectionData = !!parentElement?.elements?.length;
         if (sectionEl && !hasSectionData) sectionEl.remove();
     }
+    // if (this.prevSection.data && this.prevSection.data.elements && this.prevSection.data.elements.length && this.prevSection.data.elements.length == 1) {
+    //   pageObject.setElement(rowId, this.prevSection.id, this.prevSection.data.elements[0])
+    // }
+
     application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
 
     // regroup with new section
     if (this.isReGroup) {
-
       const dropRow = this.newSection.closest('ide-row')
       const dropRowId = dropRow?.id.replace('row-', '');
       const dropSectionId = this.newSection.id
@@ -77,17 +80,16 @@ export class UngroupElementCommand implements ICommand {
       const dropSectionData = pageObject.getElement(dropRowId, dropSectionId);
       const clonedDropSecData = JSON.parse(JSON.stringify(dropSectionData));
       if (!dropSectionId || !dropRowId || !dropSectionData) return;
-  
-      const elementList = [this.data];
+      const newElement = this.getPrimitiveData(this.data);
+      newElement.column = clonedDropSecData.column;
+      newElement.columnSpan = clonedDropSecData.columnSpan;
       const dropElementId = (this.dropElm.closest('ide-toolbar') as any)?.elementId;
       if (clonedDropSecData?.type === ElementType.COMPOSITE) {
         const elementIndex = dropElementId ? dropSectionData.elements.findIndex(elm => elm.id === dropElementId) : -1;
-        for (let i = 0; i < elementList.length; i++) {
-          pageObject.addElement(dropRowId, elementList[i], dropSectionId, elementIndex + i + 1);
-        }
+        pageObject.addElement(dropRowId, newElement, dropSectionId, elementIndex + 1);
       } else if (clonedDropSecData?.type === ElementType.PRIMITIVE) {
         // clonedDropSecData.id = generateUUID();
-        const updatedList = [...elementList].map(elm => {
+        const updatedList = [...newElement].map(elm => {
           elm.column = clonedDropSecData.column;
           elm.columnSpan = clonedDropSecData.columnSpan;
           return elm;
@@ -117,15 +119,21 @@ export class UngroupElementCommand implements ICommand {
             },
             module: this.data.module
         };
-        console.log("newElData", newElData)
-
         this.appendElm = await this.parent.addElement(newElData);
         const parentId = this.parent.id.replace('row-', '');
         pageObject.addElement(parentId, newElData);
         const elementRowId = (this.parent?.id || '').replace('row-', '');
         const elementSection = pageObject.getRow(elementRowId);
         this.parent.toggleUI(!!elementSection?.elements?.length);
-    }  
+    }
+  }
+
+  // temporary workaround
+  private getPrimitiveData(data: any) {
+    if (data.type === 'composite')
+      return this.getPrimitiveData(data.elements[0]);
+    else
+      return data;
   }
 
   async undo() {
@@ -134,7 +142,7 @@ export class UngroupElementCommand implements ICommand {
     const row = this.parent;
     const rowId = row? row.id.replace("row-", "") : undefined;
     const elmId = this.draggingToolbar.id.replace("elm-", "");
-    pageObject.removeElement(rowId, elmId);
+    pageObject.removeElement(rowId, elmId, true);
 
     const newElm = row.querySelector(`#elm-${elmId}`)
     const sectionEl = newElm.closest('ide-section');
@@ -182,9 +190,7 @@ export class UngroupElementCommand implements ICommand {
 
     const elementList = [newElData];
     if (clonedDropSecData?.type === ElementType.COMPOSITE) {
-      for (let i = 0; i < elementList.length; i++) {
-        pageObject.addElement(dropRowId, elementList[i], prevSectionId, this.oriElmIndex + i + 1);
-      }
+      pageObject.addElement(dropRowId, newElData, prevSectionId, this.oriElmIndex);
     } else if (clonedDropSecData?.type === ElementType.PRIMITIVE) {
       const updatedList = [...elementList].map(elm => {
         elm.column = clonedDropSecData.column;

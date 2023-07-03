@@ -677,7 +677,7 @@ export class PageRow extends Module {
                 overlapType: "none", section: undefined
             }
             const dragTargetSection = dragTarget.closest('ide-section') as HTMLElement;
-            if (!dragStartTarget) return {
+            if (dragStartTarget==null || dragStartTarget==undefined) return {
                 overlapType: "mutual", section: undefined
             }
             const toolbars = dragTargetSection.querySelectorAll('ide-toolbar');
@@ -794,7 +794,7 @@ export class PageRow extends Module {
                 self.isDragging = true;
 
                 // ungrouping elm
-                if (isUngrouping /*secId != toolbarId*/) {
+                if (isUngrouping) {
                     const dropElm = eventTarget;
                     const dragCmd = new UngroupElementCommand(self.currentToolbar.data, false, self.currentToolbar, dropElm);
                     commandHistory.execute(dragCmd);

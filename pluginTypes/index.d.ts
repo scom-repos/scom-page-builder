@@ -468,7 +468,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         removeRow(id: string): void;
         addRow(data: any, id?: string, index?: number): void;
         private findElement;
-        getElement(sectionId: string, elementId: string): any;
+        getElement(sectionId: string, elementId: string, getLeafOnly?: boolean): any;
         setElement(sectionId: string, elementId: string, value: any): void;
         private sortFn;
         private removeElementFn;
@@ -724,6 +724,7 @@ declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
         private appendElm;
         constructor(data: any, isReGroup: boolean, dragElm: Control, dropElm: Control);
         execute(): Promise<void>;
+        private getPrimitiveData;
         undo(): Promise<void>;
         redo(): void;
     }

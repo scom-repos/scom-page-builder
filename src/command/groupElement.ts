@@ -65,7 +65,7 @@ export class GroupElementCommand implements ICommand {
       const elementRowId = (this.elementParent?.id || '').replace('row-', '');
       const elementSection = pageObject.getRow(elementRowId);
       if (elementRowId && this.element)
-        pageObject.removeElement(elementRowId, this.element.id);
+        pageObject.removeElement(elementRowId, this.element.id, true);
       this.elementParent.visible = !!elementSection?.elements?.length;
     }
     if (this.element) this.element.remove();

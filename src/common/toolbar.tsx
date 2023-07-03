@@ -75,7 +75,7 @@ export class IDEToolbar extends Module {
     }
 
     get data() {
-        return pageObject.getElement(this.rowId, this.elementId);
+        return pageObject.getElement(this.rowId, this.elementId/*, true*/);
     }
 
     get currentReplaceData() {
