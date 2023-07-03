@@ -14,7 +14,7 @@ import { RowSettingsDialog } from '../dialogs/index';
 import './pageRow.css';
 import { EVENT } from '../const/index';
 import { IPageElement, IPageSection, GAP_WIDTH, MIN_COLUMN, IPageSectionConfig } from '../interface/index';
-import { getDragData, getMargin, getPageConfig, pageObject, setDragData } from '../store/index';
+import { getDefaultPageConfig, getDragData, getMargin, getPageConfig, pageObject, setDragData } from '../store/index';
 import {
     commandHistory,
     UpdateRowCommand,
@@ -183,13 +183,14 @@ export class PageRow extends Module {
         this.toggleUI(hasData);
     }
 
-    private updateRowConfig(config: IPageSectionConfig) {
-        const { image = '', backgroundColor, maxWidth, margin } = config || {};
+    updateRowConfig(config: IPageSectionConfig) {
+        const { image = '', backgroundColor, maxWidth, margin, align } = config || {};
         if (image) this.background.image = image;
         if (backgroundColor) this.background.color = backgroundColor;
         this.maxWidth = maxWidth ?? '100%';
         if (margin) this.margin = getMargin(margin);
         this.width = margin?.x && margin?.x !== 'auto' ? 'auto' : '100%';
+        if (align) this.updateAlign();
     }
 
     private onOpenRowSettingsDialog() {
@@ -863,7 +864,22 @@ export class PageRow extends Module {
             const sectionConfig = pageObject.getRowConfig(id) || {};
             let newConfig = { ...getPageConfig(), ...sectionConfig, ...config };
             if (rowsConfig) {
+                // TODO: check again
+                const { backgroundColor, margin, maxWidth } = getDefaultPageConfig();
                 const parsedData = rowsConfig[id] ? JSON.parse(rowsConfig[id]) : {};
+                if (parsedData?.backgroundColor === backgroundColor && newConfig.backgroundColor) {
+                    parsedData.backgroundColor = newConfig.backgroundColor;
+                }
+                if (parsedData?.maxWidth === maxWidth && newConfig.maxWidth) {
+                    parsedData.maxWidth = newConfig.maxWidth;
+                }
+                if (newConfig.margin) {
+                    const { x, y } = newConfig.margin;
+                    if (parsedData?.margin?.x === margin?.x && x !== undefined)
+                        parsedData.margin.x = newConfig.margin.x;
+                    if (parsedData?.margin?.y === margin?.y && y !== undefined)
+                        parsedData.margin.y = newConfig.margin.y;
+                }
                 newConfig = {...newConfig, ...parsedData};
             }
             pageObject.updateSection(id, { config: newConfig });

@@ -5,7 +5,8 @@ import {
     ControlElement,
     Modal,
     Form,
-    IDataSchema
+    IDataSchema,
+    IUISchema
 } from '@ijstech/components';
 import './rowSettingsDialog.css';
 const Theme = Styles.Theme.ThemeVars;
@@ -119,12 +120,67 @@ export class RowSettingsDialog extends Module {
                 }
             }
         };
-        return { jsonSchema, formOptions };
+
+        const jsonUISchema: IUISchema = {
+            type: 'VerticalLayout',
+            elements: [
+                {
+                    type: 'HorizontalLayout',
+                    elements: [
+                        {
+                            type: 'Control',
+                            label: 'Background Color',
+                            scope: '#/properties/backgroundColor',
+                            options: {
+                                color: true
+                            }
+                        },
+                        {
+                            type: 'Control',
+                            label: 'Maximum Width',
+                            scope: '#/properties/maxWidth',
+                        }
+                    ]
+                },
+                {
+                    "type": "Group",
+                    label: 'Margin',
+                    "elements": [
+                        {
+                            "type": "HorizontalLayout",
+                            "elements": [
+                                {
+                                    "type": "Control",
+                                    "scope": "#/properties/margin/properties/x"
+                                },
+                                {
+                                    "type": "Control",
+                                    "scope": "#/properties/margin/properties/y"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    type: 'HorizontalLayout',
+                    elements: [
+                        {
+                            type: 'Control',
+                            label: 'Align',
+                            scope: '#/properties/align'
+                        }
+                    ]
+                }
+            ]
+        };
+
+        return { jsonSchema, formOptions, jsonUISchema };
     }
 
     private renderForm() {
-        const { jsonSchema, formOptions } = this.getSchema();
+        const { jsonSchema, formOptions, jsonUISchema } = this.getSchema();
         this.formElm.jsonSchema = jsonSchema;
+        this.formElm.uiSchema = jsonUISchema;
         this.formElm.formOptions = formOptions;
         this.formElm.renderForm();
         const { backgroundColor, margin, maxWidth } = getPageConfig();

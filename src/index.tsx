@@ -299,7 +299,6 @@ export default class Editor extends Module {
                         overflow={{ y: 'auto', x: 'hidden' }}
                         background={{ color: Theme.background.default }}
                         border={{ right: { width: 1, style: 'solid', color: Theme.divider } }}
-                        padding={{ bottom: '1rem' }}
                     >
                         <i-vstack
                             id="pageContent"
@@ -307,6 +306,7 @@ export default class Editor extends Module {
                             width="100%"
                             horizontalAlignment='center'
                             margin={{ left: 'auto', right: 'auto' }}
+                            padding={{top: '1rem', bottom: '1rem'}}
                         >
                             <i-panel
                                 id="pnlEditor"

@@ -1203,6 +1203,10 @@ define("@scom/scom-page-builder/command/updateRow.ts", ["require", "exports", "@
             this.element.parent = this.parent;
             if (this.isDeleted) {
                 this.parent.removeChild(this.element);
+                const toolbars = this.element.querySelectorAll('ide-toolbar');
+                for (let toolbar of toolbars) {
+                    toolbar && toolbar.onHide();
+                }
                 index_3.pageObject.removeRow(this.rowId);
                 components_3.application.EventBus.dispatch(index_2.EVENT.ON_UPDATE_SECTIONS);
             }
@@ -1255,6 +1259,10 @@ define("@scom/scom-page-builder/command/updateRow.ts", ["require", "exports", "@
                 components_3.application.EventBus.dispatch(index_2.EVENT.ON_UPDATE_SECTIONS);
             }
             else {
+                const toolbars = this.element.querySelectorAll('ide-toolbar');
+                for (let toolbar of toolbars) {
+                    toolbar && toolbar.onHide();
+                }
                 this.element.remove();
                 this.data && index_3.pageObject.removeRow(this.rowId);
             }
@@ -1279,23 +1287,51 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
             const data = index_4.pageObject.getRowConfig(id) || (0, index_4.getPageConfig)();
             this.oldSettings = Object.assign({}, data);
         }
-        updateConfig(config) {
+        getChangedValues(newValue, oldValue) {
+            let result = [];
+            for (let prop in newValue) {
+                if (prop === 'margin') {
+                    const { x: newX, y: newY } = newValue.margin;
+                    const { x: oldX, y: oldY } = oldValue.margin;
+                    if (newX !== oldX || newY !== oldY)
+                        result.push(prop);
+                }
+                else {
+                    if (newValue[prop] !== oldValue[prop])
+                        result.push(prop);
+                }
+            }
+            return result;
+        }
+        updateConfig(config, updatedValues) {
             const id = this.element.id.replace('row-', '');
-            const { backgroundColor, margin } = config;
-            this.element.background = { color: backgroundColor || '' };
-            components_4.application.EventBus.dispatch(index_5.EVENT.ON_UPDATE_PAGE_BG, { color: backgroundColor || '' });
+            const { margin } = config;
             const marginStyle = (0, index_4.getMargin)(margin);
             const newConfig = Object.assign(Object.assign({}, config), { margin: { x: marginStyle.left, y: marginStyle.top } });
             index_4.pageObject.updateSection(id, { config: Object.assign({}, newConfig) });
-            this.element.setData(index_4.pageObject.getRow(id));
+            this.element.updateRowConfig(index_4.pageObject.getRowConfig(id));
+            // if (updatedValues.includes('backgroundColor')) {}
+            components_4.application.EventBus.dispatch(index_5.EVENT.ON_UPDATE_PAGE_BG, { color: (newConfig === null || newConfig === void 0 ? void 0 : newConfig.backgroundColor) || '' });
         }
         execute() {
+            const updatedValues = this.getChangedValues(this.settings, this.oldSettings);
             const id = this.element.id.replace('row-', '');
+            // const newConfig = {};
+            // const configStr = getRowConfig(id);
+            // const oldSavedConfig = configStr ? JSON.parse(configStr) : {};
+            // console.log(updatedValues, oldSavedConfig, this.settings)
+            // for (let prop in this.settings) {
+            //   if (updatedValues.includes(prop)) {
+            //     newConfig[prop] = this.settings[prop]
+            //   }
+            // }
+            // setRowConfig(id, JSON.stringify({...oldSavedConfig, newConfig}));
             (0, index_4.setRowConfig)(id, JSON.stringify(this.settings));
-            this.updateConfig(this.settings);
+            this.updateConfig(this.settings, updatedValues);
         }
         undo() {
-            this.updateConfig(this.oldSettings);
+            const updatedValues = this.getChangedValues(this.oldSettings, this.settings);
+            this.updateConfig(this.oldSettings, updatedValues);
         }
         redo() { }
     }
@@ -1855,6 +1891,7 @@ define("@scom/scom-page-builder/command/removeToolbar.ts", ["require", "exports"
             if (!this.element.closest('ide-row') && currentElm) {
                 this.element = currentElm;
             }
+            this.element.onHide();
             index_12.pageObject.removeElement(this.rowId, this.elementId, true);
             const sectionEl = this.element.closest('ide-section');
             this.element.remove();
@@ -2812,12 +2849,65 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                     }
                 }
             };
-            return { jsonSchema, formOptions };
+            const jsonUISchema = {
+                type: 'VerticalLayout',
+                elements: [
+                    {
+                        type: 'HorizontalLayout',
+                        elements: [
+                            {
+                                type: 'Control',
+                                label: 'Background Color',
+                                scope: '#/properties/backgroundColor',
+                                options: {
+                                    color: true
+                                }
+                            },
+                            {
+                                type: 'Control',
+                                label: 'Maximum Width',
+                                scope: '#/properties/maxWidth',
+                            }
+                        ]
+                    },
+                    {
+                        "type": "Group",
+                        label: 'Margin',
+                        "elements": [
+                            {
+                                "type": "HorizontalLayout",
+                                "elements": [
+                                    {
+                                        "type": "Control",
+                                        "scope": "#/properties/margin/properties/x"
+                                    },
+                                    {
+                                        "type": "Control",
+                                        "scope": "#/properties/margin/properties/y"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        type: 'HorizontalLayout',
+                        elements: [
+                            {
+                                type: 'Control',
+                                label: 'Align',
+                                scope: '#/properties/align'
+                            }
+                        ]
+                    }
+                ]
+            };
+            return { jsonSchema, formOptions, jsonUISchema };
         }
         renderForm() {
             var _a;
-            const { jsonSchema, formOptions } = this.getSchema();
+            const { jsonSchema, formOptions, jsonUISchema } = this.getSchema();
             this.formElm.jsonSchema = jsonSchema;
+            this.formElm.uiSchema = jsonUISchema;
             this.formElm.formOptions = formOptions;
             this.formElm.renderForm();
             const { backgroundColor, margin, maxWidth } = (0, index_29.getPageConfig)();
@@ -2924,17 +3014,57 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                     },
                 },
             };
-            return { jsonSchema, formOptions };
+            const jsonUISchema = {
+                type: 'VerticalLayout',
+                elements: [
+                    {
+                        type: 'HorizontalLayout',
+                        elements: [
+                            {
+                                type: 'Control',
+                                label: 'Background Color',
+                                scope: '#/properties/backgroundColor',
+                                options: {
+                                    color: true
+                                }
+                            },
+                            {
+                                type: 'Control',
+                                label: 'Maximum Width',
+                                scope: '#/properties/maxWidth',
+                            }
+                        ]
+                    },
+                    {
+                        "type": "Group",
+                        label: 'Margin',
+                        "elements": [
+                            {
+                                "type": "HorizontalLayout",
+                                "elements": [
+                                    {
+                                        "type": "Control",
+                                        "scope": "#/properties/margin/properties/x"
+                                    },
+                                    {
+                                        "type": "Control",
+                                        "scope": "#/properties/margin/properties/y"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            };
+            return { jsonSchema, formOptions, jsonUISchema };
         }
         renderForm() {
-            const { jsonSchema, formOptions } = this.getSchema();
+            const { jsonSchema, formOptions, jsonUISchema } = this.getSchema();
             this.formElm.jsonSchema = jsonSchema;
+            this.formElm.uiSchema = jsonUISchema;
             this.formElm.formOptions = formOptions;
             this.formElm.renderForm();
-            const defaultConfig = (0, index_31.getDefaultPageConfig)();
-            const config = index_31.pageObject.config || {};
-            config.margin = Object.assign(Object.assign({}, defaultConfig.margin), config.margin);
-            this.formElm.setFormData(Object.assign(Object.assign({}, defaultConfig), config));
+            this.formElm.setFormData(Object.assign({}, (0, index_31.getPageConfig)()));
         }
         close() {
             this.settingsDialog.visible = false;
@@ -3510,7 +3640,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            const { image = '', backgroundColor, maxWidth, margin } = config || {};
+            const { image = '', backgroundColor, maxWidth, margin, align } = config || {};
             if (image)
                 this.background.image = image;
             if (backgroundColor)
@@ -3519,6 +3649,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             if (margin)
                 this.margin = (0, index_39.getMargin)(margin);
             this.width = (margin === null || margin === void 0 ? void 0 : margin.x) && (margin === null || margin === void 0 ? void 0 : margin.x) !== 'auto' ? 'auto' : '100%';
+            if (align)
+                this.updateAlign();
         }
         onOpenRowSettingsDialog() {
             this.mdRowSetting.show(this.rowId);
@@ -4153,6 +4285,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         initEventBus() {
             components_24.application.EventBus.register(this, index_37.EVENT.ON_SET_DRAG_ELEMENT, async (el) => this.currentElement = el);
             components_24.application.EventBus.register(this, index_37.EVENT.ON_UPDATE_PAGE_CONFIG, async (data) => {
+                var _a, _b;
                 const { config, rowsConfig } = data;
                 if (!config)
                     return;
@@ -4160,7 +4293,22 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const sectionConfig = index_39.pageObject.getRowConfig(id) || {};
                 let newConfig = Object.assign(Object.assign(Object.assign({}, (0, index_39.getPageConfig)()), sectionConfig), config);
                 if (rowsConfig) {
+                    // TODO: check again
+                    const { backgroundColor, margin, maxWidth } = (0, index_39.getDefaultPageConfig)();
                     const parsedData = rowsConfig[id] ? JSON.parse(rowsConfig[id]) : {};
+                    if ((parsedData === null || parsedData === void 0 ? void 0 : parsedData.backgroundColor) === backgroundColor && newConfig.backgroundColor) {
+                        parsedData.backgroundColor = newConfig.backgroundColor;
+                    }
+                    if ((parsedData === null || parsedData === void 0 ? void 0 : parsedData.maxWidth) === maxWidth && newConfig.maxWidth) {
+                        parsedData.maxWidth = newConfig.maxWidth;
+                    }
+                    if (newConfig.margin) {
+                        const { x, y } = newConfig.margin;
+                        if (((_a = parsedData === null || parsedData === void 0 ? void 0 : parsedData.margin) === null || _a === void 0 ? void 0 : _a.x) === (margin === null || margin === void 0 ? void 0 : margin.x) && x !== undefined)
+                            parsedData.margin.x = newConfig.margin.x;
+                        if (((_b = parsedData === null || parsedData === void 0 ? void 0 : parsedData.margin) === null || _b === void 0 ? void 0 : _b.y) === (margin === null || margin === void 0 ? void 0 : margin.y) && y !== undefined)
+                            parsedData.margin.y = newConfig.margin.y;
+                    }
                     newConfig = Object.assign(Object.assign({}, newConfig), parsedData);
                 }
                 index_39.pageObject.updateSection(id, { config: newConfig });
@@ -4785,11 +4933,17 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 }
             }));
             components_25.application.EventBus.register(this, index_42.EVENT.ON_CLOSE_BUILDER, () => {
-                for (let event of this.events) {
-                    event.unregister();
-                }
-                this.events = [];
+                this.unRegisterEvents();
             });
+        }
+        onHide() {
+            this.unRegisterEvents();
+        }
+        unRegisterEvents() {
+            for (let event of this.events) {
+                event.unregister();
+            }
+            this.events = [];
         }
         init() {
             super.init();
@@ -6341,8 +6495,8 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             return (this.$render("i-vstack", { id: "editor", width: '100%', height: '100%', maxHeight: "100vh", overflow: 'hidden' },
                 this.$render("ide-header", { id: 'pageHeader', border: { bottom: { width: 1, style: 'solid', color: '#dadce0' } } }),
                 this.$render("i-grid-layout", { templateColumns: ['auto', 'minmax(auto, 235px)'], autoFillInHoles: true, height: "calc(100% -64px)", overflow: "hidden" },
-                    this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } }, padding: { bottom: '1rem' } },
-                        this.$render("i-vstack", { id: "pageContent", maxWidth: "calc(100% - 6em)", width: "100%", horizontalAlignment: 'center', margin: { left: 'auto', right: 'auto' } },
+                    this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } } },
+                        this.$render("i-vstack", { id: "pageContent", maxWidth: "calc(100% - 6em)", width: "100%", horizontalAlignment: 'center', margin: { left: 'auto', right: 'auto' }, padding: { top: '1rem', bottom: '1rem' } },
                             this.$render("i-panel", { id: "pnlEditor", maxWidth: 1024, minHeight: "100vh", width: "100%", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
                                 this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
                                     this.$render("ide-rows", { id: "pageRows", draggable: true })),

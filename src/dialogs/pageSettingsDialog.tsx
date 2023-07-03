@@ -6,13 +6,14 @@ import {
     Modal,
     Form,
     IDataSchema,
+    IUISchema,
 } from '@ijstech/components';
 import './pageSettingsDialog.css';
 const Theme = Styles.Theme.ThemeVars;
 
 import { assignAttr } from '../utility/index';
 import { IPageConfig } from '../interface/index';
-import { getDefaultPageConfig, pageObject } from '../store/index';
+import { getPageConfig } from '../store/index';
 
 export interface PageSettingsDialogElement extends ControlElement {
     onSave: (data: IPageConfig) => void;
@@ -88,18 +89,59 @@ export class PageSettingsDialog extends Module {
                 },
             },
         };
-        return { jsonSchema, formOptions };
+
+        const jsonUISchema: IUISchema = {
+            type: 'VerticalLayout',
+            elements: [
+                {
+                    type: 'HorizontalLayout',
+                    elements: [
+                        {
+                            type: 'Control',
+                            label: 'Background Color',
+                            scope: '#/properties/backgroundColor',
+                            options: {
+                                color: true
+                            }
+                        },
+                        {
+                            type: 'Control',
+                            label: 'Maximum Width',
+                            scope: '#/properties/maxWidth',
+                        }
+                    ]
+                },
+                {
+                    "type": "Group",
+                    label: 'Margin',
+                    "elements": [
+                        {
+                            "type": "HorizontalLayout",
+                            "elements": [
+                                {
+                                    "type": "Control",
+                                    "scope": "#/properties/margin/properties/x"
+                                },
+                                {
+                                    "type": "Control",
+                                    "scope": "#/properties/margin/properties/y"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+        return { jsonSchema, formOptions, jsonUISchema };
     }
 
     private renderForm() {
-        const { jsonSchema, formOptions } = this.getSchema();
+        const { jsonSchema, formOptions, jsonUISchema } = this.getSchema();
         this.formElm.jsonSchema = jsonSchema;
+        this.formElm.uiSchema = jsonUISchema;
         this.formElm.formOptions = formOptions;
         this.formElm.renderForm();
-        const defaultConfig = getDefaultPageConfig();
-        const config = pageObject.config || {};
-        config.margin = {...defaultConfig.margin, ...config.margin};
-        this.formElm.setFormData({ ...defaultConfig, ...config });
+        this.formElm.setFormData({ ...getPageConfig() });
     }
 
     close() {
