@@ -65,7 +65,7 @@ export class GroupElementCommand implements ICommand {
       const elementRowId = (this.elementParent?.id || '').replace('row-', '');
       const elementSection = pageObject.getRow(elementRowId);
       if (elementRowId && this.element)
-        pageObject.removeElement(elementRowId, this.element.id, true);
+        pageObject.removeElement(elementRowId, this.element.id);
       this.elementParent.visible = !!elementSection?.elements?.length;
     }
     if (this.element) this.element.remove();
@@ -77,7 +77,10 @@ export class GroupElementCommand implements ICommand {
     const elementList = this.getElements();
     if (clonedDropSecData?.type === ElementType.COMPOSITE) {
       for (let i = 0; i < elementList.length; i++) {
-        pageObject.addElement(dropRowId, elementList[i], this.dropSectionId, this.dropElementIndex + i + 1);
+        let newElm = elementList[i];
+        newElm.column = clonedDropSecData.column;
+        newElm.columnSpan = clonedDropSecData.columnSpan;
+        pageObject.addElement(dropRowId, newElm, this.dropSectionId, this.dropElementIndex + i + 1);
       }
     } else if (clonedDropSecData?.type === ElementType.PRIMITIVE) {
       clonedDropSecData.id = this.isNew ? this.config.firstId : this.config.id;

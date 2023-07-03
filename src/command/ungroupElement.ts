@@ -65,9 +65,9 @@ export class UngroupElementCommand implements ICommand {
         const hasSectionData = !!parentElement?.elements?.length;
         if (sectionEl && !hasSectionData) sectionEl.remove();
     }
-    // if (this.prevSection.data && this.prevSection.data.elements && this.prevSection.data.elements.length && this.prevSection.data.elements.length == 1) {
-    //   pageObject.setElement(rowId, this.prevSection.id, this.prevSection.data.elements[0])
-    // }
+    if (this.prevSection.data && this.prevSection.data.elements && this.prevSection.data.elements.length && this.prevSection.data.elements.length == 1) {
+      pageObject.setElement(rowId, this.prevSection.id, this.prevSection.data.elements[0])
+    }
 
     application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
 
@@ -88,15 +88,9 @@ export class UngroupElementCommand implements ICommand {
         const elementIndex = dropElementId ? dropSectionData.elements.findIndex(elm => elm.id === dropElementId) : -1;
         pageObject.addElement(dropRowId, newElement, dropSectionId, elementIndex + 1);
       } else if (clonedDropSecData?.type === ElementType.PRIMITIVE) {
-        // clonedDropSecData.id = generateUUID();
-        const updatedList = [...newElement].map(elm => {
-          elm.column = clonedDropSecData.column;
-          elm.columnSpan = clonedDropSecData.columnSpan;
-          return elm;
-        })
         pageObject.setElement(dropRowId, dropSectionId, {
           type: ElementType.COMPOSITE,
-          elements: [clonedDropSecData, ...updatedList],
+          elements: [clonedDropSecData, newElement],
           dropId: this.data?.id || ''
         })
       }
@@ -143,21 +137,21 @@ export class UngroupElementCommand implements ICommand {
     const rowId = row? row.id.replace("row-", "") : undefined;
     const elmId = this.draggingToolbar.id.replace("elm-", "");
     pageObject.removeElement(rowId, elmId, true);
-
+    
     const newElm = row.querySelector(`#elm-${elmId}`)
-    const sectionEl = newElm.closest('ide-section');
+    // const sectionEl = newElm.closest('ide-section');
     newElm.remove();
     const section = pageObject.getRow(rowId);
     const isEmpty = !section?.elements?.length || section?.elements.every(el => el.type === "composite" && !el.elements?.length);
     row && row.toggleUI(!isEmpty);
-    if (!this.prevSection.id || this.prevSection.id === elmId) {
-        const hasSectionData = !!section?.elements?.find(elm => elm.id === sectionEl?.id);
-        if (sectionEl && !hasSectionData) sectionEl.remove();
-    } else {
-        const parentElement = (section?.elements || []).find(elm => elm.id === this.prevSection.id);
-        const hasSectionData = !!parentElement?.elements?.length;
-        if (sectionEl && !hasSectionData) sectionEl.remove();
-    }
+    // if (!this.prevSection.id || this.prevSection.id === elmId) {
+    //     const hasSectionData = !!section?.elements?.find(elm => elm.id === sectionEl?.id);
+    //     if (sectionEl && !hasSectionData) sectionEl.remove();
+    // } else {
+    //     const parentElement = (section?.elements || []).find(elm => elm.id === this.prevSection.id);
+    //     const hasSectionData = !!parentElement?.elements?.length;
+    //     if (sectionEl && !hasSectionData) sectionEl.remove();
+    // }
     application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
 
     // merge the elms

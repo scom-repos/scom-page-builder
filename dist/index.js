@@ -1990,7 +1990,7 @@ define("@scom/scom-page-builder/command/groupElement.ts", ["require", "exports",
                 const elementRowId = (((_b = this.elementParent) === null || _b === void 0 ? void 0 : _b.id) || '').replace('row-', '');
                 const elementSection = index_13.pageObject.getRow(elementRowId);
                 if (elementRowId && this.element)
-                    index_13.pageObject.removeElement(elementRowId, this.element.id, true);
+                    index_13.pageObject.removeElement(elementRowId, this.element.id);
                 this.elementParent.visible = !!((_c = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _c === void 0 ? void 0 : _c.length);
             }
             if (this.element)
@@ -2002,7 +2002,10 @@ define("@scom/scom-page-builder/command/groupElement.ts", ["require", "exports",
             const elementList = this.getElements();
             if ((clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.type) === index_14.ElementType.COMPOSITE) {
                 for (let i = 0; i < elementList.length; i++) {
-                    index_13.pageObject.addElement(dropRowId, elementList[i], this.dropSectionId, this.dropElementIndex + i + 1);
+                    let newElm = elementList[i];
+                    newElm.column = clonedDropSecData.column;
+                    newElm.columnSpan = clonedDropSecData.columnSpan;
+                    index_13.pageObject.addElement(dropRowId, newElm, this.dropSectionId, this.dropElementIndex + i + 1);
                 }
             }
             else if ((clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.type) === index_14.ElementType.PRIMITIVE) {
@@ -2093,9 +2096,9 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 if (sectionEl && !hasSectionData)
                     sectionEl.remove();
             }
-            // if (this.prevSection.data && this.prevSection.data.elements && this.prevSection.data.elements.length && this.prevSection.data.elements.length == 1) {
-            //   pageObject.setElement(rowId, this.prevSection.id, this.prevSection.data.elements[0])
-            // }
+            if (this.prevSection.data && this.prevSection.data.elements && this.prevSection.data.elements.length && this.prevSection.data.elements.length == 1) {
+                index_15.pageObject.setElement(rowId, this.prevSection.id, this.prevSection.data.elements[0]);
+            }
             components_6.application.EventBus.dispatch(index_16.EVENT.ON_UPDATE_SECTIONS);
             // regroup with new section
             if (this.isReGroup) {
@@ -2116,15 +2119,9 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                     index_15.pageObject.addElement(dropRowId, newElement, dropSectionId, elementIndex + 1);
                 }
                 else if ((clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.type) === index_17.ElementType.PRIMITIVE) {
-                    // clonedDropSecData.id = generateUUID();
-                    const updatedList = [...newElement].map(elm => {
-                        elm.column = clonedDropSecData.column;
-                        elm.columnSpan = clonedDropSecData.columnSpan;
-                        return elm;
-                    });
                     index_15.pageObject.setElement(dropRowId, dropSectionId, {
                         type: index_17.ElementType.COMPOSITE,
-                        elements: [clonedDropSecData, ...updatedList],
+                        elements: [clonedDropSecData, newElement],
                         dropId: ((_e = this.data) === null || _e === void 0 ? void 0 : _e.id) || ''
                     });
                 }
@@ -2163,32 +2160,32 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 return data;
         }
         async undo() {
-            var _a, _b, _c, _d, _e, _f, _g;
+            var _a, _b, _c, _d, _e;
             // delete the elm
             const row = this.parent;
             const rowId = row ? row.id.replace("row-", "") : undefined;
             const elmId = this.draggingToolbar.id.replace("elm-", "");
             index_15.pageObject.removeElement(rowId, elmId, true);
             const newElm = row.querySelector(`#elm-${elmId}`);
+            console.log("newElm", newElm);
+            console.log("elmId", elmId);
+            console.log("this.data.id", this.data.id);
             const sectionEl = newElm.closest('ide-section');
             newElm.remove();
             const section = index_15.pageObject.getRow(rowId);
             const isEmpty = !((_a = section === null || section === void 0 ? void 0 : section.elements) === null || _a === void 0 ? void 0 : _a.length) || (section === null || section === void 0 ? void 0 : section.elements.every(el => { var _a; return el.type === "composite" && !((_a = el.elements) === null || _a === void 0 ? void 0 : _a.length); }));
             row && row.toggleUI(!isEmpty);
-            if (!this.prevSection.id || this.prevSection.id === elmId) {
-                const hasSectionData = !!((_b = section === null || section === void 0 ? void 0 : section.elements) === null || _b === void 0 ? void 0 : _b.find(elm => elm.id === (sectionEl === null || sectionEl === void 0 ? void 0 : sectionEl.id)));
-                if (sectionEl && !hasSectionData)
-                    sectionEl.remove();
-            }
-            else {
-                const parentElement = ((section === null || section === void 0 ? void 0 : section.elements) || []).find(elm => elm.id === this.prevSection.id);
-                const hasSectionData = !!((_c = parentElement === null || parentElement === void 0 ? void 0 : parentElement.elements) === null || _c === void 0 ? void 0 : _c.length);
-                if (sectionEl && !hasSectionData)
-                    sectionEl.remove();
-            }
+            // if (!this.prevSection.id || this.prevSection.id === elmId) {
+            //     const hasSectionData = !!section?.elements?.find(elm => elm.id === sectionEl?.id);
+            //     if (sectionEl && !hasSectionData) sectionEl.remove();
+            // } else {
+            //     const parentElement = (section?.elements || []).find(elm => elm.id === this.prevSection.id);
+            //     const hasSectionData = !!parentElement?.elements?.length;
+            //     if (sectionEl && !hasSectionData) sectionEl.remove();
+            // }
             components_6.application.EventBus.dispatch(index_16.EVENT.ON_UPDATE_SECTIONS);
             // merge the elms
-            const isMicroDapps = ((_e = (_d = this.data) === null || _d === void 0 ? void 0 : _d.module) === null || _e === void 0 ? void 0 : _e.category) === 'micro-dapps';
+            const isMicroDapps = ((_c = (_b = this.data) === null || _b === void 0 ? void 0 : _b.module) === null || _c === void 0 ? void 0 : _c.category) === 'micro-dapps';
             const newElData = {
                 id: this.data.id,
                 column: this.oriCol,
@@ -2225,7 +2222,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 index_15.pageObject.setElement(dropRowId, prevSectionId, {
                     type: index_17.ElementType.COMPOSITE,
                     elements: [clonedDropSecData, ...updatedList],
-                    dropId: ((_f = this.data) === null || _f === void 0 ? void 0 : _f.id) || ''
+                    dropId: ((_d = this.data) === null || _d === void 0 ? void 0 : _d.id) || ''
                 });
             }
             const newDropData = index_15.pageObject.getElement(dropRowId, prevSectionId);
@@ -2235,7 +2232,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 const elementSection = index_15.pageObject.getRow(elementRowId);
                 if (elementRowId !== dropRowId && this.appendElm)
                     index_15.pageObject.removeElement(elementRowId, this.appendElm.id, true);
-                elmParent.visible = !!((_g = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _g === void 0 ? void 0 : _g.length);
+                elmParent.visible = !!((_e = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _e === void 0 ? void 0 : _e.length);
             }
             if (this.appendElm)
                 this.appendElm.remove();
