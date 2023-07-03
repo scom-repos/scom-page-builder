@@ -53,6 +53,7 @@ declare module "@scom/scom-page-builder/const/index.ts" {
         ON_UPDATE_TOOLBAR: string;
         ON_SET_ACTION_BLOCK: string;
         ON_SET_DRAG_ELEMENT: string;
+        ON_SET_DRAG_TOOLBAR: string;
         ON_ADD_SECTION: string;
         ON_TOGGLE_SEARCH_MODAL: string;
         ON_FETCH_COMPONENTS: string;
@@ -467,7 +468,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         removeRow(id: string): void;
         addRow(data: any, id?: string, index?: number): void;
         private findElement;
-        getElement(sectionId: string, elementId: string): any;
+        getElement(sectionId: string, elementId: string, getLeafOnly?: boolean): any;
         setElement(sectionId: string, elementId: string, value: any): void;
         private sortFn;
         private removeElementFn;
@@ -691,12 +692,12 @@ declare module "@scom/scom-page-builder/command/removeToolbar.ts" {
         redo(): void;
     }
 }
-/// <amd-module name="@scom/scom-page-builder/command/updateType.ts" />
-declare module "@scom/scom-page-builder/command/updateType.ts" {
+/// <amd-module name="@scom/scom-page-builder/command/groupElement.ts" />
+declare module "@scom/scom-page-builder/command/groupElement.ts" {
     import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
     import { Control } from "@ijstech/components";
     import { IElementConfig } from "@scom/scom-page-builder/interface/index.ts";
-    export class UpdateTypeCommand implements ICommand {
+    export class GroupElementCommand implements ICommand {
         private element;
         private elementParent;
         private dropParent;
@@ -710,6 +711,29 @@ declare module "@scom/scom-page-builder/command/updateType.ts" {
         private getElements;
         execute(): void;
         undo(): void;
+        redo(): void;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/command/ungroupElement.ts" />
+declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
+    import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
+    import { Control } from "@ijstech/components";
+    export class UngroupElementCommand implements ICommand {
+        private draggingToolbar;
+        private parent;
+        private dropElm;
+        private data;
+        private isReGroup;
+        private prevSection;
+        private newSection;
+        private oriCol;
+        private oriColSpan;
+        private oriElmIndex;
+        private appendElm;
+        constructor(data: any, isReGroup: boolean, dragElm: Control, dropElm: Control);
+        execute(): Promise<void>;
+        private getPrimitiveData;
+        undo(): Promise<void>;
         redo(): void;
     }
 }
@@ -775,7 +799,8 @@ declare module "@scom/scom-page-builder/command/index.ts" {
     export { ResizeElementCommand } from "@scom/scom-page-builder/command/resize.ts";
     export { DragElementCommand } from "@scom/scom-page-builder/command/dragElement.ts";
     export { RemoveToolbarCommand } from "@scom/scom-page-builder/command/removeToolbar.ts";
-    export { UpdateTypeCommand } from "@scom/scom-page-builder/command/updateType.ts";
+    export { GroupElementCommand } from "@scom/scom-page-builder/command/groupElement.ts";
+    export { UngroupElementCommand } from "@scom/scom-page-builder/command/ungroupElement.ts";
     export { AddElementCommand } from "@scom/scom-page-builder/command/addElement.ts";
     export { ReplaceElementCommand } from "@scom/scom-page-builder/command/replaceElement.ts";
     export { ICommand, IDataColumn } from "@scom/scom-page-builder/command/interface.ts";
@@ -1043,6 +1068,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private currentWidth;
         private currentHeight;
         private currentElement;
+        private currentToolbar;
         private rowId;
         private rowData;
         private isDragging;

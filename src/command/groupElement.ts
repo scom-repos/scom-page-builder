@@ -3,7 +3,7 @@ import { pageObject } from "../store/index";
 import { Control } from "@ijstech/components";
 import { ElementType, IElementConfig } from "../interface/index";
 
-export class UpdateTypeCommand implements ICommand {
+export class GroupElementCommand implements ICommand {
   private element: any;
   private elementParent: any;
   private dropParent: any;
@@ -77,7 +77,10 @@ export class UpdateTypeCommand implements ICommand {
     const elementList = this.getElements();
     if (clonedDropSecData?.type === ElementType.COMPOSITE) {
       for (let i = 0; i < elementList.length; i++) {
-        pageObject.addElement(dropRowId, elementList[i], this.dropSectionId, this.dropElementIndex + i + 1);
+        let newElm = elementList[i];
+        newElm.column = clonedDropSecData.column;
+        newElm.columnSpan = clonedDropSecData.columnSpan;
+        pageObject.addElement(dropRowId, newElm, this.dropSectionId, this.dropElementIndex + i + 1);
       }
     } else if (clonedDropSecData?.type === ElementType.PRIMITIVE) {
       clonedDropSecData.id = this.isNew ? this.config.firstId : this.config.id;

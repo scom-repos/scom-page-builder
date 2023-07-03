@@ -21,10 +21,12 @@ import {
     ResizeElementCommand,
     DragElementCommand,
     UpdateRowSettingsCommand,
-    UpdateTypeCommand,
-    AddElementCommand
+    GroupElementCommand,
+    AddElementCommand,
+    UngroupElementCommand,
+    RemoveToolbarCommand
 } from '../command/index';
-import { IDEToolbar } from '../common/index';
+import { IDEToolbar } from '../common/toolbar';
 import { generateUUID } from '../utility/index';
 const Theme = Styles.Theme.ThemeVars;
 
@@ -54,6 +56,7 @@ export class PageRow extends Module {
     private currentWidth: number;
     private currentHeight: number;
     private currentElement: PageSection;
+    private currentToolbar: IDEToolbar;
     private rowId: string = '';
     private rowData: IPageSection;
     private isDragging: boolean = false;
@@ -442,13 +445,17 @@ export class PageRow extends Module {
         this.addEventListener('dragstart', function (event) {
             const eventTarget = event.target as Control;
             if (eventTarget instanceof PageRow) return;
-            const target = eventTarget.closest && eventTarget.closest('ide-section') as PageSection;
-            const toolbars = target ? Array.from(target.querySelectorAll('ide-toolbar')) : [];
+            const targetSection = eventTarget.closest && eventTarget.closest('ide-section') as PageSection;
+            const toolbars = targetSection ? Array.from(targetSection.querySelectorAll('ide-toolbar')) : [];
+            const targetToolbar = toolbars.find(elm => elm.classList.contains('active')) as IDEToolbar;
             const cannotDrag = toolbars.find(toolbar => toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting'));
-            if (target && !cannotDrag) {
-                self.currentElement = target;
+            if (targetSection && !cannotDrag) {
+                self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
+                self.currentElement = targetSection;
+                self.currentToolbar = targetToolbar;
+                application.EventBus.dispatch(EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
                 self.currentElement.opacity = 0;
-                application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, target);
+                application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                 self.addDottedLines();
             } else {
                 event.preventDefault();
@@ -461,17 +468,7 @@ export class PageRow extends Module {
         document.addEventListener('dragend', function (event) {
             if (self.currentElement && !self.currentElement.classList.contains('builder-item'))
                 self.currentElement.opacity = 1;
-            self.currentElement = null;
-            dragStartTarget = null;
-            dragOverTarget = null;
-            application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, null);
-            self.isDragging = false;
-            setDragData(null);
-            self.removeDottedLines();
-            updateRectangles();
-            removeClass('is-dragenter');
-            removeClass('row-entered');
-            removeClass('is-dragging');
+            resetDragTarget();
         });
 
         function dragEnter(enterTarget: Control, clientX: number, clientY: number, isOverlap: boolean = false) {
@@ -681,6 +678,11 @@ export class PageRow extends Module {
                 overlapType: "none", section: undefined
             }
             const dragTargetSection = dragTarget.closest('ide-section') as HTMLElement;
+            if (dragStartTarget==null || dragStartTarget==undefined) return {
+                overlapType: "mutual", section: undefined
+            }
+            const toolbars = dragTargetSection.querySelectorAll('ide-toolbar');
+            const isUngrouping: boolean = toolbars.length && toolbars.length > 1 && self.currentToolbar!=undefined;
             const nearestCol = findNearestFixedGridInRow(clientX)
             const dropColumn: number = parseInt(nearestCol.getAttribute("data-column"));
             const grid = dropTarget.closest('.grid');
@@ -708,7 +710,8 @@ export class PageRow extends Module {
 
             for (let i=0; i<sortedSections.length; i++) {
                 const element = sortedSections[i];
-                if (element!=dragTargetSection){
+                const condition = isUngrouping? true : element!=dragTargetSection;
+                if (condition){
 
                     const startOfDroppingElm: number = parseInt(element.dataset.column);
                     const endOfDroppingElm: number = parseInt(element.dataset.column) + parseInt(element.dataset.columnSpan) - 1;
@@ -742,22 +745,36 @@ export class PageRow extends Module {
             event.preventDefault();
             event.stopPropagation();
 
+            if (pageRow && elementConfig?.module?.name === 'sectionStack') {
+                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
+                return;
+            }
+
+            if (!self.currentElement) return;
+
+            const numberOfToolbars = self.currentElement.querySelectorAll('ide-toolbar').length
+            const isUngrouping: boolean = self.currentToolbar && numberOfToolbars > 1
+
             // if target overlap with other section
             const overlap = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX);
+
+            // collide with other section
             if (overlap.overlapType == "mutual"/* || overlap.overlapType == "border"*/) return;
-            if (overlap.overlapType == "none" && eventTarget.classList.contains('fixed-grid'))
-                return;
+            // drag on the gap of fixed panel
+            if (overlap.overlapType == "none" && eventTarget.classList.contains('fixed-grid')) return;
+            // is ungrouping and draging on the original section
+            if (overlap.overlapType == "self" && isUngrouping) return;
 
             if (pageRow && elementConfig?.module?.name === 'sectionStack')
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
             if (!self.currentElement) return;
 
             let nearestFixedItem = eventTarget.closest('.fixed-grid-item') as Control;
-
             // if target overlap with itself
             if (overlap.overlapType == "self")
                 nearestFixedItem = findNearestFixedGridInRow(event.clientX);
 
+            // check if drop on a new row
             if (nearestFixedItem) {
                 const column = Number(nearestFixedItem.dataset.column);
                 const columnSpan = self.currentElement.dataset.columnSpan ?
@@ -776,26 +793,53 @@ export class PageRow extends Module {
                 });
                 if (findedSection || self.isDragging) return;
                 self.isDragging = true;
-                if (self.currentElement.data) {
+
+                // ungrouping elm
+                if (isUngrouping) {
+                    const dropElm = eventTarget;
+                    const dragCmd = new UngroupElementCommand(self.currentToolbar.data, false, self.currentToolbar, dropElm);
+                    commandHistory.execute(dragCmd);
+                    self.currentElement.opacity = 1;
+                    updateRectangles();
+                } else if (self.currentElement.data) {
                     const dragCmd = new DragElementCommand(self.currentElement, nearestFixedItem);
                     commandHistory.execute(dragCmd);
                 } else if (elementConfig) {
                     const dragCmd = new AddElementCommand(self.getNewElementData(), true, false, nearestFixedItem);
                     commandHistory.execute(dragCmd);
+
+                // dragging elm (no group/ungroup)
+                } else {
+                    if (self.currentElement.data) {
+                        const dragCmd = new DragElementCommand(self.currentElement, nearestFixedItem);
+                        commandHistory.execute(dragCmd);
+                    } else if (getDragData()) {
+                        const dragCmd = new AddElementCommand(self.getNewElementData(), true, false, nearestFixedItem);
+                        commandHistory.execute(dragCmd);
+                    }
                 }
                 self.isDragging = false;
+            
+            // drop on a new row
             } else {
                 const dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
                 if (self.isDragging) return;
-
                 const inEmptyPnl = eventTarget.closest('#pnlEmty');
                 if (dropElm && !inEmptyPnl) {
                     self.isDragging = true;
                     dropElm.classList.remove('is-dragenter');
                     if (dropElm.classList.contains('bottom-block')) {
-                        const newConfig = self.getNewElementData();
-                        const dragCmd = new UpdateTypeCommand(dropElm, elementConfig ? null : self.currentElement, {...newConfig, firstId: generateUUID()});
-                        commandHistory.execute(dragCmd);
+                        if (isUngrouping) {
+                            const dropElement = eventTarget;
+                            const dragCmd = new UngroupElementCommand(self.currentToolbar.data, true, self.currentToolbar, dropElement);
+                            commandHistory.execute(dragCmd);
+                            self.currentElement.opacity = 1;
+                            resetDragTarget();
+                        } else {
+                            const newConfig = self.getNewElementData();
+                            const dragCmd = new GroupElementCommand(dropElm, elementConfig ? null : self.currentElement, {...newConfig, firstId: generateUUID()});
+                            commandHistory.execute(dragCmd);
+                        }
                     } else if (dropElm.classList.contains(ROW_BOTTOM_CLASS)) {
                         const prependRow = dropElm.closest('ide-row') as PageRow;
                         prependRow && self.onAppendRow(prependRow);
@@ -816,8 +860,17 @@ export class PageRow extends Module {
                         const dragCmd = !hasData && new AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
                         dragCmd && await commandHistory.execute(dragCmd);
                     } else {
-                        const dragCmd = new DragElementCommand(self.currentElement, pageRow, true, true);
-                        commandHistory.execute(dragCmd);
+                        if (isUngrouping) {
+                            const dropElement = eventTarget;
+                            const dragCmd = new UngroupElementCommand(self.currentToolbar.data, false, self.currentToolbar, dropElement);
+                            commandHistory.execute(dragCmd);
+                            self.currentElement.opacity = 1;
+                            resetDragTarget();
+                        } else {
+                            const dragCmd = new DragElementCommand(self.currentElement, pageRow, true, true);
+                            commandHistory.execute(dragCmd);
+                        }
+                        
                     }
                     self.isDragging = false;
                 }
@@ -825,6 +878,20 @@ export class PageRow extends Module {
                 updateRectangles();
             }
         });
+
+        function resetDragTarget() {
+            self.currentElement = null;
+            dragStartTarget = null;
+            dragOverTarget = null;
+            application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, null);
+            self.isDragging = false;
+            setDragData(null);
+            self.removeDottedLines();
+            updateRectangles();
+            removeClass('is-dragenter');
+            removeClass('row-entered');
+            removeClass('is-dragging');
+        }
 
         function removeClass(className: string) {
             const elements = parentWrapper.getElementsByClassName(className);
@@ -857,6 +924,7 @@ export class PageRow extends Module {
 
     private initEventBus() {
         application.EventBus.register(this, EVENT.ON_SET_DRAG_ELEMENT, async (el: any) => this.currentElement = el);
+        application.EventBus.register(this, EVENT.ON_SET_DRAG_TOOLBAR, async (el: any) => this.currentToolbar = el)
         application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_CONFIG, async (data: any) => {
             const { config, rowsConfig } = data;
             if (!config) return;

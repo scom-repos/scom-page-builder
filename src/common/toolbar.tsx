@@ -74,7 +74,7 @@ export class IDEToolbar extends Module {
     }
 
     get data() {
-        return pageObject.getElement(this.rowId, this.elementId);
+        return pageObject.getElement(this.rowId, this.elementId/*, true*/);
     }
 
     get currentReplaceData() {
@@ -562,7 +562,7 @@ export class IDEToolbar extends Module {
         this.contentStack.addEventListener('mouseover', function (event) {
             let pageRow = (self.closest('ide-row') as PageRow)
             let sectionSelected: boolean = pageRow.selectedElement? true : false;
-            let compositeSection: boolean = (self.closest('ide-section') as PageSection).data.type === ElementType.COMPOSITE;
+            let compositeSection: boolean = (self.closest('ide-section') as PageSection).data && (self.closest('ide-section') as PageSection).data.type === ElementType.COMPOSITE;
 
             if (!compositeSection || sectionSelected) {
                 // add section border
@@ -574,7 +574,7 @@ export class IDEToolbar extends Module {
 
             let pageRow = (self.closest('ide-row') as PageRow)
             let sectionSelected: boolean = pageRow.selectedElement? true : false;
-            let compositeSection: boolean = (self.closest('ide-section') as PageSection).data.type === ElementType.COMPOSITE;
+            let compositeSection: boolean = (self.closest('ide-section') as PageSection).data && (self.closest('ide-section') as PageSection).data.type === ElementType.COMPOSITE;
 
             if (!compositeSection || sectionSelected) {
                 // remove section border
