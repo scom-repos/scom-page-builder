@@ -4786,15 +4786,15 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             var _a;
             if (!this._component)
                 return;
-            if (tag.width === '100%')
-                tag.width = Number(this.width);
+            // if (tag.width === '100%') tag.width = Number(this.width);
             if (tag.height === '100%')
                 tag.height = Number(this.height);
             if ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) {
                 this.updateComponent();
                 const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
-                if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setTag)
+                if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setTag) {
                     await builderTarget.setTag(init ? Object.assign(Object.assign({}, tag), { width: '100%' }) : Object.assign({}, tag));
+                }
             }
             if (this.data && !init)
                 index_43.pageObject.setElement(this.rowId, this.data.id, { tag });

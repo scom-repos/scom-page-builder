@@ -465,13 +465,14 @@ export class IDEToolbar extends Module {
 
     async setTag(tag: any, init?: boolean) {
         if (!this._component) return;
-        if (tag.width === '100%') tag.width = Number(this.width);
+        // if (tag.width === '100%') tag.width = Number(this.width);
         if (tag.height === '100%') tag.height = Number(this.height);
         if (this._component?.getConfigurators) {
             this.updateComponent();
             const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
-            if (builderTarget?.setTag)
+            if (builderTarget?.setTag) {
                 await builderTarget.setTag(init ? {...tag, width: '100%'} : {...tag});
+            }
         }
         if (this.data && !init)
             pageObject.setElement(this.rowId, this.data.id, { tag });
