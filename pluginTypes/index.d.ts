@@ -554,6 +554,8 @@ declare module "@scom/scom-page-builder/command/updateRow.ts" {
         private prependId;
         private appendId;
         constructor(element: Control, parent: any, data: any, isDeleted?: boolean, prependId?: string, appendId?: string);
+        private addEventBus;
+        private removeEventBus;
         execute(): void;
         undo(): void;
         redo(): void;
@@ -1162,6 +1164,10 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private replaceComponent;
         private initEventListener;
         private initEventBus;
+        updateUI(data: {
+            color: string;
+        }): Promise<void>;
+        onShow(options?: any): void;
         onHide(): void;
         private unRegisterEvents;
         init(): void;

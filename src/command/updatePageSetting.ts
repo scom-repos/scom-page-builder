@@ -16,12 +16,9 @@ export class UpdatePageSettingsCommand implements ICommand {
     this.settings = {...getPageConfig(), ...settings};
     const rows = this.element.querySelectorAll('ide-row');
     for (let row of rows) {
-      const id = row.id.replace('row-', '');
-      const oldConfig = pageObject.getRowConfig(id);
-      try {
-        const parsedConfig = oldConfig || {};
-        this.rowsConfig[id] = JSON.stringify({...this.oldSettings, ...parsedConfig});
-      } catch {}
+      const id = (row?.id || '').replace('row-', '');
+      const oldConfig = pageObject.getRowConfig(id) || {};
+      this.rowsConfig[id] = JSON.stringify({...this.oldSettings, ...oldConfig});
     }
   }
 

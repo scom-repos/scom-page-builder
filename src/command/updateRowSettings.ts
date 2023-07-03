@@ -1,8 +1,7 @@
-import { Control, application } from "@ijstech/components";
+import { Control } from "@ijstech/components";
 import { getMargin, getPageConfig, pageObject } from "../store/index";
 import { ICommand } from "./interface";
 import { IPageSectionConfig } from '../interface/index';
-import { EVENT } from "../const/index";
 
 export class UpdateRowSettingsCommand implements ICommand {
   private element: any;
@@ -39,7 +38,11 @@ export class UpdateRowSettingsCommand implements ICommand {
     pageObject.updateSection(id, {config: {...newConfig}});
     this.element.updateRowConfig(pageObject.getRowConfig(id));
     if (updatedValues.includes('backgroundColor')) {
-      application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {color: newConfig?.backgroundColor || ''});
+      const color = newConfig?.backgroundColor || '';
+      const toolbars = this.element.querySelectorAll('ide-toolbar');
+      for (let toolbar of toolbars) {
+        toolbar.updateUI({ color });
+      }
     }
   }
 

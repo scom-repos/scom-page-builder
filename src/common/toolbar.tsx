@@ -598,18 +598,26 @@ export class IDEToolbar extends Module {
         )
         this.events.push(
             application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: {color: string}) => {
-                if (this._component?.getConfigurators) {
-                    const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
-                    if (builderTarget?.setTag) {
-                        const oldTag = builderTarget?.getTag ? await builderTarget.getTag() : {};
-                        await builderTarget.setTag({...oldTag, background: data?.color || ''}, true);
-                    }
-                }
+                await this.updateUI(data);
             })
         )
         application.EventBus.register(this, EVENT.ON_CLOSE_BUILDER, () => {
             this.unRegisterEvents();
         })
+    }
+
+    async updateUI(data: {color: string}) {
+        if (this._component?.getConfigurators) {
+            const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
+            if (builderTarget?.setTag) {
+                const oldTag = builderTarget?.getTag ? await builderTarget.getTag() : {};
+                await builderTarget.setTag({...oldTag, background: data?.color || ''}, true);
+            }
+        }
+    }
+
+    onShow(options?: any): void {
+        this.initEventBus();
     }
 
     onHide(): void {
