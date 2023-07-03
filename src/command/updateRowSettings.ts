@@ -1,5 +1,5 @@
 import { Control, application } from "@ijstech/components";
-import { getMargin, getPageConfig, pageObject, setRowConfig } from "../store/index";
+import { getMargin, getPageConfig, getRowConfig, pageObject, setRowConfig } from "../store/index";
 import { ICommand } from "./interface";
 import { IPageSectionConfig } from '../interface/index';
 import { EVENT } from "../const/index";
@@ -17,25 +17,51 @@ export class UpdateRowSettingsCommand implements ICommand {
     this.oldSettings = {...data};
   }
 
-  private updateConfig(config: IPageSectionConfig) {
+  private getChangedValues(newValue: IPageSectionConfig, oldValue: IPageSectionConfig) {
+    let result = [];
+    for (let prop in newValue) {
+      if (prop === 'margin') {
+        const { x: newX, y: newY } = newValue.margin;
+        const { x: oldX, y: oldY } = oldValue.margin;
+        if (newX !== oldX || newY !== oldY) result.push(prop);
+      } else {
+        if (newValue[prop] !== oldValue[prop]) result.push(prop);
+      }
+    }
+    return result;
+  }
+
+  private updateConfig(config: IPageSectionConfig, updatedValues: string[]) {
     const id = this.element.id.replace('row-', '');
-    const { backgroundColor, margin } = config;
-    this.element.background = {color: backgroundColor || ''};
-    application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {color: backgroundColor || ''});
+    const { margin } = config;
     const marginStyle = getMargin(margin);
     const newConfig = {...config, margin: {x: marginStyle.left , y: marginStyle.top}};
     pageObject.updateSection(id, {config: {...newConfig}});
-    this.element.setData(pageObject.getRow(id));
+    this.element.updateRowConfig(pageObject.getRowConfig(id));
+    // if (updatedValues.includes('backgroundColor')) {}
+    application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {color: newConfig?.backgroundColor || ''});
   }
 
   execute(): void {
+    const updatedValues = this.getChangedValues(this.settings, this.oldSettings);
     const id = this.element.id.replace('row-', '');
+    // const newConfig = {};
+    // const configStr = getRowConfig(id);
+    // const oldSavedConfig = configStr ? JSON.parse(configStr) : {};
+    // console.log(updatedValues, oldSavedConfig, this.settings)
+    // for (let prop in this.settings) {
+    //   if (updatedValues.includes(prop)) {
+    //     newConfig[prop] = this.settings[prop]
+    //   }
+    // }
+    // setRowConfig(id, JSON.stringify({...oldSavedConfig, newConfig}));
     setRowConfig(id, JSON.stringify(this.settings));
-    this.updateConfig(this.settings);
+    this.updateConfig(this.settings, updatedValues);
   }
 
   undo(): void {
-    this.updateConfig(this.oldSettings);
+    const updatedValues = this.getChangedValues(this.oldSettings, this.settings);
+    this.updateConfig(this.oldSettings, updatedValues);
   }
 
   redo(): void {}

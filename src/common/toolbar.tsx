@@ -10,8 +10,7 @@ import {
     IDataSchema,
     VStack,
     application,
-    Form,
-    renderUI
+    Form
 } from '@ijstech/components';
 import { EVENT } from '../const/index';
 import { ELEMENT_NAME, IPageBlockAction, IPageBlockData, IPageElement, ThemeType } from '../interface/index';
@@ -609,11 +608,19 @@ export class IDEToolbar extends Module {
             })
         )
         application.EventBus.register(this, EVENT.ON_CLOSE_BUILDER, () => {
-            for (let event of this.events) {
-                event.unregister();
-            }
-            this.events = [];
+            this.unRegisterEvents();
         })
+    }
+
+    onHide(): void {
+        this.unRegisterEvents();
+    }
+
+    private unRegisterEvents() {
+        for (let event of this.events) {
+            event.unregister();
+        }
+        this.events = [];
     }
 
     init() {
