@@ -91,7 +91,12 @@ export class PageSection extends Module {
 
     private async clearData() {
         const children = this.pnlMain.querySelectorAll('ide-toolbar');
-        if (children && children.length) children.forEach((item) => item.remove());
+        if (children?.length) {
+            children.forEach((item: IDEToolbar) => {
+                item.remove();
+                item.onHide();
+            });
+        }
     }
 
     async setData(rowId: string, value: IPageElement) {
@@ -104,6 +109,15 @@ export class PageSection extends Module {
             for (let element of value.elements) {
                 await this.createToolbar(element);
             }
+        }
+    }
+
+    onHide() {
+        const children = this.pnlMain.querySelectorAll('ide-toolbar');
+        if (children?.length) {
+            children.forEach((item: IDEToolbar) => {
+                item.onHide();
+            });
         }
     }
 

@@ -486,9 +486,6 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         categories: ICategory[];
         theme: ThemeType;
         defaultPageConfig: any;
-        rowsConfig: {
-            [key: string]: string;
-        };
     };
     export const setPageBlocks: (value: IPageBlockData[]) => void;
     export const getPageBlocks: () => any[];
@@ -531,8 +528,6 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         right: string | number;
         bottom: string | number;
     };
-    export const setRowConfig: (id: string, value: string) => void;
-    export const getRowConfig: (id: string) => string;
 }
 /// <amd-module name="@scom/scom-page-builder/command/interface.ts" />
 declare module "@scom/scom-page-builder/command/interface.ts" {
@@ -1078,6 +1073,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private updateGridColumn;
         private initEventListeners;
         onAppendRow(pageRow: PageRow): Promise<void>;
+        onAddRow(): Promise<void>;
         private initEventBus;
         private getNewElementData;
         private addDottedLines;
@@ -1253,6 +1249,7 @@ declare module "@scom/scom-page-builder/page/pageSection.tsx" {
         private createToolbar;
         private clearData;
         setData(rowId: string, value: IPageElement): Promise<void>;
+        onHide(): void;
         render(): any;
     }
 }
