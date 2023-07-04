@@ -863,7 +863,7 @@ export class PageRow extends Module {
                     if (dropElm.classList.contains('bottom-block')) {
                         if (isUngrouping) {
                             const dropElement = eventTarget;
-                            const dragCmd = new UngroupElementCommand(self.currentToolbar.data, true, self.currentToolbar, dropElement);
+                            const dragCmd = new UngroupElementCommand(self.currentToolbar.data, true, self.currentToolbar, dropElement, true);
                             commandHistory.execute(dragCmd);
                             self.currentElement.opacity = 1;
                             resetDragTarget();
@@ -875,7 +875,7 @@ export class PageRow extends Module {
                     } else if (dropElm.classList.contains('top-block')) {
                         if (isUngrouping) {
                             const dropElement = eventTarget;
-                            const dragCmd = new UngroupElementCommand(self.currentToolbar.data, true, self.currentToolbar, dropElement);
+                            const dragCmd = new UngroupElementCommand(self.currentToolbar.data, true, self.currentToolbar, dropElement, false);
                             commandHistory.execute(dragCmd);
                             self.currentElement.opacity = 1;
                             resetDragTarget();

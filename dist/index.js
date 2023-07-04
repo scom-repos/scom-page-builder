@@ -2047,7 +2047,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.UngroupElementCommand = void 0;
     class UngroupElementCommand {
-        constructor(data, isReGroup, dragElm, dropElm) {
+        constructor(data, isReGroup, dragElm, dropElm, isAppend = true) {
             const oriRowId = dragElm.closest('ide-row').id.replace("row-", "");
             const dragSection = dragElm.closest('ide-section');
             const oriSectionData = index_14.pageObject.getElement(oriRowId, dragSection.id);
@@ -2062,6 +2062,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             this.oriColSpan = this.data.columnSpan;
             const elmId = dragElm.id.replace("elm-", "");
             this.oriElmIndex = oriSectionData.elements.findIndex(e => e.id === elmId);
+            this.isAppend = isAppend;
         }
         async execute() {
             var _a, _b, _c, _d, _e, _f, _g, _h;
@@ -2115,7 +2116,8 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 const isComposite = (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements) && (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements.length) && (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements.length) > 0;
                 if (isComposite) {
                     const elementIndex = dropElementId ? dropSectionData.elements.findIndex(elm => elm.id === dropElementId) : -1;
-                    index_14.pageObject.addElement(dropRowId, newElement, dropSectionId, elementIndex + 1);
+                    const idx = this.isAppend ? elementIndex + 1 : elementIndex;
+                    index_14.pageObject.addElement(dropRowId, newElement, dropSectionId, idx);
                 }
                 else if (!isComposite) {
                     index_14.pageObject.setElement(dropRowId, dropSectionId, {
@@ -2208,7 +2210,8 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             const elementList = [newElData];
             const isComposite = (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements) && (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements.length) && (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements.length) > 0;
             if (isComposite) {
-                index_14.pageObject.addElement(dropRowId, newElData, prevSectionId, this.oriElmIndex);
+                const idx = this.isAppend ? this.oriElmIndex : this.oriElmIndex - 1;
+                index_14.pageObject.addElement(dropRowId, newElData, prevSectionId, idx);
             }
             else {
                 const updatedList = [...elementList].map(elm => {
@@ -4483,7 +4486,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         if (dropElm.classList.contains('bottom-block')) {
                             if (isUngrouping) {
                                 const dropElement = eventTarget;
-                                const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar.data, true, self.currentToolbar, dropElement);
+                                const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar.data, true, self.currentToolbar, dropElement, true);
                                 index_42.commandHistory.execute(dragCmd);
                                 self.currentElement.opacity = 1;
                                 resetDragTarget();
@@ -4497,7 +4500,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         else if (dropElm.classList.contains('top-block')) {
                             if (isUngrouping) {
                                 const dropElement = eventTarget;
-                                const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar.data, true, self.currentToolbar, dropElement);
+                                const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar.data, true, self.currentToolbar, dropElement, false);
                                 index_42.commandHistory.execute(dragCmd);
                                 self.currentElement.opacity = 1;
                                 resetDragTarget();

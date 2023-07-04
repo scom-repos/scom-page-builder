@@ -728,7 +728,8 @@ declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
         private oriColSpan;
         private oriElmIndex;
         private appendElm;
-        constructor(data: any, isReGroup: boolean, dragElm: Control, dropElm: Control);
+        private isAppend;
+        constructor(data: any, isReGroup: boolean, dragElm: Control, dropElm: Control, isAppend?: boolean);
         execute(): Promise<void>;
         private getPrimitiveData;
         undo(): Promise<void>;

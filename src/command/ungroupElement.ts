@@ -17,8 +17,9 @@ export class UngroupElementCommand implements ICommand {
     private oriColSpan: number;
     private oriElmIndex: number;
     private appendElm: any;
+    private isAppend: boolean;
 
-  constructor(data: any, isReGroup: boolean, dragElm: Control, dropElm: Control) {
+  constructor(data: any, isReGroup: boolean, dragElm: Control, dropElm: Control, isAppend: boolean = true) {
     const oriRowId = dragElm.closest('ide-row').id.replace("row-", "");
     const dragSection = dragElm.closest('ide-section') as Control;
 
@@ -34,6 +35,7 @@ export class UngroupElementCommand implements ICommand {
     this.oriColSpan = this.data.columnSpan;
     const elmId = dragElm.id.replace("elm-", "");
     this.oriElmIndex = oriSectionData.elements.findIndex(e => e.id === elmId);
+    this.isAppend = isAppend;
   }
 
   async execute() {
@@ -87,7 +89,8 @@ export class UngroupElementCommand implements ICommand {
       const isComposite: boolean = clonedDropSecData?.elements && clonedDropSecData?.elements.length && clonedDropSecData?.elements.length > 0;
       if (isComposite) {
         const elementIndex = dropElementId ? dropSectionData.elements.findIndex(elm => elm.id === dropElementId) : -1;
-        pageObject.addElement(dropRowId, newElement, dropSectionId, elementIndex + 1);
+        const idx: number = this.isAppend? elementIndex + 1 : elementIndex;
+        pageObject.addElement(dropRowId, newElement, dropSectionId, idx);
       } else if (!isComposite) {
         pageObject.setElement(dropRowId, dropSectionId, {
           type: ElementType.COMPOSITE, // to be removed
@@ -187,7 +190,8 @@ export class UngroupElementCommand implements ICommand {
     
     const isComposite: boolean = clonedDropSecData?.elements && clonedDropSecData?.elements.length && clonedDropSecData?.elements.length > 0;
     if (isComposite) {
-      pageObject.addElement(dropRowId, newElData, prevSectionId, this.oriElmIndex);
+      const idx: number = this.isAppend? this.oriElmIndex : this.oriElmIndex - 1;
+      pageObject.addElement(dropRowId, newElData, prevSectionId, idx);
     } else {
       const updatedList = [...elementList].map(elm => {
         elm.column = clonedDropSecData.column;
