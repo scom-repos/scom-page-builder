@@ -51,7 +51,7 @@ export class UngroupElementCommand implements ICommand {
     }
 
     // delete elm in the old section
-    pageObject.removeElement(rowId, elmId, true);
+    pageObject.removeElement(rowId, elmId);
     const sectionEl = this.draggingToolbar.closest('ide-section');
     this.draggingToolbar.remove();
     const section = pageObject.getRow(rowId);

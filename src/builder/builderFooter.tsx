@@ -103,13 +103,21 @@ export class BuilderFooter extends Module {
                 id: generateUUID(),
                 column: 1,
                 columnSpan: 12,
-                type: ElementType.PRIMITIVE,
+                type: ElementType.COMPOSITE,
                 module: textBlock,
                 properties: {},
-                tag: {
-                    width: '100%',
-                    height: '130px'
-                }
+                elements: [{
+                    id: generateUUID(),
+                    column: 1,
+                    columnSpan: 12,
+                    module: textBlock,
+                    type: ElementType.PRIMITIVE,
+                    properties: {},
+                    tag: {
+                        width: '100%',
+                        height: '130px'
+                    }
+                }]
             }]
         })
     }

@@ -29,7 +29,7 @@ export enum ELEMENT_NAME {
 }
 export interface IElementConfig {
   module: IPageBlockData;
-  type: ElementType;
+  // type: ElementType;
   prependId?: string;
   appendId?: string;
 }

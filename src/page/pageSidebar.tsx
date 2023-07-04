@@ -136,7 +136,6 @@ export class PageSidebar extends Module {
 
     private initDrag(module: Control, data: IPageBlockData) {
         module.setAttribute('draggable', 'true');
-        module.setAttribute('data-type', ElementType.PRIMITIVE);
         module.setAttribute('data-name', data.name);
     }
 
@@ -148,16 +147,15 @@ export class PageSidebar extends Module {
             if (eventTarget.nodeName === 'IMG' || (eventTarget?.closest && !eventTarget.closest('.builder-item')))
                 event.preventDefault();
             if (eventTarget.id === 'sectionStack') {
-                setDragData({ module: {name: 'sectionStack', path: ''}, type: ElementType.PRIMITIVE });
+                setDragData({module: {name: 'sectionStack', path: ''}});
                 eventTarget.classList.add('is-dragging');
             }
             else if (eventTarget?.dataset?.name) {
                 const currentName = eventTarget.dataset.name;
-                const type = eventTarget.dataset.type as ElementType;
                 const module = self.pageBlocks.find(block => block.name === currentName);
-                if (module && type) {
+                if (module) {
                     application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, eventTarget);
-                    setDragData({ module, type });
+                    setDragData({ module });
                     eventTarget.classList.add('is-dragging');
                 }
             } else {

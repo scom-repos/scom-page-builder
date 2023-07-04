@@ -956,7 +956,8 @@ export class PageRow extends Module {
     private getNewElementData() {
         const elementConfig = {...(getDragData() || {})};
         const id = generateUUID();
-        return {...elementConfig, id};
+        const elementId = generateUUID();
+        return {...elementConfig, id, elementId};
     }
 
     private addDottedLines() {

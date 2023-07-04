@@ -412,7 +412,6 @@ declare module "@scom/scom-page-builder/interface/jsonSchema.ts" {
 declare module "@scom/scom-page-builder/interface/index.ts" {
     import { IMenu, INetwork, IRoute, ITheme, ISCConfig, IBreakpoints } from "@scom/scom-page-builder/interface/core.ts";
     import { IPageBlockData } from "@scom/scom-page-builder/interface/pageBlock.ts";
-    import { ElementType } from "@scom/scom-page-builder/interface/siteData.ts";
     export { IMenu, INetwork, IRoute, ITheme, ISCConfig, IBreakpoints };
     export * from "@scom/scom-page-builder/interface/pageBlock.ts";
     export * from "@scom/scom-page-builder/interface/siteData.ts";
@@ -432,7 +431,6 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
     }
     export interface IElementConfig {
         module: IPageBlockData;
-        type: ElementType;
         prependId?: string;
         appendId?: string;
     }

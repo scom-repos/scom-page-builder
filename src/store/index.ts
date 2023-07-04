@@ -115,7 +115,7 @@ export class PageObject {
           if (elm) return elm;
         } else
           return element;
-      } else if (element && element.type === 'composite') {
+      } else if (element?.elements?.length) {
         const elm = this.findElement(element.elements, elementId, findLeafOnly);
         if (elm) return elm;
       }
@@ -163,10 +163,8 @@ export class PageObject {
     if (value.elements !== undefined) elm.elements = value.elements;
     if (value.column !== undefined && value.column !== elm.column) {
       elm.column = value.column;
-      if (elm.type === 'primitive') {
-        const section = this.getRow(sectionId);
-        if (section?.elements) section.elements = this.sortFn([...section.elements]);
-      }
+      // const section = this.getRow(sectionId);
+      // if (section?.elements) section.elements = this.sortFn([...section.elements]);
     }
   }
 
@@ -183,7 +181,7 @@ export class PageObject {
           this.removeElementFn(element.elements, elementId, removeLeafOnly);
         else
           elements.splice(i, 1); break;
-      } else if (element && element.type === 'composite') {
+      } else if (element?.elements?.length) {
         this.removeElementFn(element.elements, elementId, removeLeafOnly);
       }
     }

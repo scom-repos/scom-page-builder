@@ -101,13 +101,21 @@ export class BuilderHeader extends Module {
                 id: generateUUID(),
                 column: 4,
                 columnSpan: 5,
-                type: ElementType.PRIMITIVE,
+                type: ElementType.COMPOSITE,
                 module: textBlock,
                 properties: {},
-                tag: {
-                    width: '100%',
-                    height: '130px'
-                }
+                elements: [{
+                    id: generateUUID(),
+                    column: 4,
+                    columnSpan: 5,
+                    module: textBlock,
+                    type: ElementType.PRIMITIVE,
+                    properties: {},
+                    tag: {
+                        width: '100%',
+                        height: '130px'
+                    }
+                }]
             }]
         })
     }
