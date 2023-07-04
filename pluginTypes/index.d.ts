@@ -704,7 +704,8 @@ declare module "@scom/scom-page-builder/command/groupElement.ts" {
         private dropSectionId;
         private dropElementIndex;
         private isNew;
-        constructor(dropElm: Control, element?: any, config?: IElementConfig);
+        private isAppend;
+        constructor(dropElm: Control, element?: any, config?: IElementConfig, isAppend?: boolean);
         private getElements;
         execute(): void;
         undo(): void;
@@ -1100,6 +1101,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private updateFixedGrid;
         private updateGridColumn;
         private initEventListeners;
+        onPrependRow(pageRow: PageRow): Promise<void>;
         onAppendRow(pageRow: PageRow): Promise<void>;
         onAddRow(): Promise<void>;
         private initEventBus;

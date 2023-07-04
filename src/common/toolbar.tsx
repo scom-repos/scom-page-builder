@@ -706,6 +706,19 @@ export class IDEToolbar extends Module {
                     visible={false}
                     class="bottom-block"
                 ></i-panel>
+                
+                <i-panel
+                    position="absolute"
+                    width="90%"
+                    height="8px"
+                    left="5%"
+                    top="-8px"
+                    zIndex={999}
+                    border={{radius: '4px'}}
+                    visible={false}
+                    class="top-block"
+                ></i-panel>
+
                 <i-modal
                     id='mdActions'
                     title='Update Settings'
