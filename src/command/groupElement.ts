@@ -41,7 +41,7 @@ export class GroupElementCommand implements ICommand {
         id: this.config.id,
         column: 1,
         columnSpan: 6,
-        type: this.config?.type || ElementType.PRIMITIVE,
+        type: this.config?.type || ElementType.PRIMITIVE, // to be removed
         properties: {
           showHeader: isMicroDapps,
           showFooter: isMicroDapps
@@ -51,7 +51,8 @@ export class GroupElementCommand implements ICommand {
       return [newElData];
     } else {
       const clonedData = JSON.parse(JSON.stringify(this.data))
-      if (clonedData?.type === ElementType.COMPOSITE)
+      const isComposite: boolean = clonedData?.elements && clonedData?.elements.length && clonedData?.elements.length > 0;
+      if (isComposite)
         return clonedData?.elements || [];
       else
         return [clonedData];
@@ -79,7 +80,8 @@ export class GroupElementCommand implements ICommand {
     if (!this.dropSectionId || !dropRowId || !dropSectionData) return;
 
     const elementList = this.getElements();
-    if (clonedDropSecData?.type === ElementType.COMPOSITE) {
+    const isComposite: boolean = clonedDropSecData?.elements && clonedDropSecData?.elements.length && clonedDropSecData?.elements.length > 0;
+    if (isComposite) {
       for (let i = 0; i < elementList.length; i++) {
         let newElm = elementList[i];
         newElm.column = clonedDropSecData.column;
@@ -87,7 +89,7 @@ export class GroupElementCommand implements ICommand {
         const idx: number = this.isAppend? this.dropElementIndex + i + 1 : this.dropElementIndex + i;
         pageObject.addElement(dropRowId, newElm, this.dropSectionId, idx);
       }
-    } else if (clonedDropSecData?.type === ElementType.PRIMITIVE) {
+    } else {
       clonedDropSecData.id = this.isNew ? this.config.firstId : this.config.id;
       const updatedList = [...elementList].map(elm => {
         elm.column = clonedDropSecData.column;
@@ -95,7 +97,7 @@ export class GroupElementCommand implements ICommand {
         return elm;
       })
       pageObject.setElement(dropRowId, this.dropSectionId, {
-        type: ElementType.COMPOSITE,
+        type: ElementType.COMPOSITE, // to be removed
         elements: this.isAppend? [clonedDropSecData, ...updatedList] : [...updatedList, clonedDropSecData] ,
         dropId: this.data?.id || ''
       })

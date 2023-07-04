@@ -55,8 +55,8 @@ export class UngroupElementCommand implements ICommand {
     const sectionEl = this.draggingToolbar.closest('ide-section');
     this.draggingToolbar.remove();
     const section = pageObject.getRow(rowId);
-    const isEmpty = !section?.elements?.length || section?.elements.every(el => el.type === "composite" && !el.elements?.length);
-    prevRow && prevRow.toggleUI(!isEmpty);
+    // const isEmpty = !section?.elements?.length || section?.elements.every(el => el.type === "composite" && !el.elements?.length);
+    // prevRow && prevRow.toggleUI(!isEmpty);
     if (!this.prevSection.id || this.prevSection.id === elmId) {
         const hasSectionData = !!section?.elements?.find(elm => elm.id === sectionEl?.id);
         if (sectionEl && !hasSectionData) sectionEl.remove();
@@ -84,12 +84,13 @@ export class UngroupElementCommand implements ICommand {
       newElement.column = clonedDropSecData.column;
       newElement.columnSpan = clonedDropSecData.columnSpan;
       const dropElementId = (this.dropElm.closest('ide-toolbar') as any)?.elementId;
-      if (clonedDropSecData?.type === ElementType.COMPOSITE) {
+      const isComposite: boolean = clonedDropSecData?.elements && clonedDropSecData?.elements.length && clonedDropSecData?.elements.length > 0;
+      if (isComposite) {
         const elementIndex = dropElementId ? dropSectionData.elements.findIndex(elm => elm.id === dropElementId) : -1;
         pageObject.addElement(dropRowId, newElement, dropSectionId, elementIndex + 1);
-      } else if (clonedDropSecData?.type === ElementType.PRIMITIVE) {
+      } else if (!isComposite) {
         pageObject.setElement(dropRowId, dropSectionId, {
-          type: ElementType.COMPOSITE,
+          type: ElementType.COMPOSITE, // to be removed
           elements: [clonedDropSecData, newElement],
           dropId: this.data?.id || ''
         })
@@ -106,7 +107,7 @@ export class UngroupElementCommand implements ICommand {
             id: this.data.id,
             column: parseInt(this.dropElm.dataset.column),
             columnSpan: this.data.columnSpan,
-            type: this.data.type,
+            type: this.data.type, // to be removed
             properties: {
               showHeader: isMicroDapps,
               showFooter: isMicroDapps
@@ -124,7 +125,7 @@ export class UngroupElementCommand implements ICommand {
 
   // temporary workaround
   private getPrimitiveData(data: any) {
-    if (data.type === 'composite')
+    if (data.elements && data.elements.length && data.elements.length > 0)
       return this.getPrimitiveData(data.elements[0]);
     else
       return data;
@@ -142,8 +143,8 @@ export class UngroupElementCommand implements ICommand {
     // const sectionEl = newElm.closest('ide-section');
     newElm.remove();
     const section = pageObject.getRow(rowId);
-    const isEmpty = !section?.elements?.length || section?.elements.every(el => el.type === "composite" && !el.elements?.length);
-    row && row.toggleUI(!isEmpty);
+    // const isEmpty = !section?.elements?.length || section?.elements.every(el => el.type === "composite" && !el.elements?.length);
+    // row && row.toggleUI(!isEmpty);
     // if (!this.prevSection.id || this.prevSection.id === elmId) {
     //     const hasSectionData = !!section?.elements?.find(elm => elm.id === sectionEl?.id);
     //     if (sectionEl && !hasSectionData) sectionEl.remove();
@@ -160,7 +161,7 @@ export class UngroupElementCommand implements ICommand {
         id: this.data.id,
         column: this.oriCol,
         columnSpan: this.oriColSpan,
-        type: this.data.type,
+        type: this.data.type, // to be removed
         properties: {
           showHeader: isMicroDapps,
           showFooter: isMicroDapps
@@ -183,16 +184,18 @@ export class UngroupElementCommand implements ICommand {
     if (!prevSectionId || !dropRowId || !dropSectionData) return;
 
     const elementList = [newElData];
-    if (clonedDropSecData?.type === ElementType.COMPOSITE) {
+    
+    const isComposite: boolean = clonedDropSecData?.elements && clonedDropSecData?.elements.length && clonedDropSecData?.elements.length > 0;
+    if (isComposite) {
       pageObject.addElement(dropRowId, newElData, prevSectionId, this.oriElmIndex);
-    } else if (clonedDropSecData?.type === ElementType.PRIMITIVE) {
+    } else {
       const updatedList = [...elementList].map(elm => {
         elm.column = clonedDropSecData.column;
         elm.columnSpan = clonedDropSecData.columnSpan;
         return elm;
       })
       pageObject.setElement(dropRowId, prevSectionId, {
-        type: ElementType.COMPOSITE,
+        type: ElementType.COMPOSITE, // to be removed
         elements: [clonedDropSecData, ...updatedList],
         dropId: this.data?.id || ''
       })
