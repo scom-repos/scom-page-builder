@@ -42,6 +42,7 @@ export interface PageRowElement extends ControlElement {
     readonly?: boolean;
 }
 const ROW_BOTTOM_CLASS = 'row-bottom-block';
+const ROW_TOP_CLASS = 'row-top-block';
 
 @customElements('ide-row')
 export class PageRow extends Module {
@@ -109,6 +110,17 @@ export class PageRow extends Module {
                 zIndex={90}
                 border={{radius: '5px'}}
                 class={ROW_BOTTOM_CLASS}
+            ></i-panel>
+        )
+        this.appendChild(
+            <i-panel
+                position="absolute"
+                width="100%"
+                height="16px"
+                top="-8px"
+                zIndex={90}
+                border={{radius: '5px'}}
+                class={ROW_TOP_CLASS}
             ></i-panel>
         )
     }
@@ -484,8 +496,12 @@ export class PageRow extends Module {
             }
             if (!enterTarget || !self.currentElement) return;
             const rowBottom = enterTarget.closest(`.${ROW_BOTTOM_CLASS}`) as Control;
+            const rowTop = enterTarget.closest(`.${ROW_TOP_CLASS}`) as Control;
             if (rowBottom) {
                 updateClass(rowBottom, 'is-dragenter');
+                return;
+            } else if (rowTop) {
+                updateClass(rowTop, 'is-dragenter');
                 return;
             } else {
                 const dragEnter = parentWrapper.querySelector('.is-dragenter') as Control;
@@ -527,9 +543,15 @@ export class PageRow extends Module {
                     if (toolbar) {
                         const { y, height} = toolbar.getBoundingClientRect();
                         const bottomBlock = toolbar.querySelector('.bottom-block') as Control;
+                        const topBlock = toolbar.querySelector('.top-block') as Control;
                         if (bottomBlock) {
                             bottomBlock.visible = Math.ceil(clientY) >= Math.ceil(y + height) - 2;
                             updateClass(bottomBlock, 'is-dragenter');
+                        }
+                        
+                        if (topBlock) {
+                            topBlock.visible = Math.ceil(clientY) <= Math.ceil(y) + 2;
+                            updateClass(topBlock, 'is-dragenter');
                         }
                     }
 
@@ -579,7 +601,10 @@ export class PageRow extends Module {
                     if (block.classList.contains(ROW_BOTTOM_CLASS)) {
                         const blockRow = block.closest('ide-row') as Control;
                         result = currentRow && blockRow && currentRow.id === blockRow.id;
-                    } else {
+                    } else if (block.classList.contains(ROW_TOP_CLASS)) {
+                        const blockRow = block.closest('ide-row') as Control;
+                        result = currentRow && blockRow && currentRow.id === blockRow.id;
+                    }  else {
                         const blockSection = block.closest('ide-section') as Control;
                         result = currentSection && blockSection && currentSection.id === blockSection.id;
                     }
@@ -588,6 +613,8 @@ export class PageRow extends Module {
                 for (const block of blocks) {
                     if (isCurrentEnter(block as Control)) continue;
                     (block as Control).visible = block.classList.contains(ROW_BOTTOM_CLASS);
+                    block.classList.remove('is-dragenter');
+                    (block as Control).visible = block.classList.contains(ROW_TOP_CLASS);
                     block.classList.remove('is-dragenter');
                 }
             }
@@ -842,12 +869,27 @@ export class PageRow extends Module {
                             resetDragTarget();
                         } else {
                             const newConfig = self.getNewElementData();
-                            const dragCmd = new GroupElementCommand(dropElm, elementConfig ? null : self.currentElement, {...newConfig, firstId: generateUUID()});
+                            const dragCmd = new GroupElementCommand(dropElm, elementConfig ? null : self.currentElement, {...newConfig, firstId: generateUUID()}, true);
+                            commandHistory.execute(dragCmd);
+                        }
+                    } else if (dropElm.classList.contains('top-block')) {
+                        if (isUngrouping) {
+                            const dropElement = eventTarget;
+                            const dragCmd = new UngroupElementCommand(self.currentToolbar.data, true, self.currentToolbar, dropElement);
+                            commandHistory.execute(dragCmd);
+                            self.currentElement.opacity = 1;
+                            resetDragTarget();
+                        } else {
+                            const newConfig = self.getNewElementData();
+                            const dragCmd = new GroupElementCommand(dropElm, elementConfig ? null : self.currentElement, {...newConfig, firstId: generateUUID()}, false);
                             commandHistory.execute(dragCmd);
                         }
                     } else if (dropElm.classList.contains(ROW_BOTTOM_CLASS)) {
-                        const prependRow = dropElm.closest('ide-row') as PageRow;
-                        prependRow && self.onAppendRow(prependRow);
+                        const targetRow = dropElm.closest('ide-row') as PageRow;
+                        targetRow && self.onAppendRow(targetRow);
+                    } else if (dropElm.classList.contains(ROW_TOP_CLASS)) {
+                        const targetRow = dropElm.closest('ide-row') as PageRow;
+                        targetRow && self.onPrependRow(targetRow);
                     } else {
                         const isAppend = dropElm.classList.contains('back-block');
                         const dragCmd = elementConfig ?
@@ -913,6 +955,17 @@ export class PageRow extends Module {
             for (const rectangle of rectangles) {
                 (rectangle as Control).style.display = 'none';
             }
+        }
+    }
+
+    async onPrependRow(pageRow: PageRow) {
+        application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { appendId: pageRow.id });
+        const newPageRow = pageRow.previousElementSibling as PageRow;
+        if (newPageRow) {
+            const dragCmd = getDragData() ?
+                new AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) :
+                new DragElementCommand(this.currentElement, newPageRow, true, true);
+            await commandHistory.execute(dragCmd);
         }
     }
 
