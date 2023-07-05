@@ -163,6 +163,7 @@ export class PageObject {
     if (value.elements !== undefined) elm.elements = value.elements;
     if (value.column !== undefined && value.column !== elm.column) {
       elm.column = value.column;
+      // For automatic
       // const section = this.getRow(sectionId);
       // if (section?.elements) section.elements = this.sortFn([...section.elements]);
     }
@@ -177,10 +178,12 @@ export class PageObject {
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
       if (element && element.id === elementId) {
-        if (removeLeafOnly && element.elements)
+        if (removeLeafOnly && element?.elements?.length)
           this.removeElementFn(element.elements, elementId, removeLeafOnly);
-        else
-          elements.splice(i, 1); break;
+        else {
+          elements = elements.splice(i, 1);
+          break;
+        }
       } else if (element?.elements?.length) {
         this.removeElementFn(element.elements, elementId, removeLeafOnly);
       }

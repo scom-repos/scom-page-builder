@@ -56,23 +56,34 @@ export class AddElementCommand implements ICommand {
     }
 
     const isMicroDapps = this.data?.module?.category === 'micro-dapps';
+    // const newElData = {
+    //   id: this.data.id,
+    //   column,
+    //   columnSpan,
+    //   type: ElementType.COMPOSITE,
+    //   properties: {},
+    //   elements: [{
+    //     id: this.data.elementId,
+    //     column,
+    //     columnSpan,
+    //     type: ElementType.PRIMITIVE,
+    //     properties: {
+    //       showHeader: isMicroDapps,
+    //       showFooter: isMicroDapps
+    //     },
+    //     module: this.data.module
+    //   }]
+    // };
     const newElData = {
       id: this.data.id,
       column,
       columnSpan,
-      type: ElementType.COMPOSITE,
-      properties: {},
-      elements: [{
-        id: this.data.elementId,
-        column,
-        columnSpan,
-        type: ElementType.PRIMITIVE,
-        properties: {
-          showHeader: isMicroDapps,
-          showFooter: isMicroDapps
-        },
-        module: this.data.module
-      }]
+      type: ElementType.PRIMITIVE,
+      properties: {
+        showHeader: isMicroDapps,
+        showFooter: isMicroDapps
+      },
+      module: this.data.module
     };
     const parentData = this.parent?.data;
     // Remove any elements that are not currently listed
@@ -80,8 +91,7 @@ export class AddElementCommand implements ICommand {
       const selections = this.parent.querySelectorAll('ide-section');
       for (const section of selections) {
         const elm = parentData.elements.find((f: any) => f.id === section.id);
-        // if (!elm || (Object.keys(elm.module || {}).length === 0 && !elm.elements?.length)) {
-        if (!elm || !elm.elements?.length) {
+        if (!elm || (Object.keys(elm.module || {}).length === 0 && !elm.elements?.length)) {
           section.remove();
         }
       }

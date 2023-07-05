@@ -30,6 +30,7 @@ export class UngroupElementCommand implements ICommand {
     this.isReGroup = isReGroup;
     this.draggingToolbar = dragElm.closest('ide-toolbar');
     this.newSection = dropElm.closest('ide-section')
+
     this.oriCol = parseInt(this.data.column);
     this.oriColSpan = this.data.columnSpan;
     const elmId = dragElm.id.replace("elm-", "");
@@ -37,9 +38,10 @@ export class UngroupElementCommand implements ICommand {
   }
 
   async execute() {
-
+    if (!this.parent) return;
+    this.prevSection = this.parent.querySelector(`[id='${this.prevSection.id}']`);
     const prevRow = this.prevSection.closest && this.prevSection.closest('ide-row') as any;
-    const rowId = prevRow.id.replace("row-", "")
+    const rowId = prevRow?.id.replace("row-", "")
     const elmId = this.draggingToolbar.id.replace("elm-", "")
     const currentElm = prevRow?.querySelector(`ide-toolbar#${this.draggingToolbar.id}`);
     if (currentElm?.data) {
@@ -51,7 +53,7 @@ export class UngroupElementCommand implements ICommand {
     }
 
     // delete elm in the old section
-    pageObject.removeElement(rowId, elmId);
+    pageObject.removeElement(rowId, elmId, true);
     const sectionEl = this.draggingToolbar.closest('ide-section');
     this.draggingToolbar.remove();
     const section = pageObject.getRow(rowId);
@@ -170,18 +172,19 @@ export class UngroupElementCommand implements ICommand {
     };
 
     const elmParent = (this.appendElm ? this.appendElm.closest('ide-row') : this.dropElm.closest('ide-row')) as Control;
+    this.prevSection = this.parent.querySelector(`[id='${this.prevSection.id}']`) as Control;
     const newParent = this.prevSection.closest('ide-row') as Control;
     const prevSectionId = this.prevSection.id;
     if (this.appendElm && elmParent) {
       this.appendElm = elmParent.querySelector(`[id='${this.data.id}']`) as Control;
     }
     const dropRowId = newParent?.id.replace('row-', '');
-    const dropSection = newParent.querySelector(`[id='${prevSectionId}']`) as Control;
+    const dropSection = newParent && newParent.querySelector(`[id='${prevSectionId}']`) as Control;
 
     const dropSectionData = pageObject.getElement(dropRowId, prevSectionId);
     const clonedDropSecData = JSON.parse(JSON.stringify(dropSectionData));
 
-    if (!prevSectionId || !dropRowId || !dropSectionData) return;
+    if (!prevSectionId || !dropRowId || !dropSectionData || !dropSection) return;
 
     const elementList = [newElData];
     
@@ -197,7 +200,7 @@ export class UngroupElementCommand implements ICommand {
       pageObject.setElement(dropRowId, prevSectionId, {
         type: ElementType.COMPOSITE, // to be removed
         elements: [clonedDropSecData, ...updatedList],
-        dropId: this.data?.id || ''
+        // dropId: this.data?.id || ''
       })
     }
     const newDropData = pageObject.getElement(dropRowId, prevSectionId);
