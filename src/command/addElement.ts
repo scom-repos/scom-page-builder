@@ -2,7 +2,6 @@ import { Control } from "@ijstech/components";
 import { pageObject } from "../store/index";
 import { ICommand } from "./interface";
 import { getColumn, getColumnSpan, updateColumnData, getDropColumnData, getAppendColumnData } from "./columnUtils";
-import { ElementType } from "../interface/index";
 
 export class AddElementCommand implements ICommand {
   private element: any;
@@ -78,7 +77,7 @@ export class AddElementCommand implements ICommand {
       id: this.data.id,
       column,
       columnSpan,
-      type: ElementType.PRIMITIVE,
+      // type: ElementType.PRIMITIVE,
       properties: {
         showHeader: isMicroDapps,
         showFooter: isMicroDapps

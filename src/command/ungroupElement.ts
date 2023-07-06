@@ -3,7 +3,6 @@ import { pageObject } from "../store/index";
 import { Control } from "@ijstech/components";
 import { application } from "@ijstech/components";
 import { EVENT } from "../const/index";
-import { ElementType } from "../interface/index";
 
 export class UngroupElementCommand implements ICommand {
     private draggingToolbar: any;
@@ -11,15 +10,18 @@ export class UngroupElementCommand implements ICommand {
     private dropElm: Control;
     private data: any;
     private isReGroup: boolean;
+    private prevParent: any;
     private prevSection: any;
     private newSection: Control;
     private oriCol: number;
     private oriColSpan: number;
     private oriElmIndex: number;
     private appendElm: any;
+    private config: any;
 
-  constructor(data: any, isReGroup: boolean, dragElm: Control, dropElm: Control) {
-    const oriRowId = dragElm.closest('ide-row').id.replace("row-", "");
+  constructor(data: any, isReGroup: boolean, dragElm: Control, dropElm: Control, config: any) {
+    this.prevParent = dragElm.closest('ide-row');
+    const oriRowId = this.prevParent.id.replace("row-", "");
     const dragSection = dragElm.closest('ide-section') as Control;
 
     const oriSectionData = pageObject.getElement(oriRowId, dragSection.id);
@@ -35,11 +37,12 @@ export class UngroupElementCommand implements ICommand {
     this.oriColSpan = this.data.columnSpan;
     const elmId = dragElm.id.replace("elm-", "");
     this.oriElmIndex = oriSectionData.elements.findIndex(e => e.id === elmId);
+    this.config = config;
   }
 
   async execute() {
     if (!this.parent) return;
-    this.prevSection = this.parent.querySelector(`[id='${this.prevSection.id}']`);
+    this.prevSection = this.prevParent.querySelector(`[id='${this.prevSection.id}']`);
     const prevRow = this.prevSection.closest && this.prevSection.closest('ide-row') as any;
     const rowId = prevRow?.id.replace("row-", "")
     const elmId = this.draggingToolbar.id.replace("elm-", "")
@@ -75,6 +78,7 @@ export class UngroupElementCommand implements ICommand {
 
     // regroup with new section
     if (this.isReGroup) {
+      this.newSection = this.parent.querySelector(`[id='${this.newSection.id}']`) as Control;
       const dropRow = this.newSection.closest('ide-row')
       const dropRowId = dropRow?.id.replace('row-', '');
       const dropSectionId = this.newSection.id
@@ -91,8 +95,9 @@ export class UngroupElementCommand implements ICommand {
         const elementIndex = dropElementId ? dropSectionData.elements.findIndex(elm => elm.id === dropElementId) : -1;
         pageObject.addElement(dropRowId, newElement, dropSectionId, elementIndex + 1);
       } else if (!isComposite) {
+        if (dropSectionId === clonedDropSecData.id) clonedDropSecData.id = this.config.id;
         pageObject.setElement(dropRowId, dropSectionId, {
-          type: ElementType.COMPOSITE, // to be removed
+          // type: ElementType.COMPOSITE, // to be removed
           elements: [clonedDropSecData, newElement],
           dropId: this.data?.id || ''
         })
@@ -109,7 +114,7 @@ export class UngroupElementCommand implements ICommand {
             id: this.data.id,
             column: parseInt(this.dropElm.dataset.column),
             columnSpan: this.data.columnSpan,
-            type: this.data.type, // to be removed
+            // type: this.data.type, // to be removed
             properties: {
               showHeader: isMicroDapps,
               showFooter: isMicroDapps
@@ -134,7 +139,7 @@ export class UngroupElementCommand implements ICommand {
   }
 
   async undo() {
-
+    this.draggingToolbar = this.parent.querySelector(`[id='${this.draggingToolbar.id}']`) as Control;
     // delete the elm
     const row = this.parent;
     const rowId = row? row.id.replace("row-", "") : undefined;
@@ -142,19 +147,19 @@ export class UngroupElementCommand implements ICommand {
     pageObject.removeElement(rowId, elmId, true);
     
     const newElm = row.querySelector(`#elm-${elmId}`)
-    // const sectionEl = newElm.closest('ide-section');
-    newElm.remove();
-    const section = pageObject.getRow(rowId);
-    // const isEmpty = !section?.elements?.length || section?.elements.every(el => el.type === "composite" && !el.elements?.length);
-    // row && row.toggleUI(!isEmpty);
-    // if (!this.prevSection.id || this.prevSection.id === elmId) {
-    //     const hasSectionData = !!section?.elements?.find(elm => elm.id === sectionEl?.id);
-    //     if (sectionEl && !hasSectionData) sectionEl.remove();
-    // } else {
-    //     const parentElement = (section?.elements || []).find(elm => elm.id === this.prevSection.id);
-    //     const hasSectionData = !!parentElement?.elements?.length;
-    //     if (sectionEl && !hasSectionData) sectionEl.remove();
-    // }
+    if (newElm) {
+      const sectionEl = newElm.closest('ide-section');
+      newElm.remove();
+      const section = pageObject.getRow(rowId);
+      if (!this.prevSection.id || this.prevSection.id === elmId) {
+        const hasSectionData = !!section?.elements?.find(elm => elm.id === sectionEl?.id);
+        if (sectionEl && !hasSectionData) sectionEl.remove();
+      } else {
+        const parentElement = (section?.elements || []).find(elm => elm.id === this.prevSection.id);
+        const hasSectionData = !!parentElement?.elements?.length;
+        if (sectionEl && !hasSectionData) sectionEl.remove();
+      }
+    }
     application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
 
     // merge the elms
@@ -163,7 +168,7 @@ export class UngroupElementCommand implements ICommand {
         id: this.data.id,
         column: this.oriCol,
         columnSpan: this.oriColSpan,
-        type: this.data.type, // to be removed
+        // type: this.data.type, // to be removed
         properties: {
           showHeader: isMicroDapps,
           showFooter: isMicroDapps
@@ -172,7 +177,7 @@ export class UngroupElementCommand implements ICommand {
     };
 
     const elmParent = (this.appendElm ? this.appendElm.closest('ide-row') : this.dropElm.closest('ide-row')) as Control;
-    this.prevSection = this.parent.querySelector(`[id='${this.prevSection.id}']`) as Control;
+    this.prevSection = this.prevParent.querySelector(`[id='${this.prevSection.id}']`) as Control;
     const newParent = this.prevSection.closest('ide-row') as Control;
     const prevSectionId = this.prevSection.id;
     if (this.appendElm && elmParent) {
@@ -198,9 +203,9 @@ export class UngroupElementCommand implements ICommand {
         return elm;
       })
       pageObject.setElement(dropRowId, prevSectionId, {
-        type: ElementType.COMPOSITE, // to be removed
+        // type: ElementType.COMPOSITE, // to be removed
         elements: [clonedDropSecData, ...updatedList],
-        // dropId: this.data?.id || ''
+        dropId: this.data?.id || ''
       })
     }
     const newDropData = pageObject.getElement(dropRowId, prevSectionId);

@@ -11,7 +11,7 @@ import {
 } from '@ijstech/components';
 import { getCategories, getPageBlocks, setDragData } from '../store/index';
 import { EVENT } from '../const/index';
-import { ElementType, IPageBlockData } from '../interface/index';
+import { IPageBlockData } from '../interface/index';
 // import { Collapse } from '../common/index';
 import './pageSidebar.css';
 import assets from '../assets';

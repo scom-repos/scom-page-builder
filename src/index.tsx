@@ -177,7 +177,7 @@ export default class Editor extends Module {
     }
 
     getData() {
-        const hasData = (el: IPageElement) => el.type === 'primitive' || (el.type === 'composite' && el.elements?.length);
+        const hasData = (el: IPageElement) => Object.keys(el.module || {}).length || el.elements?.length;
         return {
             // header: pageObject.header,
             sections: pageObject.sections.filter(section => {

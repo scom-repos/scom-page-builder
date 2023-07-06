@@ -42,16 +42,16 @@ export interface IPageFooter {
     config?: IPageSectionConfig;
 }
 
-export enum ElementType {
-    PRIMITIVE = 'primitive',
-    COMPOSITE = 'composite'
-}
+// export enum ElementType {
+//     PRIMITIVE = 'primitive',
+//     COMPOSITE = 'composite'
+// }
 
 export interface IPageElement {
     id: string; // uuid
 	column: number;
 	columnSpan: number;
-	type: ElementType, // TODO: remove later
+	// type: ElementType,
     tag?: any;
     properties: any;
 	module?: IPageBlockData; // follow the standard defined in secure page, if type === 'primitive'

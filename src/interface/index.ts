@@ -1,6 +1,5 @@
 import {IMenu, INetwork, IRoute, ITheme, ISCConfig, IBreakpoints} from './core';
 import { IPageBlockData } from './pageBlock';
-import { ElementType } from './siteData';
 
 export {
   IMenu,

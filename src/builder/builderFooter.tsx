@@ -9,7 +9,7 @@ import {
     Upload
 } from '@ijstech/components';
 import { EVENT } from '../const/index';
-import { ElementType, ELEMENT_NAME, IPageFooter, TEXTBOX_PATH } from '../interface/index';
+import { IPageFooter, TEXTBOX_PATH } from '../interface/index';
 import { PageRow } from '../page/index';
 import { generateUUID } from '../utility/index';
 import { getPageBlocks, pageObject } from '../store/index';
@@ -103,7 +103,7 @@ export class BuilderFooter extends Module {
                 id: generateUUID(),
                 column: 1,
                 columnSpan: 12,
-                type: ElementType.COMPOSITE,
+                // type: ElementType.COMPOSITE,
                 module: textBlock,
                 properties: {},
                 elements: [{
@@ -111,7 +111,7 @@ export class BuilderFooter extends Module {
                     column: 1,
                     columnSpan: 12,
                     module: textBlock,
-                    type: ElementType.PRIMITIVE,
+                    // type: ElementType.PRIMITIVE,
                     properties: {},
                     tag: {
                         width: '100%',

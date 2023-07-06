@@ -145,22 +145,30 @@ export class PageObject {
     if (value.columnSpan !== undefined  && value.columnSpan !== elm.columnSpan)
       elm.columnSpan = value.columnSpan;
     if (value.tag !== undefined) elm.tag = value.tag;
-    if (value.type !== undefined && elm.type !== value.type) {
-      if (value.dropId) this.removeElement(sectionId, value.dropId);
-      if (value.type === 'primitive') {
-        elm.type = value.type;
-        elm.module = value.elements?.[0] || {};
-        elm.elements = [];
-      } else if (value.type === 'composite') {
-        const oldValue = JSON.parse(JSON.stringify(elm));
-        // oldValue.id = generateUUID();
-        elm.elements = [oldValue];
-        elm.module = {};
-        elm.type = value.type;
-      }
+    // if (value.type !== undefined && elm.type !== value.type) {
+    //   if (value.dropId) this.removeElement(sectionId, value.dropId);
+    //   if (value.type === 'primitive') {
+    //     elm.type = value.type;
+    //     elm.module = value.elements?.[0] || {};
+    //     elm.elements = [];
+    //   } else if (value.type === 'composite') {
+    //     const oldValue = JSON.parse(JSON.stringify(elm));
+    //     // oldValue.id = generateUUID();
+    //     elm.elements = [oldValue];
+    //     elm.module = {};
+    //     elm.type = value.type;
+    //   }
+    // }
+    if (value.dropId) this.removeElement(sectionId, value.dropId, true);
+    if (value.module !== undefined) {
+      elm.module = value.module;
+      // if (Object.keys(value.module).length && elm.elements)
+      //   elm.elements = [];
     }
-    if (value.module !== undefined) elm.module = value.module;
-    if (value.elements !== undefined) elm.elements = value.elements;
+    if (value.elements !== undefined) {
+      elm.elements = value.elements;
+      if (value.elements?.length) elm.module = {};
+    }
     if (value.column !== undefined && value.column !== elm.column) {
       elm.column = value.column;
       // For automatic

@@ -44,15 +44,15 @@ export class ReplaceElementCommand implements ICommand {
     this.oldReplaceData = { ...this.data };
     let value = this.currentReplaceData;
     if (!value) return;
-    const { type, tag, properties, module, elements } = value;
+    const { tag, properties, module, elements } = value;
     let data = {
       ...this.data,
       module,
       properties
     };
-    if (type) {
-      data.type = type;
-    }
+    // if (type) {
+    //   data.type = type;
+    // }
     if (tag) {
       data.tag = tag;
     }

@@ -21,7 +21,6 @@ import { currentTheme  } from '../theme/index';
 import './toolbar.css';
 import { PageSection } from '../page/pageSection';
 import { PageRow } from '../page/pageRow';
-import { ElementType } from '../interface/siteData'
 
 declare global {
     namespace JSX {
@@ -563,7 +562,8 @@ export class IDEToolbar extends Module {
         this.contentStack.addEventListener('mouseover', function (event) {
             let pageRow = (self.closest('ide-row') as PageRow)
             let sectionSelected: boolean = pageRow.selectedElement? true : false;
-            let compositeSection: boolean = (self.closest('ide-section') as PageSection).data && (self.closest('ide-section') as PageSection).data.type === ElementType.COMPOSITE;
+            let compositeSection: boolean = (self.closest('ide-section') as PageSection).data &&
+                (self.closest('ide-section') as PageSection).data?.elements?.length;
 
             if (!compositeSection || sectionSelected) {
                 // add section border
@@ -575,7 +575,8 @@ export class IDEToolbar extends Module {
 
             let pageRow = (self.closest('ide-row') as PageRow)
             let sectionSelected: boolean = pageRow.selectedElement? true : false;
-            let compositeSection: boolean = (self.closest('ide-section') as PageSection).data && (self.closest('ide-section') as PageSection).data.type === ElementType.COMPOSITE;
+            let compositeSection: boolean = (self.closest('ide-section') as PageSection).data &&
+                (self.closest('ide-section') as PageSection).data?.elements?.length;
 
             if (!compositeSection || sectionSelected) {
                 // remove section border
