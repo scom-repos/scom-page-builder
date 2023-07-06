@@ -723,7 +723,22 @@ export class PageRow extends Module {
         }
 
         function isOverlapWithSection(dropTarget: HTMLElement, dragTarget: HTMLElement, clientX: number, clientY: number): Collision {
-            if (!dropTarget || !dragTarget) return { collisionType: "none" }
+            if (!dropTarget) return { collisionType: "none" }
+            if (!dragTarget) {
+                const dropToolbar = dropTarget.closest('ide-toolbar') as HTMLElement;
+                const dropSection = dropTarget.closest('ide-section') as HTMLElement;
+                if (dropToolbar) {
+                    return {
+                        collisionType: "mutual", 
+                        section: dropSection, 
+                        toolbar: dropToolbar,
+                        // check which side is the merge target
+                        mergeSide: decideMergeSide(dropToolbar, clientX, clientY)
+                    }
+                } else {
+                    return { collisionType: "none" }
+                }
+            }
             const dragTargetSection = dragTarget.closest('ide-section') as HTMLElement;
 
             if (dragStartTarget==null || dragStartTarget==undefined) return { collisionType: "mutual" }
@@ -741,7 +756,7 @@ export class PageRow extends Module {
                     : dropTarget.closest('.is-dragenter')
             ) as Control;
             
-            // drop on the front-block, back-block, top-block or bottom block
+            // drop on the front-block, back-block, top-block or bottom block directly
             if (dropElm) return { collisionType: "none" }
 
             const sections: HTMLElement[] = Array.from(grid?.querySelectorAll('ide-section'));
@@ -766,24 +781,12 @@ export class PageRow extends Module {
                         // check if the cursor is on an element
                         const dropToolbar = dropTarget.closest('ide-toolbar') as HTMLElement;
                         if (dropToolbar && !dragTargetSection.contains(dropToolbar)) {
-                            // check which side is the merge target
-                            let side: MergeSide = "bottom";
-
-                            let rect = dropToolbar.getBoundingClientRect();
-                            let offsetX = clientX - rect.left;
-                            let offsetY = clientY - rect.top;
-
-                            if (offsetY <= rect.height * 0.3)
-                                side = "top";
-                            else if (offsetY >= rect.height * 0.7)
-                                side = "bottom";
-                            else if (offsetX <= rect.width * 0.5)
-                                side = "front";
-                            else
-                                side = "back";
-
                             return {
-                                collisionType: "mutual", section: element, toolbar: dropToolbar, mergeSide: side
+                                collisionType: "mutual", 
+                                section: element, 
+                                toolbar: dropToolbar,
+                                // check which side is the merge target
+                                mergeSide: decideMergeSide(dropToolbar, clientX, clientY)
                             }
                         } else {
                             return { collisionType: "mutual", section: element }
@@ -799,6 +802,21 @@ export class PageRow extends Module {
             if (dropTarget==dragTarget || dragTarget.contains(dropTarget)) return { collisionType: "self" }
             // no overlap
             return { collisionType: "none" }
+        }
+
+        function decideMergeSide(dropToolbar: HTMLElement, clientX: number, clientY: number): MergeSide{
+            let rect = dropToolbar.getBoundingClientRect();
+            let offsetX = clientX - rect.left;
+            let offsetY = clientY - rect.top;
+
+            if (offsetY <= rect.height * 0.3)
+                return "top";
+            else if (offsetY >= rect.height * 0.7)
+                return "bottom";
+            else if (offsetX <= rect.width * 0.5)
+                return "front";
+            else
+                return "back";
         }
 
         this.addEventListener('drop', async function (event) {

@@ -4338,8 +4338,24 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 return nearestElement;
             }
             function isOverlapWithSection(dropTarget, dragTarget, clientX, clientY) {
-                if (!dropTarget || !dragTarget)
+                if (!dropTarget)
                     return { collisionType: "none" };
+                if (!dragTarget) {
+                    const dropToolbar = dropTarget.closest('ide-toolbar');
+                    const dropSection = dropTarget.closest('ide-section');
+                    if (dropToolbar) {
+                        return {
+                            collisionType: "mutual",
+                            section: dropSection,
+                            toolbar: dropToolbar,
+                            // check which side is the merge target
+                            mergeSide: decideMergeSide(dropToolbar, clientX, clientY)
+                        };
+                    }
+                    else {
+                        return { collisionType: "none" };
+                    }
+                }
                 const dragTargetSection = dragTarget.closest('ide-section');
                 if (dragStartTarget == null || dragStartTarget == undefined)
                     return { collisionType: "mutual" };
@@ -4354,7 +4370,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 let dropElm = (isPageRow
                     ? dropTarget.querySelector('.is-dragenter')
                     : dropTarget.closest('.is-dragenter'));
-                // drop on the front-block, back-block, top-block or bottom block
+                // drop on the front-block, back-block, top-block or bottom block directly
                 if (dropElm)
                     return { collisionType: "none" };
                 const sections = Array.from(grid === null || grid === void 0 ? void 0 : grid.querySelectorAll('ide-section'));
@@ -4375,20 +4391,24 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             const dropToolbar = dropTarget.closest('ide-toolbar');
                             if (dropToolbar && !dragTargetSection.contains(dropToolbar)) {
                                 // check which side is the merge target
-                                let side = "bottom";
-                                let rect = dropToolbar.getBoundingClientRect();
-                                let offsetX = clientX - rect.left;
-                                let offsetY = clientY - rect.top;
-                                if (offsetY <= rect.height * 0.3)
-                                    side = "top";
-                                else if (offsetY >= rect.height * 0.7)
-                                    side = "bottom";
-                                else if (offsetX <= rect.width * 0.5)
-                                    side = "front";
-                                else
-                                    side = "back";
+                                // let side: MergeSide = "bottom";
+                                // let rect = dropToolbar.getBoundingClientRect();
+                                // let offsetX = clientX - rect.left;
+                                // let offsetY = clientY - rect.top;
+                                // if (offsetY <= rect.height * 0.3)
+                                //     side = "top";
+                                // else if (offsetY >= rect.height * 0.7)
+                                //     side = "bottom";
+                                // else if (offsetX <= rect.width * 0.5)
+                                //     side = "front";
+                                // else
+                                //     side = "back";
                                 return {
-                                    collisionType: "mutual", section: element, toolbar: dropToolbar, mergeSide: side
+                                    collisionType: "mutual",
+                                    section: element,
+                                    toolbar: dropToolbar,
+                                    // check which side is the merge target
+                                    mergeSide: decideMergeSide(dropToolbar, clientX, clientY)
                                 };
                             }
                             else {
@@ -4406,6 +4426,19 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     return { collisionType: "self" };
                 // no overlap
                 return { collisionType: "none" };
+            }
+            function decideMergeSide(dropToolbar, clientX, clientY) {
+                let rect = dropToolbar.getBoundingClientRect();
+                let offsetX = clientX - rect.left;
+                let offsetY = clientY - rect.top;
+                if (offsetY <= rect.height * 0.3)
+                    return "top";
+                else if (offsetY >= rect.height * 0.7)
+                    return "bottom";
+                else if (offsetX <= rect.width * 0.5)
+                    return "front";
+                else
+                    return "back";
             }
             this.addEventListener('drop', async function (event) {
                 var _a, _b, _c;
