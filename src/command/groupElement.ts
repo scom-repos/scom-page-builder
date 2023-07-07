@@ -1,7 +1,7 @@
 import { ICommand } from "./interface";
 import { pageObject } from "../store/index";
 import { Control } from "@ijstech/components";
-import { ElementType, IElementConfig } from "../interface/index";
+import { IElementConfig } from "../interface/index";
 
 export class GroupElementCommand implements ICommand {
   private element: any;
@@ -41,7 +41,7 @@ export class GroupElementCommand implements ICommand {
         id: this.config.id,
         column: 1,
         columnSpan: 6,
-        type: this.config?.type || ElementType.PRIMITIVE, // to be removed
+        // type: this.config?.type || ElementType.PRIMITIVE, // to be removed
         properties: {
           showHeader: isMicroDapps,
           showFooter: isMicroDapps
@@ -97,7 +97,7 @@ export class GroupElementCommand implements ICommand {
         return elm;
       })
       pageObject.setElement(dropRowId, this.dropSectionId, {
-        type: ElementType.COMPOSITE, // to be removed
+        // type: ElementType.COMPOSITE, // to be removed
         elements: this.isAppend? [clonedDropSecData, ...updatedList] : [...updatedList, clonedDropSecData] ,
         dropId: this.data?.id || ''
       })

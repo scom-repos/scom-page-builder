@@ -134,7 +134,8 @@ Styles.cssRule('ide-row', {
             position: 'absolute',
             top: 0,
             height: '100%',
-            border: 'solid 2px blue'
+            border: 'solid 2px blue',
+            transition: 'width .5s .5s cubic-bezier(.4,0,.2,1), left 0s .4s'
         },
         '.border-x-dotted': {
             borderLeft: 'dotted 1px black',

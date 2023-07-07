@@ -357,15 +357,10 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         elements: IPageElement[];
         config?: IPageSectionConfig;
     }
-    export enum ElementType {
-        PRIMITIVE = "primitive",
-        COMPOSITE = "composite"
-    }
     export interface IPageElement {
         id: string;
         column: number;
         columnSpan: number;
-        type: ElementType;
         tag?: any;
         properties: any;
         module?: IPageBlockData;
@@ -412,7 +407,6 @@ declare module "@scom/scom-page-builder/interface/jsonSchema.ts" {
 declare module "@scom/scom-page-builder/interface/index.ts" {
     import { IMenu, INetwork, IRoute, ITheme, ISCConfig, IBreakpoints } from "@scom/scom-page-builder/interface/core.ts";
     import { IPageBlockData } from "@scom/scom-page-builder/interface/pageBlock.ts";
-    import { ElementType } from "@scom/scom-page-builder/interface/siteData.ts";
     export { IMenu, INetwork, IRoute, ITheme, ISCConfig, IBreakpoints };
     export * from "@scom/scom-page-builder/interface/pageBlock.ts";
     export * from "@scom/scom-page-builder/interface/siteData.ts";
@@ -432,7 +426,6 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
     }
     export interface IElementConfig {
         module: IPageBlockData;
-        type: ElementType;
         prependId?: string;
         appendId?: string;
     }
@@ -722,14 +715,16 @@ declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
         private dropElm;
         private data;
         private isReGroup;
+        private prevParent;
         private prevSection;
         private newSection;
         private oriCol;
         private oriColSpan;
         private oriElmIndex;
         private appendElm;
+        private config;
         private isAppend;
-        constructor(data: any, isReGroup: boolean, dragElm: Control, dropElm: Control, isAppend?: boolean);
+        constructor(data: any, isReGroup: boolean, dragElm: Control, dropElm: Control, config: any, isAppend?: boolean);
         execute(): Promise<void>;
         private getPrimitiveData;
         undo(): Promise<void>;

@@ -1,6 +1,5 @@
 import {IMenu, INetwork, IRoute, ITheme, ISCConfig, IBreakpoints} from './core';
 import { IPageBlockData } from './pageBlock';
-import { ElementType } from './siteData';
 
 export {
   IMenu,
@@ -29,7 +28,7 @@ export enum ELEMENT_NAME {
 }
 export interface IElementConfig {
   module: IPageBlockData;
-  type: ElementType;
+  // type: ElementType;
   prependId?: string;
   appendId?: string;
 }
