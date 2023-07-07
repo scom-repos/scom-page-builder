@@ -754,7 +754,7 @@ define("@scom/scom-page-builder/interface/index.ts", ["require", "exports", "@sc
     exports.GAP_WIDTH = 15;
     exports.MAX_COLUMN = 12;
     exports.MIN_COLUMN = 2;
-    exports.INIT_COLUMN_SPAN = 4;
+    exports.INIT_COLUMN_SPAN = 6;
     exports.PAGE_SIZE = 6;
 });
 define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_2) {
@@ -1138,12 +1138,6 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         return theme === 'light' ? lightTheme.divider : darkTheme.divider;
     };
     exports.getDivider = getDivider;
-    const generateUUID = () => {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    };
     const setDefaultPageConfig = (value) => {
         exports.state.defaultPageConfig = Object.assign(Object.assign(Object.assign({}, defaultPageConfig), { backgroundColor: (0, exports.getBackgroundColor)() }), (value || {}));
     };
@@ -1233,8 +1227,10 @@ define("@scom/scom-page-builder/command/updateRow.ts", ["require", "exports", "@
                 }
                 else if (this.appendId) {
                     const appendRow = this.parent.querySelector(`#${this.appendId}`);
-                    appendRow && appendRow.insertAdjacentElement('afterend', this.element);
-                    this.element.insertAdjacentElement('afterend', appendRow);
+                    if (appendRow) {
+                        appendRow.insertAdjacentElement('afterend', this.element);
+                        this.element.insertAdjacentElement('afterend', appendRow);
+                    }
                     const appendId = this.appendId.replace('row-', '');
                     index = appendId ? index_3.pageObject.sections.findIndex(section => section.id === appendId) : -1;
                 }
@@ -1263,8 +1259,10 @@ define("@scom/scom-page-builder/command/updateRow.ts", ["require", "exports", "@
                     const appendIndex = appendId ? index_3.pageObject.sections.findIndex(section => section.id === appendId) : -1;
                     if (this.appendId) {
                         const appendRow = this.parent.querySelector(`#${this.appendId}`);
-                        appendRow && appendRow.insertAdjacentElement('afterend', this.element);
-                        this.element.insertAdjacentElement('afterend', appendRow);
+                        if (appendRow) {
+                            appendRow.insertAdjacentElement('afterend', this.element);
+                            this.element.insertAdjacentElement('afterend', appendRow);
+                        }
                     }
                     index_3.pageObject.addRow(this.data, this.rowId, appendIndex);
                 }
@@ -6500,7 +6498,6 @@ define("@scom/scom-page-builder/builder/builderFooter.tsx", ["require", "exports
         }
         initEventBus() {
             components_38.application.EventBus.register(this, index_71.EVENT.ON_UPDATE_SECTIONS, async () => {
-                // if (!pageObject.footer?.elements?.length)
                 this.updateFooter();
             });
         }
@@ -6856,8 +6853,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             index_78.pageObject.sections = (value === null || value === void 0 ? void 0 : value.sections) || [];
             index_78.pageObject.footer = value === null || value === void 0 ? void 0 : value.footer;
             index_78.pageObject.config = value === null || value === void 0 ? void 0 : value.config;
-            if (value === null || value === void 0 ? void 0 : value.config)
-                (0, index_78.setDefaultPageConfig)(value.config);
+            (0, index_78.setDefaultPageConfig)(value === null || value === void 0 ? void 0 : value.config);
             try {
                 // await this.builderHeader.setData(value.header);
                 await this.pageRows.setRows((value === null || value === void 0 ? void 0 : value.sections) || []);
