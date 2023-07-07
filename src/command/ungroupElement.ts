@@ -18,8 +18,9 @@ export class UngroupElementCommand implements ICommand {
     private oriElmIndex: number;
     private appendElm: any;
     private config: any;
+    private isAppend: boolean;
 
-  constructor(data: any, isReGroup: boolean, dragElm: Control, dropElm: Control, config: any) {
+  constructor(data: any, isReGroup: boolean, dragElm: Control, dropElm: Control, config: any, isAppend: boolean = true) {
     this.prevParent = dragElm.closest('ide-row');
     const oriRowId = this.prevParent.id.replace("row-", "");
     const dragSection = dragElm.closest('ide-section') as Control;
@@ -38,6 +39,7 @@ export class UngroupElementCommand implements ICommand {
     const elmId = dragElm.id.replace("elm-", "");
     this.oriElmIndex = oriSectionData.elements.findIndex(e => e.id === elmId);
     this.config = config;
+    this.isAppend = isAppend;
   }
 
   async execute() {
@@ -93,7 +95,8 @@ export class UngroupElementCommand implements ICommand {
       const isComposite: boolean = clonedDropSecData?.elements && clonedDropSecData?.elements.length && clonedDropSecData?.elements.length > 0;
       if (isComposite) {
         const elementIndex = dropElementId ? dropSectionData.elements.findIndex(elm => elm.id === dropElementId) : -1;
-        pageObject.addElement(dropRowId, newElement, dropSectionId, elementIndex + 1);
+        const idx: number = this.isAppend? elementIndex + 1 : elementIndex;
+        pageObject.addElement(dropRowId, newElement, dropSectionId, idx);
       } else if (!isComposite) {
         if (dropSectionId === clonedDropSecData.id) clonedDropSecData.id = this.config.id;
         pageObject.setElement(dropRowId, dropSectionId, {
@@ -195,7 +198,8 @@ export class UngroupElementCommand implements ICommand {
     
     const isComposite: boolean = clonedDropSecData?.elements && clonedDropSecData?.elements.length && clonedDropSecData?.elements.length > 0;
     if (isComposite) {
-      pageObject.addElement(dropRowId, newElData, prevSectionId, this.oriElmIndex);
+      const idx: number = this.isAppend? this.oriElmIndex : this.oriElmIndex - 1;
+      pageObject.addElement(dropRowId, newElData, prevSectionId, idx);
     } else {
       const updatedList = [...elementList].map(elm => {
         elm.column = clonedDropSecData.column;
