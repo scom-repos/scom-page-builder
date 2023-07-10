@@ -122,6 +122,7 @@ export class UngroupElementCommand implements ICommand {
               showHeader: isMicroDapps,
               showFooter: isMicroDapps
             },
+            tag:  this.data?.tag || {},
             module: this.data.module
         };
         this.appendElm = await this.parent.addElement(newElData);
@@ -176,6 +177,7 @@ export class UngroupElementCommand implements ICommand {
           showHeader: isMicroDapps,
           showFooter: isMicroDapps
         },
+        tag:  this.data?.tag || {},
         module: this.data.module
     };
 

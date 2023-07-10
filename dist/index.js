@@ -2068,7 +2068,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             this.isAppend = isAppend;
         }
         async execute() {
-            var _a, _b, _c, _d, _e, _f, _g, _h;
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j;
             if (!this.parent)
                 return;
             this.prevSection = this.prevParent.querySelector(`[id='${this.prevSection.id}']`);
@@ -2152,14 +2152,15 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                         showHeader: isMicroDapps,
                         showFooter: isMicroDapps
                     },
+                    tag: ((_g = this.data) === null || _g === void 0 ? void 0 : _g.tag) || {},
                     module: this.data.module
                 };
                 this.appendElm = await this.parent.addElement(newElData);
                 const parentId = this.parent.id.replace('row-', '');
                 index_13.pageObject.addElement(parentId, newElData);
-                const elementRowId = (((_g = this.parent) === null || _g === void 0 ? void 0 : _g.id) || '').replace('row-', '');
+                const elementRowId = (((_h = this.parent) === null || _h === void 0 ? void 0 : _h.id) || '').replace('row-', '');
                 const elementSection = index_13.pageObject.getRow(elementRowId);
-                this.parent.toggleUI(!!((_h = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _h === void 0 ? void 0 : _h.length));
+                this.parent.toggleUI(!!((_j = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _j === void 0 ? void 0 : _j.length));
             }
         }
         // temporary workaround
@@ -2170,7 +2171,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 return data;
         }
         async undo() {
-            var _a, _b, _c, _d, _e, _f;
+            var _a, _b, _c, _d, _e, _f, _g;
             this.draggingToolbar = this.parent.querySelector(`[id='${this.draggingToolbar.id}']`);
             // delete the elm
             const row = this.parent;
@@ -2206,6 +2207,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                     showHeader: isMicroDapps,
                     showFooter: isMicroDapps
                 },
+                tag: ((_e = this.data) === null || _e === void 0 ? void 0 : _e.tag) || {},
                 module: this.data.module
             };
             const elmParent = (this.appendElm ? this.appendElm.closest('ide-row') : this.dropElm.closest('ide-row'));
@@ -2236,7 +2238,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 index_13.pageObject.setElement(dropRowId, prevSectionId, {
                     // type: ElementType.COMPOSITE, // to be removed
                     elements: [clonedDropSecData, ...updatedList],
-                    dropId: ((_e = this.data) === null || _e === void 0 ? void 0 : _e.id) || ''
+                    dropId: ((_f = this.data) === null || _f === void 0 ? void 0 : _f.id) || ''
                 });
             }
             const newDropData = index_13.pageObject.getElement(dropRowId, prevSectionId);
@@ -2246,7 +2248,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 const elementSection = index_13.pageObject.getRow(elementRowId);
                 if (elementRowId !== dropRowId && this.appendElm)
                     index_13.pageObject.removeElement(elementRowId, this.appendElm.id, true);
-                elmParent.visible = !!((_f = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _f === void 0 ? void 0 : _f.length);
+                elmParent.visible = !!((_g = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _g === void 0 ? void 0 : _g.length);
             }
             if (this.appendElm)
                 this.appendElm.remove();
