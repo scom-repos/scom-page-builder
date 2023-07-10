@@ -4738,7 +4738,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         }
         render() {
             return (this.$render("i-panel", { id: "pnlRowWrap", class: 'page-row', width: "100%", height: "100%", padding: { left: '3rem', right: '3rem' } },
-                this.$render("i-button", { caption: '', icon: { name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, top: "-12px", left: "50%", zIndex: 100, class: "btn-add", onClick: () => this.onAddSection(-1) }),
+                this.$render("i-button", { caption: '', icon: { name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, top: "-12px", left: "50%", zIndex: 95, class: "btn-add", onClick: () => this.onAddSection(-1) }),
                 this.$render("i-vstack", { id: 'actionsBar', class: "row-actions-bar", verticalAlignment: "center" },
                     this.$render("i-vstack", { background: { color: '#fff' }, border: { radius: '20px' }, maxWidth: "100%", maxHeight: "100%", horizontalAlignment: "center", padding: { top: 5, bottom: 5 }, class: "bar-shadow" },
                         this.$render("i-panel", { class: "actions", tooltip: { content: 'Section settings', placement: 'right' }, visible: this.isChanged, onClick: () => this.onOpenRowSettingsDialog() },
@@ -4762,7 +4762,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         this.$render("i-label", { caption: 'Drag Elements Here', font: { transform: 'uppercase', color: 'var(--builder-color)', size: '1.25rem' }, opacity: 0.5 }))),
                 this.$render("i-grid-layout", { id: "pnlRow", width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%", position: "relative", class: "grid", opacity: 0 }),
                 this.$render("ide-row-settings-dialog", { id: "mdRowSetting", onSave: this.onSaveRowSettings.bind(this) }),
-                this.$render("i-button", { caption: '', icon: { name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, bottom: "-12px", left: "50%", zIndex: 100, class: "btn-add", onClick: () => this.onAddSection(1) })));
+                this.$render("i-button", { caption: '', icon: { name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, bottom: "-12px", left: "50%", zIndex: 95, class: "btn-add", onClick: () => this.onAddSection(1) })));
         }
     };
     __decorate([
