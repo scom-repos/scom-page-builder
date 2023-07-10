@@ -1120,7 +1120,7 @@ export class PageRow extends Module {
                     icon={{name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText}}
                     background={{color: Theme.colors.primary.main}}
                     padding={{top: 5, bottom: 5, left: 5, right: 5}}
-                    top="-12px" left="50%" zIndex={100}
+                    top="-12px" left="50%" zIndex={95}
                     class="btn-add"
                     onClick={() => this.onAddSection(-1)}
                 ></i-button>
@@ -1226,7 +1226,7 @@ export class PageRow extends Module {
                     icon={{name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText}}
                     background={{color: Theme.colors.primary.main}}
                     padding={{top: 5, bottom: 5, left: 5, right: 5}}
-                    bottom="-12px" left="50%" zIndex={100}
+                    bottom="-12px" left="50%" zIndex={95}
                     class="btn-add"
                     onClick={() => this.onAddSection(1)}
                 ></i-button>
