@@ -93,6 +93,7 @@ define("@scom/scom-page-builder/const/index.ts", ["require", "exports", "@scom/s
         ON_CLONE: 'ON_CLONE',
         ON_RESIZE: 'ON_RESIZE',
         ON_UPDATE_FOOTER: 'ON_UPDATE_FOOTER',
+        ON_SHOW_BOTTOM_BLOCK: 'ON_SHOW_BOTTOM_BLOCK',
         // Content-Block
         ON_UPDATE_TOOLBAR: 'ON_UPDATE_TOOLBAR',
         ON_SET_ACTION_BLOCK: 'ON_SET_ACTION_BLOCK',
@@ -4708,6 +4709,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             await index_41.commandHistory.execute(dragCmd);
         }
         initEventBus() {
+            const self = this;
             components_24.application.EventBus.register(this, index_38.EVENT.ON_SET_DRAG_ELEMENT, async (el) => this.currentElement = el);
             components_24.application.EventBus.register(this, index_38.EVENT.ON_SET_DRAG_TOOLBAR, async (el) => this.currentToolbar = el);
             components_24.application.EventBus.register(this, index_38.EVENT.ON_UPDATE_PAGE_CONFIG, async (data) => {
@@ -4724,6 +4726,30 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 index_40.pageObject.updateSection(id, { config: newConfig });
                 this.updateRowConfig(newConfig);
                 this.updateGridColumnWidth();
+            });
+            components_24.application.EventBus.register(this, index_38.EVENT.ON_SHOW_BOTTOM_BLOCK, async () => {
+                function _updateClass(elm, className) {
+                    if (elm.visible) {
+                        if (className === 'is-dragenter') {
+                            const blocks = self.getElementsByClassName('is-dragenter');
+                            for (let block of blocks) {
+                                block.classList.remove('is-dragenter');
+                            }
+                        }
+                        elm.classList.add(className);
+                    }
+                    else {
+                        elm.classList.remove(className);
+                    }
+                }
+                const PageRows = this.closest('ide-rows');
+                const lastRows = PageRows.querySelectorAll('ide-row:last-child');
+                const lastRow = (lastRows.length > 0) ? lastRows[0] : undefined;
+                if (lastRows.length > 0 && lastRow.id == self.id) {
+                    const bottomBlock = lastRow.querySelector('.row-bottom-block');
+                    bottomBlock.visible = true;
+                    bottomBlock && _updateClass(bottomBlock, 'is-dragenter');
+                }
             });
         }
         getNewElementData() {
@@ -6788,6 +6814,15 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                         ticking = false;
                     });
                     ticking = true;
+                }
+                const pageRowsRect = this.pageRows.getBoundingClientRect();
+                const pnlEditorRect = this.pnlEditor.getBoundingClientRect();
+                // drop on the below of rows
+                if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y
+                    && event.clientY >= pageRowsRect.height + pageRowsRect.y
+                    && event.clientX >= pageRowsRect.x
+                    && event.clientX <= pageRowsRect.x + pageRowsRect.width) {
+                    components_40.application.EventBus.dispatch(index_77.EVENT.ON_SHOW_BOTTOM_BLOCK);
                 }
             });
             function adjustScrollSpeed(mouseY) {

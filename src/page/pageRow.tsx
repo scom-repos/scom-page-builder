@@ -1060,6 +1060,7 @@ export class PageRow extends Module {
     }
 
     private initEventBus() {
+        const self = this;
         application.EventBus.register(this, EVENT.ON_SET_DRAG_ELEMENT, async (el: any) => this.currentElement = el);
         application.EventBus.register(this, EVENT.ON_SET_DRAG_TOOLBAR, async (el: any) => this.currentToolbar = el)
         application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_CONFIG, async (data: any) => {
@@ -1075,6 +1076,31 @@ export class PageRow extends Module {
             pageObject.updateSection(id, { config: newConfig });
             this.updateRowConfig(newConfig);
             this.updateGridColumnWidth();
+        });
+        application.EventBus.register(this, EVENT.ON_SHOW_BOTTOM_BLOCK, async () => {
+
+            function _updateClass(elm: Control, className: string) {
+                if (elm.visible) {
+                    if (className === 'is-dragenter') {
+                        const blocks = self.getElementsByClassName('is-dragenter');
+                        for (let block of blocks) {
+                            block.classList.remove('is-dragenter');
+                        }
+                    }
+                    elm.classList.add(className);
+                } else {
+                    elm.classList.remove(className);
+                }
+            }
+
+            const PageRows = this.closest('ide-rows')
+            const lastRows = PageRows.querySelectorAll('ide-row:last-child');
+            const lastRow = (lastRows.length > 0)? lastRows[0] : undefined;
+            if (lastRows.length > 0 && lastRow.id == self.id) {
+                const bottomBlock = lastRow.querySelector('.row-bottom-block') as Control;
+                bottomBlock.visible = true;
+                bottomBlock && _updateClass(bottomBlock, 'is-dragenter');
+            }
         });
     }
 
