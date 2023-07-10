@@ -115,7 +115,7 @@ export class PageObject {
           if (elm) return elm;
         } else
           return element;
-      } else if (element && element.type === 'composite') {
+      } else if (element?.elements?.length) {
         const elm = this.findElement(element.elements, elementId, findLeafOnly);
         if (elm) return elm;
       }
@@ -145,28 +145,35 @@ export class PageObject {
     if (value.columnSpan !== undefined  && value.columnSpan !== elm.columnSpan)
       elm.columnSpan = value.columnSpan;
     if (value.tag !== undefined) elm.tag = value.tag;
-    if (value.type !== undefined && elm.type !== value.type) {
-      if (value.dropId) this.removeElement(sectionId, value.dropId);
-      if (value.type === 'primitive') {
-        elm.type = value.type;
-        elm.module = value.elements?.[0] || {};
-        elm.elements = [];
-      } else if (value.type === 'composite') {
-        const oldValue = JSON.parse(JSON.stringify(elm));
-        // oldValue.id = generateUUID();
-        elm.elements = [oldValue];
-        elm.module = {};
-        elm.type = value.type;
-      }
+    // if (value.type !== undefined && elm.type !== value.type) {
+    //   if (value.dropId) this.removeElement(sectionId, value.dropId);
+    //   if (value.type === 'primitive') {
+    //     elm.type = value.type;
+    //     elm.module = value.elements?.[0] || {};
+    //     elm.elements = [];
+    //   } else if (value.type === 'composite') {
+    //     const oldValue = JSON.parse(JSON.stringify(elm));
+    //     // oldValue.id = generateUUID();
+    //     elm.elements = [oldValue];
+    //     elm.module = {};
+    //     elm.type = value.type;
+    //   }
+    // }
+    if (value.dropId) this.removeElement(sectionId, value.dropId, true);
+    if (value.module !== undefined) {
+      elm.module = value.module;
+      // if (Object.keys(value.module).length && elm.elements)
+      //   elm.elements = [];
     }
-    if (value.module !== undefined) elm.module = value.module;
-    if (value.elements !== undefined) elm.elements = value.elements;
+    if (value.elements !== undefined) {
+      elm.elements = value.elements;
+      if (value.elements?.length) elm.module = {};
+    }
     if (value.column !== undefined && value.column !== elm.column) {
       elm.column = value.column;
-      if (elm.type === 'primitive') {
-        const section = this.getRow(sectionId);
-        if (section?.elements) section.elements = this.sortFn([...section.elements]);
-      }
+      // For automatic
+      // const section = this.getRow(sectionId);
+      // if (section?.elements) section.elements = this.sortFn([...section.elements]);
     }
   }
 
@@ -179,11 +186,13 @@ export class PageObject {
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
       if (element && element.id === elementId) {
-        if (removeLeafOnly && element.elements)
+        if (removeLeafOnly && element?.elements?.length)
           this.removeElementFn(element.elements, elementId, removeLeafOnly);
-        else
-          elements.splice(i, 1); break;
-      } else if (element && element.type === 'composite') {
+        else {
+          elements = elements.splice(i, 1);
+          break;
+        }
+      } else if (element?.elements?.length) {
         this.removeElementFn(element.elements, elementId, removeLeafOnly);
       }
     }
@@ -364,13 +373,6 @@ export const getFontColor = (theme?: ThemeType) => {
 export const getDivider = (theme?: ThemeType) => {
   theme = theme ?? getTheme();
   return theme === 'light' ? lightTheme.divider : darkTheme.divider;
-}
-
-const generateUUID = () => {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
 }
 
 export const setDefaultPageConfig = (value: IPageConfig) => {

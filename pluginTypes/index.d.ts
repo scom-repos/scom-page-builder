@@ -357,15 +357,10 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         elements: IPageElement[];
         config?: IPageSectionConfig;
     }
-    export enum ElementType {
-        PRIMITIVE = "primitive",
-        COMPOSITE = "composite"
-    }
     export interface IPageElement {
         id: string;
         column: number;
         columnSpan: number;
-        type: ElementType;
         tag?: any;
         properties: any;
         module?: IPageBlockData;
@@ -412,7 +407,6 @@ declare module "@scom/scom-page-builder/interface/jsonSchema.ts" {
 declare module "@scom/scom-page-builder/interface/index.ts" {
     import { IMenu, INetwork, IRoute, ITheme, ISCConfig, IBreakpoints } from "@scom/scom-page-builder/interface/core.ts";
     import { IPageBlockData } from "@scom/scom-page-builder/interface/pageBlock.ts";
-    import { ElementType } from "@scom/scom-page-builder/interface/siteData.ts";
     export { IMenu, INetwork, IRoute, ITheme, ISCConfig, IBreakpoints };
     export * from "@scom/scom-page-builder/interface/pageBlock.ts";
     export * from "@scom/scom-page-builder/interface/siteData.ts";
@@ -432,7 +426,6 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
     }
     export interface IElementConfig {
         module: IPageBlockData;
-        type: ElementType;
         prependId?: string;
         appendId?: string;
     }
@@ -441,6 +434,7 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
     export const GAP_WIDTH = 15;
     export const MAX_COLUMN = 12;
     export const MIN_COLUMN = 2;
+    export const INIT_COLUMN_SPAN = 6;
     export const PAGE_SIZE = 6;
     export type ThemeType = 'dark' | 'light';
 }
@@ -704,7 +698,8 @@ declare module "@scom/scom-page-builder/command/groupElement.ts" {
         private dropSectionId;
         private dropElementIndex;
         private isNew;
-        constructor(dropElm: Control, element?: any, config?: IElementConfig);
+        private isAppend;
+        constructor(dropElm: Control, element?: any, config?: IElementConfig, isAppend?: boolean);
         private getElements;
         execute(): void;
         undo(): void;
@@ -721,13 +716,16 @@ declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
         private dropElm;
         private data;
         private isReGroup;
+        private prevParent;
         private prevSection;
         private newSection;
         private oriCol;
         private oriColSpan;
         private oriElmIndex;
         private appendElm;
-        constructor(data: any, isReGroup: boolean, dragElm: Control, dropElm: Control);
+        private config;
+        private isAppend;
+        constructor(data: any, isReGroup: boolean, dragElm: Control, dropElm: Control, config: any, isAppend?: boolean);
         execute(): Promise<void>;
         private getPrimitiveData;
         undo(): Promise<void>;
@@ -1100,6 +1098,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private updateFixedGrid;
         private updateGridColumn;
         private initEventListeners;
+        onPrependRow(pageRow: PageRow): Promise<void>;
         onAppendRow(pageRow: PageRow): Promise<void>;
         onAddRow(): Promise<void>;
         private initEventBus;

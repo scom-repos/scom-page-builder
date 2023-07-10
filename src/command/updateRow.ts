@@ -55,8 +55,10 @@ export class UpdateRowCommand implements ICommand {
         index = prependIndex === -1 ? -1 : prependIndex + 1;
       } else if (this.appendId) {
         const appendRow = this.parent.querySelector(`#${this.appendId}`);
-        appendRow && appendRow.insertAdjacentElement('afterend', this.element);
-        this.element.insertAdjacentElement('afterend', appendRow);
+        if (appendRow) {
+          appendRow.insertAdjacentElement('afterend', this.element);
+          this.element.insertAdjacentElement('afterend', appendRow);
+        }
         const appendId = this.appendId.replace('row-', '');
         index = appendId ? pageObject.sections.findIndex(section => section.id === appendId) : -1;
       }
@@ -84,8 +86,10 @@ export class UpdateRowCommand implements ICommand {
         const appendIndex = appendId ? pageObject.sections.findIndex(section => section.id === appendId) : -1;
         if (this.appendId) {
           const appendRow = this.parent.querySelector(`#${this.appendId}`);
-          appendRow && appendRow.insertAdjacentElement('afterend', this.element);
-          this.element.insertAdjacentElement('afterend', appendRow);
+          if (appendRow) {
+            appendRow.insertAdjacentElement('afterend', this.element);
+            this.element.insertAdjacentElement('afterend', appendRow);
+          }
         }
         pageObject.addRow(this.data, this.rowId, appendIndex);
       }

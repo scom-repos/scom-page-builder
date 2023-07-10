@@ -177,7 +177,7 @@ export default class Editor extends Module {
     }
 
     getData() {
-        const hasData = (el: IPageElement) => el.type === 'primitive' || (el.type === 'composite' && el.elements?.length);
+        const hasData = (el: IPageElement) => Object.keys(el.module || {}).length || el.elements?.length;
         return {
             // header: pageObject.header,
             sections: pageObject.sections.filter(section => {
@@ -198,7 +198,7 @@ export default class Editor extends Module {
         pageObject.sections = value?.sections || [];
         pageObject.footer = value?.footer;
         pageObject.config = value?.config;
-        if (value?.config) setDefaultPageConfig(value.config);
+        setDefaultPageConfig(value?.config);
         try {
             // await this.builderHeader.setData(value.header);
             await this.pageRows.setRows(value?.sections || []);

@@ -2,6 +2,7 @@ import { Control } from "@ijstech/components";
 import { pageObject } from "../store/index";
 import { ICommand } from "./interface";
 import { getColumn, getColumnSpan, updateColumnData, getDropColumnData, getAppendColumnData } from "./columnUtils";
+import { INIT_COLUMN_SPAN } from "../interface/index";
 
 export class AddElementCommand implements ICommand {
   private element: any;
@@ -45,7 +46,7 @@ export class AddElementCommand implements ICommand {
   async execute() {
     if (!this.parent) return;
     let column = 1;
-    let columnSpan = 6;
+    let columnSpan = INIT_COLUMN_SPAN;
 
     if (!this.isNew) {
       const columnData = this.getColumnData();
@@ -55,11 +56,29 @@ export class AddElementCommand implements ICommand {
     }
 
     const isMicroDapps = this.data?.module?.category === 'micro-dapps';
+    // const newElData = {
+    //   id: this.data.id,
+    //   column,
+    //   columnSpan,
+    //   type: ElementType.COMPOSITE,
+    //   properties: {},
+    //   elements: [{
+    //     id: this.data.elementId,
+    //     column,
+    //     columnSpan,
+    //     type: ElementType.PRIMITIVE,
+    //     properties: {
+    //       showHeader: isMicroDapps,
+    //       showFooter: isMicroDapps
+    //     },
+    //     module: this.data.module
+    //   }]
+    // };
     const newElData = {
       id: this.data.id,
       column,
       columnSpan,
-      type: this.data.type,
+      // type: ElementType.PRIMITIVE,
       properties: {
         showHeader: isMicroDapps,
         showFooter: isMicroDapps

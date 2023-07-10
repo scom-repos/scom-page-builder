@@ -6,7 +6,7 @@ import {
     Container
 } from '@ijstech/components';
 import './pageSection.css';
-import { ElementType, IPageElement } from '../interface/index';
+import { IPageElement } from '../interface/index';
 import { IDEToolbar } from '../common/index';
 import { isEmpty } from '../utility/index';
 import { getTheme, pageObject } from '../store/index';
@@ -103,12 +103,12 @@ export class PageSection extends Module {
         this.clearData();
         this.id = value.id;
         this.rowId = rowId;
-        if (value.type === ElementType.PRIMITIVE) {
-            await this.createToolbar(value);
-        } else if (value?.elements?.length) {
+        if (value?.elements?.length) {
             for (let element of value.elements) {
                 await this.createToolbar(element);
             }
+        } else {
+            await this.createToolbar(value);
         }
     }
 

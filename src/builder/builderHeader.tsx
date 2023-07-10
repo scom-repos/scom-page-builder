@@ -1,7 +1,7 @@
-import { Module, customElements, ControlElement, Styles, Panel, Button, Modal, Upload, Input, observable, application, Control } from '@ijstech/components';
+import { Module, customElements, ControlElement, Panel, Button, Modal, Upload, Input, observable, application, Control } from '@ijstech/components';
 import assets from '../assets';
 import { EVENT } from '../const/index';
-import { ElementType, ELEMENT_NAME, HeaderType, IPageHeader } from '../interface/index';
+import { ELEMENT_NAME, HeaderType, IPageHeader } from '../interface/index';
 import { PageRow } from '../page/index';
 import { getPageBlocks, pageObject } from '../store/index';
 import { generateUUID } from '../utility/index';
@@ -101,13 +101,21 @@ export class BuilderHeader extends Module {
                 id: generateUUID(),
                 column: 4,
                 columnSpan: 5,
-                type: ElementType.PRIMITIVE,
+                // type: ElementType.COMPOSITE,
                 module: textBlock,
                 properties: {},
-                tag: {
-                    width: '100%',
-                    height: '130px'
-                }
+                elements: [{
+                    id: generateUUID(),
+                    column: 4,
+                    columnSpan: 5,
+                    module: textBlock,
+                    // type: ElementType.PRIMITIVE,
+                    properties: {},
+                    tag: {
+                        width: '100%',
+                        height: '130px'
+                    }
+                }]
             }]
         })
     }
