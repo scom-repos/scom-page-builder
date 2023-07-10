@@ -37,6 +37,6 @@ export const IMAGE_PATH = 'scom-image';
 export const GAP_WIDTH = 15;
 export const MAX_COLUMN = 12;
 export const MIN_COLUMN = 2;
-export const INIT_COLUMN_SPAN = 4;
+export const INIT_COLUMN_SPAN = 6;
 export const PAGE_SIZE = 6;
 export type ThemeType = 'dark' | 'light';

@@ -198,7 +198,7 @@ export default class Editor extends Module {
         pageObject.sections = value?.sections || [];
         pageObject.footer = value?.footer;
         pageObject.config = value?.config;
-        if (value?.config) setDefaultPageConfig(value.config);
+        setDefaultPageConfig(value?.config);
         try {
             // await this.builderHeader.setData(value.header);
             await this.pageRows.setRows(value?.sections || []);
