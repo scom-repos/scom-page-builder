@@ -4507,19 +4507,16 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     if (!collision.mergeSide && !collision.section)
                         return;
                 }
-                // drag on the gap of fixed panel
-                if (collision.collisionType == "none" && eventTarget.classList.contains('fixed-grid'))
-                    return;
                 // is ungrouping and draging on the original section
                 if (collision.collisionType == "self" && isUngrouping)
                     return;
                 if (pageRow && ((_b = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _b === void 0 ? void 0 : _b.name) === 'sectionStack')
                     components_24.application.EventBus.dispatch(index_38.EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
-                if (!self.currentElement)
-                    return;
                 let nearestFixedItem = eventTarget.closest('.fixed-grid-item');
                 // if target overlap with itself
-                if (collision.collisionType == "self")
+                if (collision.collisionType == "self"
+                    // drag on the gap of fixed panel
+                    || (collision.collisionType == "none" && eventTarget.classList.contains('fixed-grid')))
                     nearestFixedItem = findNearestFixedGridInRow(event.clientX);
                 const config = { id: (0, index_42.generateUUID)() };
                 // check if drop on a fixed-panel

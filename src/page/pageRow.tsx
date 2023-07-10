@@ -863,18 +863,19 @@ export class PageRow extends Module {
                 // check which side is the merge target
                 if (!collision.mergeSide && !collision.section) return
             }
-            // drag on the gap of fixed panel
-            if (collision.collisionType == "none" && eventTarget.classList.contains('fixed-grid')) return;
+
             // is ungrouping and draging on the original section
             if (collision.collisionType == "self" && isUngrouping) return;
 
             if (pageRow && elementConfig?.module?.name === 'sectionStack')
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
-            if (!self.currentElement) return;
 
             let nearestFixedItem = eventTarget.closest('.fixed-grid-item') as Control;
-            // if target overlap with itself
-            if (collision.collisionType == "self")
+                // if target overlap with itself
+            if (collision.collisionType == "self"
+                // drag on the gap of fixed panel
+                || (collision.collisionType == "none" && eventTarget.classList.contains('fixed-grid')))
+
                 nearestFixedItem = findNearestFixedGridInRow(event.clientX);
 
             const config = { id: generateUUID() };
