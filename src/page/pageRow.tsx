@@ -13,7 +13,7 @@ import { PageSection } from './pageSection';
 import { RowSettingsDialog } from '../dialogs/index';
 import './pageRow.css';
 import { EVENT } from '../const/index';
-import { IPageElement, IPageSection, GAP_WIDTH, MIN_COLUMN, IPageSectionConfig } from '../interface/index';
+import { IPageElement, IPageSection, GAP_WIDTH, IPageSectionConfig, INIT_COLUMN_SPAN } from '../interface/index';
 import { getDragData, getMargin, getPageConfig, pageObject, setDragData } from '../store/index';
 import {
     commandHistory,
@@ -523,7 +523,7 @@ export class PageRow extends Module {
             self.addDottedLines();
             if (target) {
                 const column = Number(target.dataset.column);
-                const columnSpan = self.currentElement.dataset.columnSpan ? Number(self.currentElement.dataset.columnSpan) : MIN_COLUMN ;
+                const columnSpan = self.currentElement.dataset.columnSpan ? Number(self.currentElement.dataset.columnSpan) : INIT_COLUMN_SPAN;
                 const colSpan = Math.min(columnSpan, self.maxColumn);
                 const colStart = Math.min(column, self.maxColumn - colSpan + 1);
                 const grid = target.closest('.grid');
@@ -882,7 +882,7 @@ export class PageRow extends Module {
             if (nearestFixedItem) {
                 const column = Number(nearestFixedItem.dataset.column);
                 const columnSpan = self.currentElement.dataset.columnSpan ?
-                    Number(self.currentElement.dataset.columnSpan) : MIN_COLUMN;
+                    Number(self.currentElement.dataset.columnSpan) : INIT_COLUMN_SPAN;
                 const colSpan = Math.min(columnSpan, self.maxColumn);
                 const colStart = Math.min(column, self.maxColumn - colSpan + 1);
                 const grid = nearestFixedItem.closest('.grid');

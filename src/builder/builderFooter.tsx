@@ -54,7 +54,6 @@ export class BuilderFooter extends Module {
 
     initEventBus() {
         application.EventBus.register(this, EVENT.ON_UPDATE_SECTIONS, async () => {
-            // if (!pageObject.footer?.elements?.length)
             this.updateFooter();
         })
     }

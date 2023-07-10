@@ -1,6 +1,6 @@
 import { Control } from "@ijstech/components";
 import { pageObject } from "../store/index";
-import { MIN_COLUMN } from "../interface/index";
+import { INIT_COLUMN_SPAN, MIN_COLUMN } from "../interface/index";
 
 const updateColumnData = (el: Control, rowId: string, column: number, columnSpan: number) => {
   const newColumnData: any = {column, columnSpan};
@@ -29,7 +29,7 @@ const getPrevColumn = (el: Control) => {
 const getDropColumnData = (dropElm: Control, sortedSections: HTMLElement[], element?: Control) => {
   const dropRow = dropElm.closest('ide-row') as Control;
   const dropElmCol = getColumn(dropElm);
-  let columnSpan = element ? getColumnSpan(element) : MIN_COLUMN;
+  let columnSpan = element ? getColumnSpan(element) : INIT_COLUMN_SPAN;
   const dropRowId = (dropRow?.id || '').replace('row-', '');
   const MAX_COLUMN = pageObject.getColumnsNumber(dropRowId);
   const maxColumn = (MAX_COLUMN - columnSpan) + 1;
