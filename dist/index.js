@@ -2068,7 +2068,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             this.isAppend = isAppend;
         }
         async execute() {
-            var _a, _b, _c, _d, _e, _f, _g, _h;
+            var _a, _b, _c, _d, _e, _f, _g;
             if (!this.parent)
                 return;
             this.prevSection = this.prevParent.querySelector(`[id='${this.prevSection.id}']`);
@@ -2142,24 +2142,20 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             else {
                 // create elm in a new section
                 // this.newId = generateUUID();
-                const isMicroDapps = ((_f = (_e = this.data) === null || _e === void 0 ? void 0 : _e.module) === null || _f === void 0 ? void 0 : _f.category) === 'micro-dapps';
                 const newElData = {
                     id: this.data.id,
                     column: parseInt(this.dropElm.dataset.column),
                     columnSpan: this.data.columnSpan,
-                    // type: this.data.type, // to be removed
-                    properties: {
-                        showHeader: isMicroDapps,
-                        showFooter: isMicroDapps
-                    },
+                    properties: this.data.properties,
+                    tag: ((_e = this.data) === null || _e === void 0 ? void 0 : _e.tag) || {},
                     module: this.data.module
                 };
                 this.appendElm = await this.parent.addElement(newElData);
                 const parentId = this.parent.id.replace('row-', '');
                 index_13.pageObject.addElement(parentId, newElData);
-                const elementRowId = (((_g = this.parent) === null || _g === void 0 ? void 0 : _g.id) || '').replace('row-', '');
+                const elementRowId = (((_f = this.parent) === null || _f === void 0 ? void 0 : _f.id) || '').replace('row-', '');
                 const elementSection = index_13.pageObject.getRow(elementRowId);
-                this.parent.toggleUI(!!((_h = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _h === void 0 ? void 0 : _h.length));
+                this.parent.toggleUI(!!((_g = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _g === void 0 ? void 0 : _g.length));
             }
         }
         // temporary workaround
@@ -2170,8 +2166,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 return data;
         }
         async undo() {
-            var _a, _b, _c, _d, _e, _f;
-            this.draggingToolbar = this.parent.querySelector(`[id='${this.draggingToolbar.id}']`);
+            var _a, _b, _c, _d, _e;
             // delete the elm
             const row = this.parent;
             const rowId = row ? row.id.replace("row-", "") : undefined;
@@ -2179,6 +2174,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             index_13.pageObject.removeElement(rowId, elmId, true);
             const newElm = row.querySelector(`#elm-${elmId}`);
             if (newElm) {
+                this.draggingToolbar = newElm;
                 const sectionEl = newElm.closest('ide-section');
                 newElm.remove();
                 const section = index_13.pageObject.getRow(rowId);
@@ -2196,16 +2192,12 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             }
             components_5.application.EventBus.dispatch(index_14.EVENT.ON_UPDATE_SECTIONS);
             // merge the elms
-            const isMicroDapps = ((_d = (_c = this.data) === null || _c === void 0 ? void 0 : _c.module) === null || _d === void 0 ? void 0 : _d.category) === 'micro-dapps';
             const newElData = {
                 id: this.data.id,
                 column: this.oriCol,
                 columnSpan: this.oriColSpan,
-                // type: this.data.type, // to be removed
-                properties: {
-                    showHeader: isMicroDapps,
-                    showFooter: isMicroDapps
-                },
+                properties: this.data.properties,
+                tag: ((_c = this.data) === null || _c === void 0 ? void 0 : _c.tag) || {},
                 module: this.data.module
             };
             const elmParent = (this.appendElm ? this.appendElm.closest('ide-row') : this.dropElm.closest('ide-row'));
@@ -2236,7 +2228,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 index_13.pageObject.setElement(dropRowId, prevSectionId, {
                     // type: ElementType.COMPOSITE, // to be removed
                     elements: [clonedDropSecData, ...updatedList],
-                    dropId: ((_e = this.data) === null || _e === void 0 ? void 0 : _e.id) || ''
+                    dropId: ((_d = this.data) === null || _d === void 0 ? void 0 : _d.id) || ''
                 });
             }
             const newDropData = index_13.pageObject.getElement(dropRowId, prevSectionId);
@@ -2246,7 +2238,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 const elementSection = index_13.pageObject.getRow(elementRowId);
                 if (elementRowId !== dropRowId && this.appendElm)
                     index_13.pageObject.removeElement(elementRowId, this.appendElm.id, true);
-                elmParent.visible = !!((_f = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _f === void 0 ? void 0 : _f.length);
+                elmParent.visible = !!((_e = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _e === void 0 ? void 0 : _e.length);
             }
             if (this.appendElm)
                 this.appendElm.remove();
