@@ -251,8 +251,8 @@ export class IDEToolbar extends Module {
             };
             this.form.renderForm();
             this.form.clearFormData();
-            const formData = action.name === 'Theme Settings' ? (tag || {}) : (properties || {})
-            this.form.setFormData({...formData});
+            // const formData = action.name === 'Theme Settings' ? (tag || {}) : (properties || {})
+            this.form.setFormData({...tag, ...properties});
             this.form.visible = true;
         }
         this.mdActions.refresh();

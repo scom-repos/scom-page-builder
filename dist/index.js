@@ -4845,8 +4845,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 };
                 this.form.renderForm();
                 this.form.clearFormData();
-                const formData = action.name === 'Theme Settings' ? (tag || {}) : (properties || {});
-                this.form.setFormData(Object.assign({}, formData));
+                // const formData = action.name === 'Theme Settings' ? (tag || {}) : (properties || {})
+                this.form.setFormData(Object.assign(Object.assign({}, tag), properties));
                 this.form.visible = true;
             }
             this.mdActions.refresh();
