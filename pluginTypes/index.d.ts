@@ -1547,6 +1547,7 @@ declare module "@scom/scom-page-builder" {
         private pageRows;
         private builderFooter;
         private pnlWrap;
+        private pageSidebar;
         private mdComponentsSearch;
         private pnlEditor;
         private contentWrapper;

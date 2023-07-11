@@ -5,7 +5,7 @@ const Theme = Styles.Theme.ThemeVars;
 export const categoryPanelStyle = Styles.style({
     padding: 4,
     boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 50px',
-    background: Theme.background.paper,
+    background: '#fff',
     borderRadius: 5
 })
 
@@ -44,7 +44,7 @@ export const widgetStyle = Styles.style({
             opacity: 0.3
         },
         '&:hover': {
-            transform: 'scale(1.04) translateY(-2px)'
+            transform: 'scale(1.04) translateY(-4px)'
         }
     }
 })

@@ -6017,7 +6017,7 @@ define("@scom/scom-page-builder/page/pageSidebar.css.ts", ["require", "exports",
     exports.categoryPanelStyle = components_33.Styles.style({
         padding: 4,
         boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 50px',
-        background: Theme.background.paper,
+        background: '#fff',
         borderRadius: 5
     });
     exports.categoryButtonStyle = components_33.Styles.style({
@@ -6053,7 +6053,7 @@ define("@scom/scom-page-builder/page/pageSidebar.css.ts", ["require", "exports",
                 opacity: 0.3
             },
             '&:hover': {
-                transform: 'scale(1.04) translateY(-2px)'
+                transform: 'scale(1.04) translateY(-4px)'
             }
         }
     });
@@ -6810,6 +6810,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         set categories(value) {
             (0, index_78.setCategories)(value);
             // this.pageSidebar.renderUI();
+            this.pageSidebar.renderWidgetCategories();
         }
         get theme() {
             var _a;
@@ -7013,7 +7014,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                             this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
                                 this.$render("ide-rows", { id: "pageRows", draggable: true })),
                             this.$render("builder-footer", { id: "builderFooter" })))),
-                this.$render("i-scom-page-builder-sidebar", null),
+                this.$render("i-scom-page-builder-sidebar", { id: "pageSidebar" }),
                 this.$render("ide-search-components-dialog", { id: "mdComponentsSearch" })));
         }
     };

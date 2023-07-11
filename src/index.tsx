@@ -36,7 +36,7 @@ export default class Editor extends Module {
     // private builderHeader: BuilderHeader;
     private builderFooter: BuilderFooter;
     private pnlWrap: Panel;
-    // private pageSidebar: PageSidebar;
+    private pageSidebar: PageSidebar;
     private mdComponentsSearch: SearchComponentsDialog;
     private pnlEditor: Panel;
     private contentWrapper: Panel;
@@ -77,6 +77,7 @@ export default class Editor extends Module {
     set categories(value: ICategory[]) {
         setCategories(value);
         // this.pageSidebar.renderUI();
+        this.pageSidebar.renderWidgetCategories();
     }
 
     get theme() {
@@ -354,7 +355,7 @@ export default class Editor extends Module {
                         ></ide-sidebar>
                     </i-panel> */}
                 {/* </i-grid-layout> */}
-                <i-scom-page-builder-sidebar></i-scom-page-builder-sidebar>
+                <i-scom-page-builder-sidebar id="pageSidebar"></i-scom-page-builder-sidebar>
                 <ide-search-components-dialog
                     id="mdComponentsSearch"
                 ></ide-search-components-dialog>
