@@ -493,7 +493,13 @@ export class PageRow extends Module {
             if (self.currentElement && !self.currentElement.classList.contains('builder-item'))
                 self.currentElement.opacity = 1;
             resetDragTarget();
+            resetPageRow();
         });
+
+        function resetPageRow() {
+            self.pnlRow.minHeight = 'auto';
+            self.toggleUI(!!self.data?.elements?.length);
+        }
 
         function dragEnter(enterTarget: Control, clientX: number, clientY: number, collision: Collision) {
             const elementConfig = getDragData();
@@ -502,6 +508,12 @@ export class PageRow extends Module {
                 pageRow.classList.add('row-entered');
             }
             if (!enterTarget || !self.currentElement) return;
+            if (enterTarget.closest('#pnlEmty')) {
+                self.pnlRow.minHeight = '180px';
+                self.toggleUI(true);
+                self.addDottedLines();
+                return
+            }
             const rowBottom = enterTarget.closest(`.${ROW_BOTTOM_CLASS}`) as Control;
             const rowTop = enterTarget.closest(`.${ROW_TOP_CLASS}`) as Control;
             if (rowBottom) {
@@ -837,6 +849,7 @@ export class PageRow extends Module {
         }
 
         this.addEventListener('drop', async function (event) {
+            self.pnlRow.minHeight = 'auto';
             const elementConfig = getDragData();
             const eventTarget = event.target as Control;
             const pageRow = eventTarget.closest('ide-row') as PageRow;
