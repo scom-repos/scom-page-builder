@@ -39,6 +39,7 @@ export default class Editor extends Module {
     private pageSidebar: PageSidebar;
     private mdComponentsSearch: SearchComponentsDialog;
     private pnlEditor: Panel;
+    private contentWrapper: Panel;
 
     private events: any[] = [];
     private currentElement: any;
@@ -112,6 +113,16 @@ export default class Editor extends Module {
                     ticking = false;
                 });
                 ticking = true;
+            }
+            const pageRowsRect = this.pageRows.getBoundingClientRect();
+            const pnlEditorRect = this.pnlEditor.getBoundingClientRect();
+
+            // drop on the below of rows
+            if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y 
+                && event.clientY >= pageRowsRect.height + pageRowsRect.y
+                && event.clientX >= pageRowsRect.x
+                && event.clientX <= pageRowsRect.x + pageRowsRect.width) {
+                    application.EventBus.dispatch(EVENT.ON_SHOW_BOTTOM_BLOCK);
             }
         });
 

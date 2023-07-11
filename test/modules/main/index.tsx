@@ -80,7 +80,7 @@ export class MainModule extends Module {
   private async onFetchComponentsFn(options: IOnFetchComponentsOptions) {
     const { category, pageNumber, pageSize, keyword = '' } = options;
     let filteredComponents = [...this._components];
-    let total  = 0;
+    let total = 0;
     if (category) {
       filteredComponents = filteredComponents.filter(cp => cp.category === category);
     }
@@ -99,7 +99,58 @@ export class MainModule extends Module {
   init() {
     super.init();
     const data: any = {
-      "sections": [],
+      "sections": [
+        {
+          "id": "6876b0ab-a29c-4ed8-905e-51cd515fa26c",
+          "row": 1,
+          "elements": [
+            {
+              "id": "ff69df4f-ebb0-4446-adde-9bcb8a07f25d",
+              "column": 1,
+              "columnSpan": 12,
+              "type": "composite",
+              "properties": {
+                "url": "https://placehold.co/600x400.png",
+                "showHeader": false,
+                "showFooter": false
+              },
+              "module": {},
+              "tag": {
+                "width": 257,
+                "height": 257
+              },
+              "elements": [
+                {
+                  "id": "da140da9-9701-4928-b0fd-c5af250d5817",
+                  "column": 1,
+                  "columnSpan": 12,
+                  "type": "primitive",
+                  "module": {
+                    "name": "Banner",
+                    "path": "scom-banner",
+                    "category": "composables",
+                  },
+                  "properties": {
+                    "title": 'Page Banner Title',
+                    "description": 'page banner description',
+                    "backgroundImageCid": undefined,
+                    "backgroundInageUrl": '',
+                    "linkButtons": undefined
+                  },
+                  "tag": {
+                    "width": "100%",
+                    "height": 154
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "footer": {
+        "image": "",
+        "elements": []
+      },
       config: {
         maxWidth: 1000
       }
@@ -112,9 +163,9 @@ export class MainModule extends Module {
       <i-panel width="100%" height="100%">
         <i-button
           caption="Get data"
-          margin={{top: '1rem', left: '1rem', bottom: '1rem'}}
-          padding={{top: '0.5rem', left: '1rem', bottom: '0.5rem', right: '1rem'}}
-          font={{color: '#fff'}}
+          margin={{ top: '1rem', left: '1rem', bottom: '1rem' }}
+          padding={{ top: '0.5rem', left: '1rem', bottom: '0.5rem', right: '1rem' }}
+          font={{ color: '#fff' }}
           onClick={() => this.onGetData()}
         ></i-button>
         <i-scom-page-builder

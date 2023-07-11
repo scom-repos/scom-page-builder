@@ -636,7 +636,7 @@ export class PageRow extends Module {
 
         this.addEventListener('dragenter', function (event) {
             const eventTarget = event.target as Control;
-            const collision = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX, event.clientY)
+            const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY)
             dragEnter(eventTarget, event.clientX, event.clientY, collision);
         });
 
@@ -644,7 +644,7 @@ export class PageRow extends Module {
             event.preventDefault();
             const eventTarget = event.target as Control;
             let enterTarget: Control;
-            const collision = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX, event.clientY)
+            const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY)
             // if target overlap with itself
             if (collision.collisionType == "self") {
                 const cursorPosition = { x: event.clientX, y: event.clientY };
@@ -668,17 +668,32 @@ export class PageRow extends Module {
                     }
                 });
                 enterTarget = nearestElement;
-            } else if (collision.collisionType == 'mutual' && collision.mergeSide) {
+            } else if (collision.collisionType == 'mutual') {
                 // choose a merge block to display
+                if (collision.mergeSide) {
+                    let blockClass: string = `.${collision.mergeSide}-block`;
+                    const block = (collision.mergeSide == "top" || collision.mergeSide == "bottom") ?
+                        collision.toolbar.querySelector(blockClass) as Control : 
+                        collision.section.querySelector(blockClass) as Control ;
+    
+                    block.visible = true;
+                    updateClass(block, 'is-dragenter');
+                    return
 
-                let blockClass: string = `.${collision.mergeSide}-block`;
-                const block = (collision.mergeSide == "top" || collision.mergeSide == "bottom") ?
-                    collision.toolbar.querySelector(blockClass) as Control : 
-                    collision.section.querySelector(blockClass) as Control ;
-
-                block.visible = true;
-                updateClass(block, 'is-dragenter');
-                return
+                } else if (collision.section) {
+                    // handle dragging to the bottom of other elm
+                    const dragOverSection = eventTarget.closest && eventTarget.closest('ide-section');
+                    if (dragOverSection) {
+                        const lastIdeToolbars = dragOverSection.querySelectorAll('ide-toolbar:last-child');
+                        const lastIdeToolbar = (lastIdeToolbars.length > 0)? lastIdeToolbars[0] : undefined;
+                        if (lastIdeToolbars.length > 0) {
+                            const bottomBlock = lastIdeToolbar.querySelector('.bottom-block') as Control;
+                            bottomBlock.visible = true;
+                            bottomBlock && updateClass(bottomBlock, 'is-dragenter');
+                            return
+                        }
+                    }
+                } else return
 
             } else return
 
@@ -721,11 +736,11 @@ export class PageRow extends Module {
             return nearestElement;
         }
 
-        function isOverlapWithSection(dropTarget: HTMLElement, dragTarget: HTMLElement, clientX: number, clientY: number): Collision {
+        function checkCollision(dropTarget: HTMLElement, dragTarget: HTMLElement, clientX: number, clientY: number): Collision {
             if (!dropTarget) return { collisionType: "none" }
             if (!dragTarget) {
-                const dropToolbar = dropTarget.closest('ide-toolbar') as HTMLElement;
                 const dropSection = dropTarget.closest('ide-section') as HTMLElement;
+                const dropToolbar = dropTarget.closest('ide-toolbar') as HTMLElement;
                 if (dropToolbar) {
                     return {
                         collisionType: "mutual", 
@@ -734,9 +749,12 @@ export class PageRow extends Module {
                         // check which side is the merge target
                         mergeSide: decideMergeSide(dropToolbar, clientX, clientY)
                     }
-                } else {
-                    return { collisionType: "none" }
-                }
+                } else if (dropSection) {
+                    return {
+                        collisionType: "mutual", 
+                        section: dropSection,
+                    }
+                } else return { collisionType: "none" }
             }
             const dragTargetSection = dragTarget.closest('ide-section') as HTMLElement;
 
@@ -836,27 +854,28 @@ export class PageRow extends Module {
             const isUngrouping: boolean = self.currentToolbar && numberOfToolbars > 1
 
             // if target overlap with other section
-            const collision = isOverlapWithSection(eventTarget, dragStartTarget, event.clientX, event.clientY);
+            const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
 
             const dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
 
             // collide with other section 
             if (collision.collisionType == "mutual"/* || overlap.overlapType == "border"*/) {
                 // check which side is the merge target
-                if (!collision.mergeSide) return
+                if (!collision.mergeSide && !collision.section) return
             }
-            // drag on the gap of fixed panel
-            if (collision.collisionType == "none" && eventTarget.classList.contains('fixed-grid')) return;
+
             // is ungrouping and draging on the original section
             if (collision.collisionType == "self" && isUngrouping) return;
 
             if (pageRow && elementConfig?.module?.name === 'sectionStack')
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
-            if (!self.currentElement) return;
 
             let nearestFixedItem = eventTarget.closest('.fixed-grid-item') as Control;
-            // if target overlap with itself
-            if (collision.collisionType == "self")
+                // if target overlap with itself
+            if (collision.collisionType == "self"
+                // drag on the gap of fixed panel
+                || (collision.collisionType == "none" && eventTarget.classList.contains('fixed-grid')))
+
                 nearestFixedItem = findNearestFixedGridInRow(event.clientX);
 
             const config = { id: generateUUID() };
@@ -905,7 +924,7 @@ export class PageRow extends Module {
                 }
                 self.isDragging = false;
             
-            // drop on a new row
+            // if not drop on a fixed-panel
             } else {
                 if (self.isDragging) return;
                 const inEmptyPnl = eventTarget.closest('#pnlEmty');
@@ -957,6 +976,7 @@ export class PageRow extends Module {
                         const elements = parentId ? pageObject.getRow(parentId)?.elements || [] : [];
                         const hasData = elements.find((el: IPageElement) => Object.keys(el.module || {}).length || el.elements?.length);
                         const dragCmd = !hasData && new AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
+                        // drag new element on a new row
                         dragCmd && await commandHistory.execute(dragCmd);
                     } else {
                         if (isUngrouping) {
@@ -1041,6 +1061,7 @@ export class PageRow extends Module {
     }
 
     private initEventBus() {
+        const self = this;
         application.EventBus.register(this, EVENT.ON_SET_DRAG_ELEMENT, async (el: any) => this.currentElement = el);
         application.EventBus.register(this, EVENT.ON_SET_DRAG_TOOLBAR, async (el: any) => this.currentToolbar = el)
         application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_CONFIG, async (data: any) => {
@@ -1056,6 +1077,31 @@ export class PageRow extends Module {
             pageObject.updateSection(id, { config: newConfig });
             this.updateRowConfig(newConfig);
             this.updateGridColumnWidth();
+        });
+        application.EventBus.register(this, EVENT.ON_SHOW_BOTTOM_BLOCK, async () => {
+
+            function _updateClass(elm: Control, className: string) {
+                if (elm.visible) {
+                    if (className === 'is-dragenter') {
+                        const blocks = self.getElementsByClassName('is-dragenter');
+                        for (let block of blocks) {
+                            block.classList.remove('is-dragenter');
+                        }
+                    }
+                    elm.classList.add(className);
+                } else {
+                    elm.classList.remove(className);
+                }
+            }
+
+            const PageRows = this.closest('ide-rows')
+            const lastRows = PageRows.querySelectorAll('ide-row:last-child');
+            const lastRow = (lastRows.length > 0)? lastRows[0] : undefined;
+            if (lastRows.length > 0 && lastRow.id == self.id) {
+                const bottomBlock = lastRow.querySelector('.row-bottom-block') as Control;
+                bottomBlock.visible = true;
+                bottomBlock && _updateClass(bottomBlock, 'is-dragenter');
+            }
         });
     }
 

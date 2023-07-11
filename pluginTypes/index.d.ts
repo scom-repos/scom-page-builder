@@ -50,6 +50,7 @@ declare module "@scom/scom-page-builder/const/index.ts" {
         ON_CLONE: string;
         ON_RESIZE: string;
         ON_UPDATE_FOOTER: string;
+        ON_SHOW_BOTTOM_BLOCK: string;
         ON_UPDATE_TOOLBAR: string;
         ON_SET_ACTION_BLOCK: string;
         ON_SET_DRAG_ELEMENT: string;
@@ -1546,6 +1547,7 @@ declare module "@scom/scom-page-builder" {
         private pageSidebar;
         private mdComponentsSearch;
         private pnlEditor;
+        private contentWrapper;
         private events;
         private currentElement;
         private isFirstLoad;
