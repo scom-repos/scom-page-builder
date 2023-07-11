@@ -4155,21 +4155,25 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             });
             function dragEnter(enterTarget, clientX, clientY, collision) {
                 var _a, _b, _c, _d;
+                if (!enterTarget)
+                    return;
                 const elementConfig = (0, index_40.getDragData)();
                 const pageRow = enterTarget.closest('ide-row');
                 if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
                     pageRow.classList.add('row-entered');
                 }
-                if (!enterTarget || !self.currentElement)
+                if (!self.currentElement)
                     return;
                 const rowBottom = enterTarget.closest(`.${ROW_BOTTOM_CLASS}`);
                 const rowTop = enterTarget.closest(`.${ROW_TOP_CLASS}`);
                 if (rowBottom) {
                     updateClass(rowBottom, 'is-dragenter');
+                    removeRectangles();
                     return;
                 }
                 else if (rowTop) {
                     updateClass(rowTop, 'is-dragenter');
+                    removeRectangles();
                     return;
                 }
                 else {
@@ -4199,13 +4203,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     if (findedSection && findedSection != self.currentElement)
                         return;
                     self.updateGridColumnWidth();
-                    const rectangle = target
-                        .closest('.fixed-grid')
-                        .parentNode.querySelector(`.rectangle`);
-                    rectangle.style.display = 'block';
-                    rectangle.style.left = (self.gridColumnWidth + index_39.GAP_WIDTH) * (colStart - 1) + 'px';
-                    rectangle.style.width =
-                        self.gridColumnWidth * columnSpan + index_39.GAP_WIDTH * (columnSpan - 1) + 'px';
+                    const targetRow = target.closest('#pnlRow');
+                    showRectangle(targetRow, colStart, columnSpan);
                 }
                 else {
                     const section = enterTarget.closest('ide-section');
@@ -4256,8 +4255,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     target = findNearestFixedGridInRow(clientX);
                 else
                     target = leaveTarget.closest('.fixed-grid-item');
+                // if leaving a fixed-grid-item
                 if (target)
-                    updateRectangles();
+                    removeRectangles();
                 else {
                     const blocks = parentWrapper.getElementsByClassName('is-dragenter');
                     const currentSection = leaveTarget.closest('ide-section');
@@ -4296,16 +4296,17 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             }
             this.addEventListener('dragenter', function (event) {
                 const eventTarget = event.target;
+                // if (!eventTarget.classList.contains('fixed-grid-item')) return
                 const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
                 dragEnter(eventTarget, event.clientX, event.clientY, collision);
             });
-            document.addEventListener('dragover', function (event) {
+            this.addEventListener('dragover', function (event) {
                 event.preventDefault();
                 const eventTarget = event.target;
                 let enterTarget;
                 const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
                 // if target overlap with itself
-                if (collision.collisionType == "self") {
+                if (collision.collisionType == "self" || collision.collisionType == "none") {
                     const cursorPosition = { x: event.clientX, y: event.clientY };
                     const elements = self.pnlRow.querySelectorAll('.fixed-grid-item');
                     let nearestElement = null;
@@ -4364,7 +4365,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 dragEnter(enterTarget, event.clientX, event.clientY, collision);
                 dragOverTarget = enterTarget;
             });
-            document.addEventListener('dragleave', function (event) {
+            this.addEventListener('dragleave', function (event) {
                 const eventTarget = event.target;
                 dragLeave(eventTarget, event.clientX);
             });
@@ -4541,10 +4542,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     self.isDragging = true;
                     // ungrouping elm
                     if (isUngrouping) {
-                        const dragCmd = new index_41.UngroupElementCommand(self.currentToolbar.data, false, self.currentToolbar, eventTarget, config);
+                        const dragCmd = new index_41.UngroupElementCommand(self.currentToolbar.data, false, self.currentToolbar, nearestFixedItem, config);
                         index_41.commandHistory.execute(dragCmd);
                         self.currentElement.opacity = 1;
-                        updateRectangles();
+                        removeRectangles();
                     }
                     else if (self.currentElement.data) {
                         const dragCmd = new index_41.DragElementCommand(self.currentElement, nearestFixedItem);
@@ -4646,7 +4647,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         self.isDragging = false;
                     }
                     self.removeDottedLines();
-                    updateRectangles();
+                    removeRectangles();
                 }
             });
             function resetDragTarget() {
@@ -4657,7 +4658,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.isDragging = false;
                 (0, index_40.setDragData)(null);
                 self.removeDottedLines();
-                updateRectangles();
+                removeRectangles();
                 removeClass('is-dragenter');
                 removeClass('row-entered');
                 removeClass('is-dragging');
@@ -4672,7 +4673,16 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     element.classList.remove(className);
                 }
             }
-            function updateRectangles() {
+            function showRectangle(targetRow, colStart, columnSpan) {
+                const rectangle = targetRow.querySelector(`.rectangle`);
+                if (!rectangle)
+                    return;
+                rectangle.style.display = 'block';
+                rectangle.style.left = (self.gridColumnWidth + index_39.GAP_WIDTH) * (colStart - 1) + 'px';
+                rectangle.style.width =
+                    self.gridColumnWidth * columnSpan + index_39.GAP_WIDTH * (columnSpan - 1) + 'px';
+            }
+            function removeRectangles() {
                 const rectangles = parentWrapper.getElementsByClassName('rectangle');
                 for (const rectangle of rectangles) {
                     rectangle.style.display = 'none';
@@ -4740,6 +4750,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     }
                 }
                 const PageRows = this.closest('ide-rows');
+                if (!PageRows)
+                    return;
                 const lastRows = PageRows.querySelectorAll('ide-row:last-child');
                 const lastRow = (lastRows.length > 0) ? lastRows[0] : undefined;
                 if (lastRows.length > 0 && lastRow.id == self.id) {

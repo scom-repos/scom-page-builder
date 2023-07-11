@@ -496,19 +496,22 @@ export class PageRow extends Module {
         });
 
         function dragEnter(enterTarget: Control, clientX: number, clientY: number, collision: Collision) {
+            if (!enterTarget) return;
             const elementConfig = getDragData();
             const pageRow = enterTarget.closest('ide-row') as PageRow;
             if (pageRow && elementConfig?.module?.name === 'sectionStack') {
                 pageRow.classList.add('row-entered');
             }
-            if (!enterTarget || !self.currentElement) return;
+            if (!self.currentElement) return;
             const rowBottom = enterTarget.closest(`.${ROW_BOTTOM_CLASS}`) as Control;
             const rowTop = enterTarget.closest(`.${ROW_TOP_CLASS}`) as Control;
             if (rowBottom) {
                 updateClass(rowBottom, 'is-dragenter');
+                removeRectangles();
                 return;
             } else if (rowTop) {
                 updateClass(rowTop, 'is-dragenter');
+                removeRectangles();
                 return;
             } else {
                 const dragEnter = parentWrapper.querySelector('.is-dragenter') as Control;
@@ -537,13 +540,8 @@ export class PageRow extends Module {
                 });
                 if (findedSection && findedSection!=self.currentElement) return;
                 self.updateGridColumnWidth();
-                const rectangle = target
-                    .closest('.fixed-grid')
-                    .parentNode.querySelector(`.rectangle`) as Control;
-                rectangle.style.display = 'block';
-                rectangle.style.left = (self.gridColumnWidth + GAP_WIDTH) * (colStart - 1) + 'px';
-                rectangle.style.width =
-                   self.gridColumnWidth * columnSpan + GAP_WIDTH * (columnSpan - 1) + 'px';
+                const targetRow = target.closest('#pnlRow') as Control
+                showRectangle(targetRow, colStart, columnSpan);
             } else {
                 const section = enterTarget.closest('ide-section') as Control;
                 if (section && !section.isSameNode(self.currentElement)) {
@@ -598,8 +596,10 @@ export class PageRow extends Module {
                 target = findNearestFixedGridInRow(clientX);
             else
                 target = leaveTarget.closest('.fixed-grid-item') as Control;
+
+            // if leaving a fixed-grid-item
             if (target)
-                updateRectangles();
+                removeRectangles();
             else {
                 const blocks = parentWrapper.getElementsByClassName('is-dragenter');
                 const currentSection = leaveTarget.closest('ide-section') as Control;
@@ -636,17 +636,18 @@ export class PageRow extends Module {
 
         this.addEventListener('dragenter', function (event) {
             const eventTarget = event.target as Control;
-            const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY)
+            // if (!eventTarget.classList.contains('fixed-grid-item')) return
+            const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
             dragEnter(eventTarget, event.clientX, event.clientY, collision);
         });
 
-        document.addEventListener('dragover', function (event) {
+        this.addEventListener('dragover', function (event) {
             event.preventDefault();
             const eventTarget = event.target as Control;
             let enterTarget: Control;
             const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY)
             // if target overlap with itself
-            if (collision.collisionType == "self") {
+            if (collision.collisionType == "self" || collision.collisionType == "none") {
                 const cursorPosition = { x: event.clientX, y: event.clientY };
                 const elements = self.pnlRow.querySelectorAll('.fixed-grid-item');
 
@@ -698,7 +699,6 @@ export class PageRow extends Module {
             } else return
 
             if (enterTarget == dragOverTarget) return
-
             // leave previous element: dragOverTarget
             dragLeave(dragOverTarget, event.clientX, true);
 
@@ -708,7 +708,7 @@ export class PageRow extends Module {
             dragOverTarget = enterTarget;
         });
 
-        document.addEventListener('dragleave', function (event) {
+        this.addEventListener('dragleave', function (event) {
             const eventTarget = event.target as Control;
             dragLeave(eventTarget, event.clientX);
         });
@@ -761,7 +761,7 @@ export class PageRow extends Module {
             if (dragStartTarget==null || dragStartTarget==undefined) return { collisionType: "mutual" }
             const toolbars = dragTargetSection.querySelectorAll('ide-toolbar');
             const isUngrouping: boolean = toolbars.length && toolbars.length > 1 && self.currentToolbar!=undefined;
-            const nearestCol = findNearestFixedGridInRow(clientX)
+            const nearestCol = findNearestFixedGridInRow(clientX);
             const dropColumn: number = parseInt(nearestCol.getAttribute("data-column"));
             const grid = dropTarget.closest('.grid');
             if (!grid) return { collisionType: "none" }
@@ -875,9 +875,7 @@ export class PageRow extends Module {
             if (collision.collisionType == "self"
                 // drag on the gap of fixed panel
                 || (collision.collisionType == "none" && eventTarget.classList.contains('fixed-grid')))
-
-                nearestFixedItem = findNearestFixedGridInRow(event.clientX);
-
+                    nearestFixedItem = findNearestFixedGridInRow(event.clientX);
             const config = { id: generateUUID() };
             // check if drop on a fixed-panel
             if (nearestFixedItem) {
@@ -901,10 +899,10 @@ export class PageRow extends Module {
 
                 // ungrouping elm
                 if (isUngrouping) {
-                    const dragCmd = new UngroupElementCommand(self.currentToolbar.data, false, self.currentToolbar, eventTarget, config);
+                    const dragCmd = new UngroupElementCommand(self.currentToolbar.data, false, self.currentToolbar, nearestFixedItem, config);
                     commandHistory.execute(dragCmd);
                     self.currentElement.opacity = 1;
-                    updateRectangles();
+                    removeRectangles();
                 } else if (self.currentElement.data) {
                     const dragCmd = new DragElementCommand(self.currentElement, nearestFixedItem);
                     commandHistory.execute(dragCmd);
@@ -994,7 +992,7 @@ export class PageRow extends Module {
                     self.isDragging = false;
                 }
                 self.removeDottedLines();
-                updateRectangles();
+                removeRectangles();
             }
         });
 
@@ -1006,7 +1004,7 @@ export class PageRow extends Module {
             self.isDragging = false;
             setDragData(null);
             self.removeDottedLines();
-            updateRectangles();
+            removeRectangles();
             removeClass('is-dragenter');
             removeClass('row-entered');
             removeClass('is-dragging');
@@ -1023,7 +1021,16 @@ export class PageRow extends Module {
             }
         }
 
-        function updateRectangles() {
+        function showRectangle(targetRow: Control, colStart: number, columnSpan: number) {
+            const rectangle = targetRow.querySelector(`.rectangle`) as Control;
+            if (!rectangle) return;
+            rectangle.style.display = 'block';
+            rectangle.style.left = (self.gridColumnWidth + GAP_WIDTH) * (colStart - 1) + 'px';
+            rectangle.style.width =
+                self.gridColumnWidth * columnSpan + GAP_WIDTH * (columnSpan - 1) + 'px';
+        }
+
+        function removeRectangles() {
             const rectangles = parentWrapper.getElementsByClassName('rectangle');
             for (const rectangle of rectangles) {
                 (rectangle as Control).style.display = 'none';
@@ -1095,6 +1102,7 @@ export class PageRow extends Module {
             }
 
             const PageRows = this.closest('ide-rows')
+            if (!PageRows) return;
             const lastRows = PageRows.querySelectorAll('ide-row:last-child');
             const lastRow = (lastRows.length > 0)? lastRows[0] : undefined;
             if (lastRows.length > 0 && lastRow.id == self.id) {
