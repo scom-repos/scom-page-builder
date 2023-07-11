@@ -1377,58 +1377,25 @@ declare module "@scom/scom-page-builder/page/pageRows.tsx" {
     export { PageSection, PageFooter };
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageSidebar.css.ts" />
-declare module "@scom/scom-page-builder/page/pageSidebar.css.ts" { }
-/// <amd-module name="@scom/scom-page-builder/page/pageSidebar.tsx" />
-declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
-    import { Module, ControlElement } from '@ijstech/components';
-    import "@scom/scom-page-builder/page/pageSidebar.css.ts";
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ['ide-sidebar']: PageSidebarElement;
-            }
-        }
-    }
-    export interface PageSidebarElement extends ControlElement {
-    }
-    export class PageSidebar extends Module {
-        private microdappsStack;
-        private projectmicrodappsStack;
-        private chartsStack;
-        private componentsStack;
-        private sectionStack;
-        private pnlLayouts;
-        private pnlEmbeddables;
-        private get pageBlocks();
-        constructor(parent?: any);
-        init(): void;
-        renderUI(): Promise<void>;
-        private renderList;
-        private initDrag;
-        private initEventListeners;
-        private initEventBus;
-        render(): any;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/page/pageWidgets.css.ts" />
-declare module "@scom/scom-page-builder/page/pageWidgets.css.ts" {
+declare module "@scom/scom-page-builder/page/pageSidebar.css.ts" {
     export const categoryPanelStyle: string;
     export const categoryButtonStyle: string;
     export const widgetModalStyle: string;
     export const widgetStyle: string;
 }
-/// <amd-module name="@scom/scom-page-builder/page/pageWidgets.tsx" />
-declare module "@scom/scom-page-builder/page/pageWidgets.tsx" {
+/// <amd-module name="@scom/scom-page-builder/page/pageSidebar.tsx" />
+declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
     import { ControlElement, Module, Control } from '@ijstech/components';
     import { ICategory } from "@scom/scom-page-builder/interface/index.ts";
     global {
         namespace JSX {
             interface IntrinsicElements {
-                ['i-scom-page-builder-widgets']: ControlElement;
+                ['i-scom-page-builder-sidebar']: ControlElement;
             }
         }
     }
-    export class PageWidgets extends Module {
+    export class PageSidebar extends Module {
+        private toolbars;
         private pnlWidgetCategory;
         private mdWidget;
         private pnlWidgets;
@@ -1450,8 +1417,7 @@ declare module "@scom/scom-page-builder/page/index.ts" {
     import { PageRows } from "@scom/scom-page-builder/page/pageRows.tsx";
     import { PageRow } from "@scom/scom-page-builder/page/pageRow.tsx";
     import { PageSidebar } from "@scom/scom-page-builder/page/pageSidebar.tsx";
-    import { PageWidgets } from "@scom/scom-page-builder/page/pageWidgets.tsx";
-    export { PageHeader, PageSection, PageFooter, PageRows, PageRow, PageSidebar, PageWidgets };
+    export { PageHeader, PageSection, PageFooter, PageRows, PageRow, PageSidebar };
 }
 /// <amd-module name="@scom/scom-page-builder/builder/builderHeader.css.ts" />
 declare module "@scom/scom-page-builder/builder/builderHeader.css.ts" { }

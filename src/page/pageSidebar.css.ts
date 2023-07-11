@@ -1,51 +1,49 @@
-import { Styles } from '@ijstech/components';
-import { currentTheme  } from '../theme/index';
+import { Styles } from "@ijstech/components";
 
-const Theme = currentTheme;
+const Theme = Styles.Theme.ThemeVars;
 
-Styles.cssRule('ide-sidebar', {
-    borderRight: `1px solid var(--builder-divider)`,
+export const categoryPanelStyle = Styles.style({
+    position: 'absolute',
+    right: 0,
+    padding: 4,
+    boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 50px',
+    background: Theme.background.paper,
+    borderRadius: 5
+})
+
+export const categoryButtonStyle = Styles.style({
+    position: 'relative',
+    cursor: 'pointer',
     $nest: {
-        '.block-image': {
-            maxHeight: 74,
-            boxShadow: '0 0 0 1px rgb(218 220 224)',
-            overflow: 'hidden'
+        '&:hover': {
+            background: Theme.action.hover,
+            borderRadius: 4
+        }
+    }
+})
+
+export const widgetModalStyle = Styles.style({
+    $nest: {
+        '> div': {
+            boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 50px',
         },
-        '.pointer': {
-            cursor: 'all-scroll'
-        },
-        '.insert-tabs': {
-            $nest: {
-                'i-tab:not(.disabled).active': {
-                    backgroundColor: 'transparent',
-                    color: Theme.colors.primary.main,
-                },
-                'i-tab:not(.disabled).active .tab-item': {
-                    color: Theme.colors.primary.main,
-                    // borderBottom: `1px solid ${Theme.colors.primary.main}`
-                },
-                '.tab-item': {
-                    fontWeight: 600,
-                    fontSize: '1rem',
-                    color: Theme.text.primary,
-                    fontFamily: Theme.typography.fontFamily
-                },
-                'i-tab:not(.disabled):hover': {
-                    backgroundColor: Theme.action.hover
-                }
-            }
-        },
-        'i-tabs i-tab:not(.disabled).active': {
-            borderColor: 'transparent'
-        },
-        '.builder-item': {
-            transition: 'opacity .2s ease-in-out, transform 0.2s ease-in-out',
-            width: 97,
-            height: '5rem',
-            opacity: 1
-        },
-        '.is-dragging': {
+        '.modal': {
+            marginRight: -8,
+            padding: '0.5rem',
+            borderRadius: 5
+        }
+    }
+})
+
+export const widgetStyle = Styles.style({
+    padding: '0.5rem 0.75rem',
+    cursor: 'grab',
+    opacity: 1,
+    textAlign: 'center',
+    transition: 'opacity .2s ease-in-out, transform 0.2s ease-in-out',
+    $nest: {
+        '&.is-dragging': {
             opacity: 0.3
         }
     }
-});
+})
