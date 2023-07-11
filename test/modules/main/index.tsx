@@ -162,8 +162,9 @@ export class MainModule extends Module {
     return (
       <i-panel width="100%" height="100%">
         <i-button
+          position="fixed"
           caption="Get data"
-          margin={{ top: '1rem', left: '1rem', bottom: '1rem' }}
+          margin={{ top: '1rem', left: '1rem' }}
           padding={{ top: '0.5rem', left: '1rem', bottom: '0.5rem', right: '1rem' }}
           font={{ color: '#fff' }}
           onClick={() => this.onGetData()}

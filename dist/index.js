@@ -1044,18 +1044,22 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
             {
                 id: 'composables',
                 title: 'Composables',
+                icon: 'shapes'
             },
             {
                 id: 'micro-dapps',
-                title: 'MicroDApps'
+                title: 'MicroDApps',
+                icon: 'window-maximize'
             },
             {
                 id: 'charts',
-                title: 'Charts'
+                title: 'Charts',
+                icon: 'chart-pie'
             },
             {
                 id: 'project-micro-dapps',
-                title: 'Project MicroDApps'
+                title: 'Project MicroDApps',
+                icon: 'hashtag'
             }
         ],
         theme: 'light',
@@ -6160,22 +6164,176 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
     ], PageSidebar);
     exports.PageSidebar = PageSidebar;
 });
-define("@scom/scom-page-builder/page/index.ts", ["require", "exports", "@scom/scom-page-builder/page/pageHeader.tsx", "@scom/scom-page-builder/page/pageSection.tsx", "@scom/scom-page-builder/page/pageFooter.tsx", "@scom/scom-page-builder/page/pageRows.tsx", "@scom/scom-page-builder/page/pageRow.tsx", "@scom/scom-page-builder/page/pageSidebar.tsx"], function (require, exports, pageHeader_1, pageSection_2, pageFooter_2, pageRows_1, pageRow_2, pageSidebar_1) {
+define("@scom/scom-page-builder/page/pageWidgets.css.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_35) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.PageSidebar = exports.PageRow = exports.PageRows = exports.PageFooter = exports.PageSection = exports.PageHeader = void 0;
+    exports.widgetStyle = exports.widgetModalStyle = exports.categoryButtonStyle = exports.categoryPanelStyle = void 0;
+    const Theme = components_35.Styles.Theme.ThemeVars;
+    exports.categoryPanelStyle = components_35.Styles.style({
+        position: 'absolute',
+        right: 0,
+        padding: 4,
+        boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 50px',
+        background: Theme.background.paper,
+        borderRadius: 5
+    });
+    exports.categoryButtonStyle = components_35.Styles.style({
+        position: 'relative',
+        cursor: 'pointer',
+        $nest: {
+            '&:hover': {
+                background: Theme.action.hover,
+                borderRadius: 4
+            }
+        }
+    });
+    exports.widgetModalStyle = components_35.Styles.style({
+        $nest: {
+            '> div': {
+                boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 50px',
+            },
+            '.modal': {
+                marginRight: -8,
+                padding: '0.5rem',
+                borderRadius: 5
+            }
+        }
+    });
+    exports.widgetStyle = components_35.Styles.style({
+        padding: '0.5rem 0.75rem',
+        cursor: 'grab',
+        opacity: 1,
+        textAlign: 'center',
+        transition: 'opacity .2s ease-in-out, transform 0.2s ease-in-out',
+        $nest: {
+            '&.is-dragging': {
+                opacity: 0.3
+            }
+        }
+    });
+});
+define("@scom/scom-page-builder/page/pageWidgets.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/page/pageWidgets.css.ts", "@scom/scom-page-builder/assets.ts"], function (require, exports, components_36, index_65, index_66, pageWidgets_css_1, assets_4) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.PageWidgets = void 0;
+    const Theme = components_36.Styles.Theme.ThemeVars;
+    let PageWidgets = class PageWidgets extends components_36.Module {
+        get pageBlocks() {
+            return (0, index_65.getPageBlocks)();
+        }
+        init() {
+            super.init();
+            this.initEventListeners();
+            this.openWidgetModal = this.openWidgetModal.bind(this);
+            this.renderWidgetCategories();
+        }
+        renderWidgetCategories() {
+            const categories = [
+                {
+                    id: 'layouts',
+                    title: 'Layouts',
+                    icon: 'columns'
+                },
+                ...(0, index_65.getCategories)()
+            ];
+            this.pnlWidgetCategory.clearInnerHTML();
+            categories.forEach(c => {
+                this.pnlWidgetCategory.appendChild(this.$render("i-panel", null,
+                    this.$render("i-hstack", { class: pageWidgets_css_1.categoryButtonStyle, width: 40, height: 40, padding: { top: 6, bottom: 6, left: 6, right: 6 }, horizontalAlignment: 'center', verticalAlignment: 'center', tooltip: { content: c.title, placement: 'left' }, onClick: (target) => this.openWidgetModal(target.parent, c) },
+                        this.$render("i-icon", { width: 16, height: 16, name: c.icon, fill: Theme.colors.primary.main }))));
+                if (c.id === 'layouts') {
+                    this.pnlWidgetCategory.appendChild(this.$render("i-panel", { border: { bottom: { width: 1, color: Theme.divider, style: 'solid' } } }));
+                }
+            });
+        }
+        renderWidgets(category) {
+            this.pnlWidgets.clearInnerHTML();
+            this.pnlWidgets.appendChild(this.$render("i-label", { caption: category.title, font: { color: Theme.text.secondary, weight: 600 } }));
+            if (category.id === 'layouts') {
+                const moduleCard = (this.$render("i-vstack", { id: "sectionStack", class: pageWidgets_css_1.widgetStyle, verticalAlignment: "center", horizontalAlignment: "center", width: "100%", background: { color: Theme.action.hover }, border: { radius: 5 }, gap: "0.5rem" },
+                    this.$render("i-image", { url: assets_4.default.icons.logo, width: 24, height: 24, display: "block" }),
+                    this.$render("i-label", { caption: "Section", font: { size: '0.813rem' }, maxHeight: 34, overflow: "hidden", opacity: 0.7 })));
+                this.pnlWidgets.appendChild(moduleCard);
+                moduleCard.setAttribute('draggable', 'true');
+            }
+            else {
+                let components = this.pageBlocks.filter(p => p.category === category.id);
+                let matchedModules = components;
+                for (const module of matchedModules) {
+                    const moduleCard = (this.$render("i-vstack", { class: pageWidgets_css_1.widgetStyle, verticalAlignment: "center", horizontalAlignment: "center", width: "100%", gap: "0.5rem", overflow: 'hidden', background: { color: Theme.action.hover }, border: { radius: 5 } },
+                        this.$render("i-image", { url: module.imgUrl || assets_4.default.icons.logo, width: 24, height: 24, display: "block" }),
+                        this.$render("i-label", { caption: module.name, font: { size: '0.813rem' }, opacity: 0.7, maxHeight: 34, overflow: "hidden" })));
+                    this.pnlWidgets.append(moduleCard);
+                    this.initDrag(moduleCard, module);
+                }
+            }
+        }
+        openWidgetModal(target, category) {
+            this.mdWidget.parent = target;
+            this.renderWidgets(category);
+            this.mdWidget.visible = true;
+        }
+        initDrag(module, data) {
+            module.setAttribute('draggable', 'true');
+            module.setAttribute('data-name', data.name);
+        }
+        initEventListeners() {
+            const self = this;
+            this.pnlWidgets.addEventListener('dragstart', function (event) {
+                var _a;
+                event.stopPropagation();
+                const eventTarget = event.target;
+                if (eventTarget.nodeName === 'IMG' || ((eventTarget === null || eventTarget === void 0 ? void 0 : eventTarget.closest) && !eventTarget.closest('.' + pageWidgets_css_1.widgetStyle)))
+                    event.preventDefault();
+                if (eventTarget.id === 'sectionStack') {
+                    (0, index_65.setDragData)({ module: { name: 'sectionStack', path: '' } });
+                    eventTarget.classList.add('is-dragging');
+                    self.mdWidget.visible = false;
+                }
+                else if ((_a = eventTarget === null || eventTarget === void 0 ? void 0 : eventTarget.dataset) === null || _a === void 0 ? void 0 : _a.name) {
+                    const currentName = eventTarget.dataset.name;
+                    const module = self.pageBlocks.find(block => block.name === currentName);
+                    if (module) {
+                        components_36.application.EventBus.dispatch(index_66.EVENT.ON_SET_DRAG_ELEMENT, eventTarget);
+                        (0, index_65.setDragData)({ module });
+                        eventTarget.classList.add('is-dragging');
+                    }
+                    self.mdWidget.visible = false;
+                }
+                else {
+                    event.preventDefault();
+                }
+            });
+        }
+        render() {
+            return (this.$render("i-hstack", { position: 'fixed', top: '50%', right: 24, height: 0, width: 0, verticalAlignment: 'center' },
+                this.$render("i-vstack", { id: 'pnlWidgetCategory', class: pageWidgets_css_1.categoryPanelStyle, gap: "0.25rem" }),
+                this.$render("i-modal", { id: 'mdWidget', class: pageWidgets_css_1.widgetModalStyle, height: 'auto', width: 320, maxHeight: '80vh', showBackdrop: false, popupPlacement: 'left' },
+                    this.$render("i-vstack", { id: 'pnlWidgets', gap: "0.5rem" }))));
+        }
+    };
+    PageWidgets = __decorate([
+        (0, components_36.customElements)('i-scom-page-builder-widgets')
+    ], PageWidgets);
+    exports.PageWidgets = PageWidgets;
+});
+define("@scom/scom-page-builder/page/index.ts", ["require", "exports", "@scom/scom-page-builder/page/pageHeader.tsx", "@scom/scom-page-builder/page/pageSection.tsx", "@scom/scom-page-builder/page/pageFooter.tsx", "@scom/scom-page-builder/page/pageRows.tsx", "@scom/scom-page-builder/page/pageRow.tsx", "@scom/scom-page-builder/page/pageSidebar.tsx", "@scom/scom-page-builder/page/pageWidgets.tsx"], function (require, exports, pageHeader_1, pageSection_2, pageFooter_2, pageRows_1, pageRow_2, pageSidebar_1, pageWidgets_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.PageWidgets = exports.PageSidebar = exports.PageRow = exports.PageRows = exports.PageFooter = exports.PageSection = exports.PageHeader = void 0;
     Object.defineProperty(exports, "PageHeader", { enumerable: true, get: function () { return pageHeader_1.PageHeader; } });
     Object.defineProperty(exports, "PageSection", { enumerable: true, get: function () { return pageSection_2.PageSection; } });
     Object.defineProperty(exports, "PageFooter", { enumerable: true, get: function () { return pageFooter_2.PageFooter; } });
     Object.defineProperty(exports, "PageRows", { enumerable: true, get: function () { return pageRows_1.PageRows; } });
     Object.defineProperty(exports, "PageRow", { enumerable: true, get: function () { return pageRow_2.PageRow; } });
     Object.defineProperty(exports, "PageSidebar", { enumerable: true, get: function () { return pageSidebar_1.PageSidebar; } });
+    Object.defineProperty(exports, "PageWidgets", { enumerable: true, get: function () { return pageWidgets_1.PageWidgets; } });
 });
-define("@scom/scom-page-builder/builder/builderHeader.css.ts", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/theme/index.ts"], function (require, exports, components_35, index_65) {
+define("@scom/scom-page-builder/builder/builderHeader.css.ts", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/theme/index.ts"], function (require, exports, components_37, index_67) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const Theme = index_65.currentTheme;
-    components_35.Styles.cssRule('builder-header', {
+    const Theme = index_67.currentTheme;
+    components_37.Styles.cssRule('builder-header', {
         $nest: {
             '#pnlHeader': {
                 backgroundSize: 'cover',
@@ -6263,12 +6421,12 @@ define("@scom/scom-page-builder/builder/builderHeader.css.ts", ["require", "expo
         }
     });
 });
-define("@scom/scom-page-builder/builder/builderHeader.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/assets.ts", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/interface/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/utility/index.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/builder/builderHeader.css.ts"], function (require, exports, components_36, assets_4, index_66, index_67, index_68, index_69, index_70) {
+define("@scom/scom-page-builder/builder/builderHeader.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/assets.ts", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/interface/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/utility/index.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/builder/builderHeader.css.ts"], function (require, exports, components_38, assets_5, index_68, index_69, index_70, index_71, index_72) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.BuilderHeader = void 0;
-    const Theme = index_70.currentTheme;
-    let BuilderHeader = class BuilderHeader extends components_36.Module {
+    const Theme = index_72.currentTheme;
+    let BuilderHeader = class BuilderHeader extends components_38.Module {
         constructor(parent) {
             super(parent);
             this._readonly = false;
@@ -6278,22 +6436,22 @@ define("@scom/scom-page-builder/builder/builderHeader.tsx", ["require", "exports
             this.setData = this.setData.bind(this);
         }
         initEventBus() {
-            components_36.application.EventBus.register(this, index_66.EVENT.ON_UPDATE_SECTIONS, async () => {
+            components_38.application.EventBus.register(this, index_68.EVENT.ON_UPDATE_SECTIONS, async () => {
                 this.updateHeader();
             });
         }
         async setData(value) {
-            index_68.pageObject.header = value;
+            index_70.pageObject.header = value;
             await this.updateHeader();
         }
         get _elements() {
-            return index_68.pageObject.header.elements || [];
+            return index_70.pageObject.header.elements || [];
         }
         get _image() {
-            return index_68.pageObject.header.image || '';
+            return index_70.pageObject.header.image || '';
         }
         get _headerType() {
-            return index_68.pageObject.header.headerType || '';
+            return index_70.pageObject.header.headerType || '';
         }
         async updateHeader() {
             this.pnlHeaderMain.clearInnerHTML();
@@ -6314,20 +6472,20 @@ define("@scom/scom-page-builder/builder/builderHeader.tsx", ["require", "exports
             }
         }
         addHeader() {
-            const pageBlocks = (0, index_68.getPageBlocks)();
-            const textBlock = pageBlocks.find((v) => v.name === index_67.ELEMENT_NAME.TEXTBOX);
+            const pageBlocks = (0, index_70.getPageBlocks)();
+            const textBlock = pageBlocks.find((v) => v.name === index_69.ELEMENT_NAME.TEXTBOX);
             this.setData({
                 image: '',
-                headerType: index_67.HeaderType.NORMAL,
+                headerType: index_69.HeaderType.NORMAL,
                 elements: [{
-                        id: (0, index_69.generateUUID)(),
+                        id: (0, index_71.generateUUID)(),
                         column: 4,
                         columnSpan: 5,
                         // type: ElementType.COMPOSITE,
                         module: textBlock,
                         properties: {},
                         elements: [{
-                                id: (0, index_69.generateUUID)(),
+                                id: (0, index_71.generateUUID)(),
                                 column: 4,
                                 columnSpan: 5,
                                 module: textBlock,
@@ -6359,7 +6517,7 @@ define("@scom/scom-page-builder/builder/builderHeader.tsx", ["require", "exports
             if (this._isUpdatingBg) {
                 const image = file ? await this.uploader.toBase64(file) : '';
                 this.pnlHeader.background = { image };
-                index_68.pageObject.header = Object.assign(Object.assign({}, index_68.pageObject.header), { image });
+                index_70.pageObject.header = Object.assign(Object.assign({}, index_70.pageObject.header), { image });
                 this._isUpdatingBg = false;
             }
             else {
@@ -6385,7 +6543,7 @@ define("@scom/scom-page-builder/builder/builderHeader.tsx", ["require", "exports
                 type.classList.remove('active');
             });
             source.classList.add('active');
-            const header = index_68.pageObject.header;
+            const header = index_70.pageObject.header;
             this.setData(Object.assign(Object.assign({}, header), { headerType: type.type }));
             this.updateHeaderType();
         }
@@ -6395,22 +6553,22 @@ define("@scom/scom-page-builder/builder/builderHeader.tsx", ["require", "exports
                 return;
             }
             switch (this._headerType) {
-                case index_67.HeaderType.COVER:
+                case index_69.HeaderType.COVER:
                     this.height = '100vh';
                     this.pnlHeader.background = this.showAddStack ? { color: '#fff', image: '' } : { image: this._image };
                     this.btnChangeImg.visible = true;
                     break;
-                case index_67.HeaderType.LARGE:
+                case index_69.HeaderType.LARGE:
                     this.height = 520;
                     this.pnlHeader.background = this.showAddStack ? { color: '#fff', image: '' } : { image: this._image };
                     this.btnChangeImg.visible = true;
                     break;
-                case index_67.HeaderType.NORMAL:
+                case index_69.HeaderType.NORMAL:
                     this.height = 340;
                     this.pnlHeader.background = this.showAddStack ? { color: '#fff', image: '' } : { image: this._image };
                     this.btnChangeImg.visible = true;
                     break;
-                case index_67.HeaderType.TITLE:
+                case index_69.HeaderType.TITLE:
                     this.height = 180;
                     this.pnlHeader.background = { color: '#fff', image: '' };
                     this.btnChangeImg.visible = false;
@@ -6421,23 +6579,23 @@ define("@scom/scom-page-builder/builder/builderHeader.tsx", ["require", "exports
             const headerTypes = [
                 {
                     caption: 'Cover',
-                    type: index_67.HeaderType.COVER,
-                    image: assets_4.default.fullPath('img/components/cover.svg')
+                    type: index_69.HeaderType.COVER,
+                    image: assets_5.default.fullPath('img/components/cover.svg')
                 },
                 {
                     caption: 'Large Banner',
-                    type: index_67.HeaderType.LARGE,
-                    image: assets_4.default.fullPath('img/components/large.svg')
+                    type: index_69.HeaderType.LARGE,
+                    image: assets_5.default.fullPath('img/components/large.svg')
                 },
                 {
                     caption: 'Banner',
-                    type: index_67.HeaderType.NORMAL,
-                    image: assets_4.default.fullPath('img/components/banner.svg')
+                    type: index_69.HeaderType.NORMAL,
+                    image: assets_5.default.fullPath('img/components/banner.svg')
                 },
                 {
                     caption: 'Title Only',
-                    type: index_67.HeaderType.TITLE,
-                    image: assets_4.default.fullPath('img/components/title.svg')
+                    type: index_69.HeaderType.TITLE,
+                    image: assets_5.default.fullPath('img/components/title.svg')
                 }
             ];
             this.pnlHeaderTypeMain.clearInnerHTML();
@@ -6486,17 +6644,17 @@ define("@scom/scom-page-builder/builder/builderHeader.tsx", ["require", "exports
         }
     };
     __decorate([
-        (0, components_36.observable)()
+        (0, components_38.observable)()
     ], BuilderHeader.prototype, "showAddStack", void 0);
     BuilderHeader = __decorate([
-        (0, components_36.customElements)('builder-header')
+        (0, components_38.customElements)('builder-header')
     ], BuilderHeader);
     exports.BuilderHeader = BuilderHeader;
 });
-define("@scom/scom-page-builder/builder/builderFooter.css.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_37) {
+define("@scom/scom-page-builder/builder/builderFooter.css.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_39) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    components_37.Styles.cssRule('builder-footer', {
+    components_39.Styles.cssRule('builder-footer', {
         $nest: {
             '#pnlFooter': {
                 backgroundSize: 'cover',
@@ -6522,12 +6680,12 @@ define("@scom/scom-page-builder/builder/builderFooter.css.ts", ["require", "expo
         }
     });
 });
-define("@scom/scom-page-builder/builder/builderFooter.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/interface/index.ts", "@scom/scom-page-builder/utility/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/builder/builderFooter.css.ts"], function (require, exports, components_38, index_71, index_72, index_73, index_74, index_75) {
+define("@scom/scom-page-builder/builder/builderFooter.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/interface/index.ts", "@scom/scom-page-builder/utility/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/builder/builderFooter.css.ts"], function (require, exports, components_40, index_73, index_74, index_75, index_76, index_77) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.BuilderFooter = void 0;
-    const Theme = index_75.currentTheme;
-    let BuilderFooter = class BuilderFooter extends components_38.Module {
+    const Theme = index_77.currentTheme;
+    let BuilderFooter = class BuilderFooter extends components_40.Module {
         constructor(parent) {
             super(parent);
             this._readonly = false;
@@ -6536,21 +6694,21 @@ define("@scom/scom-page-builder/builder/builderFooter.tsx", ["require", "exports
             this.setData = this.setData.bind(this);
         }
         initEventBus() {
-            components_38.application.EventBus.register(this, index_71.EVENT.ON_UPDATE_SECTIONS, async () => {
+            components_40.application.EventBus.register(this, index_73.EVENT.ON_UPDATE_SECTIONS, async () => {
                 this.updateFooter();
             });
         }
         async setData(value) {
-            index_74.pageObject.footer = value;
+            index_76.pageObject.footer = value;
             await this.updateFooter();
         }
         get _elements() {
             var _a;
-            return ((_a = index_74.pageObject.footer) === null || _a === void 0 ? void 0 : _a.elements) || [];
+            return ((_a = index_76.pageObject.footer) === null || _a === void 0 ? void 0 : _a.elements) || [];
         }
         get _image() {
             var _a;
-            return ((_a = index_74.pageObject.footer) === null || _a === void 0 ? void 0 : _a.image) || '';
+            return ((_a = index_76.pageObject.footer) === null || _a === void 0 ? void 0 : _a.image) || '';
         }
         async updateFooter() {
             var _a;
@@ -6572,22 +6730,22 @@ define("@scom/scom-page-builder/builder/builderFooter.tsx", ["require", "exports
                 this.pnlFooterMain.append(pageRow);
                 this.pnlEditOverlay.classList.add('flex');
             }
-            components_38.application.EventBus.dispatch(index_71.EVENT.ON_UPDATE_FOOTER);
+            components_40.application.EventBus.dispatch(index_73.EVENT.ON_UPDATE_FOOTER);
         }
         addFooter() {
-            const pageBlocks = (0, index_74.getPageBlocks)();
-            const textBlock = pageBlocks.find((v) => v.path === index_72.TEXTBOX_PATH);
+            const pageBlocks = (0, index_76.getPageBlocks)();
+            const textBlock = pageBlocks.find((v) => v.path === index_74.TEXTBOX_PATH);
             this.setData({
                 image: '',
                 elements: [{
-                        id: (0, index_73.generateUUID)(),
+                        id: (0, index_75.generateUUID)(),
                         column: 1,
                         columnSpan: 12,
                         // type: ElementType.COMPOSITE,
                         module: textBlock,
                         properties: {},
                         elements: [{
-                                id: (0, index_73.generateUUID)(),
+                                id: (0, index_75.generateUUID)(),
                                 column: 1,
                                 columnSpan: 12,
                                 module: textBlock,
@@ -6629,7 +6787,7 @@ define("@scom/scom-page-builder/builder/builderFooter.tsx", ["require", "exports
             const file = fileList[0];
             const image = file ? await this.uploader.toBase64(file) : '';
             this.pnlFooter.background = { image };
-            index_74.pageObject.footer = Object.assign(Object.assign({}, index_74.pageObject.footer), { image });
+            index_76.pageObject.footer = Object.assign(Object.assign({}, index_76.pageObject.footer), { image });
             this.mdUpload.visible = false;
         }
         init() {
@@ -6660,10 +6818,10 @@ define("@scom/scom-page-builder/builder/builderFooter.tsx", ["require", "exports
         }
     };
     __decorate([
-        (0, components_38.observable)()
+        (0, components_40.observable)()
     ], BuilderFooter.prototype, "showAddStack", void 0);
     BuilderFooter = __decorate([
-        (0, components_38.customElements)('builder-footer')
+        (0, components_40.customElements)('builder-footer')
     ], BuilderFooter);
     exports.BuilderFooter = BuilderFooter;
 });
@@ -6674,11 +6832,11 @@ define("@scom/scom-page-builder/builder/index.ts", ["require", "exports", "@scom
     Object.defineProperty(exports, "BuilderHeader", { enumerable: true, get: function () { return builderHeader_1.BuilderHeader; } });
     Object.defineProperty(exports, "BuilderFooter", { enumerable: true, get: function () { return builderFooter_1.BuilderFooter; } });
 });
-define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/theme/index.ts"], function (require, exports, components_39, index_76) {
+define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/theme/index.ts"], function (require, exports, components_41, index_78) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const Theme = index_76.currentTheme;
-    components_39.Styles.cssRule('#editor', {
+    const Theme = index_78.currentTheme;
+    components_41.Styles.cssRule('#editor', {
         $nest: {
             '.pnl-editor-wrapper': {
                 display: 'block',
@@ -6736,11 +6894,11 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
         }
     });
 });
-define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/index.css.ts"], function (require, exports, components_40, index_77, index_78, index_79) {
+define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/index.css.ts"], function (require, exports, components_42, index_79, index_80, index_81) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const Theme = index_79.currentTheme;
-    let Editor = class Editor extends components_40.Module {
+    const Theme = index_81.currentTheme;
+    let Editor = class Editor extends components_42.Module {
         constructor(parent, options) {
             super(parent, options);
             this.events = [];
@@ -6751,24 +6909,24 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.initEventBus();
         }
         get rootDir() {
-            return (0, index_78.getRootDir)();
+            return (0, index_80.getRootDir)();
         }
         set rootDir(value) {
-            (0, index_78.setRootDir)(value);
+            (0, index_80.setRootDir)(value);
         }
         get components() {
-            return (0, index_78.getPageBlocks)();
+            return (0, index_80.getPageBlocks)();
         }
         set components(value) {
-            (0, index_78.setPageBlocks)(value);
-            this.pageSidebar.renderUI();
+            (0, index_80.setPageBlocks)(value);
+            // this.pageSidebar.renderUI();
         }
         get categories() {
-            return (0, index_78.getCategories)();
+            return (0, index_80.getCategories)();
         }
         set categories(value) {
-            (0, index_78.setCategories)(value);
-            this.pageSidebar.renderUI();
+            (0, index_80.setCategories)(value);
+            // this.pageSidebar.renderUI();
         }
         get theme() {
             var _a;
@@ -6776,10 +6934,10 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         }
         set theme(value) {
             this._theme = value !== null && value !== void 0 ? value : 'light';
-            (0, index_78.setTheme)(this.theme);
-            const bgColor = (0, index_78.getBackgroundColor)(this.theme);
-            const fontColor = (0, index_78.getFontColor)(this.theme);
-            const dividerColor = (0, index_78.getDivider)(this.theme);
+            (0, index_80.setTheme)(this.theme);
+            const bgColor = (0, index_80.getBackgroundColor)(this.theme);
+            const fontColor = (0, index_80.getFontColor)(this.theme);
+            const dividerColor = (0, index_80.getDivider)(this.theme);
             this.style.setProperty('--builder-bg', bgColor);
             this.style.setProperty('--builder-color', fontColor);
             this.style.setProperty('--builder-divider', dividerColor);
@@ -6794,7 +6952,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             const scrollThreshold = 100;
             containerElement.addEventListener("dragover", (event) => {
                 event.preventDefault();
-                if (!this.currentElement && !(0, index_78.getDragData)())
+                if (!this.currentElement && !(0, index_80.getDragData)())
                     return;
                 scrollPos = event.clientY;
                 if (!ticking) {
@@ -6811,7 +6969,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                     && event.clientY >= pageRowsRect.height + pageRowsRect.y
                     && event.clientX >= pageRowsRect.x
                     && event.clientX <= pageRowsRect.x + pageRowsRect.width) {
-                    components_40.application.EventBus.dispatch(index_77.EVENT.ON_SHOW_BOTTOM_BLOCK);
+                    components_42.application.EventBus.dispatch(index_79.EVENT.ON_SHOW_BOTTOM_BLOCK);
                 }
             });
             function adjustScrollSpeed(mouseY) {
@@ -6836,9 +6994,9 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             }
             containerElement.addEventListener('drop', (event) => {
                 var _a, _b;
-                const elementConfig = (0, index_78.getDragData)();
+                const elementConfig = (0, index_80.getDragData)();
                 if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
-                    components_40.application.EventBus.dispatch(index_77.EVENT.ON_ADD_SECTION);
+                    components_42.application.EventBus.dispatch(index_79.EVENT.ON_ADD_SECTION);
                 }
                 else {
                     const dragEnter = this.pnlEditor.querySelector('.is-dragenter');
@@ -6846,8 +7004,8 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                     if (pageRow && pageRow.onAppendRow) {
                         pageRow.onAppendRow(pageRow);
                     }
-                    else if (!((_b = index_78.pageObject.sections) === null || _b === void 0 ? void 0 : _b.length)) {
-                        components_40.application.EventBus.dispatch(index_77.EVENT.ON_ADD_SECTION);
+                    else if (!((_b = index_80.pageObject.sections) === null || _b === void 0 ? void 0 : _b.length)) {
+                        components_42.application.EventBus.dispatch(index_79.EVENT.ON_ADD_SECTION);
                         const pageRow = this.pnlEditor.querySelector('ide-row');
                         if (pageRow && pageRow.onAppendRow)
                             pageRow.onAddRow();
@@ -6864,10 +7022,10 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 this.setRootDir(rootDir);
             const components = this.getAttribute('components', true);
             if (components)
-                (0, index_78.setPageBlocks)(components);
+                (0, index_80.setPageBlocks)(components);
             const categories = this.getAttribute('categories', true);
             if (categories)
-                (0, index_78.setCategories)(categories);
+                (0, index_80.setCategories)(categories);
             const onFetchComponents = this.getAttribute('onFetchComponents', true);
             if (onFetchComponents)
                 this.onFetchComponents = onFetchComponents.bind(this);
@@ -6877,13 +7035,13 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.theme = this.getAttribute('theme', true);
         }
         setRootDir(value) {
-            (0, index_78.setRootDir)(value);
+            (0, index_80.setRootDir)(value);
         }
         getData() {
             const hasData = (el) => { var _a; return Object.keys(el.module || {}).length || ((_a = el.elements) === null || _a === void 0 ? void 0 : _a.length); };
             return {
                 // header: pageObject.header,
-                sections: index_78.pageObject.sections.filter(section => {
+                sections: index_80.pageObject.sections.filter(section => {
                     var _a;
                     const hasElements = !!((_a = section.elements) === null || _a === void 0 ? void 0 : _a.length);
                     if (hasElements) {
@@ -6892,16 +7050,16 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                     }
                     return !!section.elements.length;
                 }),
-                footer: index_78.pageObject.footer,
-                config: index_78.pageObject.config
+                footer: index_80.pageObject.footer,
+                config: index_80.pageObject.config
             };
         }
         async setData(value) {
             // pageObject.header = value.header;
-            index_78.pageObject.sections = (value === null || value === void 0 ? void 0 : value.sections) || [];
-            index_78.pageObject.footer = value === null || value === void 0 ? void 0 : value.footer;
-            index_78.pageObject.config = value === null || value === void 0 ? void 0 : value.config;
-            (0, index_78.setDefaultPageConfig)(value === null || value === void 0 ? void 0 : value.config);
+            index_80.pageObject.sections = (value === null || value === void 0 ? void 0 : value.sections) || [];
+            index_80.pageObject.footer = value === null || value === void 0 ? void 0 : value.footer;
+            index_80.pageObject.config = value === null || value === void 0 ? void 0 : value.config;
+            (0, index_80.setDefaultPageConfig)(value === null || value === void 0 ? void 0 : value.config);
             try {
                 // await this.builderHeader.setData(value.header);
                 await this.pageRows.setRows((value === null || value === void 0 ? void 0 : value.sections) || []);
@@ -6913,11 +7071,11 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             }
         }
         updatePageConfig() {
-            const { backgroundColor, margin, maxWidth } = (0, index_78.getDefaultPageConfig)();
+            const { backgroundColor, margin, maxWidth } = (0, index_80.getDefaultPageConfig)();
             this.style.setProperty('--builder-bg', backgroundColor);
             if (this.pnlEditor) {
                 this.pnlEditor.maxWidth = maxWidth !== null && maxWidth !== void 0 ? maxWidth : '100%';
-                const marginStyle = (0, index_78.getMargin)(margin);
+                const marginStyle = (0, index_80.getMargin)(margin);
                 this.pnlEditor.margin = marginStyle;
                 this.pnlEditor.style.width = `calc(100% - (2 * ${marginStyle.left}))`;
             }
@@ -6927,13 +7085,13 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 event.unregister();
             }
             this.events = [];
-            components_40.application.EventBus.dispatch(index_77.EVENT.ON_CLOSE_BUILDER);
+            components_42.application.EventBus.dispatch(index_79.EVENT.ON_CLOSE_BUILDER);
         }
         initEventBus() {
-            this.events.push(components_40.application.EventBus.register(this, index_77.EVENT.ON_UPDATE_FOOTER, async () => this.onUpdateWrapper()));
-            this.events.push(components_40.application.EventBus.register(this, index_77.EVENT.ON_SET_DRAG_ELEMENT, async (el) => this.currentElement = el));
-            this.events.push(components_40.application.EventBus.register(this, index_77.EVENT.ON_TOGGLE_SEARCH_MODAL, this.onToggleSearch));
-            this.events.push(components_40.application.EventBus.register(this, index_77.EVENT.ON_FETCH_COMPONENTS, this.onSearch));
+            this.events.push(components_42.application.EventBus.register(this, index_79.EVENT.ON_UPDATE_FOOTER, async () => this.onUpdateWrapper()));
+            this.events.push(components_42.application.EventBus.register(this, index_79.EVENT.ON_SET_DRAG_ELEMENT, async (el) => this.currentElement = el));
+            this.events.push(components_42.application.EventBus.register(this, index_79.EVENT.ON_TOGGLE_SEARCH_MODAL, this.onToggleSearch));
+            this.events.push(components_42.application.EventBus.register(this, index_79.EVENT.ON_FETCH_COMPONENTS, this.onSearch));
         }
         onUpdateWrapper() {
             //     this.contentWrapper.minHeight = `calc((100vh - 6rem) - ${this.builderFooter.offsetHeight}px)`;
@@ -6952,8 +7110,8 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 pageSize: undefined
             };
             const { items = [], total = 0 } = await this.onFetchComponents(params);
-            (0, index_78.setSearchData)({ items, total });
-            (0, index_78.setSearchOptions)(params);
+            (0, index_80.setSearchData)({ items, total });
+            (0, index_80.setSearchOptions)(params);
             this.mdComponentsSearch.renderUI();
         }
         async initData() {
@@ -6961,27 +7119,25 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             if (this.isFirstLoad)
                 return;
             await this.onSearch();
-            this.components = ((_a = (0, index_78.getSearchData)()) === null || _a === void 0 ? void 0 : _a.items) || [];
+            this.components = ((_a = (0, index_80.getSearchData)()) === null || _a === void 0 ? void 0 : _a.items) || [];
             this.isFirstLoad = true;
         }
         render() {
             return (this.$render("i-vstack", { id: "editor", width: '100%', height: '100%', maxHeight: "100vh", overflow: 'hidden' },
                 this.$render("ide-header", { id: 'pageHeader', border: { bottom: { width: 1, style: 'solid', color: '#dadce0' } } }),
-                this.$render("i-grid-layout", { templateColumns: ['auto', 'minmax(auto, 235px)'], autoFillInHoles: true, height: "calc(100% -64px)", overflow: "hidden" },
-                    this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } } },
-                        this.$render("i-vstack", { id: "pageContent", maxWidth: "calc(100% - 6em)", width: "100%", horizontalAlignment: 'center', margin: { left: 'auto', right: 'auto' }, padding: { top: '1rem', bottom: '1rem' } },
-                            this.$render("i-panel", { id: "pnlEditor", maxWidth: 1024, minHeight: "100vh", width: "100%", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
-                                this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
-                                    this.$render("ide-rows", { id: "pageRows", draggable: true })),
-                                this.$render("builder-footer", { id: "builderFooter" })))),
-                    this.$render("i-panel", { id: "pnlSidebar", height: "100%", overflow: { x: 'hidden', y: 'auto' }, class: "pnl-scrollable" },
-                        this.$render("ide-sidebar", { id: 'pageSidebar', display: 'block', width: "100%" }))),
+                this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } } },
+                    this.$render("i-vstack", { id: "pageContent", maxWidth: "calc(100% - 6em)", width: "100%", horizontalAlignment: 'center', margin: { left: 'auto', right: 'auto' }, padding: { top: '1rem', bottom: '1rem' } },
+                        this.$render("i-panel", { id: "pnlEditor", maxWidth: 1024, minHeight: "100vh", width: "100%", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
+                            this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
+                                this.$render("ide-rows", { id: "pageRows", draggable: true })),
+                            this.$render("builder-footer", { id: "builderFooter" })))),
+                this.$render("i-scom-page-builder-widgets", null),
                 this.$render("ide-search-components-dialog", { id: "mdComponentsSearch" })));
         }
     };
     Editor = __decorate([
-        (0, components_40.customElements)('i-scom-page-builder'),
-        components_40.customModule
+        (0, components_42.customElements)('i-scom-page-builder'),
+        components_42.customModule
     ], Editor);
     exports.default = Editor;
 });

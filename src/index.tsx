@@ -3,7 +3,7 @@ import { } from '@ijstech/eth-contract'
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
 import { IPageData, IPageBlockData, IPageElement, IOnFetchComponentsOptions, IOnFetchComponentsResult, ICategory, ThemeType } from './interface/index';
-import { PageRow, PageRows, PageSidebar } from './page/index';
+import { PageRow, PageRows, PageWidgets } from './page/index';
 import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData, getPageBlocks, getCategories, setCategories, setTheme, getBackgroundColor, getFontColor, getDivider, getDefaultPageConfig, getMargin, setDefaultPageConfig } from './store/index';
 import { currentTheme } from './theme/index';
 import './index.css';
@@ -36,7 +36,7 @@ export default class Editor extends Module {
     // private builderHeader: BuilderHeader;
     private builderFooter: BuilderFooter;
     private pnlWrap: Panel;
-    private pageSidebar: PageSidebar;
+    // private pageSidebar: PageSidebar;
     private mdComponentsSearch: SearchComponentsDialog;
     private pnlEditor: Panel;
     private contentWrapper: Panel;
@@ -67,7 +67,7 @@ export default class Editor extends Module {
 
     set components(value: IPageBlockData[]) {
         setPageBlocks(value);
-        this.pageSidebar.renderUI();
+        // this.pageSidebar.renderUI();
     }
 
     get categories() {
@@ -76,7 +76,7 @@ export default class Editor extends Module {
 
     set categories(value: ICategory[]) {
         setCategories(value);
-        this.pageSidebar.renderUI();
+        // this.pageSidebar.renderUI();
     }
 
     get theme() {
@@ -298,12 +298,12 @@ export default class Editor extends Module {
                     id={'pageHeader'}
                     border={{ bottom: { width: 1, style: 'solid', color: '#dadce0' } }}
                 ></ide-header>
-                <i-grid-layout
+                {/* <i-grid-layout
                     templateColumns={['auto', 'minmax(auto, 235px)']}
                     autoFillInHoles={true}
                     height="calc(100% -64px)"
                     overflow="hidden"
-                >
+                > */}
                     <i-panel
                         id="pnlWrap"
                         height="100%"
@@ -341,7 +341,7 @@ export default class Editor extends Module {
                             </i-panel>
                         </i-vstack>
                     </i-panel>
-                    <i-panel
+                    {/* <i-panel
                         id="pnlSidebar"
                         height="100%"
                         overflow={{ x: 'hidden', y: 'auto' }}
@@ -352,8 +352,9 @@ export default class Editor extends Module {
                             display={'block'}
                             width="100%"
                         ></ide-sidebar>
-                    </i-panel>
-                </i-grid-layout>
+                    </i-panel> */}
+                {/* </i-grid-layout> */}
+                <i-scom-page-builder-widgets></i-scom-page-builder-widgets>
                 <ide-search-components-dialog
                     id="mdComponentsSearch"
                 ></ide-search-components-dialog>
