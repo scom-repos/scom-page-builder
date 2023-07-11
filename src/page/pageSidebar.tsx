@@ -11,8 +11,10 @@ import {
 } from '@ijstech/components';
 import { getCategories, getPageBlocks, setDragData } from '../store/index';
 import { EVENT } from '../const/index';
-import { ICategory, IPageBlockData } from '../interface/index';
+import { ICategory, IPageBlockData, IPageConfig } from '../interface/index';
 import { categoryButtonStyle, categoryPanelStyle, widgetModalStyle, widgetStyle } from './pageSidebar.css';
+import { UpdatePageSettingsCommand, commandHistory } from '../command/index';
+import { PageSettingsDialog } from '../dialogs/index';
 import assets from '../assets';
 
 const Theme = Styles.Theme.ThemeVars;
@@ -31,6 +33,7 @@ export class PageSidebar extends Module {
     private pnlWidgetCategory: VStack;
     private mdWidget: Modal;
     private pnlWidgets: VStack;
+    private mdPageSettings: PageSettingsDialog;
 
     private get pageBlocks(): IPageBlockData[] {
         return getPageBlocks();
@@ -40,7 +43,47 @@ export class PageSidebar extends Module {
         super.init();
         this.initEventListeners();
         this.openWidgetModal = this.openWidgetModal.bind(this);
+        this.renderToolbar();
         this.renderWidgetCategories();
+    }
+
+    renderToolbar() {
+        this.toolbars.clearInnerHTML();
+        const iconList: any[] = [
+            {
+                name: 'cog',
+                tooltip: { content: 'Page settings', placement: 'left' },
+                onClick: () => {
+                    this.mdPageSettings.show();
+                }
+            },
+            {
+                name: 'undo',
+                tooltip: { content: 'Undo last action', placement: 'left' },
+                onClick: () => commandHistory.undo()
+            },
+            {
+                name: 'redo',
+                tooltip: { content: 'Redo last action', placement: 'left' },
+                onClick: () => commandHistory.redo()
+            }
+        ];
+        iconList.forEach((icon) => {
+            this.toolbars.appendChild(
+                <i-hstack
+                    class={categoryButtonStyle}
+                    width={40}
+                    height={40}
+                    padding={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                    horizontalAlignment='center'
+                    verticalAlignment='center'
+                    tooltip={icon.tooltip}
+                    onClick={icon.onClick}
+                >
+                    <i-icon width={16} height={16} name={icon.name} fill={Theme.colors.primary.main}></i-icon>
+                </i-hstack>
+            );
+        })
     }
 
     renderWidgetCategories() {
@@ -90,6 +133,7 @@ export class PageSidebar extends Module {
                     background={{ color: Theme.action.hover }}
                     border={{ radius: 5 }}
                     gap="0.5rem"
+                    tooltip={{ content: '✊ Drag to insert', placement: 'top' }}
                 >
                     <i-image url={assets.icons.logo} width={24} height={24} display="block"></i-image>
                     <i-label caption="Section" font={{ size: '0.813rem' }} maxHeight={34} overflow={"hidden"} opacity={0.7}></i-label>
@@ -111,6 +155,7 @@ export class PageSidebar extends Module {
                         overflow={'hidden'}
                         background={{ color: Theme.action.hover }}
                         border={{ radius: 5 }}
+                        tooltip={{ content: '✊ Drag to insert', placement: 'top' }}
                     >
                         <i-image
                             url={module.imgUrl || assets.icons.logo}
@@ -169,11 +214,20 @@ export class PageSidebar extends Module {
         })
     }
 
+    private onSavePageSettings(data: IPageConfig) {
+        const containerEl = this.parentElement?.querySelector('.pnl-editor-wrapper') as Control;
+        if (!containerEl) return;
+        const updateCmd = new UpdatePageSettingsCommand(containerEl, { ...data });
+        commandHistory.execute(updateCmd);
+    }
+
     render() {
         return (
             <i-hstack position='fixed' top='50%' right={24} height={0} width={0} verticalAlignment='center'>
-                <i-vstack id='toolbars' class={categoryPanelStyle} gap="0.25rem"></i-vstack>
-                <i-vstack id='pnlWidgetCategory' class={categoryPanelStyle} gap="0.25rem"></i-vstack>
+                <i-vstack position='absolute' right="0px">
+                    <i-vstack id='toolbars' class={categoryPanelStyle} gap="0.25rem" margin={{ bottom: '1rem' }}></i-vstack>
+                    <i-vstack id='pnlWidgetCategory' class={categoryPanelStyle} gap="0.25rem"></i-vstack>
+                </i-vstack>
                 <i-modal
                     id='mdWidget'
                     class={widgetModalStyle}
@@ -185,6 +239,10 @@ export class PageSidebar extends Module {
                 >
                     <i-vstack id='pnlWidgets' gap="0.5rem"></i-vstack>
                 </i-modal>
+                <ide-page-settings-dialog
+                    id="mdPageSettings"
+                    onSave={this.onSavePageSettings.bind(this)}
+                ></ide-page-settings-dialog>
             </i-hstack>
         )
     }

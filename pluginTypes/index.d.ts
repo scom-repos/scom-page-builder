@@ -1399,13 +1399,16 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
         private pnlWidgetCategory;
         private mdWidget;
         private pnlWidgets;
+        private mdPageSettings;
         private get pageBlocks();
         init(): void;
+        renderToolbar(): void;
         renderWidgetCategories(): void;
         renderWidgets(category: ICategory): void;
         openWidgetModal(target: Control, category: ICategory): void;
         private initDrag;
         private initEventListeners;
+        private onSavePageSettings;
         render(): any;
     }
 }

@@ -294,10 +294,10 @@ export default class Editor extends Module {
                 maxHeight="100vh"
                 overflow={'hidden'}
             >
-                <ide-header
+                {/* <ide-header
                     id={'pageHeader'}
                     border={{ bottom: { width: 1, style: 'solid', color: '#dadce0' } }}
-                ></ide-header>
+                ></ide-header> */}
                 {/* <i-grid-layout
                     templateColumns={['auto', 'minmax(auto, 235px)']}
                     autoFillInHoles={true}
@@ -317,7 +317,7 @@ export default class Editor extends Module {
                             maxWidth="calc(100% - 6em)"
                             width="100%"
                             horizontalAlignment='center'
-                            margin={{ left: 'auto', right: 'auto' }}
+                            margin={{ top: '3.5rem', left: 'auto', right: 'auto' }}
                             padding={{top: '1rem', bottom: '1rem'}}
                         >
                             <i-panel

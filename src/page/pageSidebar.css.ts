@@ -3,8 +3,6 @@ import { Styles } from "@ijstech/components";
 const Theme = Styles.Theme.ThemeVars;
 
 export const categoryPanelStyle = Styles.style({
-    position: 'absolute',
-    right: 0,
     padding: 4,
     boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 50px',
     background: Theme.background.paper,
@@ -44,6 +42,9 @@ export const widgetStyle = Styles.style({
     $nest: {
         '&.is-dragging': {
             opacity: 0.3
+        },
+        '&:hover': {
+            transform: 'scale(1.04) translateY(-2px)'
         }
     }
 })
