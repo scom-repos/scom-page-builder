@@ -2987,7 +2987,7 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts", ["require", "
             '.custom-modal': {
                 $nest: {
                     '.i-modal_header': {
-                        padding: '1rem 1rem 0.5rem',
+                        padding: '1rem 1.5rem 0.5rem',
                         fontSize: '1rem',
                         fontWeight: 600
                     },
@@ -2996,7 +2996,8 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts", ["require", "
                     },
                     '.modal': {
                         maxHeight: 'calc(100vh - 48px)',
-                        padding: 0
+                        padding: 0,
+                        borderRadius: 5
                     }
                 }
             }
@@ -3166,7 +3167,7 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
         }
         render() {
             return (this.$render("i-modal", { id: 'dialog', showBackdrop: true, closeOnBackdropClick: false, closeIcon: { name: 'times' }, visible: false, minWidth: 400, maxWidth: 500, title: "Section Settings", class: "custom-modal" },
-                this.$render("i-panel", { padding: { top: '1rem', bottom: '1rem', left: '1rem', right: '1rem' } },
+                this.$render("i-panel", { padding: { top: '1rem', bottom: '1rem', left: '1.5rem', right: '1.5rem' } },
                     this.$render("i-form", { id: "formElm" }))));
         }
     };
@@ -3183,7 +3184,7 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.css.ts", ["require", 
             '.custom-modal': {
                 $nest: {
                     '.i-modal_header': {
-                        padding: '1rem 1rem 0.5rem',
+                        padding: '1rem 1.5rem 0.5rem',
                         fontSize: '1rem',
                         fontWeight: 600
                     },
@@ -3192,7 +3193,8 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.css.ts", ["require", 
                     },
                     '.modal': {
                         maxHeight: 'calc(100vh - 48px)',
-                        padding: 0
+                        padding: 0,
+                        borderRadius: 5
                     }
                 }
             }
@@ -3318,7 +3320,7 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
         }
         render() {
             return (this.$render("i-modal", { id: 'settingsDialog', showBackdrop: true, closeOnBackdropClick: false, closeIcon: { name: 'times' }, visible: false, minWidth: 400, maxWidth: 500, title: "Page Settings", class: "custom-modal" },
-                this.$render("i-panel", { padding: { top: '1rem', bottom: '1rem', left: '1rem', right: '1rem' } },
+                this.$render("i-panel", { padding: { top: '1rem', bottom: '1rem', left: '1.5rem', right: '1.5rem' } },
                     this.$render("i-form", { id: "formElm" }))));
         }
     };
@@ -3532,7 +3534,7 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
             '.setting-modal': {
                 $nest: {
                     '.i-modal_header': {
-                        padding: '1rem 1rem 0.5rem',
+                        padding: '1rem 1.5rem 0.5rem',
                         fontSize: '1rem',
                         fontWeight: 600
                     },
@@ -3545,6 +3547,7 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                     },
                     '.modal': {
                         padding: 0,
+                        borderRadius: 5,
                         $nest: {
                             '#pnlForm': {
                                 maxHeight: 'calc(100vh - 100px)',
@@ -5453,7 +5456,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 this.$render("i-panel", { position: "absolute", width: "90%", height: "8px", left: "5%", bottom: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "bottom-block" }),
                 this.$render("i-panel", { position: "absolute", width: "90%", height: "8px", left: "5%", top: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "top-block" }),
                 this.$render("i-modal", { id: 'mdActions', title: 'Update Settings', closeIcon: { name: 'times' }, minWidth: 400, maxWidth: '900px', closeOnBackdropClick: false, onOpen: this.onShowModal.bind(this), onClose: this.onCloseModal.bind(this), class: "setting-modal" },
-                    this.$render("i-panel", { padding: { left: '1rem', right: '1rem', top: '1rem', bottom: '1rem' } },
+                    this.$render("i-panel", { padding: { left: '1rem', right: '1rem', top: '1.5rem', bottom: '1.5rem' } },
                         this.$render("i-vstack", { id: "pnlFormMsg", padding: { left: '1.5rem', right: '1.5rem', top: '1rem' }, gap: "0.5rem", visible: false }),
                         this.$render("i-panel", { id: "pnlForm" }),
                         this.$render("i-form", { id: "form" })))));
@@ -5791,6 +5794,9 @@ define("@scom/scom-page-builder/page/pageRows.css.ts", ["require", "exports", "@
             },
             '.row-entered': {
                 borderBottom: '3px solid rgb(66,133,244)'
+            },
+            '.container > *:not(.active):not(:focus):first-child': {
+                borderTopColor: 'transparent'
             }
         }
     });
@@ -6077,11 +6083,14 @@ define("@scom/scom-page-builder/page/pageSidebar.css.ts", ["require", "exports",
         $nest: {
             '> div': {
                 boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 50px',
+                overflow: 'hidden'
             },
             '.modal': {
                 marginRight: -8,
-                padding: '0.5rem',
-                borderRadius: 5
+                padding: '0.75rem',
+                borderRadius: 5,
+                backgroundColor: '#fff',
+                overflow: 'auto'
             }
         }
     });
@@ -6093,7 +6102,7 @@ define("@scom/scom-page-builder/page/pageSidebar.css.ts", ["require", "exports",
         transition: 'opacity .2s ease-in-out, transform 0.2s ease-in-out',
         $nest: {
             '&.is-dragging': {
-                opacity: 0.3
+                opacity: 0.7
             },
             '&:hover': {
                 transform: 'scale(1.04) translateY(-4px)'
@@ -6164,11 +6173,11 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
         }
         renderWidgets(category) {
             this.pnlWidgets.clearInnerHTML();
-            this.pnlWidgets.appendChild(this.$render("i-label", { caption: category.title, font: { color: Theme.text.secondary, weight: 600 } }));
+            this.pnlWidgets.appendChild(this.$render("i-label", { caption: category.title, font: { color: '#3b3838', weight: 600 } }));
             if (category.id === 'layouts') {
-                const moduleCard = (this.$render("i-vstack", { id: "sectionStack", class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", horizontalAlignment: "center", width: "100%", background: { color: Theme.action.hover }, border: { radius: 5 }, gap: "0.5rem", tooltip: { content: '✊ Drag to insert', placement: 'top' } },
+                const moduleCard = (this.$render("i-vstack", { id: "sectionStack", class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", horizontalAlignment: "center", width: "100%", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, gap: "0.5rem", tooltip: { content: '✊ Drag to insert', placement: 'top' } },
                     this.$render("i-image", { url: assets_3.default.icons.logo, width: 24, height: 24, display: "block" }),
-                    this.$render("i-label", { caption: "Section", font: { size: '0.813rem' }, maxHeight: 34, overflow: "hidden", opacity: 0.7 })));
+                    this.$render("i-label", { caption: "Section", font: { size: '0.813rem', color: '#3b3838' }, maxHeight: 34, overflow: "hidden" })));
                 this.pnlWidgets.appendChild(moduleCard);
                 moduleCard.setAttribute('draggable', 'true');
             }
@@ -6176,9 +6185,9 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                 let components = this.pageBlocks.filter(p => p.category === category.id);
                 let matchedModules = components;
                 for (const module of matchedModules) {
-                    const moduleCard = (this.$render("i-vstack", { class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", horizontalAlignment: "center", width: "100%", gap: "0.5rem", overflow: 'hidden', background: { color: Theme.action.hover }, border: { radius: 5 }, tooltip: { content: '✊ Drag to insert', placement: 'top' } },
+                    const moduleCard = (this.$render("i-vstack", { class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", horizontalAlignment: "center", width: "100%", gap: "0.5rem", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, tooltip: { content: '✊ Drag to insert', placement: 'top' } },
                         this.$render("i-image", { url: module.imgUrl || assets_3.default.icons.logo, width: 24, height: 24, display: "block" }),
-                        this.$render("i-label", { caption: module.name, font: { size: '0.813rem' }, opacity: 0.7, maxHeight: 34, overflow: "hidden" })));
+                        this.$render("i-label", { caption: module.name, font: { size: '0.813rem', color: '#3b3838' }, maxHeight: 34, overflow: "hidden" })));
                     this.pnlWidgets.append(moduleCard);
                     this.initDrag(moduleCard, module);
                 }
@@ -6771,19 +6780,19 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
             '.custom-input input': {
                 paddingLeft: 10
             },
-            '::-webkit-scrollbar': {
-                width: '7px',
-            },
-            '::-webkit-scrollbar-track': {
-                borderRadius: '10px',
-                border: '1px solid transparent',
-                // background: Theme.divider
-            },
-            '::-webkit-scrollbar-thumb': {
-                background: Theme.action.focus,
-                borderRadius: '10px',
-                outline: '1px solid transparent'
-            },
+            // '::-webkit-scrollbar': {
+            //   width: '7px',
+            // },
+            // '::-webkit-scrollbar-track': {
+            //   borderRadius: '10px',
+            //   border: '1px solid transparent',
+            //   // background: Theme.divider
+            // },
+            // '::-webkit-scrollbar-thumb': {
+            //   background: Theme.action.focus,
+            //   borderRadius: '10px',
+            //   outline: '1px solid transparent'
+            // },
             '#pnlForm i-input > input': {
                 boxShadow: 'none',
                 border: 'none',
@@ -7062,7 +7071,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         }
         render() {
             return (this.$render("i-vstack", { id: "editor", width: '100%', height: '100%', maxHeight: "100vh", overflow: 'hidden' },
-                this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } } },
+                this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: '#f7f3ef' } },
                     this.$render("i-vstack", { id: "pageContent", maxWidth: "calc(100% - 6em)", width: "100%", horizontalAlignment: 'center', margin: { top: '3.5rem', left: 'auto', right: 'auto' }, padding: { top: '1rem', bottom: '1rem' } },
                         this.$render("i-panel", { id: "pnlEditor", maxWidth: 1024, minHeight: "100vh", width: "100%", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
                             this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
