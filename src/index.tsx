@@ -117,7 +117,7 @@ export default class Editor extends Module {
             const pageRowsRect = this.pageRows.getBoundingClientRect();
             const pnlEditorRect = this.pnlEditor.getBoundingClientRect();
 
-            // drop on the below of rows
+            // dragover on the below of rows
             if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y 
                 && event.clientY >= pageRowsRect.height + pageRowsRect.y
                 && event.clientX >= pageRowsRect.x

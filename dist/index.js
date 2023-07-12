@@ -4416,8 +4416,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const dragTargetSection = dragTarget.closest('ide-section');
                 if (dragStartTarget == null || dragStartTarget == undefined)
                     return { collisionType: "mutual" };
-                const toolbars = dragTargetSection.querySelectorAll('ide-toolbar');
-                const isUngrouping = toolbars.length && toolbars.length > 1 && self.currentToolbar != undefined;
                 const nearestCol = findNearestFixedGridInRow(clientX);
                 const dropColumn = parseInt(nearestCol.getAttribute("data-column"));
                 const grid = dropTarget.closest('.grid');
@@ -4436,7 +4434,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const endOfDragingElm = dropColumn + parseInt(dragTargetSection.dataset.columnSpan) - 1;
                 for (let i = 0; i < sortedSections.length; i++) {
                     const element = sortedSections[i];
-                    const condition = isUngrouping ? true : element != dragTargetSection;
+                    const condition = self.isUngrouping() ? true : element != dragTargetSection;
                     if (condition) {
                         const startOfDroppingElm = parseInt(element.dataset.column);
                         const endOfDroppingElm = parseInt(element.dataset.column) + parseInt(element.dataset.columnSpan) - 1;
@@ -4497,8 +4495,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
                 if (!self.currentElement)
                     return;
-                const numberOfToolbars = self.currentElement.querySelectorAll('ide-toolbar').length;
-                const isUngrouping = self.currentToolbar && numberOfToolbars > 1;
+                const isUngrouping = self.isUngrouping();
                 // if target overlap with other section
                 const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
                 const dropElm = parentWrapper.querySelector('.is-dragenter');
@@ -4692,20 +4689,26 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         async onPrependRow(pageRow) {
             components_24.application.EventBus.dispatch(index_38.EVENT.ON_ADD_SECTION, { appendId: pageRow.id });
             const newPageRow = pageRow.previousElementSibling;
+            const config = { id: (0, index_42.generateUUID)() };
             if (newPageRow) {
                 const dragCmd = (0, index_40.getDragData)() ?
                     new index_41.AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) :
-                    new index_41.DragElementCommand(this.currentElement, newPageRow, true, true);
+                    this.isUngrouping() ?
+                        new index_41.UngroupElementCommand(this.currentToolbar.data, false, this.currentToolbar, newPageRow, config) :
+                        new index_41.DragElementCommand(this.currentElement, newPageRow, true, true);
                 await index_41.commandHistory.execute(dragCmd);
             }
         }
         async onAppendRow(pageRow) {
             components_24.application.EventBus.dispatch(index_38.EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
             const newPageRow = pageRow.nextElementSibling;
+            const config = { id: (0, index_42.generateUUID)() };
             if (newPageRow) {
                 const dragCmd = (0, index_40.getDragData)() ?
                     new index_41.AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) :
-                    new index_41.DragElementCommand(this.currentElement, newPageRow, true, true);
+                    this.isUngrouping() ?
+                        new index_41.UngroupElementCommand(this.currentToolbar.data, false, this.currentToolbar, newPageRow, config) :
+                        new index_41.DragElementCommand(this.currentElement, newPageRow, true, true);
                 await index_41.commandHistory.execute(dragCmd);
             }
         }
@@ -4714,6 +4717,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 new index_41.AddElementCommand(this.getNewElementData(), true, true, null, this) :
                 new index_41.DragElementCommand(this.currentElement, this, true, true);
             await index_41.commandHistory.execute(dragCmd);
+        }
+        isUngrouping() {
+            if (!this.currentToolbar)
+                return false;
+            const section = this.currentToolbar.closest('ide-section');
+            const toolbars = section.querySelectorAll('ide-toolbar');
+            return (toolbars && toolbars.length && toolbars.length > 1) ? true : false;
         }
         initEventBus() {
             const self = this;
@@ -6826,7 +6836,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 }
                 const pageRowsRect = this.pageRows.getBoundingClientRect();
                 const pnlEditorRect = this.pnlEditor.getBoundingClientRect();
-                // drop on the below of rows
+                // dragover on the below of rows
                 if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y
                     && event.clientY >= pageRowsRect.height + pageRowsRect.y
                     && event.clientX >= pageRowsRect.x

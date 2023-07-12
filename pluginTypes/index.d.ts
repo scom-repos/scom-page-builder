@@ -1102,6 +1102,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         onPrependRow(pageRow: PageRow): Promise<void>;
         onAppendRow(pageRow: PageRow): Promise<void>;
         onAddRow(): Promise<void>;
+        private isUngrouping;
         private initEventBus;
         private getNewElementData;
         private addDottedLines;

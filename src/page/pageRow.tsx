@@ -759,8 +759,6 @@ export class PageRow extends Module {
             const dragTargetSection = dragTarget.closest('ide-section') as HTMLElement;
 
             if (dragStartTarget==null || dragStartTarget==undefined) return { collisionType: "mutual" }
-            const toolbars = dragTargetSection.querySelectorAll('ide-toolbar');
-            const isUngrouping: boolean = toolbars.length && toolbars.length > 1 && self.currentToolbar!=undefined;
             const nearestCol = findNearestFixedGridInRow(clientX);
             const dropColumn: number = parseInt(nearestCol.getAttribute("data-column"));
             const grid = dropTarget.closest('.grid');
@@ -784,7 +782,7 @@ export class PageRow extends Module {
 
             for (let i=0; i<sortedSections.length; i++) {
                 const element = sortedSections[i];
-                const condition = isUngrouping? true : element!=dragTargetSection;
+                const condition = self.isUngrouping()? true : element!=dragTargetSection;
                 if (condition){
 
                     const startOfDroppingElm: number = parseInt(element.dataset.column);
@@ -850,8 +848,7 @@ export class PageRow extends Module {
 
             if (!self.currentElement) return;
 
-            const numberOfToolbars = self.currentElement.querySelectorAll('ide-toolbar').length
-            const isUngrouping: boolean = self.currentToolbar && numberOfToolbars > 1
+            const isUngrouping: boolean = self.isUngrouping();
 
             // if target overlap with other section
             const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
@@ -1041,9 +1038,13 @@ export class PageRow extends Module {
     async onPrependRow(pageRow: PageRow) {
         application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { appendId: pageRow.id });
         const newPageRow = pageRow.previousElementSibling as PageRow;
+        const config = { id: generateUUID() };
         if (newPageRow) {
-            const dragCmd = getDragData() ?
+            const dragCmd = 
+                getDragData() ?
                 new AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) :
+                this.isUngrouping() ?
+                new UngroupElementCommand(this.currentToolbar.data, false, this.currentToolbar, newPageRow, config) :
                 new DragElementCommand(this.currentElement, newPageRow, true, true);
             await commandHistory.execute(dragCmd);
         }
@@ -1052,9 +1053,13 @@ export class PageRow extends Module {
     async onAppendRow(pageRow: PageRow) {
         application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
         const newPageRow = pageRow.nextElementSibling as PageRow;
+        const config = { id: generateUUID() };
         if (newPageRow) {
-            const dragCmd = getDragData() ?
-                new AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) :
+            const dragCmd = 
+                getDragData() ?
+                new AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) : 
+                this.isUngrouping() ?
+                new UngroupElementCommand(this.currentToolbar.data, false, this.currentToolbar, newPageRow, config) :
                 new DragElementCommand(this.currentElement, newPageRow, true, true);
             await commandHistory.execute(dragCmd);
         }
@@ -1065,6 +1070,13 @@ export class PageRow extends Module {
             new AddElementCommand(this.getNewElementData(), true, true, null, this) :
             new DragElementCommand(this.currentElement, this, true, true);
         await commandHistory.execute(dragCmd);
+    }
+
+    private isUngrouping() {
+        if (!this.currentToolbar) return false;
+        const section = this.currentToolbar.closest('ide-section')
+        const toolbars = section.querySelectorAll('ide-toolbar');
+        return (toolbars && toolbars.length && toolbars.length > 1)? true : false;
     }
 
     private initEventBus() {
