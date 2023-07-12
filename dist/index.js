@@ -6047,11 +6047,14 @@ define("@scom/scom-page-builder/page/pageSidebar.css.ts", ["require", "exports",
         $nest: {
             '> div': {
                 boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 50px',
+                overflow: 'hidden'
             },
             '.modal': {
                 marginRight: -8,
-                padding: '0.5rem',
-                borderRadius: 5
+                padding: '0.75rem',
+                borderRadius: 5,
+                backgroundColor: '#fff',
+                overflow: 'auto'
             }
         }
     });
@@ -6063,7 +6066,7 @@ define("@scom/scom-page-builder/page/pageSidebar.css.ts", ["require", "exports",
         transition: 'opacity .2s ease-in-out, transform 0.2s ease-in-out',
         $nest: {
             '&.is-dragging': {
-                opacity: 0.3
+                opacity: 0.7
             },
             '&:hover': {
                 transform: 'scale(1.04) translateY(-4px)'
@@ -6134,11 +6137,11 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
         }
         renderWidgets(category) {
             this.pnlWidgets.clearInnerHTML();
-            this.pnlWidgets.appendChild(this.$render("i-label", { caption: category.title, font: { color: Theme.text.secondary, weight: 600 } }));
+            this.pnlWidgets.appendChild(this.$render("i-label", { caption: category.title, font: { color: '#3b3838', weight: 600 } }));
             if (category.id === 'layouts') {
-                const moduleCard = (this.$render("i-vstack", { id: "sectionStack", class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", horizontalAlignment: "center", width: "100%", background: { color: Theme.action.hover }, border: { radius: 5 }, gap: "0.5rem", tooltip: { content: '✊ Drag to insert', placement: 'top' } },
+                const moduleCard = (this.$render("i-vstack", { id: "sectionStack", class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", horizontalAlignment: "center", width: "100%", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, gap: "0.5rem", tooltip: { content: '✊ Drag to insert', placement: 'top' } },
                     this.$render("i-image", { url: assets_3.default.icons.logo, width: 24, height: 24, display: "block" }),
-                    this.$render("i-label", { caption: "Section", font: { size: '0.813rem' }, maxHeight: 34, overflow: "hidden", opacity: 0.7 })));
+                    this.$render("i-label", { caption: "Section", font: { size: '0.813rem', color: '#3b3838' }, maxHeight: 34, overflow: "hidden" })));
                 this.pnlWidgets.appendChild(moduleCard);
                 moduleCard.setAttribute('draggable', 'true');
             }
@@ -6146,9 +6149,9 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                 let components = this.pageBlocks.filter(p => p.category === category.id);
                 let matchedModules = components;
                 for (const module of matchedModules) {
-                    const moduleCard = (this.$render("i-vstack", { class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", horizontalAlignment: "center", width: "100%", gap: "0.5rem", overflow: 'hidden', background: { color: Theme.action.hover }, border: { radius: 5 }, tooltip: { content: '✊ Drag to insert', placement: 'top' } },
+                    const moduleCard = (this.$render("i-vstack", { class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", horizontalAlignment: "center", width: "100%", gap: "0.5rem", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, tooltip: { content: '✊ Drag to insert', placement: 'top' } },
                         this.$render("i-image", { url: module.imgUrl || assets_3.default.icons.logo, width: 24, height: 24, display: "block" }),
-                        this.$render("i-label", { caption: module.name, font: { size: '0.813rem' }, opacity: 0.7, maxHeight: 34, overflow: "hidden" })));
+                        this.$render("i-label", { caption: module.name, font: { size: '0.813rem', color: '#3b3838' }, maxHeight: 34, overflow: "hidden" })));
                     this.pnlWidgets.append(moduleCard);
                     this.initDrag(moduleCard, module);
                 }
@@ -7021,7 +7024,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         }
         render() {
             return (this.$render("i-vstack", { id: "editor", width: '100%', height: '100%', maxHeight: "100vh", overflow: 'hidden' },
-                this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } } },
+                this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: '#f7f3ef' }, border: { right: { width: 1, style: 'solid', color: Theme.divider } } },
                     this.$render("i-vstack", { id: "pageContent", maxWidth: "calc(100% - 6em)", width: "100%", horizontalAlignment: 'center', margin: { top: '3.5rem', left: 'auto', right: 'auto' }, padding: { top: '1rem', bottom: '1rem' } },
                         this.$render("i-panel", { id: "pnlEditor", maxWidth: 1024, minHeight: "100vh", width: "100%", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
                             this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
