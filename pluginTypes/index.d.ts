@@ -391,6 +391,7 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
     export interface ICategory {
         id: string;
         title: string;
+        icon: string;
     }
 }
 /// <amd-module name="@scom/scom-page-builder/interface/jsonSchema.ts" />
@@ -1376,36 +1377,38 @@ declare module "@scom/scom-page-builder/page/pageRows.tsx" {
     export { PageSection, PageFooter };
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageSidebar.css.ts" />
-declare module "@scom/scom-page-builder/page/pageSidebar.css.ts" { }
+declare module "@scom/scom-page-builder/page/pageSidebar.css.ts" {
+    export const categoryPanelStyle: string;
+    export const categoryButtonStyle: string;
+    export const widgetModalStyle: string;
+    export const widgetStyle: string;
+}
 /// <amd-module name="@scom/scom-page-builder/page/pageSidebar.tsx" />
 declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
-    import { Module, ControlElement } from '@ijstech/components';
-    import "@scom/scom-page-builder/page/pageSidebar.css.ts";
+    import { ControlElement, Module, Control } from '@ijstech/components';
+    import { ICategory } from "@scom/scom-page-builder/interface/index.ts";
     global {
         namespace JSX {
             interface IntrinsicElements {
-                ['ide-sidebar']: PageSidebarElement;
+                ['i-scom-page-builder-sidebar']: ControlElement;
             }
         }
     }
-    export interface PageSidebarElement extends ControlElement {
-    }
     export class PageSidebar extends Module {
-        private microdappsStack;
-        private projectmicrodappsStack;
-        private chartsStack;
-        private componentsStack;
-        private sectionStack;
-        private pnlLayouts;
-        private pnlEmbeddables;
+        private toolbars;
+        private pnlWidgetCategory;
+        private mdWidget;
+        private pnlWidgets;
+        private mdPageSettings;
         private get pageBlocks();
-        constructor(parent?: any);
         init(): void;
-        renderUI(): Promise<void>;
-        private renderList;
+        renderToolbar(): void;
+        renderWidgetCategories(): void;
+        renderWidgets(category: ICategory): void;
+        openWidgetModal(target: Control, category: ICategory): void;
         private initDrag;
         private initEventListeners;
-        private initEventBus;
+        private onSavePageSettings;
         render(): any;
     }
 }
