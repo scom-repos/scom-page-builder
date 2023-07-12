@@ -5761,6 +5761,9 @@ define("@scom/scom-page-builder/page/pageRows.css.ts", ["require", "exports", "@
             },
             '.row-entered': {
                 borderBottom: '3px solid rgb(66,133,244)'
+            },
+            '.container > *:not(.active):not(:focus):first-child': {
+                borderTopColor: 'transparent'
             }
         }
     });
