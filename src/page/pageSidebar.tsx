@@ -1,19 +1,20 @@
 import {
-    Module,
-    customElements,
     ControlElement,
-    Styles,
-    GridLayout,
-    Control,
+    customElements,
+    Module,
     VStack,
+    Styles,
+    IconName,
+    Modal,
     application,
-    Panel,
+    Control
 } from '@ijstech/components';
 import { getCategories, getPageBlocks, setDragData } from '../store/index';
 import { EVENT } from '../const/index';
-import { IPageBlockData } from '../interface/index';
-// import { Collapse } from '../common/index';
-import './pageSidebar.css';
+import { ICategory, IPageBlockData, IPageConfig } from '../interface/index';
+import { categoryButtonStyle, categoryPanelStyle, widgetModalStyle, widgetStyle } from './pageSidebar.css';
+import { UpdatePageSettingsCommand, commandHistory } from '../command/index';
+import { PageSettingsDialog } from '../dialogs/index';
 import assets from '../assets';
 
 const Theme = Styles.Theme.ThemeVars;
@@ -21,117 +22,164 @@ const Theme = Styles.Theme.ThemeVars;
 declare global {
     namespace JSX {
         interface IntrinsicElements {
-            ['ide-sidebar']: PageSidebarElement;
+            ['i-scom-page-builder-sidebar']: ControlElement;
         }
     }
 }
 
-export interface PageSidebarElement extends ControlElement {
-}
-
-@customElements('ide-sidebar')
+@customElements('i-scom-page-builder-sidebar')
 export class PageSidebar extends Module {
-    private microdappsStack: GridLayout;
-    private projectmicrodappsStack: GridLayout;
-    private chartsStack: GridLayout;
-    private componentsStack: GridLayout;
-    private sectionStack: VStack;
-    private pnlLayouts: Panel;
-    private pnlEmbeddables: Panel;
+    private toolbars: VStack;
+    private pnlWidgetCategory: VStack;
+    private mdWidget: Modal;
+    private pnlWidgets: VStack;
+    private mdPageSettings: PageSettingsDialog;
 
     private get pageBlocks(): IPageBlockData[] {
         return getPageBlocks();
     }
 
-    constructor(parent?: any) {
-        super(parent);
-    }
-
     init() {
         super.init();
-        this.renderUI();
         this.initEventListeners();
-        this.initEventBus();
+        this.openWidgetModal = this.openWidgetModal.bind(this);
+        this.renderToolbar();
+        this.renderWidgetCategories();
     }
 
-    async renderUI() {
-        const categories = getCategories();
-        this.pnlLayouts.clearInnerHTML();
-        this.pnlLayouts.appendChild(
-            <i-vstack padding={{top: '1rem', bottom: '0.5rem', left: '1rem', right: '1rem'}} border={{ bottom: { width: 1, style: 'solid', color: 'var(--builder-divider)' } }}>
-                <i-vstack
-                    id="sectionStack"
-                    class="text-center pointer builder-item"
-                    verticalAlignment="center"
-                    horizontalAlignment="center"
-                    height="68px" width="100%"
-                    background={{color: Theme.action.hover}}
-                    gap="0.5rem"
+    renderToolbar() {
+        this.toolbars.clearInnerHTML();
+        const iconList: any[] = [
+            {
+                name: 'cog',
+                tooltip: { content: 'Page settings', placement: 'left' },
+                onClick: () => {
+                    this.mdPageSettings.show();
+                }
+            },
+            {
+                name: 'undo',
+                tooltip: { content: 'Undo last action', placement: 'left' },
+                onClick: () => commandHistory.undo()
+            },
+            {
+                name: 'redo',
+                tooltip: { content: 'Redo last action', placement: 'left' },
+                onClick: () => commandHistory.redo()
+            }
+        ];
+        iconList.forEach((icon) => {
+            this.toolbars.appendChild(
+                <i-hstack
+                    class={categoryButtonStyle}
+                    width={40}
+                    height={40}
+                    padding={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                    horizontalAlignment='center'
+                    verticalAlignment='center'
+                    tooltip={icon.tooltip}
+                    onClick={icon.onClick}
                 >
-                    <i-image url={assets.icons.logo} width={24} height={24} display="block"></i-image>
-                    <i-label caption="Section" font={{size: '0.813rem'}} maxHeight={34} overflow={"hidden"} opacity={0.7}></i-label>
-                </i-vstack>
-            </i-vstack>
-        )
-        this.pnlEmbeddables.clearInnerHTML();
-        for (let i = 0; i < categories.length; i++) {
-            const stack = categories[i];
-            this.pnlEmbeddables.appendChild(
-                <i-scom-page-builder-collapse
-                    title={stack.title}
-                    border={{
-                        bottom: {
-                            width: 1,
-                            style: i === categories.length - 1 ? 'none' : 'solid',
-                            color: 'var(--builder-divider)'
-                        }
-                    }}
-                    expanded={true}
-                >
-                    <i-grid-layout
-                        id={`${stack.id.replace('-', '')}Stack`}
-                        templateColumns={['repeat(2, 1fr)']}
-                        gap={{column: '0.5rem', row: '0.75rem'}}
-                        padding={{ top: '0.5rem', bottom: '0.5rem', left: '1rem', right: '1rem' }}
-                    ></i-grid-layout>
-                </i-scom-page-builder-collapse>
+                    <i-icon width={16} height={16} name={icon.name} fill={Theme.colors.primary.main}></i-icon>
+                </i-hstack>
+            );
+        })
+    }
+
+    renderWidgetCategories() {
+        const categories = [
+            {
+                id: 'layouts',
+                title: 'Layouts',
+                icon: 'columns'
+            },
+            ...getCategories()
+        ]
+        this.pnlWidgetCategory.clearInnerHTML();
+        categories.forEach(c => {
+            this.pnlWidgetCategory.appendChild(
+                <i-panel>
+                    <i-hstack
+                        class={categoryButtonStyle}
+                        width={40}
+                        height={40}
+                        padding={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                        horizontalAlignment='center'
+                        verticalAlignment='center'
+                        tooltip={{ content: c.title, placement: 'left' }}
+                        onClick={(target) => this.openWidgetModal(target.parent, c)}
+                    >
+                        <i-icon width={16} height={16} name={c.icon as IconName} fill={Theme.colors.primary.main}></i-icon>
+                    </i-hstack>
+                </i-panel>
             )
-            this.renderList(this[`${stack.id.replace('-', '')}Stack`], stack.id);
-        }
-        this.sectionStack.setAttribute('draggable', 'true');
+            if (c.id === 'layouts') {
+                this.pnlWidgetCategory.appendChild(<i-panel border={{ bottom: { width: 1, color: Theme.divider, style: 'solid' } }}></i-panel>)
+            }
+        })
     }
 
-    private async renderList(parent: Control, category: string) {
-        parent.clearInnerHTML();
-        let components = this.pageBlocks.filter(p => p.category === category);
-        let matchedModules = components;
-        for (const module of matchedModules) {
+    renderWidgets(category: ICategory) {
+        this.pnlWidgets.clearInnerHTML();
+        this.pnlWidgets.appendChild(<i-label caption={category.title} font={{ color: Theme.text.secondary, weight: 600 }}></i-label>);
+        if (category.id === 'layouts') {
             const moduleCard = (
                 <i-vstack
-                    class="text-center pointer builder-item"
+                    id="sectionStack"
+                    class={widgetStyle}
                     verticalAlignment="center"
                     horizontalAlignment="center"
+                    width="100%"
+                    background={{ color: Theme.action.hover }}
+                    border={{ radius: 5 }}
                     gap="0.5rem"
-                    overflow={'hidden'}
-                    background={{color: Theme.action.hover}}
-                    border={{radius: 5}}
+                    tooltip={{ content: '✊ Drag to insert', placement: 'top' }}
                 >
-                    <i-image
-                        url={module.imgUrl || assets.icons.logo}
-                        width={24}
-                        height={24}
-                        display="block"
-                    ></i-image>
-                    <i-label
-                        caption={module.name}
-                        font={{size: '0.813rem'}} opacity={0.7}
-                        maxHeight={34} overflow={"hidden"}
-                    ></i-label>
+                    <i-image url={assets.icons.logo} width={24} height={24} display="block"></i-image>
+                    <i-label caption="Section" font={{ size: '0.813rem' }} maxHeight={34} overflow={"hidden"} opacity={0.7}></i-label>
                 </i-vstack>
             );
-            parent.append(moduleCard);
-            this.initDrag(moduleCard, module);
+            this.pnlWidgets.appendChild(moduleCard);
+            moduleCard.setAttribute('draggable', 'true');
+        } else {
+            let components = this.pageBlocks.filter(p => p.category === category.id);
+            let matchedModules = components;
+            for (const module of matchedModules) {
+                const moduleCard = (
+                    <i-vstack
+                        class={widgetStyle}
+                        verticalAlignment="center"
+                        horizontalAlignment="center"
+                        width="100%"
+                        gap="0.5rem"
+                        overflow={'hidden'}
+                        background={{ color: Theme.action.hover }}
+                        border={{ radius: 5 }}
+                        tooltip={{ content: '✊ Drag to insert', placement: 'top' }}
+                    >
+                        <i-image
+                            url={module.imgUrl || assets.icons.logo}
+                            width={24}
+                            height={24}
+                            display="block"
+                        ></i-image>
+                        <i-label
+                            caption={module.name}
+                            font={{ size: '0.813rem' }} opacity={0.7}
+                            maxHeight={34} overflow={"hidden"}
+                        ></i-label>
+                    </i-vstack>
+                );
+                this.pnlWidgets.append(moduleCard);
+                this.initDrag(moduleCard, module);
+            }
         }
+    }
+
+    openWidgetModal(target: Control, category: ICategory) {
+        this.mdWidget.parent = target;
+        this.renderWidgets(category);
+        this.mdWidget.visible = true;
     }
 
     private initDrag(module: Control, data: IPageBlockData) {
@@ -141,14 +189,15 @@ export class PageSidebar extends Module {
 
     private initEventListeners() {
         const self = this;
-        this.addEventListener('dragstart', function (event) {
+        this.pnlWidgets.addEventListener('dragstart', function (event) {
             event.stopPropagation();
             const eventTarget = event.target as Control;
-            if (eventTarget.nodeName === 'IMG' || (eventTarget?.closest && !eventTarget.closest('.builder-item')))
+            if (eventTarget.nodeName === 'IMG' || (eventTarget?.closest && !eventTarget.closest('.' + widgetStyle)))
                 event.preventDefault();
             if (eventTarget.id === 'sectionStack') {
-                setDragData({module: {name: 'sectionStack', path: ''}});
+                setDragData({ module: { name: 'sectionStack', path: '' } });
                 eventTarget.classList.add('is-dragging');
+                self.mdWidget.visible = false;
             }
             else if (eventTarget?.dataset?.name) {
                 const currentName = eventTarget.dataset.name;
@@ -158,42 +207,43 @@ export class PageSidebar extends Module {
                     setDragData({ module });
                     eventTarget.classList.add('is-dragging');
                 }
+                self.mdWidget.visible = false;
             } else {
                 event.preventDefault();
             }
         })
     }
 
-    private initEventBus() {
-        application.EventBus.register(this, EVENT.ON_UPDATE_SIDEBAR, (category: string) => {
-            const categoryStack = category && this[`${category.replace('-', '')}Stack`];
-            if (categoryStack)
-                this.renderList(this[`${category.replace('-', '')}Stack`], category);
-        })
+    private onSavePageSettings(data: IPageConfig) {
+        const containerEl = this.parentElement?.querySelector('.pnl-editor-wrapper') as Control;
+        if (!containerEl) return;
+        const updateCmd = new UpdatePageSettingsCommand(containerEl, { ...data });
+        commandHistory.execute(updateCmd);
     }
 
     render() {
         return (
-            <i-panel class="navigator" height={'100%'} maxWidth="100%">
-                <i-vstack padding={{top: '1rem', bottom: '0.5rem'}}>
-                    <i-label
-                        caption="Layouts"
-                        font={{size: '1rem', weight: 600}}
-                        maxHeight={34} overflow={"hidden"}
-                        margin={{left: '0.5rem', bottom: '0.5rem'}}
-                    ></i-label>
-                    <i-panel id="pnlLayouts"></i-panel>
+            <i-hstack position='fixed' top='50%' right={24} height={0} width={0} verticalAlignment='center'>
+                <i-vstack position='absolute' right="0px">
+                    <i-vstack id='toolbars' class={categoryPanelStyle} gap="0.25rem" margin={{ bottom: '1rem' }}></i-vstack>
+                    <i-vstack id='pnlWidgetCategory' class={categoryPanelStyle} gap="0.25rem"></i-vstack>
                 </i-vstack>
-                <i-vstack padding={{top: '1rem', bottom: '0.5rem'}}>
-                    <i-label
-                        caption="Embeddables"
-                        font={{size: '1rem', weight: 600}}
-                        maxHeight={34} overflow={"hidden"}
-                        margin={{left: '0.5rem', bottom: '0.5rem'}}
-                    ></i-label>
-                    <i-panel id="pnlEmbeddables"></i-panel>
-                </i-vstack>
-            </i-panel>
-        );
+                <i-modal
+                    id='mdWidget'
+                    class={widgetModalStyle}
+                    height='auto'
+                    width={320}
+                    maxHeight='80vh'
+                    showBackdrop={false}
+                    popupPlacement='left'
+                >
+                    <i-vstack id='pnlWidgets' gap="0.5rem"></i-vstack>
+                </i-modal>
+                <ide-page-settings-dialog
+                    id="mdPageSettings"
+                    onSave={this.onSavePageSettings.bind(this)}
+                ></ide-page-settings-dialog>
+            </i-hstack>
+        )
     }
 }

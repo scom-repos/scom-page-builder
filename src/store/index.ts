@@ -281,18 +281,22 @@ export const state = {
     {
       id: 'composables',
       title: 'Composables',
+      icon: 'shapes'
     },
     {
       id: 'micro-dapps',
-      title: 'MicroDApps'
+      title: 'MicroDApps',
+      icon: 'window-maximize'
     },
     {
       id: 'charts',
-      title: 'Charts'
+      title: 'Charts',
+      icon: 'chart-pie'
     },
     {
       id: 'project-micro-dapps',
-      title: 'Project MicroDApps'
+      title: 'Project MicroDApps',
+      icon: 'hashtag'
     }
   ] as ICategory[],
   theme: 'light' as ThemeType,

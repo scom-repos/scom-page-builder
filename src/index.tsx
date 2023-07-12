@@ -67,7 +67,7 @@ export default class Editor extends Module {
 
     set components(value: IPageBlockData[]) {
         setPageBlocks(value);
-        this.pageSidebar.renderUI();
+        // this.pageSidebar.renderUI();
     }
 
     get categories() {
@@ -76,7 +76,8 @@ export default class Editor extends Module {
 
     set categories(value: ICategory[]) {
         setCategories(value);
-        this.pageSidebar.renderUI();
+        // this.pageSidebar.renderUI();
+        this.pageSidebar.renderWidgetCategories();
     }
 
     get theme() {
@@ -294,16 +295,16 @@ export default class Editor extends Module {
                 maxHeight="100vh"
                 overflow={'hidden'}
             >
-                <ide-header
+                {/* <ide-header
                     id={'pageHeader'}
                     border={{ bottom: { width: 1, style: 'solid', color: '#dadce0' } }}
-                ></ide-header>
-                <i-grid-layout
+                ></ide-header> */}
+                {/* <i-grid-layout
                     templateColumns={['auto', 'minmax(auto, 235px)']}
                     autoFillInHoles={true}
                     height="calc(100% -64px)"
                     overflow="hidden"
-                >
+                > */}
                     <i-panel
                         id="pnlWrap"
                         height="100%"
@@ -317,7 +318,7 @@ export default class Editor extends Module {
                             maxWidth="calc(100% - 6em)"
                             width="100%"
                             horizontalAlignment='center'
-                            margin={{ left: 'auto', right: 'auto' }}
+                            margin={{ top: '3.5rem', left: 'auto', right: 'auto' }}
                             padding={{top: '1rem', bottom: '1rem'}}
                         >
                             <i-panel
@@ -341,7 +342,7 @@ export default class Editor extends Module {
                             </i-panel>
                         </i-vstack>
                     </i-panel>
-                    <i-panel
+                    {/* <i-panel
                         id="pnlSidebar"
                         height="100%"
                         overflow={{ x: 'hidden', y: 'auto' }}
@@ -352,8 +353,9 @@ export default class Editor extends Module {
                             display={'block'}
                             width="100%"
                         ></ide-sidebar>
-                    </i-panel>
-                </i-grid-layout>
+                    </i-panel> */}
+                {/* </i-grid-layout> */}
+                <i-scom-page-builder-sidebar id="pageSidebar"></i-scom-page-builder-sidebar>
                 <ide-search-components-dialog
                     id="mdComponentsSearch"
                 ></ide-search-components-dialog>
