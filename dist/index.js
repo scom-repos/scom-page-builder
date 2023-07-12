@@ -4148,7 +4148,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 if (self.currentElement && !self.currentElement.classList.contains('builder-item'))
                     self.currentElement.opacity = 1;
                 resetDragTarget();
+                resetPageRow();
             });
+            function resetPageRow() {
+                var _a, _b;
+                self.pnlRow.minHeight = 'auto';
+                self.toggleUI(!!((_b = (_a = self.data) === null || _a === void 0 ? void 0 : _a.elements) === null || _b === void 0 ? void 0 : _b.length));
+            }
             function dragEnter(enterTarget, clientX, clientY, collision) {
                 var _a, _b, _c, _d;
                 const elementConfig = (0, index_40.getDragData)();
@@ -4158,6 +4164,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
                 if (!enterTarget || !self.currentElement)
                     return;
+                if (enterTarget.closest('#pnlEmty')) {
+                    self.pnlRow.minHeight = '180px';
+                    self.toggleUI(true);
+                    self.addDottedLines();
+                    return;
+                }
                 const rowBottom = enterTarget.closest(`.${ROW_BOTTOM_CLASS}`);
                 const rowTop = enterTarget.closest(`.${ROW_TOP_CLASS}`);
                 if (rowBottom) {
@@ -4481,6 +4493,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             }
             this.addEventListener('drop', async function (event) {
                 var _a, _b, _c;
+                self.pnlRow.minHeight = 'auto';
                 const elementConfig = (0, index_40.getDragData)();
                 const eventTarget = event.target;
                 const pageRow = eventTarget.closest('ide-row');
