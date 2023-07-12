@@ -6780,19 +6780,19 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
             '.custom-input input': {
                 paddingLeft: 10
             },
-            '::-webkit-scrollbar': {
-                width: '7px',
-            },
-            '::-webkit-scrollbar-track': {
-                borderRadius: '10px',
-                border: '1px solid transparent',
-                // background: Theme.divider
-            },
-            '::-webkit-scrollbar-thumb': {
-                background: Theme.action.focus,
-                borderRadius: '10px',
-                outline: '1px solid transparent'
-            },
+            // '::-webkit-scrollbar': {
+            //   width: '7px',
+            // },
+            // '::-webkit-scrollbar-track': {
+            //   borderRadius: '10px',
+            //   border: '1px solid transparent',
+            //   // background: Theme.divider
+            // },
+            // '::-webkit-scrollbar-thumb': {
+            //   background: Theme.action.focus,
+            //   borderRadius: '10px',
+            //   outline: '1px solid transparent'
+            // },
             '#pnlForm i-input > input': {
                 boxShadow: 'none',
                 border: 'none',
@@ -7071,7 +7071,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         }
         render() {
             return (this.$render("i-vstack", { id: "editor", width: '100%', height: '100%', maxHeight: "100vh", overflow: 'hidden' },
-                this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: '#f7f3ef' }, border: { right: { width: 1, style: 'solid', color: Theme.divider } } },
+                this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: '#f7f3ef' } },
                     this.$render("i-vstack", { id: "pageContent", maxWidth: "calc(100% - 6em)", width: "100%", horizontalAlignment: 'center', margin: { top: '3.5rem', left: 'auto', right: 'auto' }, padding: { top: '1rem', bottom: '1rem' } },
                         this.$render("i-panel", { id: "pnlEditor", maxWidth: 1024, minHeight: "100vh", width: "100%", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
                             this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },

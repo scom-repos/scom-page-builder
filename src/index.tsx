@@ -322,7 +322,6 @@ export default class Editor extends Module {
                         width="100%"
                         overflow={{ y: 'auto', x: 'hidden' }}
                         background={{ color: '#f7f3ef' }}
-                        border={{ right: { width: 1, style: 'solid', color: Theme.divider } }}
                     >
                         <i-vstack
                             id="pageContent"
