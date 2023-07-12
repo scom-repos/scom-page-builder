@@ -112,12 +112,16 @@ export class UngroupElementCommand implements ICommand {
     } else {
         // create elm in a new section
         // this.newId = generateUUID();
+        const isMicroDapps = this.data?.module?.category === 'micro-dapps';
         const newElData = {
             id: this.data.id,
             column: parseInt(this.dropElm.dataset.column),
             columnSpan: this.data.columnSpan,
-            properties: this.data.properties,
-            tag:  this.data?.tag || {},
+            // type: this.data.type, // to be removed
+            properties: {
+              showHeader: isMicroDapps,
+              showFooter: isMicroDapps
+            },
             module: this.data.module
         };
         this.appendElm = await this.parent.addElement(newElData);
@@ -138,6 +142,7 @@ export class UngroupElementCommand implements ICommand {
   }
 
   async undo() {
+    this.draggingToolbar = this.parent.querySelector(`[id='${this.draggingToolbar.id}']`) as Control;
     // delete the elm
     const row = this.parent;
     const rowId = row? row.id.replace("row-", "") : undefined;
@@ -146,7 +151,6 @@ export class UngroupElementCommand implements ICommand {
     
     const newElm = row.querySelector(`#elm-${elmId}`)
     if (newElm) {
-      this.draggingToolbar = newElm;
       const sectionEl = newElm.closest('ide-section');
       newElm.remove();
       const section = pageObject.getRow(rowId);
@@ -162,12 +166,16 @@ export class UngroupElementCommand implements ICommand {
     application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
 
     // merge the elms
+    const isMicroDapps = this.data?.module?.category === 'micro-dapps';
     const newElData = {
         id: this.data.id,
         column: this.oriCol,
         columnSpan: this.oriColSpan,
-        properties: this.data.properties,
-        tag:  this.data?.tag || {},
+        // type: this.data.type, // to be removed
+        properties: {
+          showHeader: isMicroDapps,
+          showFooter: isMicroDapps
+        },
         module: this.data.module
     };
 
