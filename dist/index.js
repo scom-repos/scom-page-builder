@@ -2979,7 +2979,7 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts", ["require", "
             '.custom-modal': {
                 $nest: {
                     '.i-modal_header': {
-                        padding: '1rem 1rem 0.5rem',
+                        padding: '1rem 1.5rem 0.5rem',
                         fontSize: '1rem',
                         fontWeight: 600
                     },
@@ -2988,7 +2988,8 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts", ["require", "
                     },
                     '.modal': {
                         maxHeight: 'calc(100vh - 48px)',
-                        padding: 0
+                        padding: 0,
+                        borderRadius: 5
                     }
                 }
             }
@@ -3158,7 +3159,7 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
         }
         render() {
             return (this.$render("i-modal", { id: 'dialog', showBackdrop: true, closeOnBackdropClick: false, closeIcon: { name: 'times' }, visible: false, minWidth: 400, maxWidth: 500, title: "Section Settings", class: "custom-modal" },
-                this.$render("i-panel", { padding: { top: '1rem', bottom: '1rem', left: '1rem', right: '1rem' } },
+                this.$render("i-panel", { padding: { top: '1rem', bottom: '1rem', left: '1.5rem', right: '1.5rem' } },
                     this.$render("i-form", { id: "formElm" }))));
         }
     };
@@ -3175,7 +3176,7 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.css.ts", ["require", 
             '.custom-modal': {
                 $nest: {
                     '.i-modal_header': {
-                        padding: '1rem 1rem 0.5rem',
+                        padding: '1rem 1.5rem 0.5rem',
                         fontSize: '1rem',
                         fontWeight: 600
                     },
@@ -3184,7 +3185,8 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.css.ts", ["require", 
                     },
                     '.modal': {
                         maxHeight: 'calc(100vh - 48px)',
-                        padding: 0
+                        padding: 0,
+                        borderRadius: 5
                     }
                 }
             }
@@ -3310,7 +3312,7 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
         }
         render() {
             return (this.$render("i-modal", { id: 'settingsDialog', showBackdrop: true, closeOnBackdropClick: false, closeIcon: { name: 'times' }, visible: false, minWidth: 400, maxWidth: 500, title: "Page Settings", class: "custom-modal" },
-                this.$render("i-panel", { padding: { top: '1rem', bottom: '1rem', left: '1rem', right: '1rem' } },
+                this.$render("i-panel", { padding: { top: '1rem', bottom: '1rem', left: '1.5rem', right: '1.5rem' } },
                     this.$render("i-form", { id: "formElm" }))));
         }
     };
@@ -3524,7 +3526,7 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
             '.setting-modal': {
                 $nest: {
                     '.i-modal_header': {
-                        padding: '1rem 1rem 0.5rem',
+                        padding: '1rem 1.5rem 0.5rem',
                         fontSize: '1rem',
                         fontWeight: 600
                     },
@@ -3537,6 +3539,7 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                     },
                     '.modal': {
                         padding: 0,
+                        borderRadius: 5,
                         $nest: {
                             '#pnlForm': {
                                 maxHeight: 'calc(100vh - 100px)',
@@ -5423,7 +5426,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 this.$render("i-panel", { position: "absolute", width: "90%", height: "8px", left: "5%", bottom: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "bottom-block" }),
                 this.$render("i-panel", { position: "absolute", width: "90%", height: "8px", left: "5%", top: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "top-block" }),
                 this.$render("i-modal", { id: 'mdActions', title: 'Update Settings', closeIcon: { name: 'times' }, minWidth: 400, maxWidth: '900px', closeOnBackdropClick: false, onOpen: this.onShowModal.bind(this), onClose: this.onCloseModal.bind(this), class: "setting-modal" },
-                    this.$render("i-panel", { padding: { left: '1rem', right: '1rem', top: '1rem', bottom: '1rem' } },
+                    this.$render("i-panel", { padding: { left: '1rem', right: '1rem', top: '1.5rem', bottom: '1.5rem' } },
                         this.$render("i-vstack", { id: "pnlFormMsg", padding: { left: '1.5rem', right: '1.5rem', top: '1rem' }, gap: "0.5rem", visible: false }),
                         this.$render("i-panel", { id: "pnlForm" }),
                         this.$render("i-form", { id: "form" })))));
