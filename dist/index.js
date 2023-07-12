@@ -4749,9 +4749,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     }
                 }
                 const PageRows = this.closest('ide-rows');
-                const lastRows = PageRows.querySelectorAll('ide-row:last-child');
-                const lastRow = (lastRows.length > 0) ? lastRows[0] : undefined;
-                if (lastRows.length > 0 && lastRow.id == self.id) {
+                const lastRows = PageRows && PageRows.querySelectorAll('ide-row:last-child');
+                const lastRow = ((lastRows === null || lastRows === void 0 ? void 0 : lastRows.length) > 0) ? lastRows[0] : undefined;
+                if ((lastRows === null || lastRows === void 0 ? void 0 : lastRows.length) > 0 && lastRow.id == self.id) {
                     const bottomBlock = lastRow.querySelector('.row-bottom-block');
                     bottomBlock.visible = true;
                     bottomBlock && _updateClass(bottomBlock, 'is-dragenter');
@@ -6790,7 +6790,7 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
         }
     });
 });
-define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/index.css.ts"], function (require, exports, components_40, index_77, index_78, index_79) {
+define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/command/index.ts", "@scom/scom-page-builder/index.css.ts"], function (require, exports, components_40, index_77, index_78, index_79, index_80) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const Theme = index_79.currentTheme;
@@ -6800,6 +6800,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.events = [];
             this.isFirstLoad = false;
             this._theme = 'light';
+            this.boundHandleKeyUp = this.onKeyUp.bind(this);
             this.getData = this.getData.bind(this);
             this.setData = this.setData.bind(this);
             this.initEventBus();
@@ -6913,6 +6914,14 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         initEventListeners() {
             this.initScrollEvent(this.pnlWrap);
         }
+        onKeyUp(event) {
+            if (event.code === 'KeyZ' && event.ctrlKey) {
+                index_80.commandHistory.undo();
+            }
+            else if (event.code === 'KeyY' && event.ctrlKey) {
+                index_80.commandHistory.redo();
+            }
+        }
         init() {
             const rootDir = this.getAttribute('rootDir', true);
             if (rootDir)
@@ -6953,6 +6962,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         }
         async setData(value) {
             // pageObject.header = value.header;
+            document.addEventListener('keyup', this.boundHandleKeyUp);
             index_78.pageObject.sections = (value === null || value === void 0 ? void 0 : value.sections) || [];
             index_78.pageObject.footer = value === null || value === void 0 ? void 0 : value.footer;
             index_78.pageObject.config = value === null || value === void 0 ? void 0 : value.config;
@@ -6983,6 +6993,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             }
             this.events = [];
             components_40.application.EventBus.dispatch(index_77.EVENT.ON_CLOSE_BUILDER);
+            document.removeEventListener('keyup', this.boundHandleKeyUp);
         }
         initEventBus() {
             this.events.push(components_40.application.EventBus.register(this, index_77.EVENT.ON_UPDATE_FOOTER, async () => this.onUpdateWrapper()));

@@ -1550,11 +1550,11 @@ declare module "@scom/scom-page-builder" {
         private pageSidebar;
         private mdComponentsSearch;
         private pnlEditor;
-        private contentWrapper;
         private events;
         private currentElement;
         private isFirstLoad;
         private _theme;
+        private boundHandleKeyUp;
         constructor(parent?: Container, options?: any);
         get rootDir(): string;
         set rootDir(value: string);
@@ -1567,6 +1567,7 @@ declare module "@scom/scom-page-builder" {
         onFetchComponents(options: IOnFetchComponentsOptions): Promise<IOnFetchComponentsResult>;
         private initScrollEvent;
         private initEventListeners;
+        private onKeyUp;
         init(): void;
         setRootDir(value: string): void;
         getData(): {
