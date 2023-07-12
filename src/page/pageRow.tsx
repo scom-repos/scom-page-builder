@@ -493,7 +493,13 @@ export class PageRow extends Module {
             if (self.currentElement && !self.currentElement.classList.contains('builder-item'))
                 self.currentElement.opacity = 1;
             resetDragTarget();
+            resetPageRow();
         });
+
+        function resetPageRow() {
+            self.pnlRow.minHeight = 'auto';
+            self.toggleUI(!!self.data?.elements?.length);
+        }
 
         function dragEnter(enterTarget: Control, clientX: number, clientY: number, collision: Collision) {
             if (!enterTarget) return;
@@ -502,7 +508,13 @@ export class PageRow extends Module {
             if (pageRow && elementConfig?.module?.name === 'sectionStack') {
                 pageRow.classList.add('row-entered');
             }
-            if (!self.currentElement) return;
+            if (!enterTarget || !self.currentElement) return;
+            if (enterTarget.closest('#pnlEmty')) {
+                self.pnlRow.minHeight = '180px';
+                self.toggleUI(true);
+                self.addDottedLines();
+                return
+            }
             const rowBottom = enterTarget.closest(`.${ROW_BOTTOM_CLASS}`) as Control;
             const rowTop = enterTarget.closest(`.${ROW_TOP_CLASS}`) as Control;
             if (rowBottom) {
@@ -835,6 +847,7 @@ export class PageRow extends Module {
         }
 
         this.addEventListener('drop', async function (event) {
+            self.pnlRow.minHeight = 'auto';
             const elementConfig = getDragData();
             const eventTarget = event.target as Control;
             const pageRow = eventTarget.closest('ide-row') as PageRow;
@@ -1073,7 +1086,7 @@ export class PageRow extends Module {
     }
 
     private isUngrouping() {
-        if (!this.currentToolbar) return false;
+        if (!this.currentToolbar || getDragData()) return false;
         const section = this.currentToolbar.closest('ide-section')
         const toolbars = section.querySelectorAll('ide-toolbar');
         return (toolbars && toolbars.length && toolbars.length > 1)? true : false;
@@ -1186,7 +1199,7 @@ export class PageRow extends Module {
                     icon={{name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText}}
                     background={{color: Theme.colors.primary.main}}
                     padding={{top: 5, bottom: 5, left: 5, right: 5}}
-                    top="-12px" left="50%" zIndex={100}
+                    top="-12px" left="50%" zIndex={95}
                     class="btn-add"
                     onClick={() => this.onAddSection(-1)}
                 ></i-button>
@@ -1292,7 +1305,7 @@ export class PageRow extends Module {
                     icon={{name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText}}
                     background={{color: Theme.colors.primary.main}}
                     padding={{top: 5, bottom: 5, left: 5, right: 5}}
-                    bottom="-12px" left="50%" zIndex={100}
+                    bottom="-12px" left="50%" zIndex={95}
                     class="btn-add"
                     onClick={() => this.onAddSection(1)}
                 ></i-button>

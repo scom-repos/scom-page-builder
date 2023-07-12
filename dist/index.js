@@ -1044,18 +1044,22 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
             {
                 id: 'composables',
                 title: 'Composables',
+                icon: 'shapes'
             },
             {
                 id: 'micro-dapps',
-                title: 'MicroDApps'
+                title: 'MicroDApps',
+                icon: 'window-maximize'
             },
             {
                 id: 'charts',
-                title: 'Charts'
+                title: 'Charts',
+                icon: 'chart-pie'
             },
             {
                 id: 'project-micro-dapps',
-                title: 'Project MicroDApps'
+                title: 'Project MicroDApps',
+                icon: 'hashtag'
             }
         ],
         theme: 'light',
@@ -2069,7 +2073,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             this.isAppend = isAppend;
         }
         async execute() {
-            var _a, _b, _c, _d, _e, _f, _g, _h;
+            var _a, _b, _c, _d, _e, _f, _g;
             if (!this.parent)
                 return;
             this.prevSection = this.prevParent.querySelector(`[id='${this.prevSection.id}']`);
@@ -2143,24 +2147,20 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             else {
                 // create elm in a new section
                 // this.newId = generateUUID();
-                const isMicroDapps = ((_f = (_e = this.data) === null || _e === void 0 ? void 0 : _e.module) === null || _f === void 0 ? void 0 : _f.category) === 'micro-dapps';
                 const newElData = {
                     id: this.data.id,
                     column: parseInt(this.dropElm.dataset.column),
                     columnSpan: this.data.columnSpan,
-                    // type: this.data.type, // to be removed
-                    properties: {
-                        showHeader: isMicroDapps,
-                        showFooter: isMicroDapps
-                    },
+                    properties: this.data.properties,
+                    tag: ((_e = this.data) === null || _e === void 0 ? void 0 : _e.tag) || {},
                     module: this.data.module
                 };
                 this.appendElm = await this.parent.addElement(newElData);
                 const parentId = this.parent.id.replace('row-', '');
                 index_13.pageObject.addElement(parentId, newElData);
-                const elementRowId = (((_g = this.parent) === null || _g === void 0 ? void 0 : _g.id) || '').replace('row-', '');
+                const elementRowId = (((_f = this.parent) === null || _f === void 0 ? void 0 : _f.id) || '').replace('row-', '');
                 const elementSection = index_13.pageObject.getRow(elementRowId);
-                this.parent.toggleUI(!!((_h = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _h === void 0 ? void 0 : _h.length));
+                this.parent.toggleUI(!!((_g = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _g === void 0 ? void 0 : _g.length));
             }
         }
         // temporary workaround
@@ -2171,8 +2171,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 return data;
         }
         async undo() {
-            var _a, _b, _c, _d, _e, _f;
-            this.draggingToolbar = this.parent.querySelector(`[id='${this.draggingToolbar.id}']`);
+            var _a, _b, _c, _d, _e;
             // delete the elm
             const row = this.parent;
             const rowId = row ? row.id.replace("row-", "") : undefined;
@@ -2180,6 +2179,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             index_13.pageObject.removeElement(rowId, elmId, true);
             const newElm = row.querySelector(`#elm-${elmId}`);
             if (newElm) {
+                this.draggingToolbar = newElm;
                 const sectionEl = newElm.closest('ide-section');
                 newElm.remove();
                 const section = index_13.pageObject.getRow(rowId);
@@ -2197,16 +2197,12 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             }
             components_5.application.EventBus.dispatch(index_14.EVENT.ON_UPDATE_SECTIONS);
             // merge the elms
-            const isMicroDapps = ((_d = (_c = this.data) === null || _c === void 0 ? void 0 : _c.module) === null || _d === void 0 ? void 0 : _d.category) === 'micro-dapps';
             const newElData = {
                 id: this.data.id,
                 column: this.oriCol,
                 columnSpan: this.oriColSpan,
-                // type: this.data.type, // to be removed
-                properties: {
-                    showHeader: isMicroDapps,
-                    showFooter: isMicroDapps
-                },
+                properties: this.data.properties,
+                tag: ((_c = this.data) === null || _c === void 0 ? void 0 : _c.tag) || {},
                 module: this.data.module
             };
             const elmParent = (this.appendElm ? this.appendElm.closest('ide-row') : this.dropElm.closest('ide-row'));
@@ -2237,7 +2233,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 index_13.pageObject.setElement(dropRowId, prevSectionId, {
                     // type: ElementType.COMPOSITE, // to be removed
                     elements: [clonedDropSecData, ...updatedList],
-                    dropId: ((_e = this.data) === null || _e === void 0 ? void 0 : _e.id) || ''
+                    dropId: ((_d = this.data) === null || _d === void 0 ? void 0 : _d.id) || ''
                 });
             }
             const newDropData = index_13.pageObject.getElement(dropRowId, prevSectionId);
@@ -2247,7 +2243,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 const elementSection = index_13.pageObject.getRow(elementRowId);
                 if (elementRowId !== dropRowId && this.appendElm)
                     index_13.pageObject.removeElement(elementRowId, this.appendElm.id, true);
-                elmParent.visible = !!((_f = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _f === void 0 ? void 0 : _f.length);
+                elmParent.visible = !!((_e = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _e === void 0 ? void 0 : _e.length);
             }
             if (this.appendElm)
                 this.appendElm.remove();
@@ -4152,7 +4148,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 if (self.currentElement && !self.currentElement.classList.contains('builder-item'))
                     self.currentElement.opacity = 1;
                 resetDragTarget();
+                resetPageRow();
             });
+            function resetPageRow() {
+                var _a, _b;
+                self.pnlRow.minHeight = 'auto';
+                self.toggleUI(!!((_b = (_a = self.data) === null || _a === void 0 ? void 0 : _a.elements) === null || _b === void 0 ? void 0 : _b.length));
+            }
             function dragEnter(enterTarget, clientX, clientY, collision) {
                 var _a, _b, _c, _d;
                 if (!enterTarget)
@@ -4162,8 +4164,14 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
                     pageRow.classList.add('row-entered');
                 }
-                if (!self.currentElement)
+                if (!enterTarget || !self.currentElement)
                     return;
+                if (enterTarget.closest('#pnlEmty')) {
+                    self.pnlRow.minHeight = '180px';
+                    self.toggleUI(true);
+                    self.addDottedLines();
+                    return;
+                }
                 const rowBottom = enterTarget.closest(`.${ROW_BOTTOM_CLASS}`);
                 const rowTop = enterTarget.closest(`.${ROW_TOP_CLASS}`);
                 if (rowBottom) {
@@ -4484,6 +4492,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             }
             this.addEventListener('drop', async function (event) {
                 var _a, _b, _c;
+                self.pnlRow.minHeight = 'auto';
                 const elementConfig = (0, index_40.getDragData)();
                 const eventTarget = event.target;
                 const pageRow = eventTarget.closest('ide-row');
@@ -4719,7 +4728,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             await index_41.commandHistory.execute(dragCmd);
         }
         isUngrouping() {
-            if (!this.currentToolbar)
+            if (!this.currentToolbar || (0, index_40.getDragData)())
                 return false;
             const section = this.currentToolbar.closest('ide-section');
             const toolbars = section.querySelectorAll('ide-toolbar');
@@ -4815,7 +4824,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         }
         render() {
             return (this.$render("i-panel", { id: "pnlRowWrap", class: 'page-row', width: "100%", height: "100%", padding: { left: '3rem', right: '3rem' } },
-                this.$render("i-button", { caption: '', icon: { name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, top: "-12px", left: "50%", zIndex: 100, class: "btn-add", onClick: () => this.onAddSection(-1) }),
+                this.$render("i-button", { caption: '', icon: { name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, top: "-12px", left: "50%", zIndex: 95, class: "btn-add", onClick: () => this.onAddSection(-1) }),
                 this.$render("i-vstack", { id: 'actionsBar', class: "row-actions-bar", verticalAlignment: "center" },
                     this.$render("i-vstack", { background: { color: '#fff' }, border: { radius: '20px' }, maxWidth: "100%", maxHeight: "100%", horizontalAlignment: "center", padding: { top: 5, bottom: 5 }, class: "bar-shadow" },
                         this.$render("i-panel", { class: "actions", tooltip: { content: 'Section settings', placement: 'right' }, visible: this.isChanged, onClick: () => this.onOpenRowSettingsDialog() },
@@ -4839,7 +4848,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         this.$render("i-label", { caption: 'Drag Elements Here', font: { transform: 'uppercase', color: 'var(--builder-color)', size: '1.25rem' }, opacity: 0.5 }))),
                 this.$render("i-grid-layout", { id: "pnlRow", width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%", position: "relative", class: "grid", opacity: 0 }),
                 this.$render("ide-row-settings-dialog", { id: "mdRowSetting", onSave: this.onSaveRowSettings.bind(this) }),
-                this.$render("i-button", { caption: '', icon: { name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, bottom: "-12px", left: "50%", zIndex: 100, class: "btn-add", onClick: () => this.onAddSection(1) })));
+                this.$render("i-button", { caption: '', icon: { name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, bottom: "-12px", left: "50%", zIndex: 95, class: "btn-add", onClick: () => this.onAddSection(1) })));
         }
     };
     __decorate([
@@ -5044,8 +5053,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 };
                 this.form.renderForm();
                 this.form.clearFormData();
-                const formData = action.name === 'Theme Settings' ? (tag || {}) : (properties || {});
-                this.form.setFormData(Object.assign({}, formData));
+                // const formData = action.name === 'Theme Settings' ? (tag || {}) : (properties || {})
+                this.form.setFormData(Object.assign(Object.assign({}, tag), properties));
                 this.form.visible = true;
             }
             this.mdActions.refresh();
@@ -6035,108 +6044,142 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
     ], PageRows);
     exports.PageRows = PageRows;
 });
-define("@scom/scom-page-builder/page/pageSidebar.css.ts", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/theme/index.ts"], function (require, exports, components_33, index_62) {
+define("@scom/scom-page-builder/page/pageSidebar.css.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_33) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const Theme = index_62.currentTheme;
-    components_33.Styles.cssRule('ide-sidebar', {
-        borderRight: `1px solid var(--builder-divider)`,
+    exports.widgetStyle = exports.widgetModalStyle = exports.categoryButtonStyle = exports.categoryPanelStyle = void 0;
+    const Theme = components_33.Styles.Theme.ThemeVars;
+    exports.categoryPanelStyle = components_33.Styles.style({
+        padding: 4,
+        boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 50px',
+        background: '#fff',
+        borderRadius: 5
+    });
+    exports.categoryButtonStyle = components_33.Styles.style({
+        position: 'relative',
+        cursor: 'pointer',
         $nest: {
-            '.block-image': {
-                maxHeight: 74,
-                boxShadow: '0 0 0 1px rgb(218 220 224)',
-                overflow: 'hidden'
+            '&:hover': {
+                background: Theme.action.hover,
+                borderRadius: 4
+            }
+        }
+    });
+    exports.widgetModalStyle = components_33.Styles.style({
+        $nest: {
+            '> div': {
+                boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 50px',
             },
-            '.pointer': {
-                cursor: 'all-scroll'
-            },
-            '.insert-tabs': {
-                $nest: {
-                    'i-tab:not(.disabled).active': {
-                        backgroundColor: 'transparent',
-                        color: Theme.colors.primary.main,
-                    },
-                    'i-tab:not(.disabled).active .tab-item': {
-                        color: Theme.colors.primary.main,
-                        // borderBottom: `1px solid ${Theme.colors.primary.main}`
-                    },
-                    '.tab-item': {
-                        fontWeight: 600,
-                        fontSize: '1rem',
-                        color: Theme.text.primary,
-                        fontFamily: Theme.typography.fontFamily
-                    },
-                    'i-tab:not(.disabled):hover': {
-                        backgroundColor: Theme.action.hover
-                    }
-                }
-            },
-            'i-tabs i-tab:not(.disabled).active': {
-                borderColor: 'transparent'
-            },
-            '.builder-item': {
-                transition: 'opacity .2s ease-in-out, transform 0.2s ease-in-out',
-                width: 97,
-                height: '5rem',
-                opacity: 1
-            },
-            '.is-dragging': {
+            '.modal': {
+                marginRight: -8,
+                padding: '0.5rem',
+                borderRadius: 5
+            }
+        }
+    });
+    exports.widgetStyle = components_33.Styles.style({
+        padding: '0.5rem 0.75rem',
+        cursor: 'grab',
+        opacity: 1,
+        textAlign: 'center',
+        transition: 'opacity .2s ease-in-out, transform 0.2s ease-in-out',
+        $nest: {
+            '&.is-dragging': {
                 opacity: 0.3
+            },
+            '&:hover': {
+                transform: 'scale(1.04) translateY(-4px)'
             }
         }
     });
 });
-define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/assets.ts", "@scom/scom-page-builder/page/pageSidebar.css.ts"], function (require, exports, components_34, index_63, index_64, assets_3) {
+define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/page/pageSidebar.css.ts", "@scom/scom-page-builder/command/index.ts", "@scom/scom-page-builder/assets.ts"], function (require, exports, components_34, index_62, index_63, pageSidebar_css_1, index_64, assets_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.PageSidebar = void 0;
     const Theme = components_34.Styles.Theme.ThemeVars;
     let PageSidebar = class PageSidebar extends components_34.Module {
         get pageBlocks() {
-            return (0, index_63.getPageBlocks)();
-        }
-        constructor(parent) {
-            super(parent);
+            return (0, index_62.getPageBlocks)();
         }
         init() {
             super.init();
-            this.renderUI();
             this.initEventListeners();
-            this.initEventBus();
+            this.openWidgetModal = this.openWidgetModal.bind(this);
+            this.renderToolbar();
+            this.renderWidgetCategories();
         }
-        async renderUI() {
-            const categories = (0, index_63.getCategories)();
-            this.pnlLayouts.clearInnerHTML();
-            this.pnlLayouts.appendChild(this.$render("i-vstack", { padding: { top: '1rem', bottom: '0.5rem', left: '1rem', right: '1rem' }, border: { bottom: { width: 1, style: 'solid', color: 'var(--builder-divider)' } } },
-                this.$render("i-vstack", { id: "sectionStack", class: "text-center pointer builder-item", verticalAlignment: "center", horizontalAlignment: "center", height: "68px", width: "100%", background: { color: Theme.action.hover }, gap: "0.5rem" },
+        renderToolbar() {
+            this.toolbars.clearInnerHTML();
+            const iconList = [
+                {
+                    name: 'cog',
+                    tooltip: { content: 'Page settings', placement: 'left' },
+                    onClick: () => {
+                        this.mdPageSettings.show();
+                    }
+                },
+                {
+                    name: 'undo',
+                    tooltip: { content: 'Undo last action', placement: 'left' },
+                    onClick: () => index_64.commandHistory.undo()
+                },
+                {
+                    name: 'redo',
+                    tooltip: { content: 'Redo last action', placement: 'left' },
+                    onClick: () => index_64.commandHistory.redo()
+                }
+            ];
+            iconList.forEach((icon) => {
+                this.toolbars.appendChild(this.$render("i-hstack", { class: pageSidebar_css_1.categoryButtonStyle, width: 40, height: 40, padding: { top: 6, bottom: 6, left: 6, right: 6 }, horizontalAlignment: 'center', verticalAlignment: 'center', tooltip: icon.tooltip, onClick: icon.onClick },
+                    this.$render("i-icon", { width: 16, height: 16, name: icon.name, fill: Theme.colors.primary.main })));
+            });
+        }
+        renderWidgetCategories() {
+            const categories = [
+                {
+                    id: 'layouts',
+                    title: 'Layouts',
+                    icon: 'columns'
+                },
+                ...(0, index_62.getCategories)()
+            ];
+            this.pnlWidgetCategory.clearInnerHTML();
+            categories.forEach(c => {
+                this.pnlWidgetCategory.appendChild(this.$render("i-panel", null,
+                    this.$render("i-hstack", { class: pageSidebar_css_1.categoryButtonStyle, width: 40, height: 40, padding: { top: 6, bottom: 6, left: 6, right: 6 }, horizontalAlignment: 'center', verticalAlignment: 'center', tooltip: { content: c.title, placement: 'left' }, onClick: (target) => this.openWidgetModal(target.parent, c) },
+                        this.$render("i-icon", { width: 16, height: 16, name: c.icon, fill: Theme.colors.primary.main }))));
+                if (c.id === 'layouts') {
+                    this.pnlWidgetCategory.appendChild(this.$render("i-panel", { border: { bottom: { width: 1, color: Theme.divider, style: 'solid' } } }));
+                }
+            });
+        }
+        renderWidgets(category) {
+            this.pnlWidgets.clearInnerHTML();
+            this.pnlWidgets.appendChild(this.$render("i-label", { caption: category.title, font: { color: Theme.text.secondary, weight: 600 } }));
+            if (category.id === 'layouts') {
+                const moduleCard = (this.$render("i-vstack", { id: "sectionStack", class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", horizontalAlignment: "center", width: "100%", background: { color: Theme.action.hover }, border: { radius: 5 }, gap: "0.5rem", tooltip: { content: '✊ Drag to insert', placement: 'top' } },
                     this.$render("i-image", { url: assets_3.default.icons.logo, width: 24, height: 24, display: "block" }),
-                    this.$render("i-label", { caption: "Section", font: { size: '0.813rem' }, maxHeight: 34, overflow: "hidden", opacity: 0.7 }))));
-            this.pnlEmbeddables.clearInnerHTML();
-            for (let i = 0; i < categories.length; i++) {
-                const stack = categories[i];
-                this.pnlEmbeddables.appendChild(this.$render("i-scom-page-builder-collapse", { title: stack.title, border: {
-                        bottom: {
-                            width: 1,
-                            style: i === categories.length - 1 ? 'none' : 'solid',
-                            color: 'var(--builder-divider)'
-                        }
-                    }, expanded: true },
-                    this.$render("i-grid-layout", { id: `${stack.id.replace('-', '')}Stack`, templateColumns: ['repeat(2, 1fr)'], gap: { column: '0.5rem', row: '0.75rem' }, padding: { top: '0.5rem', bottom: '0.5rem', left: '1rem', right: '1rem' } })));
-                this.renderList(this[`${stack.id.replace('-', '')}Stack`], stack.id);
+                    this.$render("i-label", { caption: "Section", font: { size: '0.813rem' }, maxHeight: 34, overflow: "hidden", opacity: 0.7 })));
+                this.pnlWidgets.appendChild(moduleCard);
+                moduleCard.setAttribute('draggable', 'true');
             }
-            this.sectionStack.setAttribute('draggable', 'true');
+            else {
+                let components = this.pageBlocks.filter(p => p.category === category.id);
+                let matchedModules = components;
+                for (const module of matchedModules) {
+                    const moduleCard = (this.$render("i-vstack", { class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", horizontalAlignment: "center", width: "100%", gap: "0.5rem", overflow: 'hidden', background: { color: Theme.action.hover }, border: { radius: 5 }, tooltip: { content: '✊ Drag to insert', placement: 'top' } },
+                        this.$render("i-image", { url: module.imgUrl || assets_3.default.icons.logo, width: 24, height: 24, display: "block" }),
+                        this.$render("i-label", { caption: module.name, font: { size: '0.813rem' }, opacity: 0.7, maxHeight: 34, overflow: "hidden" })));
+                    this.pnlWidgets.append(moduleCard);
+                    this.initDrag(moduleCard, module);
+                }
+            }
         }
-        async renderList(parent, category) {
-            parent.clearInnerHTML();
-            let components = this.pageBlocks.filter(p => p.category === category);
-            let matchedModules = components;
-            for (const module of matchedModules) {
-                const moduleCard = (this.$render("i-vstack", { class: "text-center pointer builder-item", verticalAlignment: "center", horizontalAlignment: "center", gap: "0.5rem", overflow: 'hidden', background: { color: Theme.action.hover }, border: { radius: 5 } },
-                    this.$render("i-image", { url: module.imgUrl || assets_3.default.icons.logo, width: 24, height: 24, display: "block" }),
-                    this.$render("i-label", { caption: module.name, font: { size: '0.813rem' }, opacity: 0.7, maxHeight: 34, overflow: "hidden" })));
-                parent.append(moduleCard);
-                this.initDrag(moduleCard, module);
-            }
+        openWidgetModal(target, category) {
+            this.mdWidget.parent = target;
+            this.renderWidgets(category);
+            this.mdWidget.visible = true;
         }
         initDrag(module, data) {
             module.setAttribute('draggable', 'true');
@@ -6144,49 +6187,52 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
         }
         initEventListeners() {
             const self = this;
-            this.addEventListener('dragstart', function (event) {
+            this.pnlWidgets.addEventListener('dragstart', function (event) {
                 var _a;
                 event.stopPropagation();
                 const eventTarget = event.target;
-                if (eventTarget.nodeName === 'IMG' || ((eventTarget === null || eventTarget === void 0 ? void 0 : eventTarget.closest) && !eventTarget.closest('.builder-item')))
+                if (eventTarget.nodeName === 'IMG' || ((eventTarget === null || eventTarget === void 0 ? void 0 : eventTarget.closest) && !eventTarget.closest('.' + pageSidebar_css_1.widgetStyle)))
                     event.preventDefault();
                 if (eventTarget.id === 'sectionStack') {
-                    (0, index_63.setDragData)({ module: { name: 'sectionStack', path: '' } });
+                    (0, index_62.setDragData)({ module: { name: 'sectionStack', path: '' } });
                     eventTarget.classList.add('is-dragging');
+                    self.mdWidget.visible = false;
                 }
                 else if ((_a = eventTarget === null || eventTarget === void 0 ? void 0 : eventTarget.dataset) === null || _a === void 0 ? void 0 : _a.name) {
                     const currentName = eventTarget.dataset.name;
                     const module = self.pageBlocks.find(block => block.name === currentName);
                     if (module) {
-                        components_34.application.EventBus.dispatch(index_64.EVENT.ON_SET_DRAG_ELEMENT, eventTarget);
-                        (0, index_63.setDragData)({ module });
+                        components_34.application.EventBus.dispatch(index_63.EVENT.ON_SET_DRAG_ELEMENT, eventTarget);
+                        (0, index_62.setDragData)({ module });
                         eventTarget.classList.add('is-dragging');
                     }
+                    self.mdWidget.visible = false;
                 }
                 else {
                     event.preventDefault();
                 }
             });
         }
-        initEventBus() {
-            components_34.application.EventBus.register(this, index_64.EVENT.ON_UPDATE_SIDEBAR, (category) => {
-                const categoryStack = category && this[`${category.replace('-', '')}Stack`];
-                if (categoryStack)
-                    this.renderList(this[`${category.replace('-', '')}Stack`], category);
-            });
+        onSavePageSettings(data) {
+            var _a;
+            const containerEl = (_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.querySelector('.pnl-editor-wrapper');
+            if (!containerEl)
+                return;
+            const updateCmd = new index_64.UpdatePageSettingsCommand(containerEl, Object.assign({}, data));
+            index_64.commandHistory.execute(updateCmd);
         }
         render() {
-            return (this.$render("i-panel", { class: "navigator", height: '100%', maxWidth: "100%" },
-                this.$render("i-vstack", { padding: { top: '1rem', bottom: '0.5rem' } },
-                    this.$render("i-label", { caption: "Layouts", font: { size: '1rem', weight: 600 }, maxHeight: 34, overflow: "hidden", margin: { left: '0.5rem', bottom: '0.5rem' } }),
-                    this.$render("i-panel", { id: "pnlLayouts" })),
-                this.$render("i-vstack", { padding: { top: '1rem', bottom: '0.5rem' } },
-                    this.$render("i-label", { caption: "Embeddables", font: { size: '1rem', weight: 600 }, maxHeight: 34, overflow: "hidden", margin: { left: '0.5rem', bottom: '0.5rem' } }),
-                    this.$render("i-panel", { id: "pnlEmbeddables" }))));
+            return (this.$render("i-hstack", { position: 'fixed', top: '50%', right: 24, height: 0, width: 0, verticalAlignment: 'center' },
+                this.$render("i-vstack", { position: 'absolute', right: "0px" },
+                    this.$render("i-vstack", { id: 'toolbars', class: pageSidebar_css_1.categoryPanelStyle, gap: "0.25rem", margin: { bottom: '1rem' } }),
+                    this.$render("i-vstack", { id: 'pnlWidgetCategory', class: pageSidebar_css_1.categoryPanelStyle, gap: "0.25rem" })),
+                this.$render("i-modal", { id: 'mdWidget', class: pageSidebar_css_1.widgetModalStyle, height: 'auto', width: 320, maxHeight: '80vh', showBackdrop: false, popupPlacement: 'left' },
+                    this.$render("i-vstack", { id: 'pnlWidgets', gap: "0.5rem" })),
+                this.$render("ide-page-settings-dialog", { id: "mdPageSettings", onSave: this.onSavePageSettings.bind(this) })));
         }
     };
     PageSidebar = __decorate([
-        (0, components_34.customElements)('ide-sidebar')
+        (0, components_34.customElements)('i-scom-page-builder-sidebar')
     ], PageSidebar);
     exports.PageSidebar = PageSidebar;
 });
@@ -6712,7 +6758,7 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
         $nest: {
             '.pnl-editor-wrapper': {
                 display: 'block',
-                boxShadow: '0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 3px 1px -2px rgb(0 0 0 / 12%), 0px 1px 5px 0px rgb(0 0 0 / 20%)',
+                boxShadow: 'rgba(50, 50, 105, 0.15) 0px 2px 5px 0px, rgba(0, 0, 0, 0.05) 0px 1px 1px 0px',
             },
             '.custom-input input': {
                 paddingLeft: 10
@@ -6791,14 +6837,15 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         }
         set components(value) {
             (0, index_78.setPageBlocks)(value);
-            this.pageSidebar.renderUI();
+            // this.pageSidebar.renderUI();
         }
         get categories() {
             return (0, index_78.getCategories)();
         }
         set categories(value) {
             (0, index_78.setCategories)(value);
-            this.pageSidebar.renderUI();
+            // this.pageSidebar.renderUI();
+            this.pageSidebar.renderWidgetCategories();
         }
         get theme() {
             var _a;
@@ -6996,16 +7043,13 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         }
         render() {
             return (this.$render("i-vstack", { id: "editor", width: '100%', height: '100%', maxHeight: "100vh", overflow: 'hidden' },
-                this.$render("ide-header", { id: 'pageHeader', border: { bottom: { width: 1, style: 'solid', color: '#dadce0' } } }),
-                this.$render("i-grid-layout", { templateColumns: ['auto', 'minmax(auto, 235px)'], autoFillInHoles: true, height: "calc(100% -64px)", overflow: "hidden" },
-                    this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } } },
-                        this.$render("i-vstack", { id: "pageContent", maxWidth: "calc(100% - 6em)", width: "100%", horizontalAlignment: 'center', margin: { left: 'auto', right: 'auto' }, padding: { top: '1rem', bottom: '1rem' } },
-                            this.$render("i-panel", { id: "pnlEditor", maxWidth: 1024, minHeight: "100vh", width: "100%", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
-                                this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
-                                    this.$render("ide-rows", { id: "pageRows", draggable: true })),
-                                this.$render("builder-footer", { id: "builderFooter" })))),
-                    this.$render("i-panel", { id: "pnlSidebar", height: "100%", overflow: { x: 'hidden', y: 'auto' }, class: "pnl-scrollable" },
-                        this.$render("ide-sidebar", { id: 'pageSidebar', display: 'block', width: "100%" }))),
+                this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: Theme.background.default }, border: { right: { width: 1, style: 'solid', color: Theme.divider } } },
+                    this.$render("i-vstack", { id: "pageContent", maxWidth: "calc(100% - 6em)", width: "100%", horizontalAlignment: 'center', margin: { top: '3.5rem', left: 'auto', right: 'auto' }, padding: { top: '1rem', bottom: '1rem' } },
+                        this.$render("i-panel", { id: "pnlEditor", maxWidth: 1024, minHeight: "100vh", width: "100%", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
+                            this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
+                                this.$render("ide-rows", { id: "pageRows", draggable: true })),
+                            this.$render("builder-footer", { id: "builderFooter" })))),
+                this.$render("i-scom-page-builder-sidebar", { id: "pageSidebar" }),
                 this.$render("ide-search-components-dialog", { id: "mdComponentsSearch" })));
         }
     };

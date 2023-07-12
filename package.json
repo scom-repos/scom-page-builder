@@ -1,6 +1,6 @@
 {
   "name": "@scom/scom-page-builder",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "main": "dist/index.js",
   "plugin": "dist",
   "pluginTypes": "pluginTypes/index.d.ts",
@@ -9,7 +9,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@ijstech/components": "^0.1.48",
+    "@ijstech/components": "^0.1.75",
     "@ijstech/eth-contract": "^0.1.13",
     "@ijstech/eth-wallet": "^0.1.35"
   },
