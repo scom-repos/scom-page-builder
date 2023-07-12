@@ -8,6 +8,7 @@ import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPage
 import { currentTheme } from './theme/index';
 import './index.css';
 import { SearchComponentsDialog } from './dialogs/index';
+import { commandHistory } from './command/index';
 export { IOnFetchComponentsOptions, IOnFetchComponentsResult };
 
 const Theme = currentTheme;
@@ -39,12 +40,12 @@ export default class Editor extends Module {
     private pageSidebar: PageSidebar;
     private mdComponentsSearch: SearchComponentsDialog;
     private pnlEditor: Panel;
-    private contentWrapper: Panel;
 
     private events: any[] = [];
     private currentElement: any;
     private isFirstLoad: boolean = false;
     private _theme: ThemeType = 'light';
+    private boundHandleKeyUp = this.onKeyUp.bind(this);
 
     constructor(parent?: Container, options?: any) {
         super(parent, options);
@@ -168,6 +169,14 @@ export default class Editor extends Module {
         this.initScrollEvent(this.pnlWrap);
     }
 
+    private onKeyUp(event: KeyboardEvent) {
+        if (event.code === 'KeyZ' && event.ctrlKey) {
+            commandHistory.undo();
+        } else if (event.code === 'KeyY' && event.ctrlKey) {
+            commandHistory.redo();
+        }
+    }
+
     init() {
         const rootDir = this.getAttribute('rootDir', true);
         if (rootDir) this.setRootDir(rootDir);
@@ -206,6 +215,7 @@ export default class Editor extends Module {
 
     async setData(value: IPageData) {
         // pageObject.header = value.header;
+        document.addEventListener('keyup', this.boundHandleKeyUp);
         pageObject.sections = value?.sections || [];
         pageObject.footer = value?.footer;
         pageObject.config = value?.config;
@@ -237,6 +247,7 @@ export default class Editor extends Module {
         }
         this.events = [];
         application.EventBus.dispatch(EVENT.ON_CLOSE_BUILDER);
+        document.removeEventListener('keyup', this.boundHandleKeyUp);
     }
 
     private initEventBus() {

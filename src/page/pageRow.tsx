@@ -1108,9 +1108,9 @@ export class PageRow extends Module {
             }
 
             const PageRows = this.closest('ide-rows')
-            const lastRows = PageRows.querySelectorAll('ide-row:last-child');
-            const lastRow = (lastRows.length > 0)? lastRows[0] : undefined;
-            if (lastRows.length > 0 && lastRow.id == self.id) {
+            const lastRows = PageRows && PageRows.querySelectorAll('ide-row:last-child');
+            const lastRow = (lastRows?.length > 0)? lastRows[0] : undefined;
+            if (lastRows?.length > 0 && lastRow.id == self.id) {
                 const bottomBlock = lastRow.querySelector('.row-bottom-block') as Control;
                 bottomBlock.visible = true;
                 bottomBlock && _updateClass(bottomBlock, 'is-dragenter');
