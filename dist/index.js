@@ -6092,6 +6092,9 @@ define("@scom/scom-page-builder/page/pageSidebar.css.ts", ["require", "exports",
                 borderRadius: 5,
                 backgroundColor: '#fff',
                 overflow: 'auto'
+            },
+            '.prevent-select': {
+                userSelect: 'none'
             }
         }
     });
@@ -6174,7 +6177,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
         }
         renderWidgets(category) {
             this.pnlWidgets.clearInnerHTML();
-            this.pnlWidgets.appendChild(this.$render("i-label", { caption: category.title, font: { color: '#3b3838', weight: 600 } }));
+            this.pnlWidgets.appendChild(this.$render("i-label", { caption: category.title, font: { color: '#3b3838', weight: 600 }, class: "prevent-select" }));
             if (category.id === 'layouts') {
                 const moduleCard = (this.$render("i-vstack", { id: "sectionStack", class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", horizontalAlignment: "center", width: "100%", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, gap: "0.5rem", tooltip: { content: '✊ Drag to insert', placement: 'top' } },
                     this.$render("i-image", { url: assets_3.default.icons.logo, width: 24, height: 24, display: "block" }),

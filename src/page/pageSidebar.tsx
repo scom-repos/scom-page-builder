@@ -121,7 +121,7 @@ export class PageSidebar extends Module {
 
     renderWidgets(category: ICategory) {
         this.pnlWidgets.clearInnerHTML();
-        this.pnlWidgets.appendChild(<i-label caption={category.title} font={{ color: '#3b3838', weight: 600 }}></i-label>);
+        this.pnlWidgets.appendChild(<i-label caption={category.title} font={{ color: '#3b3838', weight: 600 }} class="prevent-select"></i-label>);
         if (category.id === 'layouts') {
             const moduleCard = (
                 <i-vstack
