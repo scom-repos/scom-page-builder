@@ -1,4 +1,4 @@
-import { application, Container, Control, ControlElement, customElements, customModule, Module, Panel, Styles } from '@ijstech/components';
+import { application, Container, Control, ControlElement, customElements, customModule, Module, Panel, Styles, VStack } from '@ijstech/components';
 import { } from '@ijstech/eth-contract'
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
@@ -40,6 +40,7 @@ export default class Editor extends Module {
     private pageSidebar: PageSidebar;
     private mdComponentsSearch: SearchComponentsDialog;
     private pnlEditor: Panel;
+    private pageContent: VStack;
 
     private events: any[] = [];
     private currentElement: any;
@@ -166,8 +167,18 @@ export default class Editor extends Module {
         });
     }
 
+    private initDragEvent(containerElement: Control) {
+        // remove ghost image when dragging
+        containerElement.addEventListener("dragstart", function( event ) {
+            const img = new Image();
+            img.src = "http://placehold.it/150/000000/ffffff?text=GHOST";
+            event.dataTransfer.setDragImage(img, window.outerWidth, window.outerHeight);
+        }, false);
+    }
+
     private initEventListeners() {
         this.initScrollEvent(this.pnlWrap);
+        this.initDragEvent(this.pageContent);
     }
 
     private onKeyUp(event: KeyboardEvent) {

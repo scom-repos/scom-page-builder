@@ -4142,7 +4142,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     self.currentElement = targetSection;
                     self.currentToolbar = targetToolbar;
                     components_24.application.EventBus.dispatch(index_38.EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
-                    self.currentElement.opacity = 0;
+                    // self.currentElement.opacity = 0;
+                    const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
+                    toolbars.forEach(toolbar => {
+                        toolbar.style.opacity = (toolbar.id != self.currentToolbar.id) ? '1' : '0';
+                    });
                     components_24.application.EventBus.dispatch(index_38.EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                     self.addDottedLines();
                 }
@@ -4153,8 +4157,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             });
             this.addEventListener('drag', function (event) { });
             document.addEventListener('dragend', function (event) {
-                if (self.currentElement && !self.currentElement.classList.contains('builder-item'))
-                    self.currentElement.opacity = 1;
+                if (self.currentElement && !self.currentElement.classList.contains('builder-item')) {
+                    // self.currentElement.opacity = 1;
+                    const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
+                    toolbars.forEach(toolbar => {
+                        toolbar.style.opacity = "1";
+                    });
+                }
                 resetDragTarget();
                 resetPageRow();
             });
@@ -6941,8 +6950,17 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 }
             });
         }
+        initDragEvent(containerElement) {
+            // remove ghost image when dragging
+            containerElement.addEventListener("dragstart", function (event) {
+                const img = new Image();
+                img.src = "http://placehold.it/150/000000/ffffff?text=GHOST";
+                event.dataTransfer.setDragImage(img, window.outerWidth, window.outerHeight);
+            }, false);
+        }
         initEventListeners() {
             this.initScrollEvent(this.pnlWrap);
+            this.initDragEvent(this.pageContent);
         }
         onKeyUp(event) {
             if (event.code === 'KeyZ' && event.ctrlKey) {

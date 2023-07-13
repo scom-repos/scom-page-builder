@@ -478,7 +478,12 @@ export class PageRow extends Module {
                 self.currentElement = targetSection;
                 self.currentToolbar = targetToolbar;
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
-                self.currentElement.opacity = 0;
+                // self.currentElement.opacity = 0;
+                const toolbars = self.currentElement.querySelectorAll('ide-toolbar')
+                toolbars.forEach(toolbar => {
+                    (toolbar as HTMLElement).style.opacity = (toolbar.id != self.currentToolbar.id)? '1' : '0';
+                });
+
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                 self.addDottedLines();
             } else {
@@ -490,8 +495,13 @@ export class PageRow extends Module {
         this.addEventListener('drag', function (event) {});
 
         document.addEventListener('dragend', function (event) {
-            if (self.currentElement && !self.currentElement.classList.contains('builder-item'))
-                self.currentElement.opacity = 1;
+            if (self.currentElement && !self.currentElement.classList.contains('builder-item')) {
+                // self.currentElement.opacity = 1;
+                const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
+                toolbars.forEach(toolbar => {
+                    (toolbar as HTMLElement).style.opacity = "1";
+                });
+            }
             resetDragTarget();
             resetPageRow();
         });

@@ -1551,6 +1551,7 @@ declare module "@scom/scom-page-builder" {
         private pageSidebar;
         private mdComponentsSearch;
         private pnlEditor;
+        private pageContent;
         private events;
         private currentElement;
         private isFirstLoad;
@@ -1567,6 +1568,7 @@ declare module "@scom/scom-page-builder" {
         set theme(value: ThemeType);
         onFetchComponents(options: IOnFetchComponentsOptions): Promise<IOnFetchComponentsResult>;
         private initScrollEvent;
+        private initDragEvent;
         private initEventListeners;
         private onKeyUp;
         init(): void;
