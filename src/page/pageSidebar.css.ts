@@ -14,7 +14,7 @@ export const categoryButtonStyle = Styles.style({
     cursor: 'pointer',
     $nest: {
         '&:hover': {
-            background: Theme.action.hover,
+            background: 'rgba(243, 178, 111, 0.08)',
             borderRadius: 4
         }
     }
