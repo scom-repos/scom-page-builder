@@ -50,8 +50,8 @@ Styles.cssRule('ide-row', {
             zIndex: 10,
             position: 'absolute',
             top: '0',
-            left: '-3em',
-            width: '45px',
+            left: -52,
+            width: '49px',
             padding: 0,
             paddingRight: 11,
             transition: 'opacity .3s .1s cubic-bezier(0.4,0,0.2,1), visibility 0s .1s',
@@ -62,30 +62,22 @@ Styles.cssRule('ide-row', {
                     justifyContent: 'center',
                     alignItems: 'center',
                     cursor: 'pointer',
-                    borderRadius: '50%',
-                    width: 30,
-                    height: 30,
-                    padding: 3,
+                    borderRadius: 5,
+                    padding: 6,
                     background: 'transparent',
                     $nest: {
-                        '&:hover': {
-                            boxShadow: 'none',
-                            background: Theme.action.hover,
-                            transition: 'background .3s ease-in'
+                        '&:hover i-icon svg': {
+                          fill: `${Theme.colors.primary.main} !important`,
+                          transition: 'fill .15s ease-in'
                         }
                     }
                 },
                 '&:hover': {
                     opacity: '1 !important',
-                    visibility: 'initial',
-                    $nest: {
-                        '> i-panel': {
-                            boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)'
-                        }
-                    }
+                    visibility: 'initial'
                 },
                 '.bar-shadow': {
-                    boxShadow: '0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 3px 1px -2px rgb(0 0 0 / 12%), 0px 1px 5px 0px rgb(0 0 0 / 20%)'
+                    boxShadow: 'rgba(0, 0, 0, 0.1) 0px 2px 8px 0px'
                 }
             }
         },

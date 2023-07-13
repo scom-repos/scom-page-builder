@@ -3525,8 +3525,21 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                 zIndex: 99,
                 top: -50,
                 left: 0,
-                boxShadow: '0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 3px 1px -2px rgb(0 0 0 / 12%), 0px 1px 5px 0px rgb(0 0 0 / 20%)',
+                boxShadow: 'rgba(0, 0, 0, 0.1) 0px 2px 8px 0px',
                 animation: `${tileToolbarFadeIn} 125ms cubic-bezier(0.4,0,1,1)`
+            },
+            '.toolbar': {
+                width: 34,
+                height: 34,
+                padding: 6,
+                borderRadius: 5,
+                cursor: 'pointer',
+                $nest: {
+                    '&:hover i-icon svg': {
+                        fill: `${Theme.colors.primary.main} !important`,
+                        transition: 'fill .15s ease-in'
+                    }
+                }
             },
             '#form > i-vstack > i-panel': {
                 width: '100%'
@@ -3683,8 +3696,8 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
                 zIndex: 10,
                 position: 'absolute',
                 top: '0',
-                left: '-3em',
-                width: '45px',
+                left: -52,
+                width: '49px',
                 padding: 0,
                 paddingRight: 11,
                 transition: 'opacity .3s .1s cubic-bezier(0.4,0,0.2,1), visibility 0s .1s',
@@ -3694,30 +3707,22 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
                         justifyContent: 'center',
                         alignItems: 'center',
                         cursor: 'pointer',
-                        borderRadius: '50%',
-                        width: 30,
-                        height: 30,
-                        padding: 3,
+                        borderRadius: 5,
+                        padding: 6,
                         background: 'transparent',
                         $nest: {
-                            '&:hover': {
-                                boxShadow: 'none',
-                                background: Theme.action.hover,
-                                transition: 'background .3s ease-in'
+                            '&:hover i-icon svg': {
+                                fill: `${Theme.colors.primary.main} !important`,
+                                transition: 'fill .15s ease-in'
                             }
                         }
                     },
                     '&:hover': {
                         opacity: '1 !important',
-                        visibility: 'initial',
-                        $nest: {
-                            '> i-panel': {
-                                boxShadow: '0 1px 2px rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%)'
-                            }
-                        }
+                        visibility: 'initial'
                     },
                     '.bar-shadow': {
-                        boxShadow: '0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 3px 1px -2px rgb(0 0 0 / 12%), 0px 1px 5px 0px rgb(0 0 0 / 20%)'
+                        boxShadow: 'rgba(0, 0, 0, 0.1) 0px 2px 8px 0px'
                     }
                 }
             },
@@ -4838,7 +4843,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             return (this.$render("i-panel", { id: "pnlRowWrap", class: 'page-row', width: "100%", height: "100%", padding: { left: '3rem', right: '3rem' } },
                 this.$render("i-button", { caption: '', icon: { name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, top: "-12px", left: "50%", zIndex: 95, class: "btn-add", onClick: () => this.onAddSection(-1) }),
                 this.$render("i-vstack", { id: 'actionsBar', class: "row-actions-bar", verticalAlignment: "center" },
-                    this.$render("i-vstack", { background: { color: '#fff' }, border: { radius: '20px' }, maxWidth: "100%", maxHeight: "100%", horizontalAlignment: "center", padding: { top: 5, bottom: 5 }, class: "bar-shadow" },
+                    this.$render("i-vstack", { background: { color: '#fff' }, border: { radius: 5 }, maxWidth: "100%", maxHeight: "100%", horizontalAlignment: "center", padding: { top: 4, bottom: 4, left: 4, right: 4 }, gap: "0.25rem", class: "bar-shadow" },
                         this.$render("i-panel", { class: "actions", tooltip: { content: 'Section settings', placement: 'right' }, visible: this.isChanged, onClick: () => this.onOpenRowSettingsDialog() },
                             this.$render("i-icon", { name: "cog", width: 16, height: 16, fill: "#80868b" })),
                         this.$render("i-panel", { id: "btnClone", class: "actions", tooltip: { content: 'Duplicate section', placement: 'right' }, visible: this.isCloned, onClick: this.onClone },
@@ -4935,16 +4940,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this.toolbar.clearInnerHTML();
             for (let i = 0; i < this.toolList.length; i++) {
                 const tool = this.toolList[i];
-                let elm = await components_25.Button.create({
-                    padding: { left: '12px', right: '12px', top: '12px', bottom: '12px' },
-                    width: 48,
-                    height: 48,
-                    border: { radius: '50%' },
-                    tooltip: tool.name ? { trigger: 'hover', content: tool.name, color: '#555555' } : undefined,
-                    background: { color: 'transparent' },
-                    visible: tool.visible ? tool.visible() : true,
-                    caption: `<i-icon name="${tool.icon}" width=${20} height=${20} display="block" fill="${Theme.text.primary}"></i-icon>`,
-                    onClick: () => {
+                let elm = (this.$render("i-hstack", { class: 'toolbar', tooltip: tool.name ? { trigger: 'hover', content: tool.name, color: '#555555' } : undefined, visible: tool.visible ? tool.visible() : true, horizontalAlignment: 'center', verticalAlignment: 'center', onClick: () => {
                         this.currentAction = tool;
                         if ((0, index_46.isEmpty)(tool.userInputDataSchema) && (0, index_46.isEmpty)(tool.customUI)) {
                             const commandIns = this.currentAction.command(this, null);
@@ -4956,28 +4952,18 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                         }
                         this.adjustCursorByAction();
                         this.hideToolbars();
-                    }
-                });
-                elm.classList.add('toolbar');
+                    } },
+                    this.$render("i-icon", { width: 16, height: 16, name: tool.icon, fill: Theme.text.primary })));
                 if (tool.name)
                     elm.setAttribute('tool-name', tool.name);
                 this.toolbar.appendChild(elm);
             }
-            const removeBtn = await components_25.Button.create({
-                padding: { left: '12px', right: '12px', top: '12px', bottom: '12px' },
-                width: 48,
-                height: 48,
-                border: { radius: '50%' },
-                tooltip: { trigger: 'hover', content: 'Delete', color: '#555555' },
-                background: { color: 'transparent' },
-                caption: `<i-icon name="trash" width=${20} height=${20} display="block" fill="${Theme.text.primary}"></i-icon>`,
-                onClick: () => {
+            const removeBtn = (this.$render("i-hstack", { class: 'toolbar', tooltip: { trigger: 'hover', content: 'Delete', color: '#555555' }, horizontalAlignment: 'center', verticalAlignment: 'center', onClick: () => {
                     const removeCmd = new index_47.RemoveToolbarCommand(this);
                     index_47.commandHistory.execute(removeCmd);
                     this.hideToolbars();
-                }
-            });
-            removeBtn.classList.add('toolbar');
+                } },
+                this.$render("i-icon", { width: 16, height: 16, name: 'trash', fill: Theme.text.primary })));
             this.toolbar.appendChild(removeBtn);
         }
         onShowModal() {
@@ -5440,8 +5426,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
         }
         render() {
             return (this.$render("i-vstack", { id: "mainWrapper", width: "auto", maxWidth: "100%", maxHeight: "100%", position: "relative" },
-                this.$render("i-panel", { id: "toolsStack", border: { radius: 4 }, background: { color: '#fff' }, class: "ide-toolbar", visible: false },
-                    this.$render("i-hstack", { id: "toolbar", gap: "0.5rem" })),
+                this.$render("i-panel", { id: "toolsStack", border: { radius: 5 }, background: { color: '#fff' }, class: "ide-toolbar", visible: false },
+                    this.$render("i-hstack", { id: "toolbar", padding: { top: 4, bottom: 4, left: 4, right: 4 }, gap: "0.25rem" })),
                 this.$render("i-panel", { id: "contentStack", height: "100%", position: 'relative', maxWidth: "100%", maxHeight: "100%", class: "ide-component", onClick: this.showToolbars.bind(this) },
                     this.$render("i-vstack", { id: "dragStack", verticalAlignment: "center", position: "absolute", left: "50%", top: "0px", width: "auto", height: "auto", class: "dragger" },
                         this.$render("i-grid-layout", { verticalAlignment: "center", autoFillInHoles: true, columnsPerRow: 4, gap: { column: '2px', row: '2px' }, class: "main-drag" },
@@ -6073,10 +6059,11 @@ define("@scom/scom-page-builder/page/pageSidebar.css.ts", ["require", "exports",
     exports.categoryButtonStyle = components_33.Styles.style({
         position: 'relative',
         cursor: 'pointer',
+        borderRadius: 4,
         $nest: {
             '&:hover': {
                 background: 'rgba(243, 178, 111, 0.08)',
-                borderRadius: 4
+                transition: 'background .15s ease-in'
             }
         }
     });
