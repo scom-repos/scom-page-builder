@@ -713,23 +713,22 @@ declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
     import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
     import { Control } from "@ijstech/components";
     export class UngroupElementCommand implements ICommand {
-        private draggingToolbar;
-        private parent;
+        private dragToolbar;
+        private dragSection;
+        private dragRow;
         private dropElm;
-        private data;
-        private isReGroup;
-        private prevParent;
-        private prevSection;
-        private newSection;
+        private dropSection;
+        private dropRow;
         private oriCol;
         private oriColSpan;
         private oriElmIndex;
+        private data;
         private appendElm;
         private config;
+        private isReGroup;
         private isAppend;
-        constructor(data: any, isReGroup: boolean, dragElm: Control, dropElm: Control, config: any, isAppend?: boolean);
+        constructor(dragToolbar: Control, dropElm: Control, config: any, isReGroup: boolean, isAppend?: boolean);
         execute(): Promise<void>;
-        private getPrimitiveData;
         undo(): Promise<void>;
         redo(): void;
     }
