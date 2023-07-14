@@ -32,6 +32,9 @@ export const widgetModalStyle = Styles.style({
             borderRadius: 5,
             backgroundColor: '#fff',
             overflow: 'auto'
+        },
+        '.prevent-select': {
+            userSelect: 'none'
         }
     }
 })
