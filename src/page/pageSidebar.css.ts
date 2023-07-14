@@ -12,10 +12,11 @@ export const categoryPanelStyle = Styles.style({
 export const categoryButtonStyle = Styles.style({
     position: 'relative',
     cursor: 'pointer',
+    borderRadius: 4,
     $nest: {
         '&:hover': {
             background: 'rgba(243, 178, 111, 0.08)',
-            borderRadius: 4
+            transition: 'background .15s ease-in'
         }
     }
 })
