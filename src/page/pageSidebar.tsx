@@ -124,20 +124,26 @@ export class PageSidebar extends Module {
         this.pnlWidgets.appendChild(<i-label caption={category.title} font={{ color: '#3b3838', weight: 600 }} class="prevent-select"></i-label>);
         if (category.id === 'layouts') {
             const moduleCard = (
-                <i-vstack
+                <i-grid-layout
                     id="sectionStack"
                     class={widgetStyle}
                     verticalAlignment="center"
-                    horizontalAlignment="center"
                     width="100%"
                     background={{ color: '#f9f6f3' }}
                     border={{ width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }}
-                    gap="0.5rem"
                     tooltip={{ content: '✊ Drag to insert', placement: 'top' }}
+                    templateColumns={["56px", "1fr"]}
+                    overflow="hidden"
                 >
-                    <i-image url={assets.icons.logo} width={24} height={24} display="block"></i-image>
-                    <i-label caption="Section" font={{ size: '0.813rem', color: '#3b3838' }} maxHeight={34} overflow={"hidden"}></i-label>
-                </i-vstack>
+                    <i-image url={assets.icons.logo} padding={{ top: 8, bottom: 8, left: 8, right: 8 }}></i-image>
+                    <i-label
+                        caption="Section"
+                        font={{ size: '0.813rem', color: '#3b3838', weight: 600 }}
+                        padding={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        maxHeight={34}
+                        overflow={"hidden"}
+                    ></i-label>
+                </i-grid-layout>
             );
             this.pnlWidgets.appendChild(moduleCard);
             moduleCard.setAttribute('draggable', 'true');
@@ -145,30 +151,30 @@ export class PageSidebar extends Module {
             let components = this.pageBlocks.filter(p => p.category === category.id);
             let matchedModules = components;
             for (const module of matchedModules) {
+                const lblDesc = module.description ? (
+                    <i-label caption={module.description} font={{ size: '0.813rem', color: '#8b8585' }}></i-label>
+                ) : [];
                 const moduleCard = (
-                    <i-vstack
+                    <i-grid-layout
                         class={widgetStyle}
                         verticalAlignment="center"
-                        horizontalAlignment="center"
                         width="100%"
-                        gap="0.5rem"
                         background={{ color: '#f9f6f3' }}
                         border={{ width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }}
                         tooltip={{ content: '✊ Drag to insert', placement: 'top' }}
+                        templateColumns={["56px", "1fr"]}
+                        overflow="hidden"
                     >
-                        <i-image
-                            url={module.imgUrl || assets.icons.logo}
-                            width={24}
-                            height={24}
-                            display="block"
+                        <i-image url={module.imgUrl || assets.icons.logo} padding={{ top: 8, bottom: 8, left: 8, right: 8 }}
                         ></i-image>
-                        <i-label
-                            caption={module.name}
-                            font={{ size: '0.813rem', color: '#3b3838' }}
-                            maxHeight={34}
-                            overflow={"hidden"}
-                        ></i-label>
-                    </i-vstack>
+                        <i-vstack gap="0.25rem" padding={{ top: 8, bottom: 8, left: 8, right: 8 }} overflow="hidden">
+                            <i-label
+                                caption={module.name}
+                                font={{ size: '0.813rem', color: '#3b3838', weight: 600 }}
+                            ></i-label>
+                            {lblDesc}
+                        </i-vstack>
+                    </i-grid-layout>
                 );
                 this.pnlWidgets.append(moduleCard);
                 this.initDrag(moduleCard, module);

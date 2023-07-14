@@ -306,7 +306,8 @@ export class IDEToolbar extends Module {
         if (this._component?.getConfigurators) {
             const configs = this._component.getConfigurators() || [];
             const builderTarget = configs.find(conf => conf.target === 'Builders');
-            if (builderTarget?.getActions) return builderTarget.getActions();
+            const category = this.data?.module?.category;
+            if (builderTarget?.getActions) return builderTarget.getActions(category);
         }
         return [];
     }

@@ -1,7 +1,7 @@
 // import { application, Module } from '@ijstech/components';
 import { BigNumber } from '@ijstech/eth-wallet';
 // import { getRootDir } from '../store/index';
-import { IPFS_UPLOAD_END_POINT, IPFS_GATEWAY_IJS, IPFS_GATEWAY } from '../const/index';
+import { IPFS_UPLOAD_END_POINT, IPFS_GATEWAY_IJS } from '../const/index';
 import { match, MatchFunction, compile } from './pathToRegexp';
 
 const assignAttr = (module: any) => {
@@ -29,18 +29,6 @@ const uploadToIPFS = (data: any): Promise<string> => {
             resolve(result.data.cid);
         } else
             reject();
-    });
-};
-
-const fetchFromIPFS = (cid: string): Promise<any> => {
-    return new Promise(async (resolve, reject) => {
-        let response;
-        try {
-            response = await fetch(IPFS_GATEWAY_IJS + cid);
-        } catch (err) {
-            response = await fetch(IPFS_GATEWAY + cid);
-        }
-        resolve(response);
     });
 };
 
@@ -143,19 +131,24 @@ const isEmpty = (value: any) => {
     return false;
 }
 
-const getSCConfigByCid = async (cid: string) => {
-    let scConfig;
-    let result = await fetchFromIPFS(cid);
-    let codeInfoFileContent = await result.json();
-    let ipfsCid = codeInfoFileContent.codeCID;
-    if (ipfsCid) {
-        try {
-            let scConfigRes = await fetchFromIPFS(`${ipfsCid}/dist/scconfig.json`);
-            scConfig = await scConfigRes.json();
-        } catch (err) {}
+const fetchScconfigByRootCid = async (cid: string) => {
+    try {
+        let path = IPFS_GATEWAY_IJS + cid;
+        let cidInfo = await (await fetch(path)).json();
+        let hasScconfig = cidInfo.links?.find(link => link.name === 'scconfig.json');
+        if (hasScconfig) {
+            path += '/scconfig.json';
+            let scconfig = await (await fetch(path)).json();
+            return scconfig;
+        } else {
+            cid = cidInfo.links.find(link => link.name !== 'index.html')?.cid;
+            if (cid) return fetchScconfigByRootCid(cid);
+        }
+        return null;
+    } catch {
+        return null;
     }
-    return scConfig;
-};
+}
 
 // const getEmbedElement = async (path: string) => {
 //     const rootDir = getRootDir();
@@ -173,7 +166,6 @@ const getSCConfigByCid = async (cid: string) => {
 export {
     assignAttr,
     uploadToIPFS,
-    fetchFromIPFS,
     match,
     MatchFunction,
     compile,
@@ -184,5 +176,6 @@ export {
     getPagePath,
     updatePagePath,
     generateUUID,
-    isEmpty
+    isEmpty,
+    fetchScconfigByRootCid
 };
