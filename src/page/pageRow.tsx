@@ -809,7 +809,7 @@ export class PageRow extends Module {
 
             for (let i=0; i<sortedSections.length; i++) {
                 const element = sortedSections[i];
-                const condition = self.isUngrouping()? true : element!=dragTargetSection;
+                const condition = self.isUngrouping()? true : element.id!=dragTargetSection.id;
                 if (condition){
 
                     const startOfDroppingElm: number = parseInt(element.dataset.column);
@@ -886,7 +886,7 @@ export class PageRow extends Module {
             // collide with other section 
             if (collision.collisionType == "mutual"/* || overlap.overlapType == "border"*/) {
                 // check which side is the merge target
-                if (!collision.mergeSide && !collision.section) return
+                if (!collision.mergeSide && !collision.section && !dropElm) return;
             }
 
             // is ungrouping and draging on the original section

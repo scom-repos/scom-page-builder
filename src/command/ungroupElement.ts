@@ -79,11 +79,13 @@ export class UngroupElementCommand implements ICommand {
 
     application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
 
-    const dragEnterElm = this.dropRow.querySelector('.is-dragenter')
     const dropRowId = this.dropRow?.id.replace('row-', '');
-    const dropToolbarId = (dragEnterElm.closest('ide-toolbar') as any)?.elementId;
     // regroup with new section
     if (this.isReGroup) {
+
+      const dragEnterElm = this.dropRow.closest('#pageBuilder').querySelector('.is-dragenter')
+      const dropToolbarId = (dragEnterElm.closest('ide-toolbar') as any)?.elementId;
+
       this.dropSection = this.dropRow.querySelector(`[id='${this.dropSection.id}']`) as Control;
       const dropSectionData = pageObject.getElement(dropRowId, this.dropSection.id);
       const clonedDropSecData = JSON.parse(JSON.stringify(dropSectionData));
