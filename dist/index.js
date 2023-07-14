@@ -1024,7 +1024,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
     };
     const defaultPageConfig = {
         backgroundColor: '',
-        margin: { x: 'auto', y: 0 },
+        margin: { x: 'auto', y: '0' },
         maxWidth: 1024
     };
     exports.state = {
@@ -1162,8 +1162,8 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         y = y !== null && y !== void 0 ? y : defaultMargin.y;
         const xNumber = Number(x);
         const yNumber = Number(y);
-        x = isNaN(xNumber) ? x : xNumber;
-        y = isNaN(yNumber) ? y : yNumber;
+        x = isNaN(xNumber) ? x : xNumber + 'px';
+        y = isNaN(yNumber) ? y : yNumber + 'px';
         return {
             top: y,
             left: x,
@@ -3274,9 +3274,6 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                                 type: 'Control',
                                 label: 'Background Color',
                                 scope: '#/properties/backgroundColor',
-                                options: {
-                                    color: true
-                                }
                             },
                             {
                                 type: 'Control',
