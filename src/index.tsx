@@ -171,7 +171,8 @@ export default class Editor extends Module {
         // remove ghost image when dragging
         containerElement.addEventListener("dragstart", function( event ) {
             const img = new Image();
-            img.src = "http://placehold.it/150/000000/ffffff?text=GHOST";
+            img.src = "http://placehold.it/150/000000/ffffff";
+            img.style.opacity = '0'
             event.dataTransfer.setDragImage(img, window.outerWidth, window.outerHeight);
         }, false);
     }

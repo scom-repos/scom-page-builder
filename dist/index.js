@@ -2073,7 +2073,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             this.isAppend = isAppend;
         }
         async execute() {
-            var _a, _b, _c, _d, _e, _f, _g, _h;
+            var _a, _b, _c, _d, _e, _f, _g;
             if (!this.parent)
                 return;
             this.prevSection = this.prevParent.querySelector(`[id='${this.prevSection.id}']`);
@@ -2124,7 +2124,9 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 const newElement = this.getPrimitiveData(this.data);
                 newElement.column = clonedDropSecData.column;
                 newElement.columnSpan = clonedDropSecData.columnSpan;
-                const dropElementId = (_c = this.dropElm.closest('ide-toolbar')) === null || _c === void 0 ? void 0 : _c.elementId;
+                const dragEnterElm = this.parent.querySelector('.is-dragenter');
+                const dropToolbar = dragEnterElm.closest('ide-toolbar');
+                const dropElementId = dropToolbar === null || dropToolbar === void 0 ? void 0 : dropToolbar.elementId;
                 const isComposite = (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements) && (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements.length) && (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements.length) > 0;
                 if (isComposite) {
                     const elementIndex = dropElementId ? dropSectionData.elements.findIndex(elm => elm.id === dropElementId) : -1;
@@ -2137,7 +2139,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                     index_13.pageObject.setElement(dropRowId, dropSectionId, {
                         // type: ElementType.COMPOSITE, // to be removed
                         elements: [clonedDropSecData, newElement],
-                        dropId: ((_d = this.data) === null || _d === void 0 ? void 0 : _d.id) || ''
+                        dropId: ((_c = this.data) === null || _c === void 0 ? void 0 : _c.id) || ''
                     });
                 }
                 const newDropData = index_13.pageObject.getElement(dropRowId, dropSectionId);
@@ -2147,7 +2149,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             else {
                 // create elm in a new section
                 // this.newId = generateUUID();
-                const isMicroDapps = ((_f = (_e = this.data) === null || _e === void 0 ? void 0 : _e.module) === null || _f === void 0 ? void 0 : _f.category) === 'micro-dapps';
+                const isMicroDapps = ((_e = (_d = this.data) === null || _d === void 0 ? void 0 : _d.module) === null || _e === void 0 ? void 0 : _e.category) === 'micro-dapps';
                 const newElData = {
                     id: this.data.id,
                     column: parseInt(this.dropElm.dataset.column),
@@ -2162,9 +2164,9 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 this.appendElm = await this.parent.addElement(newElData);
                 const parentId = this.parent.id.replace('row-', '');
                 index_13.pageObject.addElement(parentId, newElData);
-                const elementRowId = (((_g = this.parent) === null || _g === void 0 ? void 0 : _g.id) || '').replace('row-', '');
+                const elementRowId = (((_f = this.parent) === null || _f === void 0 ? void 0 : _f.id) || '').replace('row-', '');
                 const elementSection = index_13.pageObject.getRow(elementRowId);
-                this.parent.toggleUI(!!((_h = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _h === void 0 ? void 0 : _h.length));
+                this.parent.toggleUI(!!((_g = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _g === void 0 ? void 0 : _g.length));
             }
         }
         // temporary workaround
@@ -4142,11 +4144,15 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     self.currentElement = targetSection;
                     self.currentToolbar = targetToolbar;
                     components_24.application.EventBus.dispatch(index_38.EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
-                    // self.currentElement.opacity = 0;
                     const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
-                    toolbars.forEach(toolbar => {
-                        toolbar.style.opacity = (toolbar.id != self.currentToolbar.id) ? '1' : '0';
-                    });
+                    if (self.currentToolbar) {
+                        toolbars.forEach(toolbar => {
+                            toolbar.style.opacity = (toolbar.id != self.currentToolbar.id) ? '1' : '0';
+                        });
+                    }
+                    else {
+                        self.currentElement.opacity = 0;
+                    }
                     components_24.application.EventBus.dispatch(index_38.EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                     self.addDottedLines();
                 }
@@ -4158,11 +4164,15 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.addEventListener('drag', function (event) { });
             document.addEventListener('dragend', function (event) {
                 if (self.currentElement && !self.currentElement.classList.contains('builder-item')) {
-                    // self.currentElement.opacity = 1;
-                    const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
-                    toolbars.forEach(toolbar => {
-                        toolbar.style.opacity = "1";
-                    });
+                    if (self.currentToolbar) {
+                        const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
+                        toolbars.forEach(toolbar => {
+                            toolbar.style.opacity = "1";
+                        });
+                    }
+                    else {
+                        self.currentElement.opacity = 1;
+                    }
                 }
                 resetDragTarget();
                 resetPageRow();
@@ -4598,7 +4608,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     const inEmptyPnl = eventTarget.closest('#pnlEmty');
                     if (dropElm && !inEmptyPnl) {
                         self.isDragging = true;
-                        dropElm.classList.remove('is-dragenter');
                         if (dropElm.classList.contains('bottom-block') || collision.mergeSide == "bottom") {
                             if (isUngrouping) {
                                 const dropElement = eventTarget;
@@ -4642,6 +4651,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 new index_41.DragElementCommand(self.currentElement, dropElm, isAppend);
                             await index_41.commandHistory.execute(dragCmd);
                         }
+                        dropElm.classList.remove('is-dragenter');
                         self.isDragging = false;
                     }
                     else if (pageRow && !self.isDragging) {
@@ -6954,7 +6964,8 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             // remove ghost image when dragging
             containerElement.addEventListener("dragstart", function (event) {
                 const img = new Image();
-                img.src = "http://placehold.it/150/000000/ffffff?text=GHOST";
+                img.src = "http://placehold.it/150/000000/ffffff";
+                img.style.opacity = '0';
                 event.dataTransfer.setDragImage(img, window.outerWidth, window.outerHeight);
             }, false);
         }

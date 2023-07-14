@@ -91,7 +91,9 @@ export class UngroupElementCommand implements ICommand {
       const newElement = this.getPrimitiveData(this.data);
       newElement.column = clonedDropSecData.column;
       newElement.columnSpan = clonedDropSecData.columnSpan;
-      const dropElementId = (this.dropElm.closest('ide-toolbar') as any)?.elementId;
+      const dragEnterElm = this.parent.querySelector('.is-dragenter')
+      const dropToolbar = dragEnterElm.closest('ide-toolbar');
+      const dropElementId = (dropToolbar as any)?.elementId;
       const isComposite: boolean = clonedDropSecData?.elements && clonedDropSecData?.elements.length && clonedDropSecData?.elements.length > 0;
       if (isComposite) {
         const elementIndex = dropElementId ? dropSectionData.elements.findIndex(elm => elm.id === dropElementId) : -1;

@@ -478,12 +478,14 @@ export class PageRow extends Module {
                 self.currentElement = targetSection;
                 self.currentToolbar = targetToolbar;
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
-                // self.currentElement.opacity = 0;
                 const toolbars = self.currentElement.querySelectorAll('ide-toolbar')
-                toolbars.forEach(toolbar => {
-                    (toolbar as HTMLElement).style.opacity = (toolbar.id != self.currentToolbar.id)? '1' : '0';
-                });
-
+                if (self.currentToolbar) {
+                    toolbars.forEach(toolbar => {
+                        (toolbar as HTMLElement).style.opacity = (toolbar.id != self.currentToolbar.id)? '1' : '0';
+                    });
+                } else {
+                    self.currentElement.opacity = 0;
+                }
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                 self.addDottedLines();
             } else {
@@ -496,12 +498,15 @@ export class PageRow extends Module {
 
         document.addEventListener('dragend', function (event) {
             if (self.currentElement && !self.currentElement.classList.contains('builder-item')) {
-                // self.currentElement.opacity = 1;
-                const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
-                toolbars.forEach(toolbar => {
-                    (toolbar as HTMLElement).style.opacity = "1";
-                });
-            }
+                if (self.currentToolbar){
+                    const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
+                    toolbars.forEach(toolbar => {
+                        (toolbar as HTMLElement).style.opacity = "1";
+                    });
+                } else {
+                    self.currentElement.opacity = 1;
+                }
+            }  
             resetDragTarget();
             resetPageRow();
         });
@@ -948,7 +953,6 @@ export class PageRow extends Module {
                 const inEmptyPnl = eventTarget.closest('#pnlEmty');
                 if (dropElm && !inEmptyPnl) {
                     self.isDragging = true;
-                    dropElm.classList.remove('is-dragenter');
                     if (dropElm.classList.contains('bottom-block') || collision.mergeSide == "bottom") {
                         if (isUngrouping) {
                             const dropElement = eventTarget;
@@ -986,6 +990,7 @@ export class PageRow extends Module {
                             new DragElementCommand(self.currentElement, dropElm, isAppend);
                         await commandHistory.execute(dragCmd);
                     }
+                    dropElm.classList.remove('is-dragenter');
                     self.isDragging = false;
                 } else if (pageRow && !self.isDragging) {
                     self.isDragging = true;
