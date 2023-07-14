@@ -5,6 +5,7 @@ export interface IPageBlockData {
     path: string;
     category?: string;
     imgUrl?: string;
+    description?: string;
     disableClicked?: boolean;
     shownBackdrop?: boolean;
 }
@@ -26,7 +27,7 @@ export interface IPageBlockAction {
 }
 
 export interface IPageBlock {
-	getActions: () => IPageBlockAction[];
+	getActions: (category?: string) => IPageBlockAction[];
 	getData: () => any;
 	setData: (data: any) => Promise<void>;
 	getTag: () => any;

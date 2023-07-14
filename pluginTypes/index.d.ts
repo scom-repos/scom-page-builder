@@ -207,7 +207,6 @@ declare module "@scom/scom-page-builder/utility/index.ts" {
     import { match, MatchFunction, compile } from "@scom/scom-page-builder/utility/pathToRegexp.ts";
     const assignAttr: (module: any) => void;
     const uploadToIPFS: (data: any) => Promise<string>;
-    const fetchFromIPFS: (cid: string) => Promise<any>;
     const formatNumber: (value: any, decimals?: number) => string;
     const formatNumberWithSeparators: (value: number, precision?: number) => string;
     const isCID: (cid: string) => boolean;
@@ -216,7 +215,8 @@ declare module "@scom/scom-page-builder/utility/index.ts" {
     const updatePagePath: (pagePath: string) => void;
     const generateUUID: () => string;
     const isEmpty: (value: any) => boolean;
-    export { assignAttr, uploadToIPFS, fetchFromIPFS, match, MatchFunction, compile, formatNumber, formatNumberWithSeparators, isCID, getCID, getPagePath, updatePagePath, generateUUID, isEmpty };
+    const fetchScconfigByRootCid: (cid: string) => any;
+    export { assignAttr, uploadToIPFS, match, MatchFunction, compile, formatNumber, formatNumberWithSeparators, isCID, getCID, getPagePath, updatePagePath, generateUUID, isEmpty, fetchScconfigByRootCid };
 }
 /// <amd-module name="@scom/scom-page-builder/interface/core.ts" />
 declare module "@scom/scom-page-builder/interface/core.ts" {
@@ -293,6 +293,7 @@ declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
         path: string;
         category?: string;
         imgUrl?: string;
+        description?: string;
         disableClicked?: boolean;
         shownBackdrop?: boolean;
     }
@@ -311,7 +312,7 @@ declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
         isReplacement?: boolean;
     }
     export interface IPageBlock {
-        getActions: () => IPageBlockAction[];
+        getActions: (category?: string) => IPageBlockAction[];
         getData: () => any;
         setData: (data: any) => Promise<void>;
         getTag: () => any;

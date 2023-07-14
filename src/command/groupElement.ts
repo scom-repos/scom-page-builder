@@ -36,7 +36,7 @@ export class GroupElementCommand implements ICommand {
 
   private getElements() {
     if (this.isNew) {
-      const isMicroDapps= this.config?.module?.category === 'micro-dapps';
+      const isMicroDapps = this.config?.module?.category === 'micro-dapps' || this.config?.module?.category === 'offers';
       const newElData = {
         id: this.config.id,
         column: 1,

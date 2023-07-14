@@ -111,7 +111,8 @@ export class UngroupElementCommand implements ICommand {
     // simple ungroup
     } else {
         // create elm in a new section
-        const isMicroDapps = this.data?.module?.category === 'micro-dapps';
+        // this.newId = generateUUID();
+        const isMicroDapps = this.data?.module?.category === 'micro-dapps' || this.config?.module?.category === 'offers';
         const newElData = {
             id: this.data.id,
             column: parseInt(this.dropElm.dataset.column),
@@ -154,7 +155,7 @@ export class UngroupElementCommand implements ICommand {
     application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
 
     // merge the elms
-    const isMicroDapps = this.data?.module?.category === 'micro-dapps';
+    const isMicroDapps = this.data?.module?.category === 'micro-dapps' || this.config?.module?.category === 'offers';
     const newElData = {
         id: this.data.id,
         column: this.oriCol,
