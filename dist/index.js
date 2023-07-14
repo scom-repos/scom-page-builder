@@ -2107,6 +2107,8 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             // regroup with new section
             if (this.isReGroup) {
                 const dragEnterElm = this.dropRow.closest('#pageBuilder').querySelector('.is-dragenter');
+                if (!dragEnterElm)
+                    return;
                 const dropToolbarId = (_f = dragEnterElm.closest('ide-toolbar')) === null || _f === void 0 ? void 0 : _f.elementId;
                 this.dropSection = this.dropRow.querySelector(`[id='${this.dropSection.id}']`);
                 const dropSectionData = index_13.pageObject.getElement(dropRowId, this.dropSection.id);
@@ -4123,13 +4125,23 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     elm.classList.remove(className);
                 }
             }
+            function findClosestToolbarInSection(section, clientY) {
+                const toolbars = section.querySelectorAll('ide-toolbar');
+                for (let i = 0; i < toolbars.length; i++) {
+                    const bounds = toolbars[i].getBoundingClientRect();
+                    if (bounds.top <= clientY
+                        && bounds.top + bounds.height >= clientY) {
+                        return toolbars[i];
+                    }
+                }
+            }
             this.addEventListener('dragstart', function (event) {
                 const eventTarget = event.target;
                 if (eventTarget instanceof PageRow_1)
                     return;
                 const targetSection = eventTarget.closest && eventTarget.closest('ide-section');
+                const targetToolbar = findClosestToolbarInSection(targetSection, event.clientY);
                 const toolbars = targetSection ? Array.from(targetSection.querySelectorAll('ide-toolbar')) : [];
-                const targetToolbar = toolbars.find(elm => elm.classList.contains('active'));
                 const cannotDrag = toolbars.find(toolbar => toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting'));
                 if (targetSection && !cannotDrag) {
                     self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
@@ -4526,11 +4538,14 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const isUngrouping = self.isUngrouping();
                 // if target overlap with other section
                 const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
-                const dropElm = parentWrapper.querySelector('.is-dragenter');
+                let dropElm = parentWrapper.querySelector('.is-dragenter');
+                const dropToolbar = dropElm === null || dropElm === void 0 ? void 0 : dropElm.closest('ide-toolbar');
+                if (dropToolbar == self.currentToolbar)
+                    dropElm = null;
                 // collide with other section 
                 if (collision.collisionType == "mutual" /* || overlap.overlapType == "border"*/) {
                     // check which side is the merge target
-                    if (!collision.mergeSide && !collision.section && !dropElm)
+                    if ((!collision.mergeSide && !dropElm) || (collision.section && !dropElm))
                         return;
                 }
                 // is ungrouping and draging on the original section

@@ -466,12 +466,23 @@ export class PageRow extends Module {
             }
         }
 
+        function findClosestToolbarInSection(section: Control, clientY: number): IDEToolbar {
+            const toolbars = section.querySelectorAll('ide-toolbar');
+            for (let i=0; i<toolbars.length; i++) {
+                const bounds = toolbars[i].getBoundingClientRect();
+                if (bounds.top <= clientY 
+                && bounds.top + bounds.height >= clientY) {
+                    return toolbars[i] as IDEToolbar;
+                }
+            }
+        }
+
         this.addEventListener('dragstart', function (event) {
             const eventTarget = event.target as Control;
             if (eventTarget instanceof PageRow) return;
             const targetSection = eventTarget.closest && eventTarget.closest('ide-section') as PageSection;
+            const targetToolbar = findClosestToolbarInSection(targetSection, event.clientY)
             const toolbars = targetSection ? Array.from(targetSection.querySelectorAll('ide-toolbar')) : [];
-            const targetToolbar = toolbars.find(elm => elm.classList.contains('active')) as IDEToolbar;
             const cannotDrag = toolbars.find(toolbar => toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting'));
             if (targetSection && !cannotDrag) {
                 self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
@@ -881,12 +892,14 @@ export class PageRow extends Module {
             // if target overlap with other section
             const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
 
-            const dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
+            let dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
+            const dropToolbar = dropElm?.closest('ide-toolbar')
+            if (dropToolbar == self.currentToolbar) dropElm = null
 
             // collide with other section 
             if (collision.collisionType == "mutual"/* || overlap.overlapType == "border"*/) {
                 // check which side is the merge target
-                if (!collision.mergeSide && !collision.section && !dropElm) return;
+                if ((!collision.mergeSide && !dropElm) || (collision.section && !dropElm)) return;
             }
 
             // is ungrouping and draging on the original section
