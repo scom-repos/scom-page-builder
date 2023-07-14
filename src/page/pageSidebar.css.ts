@@ -41,10 +41,8 @@ export const widgetModalStyle = Styles.style({
 })
 
 export const widgetStyle = Styles.style({
-    padding: '0.5rem 0.75rem',
     cursor: 'grab',
     opacity: 1,
-    textAlign: 'center',
     transition: 'opacity .2s ease-in-out, transform 0.2s ease-in-out',
     $nest: {
         '&.is-dragging': {
@@ -52,6 +50,21 @@ export const widgetStyle = Styles.style({
         },
         '&:hover': {
             transform: 'scale(1.04) translateY(-4px)'
+        },
+        'i-label': {
+            overflow: 'hidden',
+            // whiteSpace: 'nowrap',
+            // textOverflow: 'ellipsis',
+            display: '-webkit-box',
+            '-webkit-line-clamp': 2,
+            WebkitBoxOrient: 'vertical',
+            lineHeight: 1.25
+        },
+        '> i-image img': {
+            width: 40,
+            height: 40,
+            objectFit: 'cover',
+            borderRadius: 5
         }
     }
 })

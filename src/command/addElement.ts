@@ -3,6 +3,7 @@ import { pageObject } from "../store/index";
 import { ICommand } from "./interface";
 import { getColumn, getColumnSpan, updateColumnData, getDropColumnData, getAppendColumnData } from "./columnUtils";
 import { INIT_COLUMN_SPAN } from "../interface/index";
+import { fetchScconfigByRootCid } from "../utility/index";
 
 export class AddElementCommand implements ICommand {
   private element: any;
@@ -85,6 +86,14 @@ export class AddElementCommand implements ICommand {
       },
       module: this.data.module
     };
+    if (this.data?.module?.category === 'offers') {
+      let scconfig = await fetchScconfigByRootCid(this.data.module.path);
+      let embedData = scconfig.embedData;
+      this.data.module.path = embedData.module.path || embedData.module.name.replace('@scom/', '');
+      if (embedData.properties) {
+        Object.assign(newElData.properties, embedData.properties);
+      }
+    }
     const parentData = this.parent?.data;
     // Remove any elements that are not currently listed
     if (parentData?.elements) {
