@@ -1221,11 +1221,12 @@ export class PageRow extends Module {
                 <i-vstack id={'actionsBar'} class="row-actions-bar" verticalAlignment="center">
                     <i-vstack
                         background={{ color: '#fff' }}
-                        border={{ radius: '20px' }}
+                        border={{ radius: 5 }}
                         maxWidth="100%"
                         maxHeight="100%"
                         horizontalAlignment="center"
-                        padding={{top: 5, bottom: 5}}
+                        padding={{ top: 4, bottom: 4, left: 4, right: 4 }}
+                        gap="0.25rem"
                         class="bar-shadow"
                     >
                         <i-panel

@@ -165,7 +165,7 @@ export class PageSettingsDialog extends Module {
                 title="Page Settings"
                 class="custom-modal"
             >
-                <i-panel padding={{ top: '1rem', bottom: '1rem', left: '1rem', right: '1rem' }}>
+                <i-panel padding={{ top: '1rem', bottom: '1rem', left: '1.5rem', right: '1.5rem' }}>
                     <i-form id="formElm"></i-form>
                 </i-panel>
             </i-modal>

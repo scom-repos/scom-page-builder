@@ -121,7 +121,7 @@ export class PageSidebar extends Module {
 
     renderWidgets(category: ICategory) {
         this.pnlWidgets.clearInnerHTML();
-        this.pnlWidgets.appendChild(<i-label caption={category.title} font={{ color: Theme.text.secondary, weight: 600 }}></i-label>);
+        this.pnlWidgets.appendChild(<i-label caption={category.title} font={{ color: '#3b3838', weight: 600 }} class="prevent-select"></i-label>);
         if (category.id === 'layouts') {
             const moduleCard = (
                 <i-vstack
@@ -130,13 +130,13 @@ export class PageSidebar extends Module {
                     verticalAlignment="center"
                     horizontalAlignment="center"
                     width="100%"
-                    background={{ color: Theme.action.hover }}
-                    border={{ radius: 5 }}
+                    background={{ color: '#f9f6f3' }}
+                    border={{ width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }}
                     gap="0.5rem"
                     tooltip={{ content: '✊ Drag to insert', placement: 'top' }}
                 >
                     <i-image url={assets.icons.logo} width={24} height={24} display="block"></i-image>
-                    <i-label caption="Section" font={{ size: '0.813rem' }} maxHeight={34} overflow={"hidden"} opacity={0.7}></i-label>
+                    <i-label caption="Section" font={{ size: '0.813rem', color: '#3b3838' }} maxHeight={34} overflow={"hidden"}></i-label>
                 </i-vstack>
             );
             this.pnlWidgets.appendChild(moduleCard);
@@ -152,9 +152,8 @@ export class PageSidebar extends Module {
                         horizontalAlignment="center"
                         width="100%"
                         gap="0.5rem"
-                        overflow={'hidden'}
-                        background={{ color: Theme.action.hover }}
-                        border={{ radius: 5 }}
+                        background={{ color: '#f9f6f3' }}
+                        border={{ width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }}
                         tooltip={{ content: '✊ Drag to insert', placement: 'top' }}
                     >
                         <i-image
@@ -165,8 +164,9 @@ export class PageSidebar extends Module {
                         ></i-image>
                         <i-label
                             caption={module.name}
-                            font={{ size: '0.813rem' }} opacity={0.7}
-                            maxHeight={34} overflow={"hidden"}
+                            font={{ size: '0.813rem', color: '#3b3838' }}
+                            maxHeight={34}
+                            overflow={"hidden"}
                         ></i-label>
                     </i-vstack>
                 );

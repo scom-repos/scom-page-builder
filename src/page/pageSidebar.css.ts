@@ -12,10 +12,11 @@ export const categoryPanelStyle = Styles.style({
 export const categoryButtonStyle = Styles.style({
     position: 'relative',
     cursor: 'pointer',
+    borderRadius: 4,
     $nest: {
         '&:hover': {
-            background: Theme.action.hover,
-            borderRadius: 4
+            background: 'rgba(243, 178, 111, 0.08)',
+            transition: 'background .15s ease-in'
         }
     }
 })
@@ -24,11 +25,17 @@ export const widgetModalStyle = Styles.style({
     $nest: {
         '> div': {
             boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 50px',
+            overflow: 'hidden'
         },
         '.modal': {
             marginRight: -8,
-            padding: '0.5rem',
-            borderRadius: 5
+            padding: '0.75rem',
+            borderRadius: 5,
+            backgroundColor: '#fff',
+            overflow: 'auto'
+        },
+        '.prevent-select': {
+            userSelect: 'none'
         }
     }
 })
@@ -41,7 +48,7 @@ export const widgetStyle = Styles.style({
     transition: 'opacity .2s ease-in-out, transform 0.2s ease-in-out',
     $nest: {
         '&.is-dragging': {
-            opacity: 0.3
+            opacity: 0.7
         },
         '&:hover': {
             transform: 'scale(1.04) translateY(-4px)'

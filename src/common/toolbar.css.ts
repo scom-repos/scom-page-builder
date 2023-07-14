@@ -29,8 +29,21 @@ Styles.cssRule('ide-toolbar', {
       zIndex: 99,
       top: -50,
       left: 0,
-      boxShadow: '0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 3px 1px -2px rgb(0 0 0 / 12%), 0px 1px 5px 0px rgb(0 0 0 / 20%)',
+      boxShadow: 'rgba(0, 0, 0, 0.1) 0px 2px 8px 0px',
       animation: `${tileToolbarFadeIn} 125ms cubic-bezier(0.4,0,1,1)`
+    },
+    '.toolbar': {
+      width: 34,
+      height: 34,
+      padding: 6,
+      borderRadius: 5,
+      cursor: 'pointer',
+      $nest: {
+        '&:hover i-icon svg': {
+          fill: `${Theme.colors.primary.main} !important`,
+          transition: 'fill .15s ease-in'
+        }
+      }
     },
     '#form > i-vstack > i-panel': {
       width: '100%'
@@ -38,7 +51,7 @@ Styles.cssRule('ide-toolbar', {
     '.setting-modal':{
       $nest: {
         '.i-modal_header': {
-          padding: '1rem 1rem 0.5rem',
+          padding: '1rem 1.5rem 0.5rem',
           fontSize: '1rem',
           fontWeight: 600
         },
@@ -51,6 +64,7 @@ Styles.cssRule('ide-toolbar', {
         },
         '.modal': {
           padding: 0,
+          borderRadius: 5,
           $nest: {
             '#pnlForm': {
               maxHeight: 'calc(100vh - 100px)',

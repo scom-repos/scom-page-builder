@@ -11,19 +11,19 @@ Styles.cssRule('#editor', {
     '.custom-input input': {
       paddingLeft: 10
     },
-    '::-webkit-scrollbar': {
-      width: '7px',
-    },
-    '::-webkit-scrollbar-track': {
-      borderRadius: '10px',
-      border: '1px solid transparent',
-      // background: Theme.divider
-    },
-    '::-webkit-scrollbar-thumb': {
-      background: Theme.action.focus,
-      borderRadius: '10px',
-      outline: '1px solid transparent'
-    },
+    // '::-webkit-scrollbar': {
+    //   width: '7px',
+    // },
+    // '::-webkit-scrollbar-track': {
+    //   borderRadius: '10px',
+    //   border: '1px solid transparent',
+    //   // background: Theme.divider
+    // },
+    // '::-webkit-scrollbar-thumb': {
+    //   background: Theme.action.focus,
+    //   borderRadius: '10px',
+    //   outline: '1px solid transparent'
+    // },
     '#pnlForm i-input > input': {
       boxShadow: 'none',
       border: 'none',
