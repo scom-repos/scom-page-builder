@@ -2107,11 +2107,11 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 index_13.pageObject.setElement(dragRowId, this.dragSection.id, this.dragSection.data.elements[0]);
             }
             components_5.application.EventBus.dispatch(index_14.EVENT.ON_UPDATE_SECTIONS);
-            const dragEnterElm = this.dropRow.querySelector('.is-dragenter');
             const dropRowId = (_e = this.dropRow) === null || _e === void 0 ? void 0 : _e.id.replace('row-', '');
-            const dropToolbarId = (_f = dragEnterElm.closest('ide-toolbar')) === null || _f === void 0 ? void 0 : _f.elementId;
             // regroup with new section
             if (this.isReGroup) {
+                const dragEnterElm = this.dropRow.closest('#pageBuilder').querySelector('.is-dragenter');
+                const dropToolbarId = (_f = dragEnterElm.closest('ide-toolbar')) === null || _f === void 0 ? void 0 : _f.elementId;
                 this.dropSection = this.dropRow.querySelector(`[id='${this.dropSection.id}']`);
                 const dropSectionData = index_13.pageObject.getElement(dropRowId, this.dropSection.id);
                 const clonedDropSecData = JSON.parse(JSON.stringify(dropSectionData));
@@ -4456,7 +4456,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const endOfDragingElm = dropColumn + parseInt(dragTargetSection.dataset.columnSpan) - 1;
                 for (let i = 0; i < sortedSections.length; i++) {
                     const element = sortedSections[i];
-                    const condition = self.isUngrouping() ? true : element != dragTargetSection;
+                    const condition = self.isUngrouping() ? true : element.id != dragTargetSection.id;
                     if (condition) {
                         const startOfDroppingElm = parseInt(element.dataset.column);
                         const endOfDroppingElm = parseInt(element.dataset.column) + parseInt(element.dataset.columnSpan) - 1;
@@ -4525,7 +4525,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 // collide with other section 
                 if (collision.collisionType == "mutual" /* || overlap.overlapType == "border"*/) {
                     // check which side is the merge target
-                    if (!collision.mergeSide && !collision.section)
+                    if (!collision.mergeSide || !collision.section)
                         return;
                 }
                 // is ungrouping and draging on the original section
@@ -4632,6 +4632,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             targetRow && self.onPrependRow(targetRow);
                         }
                         else {
+                            console.log("cp1");
                             const isAppend = dropElm.classList.contains('back-block') || collision.mergeSide == "back";
                             const dragCmd = elementConfig ?
                                 new index_41.AddElementCommand(self.getNewElementData(), isAppend, false, dropElm, null) :
