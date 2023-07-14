@@ -1347,6 +1347,9 @@ define("@scom/scom-page-builder/command/history.ts", ["require", "exports"], fun
             this.commands = [];
             this.currentCommandIndex = -1;
         }
+        get commandIndex() {
+            return this.currentCommandIndex;
+        }
         async execute(command) {
             this.commands = this.commands.slice(0, this.currentCommandIndex + 1);
             this.commands.push(command);
@@ -1366,6 +1369,10 @@ define("@scom/scom-page-builder/command/history.ts", ["require", "exports"], fun
                 const command = this.commands[this.currentCommandIndex];
                 command.execute();
             }
+        }
+        reset() {
+            this.commands = [];
+            this.currentCommandIndex = -1;
         }
     }
     exports.CommandHistory = CommandHistory;
@@ -6887,6 +6894,26 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.style.setProperty('--builder-bg', bgColor);
             this.style.setProperty('--builder-color', fontColor);
             this.style.setProperty('--builder-divider', dividerColor);
+        }
+        get commandHistoryIndex() {
+            return index_81.commandHistory.commandIndex;
+        }
+        isChanged(index) {
+            return index_81.commandHistory.commandIndex !== (index !== null && index !== void 0 ? index : -1);
+        }
+        async reset() {
+            index_79.pageObject.sections = [];
+            index_79.pageObject.footer = undefined;
+            index_79.pageObject.config = undefined;
+            index_81.commandHistory.reset();
+            (0, index_79.setDefaultPageConfig)({});
+            try {
+                await this.pageRows.setRows([]);
+                await this.builderFooter.setData(undefined);
+                this.updatePageConfig();
+            }
+            catch (error) {
+            }
         }
         async onFetchComponents(options) {
             return { items: [], total: 0 };

@@ -582,9 +582,11 @@ declare module "@scom/scom-page-builder/command/history.ts" {
     export class CommandHistory {
         private commands;
         private currentCommandIndex;
+        get commandIndex(): number;
         execute(command: ICommand): Promise<void>;
         undo(): void;
         redo(): void;
+        reset(): void;
     }
     export const commandHistory: CommandHistory;
 }
@@ -1566,6 +1568,9 @@ declare module "@scom/scom-page-builder" {
         set categories(value: ICategory[]);
         get theme(): ThemeType;
         set theme(value: ThemeType);
+        get commandHistoryIndex(): number;
+        isChanged(index?: number): boolean;
+        reset(): Promise<void>;
         onFetchComponents(options: IOnFetchComponentsOptions): Promise<IOnFetchComponentsResult>;
         private initScrollEvent;
         private initEventListeners;
