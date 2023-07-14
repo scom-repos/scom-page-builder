@@ -478,7 +478,14 @@ export class PageRow extends Module {
                 self.currentElement = targetSection;
                 self.currentToolbar = targetToolbar;
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
-                self.currentElement.opacity = 0;
+                const toolbars = self.currentElement.querySelectorAll('ide-toolbar')
+                if (self.currentToolbar) {
+                    toolbars.forEach(toolbar => {
+                        (toolbar as HTMLElement).style.opacity = (toolbar.id != self.currentToolbar.id)? '1' : '0';
+                    });
+                } else {
+                    self.currentElement.opacity = 0;
+                }
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                 self.addDottedLines();
             } else {
@@ -490,8 +497,16 @@ export class PageRow extends Module {
         this.addEventListener('drag', function (event) {});
 
         document.addEventListener('dragend', function (event) {
-            if (self.currentElement && !self.currentElement.classList.contains('builder-item'))
-                self.currentElement.opacity = 1;
+            if (self.currentElement && !self.currentElement.classList.contains('builder-item')) {
+                if (self.currentToolbar){
+                    const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
+                    toolbars.forEach(toolbar => {
+                        (toolbar as HTMLElement).style.opacity = "1";
+                    });
+                } else {
+                    self.currentElement.opacity = 1;
+                }
+            }  
             resetDragTarget();
             resetPageRow();
         });
@@ -794,7 +809,7 @@ export class PageRow extends Module {
 
             for (let i=0; i<sortedSections.length; i++) {
                 const element = sortedSections[i];
-                const condition = self.isUngrouping()? true : element!=dragTargetSection;
+                const condition = self.isUngrouping()? true : element.id!=dragTargetSection.id;
                 if (condition){
 
                     const startOfDroppingElm: number = parseInt(element.dataset.column);
@@ -871,7 +886,7 @@ export class PageRow extends Module {
             // collide with other section 
             if (collision.collisionType == "mutual"/* || overlap.overlapType == "border"*/) {
                 // check which side is the merge target
-                if (!collision.mergeSide && !collision.section) return
+                if (!collision.mergeSide && !collision.section && !dropElm) return;
             }
 
             // is ungrouping and draging on the original section
@@ -909,7 +924,7 @@ export class PageRow extends Module {
 
                 // ungrouping elm
                 if (isUngrouping) {
-                    const dragCmd = new UngroupElementCommand(self.currentToolbar.data, false, self.currentToolbar, nearestFixedItem, config);
+                    const dragCmd = new UngroupElementCommand(self.currentToolbar, nearestFixedItem, config, false);
                     commandHistory.execute(dragCmd);
                     self.currentElement.opacity = 1;
                     removeRectangles();
@@ -938,11 +953,10 @@ export class PageRow extends Module {
                 const inEmptyPnl = eventTarget.closest('#pnlEmty');
                 if (dropElm && !inEmptyPnl) {
                     self.isDragging = true;
-                    dropElm.classList.remove('is-dragenter');
                     if (dropElm.classList.contains('bottom-block') || collision.mergeSide == "bottom") {
                         if (isUngrouping) {
                             const dropElement = eventTarget;
-                            const dragCmd = new UngroupElementCommand(self.currentToolbar.data, true, self.currentToolbar, dropElement, config, true);
+                            const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, true, true);
                             commandHistory.execute(dragCmd);
                             self.currentElement.opacity = 1;
                             resetDragTarget();
@@ -954,7 +968,7 @@ export class PageRow extends Module {
                     } else if (dropElm.classList.contains('top-block') || collision.mergeSide == "top") {
                         if (isUngrouping) {
                             const dropElement = eventTarget;
-                            const dragCmd = new UngroupElementCommand(self.currentToolbar.data, true, self.currentToolbar, dropElement, config, false);
+                            const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, true, false);
                             commandHistory.execute(dragCmd);
                             self.currentElement.opacity = 1;
                             resetDragTarget();
@@ -976,6 +990,7 @@ export class PageRow extends Module {
                             new DragElementCommand(self.currentElement, dropElm, isAppend);
                         await commandHistory.execute(dragCmd);
                     }
+                    dropElm.classList.remove('is-dragenter');
                     self.isDragging = false;
                 } else if (pageRow && !self.isDragging) {
                     self.isDragging = true;
@@ -989,7 +1004,7 @@ export class PageRow extends Module {
                     } else {
                         if (isUngrouping) {
                             const dropElement = eventTarget;
-                            const dragCmd = new UngroupElementCommand(self.currentToolbar.data, false, self.currentToolbar, dropElement, config);
+                            const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, false);
                             commandHistory.execute(dragCmd);
                             self.currentElement.opacity = 1;
                             resetDragTarget();
@@ -1057,7 +1072,7 @@ export class PageRow extends Module {
                 getDragData() ?
                 new AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) :
                 this.isUngrouping() ?
-                new UngroupElementCommand(this.currentToolbar.data, false, this.currentToolbar, newPageRow, config) :
+                new UngroupElementCommand(this.currentToolbar, newPageRow, config, false) :
                 new DragElementCommand(this.currentElement, newPageRow, true, true);
             await commandHistory.execute(dragCmd);
         }
@@ -1072,7 +1087,7 @@ export class PageRow extends Module {
                 getDragData() ?
                 new AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) : 
                 this.isUngrouping() ?
-                new UngroupElementCommand(this.currentToolbar.data, false, this.currentToolbar, newPageRow, config) :
+                new UngroupElementCommand(this.currentToolbar, newPageRow, config, false) :
                 new DragElementCommand(this.currentElement, newPageRow, true, true);
             await commandHistory.execute(dragCmd);
         }

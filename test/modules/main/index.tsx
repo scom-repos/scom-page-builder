@@ -167,6 +167,7 @@ export class MainModule extends Module {
           margin={{ top: '1rem', left: '1rem' }}
           padding={{ top: '0.5rem', left: '1rem', bottom: '0.5rem', right: '1rem' }}
           font={{ color: '#fff' }}
+          zIndex={999}
           onClick={() => this.onGetData()}
         ></i-button>
         <i-scom-page-builder
