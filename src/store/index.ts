@@ -264,7 +264,7 @@ const defaultSearchOptions = {
 
 const defaultPageConfig = {
   backgroundColor: '',
-  margin: {x: 'auto', y: 0},
+  margin: {x: 'auto', y: '0'},
   maxWidth: 1024
 }
 
@@ -402,8 +402,8 @@ export const getMargin = (margin: { x?: number|string, y?: number|string }) => {
   y = y ?? defaultMargin.y;
   const xNumber = Number(x);
   const yNumber = Number(y);
-  x = isNaN(xNumber) ? x : xNumber;
-  y = isNaN(yNumber) ? y : yNumber;
+  x = isNaN(xNumber) ? x : xNumber + 'px';
+  y = isNaN(yNumber) ? y : yNumber + 'px';
   return {
     top: y,
     left: x,

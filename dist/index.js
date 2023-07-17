@@ -1024,7 +1024,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
     };
     const defaultPageConfig = {
         backgroundColor: '',
-        margin: { x: 'auto', y: 0 },
+        margin: { x: 'auto', y: '0' },
         maxWidth: 1024
     };
     exports.state = {
@@ -1162,8 +1162,8 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         y = y !== null && y !== void 0 ? y : defaultMargin.y;
         const xNumber = Number(x);
         const yNumber = Number(y);
-        x = isNaN(xNumber) ? x : xNumber;
-        y = isNaN(yNumber) ? y : yNumber;
+        x = isNaN(xNumber) ? x : xNumber + 'px';
+        y = isNaN(yNumber) ? y : yNumber + 'px';
         return {
             top: y,
             left: x,
@@ -1347,6 +1347,9 @@ define("@scom/scom-page-builder/command/history.ts", ["require", "exports"], fun
             this.commands = [];
             this.currentCommandIndex = -1;
         }
+        get commandIndex() {
+            return this.currentCommandIndex;
+        }
         async execute(command) {
             this.commands = this.commands.slice(0, this.currentCommandIndex + 1);
             this.commands.push(command);
@@ -1366,6 +1369,10 @@ define("@scom/scom-page-builder/command/history.ts", ["require", "exports"], fun
                 const command = this.commands[this.currentCommandIndex];
                 command.execute();
             }
+        }
+        reset() {
+            this.commands = [];
+            this.currentCommandIndex = -1;
         }
     }
     exports.CommandHistory = CommandHistory;
@@ -3257,9 +3264,6 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                                 type: 'Control',
                                 label: 'Background Color',
                                 scope: '#/properties/backgroundColor',
-                                options: {
-                                    color: true
-                                }
                             },
                             {
                                 type: 'Control',
@@ -6903,6 +6907,26 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.style.setProperty('--builder-bg', bgColor);
             this.style.setProperty('--builder-color', fontColor);
             this.style.setProperty('--builder-divider', dividerColor);
+        }
+        get commandHistoryIndex() {
+            return index_81.commandHistory.commandIndex;
+        }
+        isChanged(index) {
+            return index_81.commandHistory.commandIndex !== (index !== null && index !== void 0 ? index : -1);
+        }
+        async reset() {
+            index_79.pageObject.sections = [];
+            index_79.pageObject.footer = undefined;
+            index_79.pageObject.config = undefined;
+            index_81.commandHistory.reset();
+            (0, index_79.setDefaultPageConfig)({});
+            try {
+                await this.pageRows.setRows([]);
+                await this.builderFooter.setData(undefined);
+                this.updatePageConfig();
+            }
+            catch (error) {
+            }
         }
         async onFetchComponents(options) {
             return { items: [], total: 0 };

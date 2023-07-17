@@ -100,9 +100,6 @@ export class PageSettingsDialog extends Module {
                             type: 'Control',
                             label: 'Background Color',
                             scope: '#/properties/backgroundColor',
-                            options: {
-                                color: true
-                            }
                         },
                         {
                             type: 'Control',
