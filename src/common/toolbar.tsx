@@ -426,6 +426,8 @@ export class IDEToolbar extends Module {
         this._component.maxWidth = '100%';
         this._component.maxHeight = '100%';
         // this._component.overflow = 'hidden';
+        if (this.module?.nodeName === 'I-SCOM-IMAGE')
+            this._component.overflow = 'hidden';
         this._component.style.display = 'block';
         this.backdropStack.visible = data?.shownBackdrop;
         this._component.addEventListener('click', (event: Event) => {

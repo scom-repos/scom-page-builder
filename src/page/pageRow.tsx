@@ -374,7 +374,12 @@ export class PageRow extends Module {
             document.addEventListener('mouseup', mouseUpHandler);
         });
 
+        function getNewWidth(newHeight: number) {
+            return (self.currentWidth / self.currentHeight) * newHeight;
+        }
+
         function mouseMoveHandler(e: MouseEvent) {
+            const isImage = (toolbar as any).module?.nodeName === 'I-SCOM-IMAGE';
             if (!self.isResizing || !toolbar) return;
             const deltaX = e.clientX - startX;
             const deltaY = e.clientY - startY;
@@ -391,17 +396,22 @@ export class PageRow extends Module {
                 newWidth = self.currentWidth - deltaX;
                 newHeight = self.currentHeight + deltaY;
                 self.currentElement.style.left = deltaX + 'px';
-                updateDimension(newWidth, newHeight)
+                updateDimension(newWidth, undefined)
             } else if (currentDot.classList.contains('bottomRight')) {
                 newWidth = self.currentWidth + deltaX;
                 newHeight = self.currentHeight + deltaY;
-                updateDimension(newWidth, newHeight)
+                updateDimension(newWidth, undefined)
             } else if (currentDot.classList.contains('top')) {
                 newHeight = self.currentHeight - deltaY;
                 updateDimension(undefined, newHeight)
             } else if (currentDot.classList.contains('bottom')) {
                 newHeight = self.currentHeight + deltaY;
-                updateDimension(undefined, newHeight)
+                if (isImage) {
+                    newWidth = getNewWidth(newHeight);
+                    updateDimension(newWidth, undefined)
+                } else {
+                    updateDimension(undefined, newHeight)
+                }
             } else if (currentDot.classList.contains('left')) {
                 newWidth = self.currentWidth - deltaX;
                 self.currentElement.style.left = deltaX + 'px';
@@ -443,12 +453,16 @@ export class PageRow extends Module {
         }
 
         function updateDimension(newWidth?: number, newHeight?: number) {
-            if (newWidth !== undefined) toolbar.width = newWidth;
-            if (newHeight !== undefined) toolbar.height = newHeight;
+            // if (newWidth !== undefined) toolbar.width = newWidth;
+            // if (newHeight !== undefined) toolbar.height = newHeight;
+            toolbar.width = newWidth || 'auto'
+            toolbar.height = newHeight || 'auto'
             const contentStack = toolbar.querySelector('#contentStack') as Control
             if (contentStack) {
-                if (newWidth !== undefined) contentStack.width = newWidth;
-                if (newHeight !== undefined) contentStack.height = newHeight;
+                // if (newWidth !== undefined) contentStack.width = newWidth;
+                // if (newHeight !== undefined) contentStack.height = newHeight;
+                contentStack.width = newWidth || 'auto'
+                contentStack.height = newHeight || 'auto'
             }
         }
 
