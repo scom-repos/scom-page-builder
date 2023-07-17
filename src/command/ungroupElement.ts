@@ -84,6 +84,7 @@ export class UngroupElementCommand implements ICommand {
     if (this.isReGroup) {
 
       const dragEnterElm = this.dropRow.closest('#pageBuilder').querySelector('.is-dragenter')
+      if (!dragEnterElm) return;
       const dropToolbarId = (dragEnterElm.closest('ide-toolbar') as any)?.elementId;
 
       this.dropSection = this.dropRow.querySelector(`[id='${this.dropSection.id}']`) as Control;
