@@ -4,6 +4,10 @@ export class CommandHistory {
   private commands: ICommand[] = [];
   private currentCommandIndex = -1;
 
+  get commandIndex() {
+    return this.currentCommandIndex;
+  }
+
   async execute(command: ICommand): Promise<void> {
     this.commands = this.commands.slice(0, this.currentCommandIndex + 1);
     this.commands.push(command);
@@ -25,6 +29,11 @@ export class CommandHistory {
       const command = this.commands[this.currentCommandIndex];
       command.execute();
     }
+  }
+
+  reset(): void {
+    this.commands = [];
+    this.currentCommandIndex = -1;
   }
 }
 

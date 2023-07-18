@@ -1024,7 +1024,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
     };
     const defaultPageConfig = {
         backgroundColor: '',
-        margin: { x: 'auto', y: 0 },
+        margin: { x: 'auto', y: '0' },
         maxWidth: 1024
     };
     exports.state = {
@@ -1162,8 +1162,8 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         y = y !== null && y !== void 0 ? y : defaultMargin.y;
         const xNumber = Number(x);
         const yNumber = Number(y);
-        x = isNaN(xNumber) ? x : xNumber;
-        y = isNaN(yNumber) ? y : yNumber;
+        x = isNaN(xNumber) ? x : xNumber + 'px';
+        y = isNaN(yNumber) ? y : yNumber + 'px';
         return {
             top: y,
             left: x,
@@ -1347,6 +1347,9 @@ define("@scom/scom-page-builder/command/history.ts", ["require", "exports"], fun
             this.commands = [];
             this.currentCommandIndex = -1;
         }
+        get commandIndex() {
+            return this.currentCommandIndex;
+        }
         async execute(command) {
             this.commands = this.commands.slice(0, this.currentCommandIndex + 1);
             this.commands.push(command);
@@ -1366,6 +1369,10 @@ define("@scom/scom-page-builder/command/history.ts", ["require", "exports"], fun
                 const command = this.commands[this.currentCommandIndex];
                 command.execute();
             }
+        }
+        reset() {
+            this.commands = [];
+            this.currentCommandIndex = -1;
         }
     }
     exports.CommandHistory = CommandHistory;
@@ -1516,13 +1523,14 @@ define("@scom/scom-page-builder/command/resize.ts", ["require", "exports", "@sco
             this.element.style.gridColumn = `${column} / span ${columnSpan}`;
         }
         updateToolbars(isChangedColumn, rowId, columnData, changedHeight) {
-            var _a;
+            var _a, _b;
             const { column, columnSpan } = columnData;
             const toolbars = this.element.querySelectorAll('ide-toolbar');
             for (const toolbar of toolbars) {
                 const currentTag = ((_a = toolbar === null || toolbar === void 0 ? void 0 : toolbar.data) === null || _a === void 0 ? void 0 : _a.tag) || {};
                 const height = toolbar.id === this.toolbar.id ? changedHeight : '100%';
-                const tag = Object.assign(Object.assign({}, currentTag), { width: '100%', height });
+                const isImage = ((_b = toolbar.module) === null || _b === void 0 ? void 0 : _b.nodeName) === 'I-SCOM-IMAGE';
+                const tag = Object.assign(Object.assign({}, currentTag), { width: '100%', height: isImage ? 'auto' : height });
                 toolbar.setTag(tag);
                 const elementId = toolbar.elementId;
                 if (isChangedColumn && elementId !== this.element.id)
@@ -3251,9 +3259,6 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                                 type: 'Control',
                                 label: 'Background Color',
                                 scope: '#/properties/backgroundColor',
-                                options: {
-                                    color: true
-                                }
                             },
                             {
                                 type: 'Control',
@@ -4024,7 +4029,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 document.addEventListener('mousemove', mouseMoveHandler);
                 document.addEventListener('mouseup', mouseUpHandler);
             });
+            function getNewWidth(newHeight) {
+                return (self.currentWidth / self.currentHeight) * newHeight;
+            }
             function mouseMoveHandler(e) {
+                var _a;
+                const isImage = ((_a = toolbar.module) === null || _a === void 0 ? void 0 : _a.nodeName) === 'I-SCOM-IMAGE';
                 if (!self.isResizing || !toolbar)
                     return;
                 const deltaX = e.clientX - startX;
@@ -4044,12 +4054,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     newWidth = self.currentWidth - deltaX;
                     newHeight = self.currentHeight + deltaY;
                     self.currentElement.style.left = deltaX + 'px';
-                    updateDimension(newWidth, newHeight);
+                    updateDimension(newWidth, undefined);
                 }
                 else if (currentDot.classList.contains('bottomRight')) {
                     newWidth = self.currentWidth + deltaX;
                     newHeight = self.currentHeight + deltaY;
-                    updateDimension(newWidth, newHeight);
+                    updateDimension(newWidth, undefined);
                 }
                 else if (currentDot.classList.contains('top')) {
                     newHeight = self.currentHeight - deltaY;
@@ -4057,7 +4067,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
                 else if (currentDot.classList.contains('bottom')) {
                     newHeight = self.currentHeight + deltaY;
-                    updateDimension(undefined, newHeight);
+                    if (isImage) {
+                        newWidth = getNewWidth(newHeight);
+                        updateDimension(newWidth, undefined);
+                    }
+                    else {
+                        updateDimension(undefined, newHeight);
+                    }
                 }
                 else if (currentDot.classList.contains('left')) {
                     newWidth = self.currentWidth - deltaX;
@@ -4093,16 +4109,16 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 toolbar = null;
             }
             function updateDimension(newWidth, newHeight) {
-                if (newWidth !== undefined)
-                    toolbar.width = newWidth;
-                if (newHeight !== undefined)
-                    toolbar.height = newHeight;
+                // if (newWidth !== undefined) toolbar.width = newWidth;
+                // if (newHeight !== undefined) toolbar.height = newHeight;
+                toolbar.width = newWidth || 'auto';
+                toolbar.height = newHeight || 'auto';
                 const contentStack = toolbar.querySelector('#contentStack');
                 if (contentStack) {
-                    if (newWidth !== undefined)
-                        contentStack.width = newWidth;
-                    if (newHeight !== undefined)
-                        contentStack.height = newHeight;
+                    // if (newWidth !== undefined) contentStack.width = newWidth;
+                    // if (newHeight !== undefined) contentStack.height = newHeight;
+                    contentStack.width = newWidth || 'auto';
+                    contentStack.height = newHeight || 'auto';
                 }
             }
             function updateClass(elm, className) {
@@ -5212,7 +5228,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             }
         }
         async setModule(module, data) {
-            var _a;
+            var _a, _b;
             this._component = module;
             this._component.id = `component-${this.elementId}`;
             this._component.rootParent = this.closest('ide-row');
@@ -5230,6 +5246,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this._component.maxWidth = '100%';
             this._component.maxHeight = '100%';
             // this._component.overflow = 'hidden';
+            if (((_b = this.module) === null || _b === void 0 ? void 0 : _b.nodeName) === 'I-SCOM-IMAGE')
+                this._component.overflow = 'hidden';
             this._component.style.display = 'block';
             this.backdropStack.visible = data === null || data === void 0 ? void 0 : data.shownBackdrop;
             this._component.addEventListener('click', (event) => {
@@ -6897,6 +6915,26 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.style.setProperty('--builder-bg', bgColor);
             this.style.setProperty('--builder-color', fontColor);
             this.style.setProperty('--builder-divider', dividerColor);
+        }
+        get commandHistoryIndex() {
+            return index_81.commandHistory.commandIndex;
+        }
+        isChanged(index) {
+            return index_81.commandHistory.commandIndex !== (index !== null && index !== void 0 ? index : -1);
+        }
+        async reset() {
+            index_79.pageObject.sections = [];
+            index_79.pageObject.footer = undefined;
+            index_79.pageObject.config = undefined;
+            index_81.commandHistory.reset();
+            (0, index_79.setDefaultPageConfig)({});
+            try {
+                await this.pageRows.setRows([]);
+                await this.builderFooter.setData(undefined);
+                this.updatePageConfig();
+            }
+            catch (error) {
+            }
         }
         async onFetchComponents(options) {
             return { items: [], total: 0 };

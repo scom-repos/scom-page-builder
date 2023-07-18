@@ -92,7 +92,8 @@ export class ResizeElementCommand implements ICommand {
     for (const toolbar of toolbars) {
       const currentTag = toolbar?.data?.tag || {};
       const height = toolbar.id === this.toolbar.id ? changedHeight : '100%';
-      const tag = {...currentTag, width: '100%', height};
+      const isImage = toolbar.module?.nodeName === 'I-SCOM-IMAGE';
+      const tag = {...currentTag, width: '100%', height: isImage ? 'auto' : height};
       toolbar.setTag(tag);
       const elementId = toolbar.elementId;
       if (isChangedColumn && elementId !== this.element.id)

@@ -97,6 +97,28 @@ export default class Editor extends Module {
         this.style.setProperty('--builder-divider', dividerColor);
     }
 
+    get commandHistoryIndex(): number {
+        return commandHistory.commandIndex;
+    }
+
+    isChanged(index?: number): boolean {
+        return commandHistory.commandIndex !== (index??-1);
+    }
+    
+    async reset() {
+        pageObject.sections = [];
+        pageObject.footer = undefined;
+        pageObject.config = undefined;
+        commandHistory.reset();
+        setDefaultPageConfig({});
+        try {
+            await this.pageRows.setRows([]);
+            await this.builderFooter.setData(undefined);
+            this.updatePageConfig();
+        } catch (error) {
+        }
+    }
+
     async onFetchComponents(options: IOnFetchComponentsOptions): Promise<IOnFetchComponentsResult> {
         return { items: [], total: 0 };
     }
