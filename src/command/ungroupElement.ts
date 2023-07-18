@@ -3,6 +3,7 @@ import { pageObject } from "../store/index";
 import { Control } from "@ijstech/components";
 import { application } from "@ijstech/components";
 import { EVENT } from "../const/index";
+import { IMergeType } from "./type"
 
 export class UngroupElementCommand implements ICommand {
     private dragToolbar: any;
@@ -20,10 +21,9 @@ export class UngroupElementCommand implements ICommand {
     private data: any;
     private appendElm: any;
     private config: any;
-    private isReGroup: boolean;
-    private isAppend: boolean;
+    private mergeType: IMergeType;
 
-  constructor(dragToolbar: Control, dropElm: Control, config: any, isReGroup: boolean, isAppend: boolean = true) {
+  constructor(dragToolbar: Control, dropElm: Control, config: any, mergeType: IMergeType) {
     // set dragging related params
     this.dragToolbar = dragToolbar;
     this.dragRow = dragToolbar.closest('ide-row');
@@ -42,9 +42,8 @@ export class UngroupElementCommand implements ICommand {
     const elmId = dragToolbar.id.replace("elm-", "");
     this.oriElmIndex = oriSectionData.elements.findIndex(e => e.id === elmId);
 
-    this.isReGroup = isReGroup;
     this.config = config;
-    this.isAppend = isAppend;
+    this.mergeType = mergeType;
   }
 
   async execute() {
@@ -81,7 +80,7 @@ export class UngroupElementCommand implements ICommand {
 
     const dropRowId = this.dropRow?.id.replace('row-', '');
     // regroup with new section
-    if (this.isReGroup) {
+    if (this.mergeType=="top" || this.mergeType=="bottom") {
 
       const dragEnterElm = this.dropRow.closest('#pageBuilder').querySelector('.is-dragenter')
       if (!dragEnterElm) return;
@@ -97,7 +96,7 @@ export class UngroupElementCommand implements ICommand {
       const isComposite: boolean = clonedDropSecData?.elements && clonedDropSecData?.elements.length && clonedDropSecData?.elements.length > 0;
       if (isComposite) {
         const elementIndex: number = dropToolbarId ? dropSectionData.elements.findIndex(elm => elm.id === dropToolbarId) : -1;
-        const idx: number = this.isAppend? elementIndex + 1 : elementIndex;
+        const idx: number = (this.mergeType == "bottom")? elementIndex + 1 : elementIndex;
         pageObject.addElement(dropRowId, this.data, this.dropSection.id, idx);
       } else if (!isComposite) {
         if (this.dropSection.id === clonedDropSecData.id) clonedDropSecData.id = this.config.id;
@@ -181,7 +180,7 @@ export class UngroupElementCommand implements ICommand {
     
     const isComposite: boolean = clonedDropSecData?.elements && clonedDropSecData?.elements.length && clonedDropSecData?.elements.length > 0;
     if (isComposite) {
-      const idx: number = this.isAppend? this.oriElmIndex : this.oriElmIndex - 1;
+      const idx: number = (this.mergeType == "bottom")? this.oriElmIndex : this.oriElmIndex - 1;
       pageObject.addElement(dropRowId, newElData, prevSectionId, idx);
     } else {
       const updatedList = [...elementList].map(elm => {
