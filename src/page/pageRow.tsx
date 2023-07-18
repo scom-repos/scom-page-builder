@@ -845,9 +845,10 @@ export class PageRow extends Module {
                     // overlap with other section
                     if (condition1 || condition2) {
 
-                        // check if the cursor is on an element
+                        // check if the dragging toolbar overlap with other toolbar
                         const dropToolbar = dropTarget.closest('ide-toolbar') as HTMLElement;
-                        if (dropToolbar && !dragTargetSection.contains(dropToolbar)) {
+                        const dragToolbar = dragTarget.closest('ide-toolbar') as HTMLElement;
+                        if (dropToolbar && dropToolbar!=dragToolbar/*!dragTargetSection.contains(dropToolbar)*/) {
                             return {
                                 collisionType: "mutual", 
                                 section: element, 
@@ -1016,8 +1017,8 @@ export class PageRow extends Module {
                     } else {
                         const isAppend = dropElm.classList.contains('back-block') || collision.mergeSide == "back";
                         if (isUngrouping) {
+                            // TODO: ungroup & drop on front/back
                             const dropElement = eventTarget;
-                            // ungroup to back block
                             const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, collision.mergeSide);
                             commandHistory.execute(dragCmd);
                             self.currentElement.opacity = 1;

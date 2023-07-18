@@ -4494,9 +4494,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         const condition2 = startOfDroppingElm >= startOfDragingElm && startOfDroppingElm <= endOfDragingElm;
                         // overlap with other section
                         if (condition1 || condition2) {
-                            // check if the cursor is on an element
+                            // check if the dragging toolbar overlap with other toolbar
                             const dropToolbar = dropTarget.closest('ide-toolbar');
-                            if (dropToolbar && !dragTargetSection.contains(dropToolbar)) {
+                            const dragToolbar = dragTarget.closest('ide-toolbar');
+                            if (dropToolbar && dropToolbar != dragToolbar /*!dragTargetSection.contains(dropToolbar)*/) {
                                 return {
                                     collisionType: "mutual",
                                     section: element,
@@ -4670,8 +4671,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         else {
                             const isAppend = dropElm.classList.contains('back-block') || collision.mergeSide == "back";
                             if (isUngrouping) {
+                                // TODO: ungroup & drop on front/back
                                 const dropElement = eventTarget;
-                                // ungroup to back block
                                 const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, dropElement, config, collision.mergeSide);
                                 index_42.commandHistory.execute(dragCmd);
                                 self.currentElement.opacity = 1;
