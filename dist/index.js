@@ -2070,7 +2070,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             this.isAppend = isAppend;
         }
         async execute() {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+            var _a, _b, _c, _d, _e, _f, _g, _h;
             if (!this.dropRow)
                 return;
             this.dragSection = this.dragRow.querySelector(`[id='${this.dragSection.id}']`);
@@ -2138,25 +2138,22 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             else {
                 // create elm in a new section
                 // this.newId = generateUUID();
-                const isMicroDapps = ((_j = (_h = this.data) === null || _h === void 0 ? void 0 : _h.module) === null || _j === void 0 ? void 0 : _j.category) === 'micro-dapps' || ((_l = (_k = this.config) === null || _k === void 0 ? void 0 : _k.module) === null || _l === void 0 ? void 0 : _l.category) === 'offers';
+                // const isMicroDapps = this.data?.module?.category === 'micro-dapps' || this.config?.module?.category === 'offers';
                 const newElData = {
                     id: this.data.id,
                     column: parseInt(this.dropElm.dataset.column),
                     columnSpan: this.data.columnSpan,
-                    properties: {
-                        showHeader: isMicroDapps,
-                        showFooter: isMicroDapps
-                    },
+                    properties: this.data.properties,
                     module: this.data.module
                 };
                 this.appendElm = await this.dropRow.addElement(newElData);
                 index_13.pageObject.addElement(dropRowId, newElData);
                 const dropSectionData = index_13.pageObject.getRow(dropRowId);
-                this.dropRow.toggleUI(!!((_m = dropSectionData === null || dropSectionData === void 0 ? void 0 : dropSectionData.elements) === null || _m === void 0 ? void 0 : _m.length));
+                this.dropRow.toggleUI(!!((_h = dropSectionData === null || dropSectionData === void 0 ? void 0 : dropSectionData.elements) === null || _h === void 0 ? void 0 : _h.length));
             }
         }
         async undo() {
-            var _a, _b, _c, _d, _e, _f, _g, _h;
+            var _a, _b, _c, _d;
             this.dragToolbar = this.dropRow.querySelector(`[id='${this.dragToolbar.id}']`);
             // delete the elm
             const row = this.dropRow;
@@ -2182,15 +2179,12 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             }
             components_5.application.EventBus.dispatch(index_14.EVENT.ON_UPDATE_SECTIONS);
             // merge the elms
-            const isMicroDapps = ((_d = (_c = this.data) === null || _c === void 0 ? void 0 : _c.module) === null || _d === void 0 ? void 0 : _d.category) === 'micro-dapps' || ((_f = (_e = this.config) === null || _e === void 0 ? void 0 : _e.module) === null || _f === void 0 ? void 0 : _f.category) === 'offers';
+            // const isMicroDapps = this.data?.module?.category === 'micro-dapps' || this.config?.module?.category === 'offers';
             const newElData = {
                 id: this.data.id,
                 column: this.oriCol,
                 columnSpan: this.oriColSpan,
-                properties: {
-                    showHeader: isMicroDapps,
-                    showFooter: isMicroDapps
-                },
+                properties: this.data.properties,
                 module: this.data.module
             };
             const elmParent = (this.appendElm ? this.appendElm.closest('ide-row') : this.dropElm.closest('ide-row'));
@@ -2220,7 +2214,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 });
                 index_13.pageObject.setElement(dropRowId, prevSectionId, {
                     elements: [clonedDropSecData, ...updatedList],
-                    dropId: ((_g = this.data) === null || _g === void 0 ? void 0 : _g.id) || ''
+                    dropId: ((_c = this.data) === null || _c === void 0 ? void 0 : _c.id) || ''
                 });
             }
             const newDropData = index_13.pageObject.getElement(dropRowId, prevSectionId);
@@ -2230,7 +2224,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 const elementSection = index_13.pageObject.getRow(elementRowId);
                 if (elementRowId !== dropRowId && this.appendElm)
                     index_13.pageObject.removeElement(elementRowId, this.appendElm.id, true);
-                elmParent.visible = !!((_h = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _h === void 0 ? void 0 : _h.length);
+                elmParent.visible = !!((_d = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _d === void 0 ? void 0 : _d.length);
             }
             if (this.appendElm)
                 this.appendElm.remove();
