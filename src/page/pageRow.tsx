@@ -150,6 +150,7 @@ export class PageRow extends Module {
         ) as PageSection;
         if (!this._readonly) {
             pageSection.setAttribute('draggable', 'true');
+            pageSection.style.cursor = 'grab';
             pageSection.style.gridRow = '1';
             pageSection.style.gridColumn = `${data.column || 1} / span ${
                 data.columnSpan || 1
@@ -503,35 +504,40 @@ export class PageRow extends Module {
                 self.currentElement = targetSection;
                 self.currentToolbar = targetToolbar;
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
-                const toolbars = self.currentElement.querySelectorAll('ide-toolbar')
-                if (self.currentToolbar) {
-                    toolbars.forEach(toolbar => {
-                        (toolbar as HTMLElement).style.opacity = (toolbar.id != self.currentToolbar.id)? '1' : '0';
-                    });
-                } else {
-                    self.currentElement.opacity = 0;
-                }
+                // const toolbars = self.currentElement.querySelectorAll('ide-toolbar')
+                // if (self.currentToolbar) {
+                //     toolbars.forEach(toolbar => {
+                //         (toolbar as HTMLElement).style.opacity = (toolbar.id != self.currentToolbar.id)? '1' : '0';
+                //     });
+                // } else {
+                //     updateDraggingUI(0)
+                // }
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                 self.addDottedLines();
             } else {
                 event.preventDefault();
             }
             dragStartTarget = eventTarget;
+            startX = event.clientX;
+            startY = event.clientY;
         });
 
-        this.addEventListener('drag', function (event) {});
+        this.addEventListener('drag', function (event) {
+            event.preventDefault();
+        });
 
         document.addEventListener('dragend', function (event) {
-            if (self.currentElement && !self.currentElement.classList.contains('builder-item')) {
-                if (self.currentToolbar){
-                    const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
-                    toolbars.forEach(toolbar => {
-                        (toolbar as HTMLElement).style.opacity = "1";
-                    });
-                } else {
-                    self.currentElement.opacity = 1;
-                }
-            }  
+            // if (self.currentElement && !self.currentElement.classList.contains('builder-item')) {
+            //     if (self.currentToolbar){
+            //         const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
+            //         toolbars.forEach(toolbar => {
+            //             (toolbar as HTMLElement).style.opacity = "1";
+            //         });
+            //     } else {
+            //         updateDraggingUI()
+            //     }
+            // }  
+            updateDraggingUI();
             resetDragTarget();
             resetPageRow();
         });
@@ -545,6 +551,7 @@ export class PageRow extends Module {
             if (!enterTarget) return;
             const elementConfig = getDragData();
             const pageRow = enterTarget.closest('ide-row') as PageRow;
+            updateDraggingUI(enterTarget, clientX - startX, clientY - startY);
             if (pageRow && elementConfig?.module?.name === 'sectionStack') {
                 pageRow.classList.add('row-entered');
             }
@@ -596,7 +603,8 @@ export class PageRow extends Module {
                 showRectangle(targetRow, colStart, columnSpan);
             } else {
                 const section = enterTarget.closest('ide-section') as Control;
-                if (section && !section.isSameNode(self.currentElement)) {
+                const isDraggingEl = section && section.classList.contains('is-dragging');
+                if (section && section.id !== self.currentElement.id && !isDraggingEl) {
                     const toolbar = enterTarget.closest('ide-toolbar') as Control;
                     if (toolbar) {
                         const { y, height} = toolbar.getBoundingClientRect();
@@ -696,6 +704,7 @@ export class PageRow extends Module {
         this.addEventListener('dragover', function (event) {
             event.preventDefault();
             const eventTarget = event.target as Control;
+            updateDraggingUI(eventTarget, event.clientX - startX, event.clientY - startY)
             let enterTarget: Control;
             const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY)
             // if target overlap with itself
@@ -894,13 +903,6 @@ export class PageRow extends Module {
             event.preventDefault();
             event.stopPropagation();
 
-            if (pageRow && elementConfig?.module?.name === 'sectionStack') {
-                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
-                return;
-            }
-
-            if (!self.currentElement) return;
-
             const isUngrouping: boolean = self.isUngrouping();
 
             // if target overlap with other section
@@ -921,6 +923,7 @@ export class PageRow extends Module {
 
             if (pageRow && elementConfig?.module?.name === 'sectionStack')
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
+            if (!self.currentElement) return;
 
             let nearestFixedItem = eventTarget.closest('.fixed-grid-item') as Control;
                 // if target overlap with itself
@@ -953,7 +956,7 @@ export class PageRow extends Module {
                 if (isUngrouping) {
                     const dragCmd = new UngroupElementCommand(self.currentToolbar, nearestFixedItem, config, false);
                     commandHistory.execute(dragCmd);
-                    self.currentElement.opacity = 1;
+                    updateDraggingUI();
                     removeRectangles();
                 } else if (self.currentElement.data) {
                     const dragCmd = new DragElementCommand(self.currentElement, nearestFixedItem);
@@ -985,7 +988,7 @@ export class PageRow extends Module {
                             const dropElement = eventTarget;
                             const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, true, true);
                             commandHistory.execute(dragCmd);
-                            self.currentElement.opacity = 1;
+                            updateDraggingUI()
                             resetDragTarget();
                         } else {
                             const newConfig = self.getNewElementData();
@@ -997,7 +1000,7 @@ export class PageRow extends Module {
                             const dropElement = eventTarget;
                             const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, true, false);
                             commandHistory.execute(dragCmd);
-                            self.currentElement.opacity = 1;
+                            updateDraggingUI()
                             resetDragTarget();
                         } else {
                             const newConfig = self.getNewElementData();
@@ -1033,7 +1036,7 @@ export class PageRow extends Module {
                             const dropElement = eventTarget;
                             const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, false);
                             commandHistory.execute(dragCmd);
-                            self.currentElement.opacity = 1;
+                            updateDraggingUI()
                             resetDragTarget();
                         } else {
                             const dragCmd = new DragElementCommand(self.currentElement, pageRow, true, true);
@@ -1086,6 +1089,25 @@ export class PageRow extends Module {
             const rectangles = parentWrapper.getElementsByClassName('rectangle');
             for (const rectangle of rectangles) {
                 (rectangle as Control).style.display = 'none';
+            }
+        }
+
+        function updateDraggingUI(target?: Control, x?: number, y?: number) {
+            if (!self.currentElement) return;
+            if (target === undefined) {
+                self.currentElement.style.zIndex = `unset`;
+                self.currentElement.style.transform = 'unset';
+                self.currentElement.style.scale = '1';
+                self.currentElement.classList.remove('is-dragging');
+            } else {
+                self.currentElement.classList.add('is-dragging');
+                self.currentElement.style.zIndex = `${100}`;
+                self.currentElement.style.scale = '0.5';
+                const rowEl = target.closest('ide-row') as PageRow;
+                if (rowEl) self.currentElement.linkTo = rowEl;
+                self.currentElement.style.transform = `translate(${x - (self.currentElement.offsetWidth / 2)}px, ${y - (self.currentElement.offsetHeight / 2)}px)`;
+                if (self.currentToolbar)
+                    self.currentToolbar.hideToolbars();
             }
         }
     }

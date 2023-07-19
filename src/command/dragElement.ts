@@ -117,6 +117,7 @@ export class DragElementCommand implements ICommand {
     if (this.parent) {
       const oldElementSection = pageObject.getRow(oldRowId);
       this.parent.visible = !!oldElementSection?.elements?.length;
+      (this.parent as any).toggleUI(!!oldElementSection?.elements?.length);
     }
 
     for (let columnData of this.oldDataColumnMap) {
