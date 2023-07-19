@@ -501,9 +501,11 @@ export class PageRow extends Module {
             if (targetSection && !cannotDrag) {
                 self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
                 self.currentElement = targetSection;
-                self.currentToolbar = targetToolbar;
-                application.EventBus.dispatch(EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
                 const toolbars = self.currentElement.querySelectorAll('ide-toolbar')
+
+                if (targetToolbar.classList.contains('active') || toolbars.length==1) application.EventBus.dispatch(EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
+                else self.currentToolbar = undefined;
+
                 if (self.currentToolbar) {
                     toolbars.forEach(toolbar => {
                         (toolbar as HTMLElement).style.opacity = (toolbar.id != self.currentToolbar.id)? '1' : '0';
@@ -523,14 +525,11 @@ export class PageRow extends Module {
 
         document.addEventListener('dragend', function (event) {
             if (self.currentElement && !self.currentElement.classList.contains('builder-item')) {
-                if (self.currentToolbar){
-                    const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
-                    toolbars.forEach(toolbar => {
-                        (toolbar as HTMLElement).style.opacity = "1";
-                    });
-                } else {
-                    self.currentElement.opacity = 1;
-                }
+                self.currentElement.opacity = 1;
+                const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
+                toolbars.forEach(toolbar => {
+                    (toolbar as HTMLElement).style.opacity = "1";
+                });
             }  
             resetDragTarget();
             resetPageRow();
