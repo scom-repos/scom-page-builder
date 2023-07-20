@@ -132,12 +132,14 @@ export class PageRow extends Module {
         this.updateAlign();
     }
 
-    private async createNewElement(i: number) {
-        const sectionData = this.data.elements[i];
+    private async createNewElement(sectionData: any) {
+        // const sectionData = JSON.parse(JSON.stringify(this.data.elements[i]));
         return this.createElementFn(sectionData);
     }
 
     private async createElementFn(data: IPageElement) {
+        const isElmExist = document.getElementById(data.id);
+        if (isElmExist) return
         const pageSection = (
             <ide-section
                 id={data.id}
@@ -195,7 +197,7 @@ export class PageRow extends Module {
 
         if (elements && elements.length > 0) {
             for (let i = 0; i < elements.length; i++) {
-                await this.createNewElement(i);
+                await this.createNewElement(elements[i]);
             }
         }
         this.actionsBar.minHeight = '100%';
@@ -954,7 +956,7 @@ export class PageRow extends Module {
                 if (isUngrouping) {
                     // ungroup to an empty space
                     const dragCmd = new UngroupElementCommand(self.currentToolbar, nearestFixedItem, config, "none");
-                    commandHistory.execute(dragCmd);
+                    dragCmd && commandHistory.execute(dragCmd);
                     self.currentElement.opacity = 1;
                     removeRectangles();
                 } else if (self.currentElement.data) {
@@ -987,7 +989,7 @@ export class PageRow extends Module {
                             const dropElement = eventTarget;
                             // regroup to bottom block
                             const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, "bottom");
-                            commandHistory.execute(dragCmd);
+                            dragCmd && commandHistory.execute(dragCmd);
                             self.currentElement.opacity = 1;
                             resetDragTarget();
                         } else {
@@ -1000,7 +1002,7 @@ export class PageRow extends Module {
                             const dropElement = eventTarget;
                             // regroup to top block
                             const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, "top");
-                            commandHistory.execute(dragCmd);
+                            dragCmd && commandHistory.execute(dragCmd);
                             self.currentElement.opacity = 1;
                             resetDragTarget();
                         } else {
@@ -1020,7 +1022,7 @@ export class PageRow extends Module {
                             // TODO: ungroup & drop on front/back
                             const dropElement = eventTarget;
                             const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, collision.mergeSide);
-                            commandHistory.execute(dragCmd);
+                            dragCmd && commandHistory.execute(dragCmd);
                             self.currentElement.opacity = 1;
                             resetDragTarget();
                         } else {
@@ -1040,12 +1042,12 @@ export class PageRow extends Module {
                         const hasData = elements.find((el: IPageElement) => Object.keys(el.module || {}).length || el.elements?.length);
                         const dragCmd = !hasData && new AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
                         // drag new element on a new row
-                        dragCmd && await commandHistory.execute(dragCmd);
+                        await commandHistory.execute(dragCmd);
                     } else {
                         if (isUngrouping) {
                             const dropElement = eventTarget;
                             const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, collision.mergeSide);
-                            commandHistory.execute(dragCmd);
+                            dragCmd && commandHistory.execute(dragCmd);
                             self.currentElement.opacity = 1;
                             resetDragTarget();
                         } else {

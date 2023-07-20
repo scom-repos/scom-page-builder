@@ -724,9 +724,11 @@ declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
         private dragToolbar;
         private dragSection;
         private dragRow;
+        private oriDragRowData;
         private dropElm;
         private dropSection;
         private dropRow;
+        private oriDropRowData;
         private oriCol;
         private oriColSpan;
         private oriElmIndex;
