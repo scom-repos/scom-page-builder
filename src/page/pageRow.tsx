@@ -1018,8 +1018,8 @@ export class PageRow extends Module {
                         targetRow && self.onPrependRow(targetRow);
                     } else {
                         const isAppend = dropElm.classList.contains('back-block') || collision.mergeSide == "back";
+                        // ungroup & drop on front/back
                         if (isUngrouping) {
-                            // TODO: ungroup & drop on front/back
                             const dropElement = eventTarget;
                             const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, collision.mergeSide);
                             dragCmd && commandHistory.execute(dragCmd);

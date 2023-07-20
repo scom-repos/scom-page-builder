@@ -2166,22 +2166,23 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 const dropRowData = index_13.pageObject.getRow(dropRowId);
                 // if the space left is enough: simply ungroup it
                 const sortedSectionList = dropRowData.elements.sort((a, b) => a.column - b.column);
-                const currSectionIdx = sortedSectionList.findIndex((e) => e.column === parseInt(this.data.column));
+                const dragSectionIdx = sortedSectionList.findIndex((e) => e.column === parseInt(this.data.column));
+                const dropSectionIdx = sortedSectionList.findIndex((e) => e.column === parseInt(this.dropSection.data.column));
                 const isFront = this.mergeType == "front";
                 // drag to front block and ungroup
                 const frontLimit = isFront ?
-                    (currSectionIdx == 0) ? 1 : sortedSectionList[currSectionIdx - 1].column + sortedSectionList[currSectionIdx - 1].columnSpan - 1 :
-                    sortedSectionList[currSectionIdx].column + sortedSectionList[currSectionIdx].columnSpan;
+                    (dropSectionIdx == 0) ? 1 : sortedSectionList[dropSectionIdx - 1].column + sortedSectionList[dropSectionIdx - 1].columnSpan :
+                    sortedSectionList[dropSectionIdx].column + sortedSectionList[dropSectionIdx].columnSpan;
                 const backLimit = isFront ?
-                    sortedSectionList[currSectionIdx].column - 1 :
-                    (currSectionIdx == sortedSectionList.length - 1) ? 12 : sortedSectionList[currSectionIdx + 1].column - 1;
+                    sortedSectionList[dropSectionIdx].column - 1 :
+                    (dropSectionIdx == sortedSectionList.length - 1) ? 12 : sortedSectionList[dropSectionIdx + 1].column - 1;
                 const emptySpace = backLimit - frontLimit + 1;
                 // the columnSpan of new element should be same with the original section's
-                if (emptySpace >= sortedSectionList[currSectionIdx].columnSpan) {
+                if (emptySpace >= sortedSectionList[dragSectionIdx].columnSpan) {
                     // have enough space to place the dragging toolbar
                     const newColumn = isFront ?
-                        sortedSectionList[currSectionIdx].column - this.data.columnSpan :
-                        sortedSectionList[currSectionIdx].column + sortedSectionList[currSectionIdx].columnSpan;
+                        sortedSectionList[dropSectionIdx].column - this.data.columnSpan :
+                        sortedSectionList[dropSectionIdx].column + sortedSectionList[dropSectionIdx].columnSpan;
                     const newElData = {
                         id: this.data.id,
                         column: newColumn,
@@ -2207,47 +2208,46 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 }
                 else {
                     // if no any space, check if moving the current section can allocate enough space for the new section
-                    const softBackLimit = (currSectionIdx == sortedSectionList.length - 1) ? 12 : sortedSectionList[currSectionIdx + 1].column - 1;
-                    const softFrontLimit = (currSectionIdx == 0) ? 1 : sortedSectionList[currSectionIdx - 1].column + sortedSectionList[currSectionIdx - 1].columnSpan;
+                    const softBackLimit = (dropSectionIdx == sortedSectionList.length - 1) ? 12 : sortedSectionList[dropSectionIdx + 1].column - 1;
+                    const softFrontLimit = (dropSectionIdx == 0) ? 1 : sortedSectionList[dropSectionIdx - 1].column + sortedSectionList[dropSectionIdx - 1].columnSpan;
                     const softEmptySpace = isFront ?
                         softBackLimit - frontLimit + 1 :
                         backLimit - softFrontLimit + 1;
-                    if (softEmptySpace >= sortedSectionList[currSectionIdx].columnSpan * 2) {
+                    if (softEmptySpace >= sortedSectionList[dragSectionIdx].columnSpan + sortedSectionList[dropSectionIdx].columnSpan) {
                         // if moving the current section can allocate enough space for the new section, do it
                         // move the currect section
-                        sortedSectionList[currSectionIdx].column = isFront ?
-                            frontLimit + sortedSectionList[currSectionIdx].columnSpan :
-                            12 - sortedSectionList[currSectionIdx].columnSpan * 2 + 1;
+                        sortedSectionList[dropSectionIdx].column = isFront ?
+                            frontLimit + sortedSectionList[dragSectionIdx].columnSpan :
+                            12 - sortedSectionList[dragSectionIdx].columnSpan * 2 + 1;
                         dropRowData.elements = sortedSectionList;
                         this.dropRow.setData(dropRowData);
                         // add new section
                         const newColumn = isFront ?
                             frontLimit :
-                            12 - sortedSectionList[currSectionIdx].columnSpan + 1;
+                            12 - sortedSectionList[dropSectionIdx].columnSpan + 1;
                         const newElData = {
                             id: this.data.id,
                             column: newColumn,
-                            columnSpan: sortedSectionList[currSectionIdx].columnSpan,
+                            columnSpan: sortedSectionList[dragSectionIdx].columnSpan,
                             properties: this.data.properties,
                             module: this.data.module
                         };
                         this.appendElm = await this.dropRow.addElement(newElData);
                         index_13.pageObject.addElement(dropRowId, newElData);
                     }
-                    else if (sortedSectionList[currSectionIdx].columnSpan != 1) {
+                    else if (sortedSectionList[dropSectionIdx].columnSpan != 1) {
                         // if moving the current section cannot allocate enough space for the new section,
                         // check if the current section colSpan = 1
                         // if the current section colSpan != 1, current section collapse to allocate space for new elm
-                        const splitIndex = softEmptySpace / 2;
+                        const splitIndex = Math.ceil(softEmptySpace / 2);
                         // resize & move the currect section
                         this.dropRow.clearData();
-                        sortedSectionList[currSectionIdx].column = isFront ?
+                        sortedSectionList[dropSectionIdx].column = isFront ?
                             frontLimit + splitIndex :
                             softFrontLimit;
-                        sortedSectionList[currSectionIdx].columnSpan = isFront ?
+                        sortedSectionList[dropSectionIdx].columnSpan = isFront ?
                             softEmptySpace - splitIndex :
                             splitIndex;
-                        dropRowData.elements = sortedSectionList;
                         const newRowData = {
                             id: dropRowData.id,
                             row: dropRowData.row,
@@ -2260,7 +2260,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                             softFrontLimit + splitIndex;
                         const newColumnSpan = isFront ?
                             splitIndex :
-                            softFrontLimit - splitIndex;
+                            softEmptySpace - splitIndex;
                         const newElData = {
                             id: this.data.id,
                             column: newColumn,
@@ -4791,8 +4791,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         }
                         else {
                             const isAppend = dropElm.classList.contains('back-block') || collision.mergeSide == "back";
+                            // ungroup & drop on front/back
                             if (isUngrouping) {
-                                // TODO: ungroup & drop on front/back
                                 const dropElement = eventTarget;
                                 const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, dropElement, config, collision.mergeSide);
                                 dragCmd && index_42.commandHistory.execute(dragCmd);
