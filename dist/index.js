@@ -2167,119 +2167,104 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 // if the space left is enough: simply ungroup it
                 const sortedSectionList = dropRowData.elements.sort((a, b) => a.column - b.column);
                 const currSectionIdx = sortedSectionList.findIndex((e) => e.column === parseInt(this.data.column));
-                if (this.mergeType == "front") {
-                    // drag to front block and ungroup
-                    const frontLimit = (currSectionIdx == 0) ? 1 :
-                        sortedSectionList[currSectionIdx - 1].column + sortedSectionList[currSectionIdx - 1].columnSpan - 1;
-                    const backLimit = sortedSectionList[currSectionIdx].column - 1;
-                    const emptySpace = backLimit - frontLimit + 1;
-                    // the columnSpan of new element should be same with the original section's
-                    if (emptySpace >= sortedSectionList[currSectionIdx].columnSpan) {
-                        // have enough space to place the dragging toolbar
-                        const newElData = {
-                            id: this.data.id,
-                            column: sortedSectionList[currSectionIdx].column - this.data.columnSpan,
-                            columnSpan: this.data.columnSpan,
-                            properties: this.data.properties,
-                            module: this.data.module
-                        };
-                        this.appendElm = await this.dropRow.addElement(newElData);
-                        index_13.pageObject.addElement(dropRowId, newElData);
-                    }
-                    else if (emptySpace >= 1) {
-                        // no enough space to place the dragging toolbar
-                        // if emptySpace>=1, resize the dragging element to fit the space
-                        const newElData = {
-                            id: this.data.id,
-                            column: frontLimit,
-                            columnSpan: emptySpace,
-                            properties: this.data.properties,
-                            module: this.data.module
-                        };
-                        this.appendElm = await this.dropRow.addElement(newElData);
-                        index_13.pageObject.addElement(dropRowId, newElData);
-                    }
-                    else {
-                        // if no any space, check if moving the current section can allocate enough space for the new section
-                        const softBackLimit = (currSectionIdx == sortedSectionList.length - 1) ? 12 : sortedSectionList[currSectionIdx + 1].column - 1;
-                        const softEmptySpace = softBackLimit - frontLimit + 1;
-                        if (softEmptySpace >= sortedSectionList[currSectionIdx].columnSpan * 2) {
-                            // if moving the current section can allocate enough space for the new section, do it
-                            // move the currect section
-                            sortedSectionList[currSectionIdx].column = frontLimit + sortedSectionList[currSectionIdx].columnSpan;
-                            dropRowData.elements = sortedSectionList;
-                            this.dropRow.setData(dropRowData);
-                            // add new section
-                            const newElData = {
-                                id: this.data.id,
-                                column: frontLimit,
-                                columnSpan: sortedSectionList[currSectionIdx].columnSpan,
-                                properties: this.data.properties,
-                                module: this.data.module
-                            };
-                            this.appendElm = await this.dropRow.addElement(newElData);
-                            index_13.pageObject.addElement(dropRowId, newElData);
-                        }
-                        else if (sortedSectionList[currSectionIdx].columnSpan != 1) {
-                            // if moving the current section cannot allocate enough space for the new section,
-                            // check if the current section colSpan = 1
-                            // if the current section colSpan != 1, current section collapse to allocate space for new elm
-                            const splitIndex = softEmptySpace / 2;
-                            // resize & move the currect section
-                            this.dropRow.clearData();
-                            sortedSectionList[currSectionIdx].column = frontLimit + splitIndex;
-                            sortedSectionList[currSectionIdx].columnSpan = softEmptySpace - splitIndex;
-                            dropRowData.elements = sortedSectionList;
-                            const newRowData = {
-                                id: dropRowData.id,
-                                row: dropRowData.row,
-                                elements: sortedSectionList
-                            };
-                            this.dropRow.setData(newRowData);
-                            // add new section
-                            const newElData = {
-                                id: this.data.id,
-                                column: frontLimit,
-                                columnSpan: splitIndex,
-                                properties: this.data.properties,
-                                module: this.data.module
-                            };
-                            this.appendElm = await this.dropRow.addElement(newElData);
-                            index_13.pageObject.addElement(dropRowId, newElData);
-                        }
-                        else {
-                            // if the current section colSpan == 1, cannot resize and ungroup
-                            this.dropRow.setData(this.oriDropRowData);
-                            this.dragRow.setData(this.oriDragRowData);
-                        }
-                    }
+                const isFront = this.mergeType == "front";
+                // drag to front block and ungroup
+                const frontLimit = isFront ?
+                    (currSectionIdx == 0) ? 1 : sortedSectionList[currSectionIdx - 1].column + sortedSectionList[currSectionIdx - 1].columnSpan - 1 :
+                    sortedSectionList[currSectionIdx].column + sortedSectionList[currSectionIdx].columnSpan;
+                const backLimit = isFront ?
+                    sortedSectionList[currSectionIdx].column - 1 :
+                    (currSectionIdx == sortedSectionList.length - 1) ? 12 : sortedSectionList[currSectionIdx + 1].column - 1;
+                const emptySpace = backLimit - frontLimit + 1;
+                // the columnSpan of new element should be same with the original section's
+                if (emptySpace >= sortedSectionList[currSectionIdx].columnSpan) {
+                    // have enough space to place the dragging toolbar
+                    const newColumn = isFront ?
+                        sortedSectionList[currSectionIdx].column - this.data.columnSpan :
+                        sortedSectionList[currSectionIdx].column + sortedSectionList[currSectionIdx].columnSpan;
+                    const newElData = {
+                        id: this.data.id,
+                        column: newColumn,
+                        columnSpan: this.data.columnSpan,
+                        properties: this.data.properties,
+                        module: this.data.module
+                    };
+                    this.appendElm = await this.dropRow.addElement(newElData);
+                    index_13.pageObject.addElement(dropRowId, newElData);
+                }
+                else if (emptySpace >= 1) {
+                    // no enough space to place the dragging toolbar
+                    // if emptySpace>=1, resize the dragging element to fit the space
+                    const newElData = {
+                        id: this.data.id,
+                        column: frontLimit,
+                        columnSpan: emptySpace,
+                        properties: this.data.properties,
+                        module: this.data.module
+                    };
+                    this.appendElm = await this.dropRow.addElement(newElData);
+                    index_13.pageObject.addElement(dropRowId, newElData);
                 }
                 else {
-                    // drag to back block and ungroup
-                    const frontLimit = sortedSectionList[currSectionIdx].column + sortedSectionList[currSectionIdx].columnSpan;
-                    const backLimit = (currSectionIdx == sortedSectionList.length - 1) ? 12 :
-                        sortedSectionList[currSectionIdx + 1].column - 1;
-                    const emptySpace = backLimit - frontLimit;
-                    // the columnSpan of new element should be same with the original section's
-                    if (emptySpace >= sortedSectionList[currSectionIdx].columnSpan) {
-                        // have enough space to place the dragging toolbar
+                    // if no any space, check if moving the current section can allocate enough space for the new section
+                    const softBackLimit = (currSectionIdx == sortedSectionList.length - 1) ? 12 : sortedSectionList[currSectionIdx + 1].column - 1;
+                    const softFrontLimit = (currSectionIdx == 0) ? 1 : sortedSectionList[currSectionIdx - 1].column + sortedSectionList[currSectionIdx - 1].columnSpan;
+                    const softEmptySpace = isFront ?
+                        softBackLimit - frontLimit + 1 :
+                        backLimit - softFrontLimit + 1;
+                    if (softEmptySpace >= sortedSectionList[currSectionIdx].columnSpan * 2) {
+                        // if moving the current section can allocate enough space for the new section, do it
+                        // move the currect section
+                        sortedSectionList[currSectionIdx].column = isFront ?
+                            frontLimit + sortedSectionList[currSectionIdx].columnSpan :
+                            12 - sortedSectionList[currSectionIdx].columnSpan * 2 + 1;
+                        dropRowData.elements = sortedSectionList;
+                        this.dropRow.setData(dropRowData);
+                        // add new section
+                        const newColumn = isFront ?
+                            frontLimit :
+                            12 - sortedSectionList[currSectionIdx].columnSpan + 1;
                         const newElData = {
                             id: this.data.id,
-                            column: sortedSectionList[currSectionIdx].column + sortedSectionList[currSectionIdx].columnSpan,
-                            columnSpan: this.data.columnSpan,
+                            column: newColumn,
+                            columnSpan: sortedSectionList[currSectionIdx].columnSpan,
                             properties: this.data.properties,
                             module: this.data.module
                         };
                         this.appendElm = await this.dropRow.addElement(newElData);
                         index_13.pageObject.addElement(dropRowId, newElData);
                     }
-                    else if (emptySpace >= 1) {
-                        // no enough space to place the dragging toolbar
-                        // if emptySpace>=1, resize the dragging element to fit the space
+                    else if (sortedSectionList[currSectionIdx].columnSpan != 1) {
+                        // if moving the current section cannot allocate enough space for the new section,
+                        // check if the current section colSpan = 1
+                        // if the current section colSpan != 1, current section collapse to allocate space for new elm
+                        const splitIndex = softEmptySpace / 2;
+                        // resize & move the currect section
+                        this.dropRow.clearData();
+                        sortedSectionList[currSectionIdx].column = isFront ?
+                            frontLimit + splitIndex :
+                            softFrontLimit;
+                        sortedSectionList[currSectionIdx].columnSpan = isFront ?
+                            softEmptySpace - splitIndex :
+                            splitIndex;
+                        dropRowData.elements = sortedSectionList;
+                        const newRowData = {
+                            id: dropRowData.id,
+                            row: dropRowData.row,
+                            elements: sortedSectionList
+                        };
+                        this.dropRow.setData(newRowData);
+                        // add new section
+                        const newColumn = isFront ?
+                            frontLimit :
+                            softFrontLimit + splitIndex;
+                        const newColumnSpan = isFront ?
+                            splitIndex :
+                            softFrontLimit - splitIndex;
                         const newElData = {
                             id: this.data.id,
-                            column: frontLimit,
-                            columnSpan: emptySpace,
+                            column: newColumn,
+                            columnSpan: newColumnSpan,
                             properties: this.data.properties,
                             module: this.data.module
                         };
@@ -2287,59 +2272,9 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                         index_13.pageObject.addElement(dropRowId, newElData);
                     }
                     else {
-                        // if no any space, check if moving the current section can allocate enough space for the new section
-                        const softFrontLimit = (currSectionIdx == 0) ? 1 :
-                            sortedSectionList[currSectionIdx - 1].column + sortedSectionList[currSectionIdx - 1].columnSpan;
-                        const softEmptySpace = backLimit - softFrontLimit + 1;
-                        if (softEmptySpace >= sortedSectionList[currSectionIdx].columnSpan * 2) {
-                            // if moving the current section can allocate enough space for the new section, do it
-                            // move the currect section
-                            sortedSectionList[currSectionIdx].column = 12 - sortedSectionList[currSectionIdx].columnSpan * 2 + 1;
-                            dropRowData.elements = sortedSectionList;
-                            this.dropRow.setData(dropRowData);
-                            // add new section
-                            const newElData = {
-                                id: this.data.id,
-                                column: 12 - sortedSectionList[currSectionIdx].columnSpan + 1,
-                                columnSpan: sortedSectionList[currSectionIdx].columnSpan,
-                                properties: this.data.properties,
-                                module: this.data.module
-                            };
-                            this.appendElm = await this.dropRow.addElement(newElData);
-                            index_13.pageObject.addElement(dropRowId, newElData);
-                        }
-                        else if (sortedSectionList[currSectionIdx].columnSpan != 1) {
-                            // if moving the current section cannot allocate enough space for the new section,
-                            // check if the current section colSpan = 1
-                            // if the current section colSpan != 1, current section collapse to allocate space for new elm
-                            const splitIndex = softEmptySpace / 2;
-                            // resize & move the currect section
-                            this.dropRow.clearData();
-                            sortedSectionList[currSectionIdx].column = softFrontLimit;
-                            sortedSectionList[currSectionIdx].columnSpan = splitIndex;
-                            dropRowData.elements = sortedSectionList;
-                            const newRowData = {
-                                id: dropRowData.id,
-                                row: dropRowData.row,
-                                elements: sortedSectionList
-                            };
-                            this.dropRow.setData(newRowData);
-                            // add new section
-                            const newElData = {
-                                id: this.data.id,
-                                column: softFrontLimit + splitIndex,
-                                columnSpan: softEmptySpace - splitIndex,
-                                properties: this.data.properties,
-                                module: this.data.module
-                            };
-                            this.appendElm = await this.dropRow.addElement(newElData);
-                            index_13.pageObject.addElement(dropRowId, newElData);
-                        }
-                        else {
-                            // if the current section colSpan == 1, cannot resize and ungroup
-                            this.dropRow.setData(this.oriDropRowData);
-                            this.dragRow.setData(this.oriDragRowData);
-                        }
+                        // if the current section colSpan == 1, cannot resize and ungroup
+                        this.dropRow.setData(this.oriDropRowData);
+                        this.dragRow.setData(this.oriDragRowData);
                     }
                 }
                 // const dropSectionData = pageObject.getRow(dropRowId);
