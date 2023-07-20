@@ -5128,14 +5128,14 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             if (pnl)
                 pnl.classList.add('section-border');
         }
-        getActions() {
+        getActions(category) {
             var _a, _b, _c;
             if ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) {
                 const configs = this._component.getConfigurators() || [];
                 const builderTarget = configs.find(conf => conf.target === 'Builders');
-                const category = (_c = (_b = this.data) === null || _b === void 0 ? void 0 : _b.module) === null || _c === void 0 ? void 0 : _c.category;
+                const _category = category || ((_c = (_b = this.data) === null || _b === void 0 ? void 0 : _b.module) === null || _c === void 0 ? void 0 : _c.category);
                 if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getActions)
-                    return builderTarget.getActions(category);
+                    return builderTarget.getActions(_category);
             }
             return [];
         }
@@ -5262,7 +5262,9 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 event.preventDefault();
                 this.showToolList();
             });
-            this.showToolList();
+            this.toolList = this.getActions(data.category) || [];
+            this.checkToolbar();
+            this.showToolbars();
         }
         showToolList() {
             this.toolList = this.getActions() || [];
