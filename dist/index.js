@@ -3529,6 +3529,9 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                     }
                 }
             },
+            '#form': {
+                display: 'block'
+            },
             '#form > i-vstack > i-panel': {
                 width: '100%'
             },
@@ -3549,10 +3552,15 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                     '.modal': {
                         padding: 0,
                         borderRadius: 5,
+                        // boxShadow: 'rgba(0, 0, 0, 0.15) 0px 10px 50px -5px',
                         $nest: {
-                            '#pnlForm': {
-                                maxHeight: 'calc(100vh - 100px)',
+                            '#pnlForm > * > *:first-child': {
+                                padding: '1rem 1.5rem 0',
+                                maxHeight: 'calc(100vh - 114px)',
                                 overflowY: 'auto'
+                            },
+                            '#pnlForm > * > *:last-child': {
+                                padding: '0 1.5rem 1rem'
                             }
                         }
                     }
@@ -4159,15 +4167,17 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 if (targetSection && !cannotDrag) {
                     self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
                     self.currentElement = targetSection;
-                    self.currentToolbar = targetToolbar;
-                    components_24.application.EventBus.dispatch(index_39.EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
-                    // const toolbars = self.currentElement.querySelectorAll('ide-toolbar')
+                    const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
+                    if (targetToolbar.classList.contains('active') || toolbars.length == 1)
+                        components_24.application.EventBus.dispatch(index_39.EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
+                    else
+                        self.currentToolbar = undefined;
                     // if (self.currentToolbar) {
                     //     toolbars.forEach(toolbar => {
                     //         (toolbar as HTMLElement).style.opacity = (toolbar.id != self.currentToolbar.id)? '1' : '0';
                     //     });
                     // } else {
-                    //     updateDraggingUI(0)
+                    //     self.currentElement.opacity = 0;
                     // }
                     components_24.application.EventBus.dispatch(index_39.EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                     self.addDottedLines();
@@ -4184,15 +4194,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             });
             document.addEventListener('dragend', function (event) {
                 // if (self.currentElement && !self.currentElement.classList.contains('builder-item')) {
-                //     if (self.currentToolbar){
-                //         const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
-                //         toolbars.forEach(toolbar => {
-                //             (toolbar as HTMLElement).style.opacity = "1";
-                //         });
-                //     } else {
-                //         updateDraggingUI()
-                //     }
-                // }  
+                //     self.currentElement.opacity = 1;
+                //     const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
+                //     toolbars.forEach(toolbar => {
+                //         (toolbar as HTMLElement).style.opacity = "1";
+                //     });
+                // }
                 updateDraggingUI();
                 resetDragTarget();
                 resetPageRow();
@@ -5499,10 +5506,10 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 this.$render("i-panel", { position: "absolute", width: "90%", height: "8px", left: "5%", bottom: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "bottom-block" }),
                 this.$render("i-panel", { position: "absolute", width: "90%", height: "8px", left: "5%", top: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "top-block" }),
                 this.$render("i-modal", { id: 'mdActions', title: 'Update Settings', closeIcon: { name: 'times' }, minWidth: 400, maxWidth: '900px', closeOnBackdropClick: false, onOpen: this.onShowModal.bind(this), onClose: this.onCloseModal.bind(this), class: "setting-modal" },
-                    this.$render("i-panel", { padding: { left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' } },
+                    this.$render("i-panel", null,
                         this.$render("i-vstack", { id: "pnlFormMsg", padding: { left: '1.5rem', right: '1.5rem', top: '1rem' }, gap: "0.5rem", visible: false }),
                         this.$render("i-panel", { id: "pnlForm" }),
-                        this.$render("i-form", { id: "form" })))));
+                        this.$render("i-form", { id: "form", padding: { left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' } })))));
         }
     };
     IDEToolbar = __decorate([

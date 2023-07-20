@@ -45,6 +45,9 @@ Styles.cssRule('ide-toolbar', {
         }
       }
     },
+    '#form': {
+      display: 'block'
+    },
     '#form > i-vstack > i-panel': {
       width: '100%'
     },
@@ -65,10 +68,15 @@ Styles.cssRule('ide-toolbar', {
         '.modal': {
           padding: 0,
           borderRadius: 5,
+          // boxShadow: 'rgba(0, 0, 0, 0.15) 0px 10px 50px -5px',
           $nest: {
-            '#pnlForm': {
-              maxHeight: 'calc(100vh - 100px)',
+            '#pnlForm > * > *:first-child': {
+              padding: '1rem 1.5rem 0',
+              maxHeight: 'calc(100vh - 114px)',
               overflowY: 'auto'
+            },
+            '#pnlForm > * > *:last-child': {
+              padding: '0 1.5rem 1rem'
             }
           }
         }

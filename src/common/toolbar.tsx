@@ -738,7 +738,7 @@ export class IDEToolbar extends Module {
                     onClose={this.onCloseModal.bind(this)}
                     class="setting-modal"
                 >
-                    <i-panel padding={{ left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' }}>
+                    <i-panel>
                         <i-vstack
                             id="pnlFormMsg"
                             padding={{ left: '1.5rem', right: '1.5rem', top: '1rem' }}
@@ -746,7 +746,7 @@ export class IDEToolbar extends Module {
                             visible={false}
                         ></i-vstack>
                         <i-panel id="pnlForm" />
-                        <i-form id="form" />
+                        <i-form id="form" padding={{ left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' }}/>
                     </i-panel>
                 </i-modal>
             </i-vstack>
