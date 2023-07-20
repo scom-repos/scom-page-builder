@@ -83,6 +83,7 @@ export class UngroupElementCommand implements ICommand {
     application.EventBus.dispatch(EVENT.ON_UPDATE_SECTIONS);
 
     const dropRowId = this.dropRow?.id.replace('row-', '');
+    const MAX_COLUMN = pageObject.getColumnsNumber(dropRowId);
     if (this.mergeType=="top" || this.mergeType=="bottom") {
       // regroup with new section
       const dragEnterElm = this.dropRow.closest('#pageBuilder').querySelector('.is-dragenter')
@@ -141,7 +142,7 @@ export class UngroupElementCommand implements ICommand {
 
       const backLimit: number = isFront?  
         sortedSectionList[dropSectionIdx].column - 1 :
-        (dropSectionIdx == sortedSectionList.length-1)? 12 : sortedSectionList[dropSectionIdx+1].column - 1;
+        (dropSectionIdx == sortedSectionList.length-1)? MAX_COLUMN : sortedSectionList[dropSectionIdx+1].column - 1;
 
       const emptySpace = backLimit - frontLimit + 1;
 
@@ -177,7 +178,7 @@ export class UngroupElementCommand implements ICommand {
 
       } else {
         // if no any space, check if moving the current section can allocate enough space for the new section
-        const softBackLimit = (dropSectionIdx==sortedSectionList.length-1)? 12 : sortedSectionList[dropSectionIdx+1].column-1;
+        const softBackLimit = (dropSectionIdx==sortedSectionList.length-1)? MAX_COLUMN : sortedSectionList[dropSectionIdx+1].column-1;
         const softFrontLimit = (dropSectionIdx==0)? 1 : sortedSectionList[dropSectionIdx-1].column + sortedSectionList[dropSectionIdx-1].columnSpan;
         const softEmptySpace = isFront? 
           softBackLimit - frontLimit + 1 :
@@ -189,14 +190,14 @@ export class UngroupElementCommand implements ICommand {
           // move the currect section
           sortedSectionList[dropSectionIdx].column = isFront? 
             frontLimit + sortedSectionList[dragSectionIdx].columnSpan :
-            12 - sortedSectionList[dragSectionIdx].columnSpan*2 + 1;
+            MAX_COLUMN - sortedSectionList[dragSectionIdx].columnSpan*2 + 1;
           dropRowData.elements = sortedSectionList
           this.dropRow.setData(dropRowData);
 
           // add new section
           const newColumn = isFront?
             frontLimit :
-            12 - sortedSectionList[dropSectionIdx].columnSpan + 1;
+            MAX_COLUMN - sortedSectionList[dropSectionIdx].columnSpan + 1;
 
           const newElData = {
             id: this.data.id,

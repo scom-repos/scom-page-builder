@@ -302,12 +302,12 @@ export class IDEToolbar extends Module {
             pnl.classList.add('section-border')
     }
 
-    private getActions() {
+    private getActions(category?: string) {
         if (this._component?.getConfigurators) {
             const configs = this._component.getConfigurators() || [];
             const builderTarget = configs.find(conf => conf.target === 'Builders');
-            const category = this.data?.module?.category;
-            if (builderTarget?.getActions) return builderTarget.getActions(category);
+            const _category = category || this.data?.module?.category;
+            if (builderTarget?.getActions) return builderTarget.getActions(_category);
         }
         return [];
     }
@@ -436,7 +436,9 @@ export class IDEToolbar extends Module {
             event.preventDefault()
             this.showToolList();
         })
-        this.showToolList()
+        this.toolList = this.getActions(data.category) || [];
+        this.checkToolbar();
+        this.showToolbars();
     }
 
     private showToolList() {
@@ -738,7 +740,7 @@ export class IDEToolbar extends Module {
                     onClose={this.onCloseModal.bind(this)}
                     class="setting-modal"
                 >
-                    <i-panel padding={{ left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' }}>
+                    <i-panel>
                         <i-vstack
                             id="pnlFormMsg"
                             padding={{ left: '1.5rem', right: '1.5rem', top: '1rem' }}
@@ -746,7 +748,7 @@ export class IDEToolbar extends Module {
                             visible={false}
                         ></i-vstack>
                         <i-panel id="pnlForm" />
-                        <i-form id="form" />
+                        <i-form id="form" padding={{ left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' }}/>
                     </i-panel>
                 </i-modal>
             </i-vstack>
