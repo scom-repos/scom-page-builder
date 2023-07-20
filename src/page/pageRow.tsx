@@ -503,7 +503,7 @@ export class PageRow extends Module {
                 self.currentElement = targetSection;
                 const toolbars = self.currentElement.querySelectorAll('ide-toolbar')
 
-                if (targetToolbar.classList.contains('active') || toolbars.length==1) application.EventBus.dispatch(EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
+                if (targetToolbar?.classList.contains('active') || toolbars.length==1) application.EventBus.dispatch(EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
                 else self.currentToolbar = undefined;
 
                 // if (self.currentToolbar) {
@@ -1092,21 +1092,31 @@ export class PageRow extends Module {
 
         function updateDraggingUI(target?: Control, x?: number, y?: number) {
             if (!self.currentElement) return;
+            const dragElm = self.currentToolbar || self.currentElement;
             if (target === undefined) {
-                self.currentElement.style.zIndex = `unset`;
-                self.currentElement.style.transform = 'unset';
-                self.currentElement.style.scale = '1';
-                self.currentElement.classList.remove('is-dragging');
+                dragElm.style.removeProperty('zIndex');
+                dragElm.style.transform = 'unset';
+                dragElm.style.scale = '1';
+                dragElm.classList.remove('is-dragging');
+                resetElementPos();
             } else {
-                self.currentElement.classList.add('is-dragging');
                 self.currentElement.style.zIndex = `${100}`;
-                self.currentElement.style.scale = '0.5';
+                self.currentElement.classList.add('is-dragging');
+                dragElm.classList.add('is-dragging');
+                dragElm.style.scale = '0.5';
                 const rowEl = target.closest('ide-row') as PageRow;
-                if (rowEl) self.currentElement.linkTo = rowEl;
-                self.currentElement.style.transform = `translate(${x - (self.currentElement.offsetWidth / 2)}px, ${y - (self.currentElement.offsetHeight / 2)}px)`;
-                if (self.currentToolbar)
-                    self.currentToolbar.hideToolbars();
+                dragElm.linkTo = rowEl;
+                dragElm.style.transform = `translate(${x + (dragElm.offsetWidth / 2)}px, ${y + (dragElm.offsetHeight / 2)}px)`;
+                const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
+                toolbars.forEach((toolbar: IDEToolbar) => toolbar.hideToolbars())
             }
+        }
+
+        function resetElementPos() {
+            self.currentElement.style.removeProperty('zIndex');
+            self.currentElement.style.transform = 'unset';
+            self.currentElement.classList.remove('is-dragging');
+            self.currentElement.style.scale = '1';
         }
     }
 

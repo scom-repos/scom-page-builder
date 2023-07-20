@@ -3475,6 +3475,9 @@ define("@scom/scom-page-builder/page/pageSection.css.ts", ["require", "exports",
                 outline: `2px solid ${Theme.colors.primary.main}`,
                 transition: 'border ease-in .2s'
             },
+            '&.is-dragging .section-border': {
+                outline: `2px solid transparent !important`,
+            },
             'h1, h2, h3, h4, h5, h6': {
                 margin: 0
             },
@@ -3495,8 +3498,12 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
     components_22.Styles.cssRule('ide-toolbar', {
         display: 'block',
         $nest: {
-            '.ide-component.active, .ide-component.hover-border': {
-                outline: `2px solid ${Theme.colors.primary.main}`
+            '&:not(.is-dragging)': {
+                $nest: {
+                    '.ide-component.active, .ide-component.hover-border': {
+                        outline: `2px solid ${Theme.colors.primary.main}`
+                    }
+                }
             },
             '.ide-component': {
                 border: `2px solid transparent`,
@@ -4167,7 +4174,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
                     self.currentElement = targetSection;
                     const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
-                    if (targetToolbar.classList.contains('active') || toolbars.length == 1)
+                    if ((targetToolbar === null || targetToolbar === void 0 ? void 0 : targetToolbar.classList.contains('active')) || toolbars.length == 1)
                         components_24.application.EventBus.dispatch(index_39.EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
                     else
                         self.currentToolbar = undefined;
@@ -4752,23 +4759,31 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             function updateDraggingUI(target, x, y) {
                 if (!self.currentElement)
                     return;
+                const dragElm = self.currentToolbar || self.currentElement;
                 if (target === undefined) {
-                    self.currentElement.style.zIndex = `unset`;
-                    self.currentElement.style.transform = 'unset';
-                    self.currentElement.style.scale = '1';
-                    self.currentElement.classList.remove('is-dragging');
+                    dragElm.style.removeProperty('zIndex');
+                    dragElm.style.transform = 'unset';
+                    dragElm.style.scale = '1';
+                    dragElm.classList.remove('is-dragging');
+                    resetElementPos();
                 }
                 else {
-                    self.currentElement.classList.add('is-dragging');
                     self.currentElement.style.zIndex = `${100}`;
-                    self.currentElement.style.scale = '0.5';
+                    self.currentElement.classList.add('is-dragging');
+                    dragElm.classList.add('is-dragging');
+                    dragElm.style.scale = '0.5';
                     const rowEl = target.closest('ide-row');
-                    if (rowEl)
-                        self.currentElement.linkTo = rowEl;
-                    self.currentElement.style.transform = `translate(${x - (self.currentElement.offsetWidth / 2)}px, ${y - (self.currentElement.offsetHeight / 2)}px)`;
-                    if (self.currentToolbar)
-                        self.currentToolbar.hideToolbars();
+                    dragElm.linkTo = rowEl;
+                    dragElm.style.transform = `translate(${x + (dragElm.offsetWidth / 2)}px, ${y + (dragElm.offsetHeight / 2)}px)`;
+                    const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
+                    toolbars.forEach((toolbar) => toolbar.hideToolbars());
                 }
+            }
+            function resetElementPos() {
+                self.currentElement.style.removeProperty('zIndex');
+                self.currentElement.style.transform = 'unset';
+                self.currentElement.classList.remove('is-dragging');
+                self.currentElement.style.scale = '1';
             }
         }
         async onPrependRow(pageRow) {

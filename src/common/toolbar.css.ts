@@ -11,8 +11,12 @@ const tileToolbarFadeIn = Styles.keyframes({
 Styles.cssRule('ide-toolbar', {
   display: 'block',
   $nest: {
-    '.ide-component.active, .ide-component.hover-border': {
-      outline: `2px solid ${Theme.colors.primary.main}`
+    '&:not(.is-dragging)': {
+      $nest: {
+        '.ide-component.active, .ide-component.hover-border': {
+          outline: `2px solid ${Theme.colors.primary.main}`
+        }
+      }
     },
     '.ide-component': {
       border: `2px solid transparent`,
