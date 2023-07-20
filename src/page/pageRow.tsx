@@ -150,7 +150,6 @@ export class PageRow extends Module {
         ) as PageSection;
         if (!this._readonly) {
             pageSection.setAttribute('draggable', 'true');
-            pageSection.style.cursor = 'grab';
             pageSection.style.gridRow = '1';
             pageSection.style.gridColumn = `${data.column || 1} / span ${
                 data.columnSpan || 1

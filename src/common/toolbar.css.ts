@@ -102,7 +102,7 @@ Styles.cssRule('ide-toolbar', {
       cursor: 'n-resize !important'
     },
     '.move': {
-      cursor: 'move'
+      cursor: 'grab'
     },
     '.dragger': {
       cursor: 'move',

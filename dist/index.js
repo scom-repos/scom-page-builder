@@ -3586,7 +3586,7 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                 cursor: 'n-resize !important'
             },
             '.move': {
-                cursor: 'move'
+                cursor: 'grab'
             },
             '.dragger': {
                 cursor: 'move',
@@ -3847,7 +3847,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             const pageSection = (this.$render("ide-section", { id: data.id, readonly: this._readonly, display: "block", maxWidth: "100%", maxHeight: "100%", position: "relative", minWidth: 0 }));
             if (!this._readonly) {
                 pageSection.setAttribute('draggable', 'true');
-                pageSection.style.cursor = 'grab';
                 pageSection.style.gridRow = '1';
                 pageSection.style.gridColumn = `${data.column || 1} / span ${data.columnSpan || 1}`;
                 pageSection.setAttribute('data-column', `${data.column || 1}`);
