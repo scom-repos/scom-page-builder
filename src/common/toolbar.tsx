@@ -302,12 +302,12 @@ export class IDEToolbar extends Module {
             pnl.classList.add('section-border')
     }
 
-    private getActions() {
+    private getActions(category?: string) {
         if (this._component?.getConfigurators) {
             const configs = this._component.getConfigurators() || [];
             const builderTarget = configs.find(conf => conf.target === 'Builders');
-            const category = this.data?.module?.category;
-            if (builderTarget?.getActions) return builderTarget.getActions(category);
+            const _category = category || this.data?.module?.category;
+            if (builderTarget?.getActions) return builderTarget.getActions(_category);
         }
         return [];
     }
@@ -436,7 +436,9 @@ export class IDEToolbar extends Module {
             event.preventDefault()
             this.showToolList();
         })
-        this.showToolList()
+        this.toolList = this.getActions(data.category) || [];
+        this.checkToolbar();
+        this.showToolbars();
     }
 
     private showToolList() {
