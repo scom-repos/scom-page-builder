@@ -711,26 +711,32 @@ declare module "@scom/scom-page-builder/command/groupElement.ts" {
         redo(): void;
     }
 }
+/// <amd-module name="@scom/scom-page-builder/command/type.ts" />
+declare module "@scom/scom-page-builder/command/type.ts" {
+    export type IMergeType = "front" | "back" | "top" | "bottom" | "none";
+}
 /// <amd-module name="@scom/scom-page-builder/command/ungroupElement.ts" />
 declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
     import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
     import { Control } from "@ijstech/components";
+    import { IMergeType } from "@scom/scom-page-builder/command/type.ts";
     export class UngroupElementCommand implements ICommand {
         private dragToolbar;
         private dragSection;
         private dragRow;
+        private oriDragRowData;
         private dropElm;
         private dropSection;
         private dropRow;
+        private oriDropRowData;
         private oriCol;
         private oriColSpan;
         private oriElmIndex;
         private data;
         private appendElm;
         private config;
-        private isReGroup;
-        private isAppend;
-        constructor(dragToolbar: Control, dropElm: Control, config: any, isReGroup: boolean, isAppend?: boolean);
+        private mergeType;
+        constructor(dragToolbar: Control, dropElm: Control, config: any, mergeType: IMergeType);
         execute(): Promise<void>;
         undo(): Promise<void>;
         redo(): void;
@@ -804,6 +810,7 @@ declare module "@scom/scom-page-builder/command/index.ts" {
     export { ReplaceElementCommand } from "@scom/scom-page-builder/command/replaceElement.ts";
     export { ICommand, IDataColumn } from "@scom/scom-page-builder/command/interface.ts";
     export { UpdatePageSettingsCommand } from "@scom/scom-page-builder/command/updatePageSetting.ts";
+    export { IMergeType } from "@scom/scom-page-builder/command/type.ts";
 }
 /// <amd-module name="@scom/scom-page-builder/theme/light.theme.ts" />
 declare module "@scom/scom-page-builder/theme/light.theme.ts" {

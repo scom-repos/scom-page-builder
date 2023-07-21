@@ -11,3 +11,4 @@ export { AddElementCommand } from './addElement';
 export { ReplaceElementCommand } from './replaceElement';
 export { ICommand, IDataColumn } from "./interface";
 export { UpdatePageSettingsCommand } from "./updatePageSetting";
+export { IMergeType } from "./type"

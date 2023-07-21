@@ -1,0 +1,1 @@
+export type IMergeType = "front" | "back" | "top" | "bottom" | "none";
