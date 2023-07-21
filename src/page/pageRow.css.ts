@@ -15,7 +15,7 @@ Styles.cssRule('ide-row', {
     display: 'block',
     position: 'relative',
     transition: 'translate .3s ease-in',
-    border: '1px solid transparent',
+    // border: '1px solid transparent',
     boxSizing: 'border-box',
     backgroundColor: 'var(--builder-bg)',
     $nest: {
@@ -133,7 +133,16 @@ Styles.cssRule('ide-row', {
         },
         '.border-x-dotted': {
             borderLeft: 'dotted 1px #808080',
-            borderRight: 'dotted 1px #808080'
+            borderRight: 'dotted 1px #808080',
+            boxSizing: 'border-box',
+        },
+        '.border-x-dotted-left': {
+            borderRight: 'dotted 1px #808080',
+            boxSizing: 'border-box',
+        },
+        '.border-x-dotted-right': {
+            borderLeft: 'dotted 1px #808080',
+            boxSizing: 'border-box'
         },
         '.border-dotted': {
             outline: 'dotted 1px #808080'
