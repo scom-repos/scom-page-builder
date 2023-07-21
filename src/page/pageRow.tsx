@@ -917,8 +917,7 @@ export class PageRow extends Module {
             if (dropToolbar == self.currentToolbar) dropElm = null
 
             // collide with other section 
-            if (collision.collisionType == "mutual"/* || overlap.overlapType == "border"*/) {
-                // check which side is the merge target
+            if (collision.collisionType == "mutual" && !collision.rowBlock) {
                 if ((!collision.mergeSide && !dropElm) || (collision.section && !dropElm)) return;
             }
 
@@ -1148,7 +1147,7 @@ export class PageRow extends Module {
                 getDragData() ?
                 new AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) :
                 this.isUngrouping() ?
-                new UngroupElementCommand(this.currentToolbar, newPageRow, config, "top") :
+                new UngroupElementCommand(this.currentToolbar, newPageRow, config, "none") :
                 new DragElementCommand(this.currentElement, newPageRow, true, true);
             await commandHistory.execute(dragCmd);
         }
@@ -1163,7 +1162,7 @@ export class PageRow extends Module {
                 getDragData() ?
                 new AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) : 
                 this.isUngrouping() ?
-                new UngroupElementCommand(this.currentToolbar, newPageRow, config, "bottom") :
+                new UngroupElementCommand(this.currentToolbar, newPageRow, config, "none") :
                 new DragElementCommand(this.currentElement, newPageRow, true, true);
             await commandHistory.execute(dragCmd);
         }

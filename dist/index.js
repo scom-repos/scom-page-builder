@@ -4694,8 +4694,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 if (dropToolbar == self.currentToolbar)
                     dropElm = null;
                 // collide with other section 
-                if (collision.collisionType == "mutual" /* || overlap.overlapType == "border"*/) {
-                    // check which side is the merge target
+                if (collision.collisionType == "mutual" && !collision.rowBlock) {
                     if ((!collision.mergeSide && !dropElm) || (collision.section && !dropElm))
                         return;
                 }
@@ -4933,7 +4932,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const dragCmd = (0, index_41.getDragData)() ?
                     new index_42.AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) :
                     this.isUngrouping() ?
-                        new index_42.UngroupElementCommand(this.currentToolbar, newPageRow, config, "top") :
+                        new index_42.UngroupElementCommand(this.currentToolbar, newPageRow, config, "none") :
                         new index_42.DragElementCommand(this.currentElement, newPageRow, true, true);
                 await index_42.commandHistory.execute(dragCmd);
             }
@@ -4946,7 +4945,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const dragCmd = (0, index_41.getDragData)() ?
                     new index_42.AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) :
                     this.isUngrouping() ?
-                        new index_42.UngroupElementCommand(this.currentToolbar, newPageRow, config, "bottom") :
+                        new index_42.UngroupElementCommand(this.currentToolbar, newPageRow, config, "none") :
                         new index_42.DragElementCommand(this.currentElement, newPageRow, true, true);
                 await index_42.commandHistory.execute(dragCmd);
             }
