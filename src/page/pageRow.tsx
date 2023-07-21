@@ -13,7 +13,7 @@ import { PageSection } from './pageSection';
 import { RowSettingsDialog } from '../dialogs/index';
 import './pageRow.css';
 import { EVENT } from '../const/index';
-import { IPageElement, IPageSection, GAP_WIDTH, IPageSectionConfig, INIT_COLUMN_SPAN } from '../interface/index';
+import { IPageElement, IPageSection, GAP_WIDTH, IPageSectionConfig, INIT_COLUMN_SPAN, MAX_COLUMN } from '../interface/index';
 import { getDragData, getMargin, getPageConfig, pageObject, setDragData } from '../store/index';
 import {
     commandHistory,
@@ -367,6 +367,7 @@ export class PageRow extends Module {
             self.currentElement = resizableElm;
             toolbar = target.closest('ide-toolbar') as Control;
             self.addDottedLines();
+            toggleAllToolbarBoarder(true);
             self.isResizing = true;
             currentDot = parent;
             startX = e.clientX;
@@ -430,6 +431,7 @@ export class PageRow extends Module {
             document.removeEventListener('mousemove', mouseMoveHandler);
             document.removeEventListener('mouseup', mouseUpHandler);
             self.removeDottedLines();
+            toggleAllToolbarBoarder(false);
             self.isResizing = false;
             if (!toolbar) return;
             toolbar.width = 'initial';
@@ -518,13 +520,13 @@ export class PageRow extends Module {
                 // }
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                 self.addDottedLines();
+                toggleAllToolbarBoarder(true);
             } else {
                 event.preventDefault();
             }
             dragStartTarget = eventTarget;
             startX = event.clientX;
             startY = event.clientY;
-            toggleAllToolbarBoarder(true);
         });
 
         this.addEventListener('drag', function (event) {
@@ -578,6 +580,7 @@ export class PageRow extends Module {
                 self.pnlRow.minHeight = '180px';
                 self.toggleUI(true);
                 self.addDottedLines();
+                toggleAllToolbarBoarder(true);
                 return
             }
 
@@ -591,6 +594,7 @@ export class PageRow extends Module {
             else
                 target = enterTarget.closest('.fixed-grid-item') as Control;
             self.addDottedLines();
+            toggleAllToolbarBoarder(true);
             if (target) {
                 const column = Number(target.dataset.column);
                 const columnSpan = self.currentElement.dataset.columnSpan ? Number(self.currentElement.dataset.columnSpan) : INIT_COLUMN_SPAN;
@@ -1078,6 +1082,7 @@ export class PageRow extends Module {
                     self.isDragging = false;
                 }
                 self.removeDottedLines();
+                toggleAllToolbarBoarder(false);
                 removeRectangles();
             }
         });
@@ -1090,6 +1095,7 @@ export class PageRow extends Module {
             self.isDragging = false;
             setDragData(null);
             self.removeDottedLines();
+            toggleAllToolbarBoarder(false);
             removeRectangles();
             removeClass('is-dragenter');
             removeClass('row-entered');
@@ -1253,7 +1259,12 @@ export class PageRow extends Module {
     private addDottedLines() {
         const fixedGridItems = document.getElementsByClassName('fixed-grid-item');
         for (let i = 0; i < fixedGridItems.length; i++) {
-            fixedGridItems[i].classList.add('border-x-dotted');
+            if ((fixedGridItems[i] as any).dataset.column == 0)
+                fixedGridItems[i].classList.add('border-x-dotted-left');
+            else if ((fixedGridItems[i] as any).dataset.column == MAX_COLUMN)
+                fixedGridItems[i].classList.add('border-x-dotted-right');
+            else
+                fixedGridItems[i].classList.add('border-x-dotted');
         }
         const fixedGrids = document.getElementsByClassName('fixed-grid');
         for (let i = 0; i < fixedGrids.length; i++) {
@@ -1264,7 +1275,12 @@ export class PageRow extends Module {
     private removeDottedLines() {
         const fixedGridItems = document.getElementsByClassName('fixed-grid-item');
         for (let i = 0; i < fixedGridItems.length; i++) {
-            fixedGridItems[i].classList.remove('border-x-dotted');
+            if ((fixedGridItems[i] as any).dataset.column == 0)
+                fixedGridItems[i].classList.remove('border-x-dotted-left');
+            else if ((fixedGridItems[i] as any).dataset.column == MAX_COLUMN)
+                fixedGridItems[i].classList.remove('border-x-dotted-right');
+            else
+                fixedGridItems[i].classList.remove('border-x-dotted');
         }
         const fixedGrids = document.getElementsByClassName('fixed-grid');
         for (let i = 0; i < fixedGrids.length; i++) {

@@ -133,7 +133,16 @@ Styles.cssRule('ide-row', {
         },
         '.border-x-dotted': {
             borderLeft: 'dotted 1px #808080',
-            borderRight: 'dotted 1px #808080'
+            borderRight: 'dotted 1px #808080',
+            boxSizing: 'border-box',
+        },
+        '.border-x-dotted-left': {
+            borderRight: 'dotted 1px #808080',
+            boxSizing: 'border-box',
+        },
+        '.border-x-dotted-right': {
+            borderLeft: 'dotted 1px #808080',
+            boxSizing: 'border-box'
         },
         '.border-dotted': {
             outline: 'dotted 1px #808080'

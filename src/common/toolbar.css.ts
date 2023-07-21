@@ -19,7 +19,7 @@ Styles.cssRule('ide-toolbar', {
       }
     },
     '.ide-component': {
-      border: `2px solid transparent`,
+      border: `1px solid transparent`,
       boxSizing: 'border-box'
     },
     'i-button': {

@@ -3589,7 +3589,7 @@ define("@scom/scom-page-builder/page/pageSection.css.ts", ["require", "exports",
         display: 'block',
         position: 'relative',
         maxWidth: '100%',
-        border: '2px solid transparent',
+        // border: '2px solid transparent',
         transition: 'opacity .2s .1s cubic-bezier(0.4,0,0.2,1), left 0s .1s',
         $nest: {
             '&:hover .section-border': {
@@ -3628,7 +3628,7 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                 }
             },
             '.ide-component': {
-                border: `2px solid transparent`,
+                border: `1px solid transparent`,
                 boxSizing: 'border-box'
             },
             'i-button': {
@@ -3903,7 +3903,16 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
             },
             '.border-x-dotted': {
                 borderLeft: 'dotted 1px #808080',
-                borderRight: 'dotted 1px #808080'
+                borderRight: 'dotted 1px #808080',
+                boxSizing: 'border-box',
+            },
+            '.border-x-dotted-left': {
+                borderRight: 'dotted 1px #808080',
+                boxSizing: 'border-box',
+            },
+            '.border-x-dotted-right': {
+                borderLeft: 'dotted 1px #808080',
+                boxSizing: 'border-box'
             },
             '.border-dotted': {
                 outline: 'dotted 1px #808080'
@@ -4166,6 +4175,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.currentElement = resizableElm;
                 toolbar = target.closest('ide-toolbar');
                 self.addDottedLines();
+                toggleAllToolbarBoarder(true);
                 self.isResizing = true;
                 currentDot = parent;
                 startX = e.clientX;
@@ -4236,6 +4246,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 document.removeEventListener('mousemove', mouseMoveHandler);
                 document.removeEventListener('mouseup', mouseUpHandler);
                 self.removeDottedLines();
+                toggleAllToolbarBoarder(false);
                 self.isResizing = false;
                 if (!toolbar)
                     return;
@@ -4316,6 +4327,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     // }
                     components_24.application.EventBus.dispatch(index_39.EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                     self.addDottedLines();
+                    toggleAllToolbarBoarder(true);
                 }
                 else {
                     event.preventDefault();
@@ -4323,7 +4335,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 dragStartTarget = eventTarget;
                 startX = event.clientX;
                 startY = event.clientY;
-                toggleAllToolbarBoarder(true);
             });
             this.addEventListener('drag', function (event) {
                 event.preventDefault();
@@ -4377,6 +4388,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     self.pnlRow.minHeight = '180px';
                     self.toggleUI(true);
                     self.addDottedLines();
+                    toggleAllToolbarBoarder(true);
                     return;
                 }
                 const dragEnter = parentWrapper.querySelector('.is-dragenter');
@@ -4387,6 +4399,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 else
                     target = enterTarget.closest('.fixed-grid-item');
                 self.addDottedLines();
+                toggleAllToolbarBoarder(true);
                 if (target) {
                     const column = Number(target.dataset.column);
                     const columnSpan = self.currentElement.dataset.columnSpan ? Number(self.currentElement.dataset.columnSpan) : index_40.INIT_COLUMN_SPAN;
@@ -4873,6 +4886,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         self.isDragging = false;
                     }
                     self.removeDottedLines();
+                    toggleAllToolbarBoarder(false);
                     removeRectangles();
                 }
             });
@@ -4884,6 +4898,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.isDragging = false;
                 (0, index_41.setDragData)(null);
                 self.removeDottedLines();
+                toggleAllToolbarBoarder(false);
                 removeRectangles();
                 removeClass('is-dragenter');
                 removeClass('row-entered');
@@ -5038,7 +5053,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         addDottedLines() {
             const fixedGridItems = document.getElementsByClassName('fixed-grid-item');
             for (let i = 0; i < fixedGridItems.length; i++) {
-                fixedGridItems[i].classList.add('border-x-dotted');
+                if (fixedGridItems[i].dataset.column == 0)
+                    fixedGridItems[i].classList.add('border-x-dotted-left');
+                else if (fixedGridItems[i].dataset.column == index_40.MAX_COLUMN)
+                    fixedGridItems[i].classList.add('border-x-dotted-right');
+                else
+                    fixedGridItems[i].classList.add('border-x-dotted');
             }
             const fixedGrids = document.getElementsByClassName('fixed-grid');
             for (let i = 0; i < fixedGrids.length; i++) {
@@ -5048,7 +5068,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         removeDottedLines() {
             const fixedGridItems = document.getElementsByClassName('fixed-grid-item');
             for (let i = 0; i < fixedGridItems.length; i++) {
-                fixedGridItems[i].classList.remove('border-x-dotted');
+                if (fixedGridItems[i].dataset.column == 0)
+                    fixedGridItems[i].classList.remove('border-x-dotted-left');
+                else if (fixedGridItems[i].dataset.column == index_40.MAX_COLUMN)
+                    fixedGridItems[i].classList.remove('border-x-dotted-right');
+                else
+                    fixedGridItems[i].classList.remove('border-x-dotted');
             }
             const fixedGrids = document.getElementsByClassName('fixed-grid');
             for (let i = 0; i < fixedGrids.length; i++) {
