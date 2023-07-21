@@ -346,7 +346,8 @@ export class PageRow extends Module {
             collisionType: OverlapType, 
             section?: HTMLElement, // the section overlapped
             toolbar?: HTMLElement, // the toolbar overlapped
-            mergeSide?: IMergeType  // if the cursor is on an element directly, which side should be merged
+            mergeSide?: IMergeType,  // if the cursor is on an element directly, which side should be merged
+            rowBlock?: HTMLElement // check if need to trigger the row top/bottom block
         } 
         const parentWrapper = self.closest('#editor') || document;
 
@@ -562,20 +563,10 @@ export class PageRow extends Module {
                 self.addDottedLines();
                 return
             }
-            const rowBottom = enterTarget.closest(`.${ROW_BOTTOM_CLASS}`) as Control;
-            const rowTop = enterTarget.closest(`.${ROW_TOP_CLASS}`) as Control;
-            if (rowBottom) {
-                updateClass(rowBottom, 'is-dragenter');
-                removeRectangles();
-                return;
-            } else if (rowTop) {
-                updateClass(rowTop, 'is-dragenter');
-                removeRectangles();
-                return;
-            } else {
-                const dragEnter = parentWrapper.querySelector('.is-dragenter') as Control;
-                dragEnter && dragEnter.classList.remove('is-dragenter');
-            }
+
+            const dragEnter = parentWrapper.querySelector('.is-dragenter') as Control;
+            dragEnter && dragEnter.classList.remove('is-dragenter');
+
             let target: Control;
             
             if (collision.collisionType == "self")
@@ -755,8 +746,11 @@ export class PageRow extends Module {
                             return
                         }
                     }
-                } else return
-
+                } else if (collision.rowBlock) {
+                    updateClass(collision.rowBlock as Control, 'is-dragenter');
+                    removeRectangles();
+                    return;
+                } 
             } else return
 
             if (enterTarget == dragOverTarget) return
@@ -799,10 +793,26 @@ export class PageRow extends Module {
 
         function checkCollision(dropTarget: HTMLElement, dragTarget: HTMLElement, clientX: number, clientY: number): Collision {
             if (!dropTarget) return { collisionType: "none" }
+
+            const pageRow = dropTarget.closest('ide-row')
+            const rowRect = pageRow.getBoundingClientRect();
+            
+            // drop/dragover near the top/bottom block of row
+            const INNER_LIMIT = 15;
+            const OUTER_LIMIT = 3;
+            if (clientY >= rowRect.top - OUTER_LIMIT && clientY <= rowRect.top + INNER_LIMIT) {
+                // mouse is on the top row block
+                return { collisionType: "mutual", rowBlock: pageRow.querySelector(".row-top-block")}
+            } else if (clientY >= rowRect.bottom - INNER_LIMIT && clientY <= rowRect.bottom + OUTER_LIMIT) {
+                // mouse is on the bottom row block
+                return { collisionType: "mutual", rowBlock: pageRow.querySelector(".row-bottom-block")}
+            }
+
             if (!dragTarget) {
                 const dropSection = dropTarget.closest('ide-section') as HTMLElement;
                 const dropToolbar = dropTarget.closest('ide-toolbar') as HTMLElement;
                 if (dropToolbar) {
+                    // drop/dragover on an element
                     return {
                         collisionType: "mutual", 
                         section: dropSection, 
@@ -811,6 +821,7 @@ export class PageRow extends Module {
                         mergeSide: decideMergeSide(dropToolbar, clientX, clientY)
                     }
                 } else if (dropSection) {
+                    // drop/dragover on a section but not an element
                     return {
                         collisionType: "mutual", 
                         section: dropSection,
@@ -823,17 +834,8 @@ export class PageRow extends Module {
             const nearestCol = findNearestFixedGridInRow(clientX);
             const dropColumn: number = parseInt(nearestCol.getAttribute("data-column"));
             const grid = dropTarget.closest('.grid');
+            // drop/dragover outside grid
             if (!grid) return { collisionType: "none" }
-
-            const isPageRow = dropTarget.classList.contains('page-row');
-            let dropElm = (
-                isPageRow
-                    ? dropTarget.querySelector('.is-dragenter')
-                    : dropTarget.closest('.is-dragenter')
-            ) as Control;
-            
-            // drop on the front-block, back-block, top-block or bottom block directly
-            if (dropElm) return { collisionType: "none" }
 
             const sections: HTMLElement[] = Array.from(grid?.querySelectorAll('ide-section'));
             const sortedSections: HTMLElement[] = sections.sort((a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column));
@@ -858,8 +860,9 @@ export class PageRow extends Module {
                         const dropToolbar = dropTarget.closest('ide-toolbar') as HTMLElement;
                         const dragToolbar = dragTarget.closest('ide-toolbar') as HTMLElement;
                         if (dropToolbar && dropToolbar!=dragToolbar/*!dragTargetSection.contains(dropToolbar)*/) {
+                            // drop/dragover on the place which causes the dragging element overlapping with dropping element
                             return {
-                                collisionType: "mutual", 
+                                collisionType: "mutual",
                                 section: element, 
                                 toolbar: dropToolbar,
                                 // check which side is the merge target
@@ -875,9 +878,9 @@ export class PageRow extends Module {
             // if (endOfDragingElm >= self.maxColumn && (self.maxColumn - endOfLastElmInRow < parseInt(dragTargetSection.dataset.columnSpan))) return {
             //     overlapType: "border", section: undefined
             // }
-            // overlap with itself
+            // drop/dragover on itself
             if (dropTarget==dragTarget || dragTarget.contains(dropTarget)) return { collisionType: "self" }
-            // no overlap
+            // otherwise, no overlap
             return { collisionType: "none" }
         }
 
