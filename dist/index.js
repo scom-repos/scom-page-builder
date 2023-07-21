@@ -4691,7 +4691,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
                 let dropElm = parentWrapper.querySelector('.is-dragenter');
                 const dropToolbar = dropElm === null || dropElm === void 0 ? void 0 : dropElm.closest('ide-toolbar');
-                if (dropToolbar == self.currentToolbar)
+                if (self.currentToolbar && dropToolbar == self.currentToolbar)
                     dropElm = null;
                 // collide with other section 
                 if (collision.collisionType == "mutual" && !collision.rowBlock) {
@@ -4798,12 +4798,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 index_42.commandHistory.execute(dragCmd);
                             }
                         }
-                        else if (dropElm.classList.contains(ROW_BOTTOM_CLASS)) {
-                            const targetRow = dropElm.closest('ide-row');
+                        else if (dropElm.classList.contains(ROW_BOTTOM_CLASS) || (collision.rowBlock && collision.rowBlock.classList.contains('row-bottom-block'))) {
+                            const targetRow = collision.rowBlock.closest('ide-row');
                             targetRow && self.onAppendRow(targetRow);
                         }
-                        else if (dropElm.classList.contains(ROW_TOP_CLASS)) {
-                            const targetRow = dropElm.closest('ide-row');
+                        else if (dropElm.classList.contains(ROW_TOP_CLASS) || (collision.rowBlock && collision.rowBlock.classList.contains('row-top-block'))) {
+                            const targetRow = collision.rowBlock.closest('ide-row');
                             targetRow && self.onPrependRow(targetRow);
                         }
                         else {

@@ -908,13 +908,11 @@ export class PageRow extends Module {
             event.stopPropagation();
 
             const isUngrouping: boolean = self.isUngrouping();
-
-            // if target overlap with other section
             const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
 
             let dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
             const dropToolbar = dropElm?.closest('ide-toolbar')
-            if (dropToolbar == self.currentToolbar) dropElm = null
+            if (self.currentToolbar && dropToolbar == self.currentToolbar) dropElm = null
 
             // collide with other section 
             if (collision.collisionType == "mutual" && !collision.rowBlock) {
@@ -1013,11 +1011,11 @@ export class PageRow extends Module {
                             const dragCmd = new GroupElementCommand(dropElm, elementConfig ? null : self.currentElement, {...newConfig, firstId: generateUUID()}, false);
                             commandHistory.execute(dragCmd);
                         }
-                    } else if (dropElm.classList.contains(ROW_BOTTOM_CLASS)) {
-                        const targetRow = dropElm.closest('ide-row') as PageRow;
+                    } else if (dropElm.classList.contains(ROW_BOTTOM_CLASS) || (collision.rowBlock && collision.rowBlock.classList.contains('row-bottom-block'))) {
+                        const targetRow = collision.rowBlock.closest('ide-row') as PageRow;
                         targetRow && self.onAppendRow(targetRow);
-                    } else if (dropElm.classList.contains(ROW_TOP_CLASS)) {
-                        const targetRow = dropElm.closest('ide-row') as PageRow;
+                    } else if (dropElm.classList.contains(ROW_TOP_CLASS) || (collision.rowBlock && collision.rowBlock.classList.contains('row-top-block'))) {
+                        const targetRow = collision.rowBlock.closest('ide-row') as PageRow;
                         targetRow && self.onPrependRow(targetRow);
                     } else {
                         const isAppend = dropElm.classList.contains('back-block') || collision.mergeSide == "back";
