@@ -20,7 +20,7 @@ Styles.cssRule('ide-toolbar', {
     },
     '.ide-component': {
       border: `2px solid transparent`,
-      boxSizing: 'content-box'
+      boxSizing: 'border-box'
     },
     'i-button': {
       boxShadow: 'none'

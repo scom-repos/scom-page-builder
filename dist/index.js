@@ -3629,7 +3629,7 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
             },
             '.ide-component': {
                 border: `2px solid transparent`,
-                boxSizing: 'content-box'
+                boxSizing: 'border-box'
             },
             'i-button': {
                 boxShadow: 'none'
@@ -3786,7 +3786,8 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
         display: 'block',
         position: 'relative',
         transition: 'translate .3s ease-in',
-        border: '3px solid transparent',
+        border: '1px solid transparent',
+        boxSizing: 'border-box',
         backgroundColor: 'var(--builder-bg)',
         $nest: {
             '.drag-stack': {
@@ -3901,14 +3902,17 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
                 transition: 'width .5s .5s cubic-bezier(.4,0,.2,1), left 0s .4s'
             },
             '.border-x-dotted': {
-                borderLeft: 'dotted 1px black',
-                borderRight: 'dotted 1px black'
+                borderLeft: 'dotted 1px #808080',
+                borderRight: 'dotted 1px #808080'
             },
             '.border-dotted': {
-                border: 'dotted 1px black'
+                outline: 'dotted 1px #808080'
             },
             '.pnl-empty': {
                 userSelect: 'none'
+            },
+            '.to-be-dropped': {
+                outline: 'dotted 1px #808080'
             }
         }
     });
@@ -4319,6 +4323,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 dragStartTarget = eventTarget;
                 startX = event.clientX;
                 startY = event.clientY;
+                toggleAllToolbarBoarder(true);
             });
             this.addEventListener('drag', function (event) {
                 event.preventDefault();
@@ -4334,7 +4339,23 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 updateDraggingUI();
                 resetDragTarget();
                 resetPageRow();
+                toggleAllToolbarBoarder(false);
             });
+            function toggleAllToolbarBoarder(toggle) {
+                const toolbars = parentWrapper.querySelectorAll('ide-toolbar');
+                if (toggle) {
+                    toolbars.forEach(toolbar => {
+                        // if (self.currentToolbar != toolbar) {
+                        toolbar.classList.add('to-be-dropped');
+                        // }
+                    });
+                }
+                else {
+                    toolbars.forEach(toolbar => {
+                        toolbar.classList.remove('to-be-dropped');
+                    });
+                }
+            }
             function resetPageRow() {
                 var _a, _b;
                 self.pnlRow.minHeight = 'auto';
@@ -4687,7 +4708,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 event.preventDefault();
                 event.stopPropagation();
                 const isUngrouping = self.isUngrouping();
-                // if target overlap with other section
                 const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
                 let dropElm = parentWrapper.querySelector('.is-dragenter');
                 const dropToolbar = dropElm === null || dropElm === void 0 ? void 0 : dropElm.closest('ide-toolbar');

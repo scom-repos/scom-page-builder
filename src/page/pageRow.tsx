@@ -524,6 +524,7 @@ export class PageRow extends Module {
             dragStartTarget = eventTarget;
             startX = event.clientX;
             startY = event.clientY;
+            toggleAllToolbarBoarder(true);
         });
 
         this.addEventListener('drag', function (event) {
@@ -541,7 +542,23 @@ export class PageRow extends Module {
             updateDraggingUI();
             resetDragTarget();
             resetPageRow();
+            toggleAllToolbarBoarder(false);
         });
+
+        function toggleAllToolbarBoarder(toggle: boolean) {
+            const toolbars = parentWrapper.querySelectorAll('ide-toolbar');
+            if (toggle) {
+                toolbars.forEach(toolbar => {
+                    // if (self.currentToolbar != toolbar) {
+                        toolbar.classList.add('to-be-dropped')
+                    // }
+                })
+            } else {
+                toolbars.forEach(toolbar => {
+                    toolbar.classList.remove('to-be-dropped')
+                })
+            }
+        }
 
         function resetPageRow() {
             self.pnlRow.minHeight = 'auto';
