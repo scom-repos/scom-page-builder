@@ -8,7 +8,7 @@ Styles.cssRule('ide-section', {
     position: 'relative',
     maxWidth: '100%',
     border: '2px solid transparent',
-    transition: 'opacity .2s .1s cubic-bezier(0.4,0,0.2,1), left 0s .1s',
+    filter:'none',
     $nest: {
         '&:hover .section-border': {
             display: 'block',

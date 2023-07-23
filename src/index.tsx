@@ -157,17 +157,17 @@ export default class Editor extends Module {
             const isNearBottom = mouseY > bottom - scrollThreshold;
             const isNearWindowTop = mouseY <= scrollThreshold;
             const isNearWindowBottom = mouseY > window.innerHeight - scrollThreshold;
-            const scrollAmountTop = Math.max(scrollThreshold - (mouseY - top), 0);
-            const scrollAmountBottom = Math.max(scrollThreshold - (bottom - mouseY), 0);
+            // const scrollAmountTop = Math.max(scrollThreshold - (mouseY - top), 0);
+            // const scrollAmountBottom = Math.max(scrollThreshold - (bottom - mouseY), 0);
 
             if (isNearTop || isNearWindowTop) {
-                const scrollFactor = 1 + (scrollThreshold - scrollAmountTop) / scrollThreshold;
-                containerElement.scrollTop -= scrollSpeed * scrollFactor;
+                // const scrollFactor = 1 + (scrollThreshold - scrollAmountTop) / scrollThreshold;
+                containerElement.scrollTop -= scrollSpeed;
             } else if (isNearBottom || (isNearWindowBottom && bottom > window.innerHeight)) {
-                const scrollFactor = 1 + (scrollThreshold - scrollAmountBottom) / scrollThreshold;
-                containerElement.scrollTop += scrollSpeed * scrollFactor;
+                // const scrollFactor = 1 + (scrollThreshold - scrollAmountBottom) / scrollThreshold;
+                containerElement.scrollTop += scrollSpeed;
             } else {
-                containerElement.scrollTo({ behavior: 'auto', top: containerElement.scrollTop });
+                containerElement.scrollTo({ behavior: 'smooth', top: containerElement.scrollTop });
             }
         }
 
@@ -191,12 +191,12 @@ export default class Editor extends Module {
 
     private initDragEvent(containerElement: Control) {
         // remove ghost image when dragging
-        containerElement.addEventListener("dragstart", function( event ) {
-            const img = new Image();
-            img.src = "http://placehold.it/150/000000/ffffff";
-            img.style.opacity = '0'
-            event.dataTransfer.setDragImage(img, window.outerWidth, window.outerHeight);
-        }, false);
+        // containerElement.addEventListener("dragstart", async ( event ) => {
+        //     const img = new Image();
+        //     img.src = "http://placehold.it/150/000000/ffffff";
+        //     img.style.opacity = '0'
+        //     event.dataTransfer.setDragImage(img, window.outerWidth, window.outerHeight);
+        // }, false);
     }
 
     private initEventListeners() {
