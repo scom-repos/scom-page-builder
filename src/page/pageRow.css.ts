@@ -15,7 +15,8 @@ Styles.cssRule('ide-row', {
     display: 'block',
     position: 'relative',
     transition: 'translate .3s ease-in',
-    border: '3px solid transparent',
+    border: '1px solid transparent',
+    boxSizing: 'border-box',
     backgroundColor: 'var(--builder-bg)',
     $nest: {
         '.drag-stack': {
@@ -131,14 +132,26 @@ Styles.cssRule('ide-row', {
             transition: 'width .5s .5s cubic-bezier(.4,0,.2,1), left 0s .4s'
         },
         '.border-x-dotted': {
-            borderLeft: 'dotted 1px black',
-            borderRight: 'dotted 1px black'
+            borderLeft: 'dotted 1px #808080',
+            borderRight: 'dotted 1px #808080',
+            boxSizing: 'border-box',
+        },
+        '.border-x-dotted-left': {
+            borderRight: 'dotted 1px #808080',
+            boxSizing: 'border-box',
+        },
+        '.border-x-dotted-right': {
+            borderLeft: 'dotted 1px #808080',
+            boxSizing: 'border-box'
         },
         '.border-dotted': {
-            border: 'dotted 1px black'
+            outline: 'dotted 1px #808080'
         },
         '.pnl-empty': {
             userSelect: 'none'
+        },
+        '.to-be-dropped': {
+            outline: 'dotted 1px #808080'
         }
     }
 });

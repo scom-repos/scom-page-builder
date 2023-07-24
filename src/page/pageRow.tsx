@@ -13,7 +13,7 @@ import { PageSection } from './pageSection';
 import { RowSettingsDialog } from '../dialogs/index';
 import './pageRow.css';
 import { EVENT } from '../const/index';
-import { IPageElement, IPageSection, GAP_WIDTH, IPageSectionConfig, INIT_COLUMN_SPAN } from '../interface/index';
+import { IPageElement, IPageSection, GAP_WIDTH, IPageSectionConfig, INIT_COLUMN_SPAN, MAX_COLUMN } from '../interface/index';
 import { getDragData, getMargin, getPageConfig, pageObject, setDragData } from '../store/index';
 import {
     commandHistory,
@@ -28,6 +28,7 @@ import {
 } from '../command/index';
 import { IDEToolbar } from '../common/toolbar';
 import { generateUUID } from '../utility/index';
+import { IMergeType } from '../command/index'
 const Theme = Styles.Theme.ThemeVars;
 
 declare global {
@@ -131,12 +132,14 @@ export class PageRow extends Module {
         this.updateAlign();
     }
 
-    private async createNewElement(i: number) {
-        const sectionData = this.data.elements[i];
+    private async createNewElement(sectionData: any) {
+        // const sectionData = JSON.parse(JSON.stringify(this.data.elements[i]));
         return this.createElementFn(sectionData);
     }
 
     private async createElementFn(data: IPageElement) {
+        const isElmExist = document.getElementById(data.id);
+        if (isElmExist) return
         const pageSection = (
             <ide-section
                 id={data.id}
@@ -194,7 +197,7 @@ export class PageRow extends Module {
 
         if (elements && elements.length > 0) {
             for (let i = 0; i < elements.length; i++) {
-                await this.createNewElement(i);
+                await this.createNewElement(elements[i]);
             }
         }
         this.actionsBar.minHeight = '100%';
@@ -339,12 +342,12 @@ export class PageRow extends Module {
         let dragStartTarget: Control;
         let dragOverTarget: Control;
         type OverlapType = "none" | "self" | "mutual"; // | "border";
-        type MergeSide = "front" | "back" | "top" | "bottom";
         type Collision = {
             collisionType: OverlapType, 
             section?: HTMLElement, // the section overlapped
             toolbar?: HTMLElement, // the toolbar overlapped
-            mergeSide?: MergeSide  // if the cursor is on an element directly, which side should be merged
+            mergeSide?: IMergeType,  // if the cursor is on an element directly, which side should be merged
+            rowBlock?: HTMLElement // check if need to trigger the row top/bottom block
         } 
         const parentWrapper = self.closest('#editor') || document;
         let ghostImage: Control;
@@ -365,6 +368,7 @@ export class PageRow extends Module {
             self.currentElement = resizableElm;
             toolbar = target.closest('ide-toolbar') as Control;
             self.addDottedLines();
+            toggleAllToolbarBoarder(true);
             self.isResizing = true;
             currentDot = parent;
             startX = e.clientX;
@@ -428,6 +432,7 @@ export class PageRow extends Module {
             document.removeEventListener('mousemove', mouseMoveHandler);
             document.removeEventListener('mouseup', mouseUpHandler);
             self.removeDottedLines();
+            toggleAllToolbarBoarder(false);
             self.isResizing = false;
             if (!toolbar) return;
             toolbar.width = 'initial';
@@ -506,7 +511,10 @@ export class PageRow extends Module {
                 if (targetToolbar?.classList.contains('active') || toolbars.length==1) application.EventBus.dispatch(EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
                 else self.currentToolbar = undefined;
 
-                toolbars.forEach((toolbar: IDEToolbar) => toolbar.hideToolbars());
+                toolbars.forEach((toolbar: IDEToolbar) => {
+                    toolbar.hideToolbars();
+                    toolbar.classList.remove('active');
+                });
                 self.currentElement.classList.add('is-dragging');
 
                 // if (self.currentToolbar) {
@@ -524,6 +532,7 @@ export class PageRow extends Module {
 
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                 self.addDottedLines();
+                toggleAllToolbarBoarder(true);
             } else {
                 event.preventDefault();
             }
@@ -554,7 +563,23 @@ export class PageRow extends Module {
             // }
             resetDragTarget();
             resetPageRow();
+            toggleAllToolbarBoarder(false);
         });
+
+        function toggleAllToolbarBoarder(toggle: boolean) {
+            const toolbars = parentWrapper.querySelectorAll('ide-toolbar');
+            if (toggle) {
+                toolbars.forEach(toolbar => {
+                    // if (self.currentToolbar != toolbar) {
+                        toolbar.classList.add('to-be-dropped')
+                    // }
+                })
+            } else {
+                toolbars.forEach(toolbar => {
+                    toolbar.classList.remove('to-be-dropped')
+                })
+            }
+        }
 
         function resetPageRow() {
             self.pnlRow.minHeight = 'auto';
@@ -573,22 +598,13 @@ export class PageRow extends Module {
                 self.pnlRow.minHeight = '180px';
                 self.toggleUI(true);
                 self.addDottedLines();
+                toggleAllToolbarBoarder(true);
                 return
             }
-            const rowBottom = enterTarget.closest(`.${ROW_BOTTOM_CLASS}`) as Control;
-            const rowTop = enterTarget.closest(`.${ROW_TOP_CLASS}`) as Control;
-            if (rowBottom) {
-                updateClass(rowBottom, 'is-dragenter');
-                removeRectangles();
-                return;
-            } else if (rowTop) {
-                updateClass(rowTop, 'is-dragenter');
-                removeRectangles();
-                return;
-            } else {
-                const dragEnter = parentWrapper.querySelector('.is-dragenter') as Control;
-                dragEnter && dragEnter.classList.remove('is-dragenter');
-            }
+
+            const dragEnter = parentWrapper.querySelector('.is-dragenter') as Control;
+            dragEnter && dragEnter.classList.remove('is-dragenter');
+
             let target: Control;
             
             if (collision.collisionType == "self")
@@ -596,6 +612,7 @@ export class PageRow extends Module {
             else
                 target = enterTarget.closest('.fixed-grid-item') as Control;
             self.addDottedLines();
+            toggleAllToolbarBoarder(true);
             if (target) {
                 const column = Number(target.dataset.column);
                 const columnSpan = self.currentElement.dataset.columnSpan ? Number(self.currentElement.dataset.columnSpan) : INIT_COLUMN_SPAN;
@@ -767,8 +784,11 @@ export class PageRow extends Module {
                             return
                         }
                     }
-                } else return
-
+                } else if (collision.rowBlock) {
+                    updateClass(collision.rowBlock as Control, 'is-dragenter');
+                    removeRectangles();
+                    return;
+                } 
             } else return
 
             if (enterTarget == dragOverTarget) return
@@ -811,10 +831,26 @@ export class PageRow extends Module {
 
         function checkCollision(dropTarget: HTMLElement, dragTarget: HTMLElement, clientX: number, clientY: number): Collision {
             if (!dropTarget) return { collisionType: "none" }
+
+            const pageRow = dropTarget.closest('ide-row')
+            const rowRect = pageRow.getBoundingClientRect();
+            
+            // drop/dragover near the top/bottom block of row
+            const INNER_LIMIT = 15;
+            const OUTER_LIMIT = 3;
+            if (clientY >= rowRect.top - OUTER_LIMIT && clientY <= rowRect.top + INNER_LIMIT) {
+                // mouse is on the top row block
+                return { collisionType: "mutual", rowBlock: pageRow.querySelector(".row-top-block")}
+            } else if (clientY >= rowRect.bottom - INNER_LIMIT && clientY <= rowRect.bottom + OUTER_LIMIT) {
+                // mouse is on the bottom row block
+                return { collisionType: "mutual", rowBlock: pageRow.querySelector(".row-bottom-block")}
+            }
+
             if (!dragTarget) {
                 const dropSection = dropTarget.closest('ide-section') as HTMLElement;
                 const dropToolbar = dropTarget.closest('ide-toolbar') as HTMLElement;
                 if (dropToolbar) {
+                    // drop/dragover on an element
                     return {
                         collisionType: "mutual", 
                         section: dropSection, 
@@ -823,6 +859,7 @@ export class PageRow extends Module {
                         mergeSide: decideMergeSide(dropToolbar, clientX, clientY)
                     }
                 } else if (dropSection) {
+                    // drop/dragover on a section but not an element
                     return {
                         collisionType: "mutual", 
                         section: dropSection,
@@ -835,17 +872,8 @@ export class PageRow extends Module {
             const nearestCol = findNearestFixedGridInRow(clientX);
             const dropColumn: number = parseInt(nearestCol.getAttribute("data-column"));
             const grid = dropTarget.closest('.grid');
+            // drop/dragover outside grid
             if (!grid) return { collisionType: "none" }
-
-            const isPageRow = dropTarget.classList.contains('page-row');
-            let dropElm = (
-                isPageRow
-                    ? dropTarget.querySelector('.is-dragenter')
-                    : dropTarget.closest('.is-dragenter')
-            ) as Control;
-            
-            // drop on the front-block, back-block, top-block or bottom block directly
-            if (dropElm) return { collisionType: "none" }
 
             const sections: HTMLElement[] = Array.from(grid?.querySelectorAll('ide-section'));
             const sortedSections: HTMLElement[] = sections.sort((a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column));
@@ -866,11 +894,13 @@ export class PageRow extends Module {
                     // overlap with other section
                     if (condition1 || condition2) {
 
-                        // check if the cursor is on an element
+                        // check if the dragging toolbar overlap with other toolbar
                         const dropToolbar = dropTarget.closest('ide-toolbar') as HTMLElement;
-                        if (dropToolbar && !dragTargetSection.contains(dropToolbar)) {
+                        const dragToolbar = dragTarget.closest('ide-toolbar') as HTMLElement;
+                        if (dropToolbar && dropToolbar!=dragToolbar/*!dragTargetSection.contains(dropToolbar)*/) {
+                            // drop/dragover on the place which causes the dragging element overlapping with dropping element
                             return {
-                                collisionType: "mutual", 
+                                collisionType: "mutual",
                                 section: element, 
                                 toolbar: dropToolbar,
                                 // check which side is the merge target
@@ -886,13 +916,13 @@ export class PageRow extends Module {
             // if (endOfDragingElm >= self.maxColumn && (self.maxColumn - endOfLastElmInRow < parseInt(dragTargetSection.dataset.columnSpan))) return {
             //     overlapType: "border", section: undefined
             // }
-            // overlap with itself
+            // drop/dragover on itself
             if (dropTarget==dragTarget || dragTarget.contains(dropTarget)) return { collisionType: "self" }
-            // no overlap
+            // otherwise, no overlap
             return { collisionType: "none" }
         }
 
-        function decideMergeSide(dropToolbar: HTMLElement, clientX: number, clientY: number): MergeSide{
+        function decideMergeSide(dropToolbar: HTMLElement, clientX: number, clientY: number): IMergeType{
             let rect = dropToolbar.getBoundingClientRect();
             let offsetX = clientX - rect.left;
             let offsetY = clientY - rect.top;
@@ -923,17 +953,14 @@ export class PageRow extends Module {
             if (!self.currentElement) return;
 
             const isUngrouping: boolean = self.isUngrouping();
-
-            // if target overlap with other section
             const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
 
             let dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
             const dropToolbar = dropElm?.closest('ide-toolbar')
-            if (dropToolbar == self.currentToolbar) dropElm = null
+            if (self.currentToolbar && dropToolbar == self.currentToolbar) dropElm = null
 
             // collide with other section 
-            if (collision.collisionType == "mutual"/* || overlap.overlapType == "border"*/) {
-                // check which side is the merge target
+            if (collision.collisionType == "mutual" && !collision.rowBlock) {
                 if ((!collision.mergeSide && !dropElm) || (collision.section && !dropElm)) return;
             }
 
@@ -972,8 +999,9 @@ export class PageRow extends Module {
 
                 // ungrouping elm
                 if (isUngrouping) {
-                    const dragCmd = new UngroupElementCommand(self.currentToolbar, nearestFixedItem, config, false);
-                    commandHistory.execute(dragCmd);
+                    const dragCmd = new UngroupElementCommand(self.currentToolbar, nearestFixedItem, config, "none");
+                    dragCmd && commandHistory.execute(dragCmd);
+                    self.currentElement.opacity = 1;
                     updateDraggingUI();
                     removeRectangles();
                 } else if (self.currentElement.data) {
@@ -1004,8 +1032,9 @@ export class PageRow extends Module {
                     if (dropElm.classList.contains('bottom-block') || collision.mergeSide == "bottom") {
                         if (isUngrouping) {
                             const dropElement = eventTarget;
-                            const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, true, true);
-                            commandHistory.execute(dragCmd);
+                            const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, "bottom");
+                            dragCmd && commandHistory.execute(dragCmd);
+                            updateDraggingUI()
                             resetDragTarget();
                         } else {
                             const newConfig = self.getNewElementData();
@@ -1015,26 +1044,36 @@ export class PageRow extends Module {
                     } else if (dropElm.classList.contains('top-block') || collision.mergeSide == "top") {
                         if (isUngrouping) {
                             const dropElement = eventTarget;
-                            const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, true, false);
-                            commandHistory.execute(dragCmd);
+                            const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, "top");
+                            dragCmd && commandHistory.execute(dragCmd);
+                            updateDraggingUI()
                             resetDragTarget();
                         } else {
                             const newConfig = self.getNewElementData();
                             const dragCmd = new GroupElementCommand(dropElm, elementConfig ? null : self.currentElement, {...newConfig, firstId: generateUUID()}, false);
                             commandHistory.execute(dragCmd);
                         }
-                    } else if (dropElm.classList.contains(ROW_BOTTOM_CLASS)) {
-                        const targetRow = dropElm.closest('ide-row') as PageRow;
+                    } else if (dropElm.classList.contains(ROW_BOTTOM_CLASS) || (collision.rowBlock && collision.rowBlock.classList.contains('row-bottom-block'))) {
+                        const targetRow = collision.rowBlock.closest('ide-row') as PageRow;
                         targetRow && self.onAppendRow(targetRow);
-                    } else if (dropElm.classList.contains(ROW_TOP_CLASS)) {
-                        const targetRow = dropElm.closest('ide-row') as PageRow;
+                    } else if (dropElm.classList.contains(ROW_TOP_CLASS) || (collision.rowBlock && collision.rowBlock.classList.contains('row-top-block'))) {
+                        const targetRow = collision.rowBlock.closest('ide-row') as PageRow;
                         targetRow && self.onPrependRow(targetRow);
                     } else {
                         const isAppend = dropElm.classList.contains('back-block') || collision.mergeSide == "back";
-                        const dragCmd = elementConfig ?
+                        // ungroup & drop on front/back
+                        if (isUngrouping) {
+                            const dropElement = eventTarget;
+                            const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, collision.mergeSide);
+                            dragCmd && commandHistory.execute(dragCmd);
+                            self.currentElement.opacity = 1;
+                            resetDragTarget();
+                        } else {
+                            const dragCmd = elementConfig ?
                             new AddElementCommand(self.getNewElementData(), isAppend, false, dropElm, null) :
                             new DragElementCommand(self.currentElement, dropElm, isAppend);
-                        await commandHistory.execute(dragCmd);
+                            await commandHistory.execute(dragCmd);
+                        }
                     }
                     dropElm.classList.remove('is-dragenter');
                     self.isDragging = false;
@@ -1046,12 +1085,13 @@ export class PageRow extends Module {
                         const hasData = elements.find((el: IPageElement) => Object.keys(el.module || {}).length || el.elements?.length);
                         const dragCmd = !hasData && new AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
                         // drag new element on a new row
-                        dragCmd && await commandHistory.execute(dragCmd);
+                        await commandHistory.execute(dragCmd);
                     } else {
                         if (isUngrouping) {
                             const dropElement = eventTarget;
-                            const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, false);
-                            commandHistory.execute(dragCmd);
+                            const dragCmd = new UngroupElementCommand(self.currentToolbar, dropElement, config, collision.mergeSide);
+                            dragCmd && commandHistory.execute(dragCmd);
+                            updateDraggingUI()
                             resetDragTarget();
                         } else {
                             const dragCmd = new DragElementCommand(self.currentElement, pageRow, true, true);
@@ -1062,6 +1102,7 @@ export class PageRow extends Module {
                     self.isDragging = false;
                 }
                 self.removeDottedLines();
+                toggleAllToolbarBoarder(false);
                 removeRectangles();
             }
         });
@@ -1075,6 +1116,7 @@ export class PageRow extends Module {
             self.isDragging = false;
             setDragData(null);
             self.removeDottedLines();
+            toggleAllToolbarBoarder(false);
             removeRectangles();
             removeClass('is-dragenter');
             removeClass('row-entered');
@@ -1131,7 +1173,7 @@ export class PageRow extends Module {
                 getDragData() ?
                 new AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) :
                 this.isUngrouping() ?
-                new UngroupElementCommand(this.currentToolbar, newPageRow, config, false) :
+                new UngroupElementCommand(this.currentToolbar, newPageRow, config, "none") :
                 new DragElementCommand(this.currentElement, newPageRow, true, true);
             await commandHistory.execute(dragCmd);
         }
@@ -1146,7 +1188,7 @@ export class PageRow extends Module {
                 getDragData() ?
                 new AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) : 
                 this.isUngrouping() ?
-                new UngroupElementCommand(this.currentToolbar, newPageRow, config, false) :
+                new UngroupElementCommand(this.currentToolbar, newPageRow, config, "none") :
                 new DragElementCommand(this.currentElement, newPageRow, true, true);
             await commandHistory.execute(dragCmd);
         }
@@ -1222,7 +1264,12 @@ export class PageRow extends Module {
     private addDottedLines() {
         const fixedGridItems = document.getElementsByClassName('fixed-grid-item');
         for (let i = 0; i < fixedGridItems.length; i++) {
-            fixedGridItems[i].classList.add('border-x-dotted');
+            if ((fixedGridItems[i] as any).dataset.column == 0)
+                fixedGridItems[i].classList.add('border-x-dotted-left');
+            else if ((fixedGridItems[i] as any).dataset.column == MAX_COLUMN)
+                fixedGridItems[i].classList.add('border-x-dotted-right');
+            else
+                fixedGridItems[i].classList.add('border-x-dotted');
         }
         const fixedGrids = document.getElementsByClassName('fixed-grid');
         for (let i = 0; i < fixedGrids.length; i++) {
@@ -1233,7 +1280,12 @@ export class PageRow extends Module {
     private removeDottedLines() {
         const fixedGridItems = document.getElementsByClassName('fixed-grid-item');
         for (let i = 0; i < fixedGridItems.length; i++) {
-            fixedGridItems[i].classList.remove('border-x-dotted');
+            if ((fixedGridItems[i] as any).dataset.column == 0)
+                fixedGridItems[i].classList.remove('border-x-dotted-left');
+            else if ((fixedGridItems[i] as any).dataset.column == MAX_COLUMN)
+                fixedGridItems[i].classList.remove('border-x-dotted-right');
+            else
+                fixedGridItems[i].classList.remove('border-x-dotted');
         }
         const fixedGrids = document.getElementsByClassName('fixed-grid');
         for (let i = 0; i < fixedGrids.length; i++) {

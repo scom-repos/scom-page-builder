@@ -2053,20 +2053,26 @@ define("@scom/scom-page-builder/command/groupElement.ts", ["require", "exports",
     }
     exports.GroupElementCommand = GroupElementCommand;
 });
+define("@scom/scom-page-builder/command/type.ts", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+});
 define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports", "@scom/scom-page-builder/store/index.ts", "@ijstech/components", "@scom/scom-page-builder/const/index.ts"], function (require, exports, index_13, components_5, index_14) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.UngroupElementCommand = void 0;
     class UngroupElementCommand {
-        constructor(dragToolbar, dropElm, config, isReGroup, isAppend = true) {
+        constructor(dragToolbar, dropElm, config, mergeType) {
             // set dragging related params
             this.dragToolbar = dragToolbar;
             this.dragRow = dragToolbar.closest('ide-row');
             this.dragSection = dragToolbar.closest('ide-section');
+            this.oriDragRowData = JSON.parse(JSON.stringify(index_13.pageObject.getRow(this.dragRow.id.replace("row-", ""))));
             // set dropping  related params
             this.dropElm = dropElm;
             this.dropRow = dropElm.closest('ide-row');
             this.dropSection = dropElm.closest('ide-section');
+            this.oriDropRowData = JSON.parse(JSON.stringify(index_13.pageObject.getRow(this.dropRow.id.replace("row-", ""))));
             const dragRowId = this.dragRow.id.replace("row-", "");
             const oriSectionData = index_13.pageObject.getElement(dragRowId, this.dragSection.id);
             this.data = JSON.parse(JSON.stringify(dragToolbar.data));
@@ -2074,9 +2080,8 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             this.oriColSpan = this.data.columnSpan;
             const elmId = dragToolbar.id.replace("elm-", "");
             this.oriElmIndex = oriSectionData.elements.findIndex(e => e.id === elmId);
-            this.isReGroup = isReGroup;
             this.config = config;
-            this.isAppend = isAppend;
+            this.mergeType = mergeType;
         }
         async execute() {
             var _a, _b, _c, _d, _e, _f, _g, _h;
@@ -2113,8 +2118,9 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             }
             components_5.application.EventBus.dispatch(index_14.EVENT.ON_UPDATE_SECTIONS);
             const dropRowId = (_e = this.dropRow) === null || _e === void 0 ? void 0 : _e.id.replace('row-', '');
-            // regroup with new section
-            if (this.isReGroup) {
+            const MAX_COLUMN = index_13.pageObject.getColumnsNumber(dropRowId);
+            if (this.mergeType == "top" || this.mergeType == "bottom") {
+                // regroup with new section
                 const dragEnterElm = this.dropRow.closest('#pageBuilder').querySelector('.is-dragenter');
                 if (!dragEnterElm)
                     return;
@@ -2129,7 +2135,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 const isComposite = (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements) && (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements.length) && (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements.length) > 0;
                 if (isComposite) {
                     const elementIndex = dropToolbarId ? dropSectionData.elements.findIndex(elm => elm.id === dropToolbarId) : -1;
-                    const idx = this.isAppend ? elementIndex + 1 : elementIndex;
+                    const idx = (this.mergeType == "bottom") ? elementIndex + 1 : elementIndex;
                     index_13.pageObject.addElement(dropRowId, this.data, this.dropSection.id, idx);
                 }
                 else if (!isComposite) {
@@ -2142,12 +2148,9 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 }
                 const newDropData = index_13.pageObject.getElement(dropRowId, this.dropSection.id);
                 this.dropSection.setData(dropRowId, newDropData);
-                // simple ungroup
             }
-            else {
-                // create elm in a new section
-                // this.newId = generateUUID();
-                // const isMicroDapps = this.data?.module?.category === 'micro-dapps' || this.config?.module?.category === 'offers';
+            else if (this.mergeType == "none") {
+                // simple ungroup
                 const newElData = {
                     id: this.data.id,
                     column: parseInt(this.dropElm.dataset.column),
@@ -2159,6 +2162,125 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 index_13.pageObject.addElement(dropRowId, newElData);
                 const dropSectionData = index_13.pageObject.getRow(dropRowId);
                 this.dropRow.toggleUI(!!((_h = dropSectionData === null || dropSectionData === void 0 ? void 0 : dropSectionData.elements) === null || _h === void 0 ? void 0 : _h.length));
+            }
+            else {
+                // drop on the back/front block of a section
+                const dropRowData = index_13.pageObject.getRow(dropRowId);
+                // if the space left is enough: simply ungroup it
+                const sortedSectionList = dropRowData.elements.sort((a, b) => a.column - b.column);
+                const dragSectionIdx = sortedSectionList.findIndex((e) => e.column === parseInt(this.data.column));
+                const dropSectionIdx = sortedSectionList.findIndex((e) => e.column === parseInt(this.dropSection.data.column));
+                const isFront = this.mergeType == "front";
+                // drag to front block and ungroup
+                const frontLimit = isFront ?
+                    (dropSectionIdx == 0) ? 1 : sortedSectionList[dropSectionIdx - 1].column + sortedSectionList[dropSectionIdx - 1].columnSpan :
+                    sortedSectionList[dropSectionIdx].column + sortedSectionList[dropSectionIdx].columnSpan;
+                const backLimit = isFront ?
+                    sortedSectionList[dropSectionIdx].column - 1 :
+                    (dropSectionIdx == sortedSectionList.length - 1) ? MAX_COLUMN : sortedSectionList[dropSectionIdx + 1].column - 1;
+                const emptySpace = backLimit - frontLimit + 1;
+                // the columnSpan of new element should be same with the original section's
+                if (emptySpace >= sortedSectionList[dragSectionIdx].columnSpan) {
+                    // have enough space to place the dragging toolbar
+                    const newColumn = isFront ?
+                        sortedSectionList[dropSectionIdx].column - this.data.columnSpan :
+                        sortedSectionList[dropSectionIdx].column + sortedSectionList[dropSectionIdx].columnSpan;
+                    const newElData = {
+                        id: this.data.id,
+                        column: newColumn,
+                        columnSpan: this.data.columnSpan,
+                        properties: this.data.properties,
+                        module: this.data.module
+                    };
+                    this.appendElm = await this.dropRow.addElement(newElData);
+                    index_13.pageObject.addElement(dropRowId, newElData);
+                }
+                else if (emptySpace >= 1) {
+                    // no enough space to place the dragging toolbar
+                    // if emptySpace>=1, resize the dragging element to fit the space
+                    const newElData = {
+                        id: this.data.id,
+                        column: frontLimit,
+                        columnSpan: emptySpace,
+                        properties: this.data.properties,
+                        module: this.data.module
+                    };
+                    this.appendElm = await this.dropRow.addElement(newElData);
+                    index_13.pageObject.addElement(dropRowId, newElData);
+                }
+                else {
+                    // if no any space, check if moving the current section can allocate enough space for the new section
+                    const softBackLimit = (dropSectionIdx == sortedSectionList.length - 1) ? MAX_COLUMN : sortedSectionList[dropSectionIdx + 1].column - 1;
+                    const softFrontLimit = (dropSectionIdx == 0) ? 1 : sortedSectionList[dropSectionIdx - 1].column + sortedSectionList[dropSectionIdx - 1].columnSpan;
+                    const softEmptySpace = isFront ?
+                        softBackLimit - frontLimit + 1 :
+                        backLimit - softFrontLimit + 1;
+                    if (softEmptySpace >= sortedSectionList[dragSectionIdx].columnSpan + sortedSectionList[dropSectionIdx].columnSpan) {
+                        // if moving the current section can allocate enough space for the new section, do it
+                        // move the currect section
+                        sortedSectionList[dropSectionIdx].column = isFront ?
+                            frontLimit + sortedSectionList[dragSectionIdx].columnSpan :
+                            MAX_COLUMN - sortedSectionList[dragSectionIdx].columnSpan * 2 + 1;
+                        dropRowData.elements = sortedSectionList;
+                        this.dropRow.setData(dropRowData);
+                        // add new section
+                        const newColumn = isFront ?
+                            frontLimit :
+                            MAX_COLUMN - sortedSectionList[dropSectionIdx].columnSpan + 1;
+                        const newElData = {
+                            id: this.data.id,
+                            column: newColumn,
+                            columnSpan: sortedSectionList[dragSectionIdx].columnSpan,
+                            properties: this.data.properties,
+                            module: this.data.module
+                        };
+                        this.appendElm = await this.dropRow.addElement(newElData);
+                        index_13.pageObject.addElement(dropRowId, newElData);
+                    }
+                    else if (sortedSectionList[dropSectionIdx].columnSpan != 1) {
+                        // if moving the current section cannot allocate enough space for the new section,
+                        // check if the current section colSpan = 1
+                        // if the current section colSpan != 1, current section collapse to allocate space for new elm
+                        const splitIndex = Math.ceil(softEmptySpace / 2);
+                        // resize & move the currect section
+                        this.dropRow.clearData();
+                        sortedSectionList[dropSectionIdx].column = isFront ?
+                            frontLimit + splitIndex :
+                            softFrontLimit;
+                        sortedSectionList[dropSectionIdx].columnSpan = isFront ?
+                            softEmptySpace - splitIndex :
+                            splitIndex;
+                        const newRowData = {
+                            id: dropRowData.id,
+                            row: dropRowData.row,
+                            elements: sortedSectionList
+                        };
+                        this.dropRow.setData(newRowData);
+                        // add new section
+                        const newColumn = isFront ?
+                            frontLimit :
+                            softFrontLimit + splitIndex;
+                        const newColumnSpan = isFront ?
+                            splitIndex :
+                            softEmptySpace - splitIndex;
+                        const newElData = {
+                            id: this.data.id,
+                            column: newColumn,
+                            columnSpan: newColumnSpan,
+                            properties: this.data.properties,
+                            module: this.data.module
+                        };
+                        this.appendElm = await this.dropRow.addElement(newElData);
+                        index_13.pageObject.addElement(dropRowId, newElData);
+                    }
+                    else {
+                        // if the current section colSpan == 1, cannot resize and ungroup
+                        this.dropRow.setData(this.oriDropRowData);
+                        this.dragRow.setData(this.oriDragRowData);
+                    }
+                }
+                // const dropSectionData = pageObject.getRow(dropRowId);
+                // this.dropRow.toggleUI(!!dropSectionData?.elements?.length);
             }
         }
         async undo() {
@@ -2212,7 +2334,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             const elementList = [newElData];
             const isComposite = (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements) && (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements.length) && (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements.length) > 0;
             if (isComposite) {
-                const idx = this.isAppend ? this.oriElmIndex : this.oriElmIndex - 1;
+                const idx = (this.mergeType == "bottom") ? this.oriElmIndex : this.oriElmIndex - 1;
                 index_13.pageObject.addElement(dropRowId, newElData, prevSectionId, idx);
             }
             else {
@@ -3467,16 +3589,19 @@ define("@scom/scom-page-builder/page/pageSection.css.ts", ["require", "exports",
         display: 'block',
         position: 'relative',
         maxWidth: '100%',
-        border: '2px solid transparent',
-        filter: 'none',
+        // border: '2px solid transparent',
+        transition: 'opacity .2s .1s cubic-bezier(0.4,0,0.2,1), left 0s .1s',
         $nest: {
             '&:hover .section-border': {
                 display: 'block',
                 outline: `2px solid ${Theme.colors.primary.main}`,
                 transition: 'border ease-in .2s'
             },
-            '&.is-dragging .section-border': {
-                outline: `2px solid transparent !important`,
+            '&.is-dragging .section-border, &.is-dragging .hover-border': {
+                outline: `none`,
+            },
+            '&.is-dragging .resize-icon': {
+                display: 'none'
             },
             'h1, h2, h3, h4, h5, h6': {
                 margin: 0
@@ -3498,16 +3623,13 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
     components_22.Styles.cssRule('ide-toolbar', {
         display: 'block',
         $nest: {
-            '&:not(.is-dragging)': {
-                $nest: {
-                    '.ide-component.active, .ide-component.hover-border': {
-                        outline: `2px solid ${Theme.colors.primary.main}`
-                    }
-                }
+            '.ide-component.active, .ide-component.hover-border': {
+                outline: `2px solid ${Theme.colors.primary.main}`
             },
             '.ide-component': {
-                border: `2px solid transparent`,
-                boxSizing: 'content-box'
+                border: `1px solid transparent`,
+                outline: 'none',
+                boxSizing: 'border-box'
             },
             'i-button': {
                 boxShadow: 'none'
@@ -3582,6 +3704,9 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
             },
             '&.active .resize-icon': {
                 opacity: 1
+            },
+            '&.is-dragging .resize-icon': {
+                display: 'none'
             },
             '.nw-resize': {
                 cursor: 'nw-resize !important'
@@ -3664,7 +3789,8 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
         display: 'block',
         position: 'relative',
         transition: 'translate .3s ease-in',
-        border: '3px solid transparent',
+        border: '1px solid transparent',
+        boxSizing: 'border-box',
         backgroundColor: 'var(--builder-bg)',
         $nest: {
             '.drag-stack': {
@@ -3779,14 +3905,26 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
                 transition: 'width .5s .5s cubic-bezier(.4,0,.2,1), left 0s .4s'
             },
             '.border-x-dotted': {
-                borderLeft: 'dotted 1px black',
-                borderRight: 'dotted 1px black'
+                borderLeft: 'dotted 1px #808080',
+                borderRight: 'dotted 1px #808080',
+                boxSizing: 'border-box',
+            },
+            '.border-x-dotted-left': {
+                borderRight: 'dotted 1px #808080',
+                boxSizing: 'border-box',
+            },
+            '.border-x-dotted-right': {
+                borderLeft: 'dotted 1px #808080',
+                boxSizing: 'border-box'
             },
             '.border-dotted': {
-                border: 'dotted 1px black'
+                outline: 'dotted 1px #808080'
             },
             '.pnl-empty': {
                 userSelect: 'none'
+            },
+            '.to-be-dropped': {
+                outline: 'dotted 1px #808080'
             }
         }
     });
@@ -3846,11 +3984,14 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 this.pnlEmty.visible = !value;
             this.updateAlign();
         }
-        async createNewElement(i) {
-            const sectionData = this.data.elements[i];
+        async createNewElement(sectionData) {
+            // const sectionData = JSON.parse(JSON.stringify(this.data.elements[i]));
             return this.createElementFn(sectionData);
         }
         async createElementFn(data) {
+            const isElmExist = document.getElementById(data.id);
+            if (isElmExist)
+                return;
             const pageSection = (this.$render("ide-section", { id: data.id, readonly: this._readonly, display: "block", maxWidth: "100%", maxHeight: "100%", position: "relative", minWidth: 0 }));
             if (!this._readonly) {
                 pageSection.setAttribute('draggable', 'true');
@@ -3894,7 +4035,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.isChanged = ((_b = this.parentElement) === null || _b === void 0 ? void 0 : _b.nodeName) !== 'BUILDER-HEADER';
             if (elements && elements.length > 0) {
                 for (let i = 0; i < elements.length; i++) {
-                    await this.createNewElement(i);
+                    await this.createNewElement(elements[i]);
                 }
             }
             this.actionsBar.minHeight = '100%';
@@ -4038,6 +4179,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.currentElement = resizableElm;
                 toolbar = target.closest('ide-toolbar');
                 self.addDottedLines();
+                toggleAllToolbarBoarder(true);
                 self.isResizing = true;
                 currentDot = parent;
                 startX = e.clientX;
@@ -4108,6 +4250,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 document.removeEventListener('mousemove', mouseMoveHandler);
                 document.removeEventListener('mouseup', mouseUpHandler);
                 self.removeDottedLines();
+                toggleAllToolbarBoarder(false);
                 self.isResizing = false;
                 if (!toolbar)
                     return;
@@ -4179,7 +4322,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         components_24.application.EventBus.dispatch(index_39.EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
                     else
                         self.currentToolbar = undefined;
-                    toolbars.forEach((toolbar) => toolbar.hideToolbars());
+                    toolbars.forEach((toolbar) => {
+                        toolbar.hideToolbars();
+                        toolbar.classList.remove('active');
+                    });
                     self.currentElement.classList.add('is-dragging');
                     // if (self.currentToolbar) {
                     //     toolbars.forEach(toolbar => {
@@ -4194,6 +4340,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     ghostImage = dragElm.cloneNode(true);
                     components_24.application.EventBus.dispatch(index_39.EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                     self.addDottedLines();
+                    toggleAllToolbarBoarder(true);
                 }
                 else {
                     event.preventDefault();
@@ -4223,7 +4370,23 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 // }
                 resetDragTarget();
                 resetPageRow();
+                toggleAllToolbarBoarder(false);
             });
+            function toggleAllToolbarBoarder(toggle) {
+                const toolbars = parentWrapper.querySelectorAll('ide-toolbar');
+                if (toggle) {
+                    toolbars.forEach(toolbar => {
+                        // if (self.currentToolbar != toolbar) {
+                        toolbar.classList.add('to-be-dropped');
+                        // }
+                    });
+                }
+                else {
+                    toolbars.forEach(toolbar => {
+                        toolbar.classList.remove('to-be-dropped');
+                    });
+                }
+            }
             function resetPageRow() {
                 var _a, _b;
                 self.pnlRow.minHeight = 'auto';
@@ -4244,30 +4407,18 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     self.pnlRow.minHeight = '180px';
                     self.toggleUI(true);
                     self.addDottedLines();
+                    toggleAllToolbarBoarder(true);
                     return;
                 }
-                const rowBottom = enterTarget.closest(`.${ROW_BOTTOM_CLASS}`);
-                const rowTop = enterTarget.closest(`.${ROW_TOP_CLASS}`);
-                if (rowBottom) {
-                    updateClass(rowBottom, 'is-dragenter');
-                    removeRectangles();
-                    return;
-                }
-                else if (rowTop) {
-                    updateClass(rowTop, 'is-dragenter');
-                    removeRectangles();
-                    return;
-                }
-                else {
-                    const dragEnter = parentWrapper.querySelector('.is-dragenter');
-                    dragEnter && dragEnter.classList.remove('is-dragenter');
-                }
+                const dragEnter = parentWrapper.querySelector('.is-dragenter');
+                dragEnter && dragEnter.classList.remove('is-dragenter');
                 let target;
                 if (collision.collisionType == "self")
                     target = findNearestFixedGridInRow(clientX);
                 else
                     target = enterTarget.closest('.fixed-grid-item');
                 self.addDottedLines();
+                toggleAllToolbarBoarder(true);
                 if (target) {
                     const column = Number(target.dataset.column);
                     const columnSpan = self.currentElement.dataset.columnSpan ? Number(self.currentElement.dataset.columnSpan) : index_40.INIT_COLUMN_SPAN;
@@ -4435,8 +4586,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             }
                         }
                     }
-                    else
+                    else if (collision.rowBlock) {
+                        updateClass(collision.rowBlock, 'is-dragenter');
+                        removeRectangles();
                         return;
+                    }
                 }
                 else
                     return;
@@ -4475,10 +4629,24 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             function checkCollision(dropTarget, dragTarget, clientX, clientY) {
                 if (!dropTarget)
                     return { collisionType: "none" };
+                const pageRow = dropTarget.closest('ide-row');
+                const rowRect = pageRow.getBoundingClientRect();
+                // drop/dragover near the top/bottom block of row
+                const INNER_LIMIT = 15;
+                const OUTER_LIMIT = 3;
+                if (clientY >= rowRect.top - OUTER_LIMIT && clientY <= rowRect.top + INNER_LIMIT) {
+                    // mouse is on the top row block
+                    return { collisionType: "mutual", rowBlock: pageRow.querySelector(".row-top-block") };
+                }
+                else if (clientY >= rowRect.bottom - INNER_LIMIT && clientY <= rowRect.bottom + OUTER_LIMIT) {
+                    // mouse is on the bottom row block
+                    return { collisionType: "mutual", rowBlock: pageRow.querySelector(".row-bottom-block") };
+                }
                 if (!dragTarget) {
                     const dropSection = dropTarget.closest('ide-section');
                     const dropToolbar = dropTarget.closest('ide-toolbar');
                     if (dropToolbar) {
+                        // drop/dragover on an element
                         return {
                             collisionType: "mutual",
                             section: dropSection,
@@ -4488,6 +4656,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         };
                     }
                     else if (dropSection) {
+                        // drop/dragover on a section but not an element
                         return {
                             collisionType: "mutual",
                             section: dropSection,
@@ -4502,14 +4671,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const nearestCol = findNearestFixedGridInRow(clientX);
                 const dropColumn = parseInt(nearestCol.getAttribute("data-column"));
                 const grid = dropTarget.closest('.grid');
+                // drop/dragover outside grid
                 if (!grid)
-                    return { collisionType: "none" };
-                const isPageRow = dropTarget.classList.contains('page-row');
-                let dropElm = (isPageRow
-                    ? dropTarget.querySelector('.is-dragenter')
-                    : dropTarget.closest('.is-dragenter'));
-                // drop on the front-block, back-block, top-block or bottom block directly
-                if (dropElm)
                     return { collisionType: "none" };
                 const sections = Array.from(grid === null || grid === void 0 ? void 0 : grid.querySelectorAll('ide-section'));
                 const sortedSections = sections.sort((a, b) => Number(a.dataset.column) - Number(b.dataset.column));
@@ -4525,9 +4688,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         const condition2 = startOfDroppingElm >= startOfDragingElm && startOfDroppingElm <= endOfDragingElm;
                         // overlap with other section
                         if (condition1 || condition2) {
-                            // check if the cursor is on an element
+                            // check if the dragging toolbar overlap with other toolbar
                             const dropToolbar = dropTarget.closest('ide-toolbar');
-                            if (dropToolbar && !dragTargetSection.contains(dropToolbar)) {
+                            const dragToolbar = dragTarget.closest('ide-toolbar');
+                            if (dropToolbar && dropToolbar != dragToolbar /*!dragTargetSection.contains(dropToolbar)*/) {
+                                // drop/dragover on the place which causes the dragging element overlapping with dropping element
                                 return {
                                     collisionType: "mutual",
                                     section: element,
@@ -4546,10 +4711,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 // if (endOfDragingElm >= self.maxColumn && (self.maxColumn - endOfLastElmInRow < parseInt(dragTargetSection.dataset.columnSpan))) return {
                 //     overlapType: "border", section: undefined
                 // }
-                // overlap with itself
+                // drop/dragover on itself
                 if (dropTarget == dragTarget || dragTarget.contains(dropTarget))
                     return { collisionType: "self" };
-                // no overlap
+                // otherwise, no overlap
                 return { collisionType: "none" };
             }
             function decideMergeSide(dropToolbar, clientX, clientY) {
@@ -4580,15 +4745,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 if (!self.currentElement)
                     return;
                 const isUngrouping = self.isUngrouping();
-                // if target overlap with other section
                 const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
                 let dropElm = parentWrapper.querySelector('.is-dragenter');
                 const dropToolbar = dropElm === null || dropElm === void 0 ? void 0 : dropElm.closest('ide-toolbar');
-                if (dropToolbar == self.currentToolbar)
+                if (self.currentToolbar && dropToolbar == self.currentToolbar)
                     dropElm = null;
                 // collide with other section 
-                if (collision.collisionType == "mutual" /* || overlap.overlapType == "border"*/) {
-                    // check which side is the merge target
+                if (collision.collisionType == "mutual" && !collision.rowBlock) {
                     if ((!collision.mergeSide && !dropElm) || (collision.section && !dropElm))
                         return;
                 }
@@ -4626,8 +4789,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     self.isDragging = true;
                     // ungrouping elm
                     if (isUngrouping) {
-                        const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, nearestFixedItem, config, false);
-                        index_42.commandHistory.execute(dragCmd);
+                        const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, nearestFixedItem, config, "none");
+                        dragCmd && index_42.commandHistory.execute(dragCmd);
+                        self.currentElement.opacity = 1;
                         updateDraggingUI();
                         removeRectangles();
                     }
@@ -4662,8 +4826,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         if (dropElm.classList.contains('bottom-block') || collision.mergeSide == "bottom") {
                             if (isUngrouping) {
                                 const dropElement = eventTarget;
-                                const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, dropElement, config, true, true);
-                                index_42.commandHistory.execute(dragCmd);
+                                const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, dropElement, config, "bottom");
+                                dragCmd && index_42.commandHistory.execute(dragCmd);
+                                updateDraggingUI();
                                 resetDragTarget();
                             }
                             else {
@@ -4675,8 +4840,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         else if (dropElm.classList.contains('top-block') || collision.mergeSide == "top") {
                             if (isUngrouping) {
                                 const dropElement = eventTarget;
-                                const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, dropElement, config, true, false);
-                                index_42.commandHistory.execute(dragCmd);
+                                const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, dropElement, config, "top");
+                                dragCmd && index_42.commandHistory.execute(dragCmd);
+                                updateDraggingUI();
                                 resetDragTarget();
                             }
                             else {
@@ -4685,20 +4851,30 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 index_42.commandHistory.execute(dragCmd);
                             }
                         }
-                        else if (dropElm.classList.contains(ROW_BOTTOM_CLASS)) {
-                            const targetRow = dropElm.closest('ide-row');
+                        else if (dropElm.classList.contains(ROW_BOTTOM_CLASS) || (collision.rowBlock && collision.rowBlock.classList.contains('row-bottom-block'))) {
+                            const targetRow = collision.rowBlock.closest('ide-row');
                             targetRow && self.onAppendRow(targetRow);
                         }
-                        else if (dropElm.classList.contains(ROW_TOP_CLASS)) {
-                            const targetRow = dropElm.closest('ide-row');
+                        else if (dropElm.classList.contains(ROW_TOP_CLASS) || (collision.rowBlock && collision.rowBlock.classList.contains('row-top-block'))) {
+                            const targetRow = collision.rowBlock.closest('ide-row');
                             targetRow && self.onPrependRow(targetRow);
                         }
                         else {
                             const isAppend = dropElm.classList.contains('back-block') || collision.mergeSide == "back";
-                            const dragCmd = elementConfig ?
-                                new index_42.AddElementCommand(self.getNewElementData(), isAppend, false, dropElm, null) :
-                                new index_42.DragElementCommand(self.currentElement, dropElm, isAppend);
-                            await index_42.commandHistory.execute(dragCmd);
+                            // ungroup & drop on front/back
+                            if (isUngrouping) {
+                                const dropElement = eventTarget;
+                                const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, dropElement, config, collision.mergeSide);
+                                dragCmd && index_42.commandHistory.execute(dragCmd);
+                                self.currentElement.opacity = 1;
+                                resetDragTarget();
+                            }
+                            else {
+                                const dragCmd = elementConfig ?
+                                    new index_42.AddElementCommand(self.getNewElementData(), isAppend, false, dropElm, null) :
+                                    new index_42.DragElementCommand(self.currentElement, dropElm, isAppend);
+                                await index_42.commandHistory.execute(dragCmd);
+                            }
                         }
                         dropElm.classList.remove('is-dragenter');
                         self.isDragging = false;
@@ -4711,13 +4887,14 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             const hasData = elements.find((el) => { var _a; return Object.keys(el.module || {}).length || ((_a = el.elements) === null || _a === void 0 ? void 0 : _a.length); });
                             const dragCmd = !hasData && new index_42.AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
                             // drag new element on a new row
-                            dragCmd && await index_42.commandHistory.execute(dragCmd);
+                            await index_42.commandHistory.execute(dragCmd);
                         }
                         else {
                             if (isUngrouping) {
                                 const dropElement = eventTarget;
-                                const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, dropElement, config, false);
-                                index_42.commandHistory.execute(dragCmd);
+                                const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, dropElement, config, collision.mergeSide);
+                                dragCmd && index_42.commandHistory.execute(dragCmd);
+                                updateDraggingUI();
                                 resetDragTarget();
                             }
                             else {
@@ -4728,6 +4905,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         self.isDragging = false;
                     }
                     self.removeDottedLines();
+                    toggleAllToolbarBoarder(false);
                     removeRectangles();
                 }
             });
@@ -4740,6 +4918,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.isDragging = false;
                 (0, index_41.setDragData)(null);
                 self.removeDottedLines();
+                toggleAllToolbarBoarder(false);
                 removeRectangles();
                 removeClass('is-dragenter');
                 removeClass('row-entered');
@@ -4791,7 +4970,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const dragCmd = (0, index_41.getDragData)() ?
                     new index_42.AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) :
                     this.isUngrouping() ?
-                        new index_42.UngroupElementCommand(this.currentToolbar, newPageRow, config, false) :
+                        new index_42.UngroupElementCommand(this.currentToolbar, newPageRow, config, "none") :
                         new index_42.DragElementCommand(this.currentElement, newPageRow, true, true);
                 await index_42.commandHistory.execute(dragCmd);
             }
@@ -4804,7 +4983,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const dragCmd = (0, index_41.getDragData)() ?
                     new index_42.AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) :
                     this.isUngrouping() ?
-                        new index_42.UngroupElementCommand(this.currentToolbar, newPageRow, config, false) :
+                        new index_42.UngroupElementCommand(this.currentToolbar, newPageRow, config, "none") :
                         new index_42.DragElementCommand(this.currentElement, newPageRow, true, true);
                 await index_42.commandHistory.execute(dragCmd);
             }
@@ -4877,7 +5056,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         addDottedLines() {
             const fixedGridItems = document.getElementsByClassName('fixed-grid-item');
             for (let i = 0; i < fixedGridItems.length; i++) {
-                fixedGridItems[i].classList.add('border-x-dotted');
+                if (fixedGridItems[i].dataset.column == 0)
+                    fixedGridItems[i].classList.add('border-x-dotted-left');
+                else if (fixedGridItems[i].dataset.column == index_40.MAX_COLUMN)
+                    fixedGridItems[i].classList.add('border-x-dotted-right');
+                else
+                    fixedGridItems[i].classList.add('border-x-dotted');
             }
             const fixedGrids = document.getElementsByClassName('fixed-grid');
             for (let i = 0; i < fixedGrids.length; i++) {
@@ -4887,7 +5071,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         removeDottedLines() {
             const fixedGridItems = document.getElementsByClassName('fixed-grid-item');
             for (let i = 0; i < fixedGridItems.length; i++) {
-                fixedGridItems[i].classList.remove('border-x-dotted');
+                if (fixedGridItems[i].dataset.column == 0)
+                    fixedGridItems[i].classList.remove('border-x-dotted-left');
+                else if (fixedGridItems[i].dataset.column == index_40.MAX_COLUMN)
+                    fixedGridItems[i].classList.remove('border-x-dotted-right');
+                else
+                    fixedGridItems[i].classList.remove('border-x-dotted');
             }
             const fixedGrids = document.getElementsByClassName('fixed-grid');
             for (let i = 0; i < fixedGrids.length; i++) {
