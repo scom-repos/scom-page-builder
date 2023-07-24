@@ -4295,9 +4295,15 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             function findClosestToolbarInSection(section, clientY) {
                 const toolbars = section.querySelectorAll('ide-toolbar');
                 for (let i = 0; i < toolbars.length; i++) {
-                    const bounds = toolbars[i].getBoundingClientRect();
-                    if (bounds.top <= clientY
-                        && bounds.top + bounds.height >= clientY) {
+                    const toolbarBound = toolbars[i].getBoundingClientRect();
+                    if (i == 0 && clientY <= toolbarBound.top) {
+                        return toolbars[i];
+                    }
+                    else if (i == toolbars.length - 1 && clientY >= toolbarBound.bottom) {
+                        return toolbars[i];
+                    }
+                    if (toolbarBound.top <= clientY
+                        && toolbarBound.top + toolbarBound.height >= clientY) {
                         return toolbars[i];
                     }
                 }
@@ -4639,9 +4645,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     }
                     else if (dropSection) {
                         // drop/dragover on a section but not an element
+                        const nearestToolbar = findClosestToolbarInSection(dropSection, clientY);
                         return {
                             collisionType: "mutual",
                             section: dropSection,
+                            toolbar: nearestToolbar,
+                            // check which side is the merge target
+                            mergeSide: decideMergeSide(nearestToolbar, clientX, clientY)
                         };
                     }
                     else
@@ -4663,7 +4673,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 for (let i = 0; i < sortedSections.length; i++) {
                     const element = sortedSections[i];
                     const condition = self.isUngrouping() ? true : element.id != dragTargetSection.id;
-                    if (condition) {
+                    if (condition && element) {
                         const startOfDroppingElm = parseInt(element.dataset.column);
                         const endOfDroppingElm = parseInt(element.dataset.column) + parseInt(element.dataset.columnSpan) - 1;
                         const condition1 = startOfDragingElm >= startOfDroppingElm && startOfDragingElm <= endOfDroppingElm;
@@ -4673,18 +4683,17 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             // check if the dragging toolbar overlap with other toolbar
                             const dropToolbar = dropTarget.closest('ide-toolbar');
                             const dragToolbar = dragTarget.closest('ide-toolbar');
-                            if (dropToolbar && dropToolbar != dragToolbar /*!dragTargetSection.contains(dropToolbar)*/) {
-                                // drop/dragover on the place which causes the dragging element overlapping with dropping element
+                            if (!dropToolbar || (dropToolbar && dropToolbar != dragToolbar)) {
+                                // drop/dragover on a section but not an element,
+                                // or drop/dragover on the place which causes the dragging element overlapping with dropping element
+                                const nearestToolbar = findClosestToolbarInSection(element, clientY);
                                 return {
                                     collisionType: "mutual",
                                     section: element,
-                                    toolbar: dropToolbar,
+                                    toolbar: nearestToolbar,
                                     // check which side is the merge target
-                                    mergeSide: decideMergeSide(dropToolbar, clientX, clientY)
+                                    mergeSide: decideMergeSide(nearestToolbar, clientX, clientY)
                                 };
-                            }
-                            else {
-                                return { collisionType: "mutual", section: element };
                             }
                         }
                     }
@@ -4694,7 +4703,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 //     overlapType: "border", section: undefined
                 // }
                 // drop/dragover on itself
-                if (dropTarget == dragTarget || dragTarget.contains(dropTarget))
+                if (dropTarget == dragTarget || dragTarget.contains(dropTarget) || dropTarget.contains(dragTarget))
                     return { collisionType: "self" };
                 // otherwise, no overlap
                 return { collisionType: "none" };
@@ -4722,6 +4731,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 event.stopPropagation();
                 const isUngrouping = self.isUngrouping();
                 const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
+                console.log("drop collision", collision);
                 let dropElm = parentWrapper.querySelector('.is-dragenter');
                 const dropToolbar = dropElm === null || dropElm === void 0 ? void 0 : dropElm.closest('ide-toolbar');
                 if (self.currentToolbar && dropToolbar == self.currentToolbar)

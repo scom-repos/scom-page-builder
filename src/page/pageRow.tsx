@@ -488,9 +488,14 @@ export class PageRow extends Module {
         function findClosestToolbarInSection(section: Control, clientY: number): IDEToolbar {
             const toolbars = section.querySelectorAll('ide-toolbar');
             for (let i=0; i<toolbars.length; i++) {
-                const bounds = toolbars[i].getBoundingClientRect();
-                if (bounds.top <= clientY 
-                && bounds.top + bounds.height >= clientY) {
+                const toolbarBound = toolbars[i].getBoundingClientRect();
+                if (i==0 && clientY <= toolbarBound.top) {
+                    return toolbars[i] as IDEToolbar;
+                } else if (i==toolbars.length-1 && clientY >= toolbarBound.bottom) {
+                    return toolbars[i] as IDEToolbar;
+                }
+                if (toolbarBound.top <= clientY 
+                 && toolbarBound.top + toolbarBound.height >= clientY) {
                     return toolbars[i] as IDEToolbar;
                 }
             }
@@ -843,9 +848,13 @@ export class PageRow extends Module {
                     }
                 } else if (dropSection) {
                     // drop/dragover on a section but not an element
+                    const nearestToolbar = findClosestToolbarInSection(dropSection as Control, clientY);
                     return {
-                        collisionType: "mutual", 
-                        section: dropSection,
+                        collisionType: "mutual",
+                        section: dropSection, 
+                        toolbar: nearestToolbar,
+                        // check which side is the merge target
+                        mergeSide: decideMergeSide(nearestToolbar, clientX, clientY)
                     }
                 } else return { collisionType: "none" }
             }
@@ -867,7 +876,7 @@ export class PageRow extends Module {
             for (let i=0; i<sortedSections.length; i++) {
                 const element = sortedSections[i];
                 const condition = self.isUngrouping()? true : element.id!=dragTargetSection.id;
-                if (condition){
+                if (condition && element){
 
                     const startOfDroppingElm: number = parseInt(element.dataset.column);
                     const endOfDroppingElm: number = parseInt(element.dataset.column) + parseInt(element.dataset.columnSpan) - 1;
@@ -880,17 +889,17 @@ export class PageRow extends Module {
                         // check if the dragging toolbar overlap with other toolbar
                         const dropToolbar = dropTarget.closest('ide-toolbar') as HTMLElement;
                         const dragToolbar = dragTarget.closest('ide-toolbar') as HTMLElement;
-                        if (dropToolbar && dropToolbar!=dragToolbar/*!dragTargetSection.contains(dropToolbar)*/) {
-                            // drop/dragover on the place which causes the dragging element overlapping with dropping element
+                        if (!dropToolbar || (dropToolbar && dropToolbar!=dragToolbar)) {
+                            // drop/dragover on a section but not an element,
+                            // or drop/dragover on the place which causes the dragging element overlapping with dropping element
+                            const nearestToolbar = findClosestToolbarInSection(element as Control, clientY);
                             return {
                                 collisionType: "mutual",
                                 section: element, 
-                                toolbar: dropToolbar,
+                                toolbar: nearestToolbar,
                                 // check which side is the merge target
-                                mergeSide: decideMergeSide(dropToolbar, clientX, clientY)
+                                mergeSide: decideMergeSide(nearestToolbar, clientX, clientY)
                             }
-                        } else {
-                            return { collisionType: "mutual", section: element }
                         }
                     }
                 }
@@ -900,7 +909,7 @@ export class PageRow extends Module {
             //     overlapType: "border", section: undefined
             // }
             // drop/dragover on itself
-            if (dropTarget==dragTarget || dragTarget.contains(dropTarget)) return { collisionType: "self" }
+            if (dropTarget==dragTarget || dragTarget.contains(dropTarget) || dropTarget.contains(dragTarget)) return { collisionType: "self" }
             // otherwise, no overlap
             return { collisionType: "none" }
         }
