@@ -515,7 +515,6 @@ export class PageRow extends Module {
                     toolbar.hideToolbars();
                     toolbar.classList.remove('active');
                 });
-                self.currentElement.classList.add('is-dragging');
 
                 // if (self.currentToolbar) {
                 //     toolbars.forEach(toolbar => {
@@ -526,9 +525,14 @@ export class PageRow extends Module {
                 // }
 
                 self.currentElement.style.zIndex = '1';
+                if (self.currentToolbar) {
+                    self.currentToolbar.style.position = 'relative';
+                    self.currentToolbar.style.zIndex = '1';
+                }
                 const dragElm = (!self.currentToolbar || toolbars.length === 1) ? self.currentElement : self.currentToolbar;
-                dragElm.style.zIndex = '1';
+                dragElm.classList.add('is-dragging');
                 ghostImage = dragElm.cloneNode(true) as any;
+                console.log(ghostImage)
 
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                 self.addDottedLines();
@@ -632,6 +636,7 @@ export class PageRow extends Module {
                 const targetRow = target.closest('#pnlRow') as Control
                 showRectangle(targetRow, colStart, columnSpan);
             } else {
+                removeRectangles();
                 const section = enterTarget.closest('ide-section') as Control;
                 const isDraggingEl = section && section.classList.contains('is-dragging');
                 if (section && section.id !== self.currentElement.id && !isDraggingEl) {
@@ -1054,10 +1059,10 @@ export class PageRow extends Module {
                             commandHistory.execute(dragCmd);
                         }
                     } else if (dropElm.classList.contains(ROW_BOTTOM_CLASS) || (collision.rowBlock && collision.rowBlock.classList.contains('row-bottom-block'))) {
-                        const targetRow = collision.rowBlock.closest('ide-row') as PageRow;
+                        const targetRow = collision?.rowBlock?.closest('ide-row') as PageRow;
                         targetRow && self.onAppendRow(targetRow);
                     } else if (dropElm.classList.contains(ROW_TOP_CLASS) || (collision.rowBlock && collision.rowBlock.classList.contains('row-top-block'))) {
-                        const targetRow = collision.rowBlock.closest('ide-row') as PageRow;
+                        const targetRow = collision?.rowBlock?.closest('ide-row') as PageRow;
                         targetRow && self.onPrependRow(targetRow);
                     } else {
                         const isAppend = dropElm.classList.contains('back-block') || collision.mergeSide == "back";
@@ -1155,6 +1160,10 @@ export class PageRow extends Module {
                 self.currentElement.opacity = 1;
                 self.currentElement.style.zIndex = '';
                 self.currentElement.classList.remove('is-dragging');
+                // const children = self.currentElement.querySelectorAll('ide-toolbar');
+                // children.forEach(toolbar => {
+                //     (toolbar as HTMLElement).style.opacity = '1';
+                // });
             }
             if (self.currentToolbar) {
                 self.currentToolbar.opacity = 1;
