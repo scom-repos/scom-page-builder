@@ -721,22 +721,19 @@ declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
     import { Control } from "@ijstech/components";
     import { IMergeType } from "@scom/scom-page-builder/command/type.ts";
     export class UngroupElementCommand implements ICommand {
-        private dragToolbar;
-        private dragSection;
-        private dragRow;
+        private dragToolbarId;
+        private dragSectionId;
+        private dragRowId;
         private oriDragRowData;
         private dropElm;
-        private dropSection;
-        private dropRow;
+        private dropSectionId;
+        private dropRowId;
         private oriDropRowData;
-        private oriCol;
-        private oriColSpan;
-        private oriElmIndex;
         private data;
         private appendElm;
         private config;
         private mergeType;
-        constructor(dragToolbar: Control, dropElm: Control, config: any, mergeType: IMergeType);
+        constructor(dragToolbar: Control, dragSection: Control, dropElm: Control, config: any, mergeType: IMergeType);
         execute(): Promise<void>;
         undo(): Promise<void>;
         redo(): void;
