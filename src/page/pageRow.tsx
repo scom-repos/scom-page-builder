@@ -482,14 +482,15 @@ export class PageRow extends Module {
             }
         }
 
-        function findClosestToolbarInSection(section: Control, clientY: number): IDEToolbar {
+        function findClosestToolbarInSection(section: Control, clientY: number): {toolbar: IDEToolbar, index: number} {
             if (!section) return
             const toolbars = section.querySelectorAll('ide-toolbar');
             for (let i=0; i<toolbars.length; i++) {
-                const bounds = toolbars[i].getBoundingClientRect();
-                if (bounds.top <= clientY 
-                && bounds.top + bounds.height >= clientY) {
-                    return toolbars[i] as IDEToolbar;
+                const toolbarBound = toolbars[i].getBoundingClientRect();
+                if ((i==0 && clientY <= toolbarBound.top)
+                    || (i==toolbars.length-1 && clientY >= toolbarBound.bottom)
+                    || (toolbarBound.top <= clientY && toolbarBound.top + toolbarBound.height >= clientY)) {
+                    return {toolbar: toolbars[i] as IDEToolbar, index: i};
                 }
             }
         }
@@ -498,7 +499,7 @@ export class PageRow extends Module {
             const eventTarget = event.target as Control;
             if (eventTarget instanceof PageRow) return;
             const targetSection = eventTarget.closest && eventTarget.closest('ide-section') as PageSection;
-            const targetToolbar = findClosestToolbarInSection(targetSection, event.clientY)
+            const targetToolbar = findClosestToolbarInSection(targetSection, event.clientY).toolbar
             const toolbars = targetSection ? Array.from(targetSection.querySelectorAll('ide-toolbar')) : [];
             const cannotDrag = toolbars.find(toolbar => toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting'));
             if (targetSection && !cannotDrag) {
@@ -737,7 +738,7 @@ export class PageRow extends Module {
             let enterTarget: Control;
             const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY)
             // if target overlap with itself
-            if (collision.collisionType == "self" || collision.collisionType == "none") {
+            if ((collision.collisionType == "self" && !collision.toolbar) || collision.collisionType == "none") {
                 const cursorPosition = { x: event.clientX, y: event.clientY };
                 const elements = self.pnlRow.querySelectorAll('.fixed-grid-item');
 
@@ -759,7 +760,7 @@ export class PageRow extends Module {
                     }
                 });
                 enterTarget = nearestElement;
-            } else if (collision.collisionType == 'mutual') {
+            } else if ((collision.collisionType == "self" && collision.toolbar) || collision.collisionType == 'mutual') {
                 // choose a merge block to display
                 if (collision.mergeSide) {
                     let blockClass: string = `.${collision.mergeSide}-block`;
@@ -829,7 +830,7 @@ export class PageRow extends Module {
             return nearestElement;
         }
 
-        function checkCollision(dropTarget: HTMLElement, dragTarget: HTMLElement, clientX: number, clientY: number): Collision {
+        function checkCollision(dropTarget: HTMLElement, dragSection: HTMLElement, clientX: number, clientY: number): Collision {
             if (!dropTarget) return { collisionType: "none" }
 
             const pageRow = dropTarget.closest('ide-row')
@@ -846,7 +847,7 @@ export class PageRow extends Module {
                 return { collisionType: "mutual", rowBlock: pageRow.querySelector(".row-bottom-block")}
             }
 
-            if (!dragTarget) {
+            if (!dragSection) {
                 const dropSection = dropTarget.closest('ide-section') as HTMLElement;
                 const dropToolbar = dropTarget.closest('ide-toolbar') as HTMLElement;
                 if (dropToolbar) {
@@ -860,15 +861,18 @@ export class PageRow extends Module {
                     }
                 } else if (dropSection) {
                     // drop/dragover on a section but not an element
+                    const nearestToolbar = findClosestToolbarInSection(dropSection as Control, clientY);
                     return {
-                        collisionType: "mutual", 
-                        section: dropSection,
+                        collisionType: "mutual",
+                        section: dropSection, 
+                        toolbar: nearestToolbar.toolbar,
+                        // check which side is the merge target
+                        mergeSide: decideMergeSide(nearestToolbar.toolbar, clientX, clientY)
                     }
                 } else return { collisionType: "none" }
             }
-            const dragTargetSection = dragTarget.closest('ide-section') as HTMLElement;
 
-            if (dragStartTarget==null || dragStartTarget==undefined) return { collisionType: "mutual" }
+            if (dragSection==null || dragSection==undefined) return { collisionType: "mutual" }
             const nearestCol = findNearestFixedGridInRow(clientX);
             const dropColumn: number = parseInt(nearestCol.getAttribute("data-column"));
             const grid = dropTarget.closest('.grid');
@@ -879,12 +883,12 @@ export class PageRow extends Module {
             const sortedSections: HTMLElement[] = sections.sort((a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column));
 
             const startOfDragingElm: number = dropColumn;
-            const endOfDragingElm: number = dropColumn + parseInt(dragTargetSection.dataset.columnSpan) - 1;
+            const endOfDragingElm: number = dropColumn + parseInt(dragSection.dataset.columnSpan) - 1;
 
             for (let i=0; i<sortedSections.length; i++) {
                 const element = sortedSections[i];
-                const condition = self.isUngrouping()? true : element.id!=dragTargetSection.id;
-                if (condition){
+                const condition = self.isUngrouping()? true : element.id!=dragSection.id;
+                if (condition && element){
 
                     const startOfDroppingElm: number = parseInt(element.dataset.column);
                     const endOfDroppingElm: number = parseInt(element.dataset.column) + parseInt(element.dataset.columnSpan) - 1;
@@ -896,18 +900,27 @@ export class PageRow extends Module {
 
                         // check if the dragging toolbar overlap with other toolbar
                         const dropToolbar = dropTarget.closest('ide-toolbar') as HTMLElement;
-                        const dragToolbar = dragTarget.closest('ide-toolbar') as HTMLElement;
-                        if (dropToolbar && dropToolbar!=dragToolbar/*!dragTargetSection.contains(dropToolbar)*/) {
-                            // drop/dragover on the place which causes the dragging element overlapping with dropping element
+                        const nearestToolbar = findClosestToolbarInSection(element as Control, clientY);
+                        const toolbarsInDragSec = dragSection.querySelectorAll('ide-toolbar')
+                        if (!dropToolbar || (dropToolbar && self.currentToolbar && dropToolbar!=self.currentToolbar)) {
+                            // drop/dragover on a section but not an element,
+                            // or drop/dragover on the place which causes the dragging element overlapping with dropping element
                             return {
                                 collisionType: "mutual",
                                 section: element, 
-                                toolbar: dropToolbar,
+                                toolbar: nearestToolbar.toolbar,
                                 // check which side is the merge target
-                                mergeSide: decideMergeSide(dropToolbar, clientX, clientY)
+                                mergeSide: decideMergeSide(nearestToolbar.toolbar, clientX, clientY)
                             }
                         } else {
-                            return { collisionType: "mutual", section: element }
+                            // drop/dragover on the toolbar itself, the toolbar is in a composite section
+                            const toolbarIdx: number = (nearestToolbar.index == 0)? 1 : nearestToolbar.index-1
+                            return {
+                                collisionType: "self",
+                                section: element, 
+                                toolbar: toolbarsInDragSec[toolbarIdx] as Control,
+                                mergeSide: (nearestToolbar.index == 0)? "top" : "bottom"
+                            }
                         }
                     }
                 }
@@ -916,8 +929,8 @@ export class PageRow extends Module {
             // if (endOfDragingElm >= self.maxColumn && (self.maxColumn - endOfLastElmInRow < parseInt(dragTargetSection.dataset.columnSpan))) return {
             //     overlapType: "border", section: undefined
             // }
-            // drop/dragover on itself
-            if (dropTarget==dragTarget || dragTarget.contains(dropTarget)) return { collisionType: "self" }
+            // drop/dragover on the toolbar itself, the toolbar is in a primitive section
+            if (dropTarget==dragSection || dragSection.contains(dropTarget) || dropTarget.contains(dragSection)) return { collisionType: "self" }
             // otherwise, no overlap
             return { collisionType: "none" }
         }
