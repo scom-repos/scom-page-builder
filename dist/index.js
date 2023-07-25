@@ -2446,10 +2446,10 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
             };
             if (((_d = (_c = this.data) === null || _c === void 0 ? void 0 : _c.module) === null || _d === void 0 ? void 0 : _d.category) === 'offers') {
                 let scconfig = await (0, index_17.fetchScconfigByRootCid)(this.data.module.path);
-                let embedData = scconfig.embedData;
-                this.data.module.path = embedData.module.path || embedData.module.name.replace('@scom/', '');
-                if (embedData.properties) {
-                    Object.assign(newElData.properties, embedData.properties);
+                let widgetData = scconfig.widgetData;
+                this.data.module.path = widgetData.module.path || widgetData.module.name.replace('@scom/', '');
+                if (widgetData.properties) {
+                    Object.assign(newElData.properties, widgetData.properties);
                 }
             }
             const parentData = (_e = this.parent) === null || _e === void 0 ? void 0 : _e.data;
