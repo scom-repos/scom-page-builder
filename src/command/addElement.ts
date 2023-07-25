@@ -88,10 +88,10 @@ export class AddElementCommand implements ICommand {
     };
     if (this.data?.module?.category === 'offers') {
       let scconfig = await fetchScconfigByRootCid(this.data.module.path);
-      let embedData = scconfig.embedData;
-      this.data.module.path = embedData.module.path || embedData.module.name.replace('@scom/', '');
-      if (embedData.properties) {
-        Object.assign(newElData.properties, embedData.properties);
+      let widgetData = scconfig.widgetData;
+      this.data.module.path = widgetData.module.path || widgetData.module.name.replace('@scom/', '');
+      if (widgetData.properties) {
+        Object.assign(newElData.properties, widgetData.properties);
       }
     }
     const parentData = this.parent?.data;
