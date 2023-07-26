@@ -3523,7 +3523,7 @@ define("@scom/scom-page-builder/page/pageSection.css.ts", ["require", "exports",
         position: 'relative',
         maxWidth: '100%',
         // border: '2px solid transparent',
-        transition: 'opacity .2s .1s cubic-bezier(0.4,0,0.2,1), left 0s .1s',
+        transition: 'all .3s ease-in',
         $nest: {
             '&:hover .section-border': {
                 display: 'block',
@@ -3941,8 +3941,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         async addElement(data) {
             if (!data)
                 return;
+            if (this.pnlLoading)
+                this.pnlLoading.visible = true;
             const element = await this.createElementFn(data);
             this.toggleUI(true);
+            if (this.pnlLoading)
+                this.pnlLoading.visible = false;
             return element;
         }
         async clearData() {
@@ -4096,6 +4100,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             let dragStartTarget;
             let dragOverTarget;
             const parentWrapper = self.closest('#editor') || document;
+            let ghostImage;
             this.addEventListener('mousedown', (e) => {
                 const target = e.target;
                 const section = target.closest('ide-section');
@@ -4259,20 +4264,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         toolbar.hideToolbars();
                         toolbar.classList.remove('active');
                     });
-                    // if (self.currentToolbar) {
-                    //     toolbars.forEach(toolbar => {
-                    //         (toolbar as HTMLElement).style.opacity = (toolbar.id != self.currentToolbar.id)? '1' : '0';
-                    //     });
-                    // } else {
-                    //     self.currentElement.opacity = 0;
-                    // }
                     self.currentElement.style.zIndex = '1';
                     if (self.currentToolbar)
                         self.currentToolbar.style.zIndex = '1';
                     const dragElm = (!self.currentToolbar || toolbars.length === 1) ? self.currentElement : self.currentToolbar;
                     dragElm.classList.add('is-dragging');
-                    dragElm.style.opacity = '0';
-                    // event.dataTransfer.setDragImage(dragElm, startX, startY);
+                    ghostImage = dragElm.cloneNode(true);
                     components_24.application.EventBus.dispatch(index_39.EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                     self.addDottedLines();
                     toggleAllToolbarBoarder(true);
@@ -4283,16 +4280,19 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 dragStartTarget = eventTarget;
             });
             this.addEventListener('drag', function (event) {
-                event.preventDefault();
+                const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
+                const dragElm = (!self.currentToolbar || toolbars.length === 1) ? self.currentElement : self.currentToolbar;
+                if (ghostImage) {
+                    ghostImage.style.position = 'absolute';
+                    ghostImage.style.opacity = '1';
+                    ghostImage.style.zIndex = '-1';
+                    ghostImage.style.pointerEvents = 'none';
+                    event.dataTransfer.setDragImage(ghostImage, startX, startY);
+                    dragElm.style.opacity = '0';
+                    ghostImage = null;
+                }
             });
             document.addEventListener('dragend', function (event) {
-                // if (self.currentElement && !self.currentElement.classList.contains('builder-item')) {
-                //     self.currentElement.opacity = 1;
-                //     const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
-                //     toolbars.forEach(toolbar => {
-                //         (toolbar as HTMLElement).style.opacity = "1";
-                //     });
-                // }
                 resetDragTarget();
                 resetPageRow();
                 toggleAllToolbarBoarder(false);
@@ -5059,6 +5059,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
                         this.$render("i-icon", { name: "circle", width: 3, height: 3 }))),
                 this.$render("i-vstack", { id: "pnlEmty", width: "100%", visible: false, verticalAlignment: 'center', horizontalAlignment: 'center', class: "pnl-empty" },
+                    this.$render("i-vstack", { id: "pnlLoading", padding: { top: '0.5rem', bottom: '0.5rem' }, visible: false, height: "100%", width: "100%", class: "i-loading-overlay" },
+                        this.$render("i-vstack", { class: "i-loading-spinner", horizontalAlignment: "center", verticalAlignment: "center" },
+                            this.$render("i-icon", { class: "i-loading-spinner_icon", name: "spinner", width: 24, height: 24, fill: Theme.colors.primary.main }),
+                            this.$render("i-label", { caption: "Loading...", font: { color: Theme.colors.primary.main, size: '1rem' }, class: "i-loading-spinner_text" }))),
                     this.$render("i-panel", { padding: { top: '3rem', bottom: '3rem' }, margin: { top: '3rem', bottom: '3rem' }, width: "100%", border: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' }, class: "text-center" },
                         this.$render("i-label", { caption: 'Drag Elements Here', font: { transform: 'uppercase', color: 'var(--builder-color)', size: '1.25rem' }, opacity: 0.5 }))),
                 this.$render("i-grid-layout", { id: "pnlRow", width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%", position: "relative", class: "grid", opacity: 0 }),
@@ -5371,6 +5375,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             var _a;
             if (this._readonly)
                 return;
+            if (this.pnlLoading)
+                this.pnlLoading.visible = true;
             try {
                 const module = await components_25.application.createElement(((_a = data === null || data === void 0 ? void 0 : data.module) === null || _a === void 0 ? void 0 : _a.path) || '');
                 if (!module)
@@ -5383,7 +5389,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                     const allSingleContentBlockId = Object.keys(data.properties).filter(prop => prop.includes(SINGLE_CONTENT_BLOCK_ID));
                     for (let singleContentBlockId of allSingleContentBlockId) {
                         const singleContentBlock = this.parentElement.querySelector(`#${singleContentBlockId}`);
-                        singleContentBlock.fetchModule(data.properties[singleContentBlockId]);
+                        await singleContentBlock.fetchModule(data.properties[singleContentBlockId]);
                     }
                     this.dragStack.visible = false;
                 }
@@ -5397,6 +5403,9 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 console.log('fetch module error: ', error);
                 index_48.commandHistory.undo();
             }
+            const hasProps = !(0, index_47.isEmpty)(data.properties);
+            if (this.pnlLoading)
+                this.pnlLoading.visible = hasProps;
         }
         async setModule(module, data) {
             var _a, _b;
@@ -5482,6 +5491,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
         }
         async setProperties(data) {
             var _a;
+            if (this.pnlLoading)
+                this.pnlLoading.visible = true;
             if (!this._component || !((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators))
                 return;
             const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
@@ -5490,6 +5501,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             }
             if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setRootDir)
                 builderTarget.setRootDir((0, index_46.getRootDir)());
+            if (this.pnlLoading)
+                this.pnlLoading.visible = false;
         }
         setTheme(value) {
             if (this.module && value !== this.module.theme)
@@ -5623,34 +5636,41 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
         }
         init() {
             super.init();
+            if (this.pnlLoading)
+                this.pnlLoading.visible = true;
             this.readonly = this.getAttribute('readonly', true, false);
             this.setAttribute('draggable', 'true');
             this.initEventBus();
             this.initEventListener();
         }
         render() {
-            return (this.$render("i-vstack", { id: "mainWrapper", width: "auto", maxWidth: "100%", maxHeight: "100%", position: "relative" },
-                this.$render("i-panel", { id: "toolsStack", border: { radius: 5 }, background: { color: '#fff' }, class: "ide-toolbar", visible: false },
-                    this.$render("i-hstack", { id: "toolbar", padding: { top: 4, bottom: 4, left: 4, right: 4 }, gap: "0.25rem" })),
-                this.$render("i-panel", { id: "contentStack", height: "100%", position: 'relative', maxWidth: "100%", maxHeight: "100%", class: "ide-component", onClick: this.showToolbars.bind(this) },
-                    this.$render("i-vstack", { id: "dragStack", verticalAlignment: "center", position: "absolute", left: "50%", top: "0px", width: "auto", height: "auto", class: "dragger" },
-                        this.$render("i-grid-layout", { verticalAlignment: "center", autoFillInHoles: true, columnsPerRow: 4, gap: { column: '2px', row: '2px' }, class: "main-drag" },
-                            this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                            this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                            this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                            this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                            this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                            this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                            this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                            this.$render("i-icon", { name: "circle", width: 3, height: 3 }))),
-                    this.$render("i-vstack", { id: "backdropStack", width: "100%", height: "100%", position: "absolute", top: "0px", left: "0px", zIndex: 15, visible: false, onClick: this.showToolList.bind(this) })),
-                this.$render("i-panel", { position: "absolute", width: "90%", height: "8px", left: "5%", bottom: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "bottom-block" }),
-                this.$render("i-panel", { position: "absolute", width: "90%", height: "8px", left: "5%", top: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "top-block" }),
-                this.$render("i-modal", { id: 'mdActions', title: 'Update Settings', closeIcon: { name: 'times' }, minWidth: 400, maxWidth: '900px', closeOnBackdropClick: false, onOpen: this.onShowModal.bind(this), onClose: this.onCloseModal.bind(this), class: "setting-modal" },
-                    this.$render("i-panel", null,
-                        this.$render("i-vstack", { id: "pnlFormMsg", padding: { left: '1.5rem', right: '1.5rem', top: '1rem' }, gap: "0.5rem", visible: false }),
-                        this.$render("i-panel", { id: "pnlForm" }),
-                        this.$render("i-form", { id: "form", padding: { left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' } })))));
+            return (this.$render("i-panel", null,
+                this.$render("i-vstack", { id: "pnlLoading", padding: { top: '0.5rem', bottom: '0.5rem' }, visible: false, height: "100%", width: "100%", class: "i-loading-overlay" },
+                    this.$render("i-vstack", { class: "i-loading-spinner", horizontalAlignment: "center", verticalAlignment: "center" },
+                        this.$render("i-icon", { class: "i-loading-spinner_icon", name: "spinner", width: 24, height: 24, fill: Theme.colors.primary.main }),
+                        this.$render("i-label", { caption: "Loading...", font: { color: Theme.colors.primary.main, size: '1rem' }, class: "i-loading-spinner_text" }))),
+                this.$render("i-vstack", { id: "mainWrapper", width: "auto", maxWidth: "100%", maxHeight: "100%", position: "relative" },
+                    this.$render("i-panel", { id: "toolsStack", border: { radius: 5 }, background: { color: '#fff' }, class: "ide-toolbar", visible: false },
+                        this.$render("i-hstack", { id: "toolbar", padding: { top: 4, bottom: 4, left: 4, right: 4 }, gap: "0.25rem" })),
+                    this.$render("i-panel", { id: "contentStack", height: "100%", position: 'relative', maxWidth: "100%", maxHeight: "100%", class: "ide-component", onClick: this.showToolbars.bind(this) },
+                        this.$render("i-vstack", { id: "dragStack", verticalAlignment: "center", position: "absolute", left: "50%", top: "0px", width: "auto", height: "auto", class: "dragger" },
+                            this.$render("i-grid-layout", { verticalAlignment: "center", autoFillInHoles: true, columnsPerRow: 4, gap: { column: '2px', row: '2px' }, class: "main-drag" },
+                                this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
+                                this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
+                                this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
+                                this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
+                                this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
+                                this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
+                                this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
+                                this.$render("i-icon", { name: "circle", width: 3, height: 3 }))),
+                        this.$render("i-vstack", { id: "backdropStack", width: "100%", height: "100%", position: "absolute", top: "0px", left: "0px", zIndex: 15, visible: false, onClick: this.showToolList.bind(this) })),
+                    this.$render("i-panel", { position: "absolute", width: "90%", height: "8px", left: "5%", bottom: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "bottom-block" }),
+                    this.$render("i-panel", { position: "absolute", width: "90%", height: "8px", left: "5%", top: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "top-block" }),
+                    this.$render("i-modal", { id: 'mdActions', title: 'Update Settings', closeIcon: { name: 'times' }, minWidth: 400, maxWidth: '900px', closeOnBackdropClick: false, onOpen: this.onShowModal.bind(this), onClose: this.onCloseModal.bind(this), class: "setting-modal" },
+                        this.$render("i-panel", null,
+                            this.$render("i-vstack", { id: "pnlFormMsg", padding: { left: '1.5rem', right: '1.5rem', top: '1rem' }, gap: "0.5rem", visible: false }),
+                            this.$render("i-panel", { id: "pnlForm" }),
+                            this.$render("i-form", { id: "form", padding: { left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' } }))))));
         }
     };
     IDEToolbar = __decorate([

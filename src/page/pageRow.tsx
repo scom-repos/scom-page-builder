@@ -7,7 +7,8 @@ import {
     VStack,
     observable,
     GridLayout,
-    Styles
+    Styles,
+    Panel
 } from '@ijstech/components';
 import { PageSection } from './pageSection';
 import { RowSettingsDialog } from '../dialogs/index';
@@ -52,6 +53,7 @@ export class PageRow extends Module {
     private pnlRow: GridLayout;
     private mdRowSetting: RowSettingsDialog;
     private pnlEmty: VStack;
+    private pnlLoading: Panel;
 
     private _readonly: boolean;
     private isResizing: boolean = false;
@@ -167,8 +169,10 @@ export class PageRow extends Module {
 
     async addElement(data: IPageElement) {
         if (!data) return;
+        if (this.pnlLoading) this.pnlLoading.visible = true;
         const element = await this.createElementFn(data);
         this.toggleUI(true);
+        if (this.pnlLoading) this.pnlLoading.visible = false;
         return element;
     }
 
@@ -349,6 +353,7 @@ export class PageRow extends Module {
             rowBlock?: HTMLElement // check if need to trigger the row top/bottom block
         } 
         const parentWrapper = self.closest('#editor') || document;
+        let ghostImage: Control;
 
         this.addEventListener('mousedown', (e) => {
             const target = e.target as Control;
@@ -514,23 +519,13 @@ export class PageRow extends Module {
                     toolbar.hideToolbars();
                     toolbar.classList.remove('active');
                 });
-
-                // if (self.currentToolbar) {
-                //     toolbars.forEach(toolbar => {
-                //         (toolbar as HTMLElement).style.opacity = (toolbar.id != self.currentToolbar.id)? '1' : '0';
-                //     });
-                // } else {
-                //     self.currentElement.opacity = 0;
-                // }
-
                 self.currentElement.style.zIndex = '1';
                 if (self.currentToolbar)
                     self.currentToolbar.style.zIndex = '1';
-
                 const dragElm = (!self.currentToolbar || toolbars.length === 1) ? self.currentElement : self.currentToolbar;
                 dragElm.classList.add('is-dragging');
-                dragElm.style.opacity = '0';
-                // event.dataTransfer.setDragImage(dragElm, startX, startY);
+                ghostImage = dragElm.cloneNode(true) as Control;
+
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                 self.addDottedLines();
                 toggleAllToolbarBoarder(true);
@@ -541,17 +536,20 @@ export class PageRow extends Module {
         });
 
         this.addEventListener('drag', function (event) {
-            event.preventDefault()
+            const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
+            const dragElm = (!self.currentToolbar || toolbars.length === 1) ? self.currentElement : self.currentToolbar;
+            if (ghostImage) {
+                ghostImage.style.position = 'absolute'
+                ghostImage.style.opacity = '1';
+                ghostImage.style.zIndex = '-1';
+                ghostImage.style.pointerEvents = 'none'
+                event.dataTransfer.setDragImage(ghostImage, startX, startY);
+                dragElm.style.opacity = '0';
+                ghostImage = null;
+            }
         });
 
         document.addEventListener('dragend', function (event) {
-            // if (self.currentElement && !self.currentElement.classList.contains('builder-item')) {
-            //     self.currentElement.opacity = 1;
-            //     const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
-            //     toolbars.forEach(toolbar => {
-            //         (toolbar as HTMLElement).style.opacity = "1";
-            //     });
-            // }
             resetDragTarget();
             resetPageRow();
             toggleAllToolbarBoarder(false);
@@ -1403,6 +1401,28 @@ export class PageRow extends Module {
                     verticalAlignment='center' horizontalAlignment='center'
                     class="pnl-empty"
                 >
+                    <i-vstack
+                        id="pnlLoading"
+                        padding={{top: '0.5rem', bottom: '0.5rem'}}
+                        visible={false}
+                        height="100%" width="100%"
+                        class="i-loading-overlay"
+                    >
+                        <i-vstack class="i-loading-spinner" horizontalAlignment="center" verticalAlignment="center">
+                            <i-icon
+                                class="i-loading-spinner_icon"
+                                name="spinner"
+                                width={24}
+                                height={24}
+                                fill={Theme.colors.primary.main}
+                            />
+                            <i-label
+                                caption="Loading..."
+                                font={{ color: Theme.colors.primary.main, size: '1rem' }}
+                                class="i-loading-spinner_text"
+                            />
+                        </i-vstack>
+                    </i-vstack>
                     <i-panel
                         padding={{top: '3rem', bottom: '3rem'}}
                         margin={{top: '3rem', bottom: '3rem'}}
