@@ -645,6 +645,7 @@ export class IDEToolbar extends Module {
     init() {
         super.init();
         this.readonly = this.getAttribute('readonly', true, false);
+        this.setAttribute('draggable', 'true');
         this.initEventBus();
         this.initEventListener();
     }

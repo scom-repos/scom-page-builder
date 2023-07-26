@@ -3622,6 +3622,7 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
     });
     components_22.Styles.cssRule('ide-toolbar', {
         display: 'block',
+        position: 'relative',
         $nest: {
             '.ide-component.active, .ide-component.hover-border': {
                 outline: `2px solid ${Theme.colors.primary.main}`
@@ -3902,7 +3903,7 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
                 top: 0,
                 height: '100%',
                 border: 'solid 2px blue',
-                transition: 'width .5s .5s cubic-bezier(.4,0,.2,1), left 0s .4s'
+                transition: 'width .3s .2s cubic-bezier(.4,0,.2,1), left 0s .2s'
             },
             '.border-x-dotted': {
                 borderLeft: 'dotted 1px #808080',
@@ -4163,7 +4164,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             let dragStartTarget;
             let dragOverTarget;
             const parentWrapper = self.closest('#editor') || document;
-            let ghostImage;
             this.addEventListener('mousedown', (e) => {
                 const target = e.target;
                 const section = target.closest('ide-section');
@@ -4327,7 +4327,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         toolbar.hideToolbars();
                         toolbar.classList.remove('active');
                     });
-                    self.currentElement.classList.add('is-dragging');
                     // if (self.currentToolbar) {
                     //     toolbars.forEach(toolbar => {
                     //         (toolbar as HTMLElement).style.opacity = (toolbar.id != self.currentToolbar.id)? '1' : '0';
@@ -4336,9 +4335,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     //     self.currentElement.opacity = 0;
                     // }
                     self.currentElement.style.zIndex = '1';
+                    if (self.currentToolbar)
+                        self.currentToolbar.style.zIndex = '1';
                     const dragElm = (!self.currentToolbar || toolbars.length === 1) ? self.currentElement : self.currentToolbar;
-                    dragElm.style.zIndex = '1';
-                    ghostImage = dragElm.cloneNode(true);
+                    dragElm.classList.add('is-dragging');
+                    dragElm.style.opacity = '0';
+                    // event.dataTransfer.setDragImage(dragElm, startX, startY);
                     components_24.application.EventBus.dispatch(index_39.EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                     self.addDottedLines();
                     toggleAllToolbarBoarder(true);
@@ -4349,17 +4351,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 dragStartTarget = eventTarget;
             });
             this.addEventListener('drag', function (event) {
-                const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
-                const dragElm = (!self.currentToolbar || toolbars.length === 1) ? self.currentElement : self.currentToolbar;
-                if (ghostImage) {
-                    ghostImage.style.position = 'absolute';
-                    ghostImage.style.opacity = '1';
-                    ghostImage.style.zIndex = '-1';
-                    ghostImage.style.pointerEvents = 'none';
-                    event.dataTransfer.setDragImage(ghostImage, startX, startY);
-                    dragElm.style.opacity = '0';
-                    ghostImage = null;
-                }
+                event.preventDefault();
             });
             document.addEventListener('dragend', function (event) {
                 // if (self.currentElement && !self.currentElement.classList.contains('builder-item')) {
@@ -4441,6 +4433,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     showRectangle(targetRow, colStart, columnSpan);
                 }
                 else {
+                    removeRectangles();
                     const section = enterTarget.closest('ide-section');
                     const isDraggingEl = section && section.classList.contains('is-dragging');
                     if (section && section.id !== self.currentElement.id && !isDraggingEl) {
@@ -4744,7 +4737,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     return "back";
             }
             this.addEventListener('drop', async function (event) {
-                var _a, _b, _c;
+                var _a, _b, _c, _d, _e;
                 self.pnlRow.minHeight = 'auto';
                 const elementConfig = (0, index_41.getDragData)();
                 const eventTarget = event.target;
@@ -4865,11 +4858,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             }
                         }
                         else if (dropElm.classList.contains(ROW_BOTTOM_CLASS) || (collision.rowBlock && collision.rowBlock.classList.contains('row-bottom-block'))) {
-                            const targetRow = collision.rowBlock.closest('ide-row');
+                            const targetRow = (_c = collision === null || collision === void 0 ? void 0 : collision.rowBlock) === null || _c === void 0 ? void 0 : _c.closest('ide-row');
                             targetRow && self.onAppendRow(targetRow);
                         }
                         else if (dropElm.classList.contains(ROW_TOP_CLASS) || (collision.rowBlock && collision.rowBlock.classList.contains('row-top-block'))) {
-                            const targetRow = collision.rowBlock.closest('ide-row');
+                            const targetRow = (_d = collision === null || collision === void 0 ? void 0 : collision.rowBlock) === null || _d === void 0 ? void 0 : _d.closest('ide-row');
                             targetRow && self.onPrependRow(targetRow);
                         }
                         else {
@@ -4896,7 +4889,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         self.isDragging = true;
                         if (elementConfig) {
                             const parentId = pageRow === null || pageRow === void 0 ? void 0 : pageRow.id.replace('row-', '');
-                            const elements = parentId ? ((_c = index_41.pageObject.getRow(parentId)) === null || _c === void 0 ? void 0 : _c.elements) || [] : [];
+                            const elements = parentId ? ((_e = index_41.pageObject.getRow(parentId)) === null || _e === void 0 ? void 0 : _e.elements) || [] : [];
                             const hasData = elements.find((el) => { var _a; return Object.keys(el.module || {}).length || ((_a = el.elements) === null || _a === void 0 ? void 0 : _a.length); });
                             const dragCmd = !hasData && new index_42.AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
                             // drag new element on a new row
@@ -4962,7 +4955,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     rectangle.style.display = 'none';
                 }
             }
-            function updateDraggingUI(target, x, y) {
+            function updateDraggingUI() {
                 if (self.currentElement) {
                     self.currentElement.opacity = 1;
                     self.currentElement.style.zIndex = '';
@@ -5699,6 +5692,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
         init() {
             super.init();
             this.readonly = this.getAttribute('readonly', true, false);
+            this.setAttribute('draggable', 'true');
             this.initEventBus();
             this.initEventListener();
         }

@@ -350,7 +350,6 @@ export class PageRow extends Module {
             rowBlock?: HTMLElement // check if need to trigger the row top/bottom block
         } 
         const parentWrapper = self.closest('#editor') || document;
-        let ghostImage: Control;
 
         this.addEventListener('mousedown', (e) => {
             const target = e.target as Control;
@@ -516,7 +515,6 @@ export class PageRow extends Module {
                     toolbar.hideToolbars();
                     toolbar.classList.remove('active');
                 });
-                self.currentElement.classList.add('is-dragging');
 
                 // if (self.currentToolbar) {
                 //     toolbars.forEach(toolbar => {
@@ -527,10 +525,13 @@ export class PageRow extends Module {
                 // }
 
                 self.currentElement.style.zIndex = '1';
-                const dragElm = (!self.currentToolbar || toolbars.length === 1) ? self.currentElement : self.currentToolbar;
-                dragElm.style.zIndex = '1';
-                ghostImage = dragElm.cloneNode(true) as any;
+                if (self.currentToolbar)
+                    self.currentToolbar.style.zIndex = '1';
 
+                const dragElm = (!self.currentToolbar || toolbars.length === 1) ? self.currentElement : self.currentToolbar;
+                dragElm.classList.add('is-dragging');
+                dragElm.style.opacity = '0';
+                // event.dataTransfer.setDragImage(dragElm, startX, startY);
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                 self.addDottedLines();
                 toggleAllToolbarBoarder(true);
@@ -541,17 +542,7 @@ export class PageRow extends Module {
         });
 
         this.addEventListener('drag', function (event) {
-            const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
-            const dragElm = (!self.currentToolbar || toolbars.length === 1) ? self.currentElement : self.currentToolbar;
-            if (ghostImage) {
-                ghostImage.style.position = 'absolute'
-                ghostImage.style.opacity = '1';
-                ghostImage.style.zIndex = '-1';
-                ghostImage.style.pointerEvents = 'none'
-                event.dataTransfer.setDragImage(ghostImage, startX, startY);
-                dragElm.style.opacity = '0';
-                ghostImage = null;
-            }
+            event.preventDefault()
         });
 
         document.addEventListener('dragend', function (event) {
@@ -633,6 +624,7 @@ export class PageRow extends Module {
                 const targetRow = target.closest('#pnlRow') as Control
                 showRectangle(targetRow, colStart, columnSpan);
             } else {
+                removeRectangles();
                 const section = enterTarget.closest('ide-section') as Control;
                 const isDraggingEl = section && section.classList.contains('is-dragging');
                 if (section && section.id !== self.currentElement.id && !isDraggingEl) {
@@ -1067,10 +1059,10 @@ export class PageRow extends Module {
                             commandHistory.execute(dragCmd);
                         }
                     } else if (dropElm.classList.contains(ROW_BOTTOM_CLASS) || (collision.rowBlock && collision.rowBlock.classList.contains('row-bottom-block'))) {
-                        const targetRow = collision.rowBlock.closest('ide-row') as PageRow;
+                        const targetRow = collision?.rowBlock?.closest('ide-row') as PageRow;
                         targetRow && self.onAppendRow(targetRow);
                     } else if (dropElm.classList.contains(ROW_TOP_CLASS) || (collision.rowBlock && collision.rowBlock.classList.contains('row-top-block'))) {
-                        const targetRow = collision.rowBlock.closest('ide-row') as PageRow;
+                        const targetRow = collision?.rowBlock?.closest('ide-row') as PageRow;
                         targetRow && self.onPrependRow(targetRow);
                     } else {
                         const isAppend = dropElm.classList.contains('back-block') || collision.mergeSide == "back";
@@ -1163,7 +1155,7 @@ export class PageRow extends Module {
             }
         }
 
-        function updateDraggingUI(target?: Control, x?: number, y?: number) {
+        function updateDraggingUI() {
             if (self.currentElement) {
                 self.currentElement.opacity = 1;
                 self.currentElement.style.zIndex = '';
