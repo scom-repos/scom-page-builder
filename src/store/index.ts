@@ -105,6 +105,12 @@ export class PageObject {
       this.addSection(data, index);
   }
 
+  setRow(data: any, rowId: string) {
+    const currData = pageObject.getRow(rowId);
+    pageObject.removeRow((currData as IPageSection).id);
+    pageObject.addRow(data, data.id, data.row);
+  }
+
   private findElement(elements: IPageElement[], elementId: string, findLeafOnly: boolean = false) {
     if (!elements || !elements.length) return null;
     for (let i = 0; i < elements.length; i++) {

@@ -464,6 +464,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         getRow(rowId: string): IPageSection | IPageFooter;
         removeRow(id: string): void;
         addRow(data: any, id?: string, index?: number): void;
+        setRow(data: any, rowId: string): void;
         private findElement;
         getElement(sectionId: string, elementId: string, getLeafOnly?: boolean): any;
         setElement(sectionId: string, elementId: string, value: any): void;
@@ -721,22 +722,19 @@ declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
     import { Control } from "@ijstech/components";
     import { IMergeType } from "@scom/scom-page-builder/command/type.ts";
     export class UngroupElementCommand implements ICommand {
-        private dragToolbar;
-        private dragSection;
-        private dragRow;
+        private dragToolbarId;
+        private dragSectionId;
+        private dragRowId;
         private oriDragRowData;
         private dropElm;
-        private dropSection;
-        private dropRow;
+        private dropSectionId;
+        private dropRowId;
         private oriDropRowData;
-        private oriCol;
-        private oriColSpan;
-        private oriElmIndex;
         private data;
         private appendElm;
         private config;
         private mergeType;
-        constructor(dragToolbar: Control, dropElm: Control, config: any, mergeType: IMergeType);
+        constructor(dragToolbar: Control, dragSection: Control, dropElm: Control, config: any, mergeType: IMergeType);
         execute(): Promise<void>;
         undo(): Promise<void>;
         redo(): void;
