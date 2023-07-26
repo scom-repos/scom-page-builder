@@ -72,7 +72,7 @@ export class UngroupElementCommand implements ICommand {
     const MAX_COLUMN = pageObject.getColumnsNumber(this.dropRowId);
     if (this.mergeType == "top" || this.mergeType == "bottom") {
       // regroup with new section
-      const dropSection = (dragRow as HTMLElement).querySelector(`[id='${this.dropSectionId}']`) as Control;
+      const dropSection = (dropRow as HTMLElement).querySelector(`[id='${this.dropSectionId}']`) as Control;
       const dragEnterElm = dropRow.closest('#pageBuilder').querySelector('.is-dragenter')
       if (!dragEnterElm) return;
       const dropToolbarId = (dragEnterElm.closest('ide-toolbar') as any)?.elementId;
@@ -97,7 +97,6 @@ export class UngroupElementCommand implements ICommand {
       }
       const newDropData = pageObject.getElement(this.dropRowId, this.dropSectionId);
       (dropSection as any).setData(this.dropRowId, newDropData);
-
     } else if (this.mergeType=="none") {
       // simple ungroup
       const newElData = {
@@ -243,7 +242,10 @@ export class UngroupElementCommand implements ICommand {
         } else {
           // if the current section colSpan == 1, cannot resize and ungroup
           dropRow.setData(this.oriDropRowData)
+          pageObject.setRow(this.oriDropRowData, this.dropRowId)
+
           dragRow.setData(this.oriDragRowData)
+          pageObject.setRow(this.oriDragRowData, this.dragRowId)
         }
       }
       // const dropSectionData = pageObject.getRow(dropRowId);
@@ -252,11 +254,16 @@ export class UngroupElementCommand implements ICommand {
   }
 
   async undo() {
+
+    // reset ui
     const dropRow = document.getElementById(`row-${this.dropRowId}`) as any;
     const dragRow = document.getElementById(`row-${this.dragRowId}`) as any;
+    await dropRow.setData(this.oriDropRowData);
+    await dragRow.setData(this.oriDragRowData);
 
-    await dropRow.setData(this.oriDropRowData)
-    await dragRow.setData(this.oriDragRowData)
+    // reset data
+    pageObject.setRow(this.oriDropRowData, this.dropRowId);
+    pageObject.setRow(this.oriDragRowData, this.dragRowId);
   }
 
   redo(): void {}

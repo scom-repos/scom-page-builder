@@ -858,6 +858,11 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
             else
                 this.addSection(data, index);
         }
+        setRow(data, rowId) {
+            const currData = exports.pageObject.getRow(rowId);
+            exports.pageObject.removeRow(currData.id);
+            exports.pageObject.addRow(data, data.id, data.row);
+        }
         findElement(elements, elementId, findLeafOnly = false) {
             var _a;
             if (!elements || !elements.length)
@@ -2113,7 +2118,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             const MAX_COLUMN = index_13.pageObject.getColumnsNumber(this.dropRowId);
             if (this.mergeType == "top" || this.mergeType == "bottom") {
                 // regroup with new section
-                const dropSection = dragRow.querySelector(`[id='${this.dropSectionId}']`);
+                const dropSection = dropRow.querySelector(`[id='${this.dropSectionId}']`);
                 const dragEnterElm = dropRow.closest('#pageBuilder').querySelector('.is-dragenter');
                 if (!dragEnterElm)
                     return;
@@ -2269,7 +2274,9 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                     else {
                         // if the current section colSpan == 1, cannot resize and ungroup
                         dropRow.setData(this.oriDropRowData);
+                        index_13.pageObject.setRow(this.oriDropRowData, this.dropRowId);
                         dragRow.setData(this.oriDragRowData);
+                        index_13.pageObject.setRow(this.oriDragRowData, this.dragRowId);
                     }
                 }
                 // const dropSectionData = pageObject.getRow(dropRowId);
@@ -2277,10 +2284,14 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             }
         }
         async undo() {
+            // reset ui
             const dropRow = document.getElementById(`row-${this.dropRowId}`);
             const dragRow = document.getElementById(`row-${this.dragRowId}`);
             await dropRow.setData(this.oriDropRowData);
             await dragRow.setData(this.oriDragRowData);
+            // reset data
+            index_13.pageObject.setRow(this.oriDropRowData, this.dropRowId);
+            index_13.pageObject.setRow(this.oriDragRowData, this.dragRowId);
         }
         redo() { }
     }

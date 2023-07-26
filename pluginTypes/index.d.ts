@@ -464,6 +464,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         getRow(rowId: string): IPageSection | IPageFooter;
         removeRow(id: string): void;
         addRow(data: any, id?: string, index?: number): void;
+        setRow(data: any, rowId: string): void;
         private findElement;
         getElement(sectionId: string, elementId: string, getLeafOnly?: boolean): any;
         setElement(sectionId: string, elementId: string, value: any): void;
