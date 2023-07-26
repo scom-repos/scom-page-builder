@@ -1069,6 +1069,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private pnlRow;
         private mdRowSetting;
         private pnlEmty;
+        private pnlLoading;
         private _readonly;
         private isResizing;
         private currentWidth;
@@ -1156,6 +1157,8 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private mdActions;
         private backdropStack;
         private form;
+        private pnlLoading;
+        private mainWrapper;
         private _rowId;
         private _elementId;
         private _currentSingleContentBlockId;
