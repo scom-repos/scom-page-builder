@@ -3923,7 +3923,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         }
         async createElementFn(data) {
             var _a;
-            const isElmExist = (_a = this.pnlRow) === null || _a === void 0 ? void 0 : _a.querySelector('ide-section#' + data.id);
+            const isElmExist = (_a = this.pnlRow) === null || _a === void 0 ? void 0 : _a.querySelector(`ide-section[id='${data.id}']`);
             if (isElmExist)
                 return;
             const pageSection = (this.$render("ide-section", { id: data.id, readonly: this._readonly, display: "block", maxWidth: "100%", maxHeight: "100%", position: "relative", minWidth: 0 }));
