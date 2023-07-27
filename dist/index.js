@@ -4687,6 +4687,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 event.preventDefault();
                 event.stopPropagation();
                 self.removeDottedLines();
+                toggleAllToolbarBoarder(false);
+                removeRectangles();
                 if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
                     components_24.application.EventBus.dispatch(index_39.EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
                     return;
@@ -4733,6 +4735,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         const sectionData = sectionColumn + sectionColumnSpan;
                         return colStart >= sectionColumn && colData <= sectionData;
                     });
+                    console.log(findedSection, self.isDragging);
                     if (findedSection || self.isDragging)
                         return;
                     self.isDragging = true;
@@ -4740,9 +4743,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     if (isUngrouping) {
                         const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, self.currentElement, nearestFixedItem, config, "none");
                         dragCmd && index_42.commandHistory.execute(dragCmd);
-                        self.currentElement.opacity = 1;
                         updateDraggingUI();
-                        removeRectangles();
                     }
                     else if (self.currentElement.data) {
                         const dragCmd = new index_42.DragElementCommand(self.currentElement, nearestFixedItem);
@@ -4777,7 +4778,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 const dropElement = eventTarget;
                                 const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, "bottom");
                                 dragCmd && index_42.commandHistory.execute(dragCmd);
-                                updateDraggingUI();
                                 resetDragTarget();
                             }
                             else {
@@ -4791,7 +4791,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 const dropElement = eventTarget;
                                 const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, "top");
                                 dragCmd && index_42.commandHistory.execute(dragCmd);
-                                updateDraggingUI();
                                 resetDragTarget();
                             }
                             else {
@@ -4815,7 +4814,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 const dropElement = eventTarget;
                                 const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, collision.mergeSide);
                                 dragCmd && index_42.commandHistory.execute(dragCmd);
-                                self.currentElement.opacity = 1;
                                 resetDragTarget();
                             }
                             else {
@@ -4843,7 +4841,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 const dropElement = eventTarget;
                                 const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, collision.mergeSide);
                                 dragCmd && index_42.commandHistory.execute(dragCmd);
-                                updateDraggingUI();
                                 resetDragTarget();
                             }
                             else {
@@ -4853,8 +4850,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         }
                         self.isDragging = false;
                     }
-                    toggleAllToolbarBoarder(false);
-                    removeRectangles();
                 }
             });
             function resetDragTarget() {

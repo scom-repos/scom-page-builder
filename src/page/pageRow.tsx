@@ -954,7 +954,10 @@ export class PageRow extends Module {
             const pageRow = eventTarget.closest('ide-row') as PageRow;
             event.preventDefault();
             event.stopPropagation();
+
             self.removeDottedLines();
+            toggleAllToolbarBoarder(false);
+            removeRectangles();
 
             if (pageRow && elementConfig?.module?.name === 'sectionStack') {
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
@@ -1005,6 +1008,7 @@ export class PageRow extends Module {
                     const sectionData = sectionColumn + sectionColumnSpan;
                     return colStart >= sectionColumn && colData <= sectionData;
                 });
+                console.log(findedSection, self.isDragging)
                 if (findedSection || self.isDragging) return;
                 self.isDragging = true;
 
@@ -1012,9 +1016,7 @@ export class PageRow extends Module {
                 if (isUngrouping) {
                     const dragCmd = new UngroupElementCommand(self.currentToolbar, self.currentElement, nearestFixedItem, config, "none");
                     dragCmd && commandHistory.execute(dragCmd);
-                    self.currentElement.opacity = 1;
                     updateDraggingUI();
-                    removeRectangles();
                 } else if (self.currentElement.data) {
                     const dragCmd = new DragElementCommand(self.currentElement, nearestFixedItem);
                     commandHistory.execute(dragCmd);
@@ -1045,7 +1047,6 @@ export class PageRow extends Module {
                             const dropElement = eventTarget;
                             const dragCmd = new UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, "bottom");
                             dragCmd && commandHistory.execute(dragCmd);
-                            updateDraggingUI()
                             resetDragTarget();
                         } else {
                             const newConfig = self.getNewElementData();
@@ -1057,7 +1058,6 @@ export class PageRow extends Module {
                             const dropElement = eventTarget;
                             const dragCmd = new UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, "top");
                             dragCmd && commandHistory.execute(dragCmd);
-                            updateDraggingUI()
                             resetDragTarget();
                         } else {
                             const newConfig = self.getNewElementData();
@@ -1077,7 +1077,6 @@ export class PageRow extends Module {
                             const dropElement = eventTarget;
                             const dragCmd = new UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, collision.mergeSide);
                             dragCmd && commandHistory.execute(dragCmd);
-                            self.currentElement.opacity = 1;
                             resetDragTarget();
                         } else {
                             const dragCmd = elementConfig ?
@@ -1102,7 +1101,6 @@ export class PageRow extends Module {
                             const dropElement = eventTarget;
                             const dragCmd = new UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, collision.mergeSide);
                             dragCmd && commandHistory.execute(dragCmd);
-                            updateDraggingUI()
                             resetDragTarget();
                         } else {
                             const dragCmd = new DragElementCommand(self.currentElement, pageRow, true, true);
@@ -1112,8 +1110,6 @@ export class PageRow extends Module {
                     }
                     self.isDragging = false;
                 }
-                toggleAllToolbarBoarder(false);
-                removeRectangles();
             }
         });
 
