@@ -511,7 +511,6 @@ export class PageRow extends Module {
                 startX = event.offsetX;
                 startY = event.offsetY;
 
-                const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
                 if (targetToolbar?.classList.contains('active') || toolbars.length==1) application.EventBus.dispatch(EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
                 else self.currentToolbar = undefined;
 
@@ -520,10 +519,19 @@ export class PageRow extends Module {
                     toolbar.classList.remove('active');
                 });
                 self.currentElement.style.zIndex = '1';
-                if (self.currentToolbar)
+                self.currentElement.classList.add('is-dragging');
+                let dragElm = null;
+                if (!self.currentToolbar || toolbars.length === 1) {
+                    dragElm = self.currentElement;
+                    const imgs = self.currentElement.querySelectorAll('img');
+                    for (let img of imgs) {
+                        (img as HTMLElement).setAttribute('draggable', 'false');
+                    }
+                } else {
+                    dragElm = self.currentToolbar;
                     self.currentToolbar.style.zIndex = '1';
-                const dragElm = (!self.currentToolbar || toolbars.length === 1) ? self.currentElement : self.currentToolbar;
-                dragElm.classList.add('is-dragging');
+                    self.currentToolbar.classList.add('is-dragging');
+                }
                 ghostImage = dragElm.cloneNode(true) as Control;
 
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, targetSection);
@@ -536,13 +544,13 @@ export class PageRow extends Module {
         });
 
         this.addEventListener('drag', function (event) {
-            const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
+            const toolbars = self.currentElement ? self.currentElement.querySelectorAll('ide-toolbar') : [];
             const dragElm = (!self.currentToolbar || toolbars.length === 1) ? self.currentElement : self.currentToolbar;
             if (ghostImage) {
-                ghostImage.style.position = 'absolute'
+                ghostImage.style.position = 'absolute';
                 ghostImage.style.opacity = '1';
                 ghostImage.style.zIndex = '-1';
-                ghostImage.style.pointerEvents = 'none'
+                ghostImage.style.pointerEvents = 'none';
                 event.dataTransfer.setDragImage(ghostImage, startX, startY);
                 dragElm.style.opacity = '0';
                 ghostImage = null;
@@ -946,6 +954,7 @@ export class PageRow extends Module {
             const pageRow = eventTarget.closest('ide-row') as PageRow;
             event.preventDefault();
             event.stopPropagation();
+            self.removeDottedLines();
 
             if (pageRow && elementConfig?.module?.name === 'sectionStack') {
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
@@ -1103,7 +1112,6 @@ export class PageRow extends Module {
                     }
                     self.isDragging = false;
                 }
-                self.removeDottedLines();
                 toggleAllToolbarBoarder(false);
                 removeRectangles();
             }
