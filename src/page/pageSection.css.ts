@@ -15,7 +15,7 @@ Styles.cssRule('ide-section', {
             outline: `2px solid ${Theme.colors.primary.main}`,
             transition: 'border ease-in .2s'
         },
-        '&.is-dragging .section-border, &.is-dragging .hover-border': {
+        '&.is-dragging:hover .section-border, &.is-dragging .hover-border': {
             outline: `none`,
         },
         '&.is-dragging .resize-icon': {

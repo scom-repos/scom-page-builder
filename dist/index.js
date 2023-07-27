@@ -3530,7 +3530,7 @@ define("@scom/scom-page-builder/page/pageSection.css.ts", ["require", "exports",
                 outline: `2px solid ${Theme.colors.primary.main}`,
                 transition: 'border ease-in .2s'
             },
-            '&.is-dragging .section-border, &.is-dragging .hover-border': {
+            '&.is-dragging:hover .section-border, &.is-dragging .hover-border': {
                 outline: `none`,
             },
             '&.is-dragging .resize-icon': {
@@ -4256,7 +4256,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     self.currentElement = targetSection;
                     startX = event.offsetX;
                     startY = event.offsetY;
-                    const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
                     if ((targetToolbar === null || targetToolbar === void 0 ? void 0 : targetToolbar.classList.contains('active')) || toolbars.length == 1)
                         components_24.application.EventBus.dispatch(index_39.EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
                     else
@@ -4266,10 +4265,20 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         toolbar.classList.remove('active');
                     });
                     self.currentElement.style.zIndex = '1';
-                    if (self.currentToolbar)
+                    self.currentElement.classList.add('is-dragging');
+                    let dragElm = null;
+                    if (!self.currentToolbar || toolbars.length === 1) {
+                        dragElm = self.currentElement;
+                        const imgs = self.currentElement.querySelectorAll('img');
+                        for (let img of imgs) {
+                            img.setAttribute('draggable', 'false');
+                        }
+                    }
+                    else {
+                        dragElm = self.currentToolbar;
                         self.currentToolbar.style.zIndex = '1';
-                    const dragElm = (!self.currentToolbar || toolbars.length === 1) ? self.currentElement : self.currentToolbar;
-                    dragElm.classList.add('is-dragging');
+                        self.currentToolbar.classList.add('is-dragging');
+                    }
                     ghostImage = dragElm.cloneNode(true);
                     components_24.application.EventBus.dispatch(index_39.EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                     self.addDottedLines();
@@ -4281,7 +4290,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 dragStartTarget = eventTarget;
             });
             this.addEventListener('drag', function (event) {
-                const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
+                const toolbars = self.currentElement ? self.currentElement.querySelectorAll('ide-toolbar') : [];
                 const dragElm = (!self.currentToolbar || toolbars.length === 1) ? self.currentElement : self.currentToolbar;
                 if (ghostImage) {
                     ghostImage.style.position = 'absolute';
@@ -4677,6 +4686,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const pageRow = eventTarget.closest('ide-row');
                 event.preventDefault();
                 event.stopPropagation();
+                self.removeDottedLines();
                 if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
                     components_24.application.EventBus.dispatch(index_39.EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
                     return;
@@ -4843,7 +4853,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         }
                         self.isDragging = false;
                     }
-                    self.removeDottedLines();
                     toggleAllToolbarBoarder(false);
                     removeRectangles();
                 }
