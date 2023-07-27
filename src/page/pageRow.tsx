@@ -139,7 +139,7 @@ export class PageRow extends Module {
     }
 
     private async createElementFn(data: IPageElement) {
-        const isElmExist = document.getElementById(data.id);
+        const isElmExist = this.pnlRow?.querySelector(`ide-section[id='${data.id}']`);
         if (isElmExist) return
         const pageSection = (
             <ide-section
