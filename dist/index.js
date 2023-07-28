@@ -2098,8 +2098,8 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             index_13.pageObject.removeElement(this.dragRowId, this.dragToolbarId, true);
             const removeToolbar = document.getElementById(`elm-${this.dragToolbarId}`);
             const removeSection = document.getElementById(this.dragSectionId);
-            removeToolbar.remove();
-            const section = index_13.pageObject.getRow(this.dragRowId);
+            removeToolbar && removeToolbar.remove();
+            const section = JSON.parse(JSON.stringify(index_13.pageObject.getRow(this.dragRowId)));
             if (!this.dragSectionId || this.dragSectionId === this.dragToolbarId) {
                 const hasSectionData = !!((_a = section === null || section === void 0 ? void 0 : section.elements) === null || _a === void 0 ? void 0 : _a.find(elm => elm.id === (removeSection === null || removeSection === void 0 ? void 0 : removeSection.id)));
                 if (removeSection && !hasSectionData)
@@ -2148,11 +2148,22 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             }
             else if (this.mergeType == "none") {
                 // simple ungroup
-                const dropColumn = parseInt((_f = (_e = this.dropElm) === null || _e === void 0 ? void 0 : _e.dataset) === null || _f === void 0 ? void 0 : _f.column) || 1;
-                const newColumnSpan = Math.min((MAX_COLUMN - dropColumn) + 1, this.data.columnSpan);
+                let dropColumn = parseInt((_f = (_e = this.dropElm) === null || _e === void 0 ? void 0 : _e.dataset) === null || _f === void 0 ? void 0 : _f.column) || 1;
+                const emptySpace = this.data.columnSpan - ((MAX_COLUMN - dropColumn) + 1);
+                if (emptySpace > 0)
+                    dropColumn = dropColumn - emptySpace;
+                const dropColumnSpan = Math.min((MAX_COLUMN - dropColumn) + 1, this.data.columnSpan);
+                let spaces = 0;
+                const dropRowData = JSON.parse(JSON.stringify(index_13.pageObject.getRow(this.dropRowId)));
+                const sortedSectionList = dropRowData.elements.sort((a, b) => a.column - b.column);
+                for (let i = 0; i < sortedSectionList.length; i++) {
+                    const section = sortedSectionList[i];
+                    spaces += Number(section.columnSpan);
+                }
+                const newColumnSpan = MAX_COLUMN - spaces > 0 ? Math.min(MAX_COLUMN - spaces, dropColumnSpan) : dropColumnSpan;
                 const newElData = {
                     id: this.data.id,
-                    column: parseInt(this.dropElm.dataset.column),
+                    column: dropColumn,
                     columnSpan: newColumnSpan,
                     properties: this.data.properties,
                     module: this.data.module
@@ -3525,7 +3536,7 @@ define("@scom/scom-page-builder/page/pageSection.css.ts", ["require", "exports",
         position: 'relative',
         maxWidth: '100%',
         // border: '2px solid transparent',
-        transition: 'all .3s ease-in',
+        // transition: 'all .3s ease-in',
         $nest: {
             '&:hover .section-border': {
                 display: 'block',
@@ -4366,17 +4377,25 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     const grid = target.closest('.grid');
                     const sections = Array.from(grid === null || grid === void 0 ? void 0 : grid.querySelectorAll('ide-section'));
                     const sortedSections = sections.sort((a, b) => Number(a.dataset.column) - Number(b.dataset.column));
-                    const findedSection = sortedSections.find((section) => {
+                    let spaces = 0;
+                    let findedSection = null;
+                    for (let i = 0; i < sortedSections.length; i++) {
+                        const section = sortedSections[i];
                         const sectionColumn = Number(section.dataset.column);
                         const sectionColumnSpan = Number(section.dataset.columnSpan);
                         const colData = colStart + colSpan;
-                        return colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan;
-                    });
-                    if (findedSection && findedSection != self.currentElement)
+                        if (colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan) {
+                            findedSection = section;
+                        }
+                        spaces += (sectionColumnSpan);
+                    }
+                    if (findedSection && findedSection != self.currentElement) {
+                        removeRectangles();
                         return;
+                    }
                     self.updateGridColumnWidth();
                     const targetRow = target.closest('#pnlRow');
-                    showRectangle(targetRow, colStart, columnSpan);
+                    showRectangle(targetRow, colStart, Math.min(columnSpan, index_40.MAX_COLUMN - spaces));
                 }
                 else {
                     removeRectangles();

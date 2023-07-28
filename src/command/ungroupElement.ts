@@ -53,8 +53,8 @@ export class UngroupElementCommand implements ICommand {
     pageObject.removeElement(this.dragRowId, this.dragToolbarId, true);
     const removeToolbar = document.getElementById(`elm-${this.dragToolbarId}`);
     const removeSection = document.getElementById(this.dragSectionId);
-    removeToolbar.remove();
-    const section = pageObject.getRow(this.dragRowId);
+    removeToolbar && removeToolbar.remove();
+    const section = JSON.parse(JSON.stringify(pageObject.getRow(this.dragRowId)));
     if (!this.dragSectionId || this.dragSectionId === this.dragToolbarId) {
       const hasSectionData = !!section?.elements?.find(elm => elm.id === removeSection?.id);
       if (removeSection && !hasSectionData) removeSection.remove();
@@ -99,11 +99,22 @@ export class UngroupElementCommand implements ICommand {
       (dropSection as any).setData(this.dropRowId, newDropData);
     } else if (this.mergeType=="none") {
       // simple ungroup
-      const dropColumn = parseInt(this.dropElm?.dataset?.column) || 1
-      const newColumnSpan = Math.min((MAX_COLUMN - dropColumn) + 1, this.data.columnSpan)
+      let dropColumn = parseInt(this.dropElm?.dataset?.column) || 1
+      const emptySpace = this.data.columnSpan - ((MAX_COLUMN - dropColumn) + 1)
+      if (emptySpace > 0) dropColumn = dropColumn - emptySpace
+      const dropColumnSpan = Math.min((MAX_COLUMN - dropColumn) + 1, this.data.columnSpan)
+
+      let spaces = 0;
+      const dropRowData = JSON.parse(JSON.stringify(pageObject.getRow(this.dropRowId)));
+      const sortedSectionList = dropRowData.elements.sort((a, b) => a.column - b.column);
+      for (let i = 0; i < sortedSectionList.length; i++) {
+        const section = sortedSectionList[i];
+        spaces += Number(section.columnSpan);
+      }
+      const newColumnSpan = MAX_COLUMN - spaces > 0 ? Math.min(MAX_COLUMN - spaces, dropColumnSpan) : dropColumnSpan;
       const newElData = {
         id: this.data.id,
-        column: parseInt(this.dropElm.dataset.column),
+        column: dropColumn,
         columnSpan: newColumnSpan,
         properties: this.data.properties,
         module: this.data.module

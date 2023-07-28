@@ -620,16 +620,25 @@ export class PageRow extends Module {
                 const grid = target.closest('.grid');
                 const sections = Array.from(grid?.querySelectorAll('ide-section'));
                 const sortedSections = sections.sort((a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column));
-                const findedSection = sortedSections.find((section: Control) => {
+                let spaces = 0;
+                let findedSection = null;
+                for (let i = 0; i < sortedSections.length; i++) {
+                    const section = sortedSections[i] as Control
                     const sectionColumn = Number(section.dataset.column);
                     const sectionColumnSpan = Number(section.dataset.columnSpan);
                     const colData = colStart + colSpan;
-                    return colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan;
-                });
-                if (findedSection && findedSection!=self.currentElement) return;
+                    if (colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan) {
+                        findedSection = section;
+                    }
+                    spaces += (sectionColumnSpan)
+                }
+                if (findedSection && findedSection!=self.currentElement) {
+                    removeRectangles();
+                    return;
+                }
                 self.updateGridColumnWidth();
                 const targetRow = target.closest('#pnlRow') as Control
-                showRectangle(targetRow, colStart, columnSpan);
+                showRectangle(targetRow, colStart, Math.min(columnSpan, MAX_COLUMN - spaces));
             } else {
                 removeRectangles();
                 const section = enterTarget.closest('ide-section') as Control;
