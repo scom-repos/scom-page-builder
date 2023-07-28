@@ -81,7 +81,14 @@ const accentRight: any = [
 ]
 
 export const layouts = {
-    "emptySection": emptySection,
-    "accentLeft": accentLeft,
-    "accentRight": accentRight
+    "oneWidget" : {
+        "emptySection": emptySection,
+    },
+    "twoWidgets": {
+        "accentLeft": accentLeft,
+        "accentRight": accentRight
+    },
+    "multipleWidgets": {
+
+    }
 }

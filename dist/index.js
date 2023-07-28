@@ -6404,9 +6404,14 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
         }
     ];
     exports.layouts = {
-        "emptySection": emptySection,
-        "accentLeft": accentLeft,
-        "accentRight": accentRight
+        "oneWidget": {
+            "emptySection": emptySection,
+        },
+        "twoWidgets": {
+            "accentLeft": accentLeft,
+            "accentRight": accentRight
+        },
+        "multipleWidgets": {}
     };
 });
 define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/page/pageSidebar.css.ts", "@scom/scom-page-builder/command/index.ts", "@scom/scom-page-builder/assets.ts", "@scom/scom-page-builder/utility/layouts.json.ts", "@scom/scom-page-builder/utility/index.ts"], function (require, exports, components_34, index_63, index_64, pageSidebar_css_1, index_65, assets_3, layouts_json_1, index_66) {
@@ -6483,21 +6488,29 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
         }
         renderWidgets(category) {
             this.pnlWidgets.clearInnerHTML();
-            this.pnlWidgets.appendChild(this.$render("i-label", { caption: category.title, font: { color: '#3b3838', weight: 600 }, class: "prevent-select" }));
             if (category.id === 'layouts') {
+                // loop subCategory
                 for (const key in layouts_json_1.layouts) {
                     if (Object.prototype.hasOwnProperty.call(layouts_json_1.layouts, key)) {
-                        console.log(key);
-                        const moduleCard = (this.$render("i-grid-layout", { id: "sectionStack", class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", width: "100%", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, tooltip: { content: '✊ Drag to insert', placement: 'top' }, templateColumns: ["56px", "1fr"], overflow: "hidden" },
-                            this.$render("i-image", { url: assets_3.default.icons.logo, padding: { top: 8, bottom: 8, left: 8, right: 8 } }),
-                            this.$render("i-label", { caption: this.convertCamelCaseToString(key), font: { size: '0.813rem', color: '#3b3838', weight: 600 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" })));
-                        moduleCard.setAttribute('draggable', 'true');
-                        moduleCard.setAttribute('layout', key);
-                        this.pnlWidgets.appendChild(moduleCard);
+                        const subCategoryLbl = (this.$render("i-label", { caption: this.convertCamelCaseToString(key), margin: { top: '0.5rem' }, font: { color: '#3b3838', weight: 600 }, class: "prevent-select" }));
+                        this.pnlWidgets.appendChild(subCategoryLbl);
+                        // loop layout
+                        for (const key1 in layouts_json_1.layouts[key]) {
+                            if (Object.prototype.hasOwnProperty.call(layouts_json_1.layouts[key], key1)) {
+                                const moduleCard = (this.$render("i-grid-layout", { id: "sectionStack", class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", width: "100%", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, tooltip: { content: '✊ Drag to insert', placement: 'top' }, templateColumns: ["56px", "1fr"], overflow: "hidden" },
+                                    this.$render("i-image", { url: assets_3.default.icons.logo, padding: { top: 8, bottom: 8, left: 8, right: 8 } }),
+                                    this.$render("i-label", { caption: this.convertCamelCaseToString(key1), font: { size: '0.813rem', color: '#3b3838', weight: 600 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" })));
+                                moduleCard.setAttribute('draggable', 'true');
+                                moduleCard.setAttribute('layout', key1);
+                                moduleCard.setAttribute('layoutCat', key);
+                                this.pnlWidgets.appendChild(moduleCard);
+                            }
+                        }
                     }
                 }
             }
             else {
+                this.pnlWidgets.appendChild(this.$render("i-label", { caption: category.title, font: { color: '#3b3838', weight: 600 }, class: "prevent-select" }));
                 let components = this.pageBlocks.filter(p => p.category === category.id);
                 let matchedModules = components;
                 for (const module of matchedModules) {
@@ -6521,21 +6534,10 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
             module.setAttribute('draggable', 'true');
             module.setAttribute('data-name', data.name);
         }
-        getDefaultElements(layout) {
-            let defaultLayout;
-            if (layout == "emptySection") {
-                defaultLayout = layouts_json_1.layouts.emptySection;
-            }
-            else if (layout == "accentLeft") {
-                defaultLayout = layouts_json_1.layouts.accentLeft;
-            }
-            else if (layout == "accentRight") {
-                defaultLayout = layouts_json_1.layouts.accentRight;
-            }
-            else {
-                console.log("unknown layout type");
-                defaultLayout = layouts_json_1.layouts.emptySection;
-            }
+        getDefaultElements(layoutCat, layout) {
+            const defaultLayout = (layouts_json_1.layouts[layoutCat] && layouts_json_1.layouts[layoutCat][layout]) ?
+                layouts_json_1.layouts[layoutCat][layout] :
+                layouts_json_1.layouts.oneWidget.emptySection;
             return this.setUUID(defaultLayout);
         }
         setUUID(data) {
@@ -6565,7 +6567,8 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                     event.preventDefault();
                 if (eventTarget.id === 'sectionStack') {
                     const layout = eventTarget.getAttribute("layout");
-                    const defaultElements = self.getDefaultElements(layout);
+                    const layoutCat = eventTarget.getAttribute("layoutCat");
+                    const defaultElements = self.getDefaultElements(layoutCat, layout);
                     (0, index_63.setDragData)({ module: { name: 'sectionStack', path: '' }, defaultElements: defaultElements });
                     eventTarget.classList.add('is-dragging');
                     self.mdWidget.visible = false;

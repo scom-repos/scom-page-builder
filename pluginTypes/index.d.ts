@@ -1396,9 +1396,14 @@ declare module "@scom/scom-page-builder/page/pageSidebar.css.ts" {
 /// <amd-module name="@scom/scom-page-builder/utility/layouts.json.ts" />
 declare module "@scom/scom-page-builder/utility/layouts.json.ts" {
     export const layouts: {
-        emptySection: any;
-        accentLeft: any;
-        accentRight: any;
+        oneWidget: {
+            emptySection: any;
+        };
+        twoWidgets: {
+            accentLeft: any;
+            accentRight: any;
+        };
+        multipleWidgets: {};
     };
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageSidebar.tsx" />
@@ -1426,7 +1431,7 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
         renderWidgets(category: ICategory): void;
         openWidgetModal(target: Control, category: ICategory): void;
         private initDrag;
-        getDefaultElements(layout: string): any;
+        getDefaultElements(layoutCat: string, layout: string): any;
         setUUID(data: any): any;
         setUUIDFn(data: any): any;
         private initEventListeners;
