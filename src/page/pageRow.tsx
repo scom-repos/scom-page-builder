@@ -690,6 +690,7 @@ export class PageRow extends Module {
         }
 
         function dragLeave(leaveTarget: Control, clientX: number, isOverlap: boolean = false) {
+            if (!leaveTarget) return;
             let target: Control;
             if (isOverlap)
                 target = findNearestFixedGridInRow(clientX);
@@ -972,7 +973,8 @@ export class PageRow extends Module {
             removeRectangles();
 
             if (pageRow && elementConfig?.module?.name === 'sectionStack') {
-                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
+                // add section
+                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id, defaultElements: elementConfig.defaultElements });
                 return;
             }
 
@@ -992,9 +994,6 @@ export class PageRow extends Module {
 
             // is ungrouping and draging on the original section
             if (collision.collisionType == "self" && isUngrouping) return;
-
-            // if (pageRow && elementConfig?.module?.name === 'sectionStack')
-            //     application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id });
 
             let nearestFixedItem = eventTarget.closest('.fixed-grid-item') as Control;
                 // if target overlap with itself

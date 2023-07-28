@@ -16,6 +16,8 @@ import { categoryButtonStyle, categoryPanelStyle, widgetModalStyle, widgetStyle 
 import { UpdatePageSettingsCommand, commandHistory } from '../command/index';
 import { PageSettingsDialog } from '../dialogs/index';
 import assets from '../assets';
+import { layouts } from '../utility/layouts.json'
+import { generateUUID } from '../utility/index';
 
 const Theme = Styles.Theme.ThemeVars;
 
@@ -119,35 +121,65 @@ export class PageSidebar extends Module {
         })
     }
 
+    convertCamelCaseToString(input: string) {
+        const wordsArray = input.split(/(?=[A-Z])/);
+        const capitalizedStrings = wordsArray.map((str, idx) => {
+            if (typeof str !== 'string' || str.length === 0) {
+                return str;
+            }
+            if (idx)
+                return str.charAt(0).toLowerCase() + str.slice(1);
+            else 
+                return str.charAt(0).toUpperCase() + str.slice(1);
+        });
+        return capitalizedStrings.join(' ');
+    }
+
     renderWidgets(category: ICategory) {
         this.pnlWidgets.clearInnerHTML();
-        this.pnlWidgets.appendChild(<i-label caption={category.title} font={{ color: '#3b3838', weight: 600 }} class="prevent-select"></i-label>);
         if (category.id === 'layouts') {
-            const moduleCard = (
-                <i-grid-layout
-                    id="sectionStack"
-                    class={widgetStyle}
-                    verticalAlignment="center"
-                    width="100%"
-                    background={{ color: '#f9f6f3' }}
-                    border={{ width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }}
-                    tooltip={{ content: '✊ Drag to insert', placement: 'top' }}
-                    templateColumns={["56px", "1fr"]}
-                    overflow="hidden"
-                >
-                    <i-image url={assets.icons.logo} padding={{ top: 8, bottom: 8, left: 8, right: 8 }}></i-image>
-                    <i-label
-                        caption="Section"
-                        font={{ size: '0.813rem', color: '#3b3838', weight: 600 }}
-                        padding={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                        maxHeight={34}
-                        overflow={"hidden"}
-                    ></i-label>
-                </i-grid-layout>
-            );
-            this.pnlWidgets.appendChild(moduleCard);
-            moduleCard.setAttribute('draggable', 'true');
+            // loop subCategory
+            for (const key in layouts) {
+                if (Object.prototype.hasOwnProperty.call(layouts, key)) {
+                    const subCategoryLbl = (
+                        <i-label caption={this.convertCamelCaseToString(key)} margin={{ top: '0.5rem' }} font={{ color: '#3b3838', weight: 600 }} class="prevent-select"></i-label>
+                    )
+                    this.pnlWidgets.appendChild(subCategoryLbl);
+                    // loop layout
+                    for (const key1 in layouts[key]) {
+                        if (Object.prototype.hasOwnProperty.call(layouts[key], key1)) {
+                            const moduleCard = (
+                                <i-grid-layout
+                                    id="sectionStack"
+                                    class={widgetStyle}
+                                    verticalAlignment="center"
+                                    width="100%"
+                                    background={{ color: '#f9f6f3' }}
+                                    border={{ width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }}
+                                    tooltip={{ content: '✊ Drag to insert', placement: 'top' }}
+                                    templateColumns={["56px", "1fr"]}
+                                    overflow="hidden"
+                                >
+                                    <i-image url={assets.icons.logo} padding={{ top: 8, bottom: 8, left: 8, right: 8 }}></i-image>
+                                    <i-label
+                                        caption={this.convertCamelCaseToString(key1)}
+                                        font={{ size: '0.813rem', color: '#3b3838', weight: 600 }}
+                                        padding={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                        maxHeight={34}
+                                        overflow={"hidden"}
+                                    ></i-label>
+                                </i-grid-layout>
+                            );
+                            moduleCard.setAttribute('draggable', 'true');
+                            moduleCard.setAttribute('layout', key1);
+                            moduleCard.setAttribute('layoutCat', key);
+                            this.pnlWidgets.appendChild(moduleCard);
+                        }
+                    }
+                }
+            }
         } else {
+            this.pnlWidgets.appendChild(<i-label caption={category.title} font={{ color: '#3b3838', weight: 600 }} class="prevent-select"></i-label>);
             let components = this.pageBlocks.filter(p => p.category === category.id);
             let matchedModules = components;
             for (const module of matchedModules) {
@@ -193,6 +225,33 @@ export class PageSidebar extends Module {
         module.setAttribute('data-name', data.name);
     }
 
+    getDefaultElements(layoutCat: string, layout: string) {
+        const defaultLayout = (layouts[layoutCat] && layouts[layoutCat][layout]) ?
+            layouts[layoutCat][layout] :
+            layouts.oneWidget.emptySection ;
+
+        return this.setUUID(defaultLayout);
+    }
+
+    setUUID(data: any) {
+        const clonedData = JSON.parse(JSON.stringify(data));
+        for (let i=0; i<clonedData.length; i++) {
+            clonedData[i] = this.setUUIDFn(clonedData[i])
+        }
+        return clonedData;
+    }
+
+    setUUIDFn(data: any) {
+        const clonedData = JSON.parse(JSON.stringify(data));
+        clonedData.id = generateUUID();
+        if (clonedData.elements) {
+            for (let i=0; i<clonedData.elements.length; i++) {
+                clonedData.elements[i] = this.setUUIDFn(clonedData.elements[i])
+            }
+        }
+        return clonedData;
+    }
+
     private initEventListeners() {
         const self = this;
         this.pnlWidgets.addEventListener('dragstart', function (event) {
@@ -201,7 +260,10 @@ export class PageSidebar extends Module {
             if (eventTarget.nodeName === 'IMG' || (eventTarget?.closest && !eventTarget.closest('.' + widgetStyle)))
                 event.preventDefault();
             if (eventTarget.id === 'sectionStack') {
-                setDragData({ module: { name: 'sectionStack', path: '' } });
+                const layout = eventTarget.getAttribute("layout")
+                const layoutCat = eventTarget.getAttribute("layoutCat")
+                const defaultElements = self.getDefaultElements(layoutCat, layout);
+                setDragData({ module: { name: 'sectionStack', path: '' }, defaultElements: defaultElements });
                 eventTarget.classList.add('is-dragging');
                 self.mdWidget.visible = false;
             }

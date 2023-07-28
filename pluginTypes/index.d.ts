@@ -410,6 +410,7 @@ declare module "@scom/scom-page-builder/interface/jsonSchema.ts" {
 declare module "@scom/scom-page-builder/interface/index.ts" {
     import { IMenu, INetwork, IRoute, ITheme, ISCConfig, IBreakpoints } from "@scom/scom-page-builder/interface/core.ts";
     import { IPageBlockData } from "@scom/scom-page-builder/interface/pageBlock.ts";
+    import { IPageElement } from "@scom/scom-page-builder/interface/siteData.ts";
     export { IMenu, INetwork, IRoute, ITheme, ISCConfig, IBreakpoints };
     export * from "@scom/scom-page-builder/interface/pageBlock.ts";
     export * from "@scom/scom-page-builder/interface/siteData.ts";
@@ -431,6 +432,7 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
         module: IPageBlockData;
         prependId?: string;
         appendId?: string;
+        defaultElements?: IPageElement[];
     }
     export const TEXTBOX_PATH = "scom-markdown-editor";
     export const IMAGE_PATH = "scom-image";
@@ -1394,6 +1396,27 @@ declare module "@scom/scom-page-builder/page/pageSidebar.css.ts" {
     export const widgetModalStyle: string;
     export const widgetStyle: string;
 }
+/// <amd-module name="@scom/scom-page-builder/utility/layouts.json.ts" />
+declare module "@scom/scom-page-builder/utility/layouts.json.ts" {
+    export const layouts: {
+        oneWidget: {
+            emptySection: any;
+            title: any;
+            titleWithText: any;
+            titleWithButton: any;
+            titleWithBulletPoint: any;
+            titleWithTaskList: any;
+        };
+        twoWidgets: {
+            accentLeft: any;
+            accentRight: any;
+            "2ImageColumn": any;
+        };
+        multipleWidgets: {
+            "3ImageColumn": any;
+        };
+    };
+}
 /// <amd-module name="@scom/scom-page-builder/page/pageSidebar.tsx" />
 declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
     import { ControlElement, Module, Control } from '@ijstech/components';
@@ -1415,9 +1438,13 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
         init(): void;
         renderToolbar(): void;
         renderWidgetCategories(): void;
+        convertCamelCaseToString(input: string): string;
         renderWidgets(category: ICategory): void;
         openWidgetModal(target: Control, category: ICategory): void;
         private initDrag;
+        getDefaultElements(layoutCat: string, layout: string): any;
+        setUUID(data: any): any;
+        setUUIDFn(data: any): any;
         private initEventListeners;
         private onSavePageSettings;
         render(): any;
