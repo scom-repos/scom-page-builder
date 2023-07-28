@@ -6325,6 +6325,127 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
     exports.layouts = void 0;
     ///<amd-module name='@scom/scom-page-builder/utility/layouts.json.ts'/> 
     const emptySection = [];
+    const title = [
+        {
+            "id": "",
+            "column": 1,
+            "columnSpan": 12,
+            "module": {
+                "name": "Banner",
+                "path": "scom-banner",
+                "category": "composables",
+            },
+            "properties": {
+                "title": 'Title',
+                "description": 'Short description or subheading',
+                "backgroundInageUrl": ''
+            },
+            "tag": {
+                "dark": {
+                    "descriptionFontColor": "#565656",
+                    "linkButtonStyle": undefined,
+                    "titleFontColor": "#036ac4"
+                },
+                "light": {
+                    "descriptionFontColor": "#565656",
+                    "linkButtonStyle": undefined,
+                    "titleFontColor": "#036ac4"
+                }
+            }
+        }
+    ];
+    const titleWithBulletPoint = [
+        {
+            "id": "",
+            "column": 1,
+            "columnSpan": 6,
+            "module": {
+                "name": "Text box",
+                "path": "scom-markdown-editor",
+                "category": "composables"
+            },
+            "properties": {
+                "content": '## **<span style="color: #036ac4">Title</span>**\n\n* item 1\n* item 2\n* item 3'
+            },
+            "tag": {
+                "width": "100%",
+                "height": 200
+            }
+        }
+    ];
+    const titleWithTaskList = [
+        {
+            "id": "",
+            "column": 1,
+            "columnSpan": 6,
+            "module": {
+                "name": "Text box",
+                "path": "scom-markdown-editor",
+                "category": "composables"
+            },
+            "properties": {
+                "content": '## **<span style="color: #036ac4">Title</span>**\n\n - [ ] Item 1\n - [ ] Item 2\n - [ ] Item 3'
+            },
+            "tag": {
+                "width": "100%",
+                "height": 200
+            }
+        }
+    ];
+    const titleWithButton = [
+        {
+            "id": "",
+            "column": 1,
+            "columnSpan": 12,
+            "module": {
+                "name": "Banner",
+                "path": "scom-banner",
+                "category": "composables",
+            },
+            "properties": {
+                "title": 'Title',
+                "description": 'Short description or subheading',
+                "backgroundInageUrl": '',
+                "linkButtons": [
+                    {
+                        "caption": "button",
+                        "url": ""
+                    }
+                ]
+            },
+            "tag": {
+                "dark": {
+                    "descriptionFontColor": "#565656",
+                    "linkButtonStyle": undefined,
+                    "titleFontColor": "#036ac4"
+                },
+                "light": {
+                    "descriptionFontColor": "#565656",
+                    "linkButtonStyle": undefined,
+                    "titleFontColor": "#036ac4"
+                }
+            }
+        }
+    ];
+    const titleWithText = [
+        {
+            "id": "",
+            "column": 1,
+            "columnSpan": 12,
+            "module": {
+                "name": "Text box",
+                "path": "scom-markdown-editor",
+                "category": "composables"
+            },
+            "properties": {
+                "content": "## **<span style='color: #036ac4'>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>**\n\nNulla ac est sit amet urna consectetur semper. Curabitur posuere justo et nibh gravida, non tristique urna fringilla. Vestibulum id velit sed nisl tincidunt aliquet. Morbi viverra sapien eu purus venenatis, vitae vestibulum odio bibendum. Fusce volutpat gravida velit, id efficitur erat luctus id. Nullam malesuada hendrerit orci, a pretium tortor facilisis non. Sed euismod euismod felis. Nunc rhoncus diam in mi placerat efficitur. Aenean pulvinar neque ac nisl consequat, non lacinia lectus dapibus. Phasellus sagittis sagittis massa a luctus. Etiam auctor semper ullamcorper. Suspendisse potenti."
+            },
+            "tag": {
+                "width": "100%",
+                "height": 191
+            }
+        }
+    ];
     const accentLeft = [
         {
             "id": "",
@@ -6355,12 +6476,11 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
                 "category": "composables"
             },
             "properties": {
-                "showFooter": false,
-                "showHeader": false
+                "content": "## **<span style='color: #036ac4'>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>**\n\nNulla ac est sit amet urna consectetur semper. Curabitur posuere justo et nibh gravida, non tristique urna fringilla. Vestibulum id velit sed nisl tincidunt aliquet. Morbi viverra sapien eu purus venenatis, vitae vestibulum odio bibendum. Fusce volutpat gravida velit, id efficitur erat luctus id. Nullam malesuada hendrerit orci, a pretium tortor facilisis non. Sed euismod euismod felis. Nunc rhoncus diam in mi placerat efficitur. Aenean pulvinar neque ac nisl consequat, non lacinia lectus dapibus. Phasellus sagittis sagittis massa a luctus. Etiam auctor semper ullamcorper. Suspendisse potenti."
             },
             "tag": {
                 "width": "100%",
-                "height": 244
+                "height": 270
             }
         }
     ];
@@ -6375,12 +6495,11 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
                 "category": "composables"
             },
             "properties": {
-                "showFooter": false,
-                "showHeader": false
+                "content": "## **<span style='color: #036ac4'>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>**\n\nNulla ac est sit amet urna consectetur semper. Curabitur posuere justo et nibh gravida, non tristique urna fringilla. Vestibulum id velit sed nisl tincidunt aliquet. Morbi viverra sapien eu purus venenatis, vitae vestibulum odio bibendum. Fusce volutpat gravida velit, id efficitur erat luctus id. Nullam malesuada hendrerit orci, a pretium tortor facilisis non. Sed euismod euismod felis. Nunc rhoncus diam in mi placerat efficitur. Aenean pulvinar neque ac nisl consequat, non lacinia lectus dapibus. Phasellus sagittis sagittis massa a luctus. Etiam auctor semper ullamcorper. Suspendisse potenti."
             },
             "tag": {
                 "width": "100%",
-                "height": 244
+                "height": 270
             }
         },
         {
@@ -6403,15 +6522,182 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
             }
         }
     ];
+    const twoImageColumn = [
+        {
+            "id": "",
+            "column": 1,
+            "columnSpan": 6,
+            "module": {},
+            "properties": { "showHeader": false, "showFooter": false },
+            "elements": [
+                {
+                    "id": "",
+                    "column": 1,
+                    "columnSpan": 6,
+                    "module": { "name": 'Image', "path": 'scom-image', "category": 'composables', "disableClicked": true },
+                    "properties": { "showHeader": false, "showFooter": false },
+                    "tag": {
+                        "width": "100%",
+                        "height": 'auto'
+                    }
+                },
+                {
+                    "id": "",
+                    "column": 1,
+                    "columnSpan": 6,
+                    "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'composables' },
+                    "properties": { "showHeader": false, "showFooter": false }
+                }
+            ],
+            "tag": {
+                "width": "100%",
+                "height": 'auto'
+            }
+        },
+        {
+            "id": "",
+            "column": 7,
+            "columnSpan": 6,
+            "module": {},
+            "properties": { "showHeader": false, "showFooter": false },
+            "elements": [
+                {
+                    "id": "",
+                    "column": 7,
+                    "columnSpan": 6,
+                    "module": { "name": 'Image', "path": 'scom-image', "category": 'composables', "disableClicked": true },
+                    "properties": { "showHeader": false, "showFooter": false },
+                    "tag": {
+                        "width": "100%",
+                        "height": 'auto'
+                    }
+                },
+                {
+                    "id": "",
+                    "column": 7,
+                    "columnSpan": 6,
+                    "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'composables' },
+                    "properties": { "showHeader": false, "showFooter": false }
+                }
+            ],
+            "tag": {
+                "width": "100%",
+                "height": 'auto'
+            }
+        }
+    ];
+    const threeImageColumn = [
+        {
+            "id": "",
+            "column": 1,
+            "columnSpan": 4,
+            "module": {},
+            "properties": { "showHeader": false, "showFooter": false },
+            "elements": [
+                {
+                    "id": "",
+                    "column": 1,
+                    "columnSpan": 4,
+                    "module": { "name": 'Image', "path": 'scom-image', "category": 'composables', "disableClicked": true },
+                    "properties": { "showHeader": false, "showFooter": false },
+                    "tag": {
+                        "width": "100%",
+                        "height": 'auto'
+                    }
+                },
+                {
+                    "id": "",
+                    "column": 1,
+                    "columnSpan": 4,
+                    "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'composables' },
+                    "properties": { "showHeader": false, "showFooter": false }
+                }
+            ],
+            "tag": {
+                "width": "100%",
+                "height": 'auto'
+            }
+        },
+        {
+            "id": "",
+            "column": 5,
+            "columnSpan": 4,
+            "module": {},
+            "properties": { "showHeader": false, "showFooter": false },
+            "elements": [
+                {
+                    "id": "",
+                    "column": 5,
+                    "columnSpan": 4,
+                    "module": { "name": 'Image', "path": 'scom-image', "category": 'composables', "disableClicked": true },
+                    "properties": { "showHeader": false, "showFooter": false },
+                    "tag": {
+                        "width": "100%",
+                        "height": 'auto'
+                    }
+                },
+                {
+                    "id": "",
+                    "column": 5,
+                    "columnSpan": 4,
+                    "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'composables' },
+                    "properties": { "showHeader": false, "showFooter": false }
+                }
+            ],
+            "tag": {
+                "width": "100%",
+                "height": 'auto'
+            }
+        },
+        {
+            "id": "",
+            "column": 9,
+            "columnSpan": 4,
+            "module": {},
+            "properties": { "showHeader": false, "showFooter": false },
+            "elements": [
+                {
+                    "id": "",
+                    "column": 9,
+                    "columnSpan": 4,
+                    "module": { "name": 'Image', "path": 'scom-image', "category": 'composables', "disableClicked": true },
+                    "properties": { "showHeader": false, "showFooter": false },
+                    "tag": {
+                        "width": "100%",
+                        "height": 'auto'
+                    }
+                },
+                {
+                    "id": "",
+                    "column": 9,
+                    "columnSpan": 4,
+                    "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'composables' },
+                    "properties": { "showHeader": false, "showFooter": false }
+                }
+            ],
+            "tag": {
+                "width": "100%",
+                "height": 'auto'
+            }
+        }
+    ];
     exports.layouts = {
         "oneWidget": {
             "emptySection": emptySection,
+            "title": title,
+            "titleWithText": titleWithText,
+            "titleWithButton": titleWithButton,
+            "titleWithBulletPoint": titleWithBulletPoint,
+            "titleWithTaskList": titleWithTaskList
         },
         "twoWidgets": {
             "accentLeft": accentLeft,
-            "accentRight": accentRight
+            "accentRight": accentRight,
+            "2ImageColumn": twoImageColumn
         },
-        "multipleWidgets": {}
+        "multipleWidgets": {
+            "3ImageColumn": threeImageColumn
+        }
     };
 });
 define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/page/pageSidebar.css.ts", "@scom/scom-page-builder/command/index.ts", "@scom/scom-page-builder/assets.ts", "@scom/scom-page-builder/utility/layouts.json.ts", "@scom/scom-page-builder/utility/index.ts"], function (require, exports, components_34, index_63, index_64, pageSidebar_css_1, index_65, assets_3, layouts_json_1, index_66) {
@@ -6477,14 +6763,16 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
         }
         convertCamelCaseToString(input) {
             const wordsArray = input.split(/(?=[A-Z])/);
-            const capitalizedWords = wordsArray.map(word => {
-                if (word.length > 0) {
-                    return word.charAt(0).toUpperCase() + word.slice(1);
+            const capitalizedStrings = wordsArray.map((str, idx) => {
+                if (typeof str !== 'string' || str.length === 0) {
+                    return str;
                 }
-                return word;
+                if (idx)
+                    return str.charAt(0).toLowerCase() + str.slice(1);
+                else
+                    return str.charAt(0).toUpperCase() + str.slice(1);
             });
-            const capitalizedSentence = capitalizedWords.join(' ');
-            return capitalizedSentence;
+            return capitalizedStrings.join(' ');
         }
         renderWidgets(category) {
             this.pnlWidgets.clearInnerHTML();

@@ -1398,12 +1398,20 @@ declare module "@scom/scom-page-builder/utility/layouts.json.ts" {
     export const layouts: {
         oneWidget: {
             emptySection: any;
+            title: any;
+            titleWithText: any;
+            titleWithButton: any;
+            titleWithBulletPoint: any;
+            titleWithTaskList: any;
         };
         twoWidgets: {
             accentLeft: any;
             accentRight: any;
+            "2ImageColumn": any;
         };
-        multipleWidgets: {};
+        multipleWidgets: {
+            "3ImageColumn": any;
+        };
     };
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageSidebar.tsx" />

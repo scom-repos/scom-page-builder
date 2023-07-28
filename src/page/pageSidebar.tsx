@@ -123,14 +123,16 @@ export class PageSidebar extends Module {
 
     convertCamelCaseToString(input: string) {
         const wordsArray = input.split(/(?=[A-Z])/);
-        const capitalizedWords = wordsArray.map(word => {
-            if (word.length > 0) {
-                return word.charAt(0).toUpperCase() + word.slice(1);
+        const capitalizedStrings = wordsArray.map((str, idx) => {
+            if (typeof str !== 'string' || str.length === 0) {
+                return str;
             }
-            return word;
+            if (idx)
+                return str.charAt(0).toLowerCase() + str.slice(1);
+            else 
+                return str.charAt(0).toUpperCase() + str.slice(1);
         });
-        const capitalizedSentence = capitalizedWords.join(' ');
-        return capitalizedSentence;
+        return capitalizedStrings.join(' ');
     }
 
     renderWidgets(category: ICategory) {
