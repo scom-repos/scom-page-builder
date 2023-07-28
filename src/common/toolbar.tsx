@@ -4,7 +4,6 @@ import {
     Panel,
     ControlElement,
     HStack,
-    Button,
     Modal,
     IRenderUIOptions,
     IDataSchema,
@@ -59,6 +58,8 @@ export class IDEToolbar extends Module {
     private mdActions: Modal;
     private backdropStack: VStack
     private form: Form;
+    private pnlLoading: Panel;
+    private mainWrapper: Panel;
 
     private _rowId: string;
     private _elementId: string;
@@ -388,6 +389,7 @@ export class IDEToolbar extends Module {
 
     async fetchModule(data: IPageElement) {
         if (this._readonly) return;
+        if (this.pnlLoading) this.pnlLoading.visible = true;
         try {
             const module: any = await application.createElement(data?.module?.path || '');
             if (!module) throw new Error('not found');
@@ -398,7 +400,7 @@ export class IDEToolbar extends Module {
                 const allSingleContentBlockId = Object.keys(data.properties).filter(prop => prop.includes(SINGLE_CONTENT_BLOCK_ID))
                 for (let singleContentBlockId of allSingleContentBlockId) {
                     const singleContentBlock = this.parentElement.querySelector(`#${singleContentBlockId}`) as any
-                    singleContentBlock.fetchModule(data.properties[singleContentBlockId])
+                    await singleContentBlock.fetchModule(data.properties[singleContentBlockId])
                 }
                 this.dragStack.visible = false;
             } else {
@@ -410,6 +412,8 @@ export class IDEToolbar extends Module {
             console.log('fetch module error: ', error);
             commandHistory.undo();
         }
+        const hasProps = !isEmpty(data.properties);
+        if (this.pnlLoading) this.pnlLoading.visible = hasProps;
     }
 
     private async setModule(module: Module, data: IPageBlockData) {
@@ -487,12 +491,14 @@ export class IDEToolbar extends Module {
     }
 
     async setProperties(data: any) {
+        if (this.pnlLoading) this.pnlLoading.visible = true;
         if (!this._component || !this._component?.getConfigurators) return;
         const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
         if (builderTarget?.setData) {
             await builderTarget.setData(data);
         }
         if (builderTarget?.setRootDir) builderTarget.setRootDir(getRootDir());
+        if (this.pnlLoading) this.pnlLoading.visible = false;
     }
 
     setTheme(value: ThemeType) {
@@ -644,6 +650,7 @@ export class IDEToolbar extends Module {
 
     init() {
         super.init();
+        if (this.pnlLoading) this.pnlLoading.visible = true;
         this.readonly = this.getAttribute('readonly', true, false);
         this.setAttribute('draggable', 'true');
         this.initEventBus();
@@ -652,107 +659,132 @@ export class IDEToolbar extends Module {
 
     render() {
         return (
-            <i-vstack id="mainWrapper" width="auto" maxWidth="100%" maxHeight="100%" position="relative">
-                <i-panel
-                    id="toolsStack"
-                    border={{ radius: 5 }}
-                    background={{ color: '#fff' }}
-                    class="ide-toolbar"
+            <i-panel>
+                <i-vstack
+                    id="pnlLoading"
+                    padding={{top: '0.5rem', bottom: '0.5rem'}}
                     visible={false}
+                    height="100%" width="100%"
+                    class="i-loading-overlay"
                 >
-                    <i-hstack id="toolbar" padding={{ top: 4, bottom: 4, left: 4, right: 4 }} gap="0.25rem"></i-hstack>
-                </i-panel>
-                <i-panel
-                    id="contentStack"
-                    height="100%"
-                    position='relative'
-                    maxWidth="100%"
-                    maxHeight="100%"
-                    class="ide-component"
-                    onClick={this.showToolbars.bind(this)}
-                >
-                    <i-vstack
-                        id="dragStack"
-                        verticalAlignment="center"
-                        position="absolute"
-                        left="50%" top="0px"
-                        width="auto" height="auto"
-                        class="dragger"
-                    >
-                        <i-grid-layout
-                            verticalAlignment="center"
-                            autoFillInHoles={true}
-                            columnsPerRow={4}
-                            gap={{ column: '2px', row: '2px' }}
-                            class="main-drag"
-                        >
-                            <i-icon name="circle" width={3} height={3}></i-icon>
-                            <i-icon name="circle" width={3} height={3}></i-icon>
-                            <i-icon name="circle" width={3} height={3}></i-icon>
-                            <i-icon name="circle" width={3} height={3}></i-icon>
-                            <i-icon name="circle" width={3} height={3}></i-icon>
-                            <i-icon name="circle" width={3} height={3}></i-icon>
-                            <i-icon name="circle" width={3} height={3}></i-icon>
-                            <i-icon name="circle" width={3} height={3}></i-icon>
-                        </i-grid-layout>
+                    <i-vstack class="i-loading-spinner" horizontalAlignment="center" verticalAlignment="center">
+                        <i-icon
+                            class="i-loading-spinner_icon"
+                            name="spinner"
+                            width={24}
+                            height={24}
+                            fill={Theme.colors.primary.main}
+                        />
+                        <i-label
+                            caption="Loading..."
+                            font={{ color: Theme.colors.primary.main, size: '1rem' }}
+                            class="i-loading-spinner_text"
+                        />
                     </i-vstack>
-                    <i-vstack
-                        id="backdropStack"
-                        width="100%" height="100%"
-                        position="absolute"
-                        top="0px" left="0px" zIndex={15}
+                </i-vstack>
+                <i-vstack id="mainWrapper" width="auto" maxWidth="100%" maxHeight="100%" position="relative">
+                    <i-panel
+                        id="toolsStack"
+                        border={{ radius: 5 }}
+                        background={{ color: '#fff' }}
+                        class="ide-toolbar"
                         visible={false}
-                        onClick={this.showToolList.bind(this)}
-                    ></i-vstack>
-                </i-panel>
-
-                <i-panel
-                    position="absolute"
-                    width="90%"
-                    height="8px"
-                    left="5%"
-                    bottom="-8px"
-                    zIndex={999}
-                    border={{ radius: '4px' }}
-                    visible={false}
-                    class="bottom-block"
-                ></i-panel>
-
-                <i-panel
-                    position="absolute"
-                    width="90%"
-                    height="8px"
-                    left="5%"
-                    top="-8px"
-                    zIndex={999}
-                    border={{ radius: '4px' }}
-                    visible={false}
-                    class="top-block"
-                ></i-panel>
-
-                <i-modal
-                    id='mdActions'
-                    title='Update Settings'
-                    closeIcon={{ name: 'times' }}
-                    minWidth={400}
-                    maxWidth='900px'
-                    closeOnBackdropClick={false}
-                    onOpen={this.onShowModal.bind(this)}
-                    onClose={this.onCloseModal.bind(this)}
-                    class="setting-modal"
-                >
-                    <i-panel>
-                        <i-vstack
-                            id="pnlFormMsg"
-                            padding={{ left: '1.5rem', right: '1.5rem', top: '1rem' }}
-                            gap="0.5rem"
-                            visible={false}
-                        ></i-vstack>
-                        <i-panel id="pnlForm" />
-                        <i-form id="form" padding={{ left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' }}/>
+                    >
+                        <i-hstack id="toolbar" padding={{ top: 4, bottom: 4, left: 4, right: 4 }} gap="0.25rem"></i-hstack>
                     </i-panel>
-                </i-modal>
-            </i-vstack>
+                    <i-panel
+                        id="contentStack"
+                        height="100%"
+                        position='relative'
+                        maxWidth="100%"
+                        maxHeight="100%"
+                        class="ide-component"
+                        onClick={this.showToolbars.bind(this)}
+                    >
+                        <i-vstack
+                            id="dragStack"
+                            verticalAlignment="center"
+                            position="absolute"
+                            left="50%" top="0px"
+                            width="auto" height="auto"
+                            class="dragger"
+                        >
+                            <i-grid-layout
+                                verticalAlignment="center"
+                                autoFillInHoles={true}
+                                columnsPerRow={4}
+                                gap={{ column: '2px', row: '2px' }}
+                                class="main-drag"
+                            >
+                                <i-icon name="circle" width={3} height={3}></i-icon>
+                                <i-icon name="circle" width={3} height={3}></i-icon>
+                                <i-icon name="circle" width={3} height={3}></i-icon>
+                                <i-icon name="circle" width={3} height={3}></i-icon>
+                                <i-icon name="circle" width={3} height={3}></i-icon>
+                                <i-icon name="circle" width={3} height={3}></i-icon>
+                                <i-icon name="circle" width={3} height={3}></i-icon>
+                                <i-icon name="circle" width={3} height={3}></i-icon>
+                            </i-grid-layout>
+                        </i-vstack>
+                        <i-vstack
+                            id="backdropStack"
+                            width="100%" height="100%"
+                            position="absolute"
+                            top="0px" left="0px" zIndex={15}
+                            visible={false}
+                            onClick={this.showToolList.bind(this)}
+                        ></i-vstack>
+                    </i-panel>
+
+                    <i-panel
+                        position="absolute"
+                        width="90%"
+                        height="8px"
+                        left="5%"
+                        bottom="-8px"
+                        zIndex={999}
+                        border={{ radius: '4px' }}
+                        visible={false}
+                        class="bottom-block"
+                    ></i-panel>
+
+                    <i-panel
+                        position="absolute"
+                        width="90%"
+                        height="8px"
+                        left="5%"
+                        top="-8px"
+                        zIndex={999}
+                        border={{ radius: '4px' }}
+                        visible={false}
+                        class="top-block"
+                    ></i-panel>
+
+                    <i-modal
+                        id='mdActions'
+                        title='Update Settings'
+                        closeIcon={{ name: 'times' }}
+                        minWidth={400}
+                        maxWidth='900px'
+                        closeOnBackdropClick={false}
+                        onOpen={this.onShowModal.bind(this)}
+                        onClose={this.onCloseModal.bind(this)}
+                        class="setting-modal"
+                    >
+                        <i-panel>
+                            <i-vstack
+                                id="pnlFormMsg"
+                                padding={{ left: '1.5rem', right: '1.5rem', top: '1rem' }}
+                                gap="0.5rem"
+                                visible={false}
+                            ></i-vstack>
+                            <i-panel id="pnlForm" />
+                            <i-form id="form" padding={{ left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' }}/>
+                        </i-panel>
+                    </i-modal>
+                </i-vstack>
+            </i-panel>
+            
         );
     }
 }

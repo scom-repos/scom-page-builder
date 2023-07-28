@@ -7,7 +7,8 @@ import {
     VStack,
     observable,
     GridLayout,
-    Styles
+    Styles,
+    Panel
 } from '@ijstech/components';
 import { PageSection } from './pageSection';
 import { RowSettingsDialog } from '../dialogs/index';
@@ -52,6 +53,7 @@ export class PageRow extends Module {
     private pnlRow: GridLayout;
     private mdRowSetting: RowSettingsDialog;
     private pnlEmty: VStack;
+    private pnlLoading: Panel;
 
     private _readonly: boolean;
     private isResizing: boolean = false;
@@ -137,7 +139,7 @@ export class PageRow extends Module {
     }
 
     private async createElementFn(data: IPageElement) {
-        const isElmExist = document.getElementById(data.id);
+        const isElmExist = this.pnlRow?.querySelector(`ide-section[id='${data.id}']`);
         if (isElmExist) return
         const pageSection = (
             <ide-section
@@ -167,8 +169,10 @@ export class PageRow extends Module {
 
     async addElement(data: IPageElement) {
         if (!data) return;
+        if (this.pnlLoading) this.pnlLoading.visible = true;
         const element = await this.createElementFn(data);
         this.toggleUI(true);
+        if (this.pnlLoading) this.pnlLoading.visible = false;
         return element;
     }
 
@@ -349,6 +353,7 @@ export class PageRow extends Module {
             rowBlock?: HTMLElement // check if need to trigger the row top/bottom block
         } 
         const parentWrapper = self.closest('#editor') || document;
+        let ghostImage: Control;
 
         this.addEventListener('mousedown', (e) => {
             const target = e.target as Control;
@@ -497,7 +502,7 @@ export class PageRow extends Module {
             const eventTarget = event.target as Control;
             if (eventTarget instanceof PageRow) return;
             const targetSection = eventTarget.closest && eventTarget.closest('ide-section') as PageSection;
-            const targetToolbar = findClosestToolbarInSection(targetSection, event.clientY).toolbar
+            const targetToolbar = findClosestToolbarInSection(targetSection, event.clientY)?.toolbar
             const toolbars = targetSection ? Array.from(targetSection.querySelectorAll('ide-toolbar')) : [];
             const cannotDrag = toolbars.find(toolbar => toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting'));
             if (targetSection && !cannotDrag) {
@@ -506,31 +511,31 @@ export class PageRow extends Module {
                 startX = event.offsetX;
                 startY = event.offsetY;
 
-                const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
                 if (targetToolbar?.classList.contains('active') || toolbars.length==1) application.EventBus.dispatch(EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
                 else self.currentToolbar = undefined;
 
-                toolbars.forEach((toolbar: IDEToolbar) => {
+                const allToolbars = parentWrapper.querySelectorAll('ide-toolbar');
+                allToolbars.forEach((toolbar: IDEToolbar) => {
                     toolbar.hideToolbars();
                     toolbar.classList.remove('active');
                 });
 
-                // if (self.currentToolbar) {
-                //     toolbars.forEach(toolbar => {
-                //         (toolbar as HTMLElement).style.opacity = (toolbar.id != self.currentToolbar.id)? '1' : '0';
-                //     });
-                // } else {
-                //     self.currentElement.opacity = 0;
-                // }
-
                 self.currentElement.style.zIndex = '1';
-                if (self.currentToolbar)
+                self.currentElement.classList.add('is-dragging');
+                let dragElm = null;
+                if (!self.currentToolbar || toolbars.length === 1) {
+                    dragElm = self.currentElement;
+                    const imgs = self.currentElement.querySelectorAll('img');
+                    for (let img of imgs) {
+                        (img as HTMLElement).setAttribute('draggable', 'false');
+                    }
+                } else {
+                    dragElm = self.currentToolbar;
                     self.currentToolbar.style.zIndex = '1';
+                    self.currentToolbar.classList.add('is-dragging');
+                }
+                ghostImage = dragElm.cloneNode(true) as Control;
 
-                const dragElm = (!self.currentToolbar || toolbars.length === 1) ? self.currentElement : self.currentToolbar;
-                dragElm.classList.add('is-dragging');
-                dragElm.style.opacity = '0';
-                // event.dataTransfer.setDragImage(dragElm, startX, startY);
                 application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, targetSection);
                 self.addDottedLines();
                 toggleAllToolbarBoarder(true);
@@ -541,17 +546,20 @@ export class PageRow extends Module {
         });
 
         this.addEventListener('drag', function (event) {
-            event.preventDefault()
+            const toolbars = self.currentElement ? self.currentElement.querySelectorAll('ide-toolbar') : [];
+            const dragElm = (!self.currentToolbar || toolbars.length === 1) ? self.currentElement : self.currentToolbar;
+            if (ghostImage) {
+                ghostImage.style.position = 'absolute';
+                ghostImage.style.opacity = '1';
+                ghostImage.style.zIndex = '-1';
+                ghostImage.style.pointerEvents = 'none';
+                event.dataTransfer.setDragImage(ghostImage, startX, startY);
+                dragElm.style.opacity = '0';
+                ghostImage = null;
+            }
         });
 
         document.addEventListener('dragend', function (event) {
-            // if (self.currentElement && !self.currentElement.classList.contains('builder-item')) {
-            //     self.currentElement.opacity = 1;
-            //     const toolbars = self.currentElement.querySelectorAll('ide-toolbar');
-            //     toolbars.forEach(toolbar => {
-            //         (toolbar as HTMLElement).style.opacity = "1";
-            //     });
-            // }
             resetDragTarget();
             resetPageRow();
             toggleAllToolbarBoarder(false);
@@ -612,16 +620,25 @@ export class PageRow extends Module {
                 const grid = target.closest('.grid');
                 const sections = Array.from(grid?.querySelectorAll('ide-section'));
                 const sortedSections = sections.sort((a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column));
-                const findedSection = sortedSections.find((section: Control) => {
+                let spaces = 0;
+                let findedSection = null;
+                for (let i = 0; i < sortedSections.length; i++) {
+                    const section = sortedSections[i] as Control
                     const sectionColumn = Number(section.dataset.column);
                     const sectionColumnSpan = Number(section.dataset.columnSpan);
                     const colData = colStart + colSpan;
-                    return colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan;
-                });
-                if (findedSection && findedSection!=self.currentElement) return;
+                    if (colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan) {
+                        findedSection = section;
+                    }
+                    spaces += (sectionColumnSpan)
+                }
+                if (findedSection && findedSection!=self.currentElement) {
+                    removeRectangles();
+                    return;
+                }
                 self.updateGridColumnWidth();
                 const targetRow = target.closest('#pnlRow') as Control
-                showRectangle(targetRow, colStart, columnSpan);
+                showRectangle(targetRow, colStart, Math.min(columnSpan, MAX_COLUMN - spaces));
             } else {
                 removeRectangles();
                 const section = enterTarget.closest('ide-section') as Control;
@@ -866,6 +883,7 @@ export class PageRow extends Module {
 
             if (dragSection==null || dragSection==undefined) return { collisionType: "mutual" }
             const nearestCol = findNearestFixedGridInRow(clientX);
+            if (!nearestCol) return { collisionType: "none" }
             const dropColumn: number = parseInt(nearestCol.getAttribute("data-column"));
             const grid = dropTarget.closest('.grid');
             // drop/dragover outside grid
@@ -950,6 +968,10 @@ export class PageRow extends Module {
             event.preventDefault();
             event.stopPropagation();
 
+            self.removeDottedLines();
+            toggleAllToolbarBoarder(false);
+            removeRectangles();
+
             if (pageRow && elementConfig?.module?.name === 'sectionStack') {
                 // add section
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: pageRow.id, defaultElements: elementConfig.defaultElements });
@@ -1004,9 +1026,7 @@ export class PageRow extends Module {
                 if (isUngrouping) {
                     const dragCmd = new UngroupElementCommand(self.currentToolbar, self.currentElement, nearestFixedItem, config, "none");
                     dragCmd && commandHistory.execute(dragCmd);
-                    self.currentElement.opacity = 1;
                     updateDraggingUI();
-                    removeRectangles();
                 } else if (self.currentElement.data) {
                     const dragCmd = new DragElementCommand(self.currentElement, nearestFixedItem);
                     commandHistory.execute(dragCmd);
@@ -1037,7 +1057,6 @@ export class PageRow extends Module {
                             const dropElement = eventTarget;
                             const dragCmd = new UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, "bottom");
                             dragCmd && commandHistory.execute(dragCmd);
-                            updateDraggingUI()
                             resetDragTarget();
                         } else {
                             const newConfig = self.getNewElementData();
@@ -1049,7 +1068,6 @@ export class PageRow extends Module {
                             const dropElement = eventTarget;
                             const dragCmd = new UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, "top");
                             dragCmd && commandHistory.execute(dragCmd);
-                            updateDraggingUI()
                             resetDragTarget();
                         } else {
                             const newConfig = self.getNewElementData();
@@ -1057,7 +1075,7 @@ export class PageRow extends Module {
                             commandHistory.execute(dragCmd);
                         }
                     } else if (dropElm.classList.contains(ROW_BOTTOM_CLASS) || (collision.rowBlock && collision.rowBlock.classList.contains('row-bottom-block'))) {
-                        const targetRow = collision?.rowBlock?.closest('ide-row') as PageRow;
+                        const targetRow = (collision?.rowBlock?.closest('ide-row') || dropElm?.closest('ide-row')) as PageRow;
                         targetRow && self.onAppendRow(targetRow);
                     } else if (dropElm.classList.contains(ROW_TOP_CLASS) || (collision.rowBlock && collision.rowBlock.classList.contains('row-top-block'))) {
                         const targetRow = collision?.rowBlock?.closest('ide-row') as PageRow;
@@ -1069,7 +1087,6 @@ export class PageRow extends Module {
                             const dropElement = eventTarget;
                             const dragCmd = new UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, collision.mergeSide);
                             dragCmd && commandHistory.execute(dragCmd);
-                            self.currentElement.opacity = 1;
                             resetDragTarget();
                         } else {
                             const dragCmd = elementConfig ?
@@ -1094,7 +1111,6 @@ export class PageRow extends Module {
                             const dropElement = eventTarget;
                             const dragCmd = new UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, collision.mergeSide);
                             dragCmd && commandHistory.execute(dragCmd);
-                            updateDraggingUI()
                             resetDragTarget();
                         } else {
                             const dragCmd = new DragElementCommand(self.currentElement, pageRow, true, true);
@@ -1104,9 +1120,6 @@ export class PageRow extends Module {
                     }
                     self.isDragging = false;
                 }
-                self.removeDottedLines();
-                toggleAllToolbarBoarder(false);
-                removeRectangles();
             }
         });
 
@@ -1402,6 +1415,28 @@ export class PageRow extends Module {
                     verticalAlignment='center' horizontalAlignment='center'
                     class="pnl-empty"
                 >
+                    <i-vstack
+                        id="pnlLoading"
+                        padding={{top: '0.5rem', bottom: '0.5rem'}}
+                        visible={false}
+                        height="100%" width="100%"
+                        class="i-loading-overlay"
+                    >
+                        <i-vstack class="i-loading-spinner" horizontalAlignment="center" verticalAlignment="center">
+                            <i-icon
+                                class="i-loading-spinner_icon"
+                                name="spinner"
+                                width={24}
+                                height={24}
+                                fill={Theme.colors.primary.main}
+                            />
+                            <i-label
+                                caption="Loading..."
+                                font={{ color: Theme.colors.primary.main, size: '1rem' }}
+                                class="i-loading-spinner_text"
+                            />
+                        </i-vstack>
+                    </i-vstack>
                     <i-panel
                         padding={{top: '3rem', bottom: '3rem'}}
                         margin={{top: '3rem', bottom: '3rem'}}

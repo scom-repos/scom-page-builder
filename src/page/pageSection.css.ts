@@ -8,14 +8,14 @@ Styles.cssRule('ide-section', {
     position: 'relative',
     maxWidth: '100%',
     // border: '2px solid transparent',
-    transition: 'opacity .2s .1s cubic-bezier(0.4,0,0.2,1), left 0s .1s',
+    // transition: 'all .3s ease-in',
     $nest: {
         '&:hover .section-border': {
             display: 'block',
             outline: `2px solid ${Theme.colors.primary.main}`,
             transition: 'border ease-in .2s'
         },
-        '&.is-dragging .section-border, &.is-dragging .hover-border': {
+        '&.is-dragging:hover .section-border, &.is-dragging .hover-border': {
             outline: `none`,
         },
         '&.is-dragging .resize-icon': {

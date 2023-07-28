@@ -179,13 +179,14 @@ export default class Editor extends Module {
             } else {
                 const dragEnter = this.pnlEditor.querySelector('.is-dragenter') as Control;
                 const pageRow = dragEnter && dragEnter.closest('ide-row') as PageRow;
-                if (pageRow && pageRow.onAppendRow) {
-                    pageRow.onAppendRow(pageRow);
+                if (pageRow) {
+                    const customDropEvent = new Event('drop', { bubbles: true, cancelable: true });
+                    pageRow.dispatchEvent(customDropEvent);
                 } else if (!pageObject.sections?.length) {
                     // add section
                     application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
                     const pageRow = this.pnlEditor.querySelector('ide-row') as PageRow;
-                    if (pageRow && pageRow.onAppendRow) pageRow.onAddRow();
+                    if (pageRow && pageRow.onAddRow) pageRow.onAddRow();
                 }
             }
         });
