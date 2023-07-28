@@ -117,7 +117,8 @@ export class UngroupElementCommand implements ICommand {
         column: dropColumn,
         columnSpan: newColumnSpan,
         properties: this.data.properties,
-        module: this.data.module
+        module: this.data.module,
+        tag: this.data.tag
       };
       this.appendElm = await dropRow.addElement(newElData);
       pageObject.addElement(this.dropRowId, newElData);
@@ -156,7 +157,8 @@ export class UngroupElementCommand implements ICommand {
           column: newColumn,
           columnSpan: this.data.columnSpan,
           properties: this.data.properties,
-          module: this.data.module
+          module: this.data.module,
+          tag: this.data.tag
         };
         this.appendElm = await dropRow.addElement(newElData);
         pageObject.addElement(this.dropRowId, newElData);
@@ -170,7 +172,8 @@ export class UngroupElementCommand implements ICommand {
           column: frontLimit,
           columnSpan: emptySpace,
           properties: this.data.properties,
-          module: this.data.module
+          module: this.data.module,
+          tag: this.data.tag
         };
         this.appendElm = await dropRow.addElement(newElData);
         pageObject.addElement(this.dropRowId, newElData);
@@ -203,7 +206,8 @@ export class UngroupElementCommand implements ICommand {
             column: newColumn,
             columnSpan: dragSection.columnSpan,
             properties: this.data.properties,
-            module: this.data.module
+            module: this.data.module,
+            tag: this.data.tag
           };
           this.appendElm = await dropRow.addElement(newElData);
           pageObject.addElement(this.dropRowId, newElData);
@@ -248,7 +252,8 @@ export class UngroupElementCommand implements ICommand {
             column: newColumn,
             columnSpan: newColumnSpan,
             properties: this.data.properties,
-            module: this.data.module
+            module: this.data.module,
+            tag: this.data.tag
           };
           this.appendElm = await dropRow.addElement(newElData);
           pageObject.addElement(this.dropRowId, newElData);

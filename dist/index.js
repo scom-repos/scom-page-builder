@@ -2166,7 +2166,8 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                     column: dropColumn,
                     columnSpan: newColumnSpan,
                     properties: this.data.properties,
-                    module: this.data.module
+                    module: this.data.module,
+                    tag: this.data.tag
                 };
                 this.appendElm = await dropRow.addElement(newElData);
                 index_13.pageObject.addElement(this.dropRowId, newElData);
@@ -2201,7 +2202,8 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                         column: newColumn,
                         columnSpan: this.data.columnSpan,
                         properties: this.data.properties,
-                        module: this.data.module
+                        module: this.data.module,
+                        tag: this.data.tag
                     };
                     this.appendElm = await dropRow.addElement(newElData);
                     index_13.pageObject.addElement(this.dropRowId, newElData);
@@ -2214,7 +2216,8 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                         column: frontLimit,
                         columnSpan: emptySpace,
                         properties: this.data.properties,
-                        module: this.data.module
+                        module: this.data.module,
+                        tag: this.data.tag
                     };
                     this.appendElm = await dropRow.addElement(newElData);
                     index_13.pageObject.addElement(this.dropRowId, newElData);
@@ -2243,7 +2246,8 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                             column: newColumn,
                             columnSpan: dragSection.columnSpan,
                             properties: this.data.properties,
-                            module: this.data.module
+                            module: this.data.module,
+                            tag: this.data.tag
                         };
                         this.appendElm = await dropRow.addElement(newElData);
                         index_13.pageObject.addElement(this.dropRowId, newElData);
@@ -2279,7 +2283,8 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                             column: newColumn,
                             columnSpan: newColumnSpan,
                             properties: this.data.properties,
-                            module: this.data.module
+                            module: this.data.module,
+                            tag: this.data.tag
                         };
                         this.appendElm = await dropRow.addElement(newElData);
                         index_13.pageObject.addElement(this.dropRowId, newElData);
