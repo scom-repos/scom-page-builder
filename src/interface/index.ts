@@ -1,5 +1,6 @@
 import {IMenu, INetwork, IRoute, ITheme, ISCConfig, IBreakpoints} from './core';
 import { IPageBlockData } from './pageBlock';
+import { IPageElement } from './siteData';
 
 export {
   IMenu,
@@ -31,6 +32,7 @@ export interface IElementConfig {
   // type: ElementType;
   prependId?: string;
   appendId?: string;
+  defaultElements?: IPageElement[];
 }
 export const TEXTBOX_PATH = 'scom-markdown-editor';
 export const IMAGE_PATH = 'scom-image';

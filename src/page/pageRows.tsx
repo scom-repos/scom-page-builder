@@ -7,7 +7,7 @@ import {
     Control,
     VStack,
 } from '@ijstech/components';
-import { IPageSection } from '../interface/index';
+import { IPageSection, IPageElement } from '../interface/index';
 import { PageSection } from './pageSection';
 import { PageRow } from './pageRow';
 import { PageFooter } from './pageFooter';
@@ -272,8 +272,8 @@ export class PageRows extends Module {
         );
     }
 
-    private async onCreateSection(params?: {prependId?: string, appendId?: string}) {
-        const { prependId = '', appendId = '' } = params || {};
+    private async onCreateSection(params?: {prependId?: string, appendId?: string, defaultElements?: IPageElement[]}) {
+        const { prependId = '', appendId = '', defaultElements = [] } = params || {};
         const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
         if (!this._readonly) {
             pageRow.border = { top: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' } };
@@ -282,7 +282,7 @@ export class PageRows extends Module {
         const rowData = {
             id: generateUUID(),
             row: this.getRows().length,
-            elements: [],
+            elements: defaultElements,
         };
         const addRowCmd = new UpdateRowCommand(
             pageRow,

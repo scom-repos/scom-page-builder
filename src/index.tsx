@@ -174,13 +174,15 @@ export default class Editor extends Module {
         containerElement.addEventListener('drop', (event) => {
             const elementConfig = getDragData();
             if (elementConfig?.module?.name === 'sectionStack') {
-                application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
+                // add section
+                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { defaultElements: elementConfig.defaultElements });
             } else {
                 const dragEnter = this.pnlEditor.querySelector('.is-dragenter') as Control;
                 const pageRow = dragEnter && dragEnter.closest('ide-row') as PageRow;
                 if (pageRow && pageRow.onAppendRow) {
                     pageRow.onAppendRow(pageRow);
                 } else if (!pageObject.sections?.length) {
+                    // add section
                     application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
                     const pageRow = this.pnlEditor.querySelector('ide-row') as PageRow;
                     if (pageRow && pageRow.onAppendRow) pageRow.onAddRow();
