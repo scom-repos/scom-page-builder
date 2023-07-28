@@ -1,0 +1,10 @@
+{
+    "name": "@scom/scom-page-builder",
+    "type": "widget",
+    "version": "0.1.19",
+    "dependencies": [
+        "@ijstech/components",
+        "@ijstech/eth-contract",
+        "@ijstech/eth-wallet"
+    ]
+}
