@@ -99,7 +99,8 @@ export class UngroupElementCommand implements ICommand {
       (dropSection as any).setData(this.dropRowId, newDropData);
     } else if (this.mergeType=="none") {
       // simple ungroup
-      const newColumnSpan = Math.min((MAX_COLUMN - parseInt(this.dropElm.dataset.column)) + 1, this.data.columnSpan)
+      const dropColumn = parseInt(this.dropElm?.dataset?.column) || 1
+      const newColumnSpan = Math.min((MAX_COLUMN - dropColumn) + 1, this.data.columnSpan)
       const newElData = {
         id: this.data.id,
         column: parseInt(this.dropElm.dataset.column),

@@ -2084,7 +2084,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             this.mergeType = mergeType;
         }
         async execute() {
-            var _a, _b, _c, _d, _e;
+            var _a, _b, _c, _d, _e, _f, _g;
             const dropRow = document.getElementById(`row-${this.dropRowId}`);
             const dragRow = document.getElementById(`row-${this.dragRowId}`);
             if (!dropRow)
@@ -2148,7 +2148,8 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             }
             else if (this.mergeType == "none") {
                 // simple ungroup
-                const newColumnSpan = Math.min((MAX_COLUMN - parseInt(this.dropElm.dataset.column)) + 1, this.data.columnSpan);
+                const dropColumn = parseInt((_f = (_e = this.dropElm) === null || _e === void 0 ? void 0 : _e.dataset) === null || _f === void 0 ? void 0 : _f.column) || 1;
+                const newColumnSpan = Math.min((MAX_COLUMN - dropColumn) + 1, this.data.columnSpan);
                 const newElData = {
                     id: this.data.id,
                     column: parseInt(this.dropElm.dataset.column),
@@ -2159,7 +2160,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 this.appendElm = await dropRow.addElement(newElData);
                 index_13.pageObject.addElement(this.dropRowId, newElData);
                 const dropSectionData = index_13.pageObject.getRow(this.dropRowId);
-                dropRow.toggleUI(!!((_e = dropSectionData === null || dropSectionData === void 0 ? void 0 : dropSectionData.elements) === null || _e === void 0 ? void 0 : _e.length));
+                dropRow.toggleUI(!!((_g = dropSectionData === null || dropSectionData === void 0 ? void 0 : dropSectionData.elements) === null || _g === void 0 ? void 0 : _g.length));
             }
             else {
                 // drop on the back/front block of a section
