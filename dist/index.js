@@ -4348,14 +4348,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.toggleUI(!!((_b = (_a = self.data) === null || _a === void 0 ? void 0 : _a.elements) === null || _b === void 0 ? void 0 : _b.length));
             }
             function dragEnter(enterTarget, clientX, clientY, collision) {
-                var _a, _b, _c, _d;
+                var _a, _b, _c;
                 if (!enterTarget)
                     return;
-                const elementConfig = (0, index_41.getDragData)();
-                const pageRow = enterTarget.closest('ide-row');
-                if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
-                    pageRow.classList.add('row-entered');
-                }
                 if (!enterTarget || !self.currentElement)
                     return;
                 if (enterTarget.closest('#pnlEmty')) {
@@ -4421,9 +4416,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 updateClass(topBlock, 'is-dragenter');
                             }
                         }
-                        const curElmCol = Number((_b = section === null || section === void 0 ? void 0 : section.dataset) === null || _b === void 0 ? void 0 : _b.column);
-                        const curElmColSpan = Number((_c = section === null || section === void 0 ? void 0 : section.dataset) === null || _c === void 0 ? void 0 : _c.columnSpan);
-                        const sections = Array.from((_d = section.closest('#pnlRow')) === null || _d === void 0 ? void 0 : _d.querySelectorAll('ide-section'));
+                        const curElmCol = Number((_a = section === null || section === void 0 ? void 0 : section.dataset) === null || _a === void 0 ? void 0 : _a.column);
+                        const curElmColSpan = Number((_b = section === null || section === void 0 ? void 0 : section.dataset) === null || _b === void 0 ? void 0 : _b.columnSpan);
+                        const sections = Array.from((_c = section.closest('#pnlRow')) === null || _c === void 0 ? void 0 : _c.querySelectorAll('ide-section'));
                         const nextElm = sections.find((el) => {
                             const column = Number(el.dataset.column);
                             return !isNaN(column) && (curElmCol + curElmColSpan === column);
@@ -4485,13 +4480,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         block.visible = visible;
                         block.classList.remove('is-dragenter');
                     }
-                }
-                const pageRows = parentWrapper.getElementsByClassName('row-entered');
-                for (const row of pageRows) {
-                    const currentRow = leaveTarget.closest('ide-row');
-                    if (currentRow && row && currentRow.id === row.id)
-                        continue;
-                    row.classList.remove('row-entered');
                 }
             }
             this.addEventListener('dragenter', function (event) {
@@ -4894,7 +4882,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 toggleAllToolbarBoarder(false);
                 removeRectangles();
                 removeClass('is-dragenter');
-                removeClass('row-entered');
                 removeClass('is-dragging');
             }
             function removeClass(className) {
@@ -4993,7 +4980,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 this.updateRowConfig(newConfig);
                 this.updateGridColumnWidth();
             });
-            components_24.application.EventBus.register(this, index_39.EVENT.ON_SHOW_BOTTOM_BLOCK, async () => {
+            components_24.application.EventBus.register(this, index_39.EVENT.ON_SHOW_BOTTOM_BLOCK, (targetRow) => {
                 function _updateClass(elm, className) {
                     if (elm.visible) {
                         if (className === 'is-dragenter') {
@@ -5011,10 +4998,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const PageRows = this.closest('ide-rows');
                 if (!PageRows)
                     return;
-                const lastRows = PageRows.querySelectorAll('ide-row:last-child');
-                const lastRow = (lastRows.length > 0) ? lastRows[0] : undefined;
-                if (lastRows.length > 0 && lastRow.id == self.id) {
-                    const bottomBlock = lastRow.querySelector('.row-bottom-block');
+                if (targetRow.id == this.id) {
+                    const bottomBlock = targetRow.querySelector('.row-bottom-block');
                     bottomBlock.visible = true;
                     bottomBlock && _updateClass(bottomBlock, 'is-dragenter');
                 }
@@ -6038,9 +6023,6 @@ define("@scom/scom-page-builder/page/pageRows.css.ts", ["require", "exports", "@
                 position: 'relative',
                 zIndex: 999
             },
-            '.row-entered': {
-                borderBottom: '3px solid rgb(66,133,244)'
-            },
             '.container > *:not(.active):not(:focus):first-child': {
                 borderTopColor: 'transparent'
             }
@@ -6145,10 +6127,6 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
             this.currentRow.classList.remove('row-dragged');
             this.resetCurrentRow();
             this.isDragging = false;
-            const rows = this.pnlRows.querySelectorAll('ide-row');
-            for (let row of rows) {
-                row.classList.remove('row-entered');
-            }
             const canDrop = this.currentRow && this.enteredRow && this.enteredRow.classList.contains('dropzone');
             if (canDrop && !this.currentRow.isSameNode(this.enteredRow)) {
                 const moveRowCmd = new index_60.MoveElementCommand(this.currentRow, this.enteredRow, this.pnlRows, index_61.pageObject.sections);
@@ -6176,10 +6154,8 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
                     shortestDistance = distance;
                     nearestElement = dropzone;
                 }
-                dropzone.classList.remove('row-entered');
             }
             if (nearestElement && !nearestElement.isSameNode(this.currentRow)) {
-                nearestElement.classList.add('row-entered');
                 this.enteredRow = nearestElement;
                 this.pnlRowOverlay.visible = true;
                 this.pnlRowOverlay.zIndex = '1';
@@ -7607,7 +7583,9 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             let ticking = false;
             const scrollSpeed = 1000;
             const scrollThreshold = 100;
+            const self = this;
             containerElement.addEventListener("dragover", (event) => {
+                var _a;
                 event.preventDefault();
                 if (!this.currentElement && !(0, index_80.getDragData)())
                     return;
@@ -7622,11 +7600,24 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 const pageRowsRect = this.pageRows.getBoundingClientRect();
                 const pnlEditorRect = this.pnlEditor.getBoundingClientRect();
                 // dragover on the below of rows
-                if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y
-                    && event.clientY >= pageRowsRect.height + pageRowsRect.y
+                const elementConfig = (0, index_80.getDragData)();
+                if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack'
                     && event.clientX >= pageRowsRect.x
                     && event.clientX <= pageRowsRect.x + pageRowsRect.width) {
-                    components_40.application.EventBus.dispatch(index_79.EVENT.ON_SHOW_BOTTOM_BLOCK);
+                    const rows = self.getElementsByTagName('ide-row');
+                    const rowsArray = Array.from(rows);
+                    const targetRow = rowsArray.find(row => {
+                        const rowRect = row.getBoundingClientRect();
+                        if (rowRect.top <= event.clientY && rowRect.bottom >= event.clientY)
+                            return row;
+                    });
+                    if (targetRow) {
+                        components_40.application.EventBus.dispatch(index_79.EVENT.ON_SHOW_BOTTOM_BLOCK, targetRow);
+                    }
+                }
+                else if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
+                    const lastRows = this.pageRows.querySelector('ide-row:last-child');
+                    components_40.application.EventBus.dispatch(index_79.EVENT.ON_SHOW_BOTTOM_BLOCK, lastRows);
                 }
             });
             function adjustScrollSpeed(mouseY) {
@@ -7635,8 +7626,6 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 const isNearBottom = mouseY > bottom - scrollThreshold;
                 const isNearWindowTop = mouseY <= scrollThreshold;
                 const isNearWindowBottom = mouseY > window.innerHeight - scrollThreshold;
-                // const scrollAmountTop = Math.max(scrollThreshold - (mouseY - top), 0);
-                // const scrollAmountBottom = Math.max(scrollThreshold - (bottom - mouseY), 0);
                 if (isNearTop || isNearWindowTop) {
                     // const scrollFactor = 1 + (scrollThreshold - scrollAmountTop) / scrollThreshold;
                     containerElement.scrollTop -= scrollSpeed;

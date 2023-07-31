@@ -140,10 +140,6 @@ export class PageRows extends Module {
         this.currentRow.classList.remove('row-dragged');
         this.resetCurrentRow();
         this.isDragging = false;
-        const rows = this.pnlRows.querySelectorAll('ide-row');
-        for (let row of rows) {
-            row.classList.remove('row-entered');
-        }
         const canDrop = this.currentRow && this.enteredRow && this.enteredRow.classList.contains('dropzone');
         if (canDrop && !this.currentRow.isSameNode(this.enteredRow)) {
             const moveRowCmd = new MoveElementCommand(
@@ -178,10 +174,8 @@ export class PageRows extends Module {
                 shortestDistance = distance;
                 nearestElement = dropzone;
             }
-            dropzone.classList.remove('row-entered');
         }
         if (nearestElement && !nearestElement.isSameNode(this.currentRow)) {
-            nearestElement.classList.add('row-entered');
             this.enteredRow = nearestElement as PageRow;
             this.pnlRowOverlay.visible = true;
             this.pnlRowOverlay.zIndex = '1';
