@@ -93,3 +93,8 @@ export interface ICategory {
     title: string;
     icon: string;
 }
+
+export interface IMenuItem {
+    rowId: string,
+    caption: string
+}

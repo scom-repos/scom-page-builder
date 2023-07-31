@@ -61,6 +61,7 @@ declare module "@scom/scom-page-builder/const/index.ts" {
         ON_UPDATE_SIDEBAR: string;
         ON_UPDATE_PAGE_BG: string;
         ON_CLOSE_BUILDER: string;
+        ON_UPDATE_MENU: string;
         ON_UPDATE_PAGE_CONFIG: string;
     };
     export const DEFAULT_BOXED_LAYOUT_WIDTH = "1200px";
@@ -394,6 +395,10 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         title: string;
         icon: string;
     }
+    export interface IMenuItem {
+        rowId: string;
+        caption: string;
+    }
 }
 /// <amd-module name="@scom/scom-page-builder/interface/jsonSchema.ts" />
 declare module "@scom/scom-page-builder/interface/jsonSchema.ts" {
@@ -476,6 +481,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         addElement(sectionId: string, value: IPageElement, parentElmId?: string, elementIndex?: number): void;
         getRowConfig(sectionId: string): import("@scom/scom-page-builder/interface/siteData.ts").IPageSectionConfig;
         getColumnsNumber(sectionId: string): number;
+        private updateMenu;
     }
     export const pageObject: PageObject;
     export const state: {
@@ -1450,6 +1456,35 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
         render(): any;
     }
 }
+/// <amd-module name="@scom/scom-page-builder/page/pageMenu.css.ts" />
+declare module "@scom/scom-page-builder/page/pageMenu.css.ts" {
+    export const menuBtnStyle: string;
+    export const widgetModalStyle: string;
+}
+/// <amd-module name="@scom/scom-page-builder/page/pageMenu.tsx" />
+declare module "@scom/scom-page-builder/page/pageMenu.tsx" {
+    import { ControlElement, Module } from '@ijstech/components';
+    import { IPageSection, IPageElement } from "@scom/scom-page-builder/interface/index.ts";
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ['i-scom-page-builder-menu']: ControlElement;
+            }
+        }
+    }
+    export class PageMenu extends Module {
+        private pnlMenu;
+        private pnlMenuWrapper;
+        private items;
+        init(): void;
+        private initEventBus;
+        renderMenu(sections: IPageSection[]): void;
+        getTitle(data: IPageSection): string;
+        getTitleFn(data: IPageElement): string;
+        toggleMenu(): void;
+        render(): any;
+    }
+}
 /// <amd-module name="@scom/scom-page-builder/page/index.ts" />
 declare module "@scom/scom-page-builder/page/index.ts" {
     import { PageHeader } from "@scom/scom-page-builder/page/pageHeader.tsx";
@@ -1458,7 +1493,8 @@ declare module "@scom/scom-page-builder/page/index.ts" {
     import { PageRows } from "@scom/scom-page-builder/page/pageRows.tsx";
     import { PageRow } from "@scom/scom-page-builder/page/pageRow.tsx";
     import { PageSidebar } from "@scom/scom-page-builder/page/pageSidebar.tsx";
-    export { PageHeader, PageSection, PageFooter, PageRows, PageRow, PageSidebar };
+    import { PageMenu } from "@scom/scom-page-builder/page/pageMenu.tsx";
+    export { PageHeader, PageSection, PageFooter, PageRows, PageRow, PageSidebar, PageMenu };
 }
 /// <amd-module name="@scom/scom-page-builder/builder/builderHeader.css.ts" />
 declare module "@scom/scom-page-builder/builder/builderHeader.css.ts" { }
@@ -1586,6 +1622,7 @@ declare module "@scom/scom-page-builder" {
         private builderFooter;
         private pnlWrap;
         private pageSidebar;
+        private pageMenu;
         private mdComponentsSearch;
         private pnlEditor;
         private pageContent;

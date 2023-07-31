@@ -4,7 +4,6 @@
     "version": "0.1.19",
     "dependencies": [
         "@ijstech/components",
-        "@ijstech/eth-contract",
         "@ijstech/eth-wallet"
     ]
 }

@@ -1,5 +1,6 @@
-import { Styles } from "@ijstech/components";
+import { Styles, application } from "@ijstech/components";
 import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig, IOnFetchComponentsResult, IOnFetchComponentsOptions, ICategory, ThemeType, IPageConfig } from "../interface/index";
+import { EVENT } from '../const/index';
 
 const lightTheme = Styles.Theme.defaultTheme;
 const darkTheme = Styles.Theme.darkTheme;
@@ -51,11 +52,13 @@ export class PageObject {
       this._sections.splice(index, 0, value);
     else
       this._sections.push(value);
+    this.updateMenu();
   }
 
   removeSection(id: string) {
     const sectionIndex = this._sections.findIndex(section => section.id === id);
     if (sectionIndex !== -1) this._sections.splice(sectionIndex, 1);
+    this.updateMenu();
   }
 
   getSection(id: string) {
@@ -77,6 +80,7 @@ export class PageObject {
     //     const newColumn = Math.ceil(newColumnsNumber / oldColumnsNumber * oldColumn);
     //     this.setElement(id, element.id, { column: newColumn, columnSpan: newColumnSpan });
     //   }
+    this.updateMenu();
   }
 
   getRow(rowId: string) {
@@ -109,6 +113,7 @@ export class PageObject {
     const currData = pageObject.getRow(rowId);
     pageObject.removeRow((currData as IPageSection).id);
     pageObject.addRow(data, data.id, data.row);
+    this.updateMenu();
   }
 
   private findElement(elements: IPageElement[], elementId: string, findLeafOnly: boolean = false) {
@@ -181,6 +186,7 @@ export class PageObject {
       // const section = this.getRow(sectionId);
       // if (section?.elements) section.elements = this.sortFn([...section.elements]);
     }
+    this.updateMenu();
   }
 
   private sortFn(elements: IPageElement[]) {
@@ -239,6 +245,7 @@ export class PageObject {
         }
       }
     }
+    this.updateMenu();
   }
 
   getRowConfig(sectionId: string) {
@@ -251,6 +258,10 @@ export class PageObject {
     // if (!sectionId) return MAX_COLUMN;
     // const section = this.getRow(sectionId);
     // return this.getColumnsNumberFn(section);
+  }
+
+  private updateMenu() {
+    application.EventBus.dispatch(EVENT.ON_UPDATE_MENU, this.sections);
   }
 
   // private getColumnsNumberFn(section: IPageSection|IPageFooter) {

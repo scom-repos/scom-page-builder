@@ -164,6 +164,7 @@ export class MainModule extends Module {
         <i-button
           position="fixed"
           caption="Get data"
+          right="24px"
           margin={{ top: '1rem', left: '1rem' }}
           padding={{ top: '0.5rem', left: '1rem', bottom: '0.5rem', right: '1rem' }}
           font={{ color: '#fff' }}
