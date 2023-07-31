@@ -587,11 +587,6 @@ export class PageRow extends Module {
 
         function dragEnter(enterTarget: Control, clientX: number, clientY: number, collision: Collision) {
             if (!enterTarget) return;
-            const elementConfig = getDragData();
-            const pageRow = enterTarget.closest('ide-row') as PageRow;
-            if (pageRow && elementConfig?.module?.name === 'sectionStack') {
-                pageRow.classList.add('row-entered');
-            }
             if (!enterTarget || !self.currentElement) return;
             if (enterTarget.closest('#pnlEmty')) {
                 self.pnlRow.minHeight = '180px';
@@ -724,13 +719,6 @@ export class PageRow extends Module {
                     (block as Control).visible = visible;
                     block.classList.remove('is-dragenter');
                 }
-            }
-            const pageRows = parentWrapper.getElementsByClassName('row-entered');
-            for (const row of pageRows) {
-                const currentRow = leaveTarget.closest('ide-row') as Control;
-                if (currentRow && row && currentRow.id === row.id)
-                    continue;
-                row.classList.remove('row-entered');
             }
         }
 
@@ -1135,7 +1123,6 @@ export class PageRow extends Module {
             toggleAllToolbarBoarder(false);
             removeRectangles();
             removeClass('is-dragenter');
-            removeClass('row-entered');
             removeClass('is-dragging');
         }
 
@@ -1242,7 +1229,7 @@ export class PageRow extends Module {
             this.updateRowConfig(newConfig);
             this.updateGridColumnWidth();
         });
-        application.EventBus.register(this, EVENT.ON_SHOW_BOTTOM_BLOCK, async () => {
+        application.EventBus.register(this, EVENT.ON_SHOW_BOTTOM_BLOCK, (targetRow: PageRow) => {
 
             function _updateClass(elm: Control, className: string) {
                 if (elm.visible) {
@@ -1260,10 +1247,8 @@ export class PageRow extends Module {
 
             const PageRows = this.closest('ide-rows')
             if (!PageRows) return;
-            const lastRows = PageRows.querySelectorAll('ide-row:last-child');
-            const lastRow = (lastRows.length > 0)? lastRows[0] : undefined;
-            if (lastRows.length > 0 && lastRow.id == self.id) {
-                const bottomBlock = lastRow.querySelector('.row-bottom-block') as Control;
+            if (targetRow.id == this.id) {
+                const bottomBlock = targetRow.querySelector('.row-bottom-block') as Control;
                 bottomBlock.visible = true;
                 bottomBlock && _updateClass(bottomBlock, 'is-dragenter');
             }

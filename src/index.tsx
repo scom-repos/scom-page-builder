@@ -1,5 +1,5 @@
 import { application, Container, Control, ControlElement, customElements, customModule, Module, Panel, Styles, VStack } from '@ijstech/components';
-import { } from '@ijstech/eth-contract'
+// import { } from '@ijstech/eth-contract'
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
 import { IPageData, IPageBlockData, IPageElement, IOnFetchComponentsOptions, IOnFetchComponentsResult, ICategory, ThemeType } from './interface/index';
@@ -128,6 +128,7 @@ export default class Editor extends Module {
         let ticking = false;
         const scrollSpeed = 1000;
         const scrollThreshold = 100;
+        const self = this;
         containerElement.addEventListener("dragover", (event) => {
             event.preventDefault();
             if (!this.currentElement && !getDragData()) return;
@@ -141,13 +142,23 @@ export default class Editor extends Module {
             }
             const pageRowsRect = this.pageRows.getBoundingClientRect();
             const pnlEditorRect = this.pnlEditor.getBoundingClientRect();
-
             // dragover on the below of rows
-            if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y 
-                && event.clientY >= pageRowsRect.height + pageRowsRect.y
-                && event.clientX >= pageRowsRect.x
+            const elementConfig = getDragData()
+            if (elementConfig?.module?.name === 'sectionStack' 
+                && event.clientX >= pageRowsRect.x 
                 && event.clientX <= pageRowsRect.x + pageRowsRect.width) {
-                    application.EventBus.dispatch(EVENT.ON_SHOW_BOTTOM_BLOCK);
+                const rows = self.getElementsByTagName('ide-row');
+                const rowsArray = Array.from(rows);
+                const targetRow = rowsArray.find(row => {
+                    const rowRect = row.getBoundingClientRect();
+                    if (rowRect.top <= event.clientY && rowRect.bottom >= event.clientY) return row;
+                })
+                if (targetRow) {
+                    application.EventBus.dispatch(EVENT.ON_SHOW_BOTTOM_BLOCK, targetRow);
+                } 
+            } else if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
+                const lastRows = this.pageRows.querySelector('ide-row:last-child');
+                application.EventBus.dispatch(EVENT.ON_SHOW_BOTTOM_BLOCK, lastRows);
             }
         });
 
@@ -157,8 +168,6 @@ export default class Editor extends Module {
             const isNearBottom = mouseY > bottom - scrollThreshold;
             const isNearWindowTop = mouseY <= scrollThreshold;
             const isNearWindowBottom = mouseY > window.innerHeight - scrollThreshold;
-            // const scrollAmountTop = Math.max(scrollThreshold - (mouseY - top), 0);
-            // const scrollAmountBottom = Math.max(scrollThreshold - (bottom - mouseY), 0);
 
             if (isNearTop || isNearWindowTop) {
                 // const scrollFactor = 1 + (scrollThreshold - scrollAmountTop) / scrollThreshold;
