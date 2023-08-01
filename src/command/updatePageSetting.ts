@@ -47,7 +47,7 @@ export class UpdatePageSettingsCommand implements ICommand {
     if (updatedValues.includes('backgroundColor')) {
       application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {color: backgroundColor});
     }
-    this.element.maxWidth = maxWidth ?? '100%';
+    this.element.maxWidth = '100%'; // maxWidth ?? '100%';
     this.element.margin = getMargin(margin);
     pageObject.config = {backgroundColor, margin, maxWidth};
     return newConfig;
