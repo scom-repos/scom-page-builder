@@ -3283,29 +3283,115 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
             this.settingsDialog.visible = true;
         }
         getSchema() {
+            // const jsonSchema: IDataSchema = {
+            //     type: 'object',
+            //     properties: {
+            //         backgroundColor: {
+            //             type: 'string',
+            //             format: 'color'
+            //         },
+            //         maxWidth: {
+            //             type: 'number',
+            //             title: 'Maximum width'
+            //         },
+            //         margin: {
+            //             type: 'object',
+            //             properties: {
+            //                 x: {
+            //                     type: 'string'
+            //                 },
+            //                 y: {
+            //                     type: 'string'
+            //                 }
+            //             }
+            //         }
+            //     },
+            // };
             const jsonSchema = {
-                type: 'object',
-                properties: {
-                    backgroundColor: {
-                        type: 'string',
-                        format: 'color'
+                "type": "object",
+                "properties": {
+                    "backgroundColor": {
+                        "title": "Background color",
+                        "type": "string",
+                        "format": "color"
                     },
-                    maxWidth: {
-                        type: 'number',
-                        title: 'Maximum width'
+                    "backgroundImage": {
+                        "title": "Background image",
+                        "type": "string",
+                        "format": "data-url"
                     },
-                    margin: {
-                        type: 'object',
-                        properties: {
-                            x: {
-                                type: 'string'
-                            },
-                            y: {
-                                type: 'string'
-                            }
-                        }
+                    "ptb": {
+                        "title": "Section padding top / bottom (px)",
+                        "type": "number"
+                    },
+                    "plr": {
+                        "title": "Section padding left / right (px)",
+                        "type": "number"
+                    },
+                    "sectionWidth": {
+                        "title": "Section width (px)",
+                        "type": "number"
+                    },
+                    "scrollToTop": {
+                        "title": "Show scroll to top button",
+                        "type": "boolean"
                     }
-                },
+                }
+            };
+            const jsonUISchema = {
+                "type": "VerticalLayout",
+                "elements": [
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/backgroundImage"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/backgroundColor"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "Group",
+                        "label": "Section settings",
+                        "elements": [
+                            {
+                                "type": "HorizontalLayout",
+                                "elements": [
+                                    {
+                                        "type": "Control",
+                                        "scope": "#/properties/ptb"
+                                    },
+                                    {
+                                        "type": "Control",
+                                        "scope": "#/properties/plr"
+                                    },
+                                    {
+                                        "type": "Control",
+                                        "scope": "#/properties/sectionWidth"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/scrollToTop"
+                            }
+                        ]
+                    }
+                ]
             };
             const formOptions = {
                 columnWidth: '100%',
@@ -3323,45 +3409,45 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                     },
                 },
             };
-            const jsonUISchema = {
-                type: 'VerticalLayout',
-                elements: [
-                    {
-                        type: 'HorizontalLayout',
-                        elements: [
-                            {
-                                type: 'Control',
-                                label: 'Background Color',
-                                scope: '#/properties/backgroundColor',
-                            },
-                            {
-                                type: 'Control',
-                                label: 'Maximum Width',
-                                scope: '#/properties/maxWidth',
-                            }
-                        ]
-                    },
-                    {
-                        "type": "Group",
-                        label: 'Margin',
-                        "elements": [
-                            {
-                                "type": "HorizontalLayout",
-                                "elements": [
-                                    {
-                                        "type": "Control",
-                                        "scope": "#/properties/margin/properties/x"
-                                    },
-                                    {
-                                        "type": "Control",
-                                        "scope": "#/properties/margin/properties/y"
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            };
+            // const jsonUISchema: IUISchema = {
+            //     type: 'VerticalLayout',
+            //     elements: [
+            //         {
+            //             type: 'HorizontalLayout',
+            //             elements: [
+            //                 {
+            //                     type: 'Control',
+            //                     label: 'Background Color',
+            //                     scope: '#/properties/backgroundColor',
+            //                 },
+            //                 {
+            //                     type: 'Control',
+            //                     label: 'Maximum Width',
+            //                     scope: '#/properties/maxWidth',
+            //                 }
+            //             ]
+            //         },
+            //         {
+            //             "type": "Group",
+            //             label: 'Margin',
+            //             "elements": [
+            //                 {
+            //                     "type": "HorizontalLayout",
+            //                     "elements": [
+            //                         {
+            //                             "type": "Control",
+            //                             "scope": "#/properties/margin/properties/x"
+            //                         },
+            //                         {
+            //                             "type": "Control",
+            //                             "scope": "#/properties/margin/properties/y"
+            //                         }
+            //                     ]
+            //                 }
+            //             ]
+            //         }
+            //     ]
+            // };
             return { jsonSchema, formOptions, jsonUISchema };
         }
         renderForm() {
@@ -3379,7 +3465,7 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
             this.formElm.clearFormData();
         }
         render() {
-            return (this.$render("i-modal", { id: 'settingsDialog', showBackdrop: true, closeOnBackdropClick: false, closeIcon: { name: 'times' }, visible: false, minWidth: 400, maxWidth: 500, title: "Page Settings", class: "custom-modal" },
+            return (this.$render("i-modal", { id: 'settingsDialog', showBackdrop: true, closeOnBackdropClick: false, closeIcon: { name: 'times' }, visible: false, minWidth: 400, maxWidth: 800, width: 800, title: "Page Settings", class: "custom-modal" },
                 this.$render("i-panel", { padding: { top: '1rem', bottom: '1rem', left: '1.5rem', right: '1.5rem' } },
                     this.$render("i-form", { id: "formElm" }))));
         }
@@ -3695,7 +3781,7 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                         $nest: {
                             '.tabs-nav': {
                                 border: 0,
-                                borderRight: `1px solid var(--builder-divider)`,
+                                // borderRight: `1px solid var(--builder-divider)`,
                                 paddingRight: '0.5rem'
                             },
                             'i-tab': {
@@ -3703,7 +3789,7 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                                 border: 0,
                                 borderRadius: '0.25rem',
                                 color: Theme.text.primary,
-                                fontFamily: Theme.typography.fontFamily,
+                                // fontFamily: Theme.typography.fontFamily,
                                 fontSize: '0.875rem',
                                 marginBottom: 0,
                             },
