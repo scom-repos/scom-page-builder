@@ -9,21 +9,44 @@ export const menuBtnStyle = Styles.style({
     borderRadius: 5
 })
 
-export const widgetModalStyle = Styles.style({
+export const menuCardStyle = Styles.style({
+    cursor: 'grab',
+    opacity: 1,
+    transition: 'opacity .2s ease-in-out, transform 0.2s ease-in-out',
     $nest: {
-        '> div': {
-            boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 50px',
-            overflow: 'hidden'
+        '&.is-dragging': {
+            opacity: 0.7
         },
-        '.modal': {
-            // marginLeft: -8,
-            padding: '0.75rem',
-            borderRadius: 5,
-            backgroundColor: '#fff',
-            overflow: 'auto'
+        '&:hover': {
+            transform: 'scale(1.04) translateY(-4px)'
         },
-        '.prevent-select': {
-            userSelect: 'none'
+        'i-label': {
+            overflow: 'hidden',
+            // whiteSpace: 'nowrap',
+            // textOverflow: 'ellipsis',
+            display: '-webkit-box',
+            '-webkit-line-clamp': 2,
+            WebkitBoxOrient: 'vertical',
+            lineHeight: 1.25
+        },
+        '> i-image img': {
+            width: 40,
+            height: 40,
+            objectFit: 'cover',
+            borderRadius: 5
+        }
+    }
+})
+
+export const menuStyle = Styles.style({
+    $nest: {
+        '.active-drop-line': {
+            background: 'rgb(66,133,244)',
+            opacity: 1
+        },
+        '.inactive-drop-line': {
+            background: 'rgb(0,0,0)',
+            opacity: 0
         }
     }
 })

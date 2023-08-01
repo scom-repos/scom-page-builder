@@ -1268,6 +1268,11 @@ export class PageRow extends Module {
                 bottomBlock && _updateClass(bottomBlock, 'is-dragenter');
             }
         });
+        application.EventBus.register(this, EVENT.ON_SHOW_SECTION, async (rowId: string) => {
+            if (rowId == this.rowId)
+                this.setActive();
+            self.currentToolbar = undefined;
+        })
     }
 
     private getNewElementData() {

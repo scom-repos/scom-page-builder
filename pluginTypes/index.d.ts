@@ -63,6 +63,7 @@ declare module "@scom/scom-page-builder/const/index.ts" {
         ON_CLOSE_BUILDER: string;
         ON_UPDATE_MENU: string;
         ON_UPDATE_PAGE_CONFIG: string;
+        ON_SHOW_SECTION: string;
     };
     export const DEFAULT_BOXED_LAYOUT_WIDTH = "1200px";
     export const DEFAULT_SCROLLBAR_WIDTH = 17;
@@ -1459,12 +1460,13 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
 /// <amd-module name="@scom/scom-page-builder/page/pageMenu.css.ts" />
 declare module "@scom/scom-page-builder/page/pageMenu.css.ts" {
     export const menuBtnStyle: string;
-    export const widgetModalStyle: string;
+    export const menuCardStyle: string;
+    export const menuStyle: string;
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageMenu.tsx" />
 declare module "@scom/scom-page-builder/page/pageMenu.tsx" {
     import { ControlElement, Module } from '@ijstech/components';
-    import { IPageSection, IPageElement } from "@scom/scom-page-builder/interface/index.ts";
+    import { IPageSection } from "@scom/scom-page-builder/interface/index.ts";
     global {
         namespace JSX {
             interface IntrinsicElements {
@@ -1476,12 +1478,20 @@ declare module "@scom/scom-page-builder/page/pageMenu.tsx" {
         private pnlMenu;
         private pnlMenuWrapper;
         private items;
+        private draggingSectionId;
         init(): void;
         private initEventBus;
+        initEventListener(): void;
+        private getActiveDropLineIdx;
+        private getCurrCardIdx;
+        private showDropBox;
+        private reorderSection;
+        private setActiveDropLine;
         renderMenu(sections: IPageSection[]): void;
-        getTitle(data: IPageSection): string;
-        getTitleFn(data: IPageElement): string;
-        toggleMenu(): void;
+        private goToSection;
+        private getTitle;
+        private getTitleFn;
+        private toggleMenu;
         render(): any;
     }
 }
