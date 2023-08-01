@@ -260,7 +260,7 @@ export class PageObject {
     // return this.getColumnsNumberFn(section);
   }
 
-  private updateMenu() {
+  updateMenu() {
     application.EventBus.dispatch(EVENT.ON_UPDATE_MENU, this.sections);
   }
 

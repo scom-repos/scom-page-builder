@@ -276,6 +276,7 @@ export default class Editor extends Module {
         } catch (error) {
             console.log('setdata', error);
         }
+        pageObject.updateMenu();
     }
 
     private updatePageConfig() {

@@ -74,7 +74,7 @@ export class MainModule extends Module {
   }
 
   onGetData() {
-    console.log(this.pageBuilder.getData()?.sections)
+    console.log(this.pageBuilder.getData())
   }
 
   private async onFetchComponentsFn(options: IOnFetchComponentsOptions) {

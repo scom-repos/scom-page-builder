@@ -482,7 +482,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         addElement(sectionId: string, value: IPageElement, parentElmId?: string, elementIndex?: number): void;
         getRowConfig(sectionId: string): import("@scom/scom-page-builder/interface/siteData.ts").IPageSectionConfig;
         getColumnsNumber(sectionId: string): number;
-        private updateMenu;
+        updateMenu(): void;
     }
     export const pageObject: PageObject;
     export const state: {
@@ -1465,7 +1465,7 @@ declare module "@scom/scom-page-builder/page/pageMenu.css.ts" {
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageMenu.tsx" />
 declare module "@scom/scom-page-builder/page/pageMenu.tsx" {
-    import { ControlElement, Module } from '@ijstech/components';
+    import { ControlElement, Module, Control } from '@ijstech/components';
     import { IPageSection } from "@scom/scom-page-builder/interface/index.ts";
     global {
         namespace JSX {
@@ -1479,15 +1479,23 @@ declare module "@scom/scom-page-builder/page/pageMenu.tsx" {
         private pnlMenuWrapper;
         private items;
         private draggingSectionId;
+        private cardNameMap;
+        private isEditing;
         init(): void;
         private initEventBus;
+        getTitles(): Map<string, string>;
         initEventListener(): void;
+        initMenuCardEventListener(card: Control): void;
         private getActiveDropLineIdx;
-        private getCurrCardIdx;
         private showDropBox;
         private reorderSection;
         private setActiveDropLine;
         renderMenu(sections: IPageSection[]): void;
+        private setCardTitle;
+        private onClickRenameBtn;
+        private onClickConfirmBtn;
+        private toggleRenameBtn;
+        private toggleEditor;
         private goToSection;
         private getTitle;
         private getTitleFn;

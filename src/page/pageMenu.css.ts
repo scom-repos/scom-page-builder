@@ -4,21 +4,26 @@ const Theme = Styles.Theme.ThemeVars;
 
 export const menuBtnStyle = Styles.style({
     padding: 4,
-    boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 50px',
+    boxShadow: 'rgba(0, 0, 0, 0.1) 10px 10px 50px',
     background: '#fff',
-    borderRadius: 5
+    borderRadius: 10,
+    $nest: {
+        '.prevent-select': {
+            userSelect: 'none'
+        }
+    }
 })
 
 export const menuCardStyle = Styles.style({
     cursor: 'grab',
     opacity: 1,
-    transition: 'opacity .2s ease-in-out, transform 0.2s ease-in-out',
+    transition: '0.3s',
     $nest: {
         '&.is-dragging': {
             opacity: 0.7
         },
         '&:hover': {
-            transform: 'scale(1.04) translateY(-4px)'
+            backgroundColor: "#b8e4f2"
         },
         'i-label': {
             overflow: 'hidden',
