@@ -2569,7 +2569,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             if (updatedValues.includes('backgroundColor')) {
                 components_7.application.EventBus.dispatch(index_20.EVENT.ON_UPDATE_PAGE_BG, { color: backgroundColor });
             }
-            this.element.maxWidth = maxWidth !== null && maxWidth !== void 0 ? maxWidth : '100%';
+            this.element.maxWidth = '100%'; // maxWidth ?? '100%';
             this.element.margin = (0, index_19.getMargin)(margin);
             index_19.pageObject.config = { backgroundColor, margin, maxWidth };
             return newConfig;
@@ -4091,10 +4091,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 this.background.image = image;
             if (backgroundColor)
                 this.background.color = backgroundColor;
-            this.maxWidth = maxWidth !== null && maxWidth !== void 0 ? maxWidth : '100%';
+            this.pnlRowContainer.maxWidth = maxWidth !== null && maxWidth !== void 0 ? maxWidth : '100%';
             if (margin)
-                this.margin = (0, index_41.getMargin)(margin);
-            this.width = (margin === null || margin === void 0 ? void 0 : margin.x) && (margin === null || margin === void 0 ? void 0 : margin.x) !== 'auto' ? 'auto' : '100%';
+                this.pnlRowContainer.margin = (0, index_41.getMargin)(margin);
+            this.pnlRowContainer.width = (margin === null || margin === void 0 ? void 0 : margin.x) && (margin === null || margin === void 0 ? void 0 : margin.x) !== 'auto' ? 'auto' : '100%';
             if (align)
                 this.updateAlign();
         }
@@ -4137,7 +4137,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const unitWidth = Number((1 / this.maxColumn).toFixed(3)) * 100;
                 for (let section of sections) {
                     const columnSpan = Number(section.dataset.columnSpan);
-                    const widthNumber = columnSpan * this.gridColumnWidth + ((columnSpan - 1) * index_40.GAP_WIDTH);
+                    const widthNumber = columnSpan * this.gridColumnWidth + (columnSpan - 1) * index_40.GAP_WIDTH;
                     section.width = widthNumber ? `${widthNumber}px` : `${columnSpan * unitWidth}%`;
                 }
             }
@@ -4340,9 +4340,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const toolbars = section.querySelectorAll('ide-toolbar');
                 for (let i = 0; i < toolbars.length; i++) {
                     const toolbarBound = toolbars[i].getBoundingClientRect();
-                    if ((i == 0 && clientY <= toolbarBound.top)
-                        || (i == toolbars.length - 1 && clientY >= toolbarBound.bottom)
-                        || (toolbarBound.top <= clientY && toolbarBound.top + toolbarBound.height >= clientY)) {
+                    if ((i == 0 && clientY <= toolbarBound.top) ||
+                        (i == toolbars.length - 1 && clientY >= toolbarBound.bottom) ||
+                        (toolbarBound.top <= clientY && toolbarBound.top + toolbarBound.height >= clientY)) {
                         return { toolbar: toolbars[i], index: i };
                     }
                 }
@@ -4355,7 +4355,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const targetSection = eventTarget.closest && eventTarget.closest('ide-section');
                 const targetToolbar = (_a = findClosestToolbarInSection(targetSection, event.clientY)) === null || _a === void 0 ? void 0 : _a.toolbar;
                 const toolbars = targetSection ? Array.from(targetSection.querySelectorAll('ide-toolbar')) : [];
-                const cannotDrag = toolbars.find(toolbar => toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting'));
+                const cannotDrag = toolbars.find((toolbar) => toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting'));
                 if (targetSection && !cannotDrag) {
                     self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
                     self.currentElement = targetSection;
@@ -4397,7 +4397,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             });
             this.addEventListener('drag', function (event) {
                 const toolbars = self.currentElement ? self.currentElement.querySelectorAll('ide-toolbar') : [];
-                const dragElm = (!self.currentToolbar || toolbars.length === 1) ? self.currentElement : self.currentToolbar;
+                const dragElm = !self.currentToolbar || toolbars.length === 1 ? self.currentElement : self.currentToolbar;
                 if (ghostImage) {
                     ghostImage.style.position = 'absolute';
                     ghostImage.style.opacity = '1';
@@ -4416,14 +4416,14 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             function toggleAllToolbarBoarder(toggle) {
                 const toolbars = parentWrapper.querySelectorAll('ide-toolbar');
                 if (toggle) {
-                    toolbars.forEach(toolbar => {
+                    toolbars.forEach((toolbar) => {
                         // if (self.currentToolbar != toolbar) {
                         toolbar.classList.add('to-be-dropped');
                         // }
                     });
                 }
                 else {
-                    toolbars.forEach(toolbar => {
+                    toolbars.forEach((toolbar) => {
                         toolbar.classList.remove('to-be-dropped');
                     });
                 }
@@ -4449,7 +4449,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const dragEnter = parentWrapper.querySelector('.is-dragenter');
                 dragEnter && dragEnter.classList.remove('is-dragenter');
                 let target;
-                if (collision.collisionType == "self")
+                if (collision.collisionType == 'self')
                     target = findNearestFixedGridInRow(clientX);
                 else
                     target = enterTarget.closest('.fixed-grid-item');
@@ -4457,7 +4457,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 toggleAllToolbarBoarder(true);
                 if (target) {
                     const column = Number(target.dataset.column);
-                    const columnSpan = self.currentElement.dataset.columnSpan ? Number(self.currentElement.dataset.columnSpan) : index_40.INIT_COLUMN_SPAN;
+                    const columnSpan = self.currentElement.dataset.columnSpan
+                        ? Number(self.currentElement.dataset.columnSpan)
+                        : index_40.INIT_COLUMN_SPAN;
                     const colSpan = Math.min(columnSpan, self.maxColumn);
                     const colStart = Math.min(column, self.maxColumn - colSpan + 1);
                     const grid = target.closest('.grid');
@@ -4473,7 +4475,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         if (colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan) {
                             findedSection = section;
                         }
-                        spaces += (sectionColumnSpan);
+                        spaces += sectionColumnSpan;
                     }
                     if (findedSection && findedSection != self.currentElement) {
                         removeRectangles();
@@ -4507,11 +4509,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         const sections = Array.from((_c = section.closest('#pnlRow')) === null || _c === void 0 ? void 0 : _c.querySelectorAll('ide-section'));
                         const nextElm = sections.find((el) => {
                             const column = Number(el.dataset.column);
-                            return !isNaN(column) && (curElmCol + curElmColSpan === column);
+                            return !isNaN(column) && curElmCol + curElmColSpan === column;
                         });
-                        const showHiddenBlock = curElmCol === 1 && (curElmCol + curElmColSpan === self.maxColumn + 1) ||
-                            (nextElm) ||
-                            (curElmCol + curElmColSpan === self.maxColumn + 1);
+                        const showHiddenBlock = (curElmCol === 1 && curElmCol + curElmColSpan === self.maxColumn + 1) ||
+                            nextElm ||
+                            curElmCol + curElmColSpan === self.maxColumn + 1;
                         if (showHiddenBlock) {
                             const { left, right } = section.getBoundingClientRect();
                             const backBlock = section.querySelector('.back-block');
@@ -4580,7 +4582,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 let enterTarget;
                 const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
                 // if target overlap with itself
-                if ((collision.collisionType == "self" && !collision.toolbar) || collision.collisionType == "none") {
+                if ((collision.collisionType == 'self' && !collision.toolbar) || collision.collisionType == 'none') {
                     const cursorPosition = { x: event.clientX, y: event.clientY };
                     const elements = self.pnlRow.querySelectorAll('.fixed-grid-item');
                     let nearestElement = null;
@@ -4601,13 +4603,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     });
                     enterTarget = nearestElement;
                 }
-                else if ((collision.collisionType == "self" && collision.toolbar) || collision.collisionType == 'mutual') {
+                else if ((collision.collisionType == 'self' && collision.toolbar) || collision.collisionType == 'mutual') {
                     // choose a merge block to display
                     if (collision.mergeSide) {
                         let blockClass = `.${collision.mergeSide}-block`;
-                        const block = (collision.mergeSide == "top" || collision.mergeSide == "bottom") ?
-                            collision.toolbar.querySelector(blockClass) :
-                            collision.section.querySelector(blockClass);
+                        const block = collision.mergeSide == 'top' || collision.mergeSide == 'bottom'
+                            ? collision.toolbar.querySelector(blockClass)
+                            : collision.section.querySelector(blockClass);
                         block.visible = true;
                         updateClass(block, 'is-dragenter');
                         return;
@@ -4617,7 +4619,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         const dragOverSection = eventTarget.closest && eventTarget.closest('ide-section');
                         if (dragOverSection) {
                             const lastIdeToolbars = dragOverSection.querySelectorAll('ide-toolbar:last-child');
-                            const lastIdeToolbar = (lastIdeToolbars.length > 0) ? lastIdeToolbars[0] : undefined;
+                            const lastIdeToolbar = lastIdeToolbars.length > 0 ? lastIdeToolbars[0] : undefined;
                             if (lastIdeToolbars.length > 0) {
                                 const bottomBlock = lastIdeToolbar.querySelector('.bottom-block');
                                 bottomBlock.visible = true;
@@ -4668,7 +4670,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             }
             function checkCollision(dropTarget, dragSection, clientX, clientY) {
                 if (!dropTarget)
-                    return { collisionType: "none" };
+                    return { collisionType: 'none' };
                 const pageRow = dropTarget.closest('ide-row');
                 const rowRect = pageRow.getBoundingClientRect();
                 // drop/dragover near the top/bottom block of row
@@ -4676,11 +4678,17 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const OUTER_LIMIT = 3;
                 if (clientY >= rowRect.top - OUTER_LIMIT && clientY <= rowRect.top + INNER_LIMIT) {
                     // mouse is on the top row block
-                    return { collisionType: "mutual", rowBlock: pageRow.querySelector(".row-top-block") };
+                    return {
+                        collisionType: 'mutual',
+                        rowBlock: pageRow.querySelector('.row-top-block'),
+                    };
                 }
                 else if (clientY >= rowRect.bottom - INNER_LIMIT && clientY <= rowRect.bottom + OUTER_LIMIT) {
                     // mouse is on the bottom row block
-                    return { collisionType: "mutual", rowBlock: pageRow.querySelector(".row-bottom-block") };
+                    return {
+                        collisionType: 'mutual',
+                        rowBlock: pageRow.querySelector('.row-bottom-block'),
+                    };
                 }
                 if (!dragSection) {
                     const dropSection = dropTarget.closest('ide-section');
@@ -4688,37 +4696,37 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     if (dropToolbar) {
                         // drop/dragover on an element
                         return {
-                            collisionType: "mutual",
+                            collisionType: 'mutual',
                             section: dropSection,
                             toolbar: dropToolbar,
                             // check which side is the merge target
-                            mergeSide: decideMergeSide(dropToolbar, clientX, clientY)
+                            mergeSide: decideMergeSide(dropToolbar, clientX, clientY),
                         };
                     }
                     else if (dropSection) {
                         // drop/dragover on a section but not an element
                         const nearestToolbar = findClosestToolbarInSection(dropSection, clientY);
                         return {
-                            collisionType: "mutual",
+                            collisionType: 'mutual',
                             section: dropSection,
                             toolbar: nearestToolbar.toolbar,
                             // check which side is the merge target
-                            mergeSide: decideMergeSide(nearestToolbar.toolbar, clientX, clientY)
+                            mergeSide: decideMergeSide(nearestToolbar.toolbar, clientX, clientY),
                         };
                     }
                     else
-                        return { collisionType: "none" };
+                        return { collisionType: 'none' };
                 }
                 if (dragSection == null || dragSection == undefined)
-                    return { collisionType: "mutual" };
+                    return { collisionType: 'mutual' };
                 const nearestCol = findNearestFixedGridInRow(clientX);
                 if (!nearestCol)
-                    return { collisionType: "none" };
-                const dropColumn = parseInt(nearestCol.getAttribute("data-column"));
+                    return { collisionType: 'none' };
+                const dropColumn = parseInt(nearestCol.getAttribute('data-column'));
                 const grid = dropTarget.closest('.grid');
                 // drop/dragover outside grid
                 if (!grid)
-                    return { collisionType: "none" };
+                    return { collisionType: 'none' };
                 const sections = Array.from(grid === null || grid === void 0 ? void 0 : grid.querySelectorAll('ide-section'));
                 const sortedSections = sections.sort((a, b) => Number(a.dataset.column) - Number(b.dataset.column));
                 const startOfDragingElm = dropColumn;
@@ -4741,21 +4749,21 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 // drop/dragover on a section but not an element,
                                 // or drop/dragover on the place which causes the dragging element overlapping with dropping element
                                 return {
-                                    collisionType: "mutual",
+                                    collisionType: 'mutual',
                                     section: element,
                                     toolbar: nearestToolbar.toolbar,
                                     // check which side is the merge target
-                                    mergeSide: decideMergeSide(nearestToolbar.toolbar, clientX, clientY)
+                                    mergeSide: decideMergeSide(nearestToolbar.toolbar, clientX, clientY),
                                 };
                             }
                             else {
                                 // drop/dragover on the toolbar itself, the toolbar is in a composite section
-                                const toolbarIdx = (nearestToolbar.index == 0) ? 1 : nearestToolbar.index - 1;
+                                const toolbarIdx = nearestToolbar.index == 0 ? 1 : nearestToolbar.index - 1;
                                 return {
-                                    collisionType: "self",
+                                    collisionType: 'self',
                                     section: element,
                                     toolbar: toolbarsInDragSec[toolbarIdx],
-                                    mergeSide: (nearestToolbar.index == 0) ? "top" : "bottom"
+                                    mergeSide: nearestToolbar.index == 0 ? 'top' : 'bottom',
                                 };
                             }
                         }
@@ -4767,22 +4775,22 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 // }
                 // drop/dragover on the toolbar itself, the toolbar is in a primitive section
                 if (dropTarget == dragSection || dragSection.contains(dropTarget) || dropTarget.contains(dragSection))
-                    return { collisionType: "self" };
+                    return { collisionType: 'self' };
                 // otherwise, no overlap
-                return { collisionType: "none" };
+                return { collisionType: 'none' };
             }
             function decideMergeSide(dropToolbar, clientX, clientY) {
                 let rect = dropToolbar.getBoundingClientRect();
                 let offsetX = clientX - rect.left;
                 let offsetY = clientY - rect.top;
                 if (offsetY <= rect.height * 0.3)
-                    return "top";
+                    return 'top';
                 else if (offsetY >= rect.height * 0.7)
-                    return "bottom";
+                    return 'bottom';
                 else if (offsetX <= rect.width * 0.5)
-                    return "front";
+                    return 'front';
                 else
-                    return "back";
+                    return 'back';
             }
             this.addEventListener('drop', async function (event) {
                 var _a, _b, _c, _d;
@@ -4797,7 +4805,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 removeRectangles();
                 if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
                     // add section
-                    components_24.application.EventBus.dispatch(index_39.EVENT.ON_ADD_SECTION, { prependId: pageRow.id, defaultElements: elementConfig.defaultElements });
+                    components_24.application.EventBus.dispatch(index_39.EVENT.ON_ADD_SECTION, {
+                        prependId: pageRow.id,
+                        defaultElements: elementConfig.defaultElements,
+                    });
                     return;
                 }
                 if (!self.currentElement)
@@ -4808,26 +4819,27 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const dropToolbar = dropElm === null || dropElm === void 0 ? void 0 : dropElm.closest('ide-toolbar');
                 if (self.currentToolbar && dropToolbar == self.currentToolbar)
                     dropElm = null;
-                // collide with other section 
-                if (collision.collisionType == "mutual" && !collision.rowBlock) {
+                // collide with other section
+                if (collision.collisionType == 'mutual' && !collision.rowBlock) {
                     if ((!collision.mergeSide && !dropElm) || (collision.section && !dropElm))
                         return;
                 }
                 // is ungrouping and draging on the original section
-                if (collision.collisionType == "self" && isUngrouping)
+                if (collision.collisionType == 'self' && isUngrouping)
                     return;
                 let nearestFixedItem = eventTarget.closest('.fixed-grid-item');
                 // if target overlap with itself
-                if (collision.collisionType == "self"
+                if (collision.collisionType == 'self' ||
                     // drag on the gap of fixed panel
-                    || (collision.collisionType == "none" && eventTarget.classList.contains('fixed-grid')))
+                    (collision.collisionType == 'none' && eventTarget.classList.contains('fixed-grid')))
                     nearestFixedItem = findNearestFixedGridInRow(event.clientX);
                 const config = { id: (0, index_43.generateUUID)() };
                 // check if drop on a fixed-panel
                 if (nearestFixedItem) {
                     const column = Number(nearestFixedItem.dataset.column);
-                    const columnSpan = self.currentElement.dataset.columnSpan ?
-                        Number(self.currentElement.dataset.columnSpan) : index_40.INIT_COLUMN_SPAN;
+                    const columnSpan = self.currentElement.dataset.columnSpan
+                        ? Number(self.currentElement.dataset.columnSpan)
+                        : index_40.INIT_COLUMN_SPAN;
                     const colSpan = Math.min(columnSpan, self.maxColumn);
                     const colStart = Math.min(column, self.maxColumn - colSpan + 1);
                     const grid = nearestFixedItem.closest('.grid');
@@ -4845,7 +4857,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     self.isDragging = true;
                     // ungrouping elm
                     if (isUngrouping) {
-                        const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, self.currentElement, nearestFixedItem, config, "none");
+                        const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, self.currentElement, nearestFixedItem, config, 'none');
                         dragCmd && index_42.commandHistory.execute(dragCmd);
                         updateDraggingUI();
                     }
@@ -4877,10 +4889,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     const inEmptyPnl = eventTarget.closest('#pnlEmty');
                     if (dropElm && !inEmptyPnl) {
                         self.isDragging = true;
-                        if (dropElm.classList.contains('bottom-block') || collision.mergeSide == "bottom") {
+                        if (dropElm.classList.contains('bottom-block') || collision.mergeSide == 'bottom') {
                             if (isUngrouping) {
                                 const dropElement = eventTarget;
-                                const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, "bottom");
+                                const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, 'bottom');
                                 dragCmd && index_42.commandHistory.execute(dragCmd);
                                 resetDragTarget();
                             }
@@ -4890,10 +4902,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 index_42.commandHistory.execute(dragCmd);
                             }
                         }
-                        else if (dropElm.classList.contains('top-block') || collision.mergeSide == "top") {
+                        else if (dropElm.classList.contains('top-block') || collision.mergeSide == 'top') {
                             if (isUngrouping) {
                                 const dropElement = eventTarget;
-                                const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, "top");
+                                const dragCmd = new index_42.UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, 'top');
                                 dragCmd && index_42.commandHistory.execute(dragCmd);
                                 resetDragTarget();
                             }
@@ -4903,16 +4915,18 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 index_42.commandHistory.execute(dragCmd);
                             }
                         }
-                        else if (dropElm.classList.contains(ROW_BOTTOM_CLASS) || (collision.rowBlock && collision.rowBlock.classList.contains('row-bottom-block'))) {
+                        else if (dropElm.classList.contains(ROW_BOTTOM_CLASS) ||
+                            (collision.rowBlock && collision.rowBlock.classList.contains('row-bottom-block'))) {
                             const targetRow = (((_b = collision === null || collision === void 0 ? void 0 : collision.rowBlock) === null || _b === void 0 ? void 0 : _b.closest('ide-row')) || (dropElm === null || dropElm === void 0 ? void 0 : dropElm.closest('ide-row')));
                             targetRow && self.onAppendRow(targetRow);
                         }
-                        else if (dropElm.classList.contains(ROW_TOP_CLASS) || (collision.rowBlock && collision.rowBlock.classList.contains('row-top-block'))) {
+                        else if (dropElm.classList.contains(ROW_TOP_CLASS) ||
+                            (collision.rowBlock && collision.rowBlock.classList.contains('row-top-block'))) {
                             const targetRow = (_c = collision === null || collision === void 0 ? void 0 : collision.rowBlock) === null || _c === void 0 ? void 0 : _c.closest('ide-row');
                             targetRow && self.onPrependRow(targetRow);
                         }
                         else {
-                            const isAppend = dropElm.classList.contains('back-block') || collision.mergeSide == "back";
+                            const isAppend = dropElm.classList.contains('back-block') || collision.mergeSide == 'back';
                             // ungroup & drop on front/back
                             if (isUngrouping) {
                                 const dropElement = eventTarget;
@@ -4921,9 +4935,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 resetDragTarget();
                             }
                             else {
-                                const dragCmd = elementConfig ?
-                                    new index_42.AddElementCommand(self.getNewElementData(), isAppend, false, dropElm, null) :
-                                    new index_42.DragElementCommand(self.currentElement, dropElm, isAppend);
+                                const dragCmd = elementConfig
+                                    ? new index_42.AddElementCommand(self.getNewElementData(), isAppend, false, dropElm, null)
+                                    : new index_42.DragElementCommand(self.currentElement, dropElm, isAppend);
                                 await index_42.commandHistory.execute(dragCmd);
                             }
                         }
@@ -4986,8 +5000,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     return;
                 rectangle.style.display = 'block';
                 rectangle.style.left = (self.gridColumnWidth + index_40.GAP_WIDTH) * (colStart - 1) + 'px';
-                rectangle.style.width =
-                    self.gridColumnWidth * columnSpan + index_40.GAP_WIDTH * (columnSpan - 1) + 'px';
+                rectangle.style.width = self.gridColumnWidth * columnSpan + index_40.GAP_WIDTH * (columnSpan - 1) + 'px';
             }
             function removeRectangles() {
                 const rectangles = parentWrapper.getElementsByClassName('rectangle');
@@ -5013,11 +5026,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             const newPageRow = pageRow.previousElementSibling;
             const config = { id: (0, index_43.generateUUID)() };
             if (newPageRow) {
-                const dragCmd = (0, index_41.getDragData)() ?
-                    new index_42.AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) :
-                    this.isUngrouping() ?
-                        new index_42.UngroupElementCommand(this.currentToolbar, this.currentElement, newPageRow, config, "none") :
-                        new index_42.DragElementCommand(this.currentElement, newPageRow, true, true);
+                const dragCmd = (0, index_41.getDragData)()
+                    ? new index_42.AddElementCommand(this.getNewElementData(), true, true, null, newPageRow)
+                    : this.isUngrouping()
+                        ? new index_42.UngroupElementCommand(this.currentToolbar, this.currentElement, newPageRow, config, 'none')
+                        : new index_42.DragElementCommand(this.currentElement, newPageRow, true, true);
                 await index_42.commandHistory.execute(dragCmd);
             }
         }
@@ -5026,18 +5039,18 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             const newPageRow = pageRow.nextElementSibling;
             const config = { id: (0, index_43.generateUUID)() };
             if (newPageRow) {
-                const dragCmd = (0, index_41.getDragData)() ?
-                    new index_42.AddElementCommand(this.getNewElementData(), true, true, null, newPageRow) :
-                    this.isUngrouping() ?
-                        new index_42.UngroupElementCommand(this.currentToolbar, this.currentElement, newPageRow, config, "none") :
-                        new index_42.DragElementCommand(this.currentElement, newPageRow, true, true);
+                const dragCmd = (0, index_41.getDragData)()
+                    ? new index_42.AddElementCommand(this.getNewElementData(), true, true, null, newPageRow)
+                    : this.isUngrouping()
+                        ? new index_42.UngroupElementCommand(this.currentToolbar, this.currentElement, newPageRow, config, 'none')
+                        : new index_42.DragElementCommand(this.currentElement, newPageRow, true, true);
                 await index_42.commandHistory.execute(dragCmd);
             }
         }
         async onAddRow() {
-            const dragCmd = (0, index_41.getDragData)() ?
-                new index_42.AddElementCommand(this.getNewElementData(), true, true, null, this) :
-                new index_42.DragElementCommand(this.currentElement, this, true, true);
+            const dragCmd = (0, index_41.getDragData)()
+                ? new index_42.AddElementCommand(this.getNewElementData(), true, true, null, this)
+                : new index_42.DragElementCommand(this.currentElement, this, true, true);
             await index_42.commandHistory.execute(dragCmd);
         }
         isUngrouping() {
@@ -5045,12 +5058,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 return false;
             const section = this.currentToolbar.closest('ide-section');
             const toolbars = section.querySelectorAll('ide-toolbar');
-            return (toolbars && toolbars.length && toolbars.length > 1) ? true : false;
+            return toolbars && toolbars.length && toolbars.length > 1 ? true : false;
         }
         initEventBus() {
             const self = this;
-            components_24.application.EventBus.register(this, index_39.EVENT.ON_SET_DRAG_ELEMENT, async (el) => this.currentElement = el);
-            components_24.application.EventBus.register(this, index_39.EVENT.ON_SET_DRAG_TOOLBAR, async (el) => this.currentToolbar = el);
+            components_24.application.EventBus.register(this, index_39.EVENT.ON_SET_DRAG_ELEMENT, async (el) => (this.currentElement = el));
+            components_24.application.EventBus.register(this, index_39.EVENT.ON_SET_DRAG_TOOLBAR, async (el) => (this.currentToolbar = el));
             components_24.application.EventBus.register(this, index_39.EVENT.ON_UPDATE_PAGE_CONFIG, async (data) => {
                 const { config, rowsConfig } = data;
                 if (!config)
@@ -5144,36 +5157,55 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             components_24.application.EventBus.dispatch(index_39.EVENT.ON_ADD_SECTION, { prependId, appendId });
         }
         render() {
-            return (this.$render("i-panel", { id: "pnlRowWrap", class: 'page-row', width: "100%", height: "100%", padding: { left: '3rem', right: '3rem' } },
-                this.$render("i-button", { caption: '', icon: { name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, top: "-12px", left: "50%", zIndex: 95, class: "btn-add", onClick: () => this.onAddSection(-1) }),
-                this.$render("i-vstack", { id: 'actionsBar', class: "row-actions-bar", verticalAlignment: "center" },
-                    this.$render("i-vstack", { background: { color: '#fff' }, border: { radius: 5 }, maxWidth: "100%", maxHeight: "100%", horizontalAlignment: "center", padding: { top: 4, bottom: 4, left: 4, right: 4 }, gap: "0.25rem", class: "bar-shadow" },
-                        this.$render("i-panel", { class: "actions", tooltip: { content: 'Section settings', placement: 'right' }, visible: this.isChanged, onClick: () => this.onOpenRowSettingsDialog() },
-                            this.$render("i-icon", { name: "cog", width: 16, height: 16, fill: "#80868b" })),
-                        this.$render("i-panel", { id: "btnClone", class: "actions", tooltip: { content: 'Duplicate section', placement: 'right' }, visible: this.isCloned, onClick: this.onClone },
-                            this.$render("i-icon", { name: "clone", width: 16, height: 16, fill: "#80868b" })),
-                        this.$render("i-panel", { id: "btnDelete", class: "actions delete", tooltip: { content: 'Delete section', placement: 'right' }, onClick: this.onDeleteRow },
-                            this.$render("i-icon", { name: "trash", width: 16, height: 16, fill: "#80868b" })))),
-                this.$render("i-vstack", { id: "dragStack", height: "100%", verticalAlignment: "center", position: "absolute", left: "0px", top: "0px", class: "drag-stack" },
-                    this.$render("i-grid-layout", { verticalAlignment: "center", autoFillInHoles: true, columnsPerRow: 2, class: "main-drag" },
-                        this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                        this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                        this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                        this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                        this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                        this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                        this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                        this.$render("i-icon", { name: "circle", width: 3, height: 3 }))),
-                this.$render("i-vstack", { id: "pnlEmty", width: "100%", visible: false, verticalAlignment: 'center', horizontalAlignment: 'center', class: "pnl-empty" },
-                    this.$render("i-vstack", { id: "pnlLoading", padding: { top: '0.5rem', bottom: '0.5rem' }, visible: false, height: "100%", width: "100%", class: "i-loading-overlay" },
-                        this.$render("i-vstack", { class: "i-loading-spinner", horizontalAlignment: "center", verticalAlignment: "center" },
-                            this.$render("i-icon", { class: "i-loading-spinner_icon", name: "spinner", width: 24, height: 24, fill: Theme.colors.primary.main }),
-                            this.$render("i-label", { caption: "Loading...", font: { color: Theme.colors.primary.main, size: '1rem' }, class: "i-loading-spinner_text" }))),
-                    this.$render("i-panel", { padding: { top: '3rem', bottom: '3rem' }, margin: { top: '3rem', bottom: '3rem' }, width: "100%", border: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' }, class: "text-center" },
-                        this.$render("i-label", { caption: 'Drag Elements Here', font: { transform: 'uppercase', color: 'var(--builder-color)', size: '1.25rem' }, opacity: 0.5 }))),
-                this.$render("i-grid-layout", { id: "pnlRow", width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%", position: "relative", class: "grid", opacity: 0 }),
-                this.$render("ide-row-settings-dialog", { id: "mdRowSetting", onSave: this.onSaveRowSettings.bind(this) }),
-                this.$render("i-button", { caption: '', icon: { name: 'plus', width: 14, height: 14, fill: Theme.colors.primary.contrastText }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, bottom: "-12px", left: "50%", zIndex: 95, class: "btn-add", onClick: () => this.onAddSection(1) })));
+            return (this.$render("i-panel", { id: "pnlRowContainer", class: 'page-row-container', width: "100%", height: "100%" },
+                this.$render("i-panel", { id: "pnlRowWrap", class: 'page-row', width: "100%", height: "100%", padding: { left: '3rem', right: '3rem' } },
+                    this.$render("i-button", { caption: "", icon: {
+                            name: 'plus',
+                            width: 14,
+                            height: 14,
+                            fill: Theme.colors.primary.contrastText,
+                        }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, top: "-12px", left: "50%", zIndex: 95, class: "btn-add", onClick: () => this.onAddSection(-1) }),
+                    this.$render("i-vstack", { id: 'actionsBar', class: "row-actions-bar", verticalAlignment: "center" },
+                        this.$render("i-vstack", { background: { color: '#fff' }, border: { radius: 5 }, maxWidth: "100%", maxHeight: "100%", horizontalAlignment: "center", padding: { top: 4, bottom: 4, left: 4, right: 4 }, gap: "0.25rem", class: "bar-shadow" },
+                            this.$render("i-panel", { class: "actions", tooltip: { content: 'Section settings', placement: 'right' }, visible: this.isChanged, onClick: () => this.onOpenRowSettingsDialog() },
+                                this.$render("i-icon", { name: "cog", width: 16, height: 16, fill: "#80868b" })),
+                            this.$render("i-panel", { id: "btnClone", class: "actions", tooltip: { content: 'Duplicate section', placement: 'right' }, visible: this.isCloned, onClick: this.onClone },
+                                this.$render("i-icon", { name: "clone", width: 16, height: 16, fill: "#80868b" })),
+                            this.$render("i-panel", { id: "btnDelete", class: "actions delete", tooltip: { content: 'Delete section', placement: 'right' }, onClick: this.onDeleteRow },
+                                this.$render("i-icon", { name: "trash", width: 16, height: 16, fill: "#80868b" })))),
+                    this.$render("i-vstack", { id: "dragStack", height: "100%", verticalAlignment: "center", position: "absolute", left: "0px", top: "0px", class: "drag-stack" },
+                        this.$render("i-grid-layout", { verticalAlignment: "center", autoFillInHoles: true, columnsPerRow: 2, class: "main-drag" },
+                            this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
+                            this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
+                            this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
+                            this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
+                            this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
+                            this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
+                            this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
+                            this.$render("i-icon", { name: "circle", width: 3, height: 3 }))),
+                    this.$render("i-vstack", { id: "pnlEmty", width: "100%", visible: false, verticalAlignment: "center", horizontalAlignment: "center", class: "pnl-empty" },
+                        this.$render("i-vstack", { id: "pnlLoading", padding: { top: '0.5rem', bottom: '0.5rem' }, visible: false, height: "100%", width: "100%", class: "i-loading-overlay" },
+                            this.$render("i-vstack", { class: "i-loading-spinner", horizontalAlignment: "center", verticalAlignment: "center" },
+                                this.$render("i-icon", { class: "i-loading-spinner_icon", name: "spinner", width: 24, height: 24, fill: Theme.colors.primary.main }),
+                                this.$render("i-label", { caption: "Loading...", font: { color: Theme.colors.primary.main, size: '1rem' }, class: "i-loading-spinner_text" }))),
+                        this.$render("i-panel", { padding: { top: '3rem', bottom: '3rem' }, margin: { top: '3rem', bottom: '3rem' }, width: "100%", border: {
+                                width: '1px',
+                                style: 'dashed',
+                                color: 'var(--builder-divider)',
+                            }, class: "text-center" },
+                            this.$render("i-label", { caption: "Drag Elements Here", font: {
+                                    transform: 'uppercase',
+                                    color: 'var(--builder-color)',
+                                    size: '1.25rem',
+                                }, opacity: 0.5 }))),
+                    this.$render("i-grid-layout", { id: "pnlRow", width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%", position: "relative", class: "grid", opacity: 0 }),
+                    this.$render("ide-row-settings-dialog", { id: "mdRowSetting", onSave: this.onSaveRowSettings.bind(this) }),
+                    this.$render("i-button", { caption: "", icon: {
+                            name: 'plus',
+                            width: 14,
+                            height: 14,
+                            fill: Theme.colors.primary.contrastText,
+                        }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, bottom: "-12px", left: "50%", zIndex: 95, class: "btn-add", onClick: () => this.onAddSection(1) }))));
         }
     };
     __decorate([
@@ -7828,7 +7860,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             const { backgroundColor, margin, maxWidth } = (0, index_80.getDefaultPageConfig)();
             this.style.setProperty('--builder-bg', backgroundColor);
             if (this.pnlEditor) {
-                this.pnlEditor.maxWidth = maxWidth !== null && maxWidth !== void 0 ? maxWidth : '100%';
+                this.pnlEditor.maxWidth = '100%'; // maxWidth ?? '100%';
                 const marginStyle = (0, index_80.getMargin)(margin);
                 this.pnlEditor.margin = marginStyle;
                 this.pnlEditor.style.width = `calc(100% - (2 * ${marginStyle.left}))`;
@@ -7880,8 +7912,12 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         render() {
             return (this.$render("i-vstack", { id: "editor", width: '100%', height: '100%', maxHeight: "100vh", overflow: 'hidden' },
                 this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: '#f7f3ef' } },
-                    this.$render("i-vstack", { id: "pageContent", maxWidth: "calc(100% - 6em)", width: "100%", horizontalAlignment: 'center', margin: { top: '3.5rem', left: 'auto', right: 'auto' }, padding: { top: '1rem', bottom: '1rem' } },
-                        this.$render("i-panel", { id: "pnlEditor", maxWidth: 1024, minHeight: "100vh", width: "100%", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
+                    this.$render("i-vstack", { id: "pageContent", 
+                        // maxWidth="calc(100% - 6em)"
+                        width: "100%", horizontalAlignment: 'center', margin: { top: '3.5rem', left: 'auto', right: 'auto' }, padding: { top: '1rem', bottom: '1rem' } },
+                        this.$render("i-panel", { id: "pnlEditor", 
+                            // maxWidth={1024}
+                            minHeight: "100vh", width: "100%", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
                             this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
                                 this.$render("ide-rows", { id: "pageRows", draggable: true })),
                             this.$render("builder-footer", { id: "builderFooter" })))),

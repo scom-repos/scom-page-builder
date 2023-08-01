@@ -1066,6 +1066,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
     export class PageRow extends Module {
         private actionsBar;
         private dragStack;
+        private pnlRowContainer;
         private pnlRow;
         private mdRowSetting;
         private pnlEmty;
