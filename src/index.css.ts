@@ -58,7 +58,7 @@ Styles.cssRule('#editor', {
       }
     },
     'ide-rows ide-row:first-child': {
-      paddingTop: 50
+      // paddingTop: 50
     }
   }
 });

@@ -1309,6 +1309,7 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
             this.element = element;
             const id = this.element.id.replace('row-', '');
             const data = index_5.pageObject.getRowConfig(id) || (0, index_5.getPageConfig)();
+            this.settings = Object.assign(Object.assign({}, settings), data);
             this.oldSettings = Object.assign({}, data);
         }
         getChangedValues(newValue, oldValue) {
@@ -2584,7 +2585,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             }
             this.element.maxWidth = '100%'; // maxWidth ?? '100%';
             this.element.margin = (0, index_21.getMargin)(margin);
-            index_21.pageObject.config = { backgroundColor, margin, maxWidth };
+            index_21.pageObject.config = { backgroundColor, margin, sectionWidth };
             return newConfig;
         }
         execute() {
@@ -3377,8 +3378,8 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
             this.formElm.uiSchema = jsonUISchema;
             this.formElm.formOptions = formOptions;
             this.formElm.renderForm();
-            const { backgroundColor, margin, maxWidth } = (0, index_33.getPageConfig)();
-            const config = Object.assign({ align: 'left', margin, maxWidth, backgroundColor }, (((_a = this.data) === null || _a === void 0 ? void 0 : _a.config) || {}));
+            const { backgroundColor, margin, sectionWidth } = (0, index_33.getPageConfig)();
+            const config = Object.assign({ align: 'left', margin, sectionWidth, backgroundColor }, (((_a = this.data) === null || _a === void 0 ? void 0 : _a.config) || {}));
             this.formElm.setFormData(Object.assign({}, config));
         }
         close() {
@@ -8318,7 +8319,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             index_85.pageObject.updateMenu();
         }
         updatePageConfig() {
-            const { backgroundColor, margin, maxWidth } = (0, index_85.getDefaultPageConfig)();
+            const { backgroundColor, margin, sectionWidth } = (0, index_85.getDefaultPageConfig)();
             this.style.setProperty('--builder-bg', backgroundColor);
             if (this.pnlEditor) {
                 this.pnlEditor.maxWidth = '100%'; // maxWidth ?? '100%';
