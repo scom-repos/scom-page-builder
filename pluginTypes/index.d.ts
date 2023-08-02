@@ -398,10 +398,6 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         title: string;
         icon: string;
     }
-    export interface IMenuItem {
-        rowId: string;
-        caption: string;
-    }
 }
 /// <amd-module name="@scom/scom-page-builder/interface/jsonSchema.ts" />
 declare module "@scom/scom-page-builder/interface/jsonSchema.ts" {
@@ -1481,7 +1477,6 @@ declare module "@scom/scom-page-builder/page/pageMenu.tsx" {
         private pnlMenu;
         private pnlMenuWrapper;
         private menuWrapper;
-        private items;
         private draggingSectionId;
         private isEditing;
         init(): void;

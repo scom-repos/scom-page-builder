@@ -7176,7 +7176,7 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
         }
         renderMenu(sections) {
             this.pnlMenu.clearInnerHTML();
-            this.items = sections.map((section) => {
+            const items = sections.map((section) => {
                 return {
                     caption: this.getTitle(section),
                     rowId: section.id.replace("row-", "")
@@ -7185,16 +7185,16 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
             // set the titles here
             const dropLine = (this.$render("i-panel", { id: `menuDropLine-0`, width: '100%', height: '5px' }));
             this.pnlMenu.appendChild(dropLine);
-            for (let i = 0; i < this.items.length; i++) {
-                const menuCard = (this.$render("i-hstack", { id: "menuCard", class: pageMenu_css_1.menuCardStyle, verticalAlignment: "center", horizontalAlignment: 'space-between', width: "100%", border: { radius: 5 }, overflow: "hidden", onClick: () => this.goToSection(this.items[i].rowId) },
+            for (let i = 0; i < items.length; i++) {
+                const menuCard = (this.$render("i-hstack", { id: "menuCard", class: pageMenu_css_1.menuCardStyle, verticalAlignment: "center", horizontalAlignment: 'space-between', width: "100%", border: { radius: 5 }, overflow: "hidden", onClick: () => this.goToSection(items[i].rowId) },
                     this.$render("i-hstack", { verticalAlignment: "center", horizontalAlignment: 'start' },
                         this.$render("i-label", { id: "cardDot", caption: "•", font: { size: '16px', color: '#3b3838', weight: 530 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" }),
-                        this.$render("i-label", { id: "cardTitle", caption: this.items[i].caption, font: { size: '16px', color: '#3b3838', weight: 530 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" }),
-                        this.$render("i-input", { id: "cardInput", visible: false, width: '90%', height: '40px', padding: { left: '0.5rem', top: '0.5rem', bottom: '0.5rem', right: '0.5rem' }, onChanged: (control) => this.setCardTitle(control, this.items[i].rowId) })),
-                    this.$render("i-icon", { id: "cardRenameBtn", name: 'ellipsis-h', width: 22, height: 22, padding: { top: 4, bottom: 4, left: 4, right: 4 }, margin: { right: 4 }, class: "pointer iconButton", visible: false, tooltip: { content: "Rename", placement: "right" }, onClick: () => this.onClickRenameBtn(this.items[i].rowId) }),
-                    this.$render("i-icon", { id: "cardConfirmBtn", name: "check", width: 22, height: 22, padding: { top: 4, bottom: 4, left: 4, right: 4 }, margin: { right: 4 }, class: "pointer iconButton", visible: false, tooltip: { content: "Confirm", placement: "right" }, onClick: () => this.onClickConfirmBtn(this.items[i].rowId) })));
+                        this.$render("i-label", { id: "cardTitle", caption: items[i].caption, font: { size: '16px', color: '#3b3838', weight: 530 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" }),
+                        this.$render("i-input", { id: "cardInput", visible: false, width: '90%', height: '40px', padding: { left: '0.5rem', top: '0.5rem', bottom: '0.5rem', right: '0.5rem' }, onChanged: (control) => this.setCardTitle(control, items[i].rowId) })),
+                    this.$render("i-icon", { id: "cardRenameBtn", name: 'ellipsis-h', width: 22, height: 22, padding: { top: 4, bottom: 4, left: 4, right: 4 }, margin: { right: 4 }, class: "pointer iconButton", visible: false, tooltip: { content: "Rename", placement: "right" }, onClick: () => this.onClickRenameBtn(items[i].rowId) }),
+                    this.$render("i-icon", { id: "cardConfirmBtn", name: "check", width: 22, height: 22, padding: { top: 4, bottom: 4, left: 4, right: 4 }, margin: { right: 4 }, class: "pointer iconButton", visible: false, tooltip: { content: "Confirm", placement: "right" }, onClick: () => this.onClickConfirmBtn(items[i].rowId) })));
                 menuCard.setAttribute('draggable', 'true');
-                menuCard.setAttribute('rowId', this.items[i].rowId);
+                menuCard.setAttribute('rowId', items[i].rowId);
                 this.pnlMenu.appendChild(menuCard);
                 this.initMenuCardEventListener(menuCard);
                 const dropLine = (this.$render("i-panel", { id: `menuDropLine-${i + 1}`, width: '100%', height: '5px' }));

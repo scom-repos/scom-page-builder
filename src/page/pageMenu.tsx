@@ -12,7 +12,7 @@ import {
 } from '@ijstech/components';
 import { pageObject } from '../store/index';
 import { EVENT } from '../const/index';
-import { IPageSection, IPageElement, IMenuItem } from '../interface/index';
+import { IPageSection, IPageElement } from '../interface/index';
 import { menuBtnStyle, menuCardStyle, menuStyle } from './pageMenu.css';
 import { commandHistory, MoveElementCommand } from '../command/index';
 
@@ -32,7 +32,6 @@ export class PageMenu extends Module {
     private pnlMenu: VStack;
     private pnlMenuWrapper: VStack;
     private menuWrapper: VStack;
-    private items: IMenuItem[];
     private draggingSectionId: string;
     private isEditing: boolean = false;
 
@@ -168,7 +167,7 @@ export class PageMenu extends Module {
 
     renderMenu(sections: IPageSection[]) {
         this.pnlMenu.clearInnerHTML();
-        this.items = sections.map((section: IPageSection) => {
+        const items = sections.map((section: IPageSection) => {
             return {
                 caption: this.getTitle(section),
                 rowId: section.id.replace("row-", "")
@@ -178,7 +177,7 @@ export class PageMenu extends Module {
         // set the titles here
         const dropLine = (<i-panel id={`menuDropLine-0`} width={'100%'} height={'5px'}></i-panel>);
         this.pnlMenu.appendChild(dropLine);
-        for (let i = 0; i < this.items.length; i++) {
+        for (let i = 0; i < items.length; i++) {
             const menuCard = (
                 <i-hstack
                     id="menuCard"
@@ -188,7 +187,7 @@ export class PageMenu extends Module {
                     width="100%"
                     border={{ radius: 5 }}
                     overflow="hidden"
-                    onClick={() => this.goToSection(this.items[i].rowId)}
+                    onClick={() => this.goToSection(items[i].rowId)}
                 >
                     <i-hstack verticalAlignment="center" horizontalAlignment='start'>
                         <i-label
@@ -201,7 +200,7 @@ export class PageMenu extends Module {
                         ></i-label>
                         <i-label
                             id="cardTitle"
-                            caption={this.items[i].caption}
+                            caption={items[i].caption}
                             font={{ size: '16px', color: '#3b3838', weight: 530 }}
                             padding={{ top: 8, bottom: 8, left: 8, right: 8 }}
                             maxHeight={34}
@@ -213,7 +212,7 @@ export class PageMenu extends Module {
                             width='90%'
                             height='40px'
                             padding={{ left: '0.5rem', top: '0.5rem', bottom: '0.5rem', right: '0.5rem' }}
-                            onChanged={(control) => this.setCardTitle(control, this.items[i].rowId)}
+                            onChanged={(control) => this.setCardTitle(control, items[i].rowId)}
                         ></i-input>
                     </i-hstack>
                     <i-icon
@@ -225,7 +224,7 @@ export class PageMenu extends Module {
                         class="pointer iconButton"
                         visible={false}
                         tooltip={{ content: "Rename", placement: "right" }}
-                        onClick={() => this.onClickRenameBtn(this.items[i].rowId)}
+                        onClick={() => this.onClickRenameBtn(items[i].rowId)}
                     ></i-icon>
                     <i-icon
                         id="cardConfirmBtn"
@@ -236,12 +235,12 @@ export class PageMenu extends Module {
                         class="pointer iconButton"
                         visible={false}
                         tooltip={{ content: "Confirm", placement: "right" }}
-                        onClick={() => this.onClickConfirmBtn(this.items[i].rowId)}
+                        onClick={() => this.onClickConfirmBtn(items[i].rowId)}
                     ></i-icon>
                 </i-hstack>
             );
             menuCard.setAttribute('draggable', 'true');
-            menuCard.setAttribute('rowId', this.items[i].rowId);
+            menuCard.setAttribute('rowId', items[i].rowId);
             this.pnlMenu.appendChild(menuCard);
             this.initMenuCardEventListener(menuCard);
 
