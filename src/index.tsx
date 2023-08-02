@@ -283,7 +283,7 @@ export default class Editor extends Module {
         const { backgroundColor, margin, maxWidth } = getDefaultPageConfig();
         this.style.setProperty('--builder-bg', backgroundColor);
         if (this.pnlEditor) {
-            this.pnlEditor.maxWidth = maxWidth ?? '100%';
+            this.pnlEditor.maxWidth = '100%'; // maxWidth ?? '100%';
             const marginStyle = getMargin(margin);
             this.pnlEditor.margin = marginStyle;
             this.pnlEditor.style.width = `calc(100% - (2 * ${marginStyle.left}))`;
@@ -373,7 +373,7 @@ export default class Editor extends Module {
                     >
                         <i-vstack
                             id="pageContent"
-                            maxWidth="calc(100% - 6em)"
+                            // maxWidth="calc(100% - 6em)"
                             width="100%"
                             horizontalAlignment='center'
                             margin={{ top: '3.5rem', left: 'auto', right: 'auto' }}
@@ -381,7 +381,7 @@ export default class Editor extends Module {
                         >
                             <i-panel
                                 id="pnlEditor"
-                                maxWidth={1024}
+                                // maxWidth={1024}
                                 minHeight="100vh"
                                 width="100%"
                                 margin={{ top: 8, bottom: 8, left: 60, right: 60 }}

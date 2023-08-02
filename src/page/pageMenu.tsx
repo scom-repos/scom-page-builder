@@ -322,7 +322,7 @@ export class PageMenu extends Module {
             <i-hstack position='fixed' top="60px" left="30px" height={0} width={0} verticalAlignment="center" horizontalAlignment='center'>
                 <i-vstack id="menuWrapper" position='absolute' top="0px" left="0px" gap={"0.5rem"}
                     padding={{ top: '1rem', right: '1rem', bottom: '1rem', left: '1rem' }}
-                    class={menuBtnStyle}>
+                    class={menuBtnStyle} zIndex={150}>
                     <i-hstack gap={'1rem'} verticalAlignment='center' onClick={this.toggleMenu} class="pointer">
                         <i-icon width={22} height={22} name={"bars"} fill={Theme.colors.primary.main}></i-icon>
                         <i-label caption={"Menu"} font={{ color: '#3b3838', weight: 750, size: '18px' }} class="prevent-select"></i-label>
