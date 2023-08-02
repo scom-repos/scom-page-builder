@@ -153,7 +153,7 @@ export class MainModule extends Module {
         "elements": []
       },
       config: {
-        maxWidth: 1000
+        sectionWidth: 1000
       }
     }
     this.pageBuilder.setData(data);

@@ -9,7 +9,8 @@ export interface IPageData {
 
 export interface IPageConfig {
     backgroundColor?: string;
-    maxWidth?: number|string;
+    backdropColor?: string;
+    sectionWidth?: number|string;
     margin?: {
         x?: number|string;
         y?: number|string;
