@@ -3382,14 +3382,13 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
         }
         renderForm() {
             var _a;
-            debugger;
             const { jsonSchema, formOptions, jsonUISchema } = this.getSchema();
             this.formElm.jsonSchema = jsonSchema;
             this.formElm.uiSchema = jsonUISchema;
             this.formElm.formOptions = formOptions;
             this.formElm.renderForm();
             const { backgroundColor, margin, sectionWidth } = (0, index_33.getPageConfig)();
-            const config = Object.assign({ align: 'left', margin, sectionWidth, backgroundColor }, (((_a = this.data) === null || _a === void 0 ? void 0 : _a.config) || {}));
+            const config = Object.assign({ align: 'left', sectionWidth }, (((_a = this.data) === null || _a === void 0 ? void 0 : _a.config) || {}));
             this.formElm.setFormData(Object.assign({}, config));
         }
         close() {
