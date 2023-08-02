@@ -191,6 +191,15 @@ export class RowSettingsDialog extends Module {
                         {
                             "type": "Group",
                             "label": "Backdrop",
+                            "rule": {
+                                "effect": "HIDE",
+                                "condition": {
+                                    "scope": "#/properties/fullWidth",
+                                    "schema": {
+                                        "const": true
+                                    }
+                                }
+                            },
                             "elements": [
                                 {
                                     "type": "VerticalLayout",

@@ -3239,6 +3239,15 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                             {
                                 "type": "Group",
                                 "label": "Backdrop",
+                                "rule": {
+                                    "effect": "HIDE",
+                                    "condition": {
+                                        "scope": "#/properties/fullWidth",
+                                        "schema": {
+                                            "const": true
+                                        }
+                                    }
+                                },
                                 "elements": [
                                     {
                                         "type": "VerticalLayout",
@@ -3984,6 +3993,7 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
         }
     });
     components_24.Styles.cssRule('ide-row', {
+        paddingBottom: 20,
         display: 'block',
         position: 'relative',
         transition: 'translate .3s ease-in',
@@ -3991,6 +4001,9 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
         boxSizing: 'border-box',
         backgroundColor: 'var(--builder-bg)',
         $nest: {
+            '.page-row-container': {
+                borderRadius: 10,
+            },
             '.drag-stack': {
                 visibility: 'hidden',
                 opacity: 0,
@@ -4091,7 +4104,7 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
                 transition: 'border ease-in .2s'
             },
             '.is-dragenter': {
-                background: 'rgb(66,133,244)',
+                background: 'rgba(66,133,244,.9)',
                 opacity: 1
             },
             '.rectangle': {
@@ -4172,8 +4185,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.renderFixedGrid();
             this.initEventListeners();
             this.initEventBus();
-            this.appendChild(this.$render("i-panel", { position: "absolute", width: "100%", height: "16px", bottom: "-8px", zIndex: 90, border: { radius: '5px' }, class: ROW_BOTTOM_CLASS }));
-            this.appendChild(this.$render("i-panel", { position: "absolute", width: "100%", height: "16px", top: "-8px", zIndex: 90, border: { radius: '5px' }, class: ROW_TOP_CLASS }));
+            this.appendChild(this.$render("i-panel", { position: "absolute", width: "100%", height: "3px", bottom: "-3px", zIndex: 90, 
+                // border={{radius: '5px'}}
+                class: ROW_BOTTOM_CLASS }));
+            this.appendChild(this.$render("i-panel", { position: "absolute", width: "100%", height: "3px", top: "-3px", zIndex: 90, 
+                // border={{radius: '5px'}}
+                class: ROW_TOP_CLASS }));
         }
         toggleUI(value) {
             if (this.pnlRow)
@@ -4314,6 +4331,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         onDeleteRow() {
             const prependRow = this.previousElementSibling;
             const appendRow = this.nextElementSibling;
+            if (!prependRow && !appendRow) {
+                // Reject delete
+                return;
+            }
             const rowCmd = new index_44.UpdateRowCommand(this, this.parent, this.data, true, (prependRow === null || prependRow === void 0 ? void 0 : prependRow.id) || '', (appendRow === null || appendRow === void 0 ? void 0 : appendRow.id) || '');
             index_44.commandHistory.execute(rowCmd);
         }
@@ -5968,8 +5989,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                                 this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
                                 this.$render("i-icon", { name: "circle", width: 3, height: 3 }))),
                         this.$render("i-vstack", { id: "backdropStack", width: "100%", height: "100%", position: "absolute", top: "0px", left: "0px", zIndex: 15, visible: false, onClick: this.showToolList.bind(this) })),
-                    this.$render("i-panel", { position: "absolute", width: "90%", height: "8px", left: "5%", bottom: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "bottom-block" }),
-                    this.$render("i-panel", { position: "absolute", width: "90%", height: "8px", left: "5%", top: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "top-block" }),
+                    this.$render("i-panel", { position: "absolute", width: "90%", height: "3px", left: "5%", bottom: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "bottom-block" }),
+                    this.$render("i-panel", { position: "absolute", width: "90%", height: "3px", left: "5%", top: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "top-block" }),
                     this.$render("i-modal", { id: 'mdActions', title: 'Update Settings', closeIcon: { name: 'times' }, minWidth: 400, maxWidth: '900px', closeOnBackdropClick: false, onOpen: this.onShowModal.bind(this), onClose: this.onCloseModal.bind(this), class: "setting-modal" },
                         this.$render("i-panel", null,
                             this.$render("i-vstack", { id: "pnlFormMsg", padding: { left: '1.5rem', right: '1.5rem', top: '1rem' }, gap: "0.5rem", visible: false }),
@@ -6222,10 +6243,10 @@ define("@scom/scom-page-builder/page/pageSection.tsx", ["require", "exports", "@
         }
         render() {
             return (this.$render("i-panel", { id: 'pnlPageSection', maxWidth: "100%", maxHeight: "100%", height: "100%" },
-                this.$render("i-panel", { position: "absolute", width: 8, height: "90%", top: "5%", left: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "front-block" }),
+                this.$render("i-panel", { position: "absolute", width: 3, height: "90%", top: "5%", left: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "front-block" }),
                 this.$render("i-panel", { id: "pageSectionWrapper", width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%", padding: { top: '1.5rem', bottom: '1.5rem' } },
                     this.$render("i-panel", { id: "pnlMain", maxWidth: "100%", maxHeight: "100%", class: "section-border" })),
-                this.$render("i-panel", { position: "absolute", width: 8, height: "90%", top: "5%", right: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "back-block" })));
+                this.$render("i-panel", { position: "absolute", width: 3, height: "90%", top: "5%", right: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "back-block" })));
         }
     };
     PageSection = __decorate([
