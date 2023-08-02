@@ -74,7 +74,7 @@ export class MainModule extends Module {
   }
 
   onGetData() {
-    console.log(this.pageBuilder.getData()?.sections)
+    console.log(this.pageBuilder.getData())
   }
 
   private async onFetchComponentsFn(options: IOnFetchComponentsOptions) {
@@ -103,6 +103,7 @@ export class MainModule extends Module {
         {
           "id": "6876b0ab-a29c-4ed8-905e-51cd515fa26c",
           "row": 1,
+          "name": "My banner",
           "elements": [
             {
               "id": "ff69df4f-ebb0-4446-adde-9bcb8a07f25d",
@@ -165,6 +166,7 @@ export class MainModule extends Module {
             visible={false}
           position="fixed"
           caption="Get data"
+          right="24px"
           margin={{ top: '1rem', left: '1rem' }}
           padding={{ top: '0.5rem', left: '1rem', bottom: '0.5rem', right: '1rem' }}
           font={{ color: '#fff' }}
