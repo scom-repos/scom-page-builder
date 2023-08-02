@@ -69,6 +69,46 @@ export class MainModule extends Module {
         "name": "Dune Blocks",
         "path": "scom-dune",
         "category": "project-micro-dapps"
+      },
+      {
+        "name": "Table",
+        "path": "scom-table",
+        "category": "charts"
+      },
+      {
+        "name": "Counter",
+        "path": "scom-counter",
+        "category": "charts"
+      },
+      {
+        "name": "Pie Chart",
+        "path": "scom-pie-chart",
+        "category": "charts"
+      },
+      {
+        "name": "Bar Chart",
+        "path": "scom-bar-chart",
+        "category": "charts"
+      },
+      {
+        "name": "Line Chart",
+        "path": "scom-line-chart",
+        "category": "charts"
+      },
+      {
+        "name": "Area Chart",
+        "path": "scom-area-chart",
+        "category": "charts"
+      },
+      {
+        "name": "Scatter Chart",
+        "path": "scom-scatter-chart",
+        "category": "charts"
+      },
+      {
+        "name": "Mixed Chart",
+        "path": "scom-mixed-chart",
+        "category": "charts"
       }
     ]
   }
