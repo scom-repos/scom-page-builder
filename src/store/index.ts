@@ -271,7 +271,7 @@ const defaultSearchOptions = {
 const defaultPageConfig = {
   backgroundColor: '',
   margin: {x: 'auto', y: '0'},
-  maxWidth: 1024
+  sectionWidth: 1024
 }
 
 export const state = {

@@ -333,8 +333,8 @@ export class RowSettingsDialog extends Module {
         this.formElm.uiSchema = jsonUISchema;
         this.formElm.formOptions = formOptions;
         this.formElm.renderForm();
-        const { backgroundColor, margin, maxWidth } = getPageConfig();
-        const config = { align: 'left', margin, maxWidth, backgroundColor, ...(this.data?.config || {}) };
+        const { backgroundColor, margin, sectionWidth } = getPageConfig();
+        const config = { align: 'left', margin, sectionWidth, backgroundColor, ...(this.data?.config || {}) };
         this.formElm.setFormData({...config});
     }
 
@@ -355,7 +355,7 @@ export class RowSettingsDialog extends Module {
                 visible={false}
                 minWidth={400}
                 maxWidth={800}
-                     width={800}
+                width={800}
                 title="Section Settings"
                 class="custom-modal">
                 <i-panel padding={{top: '1rem', bottom: '1rem', left: '1.5rem', right: '1.5rem'}}>

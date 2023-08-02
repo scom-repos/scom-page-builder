@@ -208,10 +208,10 @@ export class PageRow extends Module {
     }
 
     updateRowConfig(config: IPageSectionConfig) {
-        const {image = '', backgroundColor, maxWidth, margin, align} = config || {};
+        const {image = '', backgroundColor, sectionWidth, margin, align} = config || {};
         if (image) this.background.image = image;
         if (backgroundColor) this.background.color = backgroundColor;
-        this.pnlRowContainer.maxWidth = maxWidth ?? '100%';
+        this.pnlRowContainer.maxWidth = sectionWidth ?? '100%';
         if (margin) this.pnlRowContainer.margin = getMargin(margin);
         this.pnlRowContainer.width = margin?.x && margin?.x !== 'auto' ? 'auto' : '100%';
         if (align) this.updateAlign();

@@ -1030,7 +1030,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
     const defaultPageConfig = {
         backgroundColor: '',
         margin: { x: 'auto', y: '0' },
-        maxWidth: 1024
+        sectionWidth: 1024
     };
     exports.state = {
         pageBlocks: [],
@@ -1295,9 +1295,9 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
     class UpdateRowSettingsCommand {
         constructor(element, settings) {
             this.element = element;
-            this.settings = Object.assign({}, settings);
             const id = this.element.id.replace('row-', '');
             const data = index_4.pageObject.getRowConfig(id) || (0, index_4.getPageConfig)();
+            this.settings = Object.assign(Object.assign({}, settings), data);
             this.oldSettings = Object.assign({}, data);
         }
         getChangedValues(newValue, oldValue) {
@@ -2559,7 +2559,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             return result;
         }
         updateConfig(config, updatedValues) {
-            const { backgroundColor, margin, maxWidth } = config;
+            const { backgroundColor, margin, sectionWidth } = config;
             let newConfig = {};
             for (let prop of updatedValues) {
                 newConfig[prop] = config[prop];
@@ -2571,7 +2571,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             }
             this.element.maxWidth = '100%'; // maxWidth ?? '100%';
             this.element.margin = (0, index_19.getMargin)(margin);
-            index_19.pageObject.config = { backgroundColor, margin, maxWidth };
+            index_19.pageObject.config = { backgroundColor, margin, sectionWidth };
             return newConfig;
         }
         execute() {
@@ -3170,7 +3170,7 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                         "title": "Right",
                         "type": "number"
                     },
-                    "fullWidths": {
+                    "fullWidth": {
                         "title": "Full width",
                         "type": "boolean"
                     },
@@ -3198,7 +3198,7 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                         "elements": [
                             {
                                 "type": "Control",
-                                "scope": "#/properties/fullWidths"
+                                "scope": "#/properties/fullWidth"
                             },
                             {
                                 "type": "Control",
@@ -3364,8 +3364,8 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
             this.formElm.uiSchema = jsonUISchema;
             this.formElm.formOptions = formOptions;
             this.formElm.renderForm();
-            const { backgroundColor, margin, maxWidth } = (0, index_31.getPageConfig)();
-            const config = Object.assign({ align: 'left', margin, maxWidth, backgroundColor }, (((_a = this.data) === null || _a === void 0 ? void 0 : _a.config) || {}));
+            const { backgroundColor, margin, sectionWidth } = (0, index_31.getPageConfig)();
+            const config = Object.assign({ align: 'left', margin, sectionWidth, backgroundColor }, (((_a = this.data) === null || _a === void 0 ? void 0 : _a.config) || {}));
             this.formElm.setFormData(Object.assign({}, config));
         }
         close() {
@@ -4232,12 +4232,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            const { image = '', backgroundColor, maxWidth, margin, align } = config || {};
+            const { image = '', backgroundColor, sectionWidth, margin, align } = config || {};
             if (image)
                 this.background.image = image;
             if (backgroundColor)
                 this.background.color = backgroundColor;
-            this.pnlRowContainer.maxWidth = maxWidth !== null && maxWidth !== void 0 ? maxWidth : '100%';
+            this.pnlRowContainer.maxWidth = sectionWidth !== null && sectionWidth !== void 0 ? sectionWidth : '100%';
             if (margin)
                 this.pnlRowContainer.margin = (0, index_41.getMargin)(margin);
             this.pnlRowContainer.width = (margin === null || margin === void 0 ? void 0 : margin.x) && (margin === null || margin === void 0 ? void 0 : margin.x) !== 'auto' ? 'auto' : '100%';
@@ -8003,7 +8003,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             }
         }
         updatePageConfig() {
-            const { backgroundColor, margin, maxWidth } = (0, index_80.getDefaultPageConfig)();
+            const { backgroundColor, margin, sectionWidth } = (0, index_80.getDefaultPageConfig)();
             this.style.setProperty('--builder-bg', backgroundColor);
             if (this.pnlEditor) {
                 this.pnlEditor.maxWidth = '100%'; // maxWidth ?? '100%';

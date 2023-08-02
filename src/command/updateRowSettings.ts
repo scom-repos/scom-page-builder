@@ -10,9 +10,9 @@ export class UpdateRowSettingsCommand implements ICommand {
 
   constructor(element: Control, settings: IPageSectionConfig) {
     this.element = element;
-    this.settings = {...settings};
     const id = this.element.id.replace('row-', '');
     const data = pageObject.getRowConfig(id) || getPageConfig();
+    this.settings = {...settings, ...data};
     this.oldSettings = {...data};
   }
 

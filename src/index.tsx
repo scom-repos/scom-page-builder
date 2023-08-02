@@ -278,7 +278,7 @@ export default class Editor extends Module {
     }
 
     private updatePageConfig() {
-        const { backgroundColor, margin, maxWidth } = getDefaultPageConfig();
+        const { backgroundColor, margin, sectionWidth } = getDefaultPageConfig();
         this.style.setProperty('--builder-bg', backgroundColor);
         if (this.pnlEditor) {
             this.pnlEditor.maxWidth = '100%'; // maxWidth ?? '100%';
