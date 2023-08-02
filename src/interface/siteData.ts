@@ -33,6 +33,7 @@ export interface IPageSection {
 	id: string; // uuid
 	row: number;
 	elements: IPageElement[];
+    name?: string;
     config?: IPageSectionConfig;
 }
 
@@ -92,4 +93,9 @@ export interface ICategory {
     id: string;
     title: string;
     icon: string;
+}
+
+export interface IMenuItem {
+    rowId: string,
+    caption: string
 }

@@ -1294,6 +1294,11 @@ export class PageRow extends Module {
                 bottomBlock && _updateClass(bottomBlock, 'is-dragenter');
             }
         });
+        application.EventBus.register(this, EVENT.ON_SHOW_SECTION, async (rowId: string) => {
+            if (rowId == this.rowId)
+                this.setActive();
+            self.currentToolbar = undefined;
+        })
     }
 
     private getNewElementData() {
@@ -1339,6 +1344,7 @@ export class PageRow extends Module {
             }
         }
         this.classList.add('active');
+        application.EventBus.dispatch(EVENT.ON_SELECT_SECTION, this.rowId);
     }
 
     private onAddSection(type: number) {

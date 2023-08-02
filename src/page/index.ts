@@ -4,4 +4,5 @@ import { PageFooter } from './pageFooter';
 import { PageRows } from './pageRows';
 import { PageRow } from './pageRow';
 import { PageSidebar } from './pageSidebar';
-export { PageHeader, PageSection, PageFooter, PageRows, PageRow, PageSidebar };
+import { PageMenu } from './pageMenu';
+export { PageHeader, PageSection, PageFooter, PageRows, PageRow, PageSidebar, PageMenu };
