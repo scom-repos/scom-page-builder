@@ -280,7 +280,7 @@ export default class Editor extends Module {
     }
 
     private updatePageConfig() {
-        const { backgroundColor, margin, maxWidth } = getDefaultPageConfig();
+        const { backgroundColor, margin, sectionWidth } = getDefaultPageConfig();
         this.style.setProperty('--builder-bg', backgroundColor);
         if (this.pnlEditor) {
             this.pnlEditor.maxWidth = '100%'; // maxWidth ?? '100%';
@@ -376,8 +376,8 @@ export default class Editor extends Module {
                             // maxWidth="calc(100% - 6em)"
                             width="100%"
                             horizontalAlignment='center'
-                            margin={{ top: '3.5rem', left: 'auto', right: 'auto' }}
-                            padding={{top: '1rem', bottom: '1rem'}}
+                            // margin={{ top: '3.5rem', left: 'auto', right: 'auto' }}
+                            // padding={{top: '1rem', bottom: '1rem'}}
                         >
                             <i-panel
                                 id="pnlEditor"

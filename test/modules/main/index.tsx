@@ -193,7 +193,7 @@ export class MainModule extends Module {
         "elements": []
       },
       config: {
-        maxWidth: 1000
+        sectionWidth: 1000
       }
     }
     this.pageBuilder.setData(data);
@@ -203,6 +203,7 @@ export class MainModule extends Module {
     return (
       <i-panel width="100%" height="100%">
         <i-button
+            visible={false}
           position="fixed"
           caption="Get data"
           right="24px"

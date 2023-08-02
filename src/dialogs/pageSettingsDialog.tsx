@@ -50,30 +50,119 @@ export class PageSettingsDialog extends Module {
     }
 
     private getSchema() {
+        // const jsonSchema: IDataSchema = {
+        //     type: 'object',
+        //     properties: {
+        //         backgroundColor: {
+        //             type: 'string',
+        //             format: 'color'
+        //         },
+        //         maxWidth: {
+        //             type: 'number',
+        //             title: 'Maximum width'
+        //         },
+        //         margin: {
+        //             type: 'object',
+        //             properties: {
+        //                 x: {
+        //                     type: 'string'
+        //                 },
+        //                 y: {
+        //                     type: 'string'
+        //                 }
+        //             }
+        //         }
+        //     },
+        // };
         const jsonSchema: IDataSchema = {
-            type: 'object',
-            properties: {
-                backgroundColor: {
-                    type: 'string',
-                    format: 'color'
+            "type": "object",
+            "properties": {
+                "backgroundColor": {
+                    "title": "Background color",
+                    "type": "string",
+                    "format": "color"
                 },
-                maxWidth: {
-                    type: 'number',
-                    title: 'Maximum width'
+                "backgroundImage": {
+                    "title": "Background image",
+                    "type": "string",
+                    "format": "data-url"
                 },
-                margin: {
-                    type: 'object',
-                    properties: {
-                        x: {
-                            type: 'string'
-                        },
-                        y: {
-                            type: 'string'
-                        }
-                    }
+                "ptb": {
+                    "title": "Section padding top / bottom (px)",
+                    "type": "number"
+                },
+                "plr": {
+                    "title": "Section padding left / right (px)",
+                    "type": "number"
+                },
+                "sectionWidth": {
+                    "title": "Section width (px)",
+                    "type": "number"
+                },
+                "scrollToTop": {
+                    "title": "Show scroll to top button",
+                    "type": "boolean"
                 }
-            },
+            }
         };
+
+        const jsonUISchema: IUISchema = {
+            "type": "VerticalLayout",
+            "elements": [
+                {
+                    "type": "HorizontalLayout",
+                    "elements": [
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/backgroundImage"
+                        }
+                    ]
+                },
+                {
+                    "type": "HorizontalLayout",
+                    "elements": [
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/backgroundColor"
+                        }
+                    ]
+                },
+                {
+                    "type": "Group",
+                    "label": "Section settings",
+                    "elements": [
+                        {
+                            "type": "HorizontalLayout",
+                            "elements": [
+                                {
+                                    "type": "Control",
+                                    "scope": "#/properties/ptb"
+                                },
+                                {
+                                    "type": "Control",
+                                    "scope": "#/properties/plr"
+                                },
+                                {
+                                    "type": "Control",
+                                    "scope": "#/properties/sectionWidth"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "HorizontalLayout",
+                    "elements": [
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/scrollToTop"
+                        }
+                    ]
+                }
+            ]
+        }
+
+
         const formOptions = {
             columnWidth: '100%',
             columnsPerRow: 1,
@@ -90,45 +179,45 @@ export class PageSettingsDialog extends Module {
             },
         };
 
-        const jsonUISchema: IUISchema = {
-            type: 'VerticalLayout',
-            elements: [
-                {
-                    type: 'HorizontalLayout',
-                    elements: [
-                        {
-                            type: 'Control',
-                            label: 'Background Color',
-                            scope: '#/properties/backgroundColor',
-                        },
-                        {
-                            type: 'Control',
-                            label: 'Maximum Width',
-                            scope: '#/properties/maxWidth',
-                        }
-                    ]
-                },
-                {
-                    "type": "Group",
-                    label: 'Margin',
-                    "elements": [
-                        {
-                            "type": "HorizontalLayout",
-                            "elements": [
-                                {
-                                    "type": "Control",
-                                    "scope": "#/properties/margin/properties/x"
-                                },
-                                {
-                                    "type": "Control",
-                                    "scope": "#/properties/margin/properties/y"
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        };
+        // const jsonUISchema: IUISchema = {
+        //     type: 'VerticalLayout',
+        //     elements: [
+        //         {
+        //             type: 'HorizontalLayout',
+        //             elements: [
+        //                 {
+        //                     type: 'Control',
+        //                     label: 'Background Color',
+        //                     scope: '#/properties/backgroundColor',
+        //                 },
+        //                 {
+        //                     type: 'Control',
+        //                     label: 'Maximum Width',
+        //                     scope: '#/properties/maxWidth',
+        //                 }
+        //             ]
+        //         },
+        //         {
+        //             "type": "Group",
+        //             label: 'Margin',
+        //             "elements": [
+        //                 {
+        //                     "type": "HorizontalLayout",
+        //                     "elements": [
+        //                         {
+        //                             "type": "Control",
+        //                             "scope": "#/properties/margin/properties/x"
+        //                         },
+        //                         {
+        //                             "type": "Control",
+        //                             "scope": "#/properties/margin/properties/y"
+        //                         }
+        //                     ]
+        //                 }
+        //             ]
+        //         }
+        //     ]
+        // };
         return { jsonSchema, formOptions, jsonUISchema };
     }
 
@@ -158,7 +247,8 @@ export class PageSettingsDialog extends Module {
                 closeIcon={{ name: 'times' }}
                 visible={false}
                 minWidth={400}
-                maxWidth={500}
+                maxWidth={800}
+                width={800}
                 title="Page Settings"
                 class="custom-modal"
             >

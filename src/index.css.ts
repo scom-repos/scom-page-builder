@@ -30,7 +30,7 @@ Styles.cssRule('#editor', {
       // background: 'transparent'
     },
     '#pnlWrap': {
-      scrollBehavior: 'smooth'
+      scrollBehavior: 'smooth',
     },
     '.pnl-scrollable': {
       maskImage: 'linear-gradient(to top, transparent, black),linear-gradient(to left, transparent 7px, black 7px)',
@@ -56,6 +56,9 @@ Styles.cssRule('#editor', {
           }
         }
       }
+    },
+    'ide-rows ide-row:first-child': {
+      marginTop: 50
     }
   }
 });

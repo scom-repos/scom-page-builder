@@ -108,10 +108,10 @@ export class PageRow extends Module {
             <i-panel
                 position="absolute"
                 width="100%"
-                height="16px"
-                bottom="-8px"
+                height="3px"
+                bottom="-3px"
                 zIndex={90}
-                border={{radius: '5px'}}
+                // border={{radius: '5px'}}
                 class={ROW_BOTTOM_CLASS}
             ></i-panel>
         );
@@ -119,10 +119,10 @@ export class PageRow extends Module {
             <i-panel
                 position="absolute"
                 width="100%"
-                height="16px"
-                top="-8px"
+                height="3px"
+                top="-3px"
                 zIndex={90}
-                border={{radius: '5px'}}
+                // border={{radius: '5px'}}
                 class={ROW_TOP_CLASS}
             ></i-panel>
         );
@@ -208,10 +208,11 @@ export class PageRow extends Module {
     }
 
     updateRowConfig(config: IPageSectionConfig) {
-        const {image = '', backgroundColor, maxWidth, margin, align} = config || {};
+        const {image = '', backgroundColor, backdropColor, sectionWidth, margin, align} = config || {};
         if (image) this.background.image = image;
-        if (backgroundColor) this.background.color = backgroundColor;
-        this.pnlRowContainer.maxWidth = maxWidth ?? '100%';
+        if (backdropColor) this.background.color = backdropColor;
+        if (backgroundColor) this.pnlRowContainer.background.color = backgroundColor;
+        this.pnlRowContainer.maxWidth = sectionWidth ?? '100%';
         if (margin) this.pnlRowContainer.margin = getMargin(margin);
         this.pnlRowContainer.width = margin?.x && margin?.x !== 'auto' ? 'auto' : '100%';
         if (align) this.updateAlign();
@@ -278,6 +279,10 @@ export class PageRow extends Module {
     onDeleteRow() {
         const prependRow = this.previousElementSibling;
         const appendRow = this.nextElementSibling;
+        if(!prependRow && !appendRow) {
+            // Reject delete
+            return;
+        }
         const rowCmd = new UpdateRowCommand(this, this.parent, this.data, true, prependRow?.id || '', appendRow?.id || '');
         commandHistory.execute(rowCmd);
     }
@@ -1289,6 +1294,7 @@ export class PageRow extends Module {
                 newConfig = {...newConfig, ...parsedData};
             }
             pageObject.updateSection(id, {config: newConfig});
+            Reflect.deleteProperty(newConfig, 'backgroundColor')
             this.updateRowConfig(newConfig);
             this.updateGridColumnWidth();
         });
