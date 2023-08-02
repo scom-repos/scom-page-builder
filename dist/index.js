@@ -2579,10 +2579,12 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
                 newConfig[prop] = config[prop];
             }
             const element = this.element.closest('i-scom-page-builder') || this.element;
-            // element.style.setProperty('--builder-bg', backgroundColor);
             if (updatedValues.includes('backgroundImage')) {
+                element.style.setProperty('--builder-bg', `url('${backgroundImage}') no-repeat cover`);
+                components_8.application.EventBus.dispatch(index_22.EVENT.ON_UPDATE_PAGE_BG, { color: `url('${backgroundImage}') no-repeat cover` });
             }
-            if (updatedValues.includes('backgroundColor')) {
+            else if (updatedValues.includes('backgroundColor')) {
+                element.style.setProperty('--builder-bg', backgroundColor);
                 components_8.application.EventBus.dispatch(index_22.EVENT.ON_UPDATE_PAGE_BG, { color: backgroundColor });
             }
             this.element.maxWidth = '100%'; // maxWidth ?? '100%';
@@ -4694,7 +4696,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     }
                     self.updateGridColumnWidth();
                     const targetRow = target.closest('#pnlRow');
-                    console.log(columnSpan, index_42.MAX_COLUMN - spaces);
                     showRectangle(targetRow, colStart, Math.min(columnSpan, index_42.MAX_COLUMN - spaces));
                 }
                 else {

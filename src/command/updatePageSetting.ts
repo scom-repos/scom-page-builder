@@ -43,11 +43,12 @@ export class UpdatePageSettingsCommand implements ICommand {
       newConfig[prop] = config[prop];
     }
     const element = this.element.closest('i-scom-page-builder') || this.element;
-    // element.style.setProperty('--builder-bg', backgroundColor);
+
     if(updatedValues.includes('backgroundImage')) {
 
     }
-    if (updatedValues.includes('backgroundColor')) {
+    else if (updatedValues.includes('backgroundColor')) {
+      element.style.setProperty('--builder-bg', backgroundColor);
       application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {color: backgroundColor});
     }
     this.element.maxWidth = '100%'; // maxWidth ?? '100%';
