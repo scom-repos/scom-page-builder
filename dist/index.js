@@ -3382,6 +3382,7 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
         }
         renderForm() {
             var _a;
+            debugger;
             const { jsonSchema, formOptions, jsonUISchema } = this.getSchema();
             this.formElm.jsonSchema = jsonSchema;
             this.formElm.uiSchema = jsonUISchema;
@@ -8102,8 +8103,14 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
                     }
                 }
             },
-            'ide-rows ide-row:first-child': {
-                marginTop: 50
+            'ide-rows ide-row': {
+                paddingTop: 20,
+                paddingBottom: 20,
+                $nest: {
+                    '&:first-child': {
+                        paddingTop: 50
+                    }
+                }
             }
         }
     });

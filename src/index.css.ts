@@ -57,8 +57,14 @@ Styles.cssRule('#editor', {
         }
       }
     },
-    'ide-rows ide-row:first-child': {
-      marginTop: 50
+    'ide-rows ide-row': {
+      paddingTop: 20,
+      paddingBottom: 20,
+      $nest: {
+       '&:first-child': {
+         paddingTop: 50
+       }
+      }
     }
   }
 });

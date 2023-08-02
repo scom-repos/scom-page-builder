@@ -337,6 +337,7 @@ export class RowSettingsDialog extends Module {
     }
 
     private renderForm() {
+        debugger
         const { jsonSchema, formOptions, jsonUISchema } = this.getSchema();
         this.formElm.jsonSchema = jsonSchema;
         this.formElm.uiSchema = jsonUISchema;
