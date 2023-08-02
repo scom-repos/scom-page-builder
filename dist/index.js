@@ -1309,7 +1309,7 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
             this.element = element;
             const id = this.element.id.replace('row-', '');
             const data = index_5.pageObject.getRowConfig(id) || (0, index_5.getPageConfig)();
-            this.settings = Object.assign(Object.assign({}, settings), data);
+            this.settings = Object.assign({}, data, settings);
             this.oldSettings = Object.assign({}, data);
         }
         getChangedValues(newValue, oldValue) {
@@ -4246,11 +4246,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            const { image = '', backgroundColor, sectionWidth, margin, align } = config || {};
+            const { image = '', backgroundColor, backdropColor, sectionWidth, margin, align } = config || {};
             if (image)
                 this.background.image = image;
+            if (backdropColor)
+                this.background.color = backdropColor;
             if (backgroundColor)
-                this.background.color = backgroundColor;
+                this.pnlRowContainer.background.color = backgroundColor;
             this.pnlRowContainer.maxWidth = sectionWidth !== null && sectionWidth !== void 0 ? sectionWidth : '100%';
             if (margin)
                 this.pnlRowContainer.margin = (0, index_43.getMargin)(margin);
@@ -5236,6 +5238,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     newConfig = Object.assign(Object.assign({}, newConfig), parsedData);
                 }
                 index_43.pageObject.updateSection(id, { config: newConfig });
+                Reflect.deleteProperty(newConfig, 'backgroundColor');
                 this.updateRowConfig(newConfig);
                 this.updateGridColumnWidth();
             });
@@ -8079,7 +8082,7 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
                 }
             },
             'ide-rows ide-row:first-child': {
-                paddingTop: 50
+                marginTop: 50
             }
         }
     });

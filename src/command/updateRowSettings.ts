@@ -12,7 +12,7 @@ export class UpdateRowSettingsCommand implements ICommand {
     this.element = element;
     const id = this.element.id.replace('row-', '');
     const data = pageObject.getRowConfig(id) || getPageConfig();
-    this.settings = {...settings, ...data};
+    this.settings = Object.assign({}, data, settings);
     this.oldSettings = {...data};
   }
 

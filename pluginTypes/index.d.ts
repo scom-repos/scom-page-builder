@@ -333,6 +333,7 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
     }
     export interface IPageConfig {
         backgroundColor?: string;
+        backdropColor?: string;
         sectionWidth?: number | string;
         margin?: {
             x?: number | string;
@@ -523,6 +524,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
     export const getDefaultPageConfig: () => IPageConfig;
     export const getPageConfig: () => {
         backgroundColor?: string;
+        backdropColor?: string;
         sectionWidth?: string | number;
         margin?: {
             x?: string | number;
