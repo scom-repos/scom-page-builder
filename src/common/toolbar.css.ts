@@ -63,8 +63,17 @@ Styles.cssRule('ide-toolbar', {
         'i-button': {
           padding: '0.5rem 1rem'
         },
+        'i-color': {
+          display: 'flex',
+          $nest: {
+            '.i-color': {
+              height: '30px !important',
+              marginBlock: 'auto'
+            }
+          }
+        },
         'i-input': {
-          border: `1px solid var(--builder-divider)`,
+          // border: `1px solid var(--builder-divider)`,
           // marginBottom: '1rem'
         },
         '.modal': {

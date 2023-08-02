@@ -3640,9 +3640,18 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                     'i-button': {
                         padding: '0.5rem 1rem'
                     },
+                    'i-color': {
+                        display: 'flex',
+                        $nest: {
+                            '.i-color': {
+                                height: '30px !important',
+                                marginBlock: 'auto'
+                            }
+                        }
+                    },
                     'i-input': {
-                        border: `1px solid var(--builder-divider)`,
-                        // marginBottom: '1rem'
+                    // border: `1px solid var(--builder-divider)`,
+                    // marginBottom: '1rem'
                     },
                     '.modal': {
                         padding: 0,
@@ -7815,8 +7824,8 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
             // },
             '#pnlForm i-input > input': {
                 boxShadow: 'none',
-                border: 'none',
-                background: 'transparent'
+                // border: 'none',
+                // background: 'transparent'
             },
             '#pnlWrap': {
                 scrollBehavior: 'smooth'
