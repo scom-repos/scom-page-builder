@@ -37,13 +37,16 @@ export class UpdatePageSettingsCommand implements ICommand {
   }
 
   private updateConfig(config: IPageConfig, updatedValues: string[]) {
-    const { backgroundColor, margin, sectionWidth } = config;
+    const { backgroundColor, backgroundImage, margin, sectionWidth } = config;
     let newConfig: IPageConfig = {};
     for (let prop of updatedValues) {
       newConfig[prop] = config[prop];
     }
     const element = this.element.closest('i-scom-page-builder') || this.element;
-    element.style.setProperty('--builder-bg', backgroundColor);
+    // element.style.setProperty('--builder-bg', backgroundColor);
+    if(updatedValues.includes('backgroundImage')) {
+
+    }
     if (updatedValues.includes('backgroundColor')) {
       application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {color: backgroundColor});
     }

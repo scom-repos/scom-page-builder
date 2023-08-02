@@ -2573,13 +2573,15 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             return result;
         }
         updateConfig(config, updatedValues) {
-            const { backgroundColor, margin, sectionWidth } = config;
+            const { backgroundColor, backgroundImage, margin, sectionWidth } = config;
             let newConfig = {};
             for (let prop of updatedValues) {
                 newConfig[prop] = config[prop];
             }
             const element = this.element.closest('i-scom-page-builder') || this.element;
-            element.style.setProperty('--builder-bg', backgroundColor);
+            // element.style.setProperty('--builder-bg', backgroundColor);
+            if (updatedValues.includes('backgroundImage')) {
+            }
             if (updatedValues.includes('backgroundColor')) {
                 components_8.application.EventBus.dispatch(index_22.EVENT.ON_UPDATE_PAGE_BG, { color: backgroundColor });
             }
@@ -4263,10 +4265,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            const { image = '', backgroundColor, backdropColor, sectionWidth, margin, align } = config || {};
+            const { image = '', backgroundColor, backdropColor, backdropImage, sectionWidth, margin, align } = config || {};
             if (image)
                 this.background.image = image;
-            if (backdropColor)
+            if (backdropImage)
+                this.background.image = backdropImage;
+            else if (backdropColor)
                 this.background.color = backdropColor;
             if (backgroundColor)
                 this.pnlRowContainer.background.color = backgroundColor;
