@@ -64,6 +64,7 @@ declare module "@scom/scom-page-builder/const/index.ts" {
         ON_UPDATE_MENU: string;
         ON_UPDATE_PAGE_CONFIG: string;
         ON_SHOW_SECTION: string;
+        ON_SELECT_SECTION: string;
     };
     export const DEFAULT_BOXED_LAYOUT_WIDTH = "1200px";
     export const DEFAULT_SCROLLBAR_WIDTH = 17;
@@ -354,6 +355,7 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         id: string;
         row: number;
         elements: IPageElement[];
+        name?: string;
         config?: IPageSectionConfig;
     }
     export interface IPageFooter {
@@ -1477,15 +1479,15 @@ declare module "@scom/scom-page-builder/page/pageMenu.tsx" {
     export class PageMenu extends Module {
         private pnlMenu;
         private pnlMenuWrapper;
+        private menuWrapper;
         private items;
         private draggingSectionId;
-        private cardNameMap;
         private isEditing;
         init(): void;
         private initEventBus;
-        getTitles(): Map<string, string>;
         initEventListener(): void;
         initMenuCardEventListener(card: Control): void;
+        private setfocusCard;
         private getActiveDropLineIdx;
         private showDropBox;
         private reorderSection;

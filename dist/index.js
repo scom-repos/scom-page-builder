@@ -107,7 +107,8 @@ define("@scom/scom-page-builder/const/index.ts", ["require", "exports", "@scom/s
         ON_CLOSE_BUILDER: 'ON_CLOSE_BUILDER',
         ON_UPDATE_MENU: 'ON_UPDATE_MENU',
         ON_UPDATE_PAGE_CONFIG: 'ON_UPDATE_PAGE_CONFIG',
-        ON_SHOW_SECTION: 'ON_SHOW_SECTION'
+        ON_SHOW_SECTION: 'ON_SHOW_SECTION',
+        ON_SELECT_SECTION: 'ON_SELECT_SECTION'
     };
     exports.DEFAULT_BOXED_LAYOUT_WIDTH = '1200px';
     exports.DEFAULT_SCROLLBAR_WIDTH = 17;
@@ -5069,6 +5070,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
             }
             this.classList.add('active');
+            components_25.application.EventBus.dispatch(index_41.EVENT.ON_SELECT_SECTION, this.rowId);
         }
         onAddSection(type) {
             const prependId = type === 1 ? this.id : '';
@@ -6957,6 +6959,7 @@ define("@scom/scom-page-builder/page/pageMenu.css.ts", ["require", "exports", "@
         boxShadow: 'rgba(0, 0, 0, 0.1) 10px 10px 50px',
         background: '#fff',
         borderRadius: 10,
+        transition: 'height 0.9s ease',
         $nest: {
             '.prevent-select': {
                 userSelect: 'none'
@@ -6988,6 +6991,16 @@ define("@scom/scom-page-builder/page/pageMenu.css.ts", ["require", "exports", "@
                 height: 40,
                 objectFit: 'cover',
                 borderRadius: 5
+            },
+            '.focused-card': {
+                color: "#0247bf !important",
+                fontWeight: "600 !important"
+            },
+            '.iconButton:hover': {
+                backgroundColor: 'a9a9a9 !important'
+            },
+            '.iconButton': {
+                borderRadius: '10px'
             }
         }
     });
@@ -7012,7 +7025,6 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
     let PageMenu = class PageMenu extends components_37.Module {
         constructor() {
             super(...arguments);
-            this.cardNameMap = new Map();
             this.isEditing = false;
         }
         init() {
@@ -7022,21 +7034,23 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
         }
         initEventBus() {
             components_37.application.EventBus.register(this, index_70.EVENT.ON_UPDATE_MENU, async (sections) => this.renderMenu(sections));
-        }
-        getTitles() {
-            return this.cardNameMap;
+            components_37.application.EventBus.register(this, index_70.EVENT.ON_SELECT_SECTION, async (rowId) => this.setfocusCard(rowId));
         }
         initEventListener() {
             this.addEventListener('dragstart', (event) => {
                 const eventTarget = event.target;
-                if (!eventTarget || this.isEditing)
+                if (!eventTarget || this.isEditing) {
+                    event.preventDefault();
                     return;
+                }
                 this.draggingSectionId = eventTarget.getAttribute('rowId');
             });
             this.addEventListener('dragend', (event) => {
                 // remove all active drop line
-                if (!this.draggingSectionId)
+                if (!this.draggingSectionId) {
+                    event.preventDefault();
                     return;
+                }
                 const activeLineIdx = this.getActiveDropLineIdx();
                 if (activeLineIdx != -1)
                     this.reorderSection(this.draggingSectionId, activeLineIdx);
@@ -7044,11 +7058,17 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
                 this.draggingSectionId = undefined;
             });
             this.addEventListener('dragover', (event) => {
-                if (!this.draggingSectionId)
+                if (!this.draggingSectionId) {
+                    event.preventDefault();
                     return;
+                }
                 this.showDropBox(event.clientX, event.clientY);
             });
             this.addEventListener('drop', (event) => {
+                if (!this.draggingSectionId) {
+                    event.preventDefault();
+                    return;
+                }
             });
         }
         initMenuCardEventListener(card) {
@@ -7062,6 +7082,19 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
                     return;
                 this.toggleRenameBtn(card.getAttribute('rowId'), false);
             });
+        }
+        setfocusCard(rowId) {
+            const menuCards = this.pnlMenu.querySelectorAll('#menuCard');
+            for (let i = 0; i < menuCards.length; i++) {
+                const cardDot = menuCards[i].querySelector('#cardDot');
+                const cardTitle = menuCards[i].querySelector('#cardTitle');
+                cardDot.classList.remove("focused-card");
+                cardTitle.classList.remove("focused-card");
+                if (menuCards[i].getAttribute('rowId') == rowId) {
+                    cardDot.classList.add("focused-card");
+                    cardTitle.classList.add("focused-card");
+                }
+            }
         }
         getActiveDropLineIdx() {
             const dropLines = document.querySelectorAll('[id^="menuDropLine"]');
@@ -7122,10 +7155,12 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
             this.pnlMenu.appendChild(dropLine);
             for (let i = 0; i < this.items.length; i++) {
                 const menuCard = (this.$render("i-hstack", { id: "menuCard", class: pageMenu_css_1.menuCardStyle, verticalAlignment: "center", horizontalAlignment: 'space-between', width: "100%", border: { radius: 5 }, overflow: "hidden", onClick: () => this.goToSection(this.items[i].rowId) },
-                    this.$render("i-label", { id: "cardTitle", caption: this.items[i].caption, font: { size: '0.813rem', color: '#3b3838', weight: 600 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" }),
-                    this.$render("i-input", { id: "cardInput", visible: false, width: '70%', height: '40px', padding: { left: '0.5rem', top: '0.5rem', bottom: '0.5rem', right: '0.5rem' }, onChanged: (control) => this.setCardTitle(control, this.items[i].rowId) }),
-                    this.$render("i-icon", { id: "cardRenameBtn", name: 'ellipsis-h', width: 22, height: 22, padding: { top: 4, bottom: 4, left: 4, right: 4 }, class: "pointer", visible: false, tooltip: { content: "Rename", placement: "right" }, onClick: () => this.onClickRenameBtn(this.items[i].rowId) }),
-                    this.$render("i-icon", { id: "cardConfirmBtn", name: "check", width: 22, height: 22, padding: { top: 4, bottom: 4, left: 4, right: 4 }, class: "pointer", visible: false, tooltip: { content: "Confirm", placement: "right" }, onClick: () => this.onClickConfirmBtn(this.items[i].rowId) })));
+                    this.$render("i-hstack", { verticalAlignment: "center", horizontalAlignment: 'start' },
+                        this.$render("i-label", { id: "cardDot", caption: "•", font: { size: '16px', color: '#3b3838', weight: 530 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" }),
+                        this.$render("i-label", { id: "cardTitle", caption: this.items[i].caption, font: { size: '16px', color: '#3b3838', weight: 530 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" }),
+                        this.$render("i-input", { id: "cardInput", visible: false, width: '90%', height: '40px', padding: { left: '0.5rem', top: '0.5rem', bottom: '0.5rem', right: '0.5rem' }, onChanged: (control) => this.setCardTitle(control, this.items[i].rowId) })),
+                    this.$render("i-icon", { id: "cardRenameBtn", name: 'ellipsis-h', width: 22, height: 22, padding: { top: 4, bottom: 4, left: 4, right: 4 }, margin: { right: 4 }, class: "pointer iconButton", visible: false, tooltip: { content: "Rename", placement: "right" }, onClick: () => this.onClickRenameBtn(this.items[i].rowId) }),
+                    this.$render("i-icon", { id: "cardConfirmBtn", name: "check", width: 22, height: 22, padding: { top: 4, bottom: 4, left: 4, right: 4 }, margin: { right: 4 }, class: "pointer iconButton", visible: false, tooltip: { content: "Confirm", placement: "right" }, onClick: () => this.onClickConfirmBtn(this.items[i].rowId) })));
                 menuCard.setAttribute('draggable', 'true');
                 menuCard.setAttribute('rowId', this.items[i].rowId);
                 this.pnlMenu.appendChild(menuCard);
@@ -7135,10 +7170,11 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
             }
         }
         setCardTitle(control, rowId) {
-            // change ther data
             const caption = control.value;
-            this.cardNameMap.set(rowId, caption);
-            // change the UI on-the-fly
+            // change data
+            const sectionIdx = index_69.pageObject.sections.findIndex(section => section.id == rowId);
+            index_69.pageObject.sections[sectionIdx].name = caption;
+            // change UI on-the-fly
             const currCard = this.pnlMenu.querySelector(`[rowId="${rowId}"]`);
             const cardTitle = currCard.querySelector('#cardTitle');
             cardTitle.caption = caption;
@@ -7172,8 +7208,7 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
             components_37.application.EventBus.dispatch(index_70.EVENT.ON_SHOW_SECTION, rowId);
         }
         getTitle(data) {
-            const existingName = this.cardNameMap.get(data.id);
-            return existingName ? existingName : this.getTitleFn(data.elements[0]);
+            return data.name ? data.name : (data.elements.length > 1) ? "Untitled section" : this.getTitleFn(data.elements[0]);
         }
         getTitleFn(data) {
             if (data && data.elements) {
@@ -7192,10 +7227,10 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
         }
         render() {
             return (this.$render("i-hstack", { position: 'fixed', top: "60px", left: "30px", height: 0, width: 0, verticalAlignment: "center", horizontalAlignment: 'center' },
-                this.$render("i-vstack", { id: "iconWrapper", position: 'absolute', top: "0px", left: "0px", gap: "0.5rem", padding: { top: '1rem', right: '1rem', bottom: '1rem', left: '1rem' }, class: pageMenu_css_1.menuBtnStyle },
+                this.$render("i-vstack", { id: "menuWrapper", position: 'absolute', top: "0px", left: "0px", gap: "0.5rem", padding: { top: '1rem', right: '1rem', bottom: '1rem', left: '1rem' }, class: pageMenu_css_1.menuBtnStyle },
                     this.$render("i-hstack", { gap: '1rem', verticalAlignment: 'center', onClick: this.toggleMenu, class: "pointer" },
                         this.$render("i-icon", { width: 22, height: 22, name: "bars", fill: Theme.colors.primary.main }),
-                        this.$render("i-label", { caption: "Menu", font: { color: '#3b3838', weight: 600 }, class: "prevent-select" })),
+                        this.$render("i-label", { caption: "Menu", font: { color: '#3b3838', weight: 750, size: '18px' }, class: "prevent-select" })),
                     this.$render("i-vstack", { id: "pnlMenuWrapper", width: 320, visible: false },
                         this.$render("i-vstack", { id: 'pnlMenu', class: pageMenu_css_1.menuStyle })))));
         }

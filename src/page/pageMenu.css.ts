@@ -7,6 +7,7 @@ export const menuBtnStyle = Styles.style({
     boxShadow: 'rgba(0, 0, 0, 0.1) 10px 10px 50px',
     background: '#fff',
     borderRadius: 10,
+    transition: 'height 0.9s ease',
     $nest: {
         '.prevent-select': {
             userSelect: 'none'
@@ -39,6 +40,16 @@ export const menuCardStyle = Styles.style({
             height: 40,
             objectFit: 'cover',
             borderRadius: 5
+        },
+        '.focused-card': {
+            color: "#0247bf !important",
+            fontWeight: "600 !important"
+        },
+        '.iconButton:hover': {
+            backgroundColor: 'a9a9a9 !important'
+        },
+        '.iconButton': {
+            borderRadius: '10px'
         }
     }
 })

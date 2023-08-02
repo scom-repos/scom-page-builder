@@ -4,26 +4,17 @@ import {
     Module,
     VStack,
     Styles,
-    IconName,
-    Modal,
     application,
     Control,
-    Menu,
-    TreeView,
-    TreeNode,
     Input,
     Label,
     Icon
 } from '@ijstech/components';
-import { getCategories, getPageBlocks, setDragData, pageObject } from '../store/index';
+import { pageObject } from '../store/index';
 import { EVENT } from '../const/index';
-import { ICategory, IPageBlockData, IPageConfig, IPageSection, IPageElement, IMenuItem } from '../interface/index';
+import { IPageSection, IPageElement, IMenuItem } from '../interface/index';
 import { menuBtnStyle, menuCardStyle, menuStyle } from './pageMenu.css';
-import { UpdatePageSettingsCommand, commandHistory, UpdateRowCommand, MoveElementCommand } from '../command/index';
-import { PageSettingsDialog } from '../dialogs/index';
-import assets from '../assets';
-import { layouts } from '../utility/layouts.json'
-import { generateUUID } from '../utility/index';
+import { commandHistory, MoveElementCommand } from '../command/index';
 
 const Theme = Styles.Theme.ThemeVars;
 
@@ -40,9 +31,9 @@ export class PageMenu extends Module {
 
     private pnlMenu: VStack;
     private pnlMenuWrapper: VStack;
+    private menuWrapper: VStack;
     private items: IMenuItem[];
     private draggingSectionId: string;
-    private cardNameMap: Map<string, string> = new Map();
     private isEditing: boolean = false;
 
     init() {
@@ -53,22 +44,25 @@ export class PageMenu extends Module {
 
     private initEventBus() {
         application.EventBus.register(this, EVENT.ON_UPDATE_MENU, async (sections: IPageSection[]) => this.renderMenu(sections));
-    }
-
-    getTitles() {
-        return this.cardNameMap;
+        application.EventBus.register(this, EVENT.ON_SELECT_SECTION, async (rowId: string) => this.setfocusCard(rowId));
     }
 
     initEventListener() {
         this.addEventListener('dragstart', (event) => {
             const eventTarget = event.target as HTMLElement;
-            if (!eventTarget || this.isEditing) return;
+            if (!eventTarget || this.isEditing) {
+                event.preventDefault();
+                return;
+            }
             this.draggingSectionId = eventTarget.getAttribute('rowId');
         });
 
         this.addEventListener('dragend', (event) => {
             // remove all active drop line
-            if (!this.draggingSectionId) return;
+            if (!this.draggingSectionId) {
+                event.preventDefault();
+                return;
+            }
             const activeLineIdx = this.getActiveDropLineIdx();
             if (activeLineIdx != -1)
                 this.reorderSection(this.draggingSectionId, activeLineIdx);
@@ -78,12 +72,18 @@ export class PageMenu extends Module {
         });
 
         this.addEventListener('dragover', (event) => {
-            if (!this.draggingSectionId) return;
+            if (!this.draggingSectionId) {
+                event.preventDefault();
+                return;
+            }
             this.showDropBox(event.clientX, event.clientY);
         });
 
         this.addEventListener('drop', (event) => {
-
+            if (!this.draggingSectionId) {
+                event.preventDefault();
+                return;
+            }
         });
     }
 
@@ -96,6 +96,20 @@ export class PageMenu extends Module {
             if (this.isEditing) return;
             this.toggleRenameBtn(card.getAttribute('rowId'), false);
         });
+    }
+
+    private setfocusCard(rowId: string) {
+        const menuCards = this.pnlMenu.querySelectorAll('#menuCard');
+        for (let i = 0; i < menuCards.length; i++) {
+            const cardDot = menuCards[i].querySelector('#cardDot');
+            const cardTitle = menuCards[i].querySelector('#cardTitle');
+            cardDot.classList.remove("focused-card");
+            cardTitle.classList.remove("focused-card");
+            if (menuCards[i].getAttribute('rowId') == rowId) {
+                cardDot.classList.add("focused-card");
+                cardTitle.classList.add("focused-card");
+            }
+        }
     }
 
     private getActiveDropLineIdx(): number {
@@ -176,28 +190,39 @@ export class PageMenu extends Module {
                     overflow="hidden"
                     onClick={() => this.goToSection(this.items[i].rowId)}
                 >
-                    <i-label
-                        id="cardTitle"
-                        caption={this.items[i].caption}
-                        font={{ size: '0.813rem', color: '#3b3838', weight: 600 }}
-                        padding={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                        maxHeight={34}
-                        overflow={"hidden"}
-                    ></i-label>
-                    <i-input
-                        id="cardInput"
-                        visible={false}
-                        width='70%'
-                        height='40px'
-                        padding={{ left: '0.5rem', top: '0.5rem', bottom: '0.5rem', right: '0.5rem' }}
-                        onChanged={(control) => this.setCardTitle(control, this.items[i].rowId)}
-                    ></i-input>
+                    <i-hstack verticalAlignment="center" horizontalAlignment='start'>
+                        <i-label
+                            id="cardDot"
+                            caption={"•"}
+                            font={{ size: '16px', color: '#3b3838', weight: 530 }}
+                            padding={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                            maxHeight={34}
+                            overflow={"hidden"}
+                        ></i-label>
+                        <i-label
+                            id="cardTitle"
+                            caption={this.items[i].caption}
+                            font={{ size: '16px', color: '#3b3838', weight: 530 }}
+                            padding={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                            maxHeight={34}
+                            overflow={"hidden"}
+                        ></i-label>
+                        <i-input
+                            id="cardInput"
+                            visible={false}
+                            width='90%'
+                            height='40px'
+                            padding={{ left: '0.5rem', top: '0.5rem', bottom: '0.5rem', right: '0.5rem' }}
+                            onChanged={(control) => this.setCardTitle(control, this.items[i].rowId)}
+                        ></i-input>
+                    </i-hstack>
                     <i-icon
                         id="cardRenameBtn"
                         name='ellipsis-h'
                         width={22} height={22}
                         padding={{ top: 4, bottom: 4, left: 4, right: 4 }}
-                        class="pointer"
+                        margin={{ right: 4 }}
+                        class="pointer iconButton"
                         visible={false}
                         tooltip={{ content: "Rename", placement: "right" }}
                         onClick={() => this.onClickRenameBtn(this.items[i].rowId)}
@@ -207,7 +232,8 @@ export class PageMenu extends Module {
                         name="check"
                         width={22} height={22}
                         padding={{ top: 4, bottom: 4, left: 4, right: 4 }}
-                        class="pointer"
+                        margin={{ right: 4 }}
+                        class="pointer iconButton"
                         visible={false}
                         tooltip={{ content: "Confirm", placement: "right" }}
                         onClick={() => this.onClickConfirmBtn(this.items[i].rowId)}
@@ -225,10 +251,13 @@ export class PageMenu extends Module {
     }
 
     private setCardTitle(control: Control, rowId: string) {
-        // change ther data
         const caption = (control as Input).value;
-        this.cardNameMap.set(rowId, caption);
-        // change the UI on-the-fly
+
+        // change data
+        const sectionIdx = pageObject.sections.findIndex(section => section.id == rowId);
+        pageObject.sections[sectionIdx].name = caption;
+
+        // change UI on-the-fly
         const currCard = this.pnlMenu.querySelector(`[rowId="${rowId}"]`) as HTMLElement;
         const cardTitle = currCard.querySelector('#cardTitle');
         (cardTitle as Label).caption = caption;
@@ -256,7 +285,7 @@ export class PageMenu extends Module {
         const cardInput = currCard.querySelector('#cardInput');
         const cardRenameBtn = currCard.querySelector('#cardRenameBtn');
         const cardConfirmBtn = currCard.querySelector('#cardConfirmBtn');
-        
+
         (cardInput as Input).value = (cardTitle as Label).caption;
         (cardTitle as Label).visible = !toggle;
         (cardInput as Input).visible = toggle;
@@ -270,8 +299,7 @@ export class PageMenu extends Module {
     }
 
     private getTitle(data: IPageSection): string {
-        const existingName = this.cardNameMap.get(data.id);
-        return existingName ? existingName : this.getTitleFn(data.elements[0]);
+        return data.name ? data.name : (data.elements.length > 1) ? "Untitled section" : this.getTitleFn(data.elements[0]);
     }
 
     private getTitleFn(data: IPageElement): string {
@@ -292,12 +320,12 @@ export class PageMenu extends Module {
     render() {
         return (
             <i-hstack position='fixed' top="60px" left="30px" height={0} width={0} verticalAlignment="center" horizontalAlignment='center'>
-                <i-vstack id="iconWrapper" position='absolute' top="0px" left="0px" gap={"0.5rem"}
+                <i-vstack id="menuWrapper" position='absolute' top="0px" left="0px" gap={"0.5rem"}
                     padding={{ top: '1rem', right: '1rem', bottom: '1rem', left: '1rem' }}
                     class={menuBtnStyle}>
                     <i-hstack gap={'1rem'} verticalAlignment='center' onClick={this.toggleMenu} class="pointer">
                         <i-icon width={22} height={22} name={"bars"} fill={Theme.colors.primary.main}></i-icon>
-                        <i-label caption={"Menu"} font={{ color: '#3b3838', weight: 600 }} class="prevent-select"></i-label>
+                        <i-label caption={"Menu"} font={{ color: '#3b3838', weight: 750, size: '18px' }} class="prevent-select"></i-label>
                     </i-hstack>
                     <i-vstack id="pnlMenuWrapper" width={320} visible={false}>
                         <i-vstack id='pnlMenu' class={menuStyle}></i-vstack>

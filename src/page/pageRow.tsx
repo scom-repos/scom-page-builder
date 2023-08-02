@@ -1309,6 +1309,7 @@ export class PageRow extends Module {
             }
         }
         this.classList.add('active');
+        application.EventBus.dispatch(EVENT.ON_SELECT_SECTION, this.rowId);
     }
 
     private onAddSection(type: number) {

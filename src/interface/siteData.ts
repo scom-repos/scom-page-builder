@@ -33,6 +33,7 @@ export interface IPageSection {
 	id: string; // uuid
 	row: number;
 	elements: IPageElement[];
+    name?: string;
     config?: IPageSectionConfig;
 }
 

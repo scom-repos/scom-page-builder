@@ -103,6 +103,7 @@ export class MainModule extends Module {
         {
           "id": "6876b0ab-a29c-4ed8-905e-51cd515fa26c",
           "row": 1,
+          "name": "My banner",
           "elements": [
             {
               "id": "ff69df4f-ebb0-4446-adde-9bcb8a07f25d",
