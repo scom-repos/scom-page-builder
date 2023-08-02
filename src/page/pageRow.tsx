@@ -628,7 +628,7 @@ export class PageRow extends Module {
                 let spaces = 0;
                 let findedSection = null;
                 let isUpdated: boolean = false;
-
+                const isFromToolbar = !self.currentElement?.id;
                 for (let i = 0; i < sortedSections.length; i++) {
                     const section = sortedSections[i] as Control;
                     const sectionColumn = Number(section.dataset.column);
@@ -642,11 +642,11 @@ export class PageRow extends Module {
                     if ((colStart >= sectionColumn && colData <= sectionData) || (colStart < sectionData && colData > sectionData)) {
                         findedSection = section;
                     }
-                    if (self.currentElement?.id && self.currentElement.id !== section.id) {
+                    if (self.currentElement?.id !== section.id) {
                         spaces += sectionColumnSpan;
                     }
                 }
-                if (findedSection && (self.currentElement?.id && self.currentElement.id !== findedSection.id) || MAX_COLUMN - spaces < 1) {
+                if (findedSection && (isFromToolbar || self.currentElement.id !== findedSection.id) || MAX_COLUMN - spaces < 1) {
                     removeRectangles();
                     return;
                 }
@@ -1315,6 +1315,11 @@ export class PageRow extends Module {
                 bottomBlock && _updateClass(bottomBlock, 'is-dragenter');
             }
         });
+        application.EventBus.register(this, EVENT.ON_SHOW_SECTION, async (rowId: string) => {
+            if (rowId == this.rowId)
+                this.setActive();
+            self.currentToolbar = undefined;
+        })
     }
 
     private getNewElementData() {
@@ -1360,6 +1365,7 @@ export class PageRow extends Module {
             }
         }
         this.classList.add('active');
+        application.EventBus.dispatch(EVENT.ON_SELECT_SECTION, this.rowId);
     }
 
     private onAddSection(type: number) {

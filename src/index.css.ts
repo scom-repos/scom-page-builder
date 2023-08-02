@@ -27,7 +27,7 @@ Styles.cssRule('#editor', {
     '#pnlForm i-input > input': {
       boxShadow: 'none',
       border: 'none',
-      background: 'transparent'
+      // background: 'transparent'
     },
     '#pnlWrap': {
       scrollBehavior: 'smooth'

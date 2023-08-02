@@ -3,7 +3,7 @@ import { application, Container, Control, ControlElement, customElements, custom
 import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
 import { IPageData, IPageBlockData, IPageElement, IOnFetchComponentsOptions, IOnFetchComponentsResult, ICategory, ThemeType } from './interface/index';
-import { PageRow, PageRows, PageSidebar } from './page/index';
+import { PageRow, PageRows, PageSidebar, PageMenu } from './page/index';
 import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData, getPageBlocks, getCategories, setCategories, setTheme, getBackgroundColor, getFontColor, getDivider, getDefaultPageConfig, getMargin, setDefaultPageConfig } from './store/index';
 import { currentTheme } from './theme/index';
 import './index.css';
@@ -38,6 +38,7 @@ export default class Editor extends Module {
     private builderFooter: BuilderFooter;
     private pnlWrap: Panel;
     private pageSidebar: PageSidebar;
+    private pageMenu: PageMenu;
     private mdComponentsSearch: SearchComponentsDialog;
     private pnlEditor: Panel;
     private pageContent: VStack;
@@ -275,6 +276,7 @@ export default class Editor extends Module {
         } catch (error) {
             console.log('setdata', error);
         }
+        pageObject.updateMenu();
     }
 
     private updatePageConfig() {
@@ -411,6 +413,7 @@ export default class Editor extends Module {
                         ></ide-sidebar>
                     </i-panel> */}
                 {/* </i-grid-layout> */}
+                <i-scom-page-builder-menu id="pageMenu"></i-scom-page-builder-menu>
                 <i-scom-page-builder-sidebar id="pageSidebar"></i-scom-page-builder-sidebar>
                 <ide-search-components-dialog
                     id="mdComponentsSearch"
