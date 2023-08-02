@@ -4371,9 +4371,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.toggleUI(!!((_b = (_a = self.data) === null || _a === void 0 ? void 0 : _a.elements) === null || _b === void 0 ? void 0 : _b.length));
             }
             function dragEnter(enterTarget, clientX, clientY, collision) {
-                var _a, _b, _c;
-                if (!enterTarget)
-                    return;
+                var _a, _b, _c, _d, _e, _f;
                 if (!enterTarget || !self.currentElement)
                     return;
                 if (enterTarget.closest('#pnlEmty')) {
@@ -4393,33 +4391,51 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.addDottedLines();
                 toggleAllToolbarBoarder(true);
                 if (target) {
-                    const column = Number(target.dataset.column);
+                    const dropRow = target.closest('ide-row');
+                    let offsetLeft = 0;
+                    if (!((_a = (0, index_43.getDragData)()) === null || _a === void 0 ? void 0 : _a.module)) {
+                        const dragRow = self.currentElement.closest('ide-row');
+                        if ((dragRow === null || dragRow === void 0 ? void 0 : dragRow.id) && (dropRow === null || dropRow === void 0 ? void 0 : dropRow.id) && dragRow.id === dropRow.id) {
+                            offsetLeft = Math.floor((startX + index_42.GAP_WIDTH) / (self.gridColumnWidth + index_42.GAP_WIDTH));
+                        }
+                    }
+                    const targetCol = Number(target.dataset.column);
+                    const column = targetCol - offsetLeft > 0 ? targetCol - offsetLeft : targetCol;
                     const columnSpan = self.currentElement.dataset.columnSpan
                         ? Number(self.currentElement.dataset.columnSpan)
                         : index_42.INIT_COLUMN_SPAN;
-                    const colSpan = Math.min(columnSpan, self.maxColumn);
-                    const colStart = Math.min(column, self.maxColumn - colSpan + 1);
-                    const grid = target.closest('.grid');
-                    const sections = Array.from(grid === null || grid === void 0 ? void 0 : grid.querySelectorAll('ide-section'));
-                    const sortedSections = sections.sort((a, b) => Number(a.dataset.column) - Number(b.dataset.column));
+                    let colSpan = Math.min(columnSpan, self.maxColumn);
+                    let colStart = Math.min(column, self.maxColumn);
+                    const sections = Array.from(dropRow === null || dropRow === void 0 ? void 0 : dropRow.querySelectorAll('ide-section'));
+                    const sortedSections = sections.sort((a, b) => Number(b.dataset.column) - Number(a.dataset.column));
                     let spaces = 0;
                     let findedSection = null;
+                    let isUpdated = false;
+                    const isFromToolbar = !((_b = self.currentElement) === null || _b === void 0 ? void 0 : _b.id);
                     for (let i = 0; i < sortedSections.length; i++) {
                         const section = sortedSections[i];
                         const sectionColumn = Number(section.dataset.column);
                         const sectionColumnSpan = Number(section.dataset.columnSpan);
+                        const sectionData = sectionColumn + sectionColumnSpan;
+                        if (colStart >= sectionData && (self.maxColumn - colStart) + 1 < colSpan && !isUpdated) {
+                            colStart = sectionData;
+                            isUpdated = true;
+                        }
                         const colData = colStart + colSpan;
-                        if (colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan) {
+                        if ((colStart >= sectionColumn && colData <= sectionData) || (colStart < sectionData && colData > sectionData)) {
                             findedSection = section;
                         }
-                        spaces += sectionColumnSpan;
+                        if (((_c = self.currentElement) === null || _c === void 0 ? void 0 : _c.id) !== section.id) {
+                            spaces += sectionColumnSpan;
+                        }
                     }
-                    if (findedSection && findedSection != self.currentElement) {
+                    if (findedSection && (isFromToolbar || self.currentElement.id !== findedSection.id) || index_42.MAX_COLUMN - spaces < 1) {
                         removeRectangles();
                         return;
                     }
                     self.updateGridColumnWidth();
                     const targetRow = target.closest('#pnlRow');
+                    console.log(columnSpan, index_42.MAX_COLUMN - spaces);
                     showRectangle(targetRow, colStart, Math.min(columnSpan, index_42.MAX_COLUMN - spaces));
                 }
                 else {
@@ -4441,9 +4457,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 updateClass(topBlock, 'is-dragenter');
                             }
                         }
-                        const curElmCol = Number((_a = section === null || section === void 0 ? void 0 : section.dataset) === null || _a === void 0 ? void 0 : _a.column);
-                        const curElmColSpan = Number((_b = section === null || section === void 0 ? void 0 : section.dataset) === null || _b === void 0 ? void 0 : _b.columnSpan);
-                        const sections = Array.from((_c = section.closest('#pnlRow')) === null || _c === void 0 ? void 0 : _c.querySelectorAll('ide-section'));
+                        const curElmCol = Number((_d = section === null || section === void 0 ? void 0 : section.dataset) === null || _d === void 0 ? void 0 : _d.column);
+                        const curElmColSpan = Number((_e = section === null || section === void 0 ? void 0 : section.dataset) === null || _e === void 0 ? void 0 : _e.columnSpan);
+                        const sections = Array.from((_f = section.closest('#pnlRow')) === null || _f === void 0 ? void 0 : _f.querySelectorAll('ide-section'));
                         const nextElm = sections.find((el) => {
                             const column = Number(el.dataset.column);
                             return !isNaN(column) && curElmCol + curElmColSpan === column;
@@ -4773,7 +4789,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const config = { id: (0, index_45.generateUUID)() };
                 // check if drop on a fixed-panel
                 if (nearestFixedItem) {
-                    const column = Number(nearestFixedItem.dataset.column);
+                    const offsetLeft = Math.floor((startX + index_42.GAP_WIDTH) / (self.gridColumnWidth + index_42.GAP_WIDTH));
+                    let column = Number(nearestFixedItem.dataset.column);
+                    if (column - offsetLeft > 0) {
+                        nearestFixedItem = pageRow.querySelector(`.fixed-grid-item[data-column='${column - offsetLeft}']`);
+                    }
+                    column = Number(nearestFixedItem.dataset.column);
                     const columnSpan = self.currentElement.dataset.columnSpan
                         ? Number(self.currentElement.dataset.columnSpan)
                         : index_42.INIT_COLUMN_SPAN;
@@ -6977,7 +6998,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
         }
         render() {
             return (this.$render("i-hstack", { position: 'fixed', top: '50%', right: 24, height: 0, width: 0, verticalAlignment: 'center' },
-                this.$render("i-vstack", { position: 'absolute', right: "0px" },
+                this.$render("i-vstack", { position: 'absolute', right: "0px", zIndex: 100 },
                     this.$render("i-vstack", { id: 'toolbars', class: pageSidebar_css_1.categoryPanelStyle, gap: "0.25rem", margin: { bottom: '1rem' } }),
                     this.$render("i-vstack", { id: 'pnlWidgetCategory', class: pageSidebar_css_1.categoryPanelStyle, gap: "0.25rem" })),
                 this.$render("i-modal", { id: 'mdWidget', class: pageSidebar_css_1.widgetModalStyle, height: 'auto', width: 320, maxHeight: '80vh', showBackdrop: false, popupPlacement: 'left' },
@@ -7824,7 +7845,7 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
             // },
             '#pnlForm i-input > input': {
                 boxShadow: 'none',
-                // border: 'none',
+                border: 'none',
                 // background: 'transparent'
             },
             '#pnlWrap': {
