@@ -374,8 +374,8 @@ export default class Editor extends Module {
                             // maxWidth="calc(100% - 6em)"
                             width="100%"
                             horizontalAlignment='center'
-                            margin={{ top: '3.5rem', left: 'auto', right: 'auto' }}
-                            padding={{top: '1rem', bottom: '1rem'}}
+                            // margin={{ top: '3.5rem', left: 'auto', right: 'auto' }}
+                            // padding={{top: '1rem', bottom: '1rem'}}
                         >
                             <i-panel
                                 id="pnlEditor"

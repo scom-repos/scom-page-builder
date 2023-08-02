@@ -162,6 +162,7 @@ export class MainModule extends Module {
     return (
       <i-panel width="100%" height="100%">
         <i-button
+            visible={false}
           position="fixed"
           caption="Get data"
           margin={{ top: '1rem', left: '1rem' }}
