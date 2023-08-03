@@ -1446,6 +1446,8 @@ declare module "@scom/scom-page-builder/page/pageMenu.tsx" {
         private menuWrapper;
         private draggingSectionId;
         private isEditing;
+        private editBtnStack;
+        private cardInput;
         init(): void;
         private initEventBus;
         initEventListener(): void;
@@ -1459,6 +1461,7 @@ declare module "@scom/scom-page-builder/page/pageMenu.tsx" {
         private setCardTitle;
         private onClickRenameBtn;
         private onClickConfirmBtn;
+        private onClickCancelBtn;
         private toggleRenameBtn;
         private toggleEditor;
         private goToSection;

@@ -8,7 +8,8 @@ import {
     Control,
     Input,
     Label,
-    Icon
+    Icon,
+    HStack
 } from '@ijstech/components';
 import { pageObject } from '../store/index';
 import { EVENT } from '../const/index';
@@ -34,6 +35,8 @@ export class PageMenu extends Module {
     private menuWrapper: VStack;
     private draggingSectionId: string;
     private isEditing: boolean = false;
+    private editBtnStack: HStack;
+    private cardInput: Input;
 
     init() {
         super.init();
@@ -212,12 +215,12 @@ export class PageMenu extends Module {
                             width='90%'
                             height='40px'
                             padding={{ left: '0.5rem', top: '0.5rem', bottom: '0.5rem', right: '0.5rem' }}
-                            onChanged={(control) => this.setCardTitle(control, items[i].rowId)}
                         ></i-input>
                     </i-hstack>
                     <i-icon
                         id="cardRenameBtn"
-                        name='ellipsis-h'
+                        name='pen'
+                        fill={'var(--colors-primary-main)'}
                         width={22} height={22}
                         padding={{ top: 4, bottom: 4, left: 4, right: 4 }}
                         margin={{ right: 4 }}
@@ -226,17 +229,28 @@ export class PageMenu extends Module {
                         tooltip={{ content: "Rename", placement: "right" }}
                         onClick={() => this.onClickRenameBtn(items[i].rowId)}
                     ></i-icon>
-                    <i-icon
-                        id="cardConfirmBtn"
-                        name="check"
-                        width={22} height={22}
-                        padding={{ top: 4, bottom: 4, left: 4, right: 4 }}
-                        margin={{ right: 4 }}
-                        class="pointer iconButton"
-                        visible={false}
-                        tooltip={{ content: "Confirm", placement: "right" }}
-                        onClick={() => this.onClickConfirmBtn(items[i].rowId)}
-                    ></i-icon>
+                    <i-hstack id="editBtnStack" verticalAlignment="center" visible={false}>
+                        <i-icon
+                            name='times'
+                            width={22} height={22}
+                            fill={'var(--colors-primary-main)'}
+                            padding={{ top: 4, bottom: 4, left: 4, right: 4 }}
+                            margin={{ right: 4 }}
+                            class="pointer iconButton"
+                            tooltip={{ content: "Cancel", placement: "right" }}
+                            onClick={() => this.onClickCancelBtn(items[i].rowId)}
+                        ></i-icon>
+                        <i-icon
+                            name="check"
+                            width={22} height={22}
+                            fill={'var(--colors-primary-main)'}
+                            padding={{ top: 4, bottom: 4, left: 4, right: 4 }}
+                            margin={{ right: 4 }}
+                            class="pointer iconButton"
+                            tooltip={{ content: "Confirm", placement: "right" }}
+                            onClick={() => this.onClickConfirmBtn(items[i].rowId)}
+                        ></i-icon>
+                    </i-hstack>
                 </i-hstack>
             );
             menuCard.setAttribute('draggable', 'true');
@@ -249,8 +263,8 @@ export class PageMenu extends Module {
         }
     }
 
-    private setCardTitle(control: Control, rowId: string) {
-        const caption = (control as Input).value;
+    private setCardTitle(rowId: string) {
+        const caption = this.cardInput.value;
 
         // change data
         const sectionIdx = pageObject.sections.findIndex(section => section.id == rowId);
@@ -267,6 +281,11 @@ export class PageMenu extends Module {
     }
 
     private onClickConfirmBtn(rowId: string) {
+        this.setCardTitle(rowId);
+        this.toggleEditor(rowId, false);
+    }
+
+    private onClickCancelBtn(rowId: string) {
         this.toggleEditor(rowId, false);
     }
 
@@ -283,13 +302,12 @@ export class PageMenu extends Module {
         const cardTitle = currCard.querySelector('#cardTitle');
         const cardInput = currCard.querySelector('#cardInput');
         const cardRenameBtn = currCard.querySelector('#cardRenameBtn');
-        const cardConfirmBtn = currCard.querySelector('#cardConfirmBtn');
 
         (cardInput as Input).value = (cardTitle as Label).caption;
         (cardTitle as Label).visible = !toggle;
         (cardInput as Input).visible = toggle;
         (cardRenameBtn as Icon).visible = !toggle;
-        (cardConfirmBtn as Icon).visible = toggle;
+        this.editBtnStack.visible = toggle;
     }
 
     private goToSection(rowId: string) {

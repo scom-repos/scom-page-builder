@@ -325,7 +325,6 @@ export class PageSidebar extends Module {
                     maxHeight='80vh'
                     showBackdrop={false}
                     popupPlacement='left'
-                    padding={{top: 0, bottom: 0, left: 0, right: 0}}
                 >
                     <i-vstack id='pnlWidgets' gap="0.5rem"></i-vstack>
                 </i-modal>

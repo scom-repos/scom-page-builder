@@ -6986,9 +6986,11 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
                     this.$render("i-hstack", { verticalAlignment: "center", horizontalAlignment: 'start' },
                         this.$render("i-label", { id: "cardDot", caption: "•", font: { size: '16px', color: '#3b3838', weight: 530 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" }),
                         this.$render("i-label", { id: "cardTitle", caption: items[i].caption, font: { size: '16px', color: '#3b3838', weight: 530 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" }),
-                        this.$render("i-input", { id: "cardInput", visible: false, width: '90%', height: '40px', padding: { left: '0.5rem', top: '0.5rem', bottom: '0.5rem', right: '0.5rem' }, onChanged: (control) => this.setCardTitle(control, items[i].rowId) })),
-                    this.$render("i-icon", { id: "cardRenameBtn", name: 'ellipsis-h', width: 22, height: 22, padding: { top: 4, bottom: 4, left: 4, right: 4 }, margin: { right: 4 }, class: "pointer iconButton", visible: false, tooltip: { content: "Rename", placement: "right" }, onClick: () => this.onClickRenameBtn(items[i].rowId) }),
-                    this.$render("i-icon", { id: "cardConfirmBtn", name: "check", width: 22, height: 22, padding: { top: 4, bottom: 4, left: 4, right: 4 }, margin: { right: 4 }, class: "pointer iconButton", visible: false, tooltip: { content: "Confirm", placement: "right" }, onClick: () => this.onClickConfirmBtn(items[i].rowId) })));
+                        this.$render("i-input", { id: "cardInput", visible: false, width: '90%', height: '40px', padding: { left: '0.5rem', top: '0.5rem', bottom: '0.5rem', right: '0.5rem' } })),
+                    this.$render("i-icon", { id: "cardRenameBtn", name: 'pen', fill: 'var(--colors-primary-main)', width: 22, height: 22, padding: { top: 4, bottom: 4, left: 4, right: 4 }, margin: { right: 4 }, class: "pointer iconButton", visible: false, tooltip: { content: "Rename", placement: "right" }, onClick: () => this.onClickRenameBtn(items[i].rowId) }),
+                    this.$render("i-hstack", { id: "editBtnStack", verticalAlignment: "center", visible: false },
+                        this.$render("i-icon", { name: 'times', width: 22, height: 22, fill: 'var(--colors-primary-main)', padding: { top: 4, bottom: 4, left: 4, right: 4 }, margin: { right: 4 }, class: "pointer iconButton", tooltip: { content: "Cancel", placement: "right" }, onClick: () => this.onClickCancelBtn(items[i].rowId) }),
+                        this.$render("i-icon", { name: "check", width: 22, height: 22, fill: 'var(--colors-primary-main)', padding: { top: 4, bottom: 4, left: 4, right: 4 }, margin: { right: 4 }, class: "pointer iconButton", tooltip: { content: "Confirm", placement: "right" }, onClick: () => this.onClickConfirmBtn(items[i].rowId) }))));
                 menuCard.setAttribute('draggable', 'true');
                 menuCard.setAttribute('rowId', items[i].rowId);
                 this.pnlMenu.appendChild(menuCard);
@@ -6997,8 +6999,8 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
                 this.pnlMenu.appendChild(dropLine);
             }
         }
-        setCardTitle(control, rowId) {
-            const caption = control.value;
+        setCardTitle(rowId) {
+            const caption = this.cardInput.value;
             // change data
             const sectionIdx = index_65.pageObject.sections.findIndex(section => section.id == rowId);
             index_65.pageObject.sections[sectionIdx].name = caption;
@@ -7011,6 +7013,10 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
             this.toggleEditor(rowId, true);
         }
         onClickConfirmBtn(rowId) {
+            this.setCardTitle(rowId);
+            this.toggleEditor(rowId, false);
+        }
+        onClickCancelBtn(rowId) {
             this.toggleEditor(rowId, false);
         }
         toggleRenameBtn(rowId, toggle) {
@@ -7024,12 +7030,11 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
             const cardTitle = currCard.querySelector('#cardTitle');
             const cardInput = currCard.querySelector('#cardInput');
             const cardRenameBtn = currCard.querySelector('#cardRenameBtn');
-            const cardConfirmBtn = currCard.querySelector('#cardConfirmBtn');
             cardInput.value = cardTitle.caption;
             cardTitle.visible = !toggle;
             cardInput.visible = toggle;
             cardRenameBtn.visible = !toggle;
-            cardConfirmBtn.visible = toggle;
+            this.editBtnStack.visible = toggle;
         }
         goToSection(rowId) {
             document.getElementById(`row-${rowId}`).scrollIntoView();
@@ -7273,7 +7278,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                 this.$render("i-vstack", { position: 'absolute', right: "0px" },
                     this.$render("i-vstack", { id: 'toolbars', class: pageSidebar_css_1.categoryPanelStyle, gap: "0.25rem", margin: { bottom: '1rem' } }),
                     this.$render("i-vstack", { id: 'pnlWidgetCategory', class: pageSidebar_css_1.categoryPanelStyle, gap: "0.25rem" })),
-                this.$render("i-modal", { id: 'mdWidget', class: pageSidebar_css_1.widgetModalStyle, height: 'auto', width: 320, maxHeight: '80vh', showBackdrop: false, popupPlacement: 'left', padding: { top: 0, bottom: 0, left: 0, right: 0 } },
+                this.$render("i-modal", { id: 'mdWidget', class: pageSidebar_css_1.widgetModalStyle, height: 'auto', width: 320, maxHeight: '80vh', showBackdrop: false, popupPlacement: 'left' },
                     this.$render("i-vstack", { id: 'pnlWidgets', gap: "0.5rem" })),
                 this.$render("ide-page-settings-dialog", { id: "mdPageSettings", onSave: this.onSavePageSettings.bind(this) })));
         }
