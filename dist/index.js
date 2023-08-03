@@ -4690,7 +4690,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     }
                     self.updateGridColumnWidth();
                     const targetRow = target.closest('#pnlRow');
-                    console.log(columnSpan, index_42.MAX_COLUMN - spaces);
                     showRectangle(targetRow, colStart, Math.min(columnSpan, index_42.MAX_COLUMN - spaces));
                 }
                 else {
