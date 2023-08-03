@@ -2580,16 +2580,15 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             }
             const element = this.element.closest('i-scom-page-builder') || this.element;
             if (updatedValues.includes('backgroundImage')) {
-                element.style.setProperty('--builder-bg', `url('${backgroundImage}') no-repeat cover`);
-                components_8.application.EventBus.dispatch(index_22.EVENT.ON_UPDATE_PAGE_BG, { color: `url('${backgroundImage}') no-repeat cover` });
+                components_8.application.EventBus.dispatch(index_22.EVENT.ON_UPDATE_PAGE_BG, { image: backgroundImage });
             }
-            else if (updatedValues.includes('backgroundColor')) {
+            if (updatedValues.includes('backgroundColor')) {
                 element.style.setProperty('--builder-bg', backgroundColor);
                 components_8.application.EventBus.dispatch(index_22.EVENT.ON_UPDATE_PAGE_BG, { color: backgroundColor });
             }
             this.element.maxWidth = '100%'; // maxWidth ?? '100%';
             this.element.margin = (0, index_21.getMargin)(margin);
-            index_21.pageObject.config = { backgroundColor, margin, sectionWidth };
+            index_21.pageObject.config = { backgroundColor, backgroundImage, margin, sectionWidth };
             return newConfig;
         }
         execute() {
@@ -4012,7 +4011,7 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
         transition: 'translate .3s ease-in',
         border: '1px solid transparent',
         boxSizing: 'border-box',
-        backgroundColor: 'var(--builder-bg)',
+        // backgroundColor: 'var(--builder-bg)',
         $nest: {
             '.page-row-container': {
                 borderRadius: 10,
@@ -8086,6 +8085,9 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
         $nest: {
             '.pnl-editor-wrapper': {
                 display: 'block',
+                backgroundRepeat: 'repeat',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
                 boxShadow: 'rgba(50, 50, 105, 0.15) 0px 2px 5px 0px, rgba(0, 0, 0, 0.05) 0px 1px 1px 0px',
             },
             '.custom-input input': {
@@ -8384,7 +8386,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             index_85.pageObject.updateMenu();
         }
         updatePageConfig() {
-            const { backgroundColor, margin, sectionWidth } = (0, index_85.getDefaultPageConfig)();
+            const { backgroundColor, backgroundImage, margin, sectionWidth } = (0, index_85.getDefaultPageConfig)();
             this.style.setProperty('--builder-bg', backgroundColor);
             if (this.pnlEditor) {
                 this.pnlEditor.maxWidth = '100%'; // maxWidth ?? '100%';
@@ -8406,6 +8408,10 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.events.push(components_43.application.EventBus.register(this, index_84.EVENT.ON_SET_DRAG_ELEMENT, async (el) => this.currentElement = el));
             this.events.push(components_43.application.EventBus.register(this, index_84.EVENT.ON_TOGGLE_SEARCH_MODAL, this.onToggleSearch));
             this.events.push(components_43.application.EventBus.register(this, index_84.EVENT.ON_FETCH_COMPONENTS, this.onSearch));
+            this.events.push(components_43.application.EventBus.register(this, index_84.EVENT.ON_UPDATE_PAGE_BG, async (data) => {
+                if (data.image)
+                    this.pnlEditor.style.backgroundImage = `url(${data.image})`;
+            }));
         }
         onUpdateWrapper() {
             //     this.contentWrapper.minHeight = `calc((100vh - 6rem) - ${this.builderFooter.offsetHeight}px)`;
