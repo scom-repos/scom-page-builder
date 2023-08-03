@@ -22,6 +22,18 @@ declare module "@scom/scom-page-builder/assets.ts" {
                 binanceChainWallet: string;
                 walletconnect: string;
             };
+            layout: {
+                emptySection: string;
+                title: string;
+                titleWithText: string;
+                titleWithButton: string;
+                titleWithBulletPoint: string;
+                titleWithTaskList: string;
+                accentLeft: string;
+                accentRight: string;
+                twoImageColumn: string;
+                threeImageColumn: string;
+            };
         };
         fullPath: typeof fullPath;
     };
@@ -1418,10 +1430,10 @@ declare module "@scom/scom-page-builder/utility/layouts.json.ts" {
         twoWidgets: {
             accentLeft: any;
             accentRight: any;
-            "2ImageColumn": any;
+            twoImageColumn: any;
         };
         multipleWidgets: {
-            "3ImageColumn": any;
+            threeImageColumn: any;
         };
     };
 }
@@ -1493,6 +1505,7 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
         convertCamelCaseToString(input: string): string;
         renderMenu(): void;
         renderWidgets(category: ICategory): void;
+        getLayoutIcon(layoutName: string): string;
         openWidgetModal(target: Control, category: ICategory): void;
         openMenuModal(target: Control): void;
         private initDrag;

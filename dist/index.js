@@ -45,6 +45,18 @@ define("@scom/scom-page-builder/assets.ts", ["require", "exports", "@ijstech/com
                 trustwallet: fullPath('img/wallet/trustwallet.svg'),
                 binanceChainWallet: fullPath('img/wallet/binance-chain-wallet.svg'),
                 walletconnect: fullPath('img/wallet/walletconnect.svg')
+            },
+            layout: {
+                emptySection: fullPath('img/layouts/oneWidget/empty_section.svg'),
+                title: fullPath('img/layouts/oneWidget/title.svg'),
+                titleWithText: fullPath('img/layouts/oneWidget/title_with_text.svg'),
+                titleWithButton: fullPath('img/layouts/oneWidget/title_with_button.svg'),
+                titleWithBulletPoint: fullPath('img/layouts/oneWidget/title_with_bullet_point.svg'),
+                titleWithTaskList: fullPath('img/layouts/oneWidget/title_with_task_list.svg'),
+                accentLeft: fullPath('img/layouts/twoWidget/accent_left.svg'),
+                accentRight: fullPath('img/layouts/twoWidget/accent_right.svg'),
+                twoImageColumn: fullPath('img/layouts/twoWidget/two_image_column.svg'),
+                threeImageColumn: fullPath('img/layouts/multipleWidget/three_image_column.svg')
             }
         },
         fullPath
@@ -6678,10 +6690,11 @@ define("@scom/scom-page-builder/page/pageSidebar.css.ts", ["require", "exports",
                 lineHeight: 1.25
             },
             '> i-image img': {
-                width: 40,
+                width: 'auto',
                 height: 40,
                 objectFit: 'cover',
-                borderRadius: 5
+                borderRadius: 5,
+                backgroundColor: '#fff'
             }
         }
     });
@@ -7060,10 +7073,10 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
         "twoWidgets": {
             "accentLeft": accentLeft,
             "accentRight": accentRight,
-            "2ImageColumn": twoImageColumn
+            "twoImageColumn": twoImageColumn
         },
         "multipleWidgets": {
-            "3ImageColumn": threeImageColumn
+            "threeImageColumn": threeImageColumn
         }
     };
 });
@@ -7485,8 +7498,8 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                         // loop layout
                         for (const key1 in layouts_json_1.layouts[key]) {
                             if (Object.prototype.hasOwnProperty.call(layouts_json_1.layouts[key], key1)) {
-                                const moduleCard = (this.$render("i-grid-layout", { id: "sectionStack", class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", width: "100%", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, tooltip: { content: '✊ Drag to insert', placement: 'top' }, templateColumns: ["56px", "1fr"], overflow: "hidden" },
-                                    this.$render("i-image", { url: assets_3.default.icons.logo, padding: { top: 8, bottom: 8, left: 8, right: 8 } }),
+                                const moduleCard = (this.$render("i-grid-layout", { id: "sectionStack", class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", width: "100%", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, tooltip: { content: '✊ Drag to insert', placement: 'top' }, templateColumns: ["80px", "1fr"], overflow: "hidden" },
+                                    this.$render("i-image", { url: this.getLayoutIcon(key1) || assets_3.default.icons.logo, padding: { top: 8, bottom: 8, left: 8, right: 8 } }),
                                     this.$render("i-label", { caption: this.convertCamelCaseToString(key1), font: { size: '0.813rem', color: '#3b3838', weight: 600 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" })));
                                 moduleCard.setAttribute('draggable', 'true');
                                 moduleCard.setAttribute('layout', key1);
@@ -7512,6 +7525,9 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                     this.initDrag(moduleCard, module);
                 }
             }
+        }
+        getLayoutIcon(layoutName) {
+            return assets_3.default.img.layout[layoutName];
         }
         openWidgetModal(target, category) {
             this.mdWidget.width = '320px';

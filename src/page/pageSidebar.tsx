@@ -171,10 +171,10 @@ export class PageSidebar extends Module {
                                     background={{ color: '#f9f6f3' }}
                                     border={{ width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }}
                                     tooltip={{ content: '✊ Drag to insert', placement: 'top' }}
-                                    templateColumns={["56px", "1fr"]}
+                                    templateColumns={["80px", "1fr"]}
                                     overflow="hidden"
                                 >
-                                    <i-image url={assets.icons.logo} padding={{ top: 8, bottom: 8, left: 8, right: 8 }}></i-image>
+                                    <i-image url={this.getLayoutIcon(key1) || assets.icons.logo} padding={{ top: 8, bottom: 8, left: 8, right: 8 }}></i-image>
                                     <i-label
                                         caption={this.convertCamelCaseToString(key1)}
                                         font={{ size: '0.813rem', color: '#3b3838', weight: 600 }}
@@ -226,6 +226,10 @@ export class PageSidebar extends Module {
                 this.initDrag(moduleCard, module);
             }
         }
+    }
+
+    getLayoutIcon(layoutName: string): string {
+        return assets.img.layout[layoutName];
     }
 
     openWidgetModal(target: Control, category: ICategory) {
