@@ -9,7 +9,7 @@ import {
     application,
     Control
 } from '@ijstech/components';
-import { getCategories, getPageBlocks, setDragData } from '../store/index';
+import { getCategories, getPageBlocks, pageObject, setDragData } from '../store/index';
 import { EVENT } from '../const/index';
 import { ICategory, IPageBlockData, IPageConfig } from '../interface/index';
 import { categoryButtonStyle, categoryPanelStyle, widgetModalStyle, widgetStyle } from './pageSidebar.css';
@@ -18,6 +18,7 @@ import { PageSettingsDialog } from '../dialogs/index';
 import assets from '../assets';
 import { layouts } from '../utility/layouts.json'
 import { generateUUID } from '../utility/index';
+import { PageMenu } from './pageMenu';
 
 const Theme = Styles.Theme.ThemeVars;
 
@@ -43,7 +44,6 @@ export class PageSidebar extends Module {
 
     init() {
         super.init();
-        this.initEventListeners();
         this.openWidgetModal = this.openWidgetModal.bind(this);
         this.renderToolbar();
         this.renderWidgetCategories();
@@ -52,6 +52,13 @@ export class PageSidebar extends Module {
     renderToolbar() {
         this.toolbars.clearInnerHTML();
         const iconList: any[] = [
+            {
+                name: 'bars',
+                tooltip: { content: 'Page menu', placement: 'left' },
+                onClick: (target: Control) => {
+                    this.openMenuModal(target);
+                }
+            },
             {
                 name: 'cog',
                 tooltip: { content: 'Page settings', placement: 'left' },
@@ -135,6 +142,13 @@ export class PageSidebar extends Module {
         return capitalizedStrings.join(' ');
     }
 
+    renderMenu() {
+        this.pnlWidgets.clearInnerHTML();
+        const menu = (<i-scom-page-builder-menu></i-scom-page-builder-menu>) as PageMenu;
+        this.pnlWidgets.appendChild(menu);
+        menu.renderMenu(pageObject.sections);
+    }
+
     renderWidgets(category: ICategory) {
         this.pnlWidgets.clearInnerHTML();
         if (category.id === 'layouts') {
@@ -215,8 +229,18 @@ export class PageSidebar extends Module {
     }
 
     openWidgetModal(target: Control, category: ICategory) {
+        this.mdWidget.width = '320px'
+        this.pnlWidgets.addEventListener('dragstart', this.pnlWidgetsDragStartEvent);
         this.mdWidget.parent = target;
         this.renderWidgets(category);
+        this.mdWidget.visible = true;
+    }
+
+    openMenuModal(target: Control) {
+        this.mdWidget.width = 'auto'
+        this.pnlWidgets.removeEventListener("dragstart", this.pnlWidgetsDragStartEvent)
+        this.mdWidget.parent = target;
+        this.renderMenu();
         this.mdWidget.visible = true;
     }
 
@@ -252,34 +276,31 @@ export class PageSidebar extends Module {
         return clonedData;
     }
 
-    private initEventListeners() {
-        const self = this;
-        this.pnlWidgets.addEventListener('dragstart', function (event) {
-            event.stopPropagation();
-            const eventTarget = event.target as Control;
-            if (eventTarget.nodeName === 'IMG' || (eventTarget?.closest && !eventTarget.closest('.' + widgetStyle)))
-                event.preventDefault();
-            if (eventTarget.id === 'sectionStack') {
-                const layout = eventTarget.getAttribute("layout")
-                const layoutCat = eventTarget.getAttribute("layoutCat")
-                const defaultElements = self.getDefaultElements(layoutCat, layout);
-                setDragData({ module: { name: 'sectionStack', path: '' }, defaultElements: defaultElements });
+    private pnlWidgetsDragStartEvent = (event: DragEvent) => {
+        event.stopPropagation();
+        const eventTarget = event.target as Control;
+        if (eventTarget.nodeName === 'IMG' || (eventTarget?.closest && !eventTarget.closest('.' + widgetStyle)))
+            event.preventDefault();
+        if (eventTarget.id === 'sectionStack') {
+            const layout = eventTarget.getAttribute("layout")
+            const layoutCat = eventTarget.getAttribute("layoutCat")
+            const defaultElements = this.getDefaultElements(layoutCat, layout);
+            setDragData({ module: { name: 'sectionStack', path: '' }, defaultElements: defaultElements });
+            eventTarget.classList.add('is-dragging');
+            this.mdWidget.visible = false;
+        }
+        else if (eventTarget?.dataset?.name) {
+            const currentName = eventTarget.dataset.name;
+            const module = this.pageBlocks.find(block => block.name === currentName);
+            if (module) {
+                application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, eventTarget);
+                setDragData({ module });
                 eventTarget.classList.add('is-dragging');
-                self.mdWidget.visible = false;
             }
-            else if (eventTarget?.dataset?.name) {
-                const currentName = eventTarget.dataset.name;
-                const module = self.pageBlocks.find(block => block.name === currentName);
-                if (module) {
-                    application.EventBus.dispatch(EVENT.ON_SET_DRAG_ELEMENT, eventTarget);
-                    setDragData({ module });
-                    eventTarget.classList.add('is-dragging');
-                }
-                self.mdWidget.visible = false;
-            } else {
-                event.preventDefault();
-            }
-        })
+            this.mdWidget.visible = false;
+        } else {
+            event.preventDefault();
+        }
     }
 
     private onSavePageSettings(data: IPageConfig) {

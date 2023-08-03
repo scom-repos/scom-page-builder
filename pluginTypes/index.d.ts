@@ -399,10 +399,6 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         title: string;
         icon: string;
     }
-    export interface IMenuItem {
-        rowId: string;
-        caption: string;
-    }
 }
 /// <amd-module name="@scom/scom-page-builder/interface/jsonSchema.ts" />
 declare module "@scom/scom-page-builder/interface/jsonSchema.ts" {
@@ -1429,6 +1425,50 @@ declare module "@scom/scom-page-builder/utility/layouts.json.ts" {
         };
     };
 }
+/// <amd-module name="@scom/scom-page-builder/page/pageMenu.css.ts" />
+declare module "@scom/scom-page-builder/page/pageMenu.css.ts" {
+    export const menuBtnStyle: string;
+    export const menuCardStyle: string;
+    export const menuStyle: string;
+}
+/// <amd-module name="@scom/scom-page-builder/page/pageMenu.tsx" />
+declare module "@scom/scom-page-builder/page/pageMenu.tsx" {
+    import { ControlElement, Module } from '@ijstech/components';
+    import { IPageSection } from "@scom/scom-page-builder/interface/index.ts";
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ['i-scom-page-builder-menu']: ControlElement;
+            }
+        }
+    }
+    export class PageMenu extends Module {
+        private pnlMenu;
+        private draggingSectionId;
+        private isEditing;
+        private focusRowId;
+        init(): void;
+        private initEventBus;
+        private initEventListener;
+        private initMenuCardEventListener;
+        private setfocusCard;
+        private getActiveDropLineIdx;
+        private showDropBox;
+        private reorderSection;
+        private setActiveDropLine;
+        renderMenu(sections: IPageSection[]): void;
+        private setCardTitle;
+        private onClickRenameBtn;
+        private onClickConfirmBtn;
+        private onClickCancelBtn;
+        private toggleRenameBtn;
+        private toggleEditor;
+        private goToSection;
+        private getTitle;
+        private getTitleFn;
+        render(): any;
+    }
+}
 /// <amd-module name="@scom/scom-page-builder/page/pageSidebar.tsx" />
 declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
     import { ControlElement, Module, Control } from '@ijstech/components';
@@ -1451,60 +1491,16 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
         renderToolbar(): void;
         renderWidgetCategories(): void;
         convertCamelCaseToString(input: string): string;
+        renderMenu(): void;
         renderWidgets(category: ICategory): void;
         openWidgetModal(target: Control, category: ICategory): void;
+        openMenuModal(target: Control): void;
         private initDrag;
         getDefaultElements(layoutCat: string, layout: string): any;
         setUUID(data: any): any;
         setUUIDFn(data: any): any;
-        private initEventListeners;
+        private pnlWidgetsDragStartEvent;
         private onSavePageSettings;
-        render(): any;
-    }
-}
-/// <amd-module name="@scom/scom-page-builder/page/pageMenu.css.ts" />
-declare module "@scom/scom-page-builder/page/pageMenu.css.ts" {
-    export const menuBtnStyle: string;
-    export const menuCardStyle: string;
-    export const menuStyle: string;
-}
-/// <amd-module name="@scom/scom-page-builder/page/pageMenu.tsx" />
-declare module "@scom/scom-page-builder/page/pageMenu.tsx" {
-    import { ControlElement, Module, Control } from '@ijstech/components';
-    import { IPageSection } from "@scom/scom-page-builder/interface/index.ts";
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ['i-scom-page-builder-menu']: ControlElement;
-            }
-        }
-    }
-    export class PageMenu extends Module {
-        private pnlMenu;
-        private pnlMenuWrapper;
-        private menuWrapper;
-        private items;
-        private draggingSectionId;
-        private isEditing;
-        init(): void;
-        private initEventBus;
-        initEventListener(): void;
-        initMenuCardEventListener(card: Control): void;
-        private setfocusCard;
-        private getActiveDropLineIdx;
-        private showDropBox;
-        private reorderSection;
-        private setActiveDropLine;
-        renderMenu(sections: IPageSection[]): void;
-        private setCardTitle;
-        private onClickRenameBtn;
-        private onClickConfirmBtn;
-        private toggleRenameBtn;
-        private toggleEditor;
-        private goToSection;
-        private getTitle;
-        private getTitleFn;
-        private toggleMenu;
         render(): any;
     }
 }

@@ -413,7 +413,6 @@ export default class Editor extends Module {
                         ></ide-sidebar>
                     </i-panel> */}
                 {/* </i-grid-layout> */}
-                <i-scom-page-builder-menu id="pageMenu"></i-scom-page-builder-menu>
                 <i-scom-page-builder-sidebar id="pageSidebar"></i-scom-page-builder-sidebar>
                 <ide-search-components-dialog
                     id="mdComponentsSearch"
