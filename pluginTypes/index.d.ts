@@ -1423,39 +1423,6 @@ declare module "@scom/scom-page-builder/utility/layouts.json.ts" {
         };
     };
 }
-/// <amd-module name="@scom/scom-page-builder/page/pageSidebar.tsx" />
-declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
-    import { ControlElement, Module, Control } from '@ijstech/components';
-    import { ICategory } from "@scom/scom-page-builder/interface/index.ts";
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ['i-scom-page-builder-sidebar']: ControlElement;
-            }
-        }
-    }
-    export class PageSidebar extends Module {
-        private toolbars;
-        private pnlWidgetCategory;
-        private mdWidget;
-        private pnlWidgets;
-        private mdPageSettings;
-        private get pageBlocks();
-        init(): void;
-        renderToolbar(): void;
-        renderWidgetCategories(): void;
-        convertCamelCaseToString(input: string): string;
-        renderWidgets(category: ICategory): void;
-        openWidgetModal(target: Control, category: ICategory): void;
-        private initDrag;
-        getDefaultElements(layoutCat: string, layout: string): any;
-        setUUID(data: any): any;
-        setUUIDFn(data: any): any;
-        private initEventListeners;
-        private onSavePageSettings;
-        render(): any;
-    }
-}
 /// <amd-module name="@scom/scom-page-builder/page/pageMenu.css.ts" />
 declare module "@scom/scom-page-builder/page/pageMenu.css.ts" {
     export const menuBtnStyle: string;
@@ -1497,7 +1464,41 @@ declare module "@scom/scom-page-builder/page/pageMenu.tsx" {
         private goToSection;
         private getTitle;
         private getTitleFn;
-        private toggleMenu;
+        render(): any;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/page/pageSidebar.tsx" />
+declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
+    import { ControlElement, Module, Control } from '@ijstech/components';
+    import { ICategory } from "@scom/scom-page-builder/interface/index.ts";
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ['i-scom-page-builder-sidebar']: ControlElement;
+            }
+        }
+    }
+    export class PageSidebar extends Module {
+        private toolbars;
+        private pnlWidgetCategory;
+        private mdWidget;
+        private pnlWidgets;
+        private mdPageSettings;
+        private get pageBlocks();
+        init(): void;
+        renderToolbar(): void;
+        renderWidgetCategories(): void;
+        convertCamelCaseToString(input: string): string;
+        renderMenu(): void;
+        renderWidgets(category: ICategory): void;
+        openWidgetModal(target: Control, category: ICategory): void;
+        openMenuModal(target: Control): void;
+        private initDrag;
+        getDefaultElements(layoutCat: string, layout: string): any;
+        setUUID(data: any): any;
+        setUUIDFn(data: any): any;
+        private pnlWidgetsDragStartEvent;
+        private onSavePageSettings;
         render(): any;
     }
 }

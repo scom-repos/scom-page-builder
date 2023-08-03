@@ -3,11 +3,6 @@ import { Styles } from "@ijstech/components";
 const Theme = Styles.Theme.ThemeVars;
 
 export const menuBtnStyle = Styles.style({
-    padding: 4,
-    boxShadow: 'rgba(0, 0, 0, 0.1) 10px 10px 50px',
-    background: '#fff',
-    borderRadius: 10,
-    transition: 'height 0.9s ease',
     $nest: {
         '.prevent-select': {
             userSelect: 'none'

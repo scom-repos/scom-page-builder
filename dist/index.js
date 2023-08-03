@@ -6782,223 +6782,19 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
         }
     };
 });
-define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/page/pageSidebar.css.ts", "@scom/scom-page-builder/command/index.ts", "@scom/scom-page-builder/assets.ts", "@scom/scom-page-builder/utility/layouts.json.ts", "@scom/scom-page-builder/utility/index.ts"], function (require, exports, components_35, index_65, index_66, pageSidebar_css_1, index_67, assets_3, layouts_json_1, index_68) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.PageSidebar = void 0;
-    const Theme = components_35.Styles.Theme.ThemeVars;
-    let PageSidebar = class PageSidebar extends components_35.Module {
-        get pageBlocks() {
-            return (0, index_65.getPageBlocks)();
-        }
-        init() {
-            super.init();
-            this.initEventListeners();
-            this.openWidgetModal = this.openWidgetModal.bind(this);
-            this.renderToolbar();
-            this.renderWidgetCategories();
-        }
-        renderToolbar() {
-            this.toolbars.clearInnerHTML();
-            const iconList = [
-                {
-                    name: 'cog',
-                    tooltip: { content: 'Page settings', placement: 'left' },
-                    onClick: () => {
-                        this.mdPageSettings.show();
-                    }
-                },
-                {
-                    name: 'undo',
-                    tooltip: { content: 'Undo last action', placement: 'left' },
-                    onClick: () => index_67.commandHistory.undo()
-                },
-                {
-                    name: 'redo',
-                    tooltip: { content: 'Redo last action', placement: 'left' },
-                    onClick: () => index_67.commandHistory.redo()
-                }
-            ];
-            iconList.forEach((icon) => {
-                this.toolbars.appendChild(this.$render("i-hstack", { class: pageSidebar_css_1.categoryButtonStyle, width: 40, height: 40, padding: { top: 6, bottom: 6, left: 6, right: 6 }, horizontalAlignment: 'center', verticalAlignment: 'center', tooltip: icon.tooltip, onClick: icon.onClick },
-                    this.$render("i-icon", { width: 16, height: 16, name: icon.name, fill: Theme.colors.primary.main })));
-            });
-        }
-        renderWidgetCategories() {
-            const categories = [
-                {
-                    id: 'layouts',
-                    title: 'Layouts',
-                    icon: 'columns'
-                },
-                ...(0, index_65.getCategories)()
-            ];
-            this.pnlWidgetCategory.clearInnerHTML();
-            categories.forEach(c => {
-                this.pnlWidgetCategory.appendChild(this.$render("i-panel", null,
-                    this.$render("i-hstack", { class: pageSidebar_css_1.categoryButtonStyle, width: 40, height: 40, padding: { top: 6, bottom: 6, left: 6, right: 6 }, horizontalAlignment: 'center', verticalAlignment: 'center', tooltip: { content: c.title, placement: 'left' }, onClick: (target) => this.openWidgetModal(target.parent, c) },
-                        this.$render("i-icon", { width: 16, height: 16, name: c.icon, fill: Theme.colors.primary.main }))));
-                if (c.id === 'layouts') {
-                    this.pnlWidgetCategory.appendChild(this.$render("i-panel", { border: { bottom: { width: 1, color: Theme.divider, style: 'solid' } } }));
-                }
-            });
-        }
-        convertCamelCaseToString(input) {
-            const wordsArray = input.split(/(?=[A-Z])/);
-            const capitalizedStrings = wordsArray.map((str, idx) => {
-                if (typeof str !== 'string' || str.length === 0) {
-                    return str;
-                }
-                if (idx)
-                    return str.charAt(0).toLowerCase() + str.slice(1);
-                else
-                    return str.charAt(0).toUpperCase() + str.slice(1);
-            });
-            return capitalizedStrings.join(' ');
-        }
-        renderWidgets(category) {
-            this.pnlWidgets.clearInnerHTML();
-            if (category.id === 'layouts') {
-                // loop subCategory
-                for (const key in layouts_json_1.layouts) {
-                    if (Object.prototype.hasOwnProperty.call(layouts_json_1.layouts, key)) {
-                        const subCategoryLbl = (this.$render("i-label", { caption: this.convertCamelCaseToString(key), margin: { top: '0.5rem' }, font: { color: '#3b3838', weight: 600 }, class: "prevent-select" }));
-                        this.pnlWidgets.appendChild(subCategoryLbl);
-                        // loop layout
-                        for (const key1 in layouts_json_1.layouts[key]) {
-                            if (Object.prototype.hasOwnProperty.call(layouts_json_1.layouts[key], key1)) {
-                                const moduleCard = (this.$render("i-grid-layout", { id: "sectionStack", class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", width: "100%", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, tooltip: { content: '✊ Drag to insert', placement: 'top' }, templateColumns: ["56px", "1fr"], overflow: "hidden" },
-                                    this.$render("i-image", { url: assets_3.default.icons.logo, padding: { top: 8, bottom: 8, left: 8, right: 8 } }),
-                                    this.$render("i-label", { caption: this.convertCamelCaseToString(key1), font: { size: '0.813rem', color: '#3b3838', weight: 600 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" })));
-                                moduleCard.setAttribute('draggable', 'true');
-                                moduleCard.setAttribute('layout', key1);
-                                moduleCard.setAttribute('layoutCat', key);
-                                this.pnlWidgets.appendChild(moduleCard);
-                            }
-                        }
-                    }
-                }
-            }
-            else {
-                this.pnlWidgets.appendChild(this.$render("i-label", { caption: category.title, font: { color: '#3b3838', weight: 600 }, class: "prevent-select" }));
-                let components = this.pageBlocks.filter(p => p.category === category.id);
-                let matchedModules = components;
-                for (const module of matchedModules) {
-                    const lblDesc = module.description ? (this.$render("i-label", { caption: module.description, font: { size: '0.813rem', color: '#8b8585' } })) : [];
-                    const moduleCard = (this.$render("i-grid-layout", { class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", width: "100%", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, tooltip: { content: '✊ Drag to insert', placement: 'top' }, templateColumns: ["56px", "1fr"], overflow: "hidden" },
-                        this.$render("i-image", { url: module.imgUrl || assets_3.default.icons.logo, padding: { top: 8, bottom: 8, left: 8, right: 8 } }),
-                        this.$render("i-vstack", { gap: "0.25rem", padding: { top: 8, bottom: 8, left: 8, right: 8 }, overflow: "hidden" },
-                            this.$render("i-label", { caption: module.name, font: { size: '0.813rem', color: '#3b3838', weight: 600 } }),
-                            lblDesc)));
-                    this.pnlWidgets.append(moduleCard);
-                    this.initDrag(moduleCard, module);
-                }
-            }
-        }
-        openWidgetModal(target, category) {
-            this.mdWidget.parent = target;
-            this.renderWidgets(category);
-            this.mdWidget.visible = true;
-        }
-        initDrag(module, data) {
-            module.setAttribute('draggable', 'true');
-            module.setAttribute('data-name', data.name);
-        }
-        getDefaultElements(layoutCat, layout) {
-            const defaultLayout = (layouts_json_1.layouts[layoutCat] && layouts_json_1.layouts[layoutCat][layout]) ?
-                layouts_json_1.layouts[layoutCat][layout] :
-                layouts_json_1.layouts.oneWidget.emptySection;
-            return this.setUUID(defaultLayout);
-        }
-        setUUID(data) {
-            const clonedData = JSON.parse(JSON.stringify(data));
-            for (let i = 0; i < clonedData.length; i++) {
-                clonedData[i] = this.setUUIDFn(clonedData[i]);
-            }
-            return clonedData;
-        }
-        setUUIDFn(data) {
-            const clonedData = JSON.parse(JSON.stringify(data));
-            clonedData.id = (0, index_68.generateUUID)();
-            if (clonedData.elements) {
-                for (let i = 0; i < clonedData.elements.length; i++) {
-                    clonedData.elements[i] = this.setUUIDFn(clonedData.elements[i]);
-                }
-            }
-            return clonedData;
-        }
-        initEventListeners() {
-            const self = this;
-            this.pnlWidgets.addEventListener('dragstart', function (event) {
-                var _a;
-                event.stopPropagation();
-                const eventTarget = event.target;
-                if (eventTarget.nodeName === 'IMG' || ((eventTarget === null || eventTarget === void 0 ? void 0 : eventTarget.closest) && !eventTarget.closest('.' + pageSidebar_css_1.widgetStyle)))
-                    event.preventDefault();
-                if (eventTarget.id === 'sectionStack') {
-                    const layout = eventTarget.getAttribute("layout");
-                    const layoutCat = eventTarget.getAttribute("layoutCat");
-                    const defaultElements = self.getDefaultElements(layoutCat, layout);
-                    (0, index_65.setDragData)({ module: { name: 'sectionStack', path: '' }, defaultElements: defaultElements });
-                    eventTarget.classList.add('is-dragging');
-                    self.mdWidget.visible = false;
-                }
-                else if ((_a = eventTarget === null || eventTarget === void 0 ? void 0 : eventTarget.dataset) === null || _a === void 0 ? void 0 : _a.name) {
-                    const currentName = eventTarget.dataset.name;
-                    const module = self.pageBlocks.find(block => block.name === currentName);
-                    if (module) {
-                        components_35.application.EventBus.dispatch(index_66.EVENT.ON_SET_DRAG_ELEMENT, eventTarget);
-                        (0, index_65.setDragData)({ module });
-                        eventTarget.classList.add('is-dragging');
-                    }
-                    self.mdWidget.visible = false;
-                }
-                else {
-                    event.preventDefault();
-                }
-            });
-        }
-        onSavePageSettings(data) {
-            var _a;
-            const containerEl = (_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.querySelector('.pnl-editor-wrapper');
-            if (!containerEl)
-                return;
-            const updateCmd = new index_67.UpdatePageSettingsCommand(containerEl, Object.assign({}, data));
-            index_67.commandHistory.execute(updateCmd);
-        }
-        render() {
-            return (this.$render("i-hstack", { position: 'fixed', top: '50%', right: 24, height: 0, width: 0, verticalAlignment: 'center' },
-                this.$render("i-vstack", { position: 'absolute', right: "0px" },
-                    this.$render("i-vstack", { id: 'toolbars', class: pageSidebar_css_1.categoryPanelStyle, gap: "0.25rem", margin: { bottom: '1rem' } }),
-                    this.$render("i-vstack", { id: 'pnlWidgetCategory', class: pageSidebar_css_1.categoryPanelStyle, gap: "0.25rem" })),
-                this.$render("i-modal", { id: 'mdWidget', class: pageSidebar_css_1.widgetModalStyle, height: 'auto', width: 320, maxHeight: '80vh', showBackdrop: false, popupPlacement: 'left' },
-                    this.$render("i-vstack", { id: 'pnlWidgets', gap: "0.5rem" })),
-                this.$render("ide-page-settings-dialog", { id: "mdPageSettings", onSave: this.onSavePageSettings.bind(this) })));
-        }
-    };
-    PageSidebar = __decorate([
-        (0, components_35.customElements)('i-scom-page-builder-sidebar')
-    ], PageSidebar);
-    exports.PageSidebar = PageSidebar;
-});
-define("@scom/scom-page-builder/page/pageMenu.css.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_36) {
+define("@scom/scom-page-builder/page/pageMenu.css.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_35) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.menuStyle = exports.menuCardStyle = exports.menuBtnStyle = void 0;
-    const Theme = components_36.Styles.Theme.ThemeVars;
-    exports.menuBtnStyle = components_36.Styles.style({
-        padding: 4,
-        boxShadow: 'rgba(0, 0, 0, 0.1) 10px 10px 50px',
-        background: '#fff',
-        borderRadius: 10,
-        transition: 'height 0.9s ease',
+    const Theme = components_35.Styles.Theme.ThemeVars;
+    exports.menuBtnStyle = components_35.Styles.style({
         $nest: {
             '.prevent-select': {
                 userSelect: 'none'
             }
         }
     });
-    exports.menuCardStyle = components_36.Styles.style({
+    exports.menuCardStyle = components_35.Styles.style({
         cursor: 'grab',
         opacity: 1,
         transition: '0.3s',
@@ -7036,7 +6832,7 @@ define("@scom/scom-page-builder/page/pageMenu.css.ts", ["require", "exports", "@
             }
         }
     });
-    exports.menuStyle = components_36.Styles.style({
+    exports.menuStyle = components_35.Styles.style({
         $nest: {
             '.active-drop-line': {
                 background: 'rgb(66,133,244)',
@@ -7049,12 +6845,12 @@ define("@scom/scom-page-builder/page/pageMenu.css.ts", ["require", "exports", "@
         }
     });
 });
-define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/page/pageMenu.css.ts", "@scom/scom-page-builder/command/index.ts"], function (require, exports, components_37, index_69, index_70, pageMenu_css_1, index_71) {
+define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/page/pageMenu.css.ts", "@scom/scom-page-builder/command/index.ts"], function (require, exports, components_36, index_65, index_66, pageMenu_css_1, index_67) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.PageMenu = void 0;
-    const Theme = components_37.Styles.Theme.ThemeVars;
-    let PageMenu = class PageMenu extends components_37.Module {
+    const Theme = components_36.Styles.Theme.ThemeVars;
+    let PageMenu = class PageMenu extends components_36.Module {
         constructor() {
             super(...arguments);
             this.isEditing = false;
@@ -7065,8 +6861,8 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
             this.initEventListener();
         }
         initEventBus() {
-            components_37.application.EventBus.register(this, index_70.EVENT.ON_UPDATE_MENU, async (sections) => this.renderMenu(sections));
-            components_37.application.EventBus.register(this, index_70.EVENT.ON_SELECT_SECTION, async (rowId) => this.setfocusCard(rowId));
+            components_36.application.EventBus.register(this, index_66.EVENT.ON_UPDATE_MENU, async (sections) => this.renderMenu(sections));
+            components_36.application.EventBus.register(this, index_66.EVENT.ON_SELECT_SECTION, async (rowId) => this.setfocusCard(rowId));
         }
         initEventListener() {
             this.addEventListener('dragstart', (event) => {
@@ -7158,8 +6954,8 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
             const currentRow = document.getElementById(`row-${currentRowId}`);
             const enteredRow = document.getElementById(`row-${enteredRowId}`);
             const pnlRows = document.getElementById('pnlRows');
-            const moveRowCmd = new index_71.MoveElementCommand(currentRow, enteredRow, pnlRows, index_69.pageObject.sections);
-            moveRowCmd && index_71.commandHistory.execute(moveRowCmd);
+            const moveRowCmd = new index_67.MoveElementCommand(currentRow, enteredRow, pnlRows, index_65.pageObject.sections);
+            moveRowCmd && index_67.commandHistory.execute(moveRowCmd);
         }
         setActiveDropLine(idx) {
             const dropLines = document.querySelectorAll('[id^="menuDropLine"]');
@@ -7204,8 +7000,8 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
         setCardTitle(control, rowId) {
             const caption = control.value;
             // change data
-            const sectionIdx = index_69.pageObject.sections.findIndex(section => section.id == rowId);
-            index_69.pageObject.sections[sectionIdx].name = caption;
+            const sectionIdx = index_65.pageObject.sections.findIndex(section => section.id == rowId);
+            index_65.pageObject.sections[sectionIdx].name = caption;
             // change UI on-the-fly
             const currCard = this.pnlMenu.querySelector(`[rowId="${rowId}"]`);
             const cardTitle = currCard.querySelector('#cardTitle');
@@ -7237,7 +7033,7 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
         }
         goToSection(rowId) {
             document.getElementById(`row-${rowId}`).scrollIntoView();
-            components_37.application.EventBus.dispatch(index_70.EVENT.ON_SHOW_SECTION, rowId);
+            components_36.application.EventBus.dispatch(index_66.EVENT.ON_SHOW_SECTION, rowId);
         }
         getTitle(data) {
             return data.name ? data.name : (data.elements.length > 1) ? "Untitled section" : this.getTitleFn(data.elements[0]);
@@ -7254,23 +7050,238 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
                 return "Untitled section";
             }
         }
-        toggleMenu() {
-            this.pnlMenuWrapper.visible = !this.pnlMenuWrapper.visible;
-        }
         render() {
-            return (this.$render("i-hstack", { position: 'fixed', top: "60px", left: "30px", height: 0, width: 0, verticalAlignment: "center", horizontalAlignment: 'center' },
-                this.$render("i-vstack", { id: "menuWrapper", position: 'absolute', top: "0px", left: "0px", gap: "0.5rem", padding: { top: '1rem', right: '1rem', bottom: '1rem', left: '1rem' }, class: pageMenu_css_1.menuBtnStyle, zIndex: 150 },
-                    this.$render("i-hstack", { gap: '1rem', verticalAlignment: 'center', onClick: this.toggleMenu, class: "pointer" },
-                        this.$render("i-icon", { width: 22, height: 22, name: "bars", fill: Theme.colors.primary.main }),
-                        this.$render("i-label", { caption: "Menu", font: { color: '#3b3838', weight: 750, size: '18px' }, class: "prevent-select" })),
-                    this.$render("i-vstack", { id: "pnlMenuWrapper", width: 320, visible: false },
-                        this.$render("i-vstack", { id: 'pnlMenu', class: pageMenu_css_1.menuStyle })))));
+            return (this.$render("i-vstack", { id: "menuWrapper", gap: "0.5rem", class: pageMenu_css_1.menuBtnStyle, zIndex: 150 },
+                this.$render("i-hstack", { gap: '1rem', verticalAlignment: 'center', class: "pointer" },
+                    this.$render("i-label", { caption: "Page menu", font: { color: '#3b3838', weight: 750, size: '18px' }, class: "prevent-select" })),
+                this.$render("i-vstack", { id: "pnlMenuWrapper", width: 320 },
+                    this.$render("i-vstack", { id: 'pnlMenu', class: pageMenu_css_1.menuStyle }))));
         }
     };
     PageMenu = __decorate([
-        (0, components_37.customElements)('i-scom-page-builder-menu')
+        (0, components_36.customElements)('i-scom-page-builder-menu')
     ], PageMenu);
     exports.PageMenu = PageMenu;
+});
+define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/page/pageSidebar.css.ts", "@scom/scom-page-builder/command/index.ts", "@scom/scom-page-builder/assets.ts", "@scom/scom-page-builder/utility/layouts.json.ts", "@scom/scom-page-builder/utility/index.ts"], function (require, exports, components_37, index_68, index_69, pageSidebar_css_1, index_70, assets_3, layouts_json_1, index_71) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.PageSidebar = void 0;
+    const Theme = components_37.Styles.Theme.ThemeVars;
+    let PageSidebar = class PageSidebar extends components_37.Module {
+        constructor() {
+            super(...arguments);
+            this.pnlWidgetsDragStartEvent = (event) => {
+                var _a;
+                event.stopPropagation();
+                const eventTarget = event.target;
+                if (eventTarget.nodeName === 'IMG' || ((eventTarget === null || eventTarget === void 0 ? void 0 : eventTarget.closest) && !eventTarget.closest('.' + pageSidebar_css_1.widgetStyle)))
+                    event.preventDefault();
+                if (eventTarget.id === 'sectionStack') {
+                    const layout = eventTarget.getAttribute("layout");
+                    const layoutCat = eventTarget.getAttribute("layoutCat");
+                    const defaultElements = this.getDefaultElements(layoutCat, layout);
+                    (0, index_68.setDragData)({ module: { name: 'sectionStack', path: '' }, defaultElements: defaultElements });
+                    eventTarget.classList.add('is-dragging');
+                    this.mdWidget.visible = false;
+                }
+                else if ((_a = eventTarget === null || eventTarget === void 0 ? void 0 : eventTarget.dataset) === null || _a === void 0 ? void 0 : _a.name) {
+                    const currentName = eventTarget.dataset.name;
+                    const module = this.pageBlocks.find(block => block.name === currentName);
+                    if (module) {
+                        components_37.application.EventBus.dispatch(index_69.EVENT.ON_SET_DRAG_ELEMENT, eventTarget);
+                        (0, index_68.setDragData)({ module });
+                        eventTarget.classList.add('is-dragging');
+                    }
+                    this.mdWidget.visible = false;
+                }
+                else {
+                    event.preventDefault();
+                }
+            };
+        }
+        get pageBlocks() {
+            return (0, index_68.getPageBlocks)();
+        }
+        init() {
+            super.init();
+            this.openWidgetModal = this.openWidgetModal.bind(this);
+            this.renderToolbar();
+            this.renderWidgetCategories();
+        }
+        renderToolbar() {
+            this.toolbars.clearInnerHTML();
+            const iconList = [
+                {
+                    name: 'bars',
+                    tooltip: { content: 'Page menu', placement: 'left' },
+                    onClick: (target) => {
+                        this.openMenuModal(target);
+                    }
+                },
+                {
+                    name: 'cog',
+                    tooltip: { content: 'Page settings', placement: 'left' },
+                    onClick: () => {
+                        this.mdPageSettings.show();
+                    }
+                },
+                {
+                    name: 'undo',
+                    tooltip: { content: 'Undo last action', placement: 'left' },
+                    onClick: () => index_70.commandHistory.undo()
+                },
+                {
+                    name: 'redo',
+                    tooltip: { content: 'Redo last action', placement: 'left' },
+                    onClick: () => index_70.commandHistory.redo()
+                }
+            ];
+            iconList.forEach((icon) => {
+                this.toolbars.appendChild(this.$render("i-hstack", { class: pageSidebar_css_1.categoryButtonStyle, width: 40, height: 40, padding: { top: 6, bottom: 6, left: 6, right: 6 }, horizontalAlignment: 'center', verticalAlignment: 'center', tooltip: icon.tooltip, onClick: icon.onClick },
+                    this.$render("i-icon", { width: 16, height: 16, name: icon.name, fill: Theme.colors.primary.main })));
+            });
+        }
+        renderWidgetCategories() {
+            const categories = [
+                {
+                    id: 'layouts',
+                    title: 'Layouts',
+                    icon: 'columns'
+                },
+                ...(0, index_68.getCategories)()
+            ];
+            this.pnlWidgetCategory.clearInnerHTML();
+            categories.forEach(c => {
+                this.pnlWidgetCategory.appendChild(this.$render("i-panel", null,
+                    this.$render("i-hstack", { class: pageSidebar_css_1.categoryButtonStyle, width: 40, height: 40, padding: { top: 6, bottom: 6, left: 6, right: 6 }, horizontalAlignment: 'center', verticalAlignment: 'center', tooltip: { content: c.title, placement: 'left' }, onClick: (target) => this.openWidgetModal(target.parent, c) },
+                        this.$render("i-icon", { width: 16, height: 16, name: c.icon, fill: Theme.colors.primary.main }))));
+                if (c.id === 'layouts') {
+                    this.pnlWidgetCategory.appendChild(this.$render("i-panel", { border: { bottom: { width: 1, color: Theme.divider, style: 'solid' } } }));
+                }
+            });
+        }
+        convertCamelCaseToString(input) {
+            const wordsArray = input.split(/(?=[A-Z])/);
+            const capitalizedStrings = wordsArray.map((str, idx) => {
+                if (typeof str !== 'string' || str.length === 0) {
+                    return str;
+                }
+                if (idx)
+                    return str.charAt(0).toLowerCase() + str.slice(1);
+                else
+                    return str.charAt(0).toUpperCase() + str.slice(1);
+            });
+            return capitalizedStrings.join(' ');
+        }
+        renderMenu() {
+            this.pnlWidgets.clearInnerHTML();
+            const menu = (this.$render("i-scom-page-builder-menu", null));
+            this.pnlWidgets.appendChild(menu);
+            menu.renderMenu(index_68.pageObject.sections);
+        }
+        renderWidgets(category) {
+            this.pnlWidgets.clearInnerHTML();
+            if (category.id === 'layouts') {
+                // loop subCategory
+                for (const key in layouts_json_1.layouts) {
+                    if (Object.prototype.hasOwnProperty.call(layouts_json_1.layouts, key)) {
+                        const subCategoryLbl = (this.$render("i-label", { caption: this.convertCamelCaseToString(key), margin: { top: '0.5rem' }, font: { color: '#3b3838', weight: 600 }, class: "prevent-select" }));
+                        this.pnlWidgets.appendChild(subCategoryLbl);
+                        // loop layout
+                        for (const key1 in layouts_json_1.layouts[key]) {
+                            if (Object.prototype.hasOwnProperty.call(layouts_json_1.layouts[key], key1)) {
+                                const moduleCard = (this.$render("i-grid-layout", { id: "sectionStack", class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", width: "100%", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, tooltip: { content: '✊ Drag to insert', placement: 'top' }, templateColumns: ["56px", "1fr"], overflow: "hidden" },
+                                    this.$render("i-image", { url: assets_3.default.icons.logo, padding: { top: 8, bottom: 8, left: 8, right: 8 } }),
+                                    this.$render("i-label", { caption: this.convertCamelCaseToString(key1), font: { size: '0.813rem', color: '#3b3838', weight: 600 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" })));
+                                moduleCard.setAttribute('draggable', 'true');
+                                moduleCard.setAttribute('layout', key1);
+                                moduleCard.setAttribute('layoutCat', key);
+                                this.pnlWidgets.appendChild(moduleCard);
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                this.pnlWidgets.appendChild(this.$render("i-label", { caption: category.title, font: { color: '#3b3838', weight: 600 }, class: "prevent-select" }));
+                let components = this.pageBlocks.filter(p => p.category === category.id);
+                let matchedModules = components;
+                for (const module of matchedModules) {
+                    const lblDesc = module.description ? (this.$render("i-label", { caption: module.description, font: { size: '0.813rem', color: '#8b8585' } })) : [];
+                    const moduleCard = (this.$render("i-grid-layout", { class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", width: "100%", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, tooltip: { content: '✊ Drag to insert', placement: 'top' }, templateColumns: ["56px", "1fr"], overflow: "hidden" },
+                        this.$render("i-image", { url: module.imgUrl || assets_3.default.icons.logo, padding: { top: 8, bottom: 8, left: 8, right: 8 } }),
+                        this.$render("i-vstack", { gap: "0.25rem", padding: { top: 8, bottom: 8, left: 8, right: 8 }, overflow: "hidden" },
+                            this.$render("i-label", { caption: module.name, font: { size: '0.813rem', color: '#3b3838', weight: 600 } }),
+                            lblDesc)));
+                    this.pnlWidgets.append(moduleCard);
+                    this.initDrag(moduleCard, module);
+                }
+            }
+        }
+        openWidgetModal(target, category) {
+            this.mdWidget.width = '320px';
+            this.pnlWidgets.addEventListener('dragstart', this.pnlWidgetsDragStartEvent);
+            this.mdWidget.parent = target;
+            this.renderWidgets(category);
+            this.mdWidget.visible = true;
+        }
+        openMenuModal(target) {
+            this.mdWidget.width = 'auto';
+            this.pnlWidgets.removeEventListener("dragstart", this.pnlWidgetsDragStartEvent);
+            this.mdWidget.parent = target;
+            this.renderMenu();
+            this.mdWidget.visible = true;
+        }
+        initDrag(module, data) {
+            module.setAttribute('draggable', 'true');
+            module.setAttribute('data-name', data.name);
+        }
+        getDefaultElements(layoutCat, layout) {
+            const defaultLayout = (layouts_json_1.layouts[layoutCat] && layouts_json_1.layouts[layoutCat][layout]) ?
+                layouts_json_1.layouts[layoutCat][layout] :
+                layouts_json_1.layouts.oneWidget.emptySection;
+            return this.setUUID(defaultLayout);
+        }
+        setUUID(data) {
+            const clonedData = JSON.parse(JSON.stringify(data));
+            for (let i = 0; i < clonedData.length; i++) {
+                clonedData[i] = this.setUUIDFn(clonedData[i]);
+            }
+            return clonedData;
+        }
+        setUUIDFn(data) {
+            const clonedData = JSON.parse(JSON.stringify(data));
+            clonedData.id = (0, index_71.generateUUID)();
+            if (clonedData.elements) {
+                for (let i = 0; i < clonedData.elements.length; i++) {
+                    clonedData.elements[i] = this.setUUIDFn(clonedData.elements[i]);
+                }
+            }
+            return clonedData;
+        }
+        onSavePageSettings(data) {
+            var _a;
+            const containerEl = (_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.querySelector('.pnl-editor-wrapper');
+            if (!containerEl)
+                return;
+            const updateCmd = new index_70.UpdatePageSettingsCommand(containerEl, Object.assign({}, data));
+            index_70.commandHistory.execute(updateCmd);
+        }
+        render() {
+            return (this.$render("i-hstack", { position: 'fixed', top: '50%', right: 24, height: 0, width: 0, verticalAlignment: 'center' },
+                this.$render("i-vstack", { position: 'absolute', right: "0px" },
+                    this.$render("i-vstack", { id: 'toolbars', class: pageSidebar_css_1.categoryPanelStyle, gap: "0.25rem", margin: { bottom: '1rem' } }),
+                    this.$render("i-vstack", { id: 'pnlWidgetCategory', class: pageSidebar_css_1.categoryPanelStyle, gap: "0.25rem" })),
+                this.$render("i-modal", { id: 'mdWidget', class: pageSidebar_css_1.widgetModalStyle, height: 'auto', width: 320, maxHeight: '80vh', showBackdrop: false, popupPlacement: 'left', padding: { top: 0, bottom: 0, left: 0, right: 0 } },
+                    this.$render("i-vstack", { id: 'pnlWidgets', gap: "0.5rem" })),
+                this.$render("ide-page-settings-dialog", { id: "mdPageSettings", onSave: this.onSavePageSettings.bind(this) })));
+        }
+    };
+    PageSidebar = __decorate([
+        (0, components_37.customElements)('i-scom-page-builder-sidebar')
+    ], PageSidebar);
+    exports.PageSidebar = PageSidebar;
 });
 define("@scom/scom-page-builder/page/index.ts", ["require", "exports", "@scom/scom-page-builder/page/pageHeader.tsx", "@scom/scom-page-builder/page/pageSection.tsx", "@scom/scom-page-builder/page/pageFooter.tsx", "@scom/scom-page-builder/page/pageRows.tsx", "@scom/scom-page-builder/page/pageRow.tsx", "@scom/scom-page-builder/page/pageSidebar.tsx", "@scom/scom-page-builder/page/pageMenu.tsx"], function (require, exports, pageHeader_1, pageSection_2, pageFooter_2, pageRows_1, pageRow_2, pageSidebar_1, pageMenu_1) {
     "use strict";
@@ -8148,7 +8159,6 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                             this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
                                 this.$render("ide-rows", { id: "pageRows", draggable: true })),
                             this.$render("builder-footer", { id: "builderFooter" })))),
-                this.$render("i-scom-page-builder-menu", { id: "pageMenu" }),
                 this.$render("i-scom-page-builder-sidebar", { id: "pageSidebar" }),
                 this.$render("ide-search-components-dialog", { id: "mdComponentsSearch" })));
         }
