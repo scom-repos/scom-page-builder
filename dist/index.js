@@ -6882,6 +6882,7 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
                 const activeLineIdx = this.getActiveDropLineIdx();
                 if (activeLineIdx != -1)
                     this.reorderSection(this.draggingSectionId, activeLineIdx);
+                this.setfocusCard(this.focusRowId);
                 this.setActiveDropLine(-1);
                 this.draggingSectionId = undefined;
             });
@@ -6912,6 +6913,7 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
             });
         }
         setfocusCard(rowId) {
+            this.focusRowId = rowId;
             const menuCards = this.pnlMenu.querySelectorAll('#menuCard');
             for (let i = 0; i < menuCards.length; i++) {
                 const cardDot = menuCards[i].querySelector('#cardDot');
@@ -7000,12 +7002,13 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
             }
         }
         setCardTitle(rowId) {
-            const caption = this.cardInput.value;
+            const currCard = this.pnlMenu.querySelector(`[rowId="${rowId}"]`);
+            const cardInput = currCard.querySelector('#cardInput');
+            const caption = cardInput.value;
             // change data
             const sectionIdx = index_65.pageObject.sections.findIndex(section => section.id == rowId);
             index_65.pageObject.sections[sectionIdx].name = caption;
             // change UI on-the-fly
-            const currCard = this.pnlMenu.querySelector(`[rowId="${rowId}"]`);
             const cardTitle = currCard.querySelector('#cardTitle');
             cardTitle.caption = caption;
         }
@@ -7034,7 +7037,8 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
             cardTitle.visible = !toggle;
             cardInput.visible = toggle;
             cardRenameBtn.visible = !toggle;
-            this.editBtnStack.visible = toggle;
+            const editBtnStack = currCard.querySelector('#editBtnStack');
+            editBtnStack.visible = toggle;
         }
         goToSection(rowId) {
             document.getElementById(`row-${rowId}`).scrollIntoView();
@@ -7058,7 +7062,7 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
         render() {
             return (this.$render("i-vstack", { id: "menuWrapper", gap: "0.5rem", class: pageMenu_css_1.menuBtnStyle, zIndex: 150 },
                 this.$render("i-hstack", { gap: '1rem', verticalAlignment: 'center', class: "pointer" },
-                    this.$render("i-label", { caption: "Page menu", font: { color: '#3b3838', weight: 750, size: '18px' }, class: "prevent-select" })),
+                    this.$render("i-label", { caption: "Page menu", font: { color: 'var(--colors-primary-main)', weight: 750, size: '18px' }, class: "prevent-select" })),
                 this.$render("i-vstack", { id: "pnlMenuWrapper", width: 320 },
                     this.$render("i-vstack", { id: 'pnlMenu', class: pageMenu_css_1.menuStyle }))));
         }

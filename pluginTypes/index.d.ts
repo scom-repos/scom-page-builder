@@ -1431,7 +1431,7 @@ declare module "@scom/scom-page-builder/page/pageMenu.css.ts" {
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageMenu.tsx" />
 declare module "@scom/scom-page-builder/page/pageMenu.tsx" {
-    import { ControlElement, Module, Control } from '@ijstech/components';
+    import { ControlElement, Module } from '@ijstech/components';
     import { IPageSection } from "@scom/scom-page-builder/interface/index.ts";
     global {
         namespace JSX {
@@ -1442,16 +1442,13 @@ declare module "@scom/scom-page-builder/page/pageMenu.tsx" {
     }
     export class PageMenu extends Module {
         private pnlMenu;
-        private pnlMenuWrapper;
-        private menuWrapper;
         private draggingSectionId;
         private isEditing;
-        private editBtnStack;
-        private cardInput;
+        private focusRowId;
         init(): void;
         private initEventBus;
-        initEventListener(): void;
-        initMenuCardEventListener(card: Control): void;
+        private initEventListener;
+        private initMenuCardEventListener;
         private setfocusCard;
         private getActiveDropLineIdx;
         private showDropBox;

@@ -31,12 +31,9 @@ declare global {
 export class PageMenu extends Module {
 
     private pnlMenu: VStack;
-    private pnlMenuWrapper: VStack;
-    private menuWrapper: VStack;
     private draggingSectionId: string;
     private isEditing: boolean = false;
-    private editBtnStack: HStack;
-    private cardInput: Input;
+    private focusRowId: string;
 
     init() {
         super.init();
@@ -49,7 +46,7 @@ export class PageMenu extends Module {
         application.EventBus.register(this, EVENT.ON_SELECT_SECTION, async (rowId: string) => this.setfocusCard(rowId));
     }
 
-    initEventListener() {
+    private initEventListener() {
         this.addEventListener('dragstart', (event) => {
             const eventTarget = event.target as HTMLElement;
             if (!eventTarget || this.isEditing) {
@@ -69,6 +66,7 @@ export class PageMenu extends Module {
             if (activeLineIdx != -1)
                 this.reorderSection(this.draggingSectionId, activeLineIdx);
 
+            this.setfocusCard(this.focusRowId);
             this.setActiveDropLine(-1);
             this.draggingSectionId = undefined;
         });
@@ -89,7 +87,7 @@ export class PageMenu extends Module {
         });
     }
 
-    initMenuCardEventListener(card: Control) {
+    private initMenuCardEventListener(card: Control) {
         card.addEventListener('mouseenter', (event) => {
             if (this.isEditing) return;
             this.toggleRenameBtn(card.getAttribute('rowId'), true);
@@ -101,6 +99,7 @@ export class PageMenu extends Module {
     }
 
     private setfocusCard(rowId: string) {
+        this.focusRowId = rowId;
         const menuCards = this.pnlMenu.querySelectorAll('#menuCard');
         for (let i = 0; i < menuCards.length; i++) {
             const cardDot = menuCards[i].querySelector('#cardDot');
@@ -264,14 +263,15 @@ export class PageMenu extends Module {
     }
 
     private setCardTitle(rowId: string) {
-        const caption = this.cardInput.value;
+        const currCard = this.pnlMenu.querySelector(`[rowId="${rowId}"]`) as HTMLElement;
+        const cardInput = currCard.querySelector('#cardInput') as Input;
+        const caption = cardInput.value;
 
         // change data
         const sectionIdx = pageObject.sections.findIndex(section => section.id == rowId);
         pageObject.sections[sectionIdx].name = caption;
 
         // change UI on-the-fly
-        const currCard = this.pnlMenu.querySelector(`[rowId="${rowId}"]`) as HTMLElement;
         const cardTitle = currCard.querySelector('#cardTitle');
         (cardTitle as Label).caption = caption;
     }
@@ -307,7 +307,8 @@ export class PageMenu extends Module {
         (cardTitle as Label).visible = !toggle;
         (cardInput as Input).visible = toggle;
         (cardRenameBtn as Icon).visible = !toggle;
-        this.editBtnStack.visible = toggle;
+        const editBtnStack = currCard.querySelector('#editBtnStack') as HStack;
+        editBtnStack.visible = toggle;
     }
 
     private goToSection(rowId: string) {
@@ -335,7 +336,7 @@ export class PageMenu extends Module {
             <i-vstack id="menuWrapper" gap={"0.5rem"}
                 class={menuBtnStyle} zIndex={150}>
                 <i-hstack gap={'1rem'} verticalAlignment='center' class="pointer">
-                    <i-label caption={"Page menu"} font={{ color: '#3b3838', weight: 750, size: '18px' }} class="prevent-select"></i-label>
+                    <i-label caption={"Page menu"} font={{ color: 'var(--colors-primary-main)', weight: 750, size: '18px' }} class="prevent-select"></i-label>
                 </i-hstack>
                 <i-vstack id="pnlMenuWrapper" width={320}>
                     <i-vstack id='pnlMenu' class={menuStyle}></i-vstack>
