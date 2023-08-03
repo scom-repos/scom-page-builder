@@ -12,6 +12,7 @@ Styles.cssRule('#editor', {
 });
 
 Styles.cssRule('ide-row', {
+    paddingBottom: 20,
     display: 'block',
     position: 'relative',
     transition: 'translate .3s ease-in',
@@ -19,6 +20,9 @@ Styles.cssRule('ide-row', {
     boxSizing: 'border-box',
     backgroundColor: 'var(--builder-bg)',
     $nest: {
+        '.page-row-container': {
+            borderRadius: 10,
+        },
         '.drag-stack': {
             visibility: 'hidden',
             opacity: 0,
@@ -120,7 +124,7 @@ Styles.cssRule('ide-row', {
             transition: 'border ease-in .2s'
         },
         '.is-dragenter': {
-            background: 'rgb(66,133,244)',
+            background: 'rgba(66,133,244,.9)',
             opacity: 1
         },
         '.rectangle': {

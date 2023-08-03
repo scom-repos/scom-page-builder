@@ -55,56 +55,215 @@ export class RowSettingsDialog extends Module {
     }
 
     private getSchema() {
-        let jsonSchema: IDataSchema = {
-            type: 'object',
-            // required: ['columnLayout'],
-            properties: {
-                //   "columnLayout": {
-                //     type: 'string',
-                //     enum: [
-                //         IColumnLayoutType.FIXED,
-                //         IColumnLayoutType.AUTOMATIC
-                //     ],
-                //     default: IColumnLayoutType.FIXED
-                //   },        
-                //   "columnsNumber": {
-                //     type: 'number'
-                //   },
-                //   "maxColumnsPerRow": {
-                //     type: 'number'
-                //   },
-                //   "columnMinWidth": {
-                //     type: 'number'
-                //   },
-                backgroundColor: {
-                    type: 'string',
-                    format: 'color'
+        // let jsonSchema: IDataSchema = {
+        //     type: 'object',
+        //     // required: ['columnLayout'],
+        //     properties: {
+        //         //   "columnLayout": {
+        //         //     type: 'string',
+        //         //     enum: [
+        //         //         IColumnLayoutType.FIXED,
+        //         //         IColumnLayoutType.AUTOMATIC
+        //         //     ],
+        //         //     default: IColumnLayoutType.FIXED
+        //         //   },
+        //         //   "columnsNumber": {
+        //         //     type: 'number'
+        //         //   },
+        //         //   "maxColumnsPerRow": {
+        //         //     type: 'number'
+        //         //   },
+        //         //   "columnMinWidth": {
+        //         //     type: 'number'
+        //         //   },
+        //         backgroundColor: {
+        //             type: 'string',
+        //             format: 'color'
+        //         },
+        //         maxWidth: {
+        //             type: 'number',
+        //             title: 'Maximum width'
+        //         },
+        //         margin: {
+        //             type: 'object',
+        //             properties: {
+        //                 x: {
+        //                     type: 'string'
+        //                 },
+        //                 y: {
+        //                     type: 'string'
+        //                 }
+        //             }
+        //         },
+        //         align: {
+        //             type: 'string',
+        //             enum: [
+        //                 'left',
+        //                 'center',
+        //                 'right'
+        //             ]
+        //         }
+        //     }
+        // }
+
+        const jsonSchema: IDataSchema = {
+            "type": "object",
+            "properties": {
+                "backdropImage": {
+                    "title": "Backdrop image",
+                    "type": "string",
+                    "format": "data-url"
                 },
-                maxWidth: {
-                    type: 'number',
-                    title: 'Maximum width'
+                "backdropColor": {
+                    "title": "Backdrop color",
+                    "type": "string",
+                    "format": "color"
                 },
-                margin: {
-                    type: 'object',
-                    properties: {
-                        x: {
-                            type: 'string'
-                        },
-                        y: {
-                            type: 'string'
-                        }
-                    }
+                "pt": {
+                    "title": "Top",
+                    "type": "number"
                 },
-                align: {
-                    type: 'string',
-                    enum: [
-                        'left',
-                        'center',
-                        'right'
-                    ]
+                "pb": {
+                    "title": "Bottom",
+                    "type": "number"
+                },
+                "pl": {
+                    "title": "Left",
+                    "type": "number"
+                },
+                "pr": {
+                    "title": "Right",
+                    "type": "number"
+                },
+                "fullWidth": {
+                    "title": "Full width",
+                    "type": "boolean"
+                },
+                "backgroundColor": {
+                    "title": "Background color",
+                    "type": "string",
+                    "format": "color"
+                },
+                "border": {
+                    "title": "Border",
+                    "type": "boolean"
+                },
+                "borderColor": {
+                    "title": "Border color",
+                    "type": "string",
+                    "format": "color"
                 }
             }
-        }
+        };
+
+        const jsonUISchema: IUISchema = {
+            "type": "VerticalLayout",
+            "elements": [
+                {
+                    "type": "HorizontalLayout",
+                    "elements": [
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/fullWidth"
+                        },
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/border"
+                        }
+                    ]
+                },
+                {
+                    "type": "HorizontalLayout",
+                    "elements": [
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/backgroundColor"
+                        },
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/borderColor"
+                        }
+                    ]
+                },
+                {
+                    "type": "HorizontalLayout",
+                    "elements": [
+                        {
+                            "type": "Group",
+                            "label": "Backdrop",
+                            "rule": {
+                                "effect": "HIDE",
+                                "condition": {
+                                    "scope": "#/properties/fullWidth",
+                                    "schema": {
+                                        "const": true
+                                    }
+                                }
+                            },
+                            "elements": [
+                                {
+                                    "type": "VerticalLayout",
+                                    "elements": [
+                                        {
+                                            "type": "HorizontalLayout",
+                                            "elements": [
+                                                {
+                                                    "type": "Control",
+                                                    "scope": "#/properties/backdropImage"
+                                                },
+                                                {
+                                                    "type": "Control",
+                                                    "scope": "#/properties/backdropColor"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "HorizontalLayout",
+                    "elements": [
+                        {
+                            "type": "Group",
+                            "label": "Padding (px)",
+                            "elements": [
+                                {
+                                    "type": "VerticalLayout",
+                                    "elements": [
+                                        {
+                                            "type": "HorizontalLayout",
+                                            "elements": [
+                                                {
+                                                    "type": "Control",
+                                                    "scope": "#/properties/pt"
+                                                },
+                                                {
+                                                    "type": "Control",
+                                                    "scope": "#/properties/pb"
+                                                },
+                                                {
+                                                    "type": "Control",
+                                                    "scope": "#/properties/pl"
+                                                },
+                                                {
+                                                    "type": "Control",
+                                                    "scope": "#/properties/pr"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+
         const formOptions = {
             columnWidth: '100%',
             columnsPerRow: 1,
@@ -121,58 +280,58 @@ export class RowSettingsDialog extends Module {
             }
         };
 
-        const jsonUISchema: IUISchema = {
-            type: 'VerticalLayout',
-            elements: [
-                {
-                    type: 'HorizontalLayout',
-                    elements: [
-                        {
-                            type: 'Control',
-                            label: 'Background Color',
-                            scope: '#/properties/backgroundColor',
-                            options: {
-                                color: true
-                            }
-                        },
-                        {
-                            type: 'Control',
-                            label: 'Maximum Width',
-                            scope: '#/properties/maxWidth',
-                        }
-                    ]
-                },
-                {
-                    "type": "Group",
-                    label: 'Margin',
-                    "elements": [
-                        {
-                            "type": "HorizontalLayout",
-                            "elements": [
-                                {
-                                    "type": "Control",
-                                    "scope": "#/properties/margin/properties/x"
-                                },
-                                {
-                                    "type": "Control",
-                                    "scope": "#/properties/margin/properties/y"
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    type: 'HorizontalLayout',
-                    elements: [
-                        {
-                            type: 'Control',
-                            label: 'Align',
-                            scope: '#/properties/align'
-                        }
-                    ]
-                }
-            ]
-        };
+        // const jsonUISchema: IUISchema = {
+        //     type: 'VerticalLayout',
+        //     elements: [
+        //         {
+        //             type: 'HorizontalLayout',
+        //             elements: [
+        //                 {
+        //                     type: 'Control',
+        //                     label: 'Background Color',
+        //                     scope: '#/properties/backgroundColor',
+        //                     options: {
+        //                         color: true
+        //                     }
+        //                 },
+        //                 {
+        //                     type: 'Control',
+        //                     label: 'Maximum Width',
+        //                     scope: '#/properties/maxWidth',
+        //                 }
+        //             ]
+        //         },
+        //         {
+        //             "type": "Group",
+        //             label: 'Margin',
+        //             "elements": [
+        //                 {
+        //                     "type": "HorizontalLayout",
+        //                     "elements": [
+        //                         {
+        //                             "type": "Control",
+        //                             "scope": "#/properties/margin/properties/x"
+        //                         },
+        //                         {
+        //                             "type": "Control",
+        //                             "scope": "#/properties/margin/properties/y"
+        //                         }
+        //                     ]
+        //                 }
+        //             ]
+        //         },
+        //         {
+        //             type: 'HorizontalLayout',
+        //             elements: [
+        //                 {
+        //                     type: 'Control',
+        //                     label: 'Align',
+        //                     scope: '#/properties/align'
+        //                 }
+        //             ]
+        //         }
+        //     ]
+        // };
 
         return { jsonSchema, formOptions, jsonUISchema };
     }
@@ -183,8 +342,8 @@ export class RowSettingsDialog extends Module {
         this.formElm.uiSchema = jsonUISchema;
         this.formElm.formOptions = formOptions;
         this.formElm.renderForm();
-        const { backgroundColor, margin, maxWidth } = getPageConfig();
-        const config = { align: 'left', margin, maxWidth, backgroundColor, ...(this.data?.config || {}) };
+        const { backgroundColor, margin, sectionWidth } = getPageConfig();
+        const config = { align: 'left', margin, sectionWidth, backgroundColor, ...(this.data?.config || {}) };
         this.formElm.setFormData({...config});
     }
 
@@ -204,10 +363,10 @@ export class RowSettingsDialog extends Module {
                 closeIcon={{ name: 'times' }}
                 visible={false}
                 minWidth={400}
-                maxWidth={500}
+                maxWidth={800}
+                width={800}
                 title="Section Settings"
-                class="custom-modal"
-            >
+                class="custom-modal">
                 <i-panel padding={{top: '1rem', bottom: '1rem', left: '1.5rem', right: '1.5rem'}}>
                     <i-form id="formElm"></i-form>
                 </i-panel>

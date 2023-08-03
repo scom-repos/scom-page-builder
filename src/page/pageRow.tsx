@@ -108,10 +108,10 @@ export class PageRow extends Module {
             <i-panel
                 position="absolute"
                 width="100%"
-                height="16px"
-                bottom="-8px"
+                height="3px"
+                bottom="-3px"
                 zIndex={90}
-                border={{radius: '5px'}}
+                // border={{radius: '5px'}}
                 class={ROW_BOTTOM_CLASS}
             ></i-panel>
         );
@@ -119,10 +119,10 @@ export class PageRow extends Module {
             <i-panel
                 position="absolute"
                 width="100%"
-                height="16px"
-                top="-8px"
+                height="3px"
+                top="-3px"
                 zIndex={90}
-                border={{radius: '5px'}}
+                // border={{radius: '5px'}}
                 class={ROW_TOP_CLASS}
             ></i-panel>
         );
@@ -208,10 +208,11 @@ export class PageRow extends Module {
     }
 
     updateRowConfig(config: IPageSectionConfig) {
-        const {image = '', backgroundColor, maxWidth, margin, align} = config || {};
+        const {image = '', backgroundColor, backdropColor, sectionWidth, margin, align} = config || {};
         if (image) this.background.image = image;
-        if (backgroundColor) this.background.color = backgroundColor;
-        this.pnlRowContainer.maxWidth = maxWidth ?? '100%';
+        if (backdropColor) this.background.color = backdropColor;
+        if (backgroundColor) this.pnlRowContainer.background.color = backgroundColor;
+        this.pnlRowContainer.maxWidth = sectionWidth ?? '100%';
         if (margin) this.pnlRowContainer.margin = getMargin(margin);
         this.pnlRowContainer.width = margin?.x && margin?.x !== 'auto' ? 'auto' : '100%';
         if (align) this.updateAlign();
@@ -278,6 +279,10 @@ export class PageRow extends Module {
     onDeleteRow() {
         const prependRow = this.previousElementSibling;
         const appendRow = this.nextElementSibling;
+        if(!prependRow && !appendRow) {
+            // Reject delete
+            return;
+        }
         const rowCmd = new UpdateRowCommand(this, this.parent, this.data, true, prependRow?.id || '', appendRow?.id || '');
         commandHistory.execute(rowCmd);
     }
@@ -587,7 +592,6 @@ export class PageRow extends Module {
         }
 
         function dragEnter(enterTarget: Control, clientX: number, clientY: number, collision: Collision) {
-            if (!enterTarget) return;
             if (!enterTarget || !self.currentElement) return;
             if (enterTarget.closest('#pnlEmty')) {
                 self.pnlRow.minHeight = '180px';
@@ -607,30 +611,47 @@ export class PageRow extends Module {
             self.addDottedLines();
             toggleAllToolbarBoarder(true);
             if (target) {
-                const column = Number(target.dataset.column);
+                const dropRow = target.closest('ide-row');
+                let offsetLeft = 0;
+                if (!getDragData()?.module) {
+                    const dragRow = self.currentElement.closest('ide-row');
+                    if (dragRow?.id && dropRow?.id && dragRow.id === dropRow.id) {
+                        offsetLeft = Math.floor((startX + GAP_WIDTH) / (self.gridColumnWidth + GAP_WIDTH));
+                    }
+                }
+                const targetCol = Number(target.dataset.column);
+                const column = targetCol - offsetLeft > 0 ? targetCol - offsetLeft : targetCol
                 const columnSpan = self.currentElement.dataset.columnSpan
                     ? Number(self.currentElement.dataset.columnSpan)
                     : INIT_COLUMN_SPAN;
-                const colSpan = Math.min(columnSpan, self.maxColumn);
-                const colStart = Math.min(column, self.maxColumn - colSpan + 1);
-                const grid = target.closest('.grid');
-                const sections = Array.from(grid?.querySelectorAll('ide-section'));
+                let colSpan = Math.min(columnSpan, self.maxColumn);
+                let colStart = Math.min(column, self.maxColumn);
+                const sections = Array.from(dropRow?.querySelectorAll('ide-section'));
                 const sortedSections = sections.sort(
-                    (a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column)
+                    (a: HTMLElement, b: HTMLElement) => Number(b.dataset.column) - Number(a.dataset.column)
                 );
                 let spaces = 0;
                 let findedSection = null;
+                let isUpdated: boolean = false;
+                const isFromToolbar = !self.currentElement?.id;
                 for (let i = 0; i < sortedSections.length; i++) {
                     const section = sortedSections[i] as Control;
                     const sectionColumn = Number(section.dataset.column);
                     const sectionColumnSpan = Number(section.dataset.columnSpan);
+                    const sectionData = sectionColumn + sectionColumnSpan;
+                    if (colStart >= sectionData && (self.maxColumn - colStart) + 1 < colSpan && !isUpdated) {
+                        colStart = sectionData;
+                        isUpdated = true;
+                    }
                     const colData = colStart + colSpan;
-                    if (colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan) {
+                    if ((colStart >= sectionColumn && colData <= sectionData) || (colStart < sectionData && colData > sectionData)) {
                         findedSection = section;
                     }
-                    spaces += sectionColumnSpan;
+                    if (self.currentElement?.id !== section.id) {
+                        spaces += sectionColumnSpan;
+                    }
                 }
-                if (findedSection && findedSection != self.currentElement) {
+                if (findedSection && (isFromToolbar || self.currentElement.id !== findedSection.id) || MAX_COLUMN - spaces < 1) {
                     removeRectangles();
                     return;
                 }
@@ -1001,7 +1022,12 @@ export class PageRow extends Module {
             const config = {id: generateUUID()};
             // check if drop on a fixed-panel
             if (nearestFixedItem) {
-                const column = Number(nearestFixedItem.dataset.column);
+                const offsetLeft = Math.floor((startX + GAP_WIDTH) / (self.gridColumnWidth + GAP_WIDTH));
+                let column = Number(nearestFixedItem.dataset.column);
+                if (column - offsetLeft > 0) {
+                    nearestFixedItem = pageRow.querySelector(`.fixed-grid-item[data-column='${column - offsetLeft}']`)
+                }
+                column = Number(nearestFixedItem.dataset.column);
                 const columnSpan = self.currentElement.dataset.columnSpan
                     ? Number(self.currentElement.dataset.columnSpan)
                     : INIT_COLUMN_SPAN;
@@ -1268,6 +1294,7 @@ export class PageRow extends Module {
                 newConfig = {...newConfig, ...parsedData};
             }
             pageObject.updateSection(id, {config: newConfig});
+            Reflect.deleteProperty(newConfig, 'backgroundColor')
             this.updateRowConfig(newConfig);
             this.updateGridColumnWidth();
         });

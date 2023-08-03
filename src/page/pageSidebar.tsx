@@ -313,7 +313,7 @@ export class PageSidebar extends Module {
     render() {
         return (
             <i-hstack position='fixed' top='50%' right={24} height={0} width={0} verticalAlignment='center'>
-                <i-vstack position='absolute' right="0px">
+                <i-vstack position='absolute' right="0px" zIndex={100}>
                     <i-vstack id='toolbars' class={categoryPanelStyle} gap="0.25rem" margin={{ bottom: '1rem' }}></i-vstack>
                     <i-vstack id='pnlWidgetCategory' class={categoryPanelStyle} gap="0.25rem"></i-vstack>
                 </i-vstack>

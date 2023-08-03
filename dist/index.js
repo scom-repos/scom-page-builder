@@ -1042,7 +1042,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
     const defaultPageConfig = {
         backgroundColor: '',
         margin: { x: 'auto', y: '0' },
-        maxWidth: 1024
+        sectionWidth: 1024
     };
     exports.state = {
         pageBlocks: [],
@@ -1307,9 +1307,9 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
     class UpdateRowSettingsCommand {
         constructor(element, settings) {
             this.element = element;
-            this.settings = Object.assign({}, settings);
             const id = this.element.id.replace('row-', '');
             const data = index_5.pageObject.getRowConfig(id) || (0, index_5.getPageConfig)();
+            this.settings = Object.assign({}, data, settings);
             this.oldSettings = Object.assign({}, data);
         }
         getChangedValues(newValue, oldValue) {
@@ -2573,7 +2573,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             return result;
         }
         updateConfig(config, updatedValues) {
-            const { backgroundColor, margin, maxWidth } = config;
+            const { backgroundColor, margin, sectionWidth } = config;
             let newConfig = {};
             for (let prop of updatedValues) {
                 newConfig[prop] = config[prop];
@@ -2585,7 +2585,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             }
             this.element.maxWidth = '100%'; // maxWidth ?? '100%';
             this.element.margin = (0, index_21.getMargin)(margin);
-            index_21.pageObject.config = { backgroundColor, margin, maxWidth };
+            index_21.pageObject.config = { backgroundColor, margin, sectionWidth };
             return newConfig;
         }
         execute() {
@@ -3105,55 +3105,210 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
             this.dialog.visible = true;
         }
         getSchema() {
-            let jsonSchema = {
-                type: 'object',
-                // required: ['columnLayout'],
-                properties: {
-                    //   "columnLayout": {
-                    //     type: 'string',
-                    //     enum: [
-                    //         IColumnLayoutType.FIXED,
-                    //         IColumnLayoutType.AUTOMATIC
-                    //     ],
-                    //     default: IColumnLayoutType.FIXED
-                    //   },        
-                    //   "columnsNumber": {
-                    //     type: 'number'
-                    //   },
-                    //   "maxColumnsPerRow": {
-                    //     type: 'number'
-                    //   },
-                    //   "columnMinWidth": {
-                    //     type: 'number'
-                    //   },
-                    backgroundColor: {
-                        type: 'string',
-                        format: 'color'
+            // let jsonSchema: IDataSchema = {
+            //     type: 'object',
+            //     // required: ['columnLayout'],
+            //     properties: {
+            //         //   "columnLayout": {
+            //         //     type: 'string',
+            //         //     enum: [
+            //         //         IColumnLayoutType.FIXED,
+            //         //         IColumnLayoutType.AUTOMATIC
+            //         //     ],
+            //         //     default: IColumnLayoutType.FIXED
+            //         //   },
+            //         //   "columnsNumber": {
+            //         //     type: 'number'
+            //         //   },
+            //         //   "maxColumnsPerRow": {
+            //         //     type: 'number'
+            //         //   },
+            //         //   "columnMinWidth": {
+            //         //     type: 'number'
+            //         //   },
+            //         backgroundColor: {
+            //             type: 'string',
+            //             format: 'color'
+            //         },
+            //         maxWidth: {
+            //             type: 'number',
+            //             title: 'Maximum width'
+            //         },
+            //         margin: {
+            //             type: 'object',
+            //             properties: {
+            //                 x: {
+            //                     type: 'string'
+            //                 },
+            //                 y: {
+            //                     type: 'string'
+            //                 }
+            //             }
+            //         },
+            //         align: {
+            //             type: 'string',
+            //             enum: [
+            //                 'left',
+            //                 'center',
+            //                 'right'
+            //             ]
+            //         }
+            //     }
+            // }
+            const jsonSchema = {
+                "type": "object",
+                "properties": {
+                    "backdropImage": {
+                        "title": "Backdrop image",
+                        "type": "string",
+                        "format": "data-url"
                     },
-                    maxWidth: {
-                        type: 'number',
-                        title: 'Maximum width'
+                    "backdropColor": {
+                        "title": "Backdrop color",
+                        "type": "string",
+                        "format": "color"
                     },
-                    margin: {
-                        type: 'object',
-                        properties: {
-                            x: {
-                                type: 'string'
-                            },
-                            y: {
-                                type: 'string'
-                            }
-                        }
+                    "pt": {
+                        "title": "Top",
+                        "type": "number"
                     },
-                    align: {
-                        type: 'string',
-                        enum: [
-                            'left',
-                            'center',
-                            'right'
-                        ]
+                    "pb": {
+                        "title": "Bottom",
+                        "type": "number"
+                    },
+                    "pl": {
+                        "title": "Left",
+                        "type": "number"
+                    },
+                    "pr": {
+                        "title": "Right",
+                        "type": "number"
+                    },
+                    "fullWidth": {
+                        "title": "Full width",
+                        "type": "boolean"
+                    },
+                    "backgroundColor": {
+                        "title": "Background color",
+                        "type": "string",
+                        "format": "color"
+                    },
+                    "border": {
+                        "title": "Border",
+                        "type": "boolean"
+                    },
+                    "borderColor": {
+                        "title": "Border color",
+                        "type": "string",
+                        "format": "color"
                     }
                 }
+            };
+            const jsonUISchema = {
+                "type": "VerticalLayout",
+                "elements": [
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/fullWidth"
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/border"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/backgroundColor"
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/borderColor"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Group",
+                                "label": "Backdrop",
+                                "rule": {
+                                    "effect": "HIDE",
+                                    "condition": {
+                                        "scope": "#/properties/fullWidth",
+                                        "schema": {
+                                            "const": true
+                                        }
+                                    }
+                                },
+                                "elements": [
+                                    {
+                                        "type": "VerticalLayout",
+                                        "elements": [
+                                            {
+                                                "type": "HorizontalLayout",
+                                                "elements": [
+                                                    {
+                                                        "type": "Control",
+                                                        "scope": "#/properties/backdropImage"
+                                                    },
+                                                    {
+                                                        "type": "Control",
+                                                        "scope": "#/properties/backdropColor"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Group",
+                                "label": "Padding (px)",
+                                "elements": [
+                                    {
+                                        "type": "VerticalLayout",
+                                        "elements": [
+                                            {
+                                                "type": "HorizontalLayout",
+                                                "elements": [
+                                                    {
+                                                        "type": "Control",
+                                                        "scope": "#/properties/pt"
+                                                    },
+                                                    {
+                                                        "type": "Control",
+                                                        "scope": "#/properties/pb"
+                                                    },
+                                                    {
+                                                        "type": "Control",
+                                                        "scope": "#/properties/pl"
+                                                    },
+                                                    {
+                                                        "type": "Control",
+                                                        "scope": "#/properties/pr"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
             };
             const formOptions = {
                 columnWidth: '100%',
@@ -3171,58 +3326,58 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                     }
                 }
             };
-            const jsonUISchema = {
-                type: 'VerticalLayout',
-                elements: [
-                    {
-                        type: 'HorizontalLayout',
-                        elements: [
-                            {
-                                type: 'Control',
-                                label: 'Background Color',
-                                scope: '#/properties/backgroundColor',
-                                options: {
-                                    color: true
-                                }
-                            },
-                            {
-                                type: 'Control',
-                                label: 'Maximum Width',
-                                scope: '#/properties/maxWidth',
-                            }
-                        ]
-                    },
-                    {
-                        "type": "Group",
-                        label: 'Margin',
-                        "elements": [
-                            {
-                                "type": "HorizontalLayout",
-                                "elements": [
-                                    {
-                                        "type": "Control",
-                                        "scope": "#/properties/margin/properties/x"
-                                    },
-                                    {
-                                        "type": "Control",
-                                        "scope": "#/properties/margin/properties/y"
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        type: 'HorizontalLayout',
-                        elements: [
-                            {
-                                type: 'Control',
-                                label: 'Align',
-                                scope: '#/properties/align'
-                            }
-                        ]
-                    }
-                ]
-            };
+            // const jsonUISchema: IUISchema = {
+            //     type: 'VerticalLayout',
+            //     elements: [
+            //         {
+            //             type: 'HorizontalLayout',
+            //             elements: [
+            //                 {
+            //                     type: 'Control',
+            //                     label: 'Background Color',
+            //                     scope: '#/properties/backgroundColor',
+            //                     options: {
+            //                         color: true
+            //                     }
+            //                 },
+            //                 {
+            //                     type: 'Control',
+            //                     label: 'Maximum Width',
+            //                     scope: '#/properties/maxWidth',
+            //                 }
+            //             ]
+            //         },
+            //         {
+            //             "type": "Group",
+            //             label: 'Margin',
+            //             "elements": [
+            //                 {
+            //                     "type": "HorizontalLayout",
+            //                     "elements": [
+            //                         {
+            //                             "type": "Control",
+            //                             "scope": "#/properties/margin/properties/x"
+            //                         },
+            //                         {
+            //                             "type": "Control",
+            //                             "scope": "#/properties/margin/properties/y"
+            //                         }
+            //                     ]
+            //                 }
+            //             ]
+            //         },
+            //         {
+            //             type: 'HorizontalLayout',
+            //             elements: [
+            //                 {
+            //                     type: 'Control',
+            //                     label: 'Align',
+            //                     scope: '#/properties/align'
+            //                 }
+            //             ]
+            //         }
+            //     ]
+            // };
             return { jsonSchema, formOptions, jsonUISchema };
         }
         renderForm() {
@@ -3232,8 +3387,8 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
             this.formElm.uiSchema = jsonUISchema;
             this.formElm.formOptions = formOptions;
             this.formElm.renderForm();
-            const { backgroundColor, margin, maxWidth } = (0, index_33.getPageConfig)();
-            const config = Object.assign({ align: 'left', margin, maxWidth, backgroundColor }, (((_a = this.data) === null || _a === void 0 ? void 0 : _a.config) || {}));
+            const { backgroundColor, margin, sectionWidth } = (0, index_33.getPageConfig)();
+            const config = Object.assign({ align: 'left', margin, sectionWidth, backgroundColor }, (((_a = this.data) === null || _a === void 0 ? void 0 : _a.config) || {}));
             this.formElm.setFormData(Object.assign({}, config));
         }
         close() {
@@ -3243,7 +3398,7 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
             this.formElm.clearFormData();
         }
         render() {
-            return (this.$render("i-modal", { id: 'dialog', showBackdrop: true, closeOnBackdropClick: false, closeIcon: { name: 'times' }, visible: false, minWidth: 400, maxWidth: 500, title: "Section Settings", class: "custom-modal" },
+            return (this.$render("i-modal", { id: 'dialog', showBackdrop: true, closeOnBackdropClick: false, closeIcon: { name: 'times' }, visible: false, minWidth: 400, maxWidth: 800, width: 800, title: "Section Settings", class: "custom-modal" },
                 this.$render("i-panel", { padding: { top: '1rem', bottom: '1rem', left: '1.5rem', right: '1.5rem' } },
                     this.$render("i-form", { id: "formElm" }))));
         }
@@ -3297,29 +3452,115 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
             this.settingsDialog.visible = true;
         }
         getSchema() {
+            // const jsonSchema: IDataSchema = {
+            //     type: 'object',
+            //     properties: {
+            //         backgroundColor: {
+            //             type: 'string',
+            //             format: 'color'
+            //         },
+            //         maxWidth: {
+            //             type: 'number',
+            //             title: 'Maximum width'
+            //         },
+            //         margin: {
+            //             type: 'object',
+            //             properties: {
+            //                 x: {
+            //                     type: 'string'
+            //                 },
+            //                 y: {
+            //                     type: 'string'
+            //                 }
+            //             }
+            //         }
+            //     },
+            // };
             const jsonSchema = {
-                type: 'object',
-                properties: {
-                    backgroundColor: {
-                        type: 'string',
-                        format: 'color'
+                "type": "object",
+                "properties": {
+                    "backgroundColor": {
+                        "title": "Background color",
+                        "type": "string",
+                        "format": "color"
                     },
-                    maxWidth: {
-                        type: 'number',
-                        title: 'Maximum width'
+                    "backgroundImage": {
+                        "title": "Background image",
+                        "type": "string",
+                        "format": "data-url"
                     },
-                    margin: {
-                        type: 'object',
-                        properties: {
-                            x: {
-                                type: 'string'
-                            },
-                            y: {
-                                type: 'string'
-                            }
-                        }
+                    "ptb": {
+                        "title": "Section padding top / bottom (px)",
+                        "type": "number"
+                    },
+                    "plr": {
+                        "title": "Section padding left / right (px)",
+                        "type": "number"
+                    },
+                    "sectionWidth": {
+                        "title": "Section width (px)",
+                        "type": "number"
+                    },
+                    "scrollToTop": {
+                        "title": "Show scroll to top button",
+                        "type": "boolean"
                     }
-                },
+                }
+            };
+            const jsonUISchema = {
+                "type": "VerticalLayout",
+                "elements": [
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/backgroundImage"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/backgroundColor"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "Group",
+                        "label": "Section settings",
+                        "elements": [
+                            {
+                                "type": "HorizontalLayout",
+                                "elements": [
+                                    {
+                                        "type": "Control",
+                                        "scope": "#/properties/ptb"
+                                    },
+                                    {
+                                        "type": "Control",
+                                        "scope": "#/properties/plr"
+                                    },
+                                    {
+                                        "type": "Control",
+                                        "scope": "#/properties/sectionWidth"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/scrollToTop"
+                            }
+                        ]
+                    }
+                ]
             };
             const formOptions = {
                 columnWidth: '100%',
@@ -3337,45 +3578,45 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                     },
                 },
             };
-            const jsonUISchema = {
-                type: 'VerticalLayout',
-                elements: [
-                    {
-                        type: 'HorizontalLayout',
-                        elements: [
-                            {
-                                type: 'Control',
-                                label: 'Background Color',
-                                scope: '#/properties/backgroundColor',
-                            },
-                            {
-                                type: 'Control',
-                                label: 'Maximum Width',
-                                scope: '#/properties/maxWidth',
-                            }
-                        ]
-                    },
-                    {
-                        "type": "Group",
-                        label: 'Margin',
-                        "elements": [
-                            {
-                                "type": "HorizontalLayout",
-                                "elements": [
-                                    {
-                                        "type": "Control",
-                                        "scope": "#/properties/margin/properties/x"
-                                    },
-                                    {
-                                        "type": "Control",
-                                        "scope": "#/properties/margin/properties/y"
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            };
+            // const jsonUISchema: IUISchema = {
+            //     type: 'VerticalLayout',
+            //     elements: [
+            //         {
+            //             type: 'HorizontalLayout',
+            //             elements: [
+            //                 {
+            //                     type: 'Control',
+            //                     label: 'Background Color',
+            //                     scope: '#/properties/backgroundColor',
+            //                 },
+            //                 {
+            //                     type: 'Control',
+            //                     label: 'Maximum Width',
+            //                     scope: '#/properties/maxWidth',
+            //                 }
+            //             ]
+            //         },
+            //         {
+            //             "type": "Group",
+            //             label: 'Margin',
+            //             "elements": [
+            //                 {
+            //                     "type": "HorizontalLayout",
+            //                     "elements": [
+            //                         {
+            //                             "type": "Control",
+            //                             "scope": "#/properties/margin/properties/x"
+            //                         },
+            //                         {
+            //                             "type": "Control",
+            //                             "scope": "#/properties/margin/properties/y"
+            //                         }
+            //                     ]
+            //                 }
+            //             ]
+            //         }
+            //     ]
+            // };
             return { jsonSchema, formOptions, jsonUISchema };
         }
         renderForm() {
@@ -3393,7 +3634,7 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
             this.formElm.clearFormData();
         }
         render() {
-            return (this.$render("i-modal", { id: 'settingsDialog', showBackdrop: true, closeOnBackdropClick: false, closeIcon: { name: 'times' }, visible: false, minWidth: 400, maxWidth: 500, title: "Page Settings", class: "custom-modal" },
+            return (this.$render("i-modal", { id: 'settingsDialog', showBackdrop: true, closeOnBackdropClick: false, closeIcon: { name: 'times' }, visible: false, minWidth: 400, maxWidth: 800, width: 800, title: "Page Settings", class: "custom-modal" },
                 this.$render("i-panel", { padding: { top: '1rem', bottom: '1rem', left: '1.5rem', right: '1.5rem' } },
                     this.$render("i-form", { id: "formElm" }))));
         }
@@ -3640,9 +3881,18 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                     'i-button': {
                         padding: '0.5rem 1rem'
                     },
+                    'i-color': {
+                        display: 'flex',
+                        $nest: {
+                            '.i-color': {
+                                height: '30px !important',
+                                marginBlock: 'auto'
+                            }
+                        }
+                    },
                     'i-input': {
-                        border: `1px solid var(--builder-divider)`,
-                        // marginBottom: '1rem'
+                    // border: `1px solid var(--builder-divider)`,
+                    // marginBottom: '1rem'
                     },
                     '.modal': {
                         padding: 0,
@@ -3709,7 +3959,7 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                         $nest: {
                             '.tabs-nav': {
                                 border: 0,
-                                borderRight: `1px solid var(--builder-divider)`,
+                                // borderRight: `1px solid var(--builder-divider)`,
                                 paddingRight: '0.5rem'
                             },
                             'i-tab': {
@@ -3717,7 +3967,7 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                                 border: 0,
                                 borderRadius: '0.25rem',
                                 color: Theme.text.primary,
-                                fontFamily: Theme.typography.fontFamily,
+                                // fontFamily: Theme.typography.fontFamily,
                                 fontSize: '0.875rem',
                                 marginBottom: 0,
                             },
@@ -3752,6 +4002,7 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
         }
     });
     components_24.Styles.cssRule('ide-row', {
+        paddingBottom: 20,
         display: 'block',
         position: 'relative',
         transition: 'translate .3s ease-in',
@@ -3759,6 +4010,9 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
         boxSizing: 'border-box',
         backgroundColor: 'var(--builder-bg)',
         $nest: {
+            '.page-row-container': {
+                borderRadius: 10,
+            },
             '.drag-stack': {
                 visibility: 'hidden',
                 opacity: 0,
@@ -3859,7 +4113,7 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
                 transition: 'border ease-in .2s'
             },
             '.is-dragenter': {
-                background: 'rgb(66,133,244)',
+                background: 'rgba(66,133,244,.9)',
                 opacity: 1
             },
             '.rectangle': {
@@ -3940,8 +4194,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.renderFixedGrid();
             this.initEventListeners();
             this.initEventBus();
-            this.appendChild(this.$render("i-panel", { position: "absolute", width: "100%", height: "16px", bottom: "-8px", zIndex: 90, border: { radius: '5px' }, class: ROW_BOTTOM_CLASS }));
-            this.appendChild(this.$render("i-panel", { position: "absolute", width: "100%", height: "16px", top: "-8px", zIndex: 90, border: { radius: '5px' }, class: ROW_TOP_CLASS }));
+            this.appendChild(this.$render("i-panel", { position: "absolute", width: "100%", height: "3px", bottom: "-3px", zIndex: 90, 
+                // border={{radius: '5px'}}
+                class: ROW_BOTTOM_CLASS }));
+            this.appendChild(this.$render("i-panel", { position: "absolute", width: "100%", height: "3px", top: "-3px", zIndex: 90, 
+                // border={{radius: '5px'}}
+                class: ROW_TOP_CLASS }));
         }
         toggleUI(value) {
             if (this.pnlRow)
@@ -4014,12 +4272,14 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            const { image = '', backgroundColor, maxWidth, margin, align } = config || {};
+            const { image = '', backgroundColor, backdropColor, sectionWidth, margin, align } = config || {};
             if (image)
                 this.background.image = image;
+            if (backdropColor)
+                this.background.color = backdropColor;
             if (backgroundColor)
-                this.background.color = backgroundColor;
-            this.pnlRowContainer.maxWidth = maxWidth !== null && maxWidth !== void 0 ? maxWidth : '100%';
+                this.pnlRowContainer.background.color = backgroundColor;
+            this.pnlRowContainer.maxWidth = sectionWidth !== null && sectionWidth !== void 0 ? sectionWidth : '100%';
             if (margin)
                 this.pnlRowContainer.margin = (0, index_43.getMargin)(margin);
             this.pnlRowContainer.width = (margin === null || margin === void 0 ? void 0 : margin.x) && (margin === null || margin === void 0 ? void 0 : margin.x) !== 'auto' ? 'auto' : '100%';
@@ -4082,6 +4342,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         onDeleteRow() {
             const prependRow = this.previousElementSibling;
             const appendRow = this.nextElementSibling;
+            if (!prependRow && !appendRow) {
+                // Reject delete
+                return;
+            }
             const rowCmd = new index_44.UpdateRowCommand(this, this.parent, this.data, true, (prependRow === null || prependRow === void 0 ? void 0 : prependRow.id) || '', (appendRow === null || appendRow === void 0 ? void 0 : appendRow.id) || '');
             index_44.commandHistory.execute(rowCmd);
         }
@@ -4362,9 +4626,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.toggleUI(!!((_b = (_a = self.data) === null || _a === void 0 ? void 0 : _a.elements) === null || _b === void 0 ? void 0 : _b.length));
             }
             function dragEnter(enterTarget, clientX, clientY, collision) {
-                var _a, _b, _c;
-                if (!enterTarget)
-                    return;
+                var _a, _b, _c, _d, _e, _f;
                 if (!enterTarget || !self.currentElement)
                     return;
                 if (enterTarget.closest('#pnlEmty')) {
@@ -4384,28 +4646,45 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.addDottedLines();
                 toggleAllToolbarBoarder(true);
                 if (target) {
-                    const column = Number(target.dataset.column);
+                    const dropRow = target.closest('ide-row');
+                    let offsetLeft = 0;
+                    if (!((_a = (0, index_43.getDragData)()) === null || _a === void 0 ? void 0 : _a.module)) {
+                        const dragRow = self.currentElement.closest('ide-row');
+                        if ((dragRow === null || dragRow === void 0 ? void 0 : dragRow.id) && (dropRow === null || dropRow === void 0 ? void 0 : dropRow.id) && dragRow.id === dropRow.id) {
+                            offsetLeft = Math.floor((startX + index_42.GAP_WIDTH) / (self.gridColumnWidth + index_42.GAP_WIDTH));
+                        }
+                    }
+                    const targetCol = Number(target.dataset.column);
+                    const column = targetCol - offsetLeft > 0 ? targetCol - offsetLeft : targetCol;
                     const columnSpan = self.currentElement.dataset.columnSpan
                         ? Number(self.currentElement.dataset.columnSpan)
                         : index_42.INIT_COLUMN_SPAN;
-                    const colSpan = Math.min(columnSpan, self.maxColumn);
-                    const colStart = Math.min(column, self.maxColumn - colSpan + 1);
-                    const grid = target.closest('.grid');
-                    const sections = Array.from(grid === null || grid === void 0 ? void 0 : grid.querySelectorAll('ide-section'));
-                    const sortedSections = sections.sort((a, b) => Number(a.dataset.column) - Number(b.dataset.column));
+                    let colSpan = Math.min(columnSpan, self.maxColumn);
+                    let colStart = Math.min(column, self.maxColumn);
+                    const sections = Array.from(dropRow === null || dropRow === void 0 ? void 0 : dropRow.querySelectorAll('ide-section'));
+                    const sortedSections = sections.sort((a, b) => Number(b.dataset.column) - Number(a.dataset.column));
                     let spaces = 0;
                     let findedSection = null;
+                    let isUpdated = false;
+                    const isFromToolbar = !((_b = self.currentElement) === null || _b === void 0 ? void 0 : _b.id);
                     for (let i = 0; i < sortedSections.length; i++) {
                         const section = sortedSections[i];
                         const sectionColumn = Number(section.dataset.column);
                         const sectionColumnSpan = Number(section.dataset.columnSpan);
+                        const sectionData = sectionColumn + sectionColumnSpan;
+                        if (colStart >= sectionData && (self.maxColumn - colStart) + 1 < colSpan && !isUpdated) {
+                            colStart = sectionData;
+                            isUpdated = true;
+                        }
                         const colData = colStart + colSpan;
-                        if (colStart >= sectionColumn && colData <= sectionColumn + sectionColumnSpan) {
+                        if ((colStart >= sectionColumn && colData <= sectionData) || (colStart < sectionData && colData > sectionData)) {
                             findedSection = section;
                         }
-                        spaces += sectionColumnSpan;
+                        if (((_c = self.currentElement) === null || _c === void 0 ? void 0 : _c.id) !== section.id) {
+                            spaces += sectionColumnSpan;
+                        }
                     }
-                    if (findedSection && findedSection != self.currentElement) {
+                    if (findedSection && (isFromToolbar || self.currentElement.id !== findedSection.id) || index_42.MAX_COLUMN - spaces < 1) {
                         removeRectangles();
                         return;
                     }
@@ -4432,9 +4711,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 updateClass(topBlock, 'is-dragenter');
                             }
                         }
-                        const curElmCol = Number((_a = section === null || section === void 0 ? void 0 : section.dataset) === null || _a === void 0 ? void 0 : _a.column);
-                        const curElmColSpan = Number((_b = section === null || section === void 0 ? void 0 : section.dataset) === null || _b === void 0 ? void 0 : _b.columnSpan);
-                        const sections = Array.from((_c = section.closest('#pnlRow')) === null || _c === void 0 ? void 0 : _c.querySelectorAll('ide-section'));
+                        const curElmCol = Number((_d = section === null || section === void 0 ? void 0 : section.dataset) === null || _d === void 0 ? void 0 : _d.column);
+                        const curElmColSpan = Number((_e = section === null || section === void 0 ? void 0 : section.dataset) === null || _e === void 0 ? void 0 : _e.columnSpan);
+                        const sections = Array.from((_f = section.closest('#pnlRow')) === null || _f === void 0 ? void 0 : _f.querySelectorAll('ide-section'));
                         const nextElm = sections.find((el) => {
                             const column = Number(el.dataset.column);
                             return !isNaN(column) && curElmCol + curElmColSpan === column;
@@ -4764,7 +5043,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const config = { id: (0, index_45.generateUUID)() };
                 // check if drop on a fixed-panel
                 if (nearestFixedItem) {
-                    const column = Number(nearestFixedItem.dataset.column);
+                    const offsetLeft = Math.floor((startX + index_42.GAP_WIDTH) / (self.gridColumnWidth + index_42.GAP_WIDTH));
+                    let column = Number(nearestFixedItem.dataset.column);
+                    if (column - offsetLeft > 0) {
+                        nearestFixedItem = pageRow.querySelector(`.fixed-grid-item[data-column='${column - offsetLeft}']`);
+                    }
+                    column = Number(nearestFixedItem.dataset.column);
                     const columnSpan = self.currentElement.dataset.columnSpan
                         ? Number(self.currentElement.dataset.columnSpan)
                         : index_42.INIT_COLUMN_SPAN;
@@ -5004,6 +5288,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     newConfig = Object.assign(Object.assign({}, newConfig), parsedData);
                 }
                 index_43.pageObject.updateSection(id, { config: newConfig });
+                Reflect.deleteProperty(newConfig, 'backgroundColor');
                 this.updateRowConfig(newConfig);
                 this.updateGridColumnWidth();
             });
@@ -5736,8 +6021,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                                 this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
                                 this.$render("i-icon", { name: "circle", width: 3, height: 3 }))),
                         this.$render("i-vstack", { id: "backdropStack", width: "100%", height: "100%", position: "absolute", top: "0px", left: "0px", zIndex: 15, visible: false, onClick: this.showToolList.bind(this) })),
-                    this.$render("i-panel", { position: "absolute", width: "90%", height: "8px", left: "5%", bottom: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "bottom-block" }),
-                    this.$render("i-panel", { position: "absolute", width: "90%", height: "8px", left: "5%", top: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "top-block" }),
+                    this.$render("i-panel", { position: "absolute", width: "90%", height: "3px", left: "5%", bottom: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "bottom-block" }),
+                    this.$render("i-panel", { position: "absolute", width: "90%", height: "3px", left: "5%", top: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "top-block" }),
                     this.$render("i-modal", { id: 'mdActions', title: 'Update Settings', closeIcon: { name: 'times' }, minWidth: 400, maxWidth: '900px', closeOnBackdropClick: false, onOpen: this.onShowModal.bind(this), onClose: this.onCloseModal.bind(this), class: "setting-modal" },
                         this.$render("i-panel", null,
                             this.$render("i-vstack", { id: "pnlFormMsg", padding: { left: '1.5rem', right: '1.5rem', top: '1rem' }, gap: "0.5rem", visible: false }),
@@ -5990,10 +6275,10 @@ define("@scom/scom-page-builder/page/pageSection.tsx", ["require", "exports", "@
         }
         render() {
             return (this.$render("i-panel", { id: 'pnlPageSection', maxWidth: "100%", maxHeight: "100%", height: "100%" },
-                this.$render("i-panel", { position: "absolute", width: 8, height: "90%", top: "5%", left: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "front-block" }),
+                this.$render("i-panel", { position: "absolute", width: 3, height: "90%", top: "5%", left: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "front-block" }),
                 this.$render("i-panel", { id: "pageSectionWrapper", width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%", padding: { top: '1.5rem', bottom: '1.5rem' } },
                     this.$render("i-panel", { id: "pnlMain", maxWidth: "100%", maxHeight: "100%", class: "section-border" })),
-                this.$render("i-panel", { position: "absolute", width: 8, height: "90%", top: "5%", right: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "back-block" })));
+                this.$render("i-panel", { position: "absolute", width: 3, height: "90%", top: "5%", right: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "back-block" })));
         }
     };
     PageSection = __decorate([
@@ -7279,7 +7564,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
         }
         render() {
             return (this.$render("i-hstack", { position: 'fixed', top: '50%', right: 24, height: 0, width: 0, verticalAlignment: 'center' },
-                this.$render("i-vstack", { position: 'absolute', right: "0px" },
+                this.$render("i-vstack", { position: 'absolute', right: "0px", zIndex: 100 },
                     this.$render("i-vstack", { id: 'toolbars', class: pageSidebar_css_1.categoryPanelStyle, gap: "0.25rem", margin: { bottom: '1rem' } }),
                     this.$render("i-vstack", { id: 'pnlWidgetCategory', class: pageSidebar_css_1.categoryPanelStyle, gap: "0.25rem" })),
                 this.$render("i-modal", { id: 'mdWidget', class: pageSidebar_css_1.widgetModalStyle, height: 'auto', width: 320, maxHeight: '80vh', showBackdrop: false, popupPlacement: 'left' },
@@ -7836,10 +8121,10 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
             '#pnlForm i-input > input': {
                 boxShadow: 'none',
                 border: 'none',
-                background: 'transparent'
+                // background: 'transparent'
             },
             '#pnlWrap': {
-                scrollBehavior: 'smooth'
+                scrollBehavior: 'smooth',
             },
             '.pnl-scrollable': {
                 maskImage: 'linear-gradient(to top, transparent, black),linear-gradient(to left, transparent 7px, black 7px)',
@@ -7865,6 +8150,9 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
                         }
                     }
                 }
+            },
+            'ide-rows ide-row:first-child': {
+                marginTop: 50
             }
         }
     });
@@ -8104,7 +8392,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             index_85.pageObject.updateMenu();
         }
         updatePageConfig() {
-            const { backgroundColor, margin, maxWidth } = (0, index_85.getDefaultPageConfig)();
+            const { backgroundColor, margin, sectionWidth } = (0, index_85.getDefaultPageConfig)();
             this.style.setProperty('--builder-bg', backgroundColor);
             if (this.pnlEditor) {
                 this.pnlEditor.maxWidth = '100%'; // maxWidth ?? '100%';
@@ -8161,7 +8449,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 this.$render("i-panel", { id: "pnlWrap", height: "100%", width: "100%", overflow: { y: 'auto', x: 'hidden' }, background: { color: '#f7f3ef' } },
                     this.$render("i-vstack", { id: "pageContent", 
                         // maxWidth="calc(100% - 6em)"
-                        width: "100%", horizontalAlignment: 'center', margin: { top: '3.5rem', left: 'auto', right: 'auto' }, padding: { top: '1rem', bottom: '1rem' } },
+                        width: "100%", horizontalAlignment: 'center' },
                         this.$render("i-panel", { id: "pnlEditor", 
                             // maxWidth={1024}
                             minHeight: "100vh", width: "100%", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },

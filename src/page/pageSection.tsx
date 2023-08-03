@@ -126,7 +126,7 @@ export class PageSection extends Module {
             <i-panel id={'pnlPageSection'} maxWidth="100%" maxHeight="100%" height="100%">
                 <i-panel
                     position="absolute"
-                    width={8}
+                    width={3}
                     height="90%"
                     top="5%" left="-8px"
                     zIndex={999}
@@ -144,7 +144,7 @@ export class PageSection extends Module {
                 </i-panel>
                 <i-panel
                     position="absolute"
-                    width={8}
+                    width={3}
                     height="90%"
                     top="5%" right="-8px"
                     zIndex={999}

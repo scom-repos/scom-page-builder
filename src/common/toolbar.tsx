@@ -739,7 +739,7 @@ export class IDEToolbar extends Module {
                     <i-panel
                         position="absolute"
                         width="90%"
-                        height="8px"
+                        height="3px"
                         left="5%"
                         bottom="-8px"
                         zIndex={999}
@@ -751,7 +751,7 @@ export class IDEToolbar extends Module {
                     <i-panel
                         position="absolute"
                         width="90%"
-                        height="8px"
+                        height="3px"
                         left="5%"
                         top="-8px"
                         zIndex={999}
