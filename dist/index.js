@@ -5552,10 +5552,10 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 const customUI = action.customUI;
                 let element = null;
                 if (action.isReplacement) {
-                    element = customUI.render(Object.assign(Object.assign({}, properties), tag), this.replaceComponent.bind(this));
+                    element = await customUI.render(Object.assign(Object.assign({}, properties), tag), this.replaceComponent.bind(this));
                 }
                 else {
-                    element = customUI.render(Object.assign(Object.assign({}, properties), tag), this.onSave.bind(this));
+                    element = await customUI.render(Object.assign(Object.assign({}, properties), tag), this.onSave.bind(this));
                 }
                 this.pnlForm.append(element);
                 this.form.visible = false;
