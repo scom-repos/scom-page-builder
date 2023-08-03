@@ -377,9 +377,9 @@ export const layouts = {
     "twoWidgets": {
         "accentLeft": accentLeft,
         "accentRight": accentRight,
-        "2ImageColumn": twoImageColumn
+        "twoImageColumn": twoImageColumn
     },
     "multipleWidgets": {
-        "3ImageColumn": threeImageColumn
+        "threeImageColumn": threeImageColumn
     }
 }
