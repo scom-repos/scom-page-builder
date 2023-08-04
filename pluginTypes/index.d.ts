@@ -476,6 +476,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         get footer(): IPageFooter;
         set config(value: IPageConfig);
         get config(): IPageConfig;
+        getNonNullSections(): IPageSection[];
         addSection(value: IPageSection, index?: number): void;
         removeSection(id: string): void;
         getSection(id: string): IPageSection;
@@ -493,7 +494,6 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         addElement(sectionId: string, value: IPageElement, parentElmId?: string, elementIndex?: number): void;
         getRowConfig(sectionId: string): import("@scom/scom-page-builder/interface/siteData.ts").IPageSectionConfig;
         getColumnsNumber(sectionId: string): number;
-        updateMenu(): void;
     }
     export const pageObject: PageObject;
     export const state: {
@@ -1446,7 +1446,6 @@ declare module "@scom/scom-page-builder/page/pageMenu.css.ts" {
 /// <amd-module name="@scom/scom-page-builder/page/pageMenu.tsx" />
 declare module "@scom/scom-page-builder/page/pageMenu.tsx" {
     import { ControlElement, Module } from '@ijstech/components';
-    import { IPageSection } from "@scom/scom-page-builder/interface/index.ts";
     global {
         namespace JSX {
             interface IntrinsicElements {
@@ -1468,7 +1467,7 @@ declare module "@scom/scom-page-builder/page/pageMenu.tsx" {
         private showDropBox;
         private reorderSection;
         private setActiveDropLine;
-        renderMenu(sections: IPageSection[]): void;
+        private renderMenu;
         private setCardTitle;
         private onClickRenameBtn;
         private onClickConfirmBtn;

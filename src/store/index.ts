@@ -28,6 +28,7 @@ export class PageObject {
 
   set sections(value: IPageSection[]) {
     this._sections = value || [];
+    application.EventBus.dispatch(EVENT.ON_UPDATE_MENU);
   }
   get sections(): IPageSection[] {
     return this._sections || [];
@@ -47,18 +48,30 @@ export class PageObject {
     return this._config;
   }
 
+  getNonNullSections(): IPageSection[] {
+    const hasData = (el: IPageElement) => Object.keys(el.module || {}).length || el.elements?.length;
+      return this._sections.filter(section => {
+        const hasElements = !!section.elements?.length;
+        if (hasElements) {
+            const elements = [...section.elements].filter(hasData);
+            section.elements = elements;
+        }
+        return !!section.elements.length;
+      })
+  }
+
   addSection(value: IPageSection, index?: number) {
     if (typeof index === 'number' && index >= 0)
       this._sections.splice(index, 0, value);
     else
       this._sections.push(value);
-    this.updateMenu();
+      application.EventBus.dispatch(EVENT.ON_UPDATE_MENU);
   }
 
   removeSection(id: string) {
     const sectionIndex = this._sections.findIndex(section => section.id === id);
     if (sectionIndex !== -1) this._sections.splice(sectionIndex, 1);
-    this.updateMenu();
+    application.EventBus.dispatch(EVENT.ON_UPDATE_MENU);
   }
 
   getSection(id: string) {
@@ -80,7 +93,7 @@ export class PageObject {
     //     const newColumn = Math.ceil(newColumnsNumber / oldColumnsNumber * oldColumn);
     //     this.setElement(id, element.id, { column: newColumn, columnSpan: newColumnSpan });
     //   }
-    this.updateMenu();
+    application.EventBus.dispatch(EVENT.ON_UPDATE_MENU);
   }
 
   getRow(rowId: string) {
@@ -98,6 +111,7 @@ export class PageObject {
       this._footer.elements = [];
     else
       this.removeSection(id);
+      application.EventBus.dispatch(EVENT.ON_UPDATE_MENU);
   }
 
   addRow(data: any, id?: string, index?: number) {
@@ -107,13 +121,14 @@ export class PageObject {
       this.footer = data;
     else
       this.addSection(data, index);
+      application.EventBus.dispatch(EVENT.ON_UPDATE_MENU);
   }
 
   setRow(data: any, rowId: string) {
     const currData = pageObject.getRow(rowId);
     pageObject.removeRow((currData as IPageSection).id);
     pageObject.addRow(data, data.id, data.row);
-    this.updateMenu();
+    application.EventBus.dispatch(EVENT.ON_UPDATE_MENU);
   }
 
   private findElement(elements: IPageElement[], elementId: string, findLeafOnly: boolean = false) {
@@ -186,7 +201,7 @@ export class PageObject {
       // const section = this.getRow(sectionId);
       // if (section?.elements) section.elements = this.sortFn([...section.elements]);
     }
-    this.updateMenu();
+    application.EventBus.dispatch(EVENT.ON_UPDATE_MENU);
   }
 
   private sortFn(elements: IPageElement[]) {
@@ -221,6 +236,7 @@ export class PageObject {
       elements = section?.elements || [];
     }
     this.removeElementFn(elements, elementId, removeLeafOnly);
+    application.EventBus.dispatch(EVENT.ON_UPDATE_MENU);
   }
 
   addElement(sectionId: string, value: IPageElement, parentElmId = '', elementIndex?: number) {
@@ -245,7 +261,7 @@ export class PageObject {
         }
       }
     }
-    this.updateMenu();
+    application.EventBus.dispatch(EVENT.ON_UPDATE_MENU);
   }
 
   getRowConfig(sectionId: string) {
@@ -258,10 +274,6 @@ export class PageObject {
     // if (!sectionId) return MAX_COLUMN;
     // const section = this.getRow(sectionId);
     // return this.getColumnsNumberFn(section);
-  }
-
-  updateMenu() {
-    application.EventBus.dispatch(EVENT.ON_UPDATE_MENU, this.sections);
   }
 
   // private getColumnsNumberFn(section: IPageSection|IPageFooter) {

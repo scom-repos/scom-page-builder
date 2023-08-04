@@ -1,6 +1,7 @@
 import { ICommand } from "./interface";
 import { application } from "@ijstech/components";
 import { EVENT } from '../const/index';
+import { pageObject } from "../store/index";
 
 export class MoveElementCommand implements ICommand {
   private element: HTMLElement;
@@ -40,7 +41,7 @@ export class MoveElementCommand implements ICommand {
       templateColumns.push(i === this.dropIndex ? 'minmax(auto, 100%)' : `${unitWidth}px`);
     }
     (this.parent as any).templateColumns = templateColumns;
-    application.EventBus.dispatch(EVENT.ON_UPDATE_MENU, this.dataList);
+    application.EventBus.dispatch(EVENT.ON_UPDATE_MENU);
   }
 
   undo(): void {
@@ -64,7 +65,7 @@ export class MoveElementCommand implements ICommand {
       templateColumns.push(i === this.dragIndex ? 'minmax(auto, 100%)' : `${unitWidth}px`);
     }
     (this.parent as any).templateColumns = templateColumns;
-    application.EventBus.dispatch(EVENT.ON_UPDATE_MENU, this.dataList);
+    application.EventBus.dispatch(EVENT.ON_UPDATE_MENU);
   }
 
   redo(): void {}

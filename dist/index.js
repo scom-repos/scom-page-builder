@@ -802,6 +802,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         }
         set sections(value) {
             this._sections = value || [];
+            components_2.application.EventBus.dispatch(index_2.EVENT.ON_UPDATE_MENU);
         }
         get sections() {
             return this._sections || [];
@@ -818,18 +819,30 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         get config() {
             return this._config;
         }
+        getNonNullSections() {
+            const hasData = (el) => { var _a; return Object.keys(el.module || {}).length || ((_a = el.elements) === null || _a === void 0 ? void 0 : _a.length); };
+            return this._sections.filter(section => {
+                var _a;
+                const hasElements = !!((_a = section.elements) === null || _a === void 0 ? void 0 : _a.length);
+                if (hasElements) {
+                    const elements = [...section.elements].filter(hasData);
+                    section.elements = elements;
+                }
+                return !!section.elements.length;
+            });
+        }
         addSection(value, index) {
             if (typeof index === 'number' && index >= 0)
                 this._sections.splice(index, 0, value);
             else
                 this._sections.push(value);
-            this.updateMenu();
+            components_2.application.EventBus.dispatch(index_2.EVENT.ON_UPDATE_MENU);
         }
         removeSection(id) {
             const sectionIndex = this._sections.findIndex(section => section.id === id);
             if (sectionIndex !== -1)
                 this._sections.splice(sectionIndex, 1);
-            this.updateMenu();
+            components_2.application.EventBus.dispatch(index_2.EVENT.ON_UPDATE_MENU);
         }
         getSection(id) {
             return this._sections.find(section => section.id === id);
@@ -851,7 +864,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
             //     const newColumn = Math.ceil(newColumnsNumber / oldColumnsNumber * oldColumn);
             //     this.setElement(id, element.id, { column: newColumn, columnSpan: newColumnSpan });
             //   }
-            this.updateMenu();
+            components_2.application.EventBus.dispatch(index_2.EVENT.ON_UPDATE_MENU);
         }
         getRow(rowId) {
             if (rowId === 'header')
@@ -867,6 +880,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
                 this._footer.elements = [];
             else
                 this.removeSection(id);
+            components_2.application.EventBus.dispatch(index_2.EVENT.ON_UPDATE_MENU);
         }
         addRow(data, id, index) {
             if (id === 'header')
@@ -875,12 +889,13 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
                 this.footer = data;
             else
                 this.addSection(data, index);
+            components_2.application.EventBus.dispatch(index_2.EVENT.ON_UPDATE_MENU);
         }
         setRow(data, rowId) {
             const currData = exports.pageObject.getRow(rowId);
             exports.pageObject.removeRow(currData.id);
             exports.pageObject.addRow(data, data.id, data.row);
-            this.updateMenu();
+            components_2.application.EventBus.dispatch(index_2.EVENT.ON_UPDATE_MENU);
         }
         findElement(elements, elementId, findLeafOnly = false) {
             var _a;
@@ -964,7 +979,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
                 // const section = this.getRow(sectionId);
                 // if (section?.elements) section.elements = this.sortFn([...section.elements]);
             }
-            this.updateMenu();
+            components_2.application.EventBus.dispatch(index_2.EVENT.ON_UPDATE_MENU);
         }
         sortFn(elements) {
             return [...elements].sort((a, b) => Number(a.column) - Number(b.column));
@@ -1001,6 +1016,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
                 elements = (section === null || section === void 0 ? void 0 : section.elements) || [];
             }
             this.removeElementFn(elements, elementId, removeLeafOnly);
+            components_2.application.EventBus.dispatch(index_2.EVENT.ON_UPDATE_MENU);
         }
         addElement(sectionId, value, parentElmId = '', elementIndex) {
             if (sectionId === 'header') {
@@ -1028,7 +1044,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
                     }
                 }
             }
-            this.updateMenu();
+            components_2.application.EventBus.dispatch(index_2.EVENT.ON_UPDATE_MENU);
         }
         getRowConfig(sectionId) {
             const section = this.getRow(sectionId);
@@ -1039,9 +1055,6 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
             // if (!sectionId) return MAX_COLUMN;
             // const section = this.getRow(sectionId);
             // return this.getColumnsNumberFn(section);
-        }
-        updateMenu() {
-            components_2.application.EventBus.dispatch(index_2.EVENT.ON_UPDATE_MENU, this.sections);
         }
     }
     exports.PageObject = PageObject;
@@ -1449,7 +1462,7 @@ define("@scom/scom-page-builder/command/moveRow.ts", ["require", "exports", "@ij
                 templateColumns.push(i === this.dropIndex ? 'minmax(auto, 100%)' : `${unitWidth}px`);
             }
             this.parent.templateColumns = templateColumns;
-            components_4.application.EventBus.dispatch(index_6.EVENT.ON_UPDATE_MENU, this.dataList);
+            components_4.application.EventBus.dispatch(index_6.EVENT.ON_UPDATE_MENU);
         }
         undo() {
             if (!this.parent.contains(this.element))
@@ -1473,7 +1486,7 @@ define("@scom/scom-page-builder/command/moveRow.ts", ["require", "exports", "@ij
                 templateColumns.push(i === this.dragIndex ? 'minmax(auto, 100%)' : `${unitWidth}px`);
             }
             this.parent.templateColumns = templateColumns;
-            components_4.application.EventBus.dispatch(index_6.EVENT.ON_UPDATE_MENU, this.dataList);
+            components_4.application.EventBus.dispatch(index_6.EVENT.ON_UPDATE_MENU);
         }
         redo() { }
     }
@@ -7159,7 +7172,7 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
             this.initEventListener();
         }
         initEventBus() {
-            components_36.application.EventBus.register(this, index_66.EVENT.ON_UPDATE_MENU, async (sections) => this.renderMenu(sections));
+            components_36.application.EventBus.register(this, index_66.EVENT.ON_UPDATE_MENU, async () => this.renderMenu());
             components_36.application.EventBus.register(this, index_66.EVENT.ON_SELECT_SECTION, async (rowId) => this.setfocusCard(rowId));
         }
         initEventListener() {
@@ -7270,8 +7283,9 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
                 }
             }
         }
-        renderMenu(sections) {
+        renderMenu() {
             this.pnlMenu.clearInnerHTML();
+            const sections = index_65.pageObject.getNonNullSections();
             const items = sections.map((section) => {
                 return {
                     caption: this.getTitle(section),
@@ -7485,7 +7499,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
             this.pnlWidgets.clearInnerHTML();
             const menu = (this.$render("i-scom-page-builder-menu", null));
             this.pnlWidgets.appendChild(menu);
-            menu.renderMenu(index_68.pageObject.sections);
+            components_37.application.EventBus.dispatch(index_69.EVENT.ON_UPDATE_MENU);
         }
         renderWidgets(category) {
             this.pnlWidgets.clearInnerHTML();
@@ -8373,18 +8387,9 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             (0, index_85.setRootDir)(value);
         }
         getData() {
-            const hasData = (el) => { var _a; return Object.keys(el.module || {}).length || ((_a = el.elements) === null || _a === void 0 ? void 0 : _a.length); };
             return {
                 // header: pageObject.header,
-                sections: index_85.pageObject.sections.filter(section => {
-                    var _a;
-                    const hasElements = !!((_a = section.elements) === null || _a === void 0 ? void 0 : _a.length);
-                    if (hasElements) {
-                        const elements = [...section.elements].filter(hasData);
-                        section.elements = elements;
-                    }
-                    return !!section.elements.length;
-                }),
+                sections: index_85.pageObject.getNonNullSections(),
                 footer: index_85.pageObject.footer,
                 config: index_85.pageObject.config
             };
@@ -8405,7 +8410,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             catch (error) {
                 console.log('setdata', error);
             }
-            index_85.pageObject.updateMenu();
+            components_43.application.EventBus.dispatch(index_84.EVENT.ON_UPDATE_MENU);
         }
         updatePageConfig() {
             const { backgroundColor, margin, sectionWidth } = (0, index_85.getDefaultPageConfig)();
