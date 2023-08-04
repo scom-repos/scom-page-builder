@@ -4846,17 +4846,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     }
                 }
             }
-            this.addEventListener('dragenter', function (event) {
-                const eventTarget = event.target;
-                // if (!eventTarget.classList.contains('fixed-grid-item')) return
-                const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
-                dragEnter(eventTarget, event.clientX, event.clientY, collision);
-            });
+            this.addEventListener('dragenter', function (event) { });
             this.addEventListener('dragover', function (event) {
                 event.preventDefault();
                 const eventTarget = event.target;
                 let enterTarget;
-                const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
+                const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') : undefined;
+                const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
                 // if target overlap with itself
                 if ((collision.collisionType == 'self' && !collision.toolbar) || collision.collisionType == 'none') {
                     const cursorPosition = { x: event.clientX, y: event.clientY };

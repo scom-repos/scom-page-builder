@@ -744,18 +744,14 @@ export class PageRow extends Module {
             }
         }
 
-        this.addEventListener('dragenter', function (event) {
-            const eventTarget = event.target as Control;
-            // if (!eventTarget.classList.contains('fixed-grid-item')) return
-            const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
-            dragEnter(eventTarget, event.clientX, event.clientY, collision);
-        });
+        this.addEventListener('dragenter', function (event) { });
 
         this.addEventListener('dragover', function (event) {
             event.preventDefault();
             const eventTarget = event.target as Control;
             let enterTarget: Control;
-            const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
+            const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
+            const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
             // if target overlap with itself
             if ((collision.collisionType == 'self' && !collision.toolbar) || collision.collisionType == 'none') {
                 const cursorPosition = {x: event.clientX, y: event.clientY};
