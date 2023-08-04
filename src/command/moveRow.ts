@@ -1,7 +1,6 @@
 import { ICommand } from "./interface";
 import { application } from "@ijstech/components";
 import { EVENT } from '../const/index';
-import { pageObject } from "../store/index";
 
 export class MoveElementCommand implements ICommand {
   private element: HTMLElement;

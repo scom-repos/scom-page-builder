@@ -5048,6 +5048,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const isUngrouping = self.isUngrouping();
                 const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
                 let dropElm = parentWrapper.querySelector('.is-dragenter');
+                // drop outside the grid panel of a row (drop on left/right)
+                if (eventTarget && eventTarget.id && eventTarget.id.startsWith("row-")) {
+                    const pnlRow = eventTarget.closest('#pnlRow');
+                    if (!pnlRow && !dropElm)
+                        return;
+                }
                 const dropToolbar = dropElm === null || dropElm === void 0 ? void 0 : dropElm.closest('ide-toolbar');
                 if (self.currentToolbar && dropToolbar == self.currentToolbar)
                     dropElm = null;

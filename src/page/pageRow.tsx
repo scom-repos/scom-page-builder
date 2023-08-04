@@ -1000,6 +1000,12 @@ export class PageRow extends Module {
             const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
 
             let dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
+            // drop outside the grid panel of a row (drop on left/right)
+            if (eventTarget && eventTarget.id && eventTarget.id.startsWith("row-")) {
+                const pnlRow = eventTarget.closest('#pnlRow')
+                if (!pnlRow && !dropElm) return;
+            }
+            
             const dropToolbar = dropElm?.closest('ide-toolbar');
             if (self.currentToolbar && dropToolbar == self.currentToolbar) dropElm = null;
 
