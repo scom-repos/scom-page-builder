@@ -4275,13 +4275,19 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            const { image = '', backgroundColor, backdropColor, backdropImage, sectionWidth, margin, align } = config || {};
-            if (image)
-                this.background.image = image;
-            if (backdropImage)
-                this.background.image = backdropImage;
-            else if (backdropColor)
-                this.background.color = backdropColor;
+            const { image = '', backgroundColor, backdropColor, backdropImage, sectionWidth, margin, align, fullWidth } = config || {};
+            if (!fullWidth) {
+                if (image)
+                    this.background.image = image;
+                if (backdropImage)
+                    this.background.image = backdropImage;
+                else if (backdropColor)
+                    this.background.color = backdropColor;
+            }
+            else {
+                if (backgroundColor)
+                    this.background.color = backgroundColor;
+            }
             if (backgroundColor)
                 this.pnlRowContainer.background.color = backgroundColor;
             this.pnlRowContainer.maxWidth = sectionWidth !== null && sectionWidth !== void 0 ? sectionWidth : '100%';

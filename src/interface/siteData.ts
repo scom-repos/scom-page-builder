@@ -75,6 +75,7 @@ export type AlignType = 'left' | 'center' | 'right';
 export interface IPageSectionConfig extends IPageConfig {
     align?: AlignType;
     image?: string;
+    fullWidth?: boolean;
 }
 
 // export interface IRowSettings {

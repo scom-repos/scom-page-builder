@@ -385,6 +385,7 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
     export interface IPageSectionConfig extends IPageConfig {
         align?: AlignType;
         image?: string;
+        fullWidth?: boolean;
     }
     export interface IOnFetchComponentsOptions {
         category?: string;
