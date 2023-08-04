@@ -755,8 +755,14 @@ declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
         private appendElm;
         private config;
         private mergeType;
-        constructor(dragToolbar: Control, dragSection: Control, dropElm: Control, config: any, mergeType: IMergeType);
+        private clientX;
+        constructor(dragToolbar: Control, dragSection: Control, dropElm: Control, config: any, mergeType: IMergeType, clientX?: number);
         execute(): Promise<void>;
+        moveSection(dropRow: any, dragRow: any, nearestDropSection: any, dragSection: any, isFront: boolean): Promise<void>;
+        findNearestSection(parent: any, point: number): {
+            isFront: boolean;
+            element: any;
+        };
         undo(): Promise<void>;
         redo(): void;
     }
