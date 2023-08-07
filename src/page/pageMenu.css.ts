@@ -41,7 +41,7 @@ export const menuCardStyle = Styles.style({
             fontWeight: "600 !important"
         },
         '.iconButton:hover': {
-            backgroundColor: 'a9a9a9 !important'
+            backgroundColor: '#abccd4 !important'
         },
         '.iconButton': {
             borderRadius: '10px'

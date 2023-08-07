@@ -7182,7 +7182,7 @@ define("@scom/scom-page-builder/page/pageMenu.css.ts", ["require", "exports", "@
                 fontWeight: "600 !important"
             },
             '.iconButton:hover': {
-                backgroundColor: 'a9a9a9 !important'
+                backgroundColor: '#abccd4 !important'
             },
             '.iconButton': {
                 borderRadius: '10px'
@@ -7347,10 +7347,10 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
                         this.$render("i-label", { id: "cardDot", caption: "•", font: { size: '16px', color: '#3b3838', weight: 530 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" }),
                         this.$render("i-label", { id: "cardTitle", caption: items[i].caption, font: { size: '16px', color: '#3b3838', weight: 530 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" }),
                         this.$render("i-input", { id: "cardInput", visible: false, width: '90%', height: '40px', padding: { left: '0.5rem', top: '0.5rem', bottom: '0.5rem', right: '0.5rem' } })),
-                    this.$render("i-icon", { id: "cardRenameBtn", name: 'pen', fill: 'var(--colors-primary-main)', width: 22, height: 22, padding: { top: 4, bottom: 4, left: 4, right: 4 }, margin: { right: 4 }, class: "pointer iconButton", visible: false, tooltip: { content: "Rename", placement: "right" }, onClick: () => this.onClickRenameBtn(items[i].rowId) }),
+                    this.$render("i-icon", { id: "cardRenameBtn", name: 'pen', fill: 'var(--colors-primary-main)', width: 28, height: 28, padding: { top: 7, bottom: 7, left: 7, right: 7 }, margin: { right: 4 }, class: "pointer iconButton", visible: false, tooltip: { content: "Rename", placement: "top" }, onClick: () => this.onClickRenameBtn(items[i].rowId) }),
                     this.$render("i-hstack", { id: "editBtnStack", verticalAlignment: "center", visible: false },
-                        this.$render("i-icon", { name: 'times', width: 22, height: 22, fill: 'var(--colors-primary-main)', padding: { top: 4, bottom: 4, left: 4, right: 4 }, margin: { right: 4 }, class: "pointer iconButton", tooltip: { content: "Cancel", placement: "right" }, onClick: () => this.onClickCancelBtn(items[i].rowId) }),
-                        this.$render("i-icon", { name: "check", width: 22, height: 22, fill: 'var(--colors-primary-main)', padding: { top: 4, bottom: 4, left: 4, right: 4 }, margin: { right: 4 }, class: "pointer iconButton", tooltip: { content: "Confirm", placement: "right" }, onClick: () => this.onClickConfirmBtn(items[i].rowId) }))));
+                        this.$render("i-icon", { name: 'times', width: 28, height: 28, fill: 'var(--colors-primary-main)', padding: { top: 7, bottom: 7, left: 7, right: 7 }, margin: { right: 4 }, class: "pointer iconButton", tooltip: { content: "Cancel", placement: "top" }, onClick: () => this.onClickCancelBtn(items[i].rowId) }),
+                        this.$render("i-icon", { name: "check", width: 28, height: 28, fill: 'var(--colors-primary-main)', padding: { top: 7, bottom: 7, left: 7, right: 7 }, margin: { right: 4 }, class: "pointer iconButton", tooltip: { content: "Confirm", placement: "top" }, onClick: () => this.onClickConfirmBtn(items[i].rowId) }))));
                 menuCard.setAttribute('draggable', 'true');
                 menuCard.setAttribute('rowId', items[i].rowId);
                 this.pnlMenu.appendChild(menuCard);
@@ -7419,7 +7419,7 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
         }
         render() {
             return (this.$render("i-vstack", { id: "menuWrapper", gap: "0.5rem", class: pageMenu_css_1.menuBtnStyle, zIndex: 150 },
-                this.$render("i-hstack", { gap: '1rem', verticalAlignment: 'center', class: "pointer" },
+                this.$render("i-hstack", { gap: '1rem', verticalAlignment: 'center' },
                     this.$render("i-label", { caption: "Page menu", font: { color: 'var(--colors-primary-main)', weight: 750, size: '18px' }, class: "prevent-select" })),
                 this.$render("i-vstack", { id: "pnlMenuWrapper", width: 320 },
                     this.$render("i-vstack", { id: 'pnlMenu', class: pageMenu_css_1.menuStyle }))));
@@ -7483,7 +7483,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                     name: 'bars',
                     tooltip: { content: 'Page menu', placement: 'left' },
                     onClick: (target) => {
-                        this.openMenuModal(target);
+                        this.openMenuModal(target.parent);
                     }
                 },
                 {
@@ -7504,9 +7504,11 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                     onClick: () => index_70.commandHistory.redo()
                 }
             ];
+            this.toolbars.clearInnerHTML();
             iconList.forEach((icon) => {
-                this.toolbars.appendChild(this.$render("i-hstack", { class: pageSidebar_css_1.categoryButtonStyle, width: 40, height: 40, padding: { top: 6, bottom: 6, left: 6, right: 6 }, horizontalAlignment: 'center', verticalAlignment: 'center', tooltip: icon.tooltip, onClick: icon.onClick },
-                    this.$render("i-icon", { width: 16, height: 16, name: icon.name, fill: Theme.colors.primary.main })));
+                this.toolbars.appendChild(this.$render("i-panel", null,
+                    this.$render("i-hstack", { class: pageSidebar_css_1.categoryButtonStyle, width: 40, height: 40, padding: { top: 6, bottom: 6, left: 6, right: 6 }, horizontalAlignment: 'center', verticalAlignment: 'center', tooltip: icon.tooltip, onClick: icon.onClick, overflow: "hidden" },
+                        this.$render("i-icon", { width: 16, height: 16, name: icon.name, fill: Theme.colors.primary.main }))));
             });
         }
         renderWidgetCategories() {

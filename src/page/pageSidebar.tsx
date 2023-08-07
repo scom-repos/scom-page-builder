@@ -56,7 +56,7 @@ export class PageSidebar extends Module {
                 name: 'bars',
                 tooltip: { content: 'Page menu', placement: 'left' },
                 onClick: (target: Control) => {
-                    this.openMenuModal(target);
+                    this.openMenuModal(target.parent);
                 }
             },
             {
@@ -77,20 +77,24 @@ export class PageSidebar extends Module {
                 onClick: () => commandHistory.redo()
             }
         ];
+        this.toolbars.clearInnerHTML();
         iconList.forEach((icon) => {
             this.toolbars.appendChild(
-                <i-hstack
-                    class={categoryButtonStyle}
-                    width={40}
-                    height={40}
-                    padding={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                    horizontalAlignment='center'
-                    verticalAlignment='center'
-                    tooltip={icon.tooltip}
-                    onClick={icon.onClick}
-                >
-                    <i-icon width={16} height={16} name={icon.name} fill={Theme.colors.primary.main}></i-icon>
-                </i-hstack>
+                <i-panel>
+                    <i-hstack
+                        class={categoryButtonStyle}
+                        width={40}
+                        height={40}
+                        padding={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                        horizontalAlignment='center'
+                        verticalAlignment='center'
+                        tooltip={icon.tooltip}
+                        onClick={icon.onClick}
+                        overflow="hidden"
+                    >
+                        <i-icon width={16} height={16} name={icon.name as IconName} fill={Theme.colors.primary.main}></i-icon>
+                    </i-hstack>
+                </i-panel>
             );
         })
     }
