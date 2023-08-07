@@ -61,10 +61,11 @@ export const widgetStyle = Styles.style({
             lineHeight: 1.25
         },
         '> i-image img': {
-            width: 40,
+            width: 'auto',
             height: 40,
             objectFit: 'cover',
-            borderRadius: 5
+            borderRadius: 5,
+            backgroundColor: '#fff'
         }
     }
 })

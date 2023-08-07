@@ -40,7 +40,7 @@ export class MoveElementCommand implements ICommand {
       templateColumns.push(i === this.dropIndex ? 'minmax(auto, 100%)' : `${unitWidth}px`);
     }
     (this.parent as any).templateColumns = templateColumns;
-    application.EventBus.dispatch(EVENT.ON_UPDATE_MENU, this.dataList);
+    application.EventBus.dispatch(EVENT.ON_UPDATE_MENU);
   }
 
   undo(): void {
@@ -64,7 +64,7 @@ export class MoveElementCommand implements ICommand {
       templateColumns.push(i === this.dragIndex ? 'minmax(auto, 100%)' : `${unitWidth}px`);
     }
     (this.parent as any).templateColumns = templateColumns;
-    application.EventBus.dispatch(EVENT.ON_UPDATE_MENU, this.dataList);
+    application.EventBus.dispatch(EVENT.ON_UPDATE_MENU);
   }
 
   redo(): void {}

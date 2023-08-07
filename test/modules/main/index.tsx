@@ -142,7 +142,7 @@ export class MainModule extends Module {
       "sections": [
         {
           "id": "6876b0ab-a29c-4ed8-905e-51cd515fa26c",
-          "row": 1,
+          "row": 0,
           "name": "My banner",
           "elements": [
             {
@@ -203,7 +203,7 @@ export class MainModule extends Module {
     return (
       <i-panel width="100%" height="100%">
         <i-button
-            visible={false}
+          visible={false}
           position="fixed"
           caption="Get data"
           right="24px"

@@ -199,9 +199,9 @@ export class IDEToolbar extends Module {
             const customUI = action.customUI;
             let element = null;
             if (action.isReplacement) {
-                element = customUI.render({ ...properties, ...tag }, this.replaceComponent.bind(this));
+                element = await customUI.render({ ...properties, ...tag }, this.replaceComponent.bind(this));
             } else {
-                element = customUI.render({ ...properties, ...tag }, this.onSave.bind(this));
+                element = await customUI.render({ ...properties, ...tag }, this.onSave.bind(this));
             }
             this.pnlForm.append(element);
             this.form.visible = false

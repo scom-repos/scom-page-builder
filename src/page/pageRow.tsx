@@ -751,18 +751,14 @@ export class PageRow extends Module {
             }
         }
 
-        this.addEventListener('dragenter', function (event) {
-            const eventTarget = event.target as Control;
-            // if (!eventTarget.classList.contains('fixed-grid-item')) return
-            const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
-            dragEnter(eventTarget, event.clientX, event.clientY, collision);
-        });
+        this.addEventListener('dragenter', function (event) { });
 
         this.addEventListener('dragover', function (event) {
             event.preventDefault();
             const eventTarget = event.target as Control;
             let enterTarget: Control;
-            const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
+            const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
+            const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
             // if target overlap with itself
             if ((collision.collisionType == 'self' && !collision.toolbar) || collision.collisionType == 'none') {
                 const cursorPosition = {x: event.clientX, y: event.clientY};
@@ -1007,6 +1003,12 @@ export class PageRow extends Module {
             const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
 
             let dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
+            // drop outside the grid panel of a row (drop on left/right)
+            if (eventTarget && eventTarget.id && eventTarget.id.startsWith("row-")) {
+                const pnlRow = eventTarget.closest('#pnlRow')
+                if (!pnlRow && !dropElm) return;
+            }
+            
             const dropToolbar = dropElm?.closest('ide-toolbar');
             if (self.currentToolbar && dropToolbar == self.currentToolbar) dropElm = null;
 
@@ -1057,7 +1059,7 @@ export class PageRow extends Module {
 
                 // ungrouping elm
                 if (isUngrouping) {
-                    const dragCmd = new UngroupElementCommand(self.currentToolbar, self.currentElement, nearestFixedItem, config, 'none');
+                    const dragCmd = new UngroupElementCommand(self.currentToolbar, self.currentElement, nearestFixedItem, config, 'none', event.clientX);
                     dragCmd && commandHistory.execute(dragCmd);
                     updateDraggingUI();
                 } else if (self.currentElement.data) {
@@ -1093,7 +1095,8 @@ export class PageRow extends Module {
                                 self.currentElement,
                                 dropElement,
                                 config,
-                                'bottom'
+                                'bottom', 
+                                event.clientX
                             );
                             dragCmd && commandHistory.execute(dragCmd);
                             resetDragTarget();
@@ -1110,7 +1113,7 @@ export class PageRow extends Module {
                     } else if (dropElm.classList.contains('top-block') || collision.mergeSide == 'top') {
                         if (isUngrouping) {
                             const dropElement = eventTarget;
-                            const dragCmd = new UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, 'top');
+                            const dragCmd = new UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, 'top', event.clientX);
                             dragCmd && commandHistory.execute(dragCmd);
                             resetDragTarget();
                         } else {
@@ -1145,7 +1148,8 @@ export class PageRow extends Module {
                                 self.currentElement,
                                 dropElement,
                                 config,
-                                collision.mergeSide
+                                collision.mergeSide, 
+                                event.clientX
                             );
                             dragCmd && commandHistory.execute(dragCmd);
                             resetDragTarget();
@@ -1175,7 +1179,8 @@ export class PageRow extends Module {
                                 self.currentElement,
                                 dropElement,
                                 config,
-                                collision.mergeSide
+                                collision.mergeSide, 
+                                event.clientX
                             );
                             dragCmd && commandHistory.execute(dragCmd);
                             resetDragTarget();

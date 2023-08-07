@@ -8,11 +8,12 @@ import {
     Control,
     Input,
     Label,
-    Icon
+    Icon,
+    HStack
 } from '@ijstech/components';
 import { pageObject } from '../store/index';
 import { EVENT } from '../const/index';
-import { IPageSection, IPageElement, IMenuItem } from '../interface/index';
+import { IPageSection, IPageElement } from '../interface/index';
 import { menuBtnStyle, menuCardStyle, menuStyle } from './pageMenu.css';
 import { commandHistory, MoveElementCommand } from '../command/index';
 
@@ -30,11 +31,9 @@ declare global {
 export class PageMenu extends Module {
 
     private pnlMenu: VStack;
-    private pnlMenuWrapper: VStack;
-    private menuWrapper: VStack;
-    private items: IMenuItem[];
     private draggingSectionId: string;
     private isEditing: boolean = false;
+    private focusRowId: string;
 
     init() {
         super.init();
@@ -43,11 +42,11 @@ export class PageMenu extends Module {
     }
 
     private initEventBus() {
-        application.EventBus.register(this, EVENT.ON_UPDATE_MENU, async (sections: IPageSection[]) => this.renderMenu(sections));
+        application.EventBus.register(this, EVENT.ON_UPDATE_MENU, async () => this.renderMenu());
         application.EventBus.register(this, EVENT.ON_SELECT_SECTION, async (rowId: string) => this.setfocusCard(rowId));
     }
 
-    initEventListener() {
+    private initEventListener() {
         this.addEventListener('dragstart', (event) => {
             const eventTarget = event.target as HTMLElement;
             if (!eventTarget || this.isEditing) {
@@ -67,6 +66,7 @@ export class PageMenu extends Module {
             if (activeLineIdx != -1)
                 this.reorderSection(this.draggingSectionId, activeLineIdx);
 
+            this.setfocusCard(this.focusRowId);
             this.setActiveDropLine(-1);
             this.draggingSectionId = undefined;
         });
@@ -87,7 +87,7 @@ export class PageMenu extends Module {
         });
     }
 
-    initMenuCardEventListener(card: Control) {
+    private initMenuCardEventListener(card: Control) {
         card.addEventListener('mouseenter', (event) => {
             if (this.isEditing) return;
             this.toggleRenameBtn(card.getAttribute('rowId'), true);
@@ -99,6 +99,7 @@ export class PageMenu extends Module {
     }
 
     private setfocusCard(rowId: string) {
+        this.focusRowId = rowId;
         const menuCards = this.pnlMenu.querySelectorAll('#menuCard');
         for (let i = 0; i < menuCards.length; i++) {
             const cardDot = menuCards[i].querySelector('#cardDot');
@@ -166,9 +167,10 @@ export class PageMenu extends Module {
         }
     }
 
-    renderMenu(sections: IPageSection[]) {
+    private renderMenu() {
         this.pnlMenu.clearInnerHTML();
-        this.items = sections.map((section: IPageSection) => {
+        const sections = pageObject.getNonNullSections();
+        const items = sections.map((section: IPageSection) => {
             return {
                 caption: this.getTitle(section),
                 rowId: section.id.replace("row-", "")
@@ -178,7 +180,7 @@ export class PageMenu extends Module {
         // set the titles here
         const dropLine = (<i-panel id={`menuDropLine-0`} width={'100%'} height={'5px'}></i-panel>);
         this.pnlMenu.appendChild(dropLine);
-        for (let i = 0; i < this.items.length; i++) {
+        for (let i = 0; i < items.length; i++) {
             const menuCard = (
                 <i-hstack
                     id="menuCard"
@@ -188,7 +190,7 @@ export class PageMenu extends Module {
                     width="100%"
                     border={{ radius: 5 }}
                     overflow="hidden"
-                    onClick={() => this.goToSection(this.items[i].rowId)}
+                    onClick={() => this.goToSection(items[i].rowId)}
                 >
                     <i-hstack verticalAlignment="center" horizontalAlignment='start'>
                         <i-label
@@ -201,7 +203,7 @@ export class PageMenu extends Module {
                         ></i-label>
                         <i-label
                             id="cardTitle"
-                            caption={this.items[i].caption}
+                            caption={items[i].caption}
                             font={{ size: '16px', color: '#3b3838', weight: 530 }}
                             padding={{ top: 8, bottom: 8, left: 8, right: 8 }}
                             maxHeight={34}
@@ -213,35 +215,46 @@ export class PageMenu extends Module {
                             width='90%'
                             height='40px'
                             padding={{ left: '0.5rem', top: '0.5rem', bottom: '0.5rem', right: '0.5rem' }}
-                            onChanged={(control) => this.setCardTitle(control, this.items[i].rowId)}
                         ></i-input>
                     </i-hstack>
                     <i-icon
                         id="cardRenameBtn"
-                        name='ellipsis-h'
+                        name='pen'
+                        fill={'var(--colors-primary-main)'}
                         width={22} height={22}
                         padding={{ top: 4, bottom: 4, left: 4, right: 4 }}
                         margin={{ right: 4 }}
                         class="pointer iconButton"
                         visible={false}
                         tooltip={{ content: "Rename", placement: "right" }}
-                        onClick={() => this.onClickRenameBtn(this.items[i].rowId)}
+                        onClick={() => this.onClickRenameBtn(items[i].rowId)}
                     ></i-icon>
-                    <i-icon
-                        id="cardConfirmBtn"
-                        name="check"
-                        width={22} height={22}
-                        padding={{ top: 4, bottom: 4, left: 4, right: 4 }}
-                        margin={{ right: 4 }}
-                        class="pointer iconButton"
-                        visible={false}
-                        tooltip={{ content: "Confirm", placement: "right" }}
-                        onClick={() => this.onClickConfirmBtn(this.items[i].rowId)}
-                    ></i-icon>
+                    <i-hstack id="editBtnStack" verticalAlignment="center" visible={false}>
+                        <i-icon
+                            name='times'
+                            width={22} height={22}
+                            fill={'var(--colors-primary-main)'}
+                            padding={{ top: 4, bottom: 4, left: 4, right: 4 }}
+                            margin={{ right: 4 }}
+                            class="pointer iconButton"
+                            tooltip={{ content: "Cancel", placement: "right" }}
+                            onClick={() => this.onClickCancelBtn(items[i].rowId)}
+                        ></i-icon>
+                        <i-icon
+                            name="check"
+                            width={22} height={22}
+                            fill={'var(--colors-primary-main)'}
+                            padding={{ top: 4, bottom: 4, left: 4, right: 4 }}
+                            margin={{ right: 4 }}
+                            class="pointer iconButton"
+                            tooltip={{ content: "Confirm", placement: "right" }}
+                            onClick={() => this.onClickConfirmBtn(items[i].rowId)}
+                        ></i-icon>
+                    </i-hstack>
                 </i-hstack>
             );
             menuCard.setAttribute('draggable', 'true');
-            menuCard.setAttribute('rowId', this.items[i].rowId);
+            menuCard.setAttribute('rowId', items[i].rowId);
             this.pnlMenu.appendChild(menuCard);
             this.initMenuCardEventListener(menuCard);
 
@@ -250,15 +263,16 @@ export class PageMenu extends Module {
         }
     }
 
-    private setCardTitle(control: Control, rowId: string) {
-        const caption = (control as Input).value;
+    private setCardTitle(rowId: string) {
+        const currCard = this.pnlMenu.querySelector(`[rowId="${rowId}"]`) as HTMLElement;
+        const cardInput = currCard.querySelector('#cardInput') as Input;
+        const caption = cardInput.value;
 
         // change data
         const sectionIdx = pageObject.sections.findIndex(section => section.id == rowId);
         pageObject.sections[sectionIdx].name = caption;
 
         // change UI on-the-fly
-        const currCard = this.pnlMenu.querySelector(`[rowId="${rowId}"]`) as HTMLElement;
         const cardTitle = currCard.querySelector('#cardTitle');
         (cardTitle as Label).caption = caption;
     }
@@ -268,6 +282,11 @@ export class PageMenu extends Module {
     }
 
     private onClickConfirmBtn(rowId: string) {
+        this.setCardTitle(rowId);
+        this.toggleEditor(rowId, false);
+    }
+
+    private onClickCancelBtn(rowId: string) {
         this.toggleEditor(rowId, false);
     }
 
@@ -284,13 +303,13 @@ export class PageMenu extends Module {
         const cardTitle = currCard.querySelector('#cardTitle');
         const cardInput = currCard.querySelector('#cardInput');
         const cardRenameBtn = currCard.querySelector('#cardRenameBtn');
-        const cardConfirmBtn = currCard.querySelector('#cardConfirmBtn');
 
         (cardInput as Input).value = (cardTitle as Label).caption;
         (cardTitle as Label).visible = !toggle;
         (cardInput as Input).visible = toggle;
         (cardRenameBtn as Icon).visible = !toggle;
-        (cardConfirmBtn as Icon).visible = toggle;
+        const editBtnStack = currCard.querySelector('#editBtnStack') as HStack;
+        editBtnStack.visible = toggle;
     }
 
     private goToSection(rowId: string) {
@@ -313,25 +332,17 @@ export class PageMenu extends Module {
         }
     }
 
-    private toggleMenu() {
-        this.pnlMenuWrapper.visible = !this.pnlMenuWrapper.visible;
-    }
-
     render() {
         return (
-            <i-hstack position='fixed' top="60px" left="30px" height={0} width={0} verticalAlignment="center" horizontalAlignment='center'>
-                <i-vstack id="menuWrapper" position='absolute' top="0px" left="0px" gap={"0.5rem"}
-                    padding={{ top: '1rem', right: '1rem', bottom: '1rem', left: '1rem' }}
-                    class={menuBtnStyle} zIndex={150}>
-                    <i-hstack gap={'1rem'} verticalAlignment='center' onClick={this.toggleMenu} class="pointer">
-                        <i-icon width={22} height={22} name={"bars"} fill={Theme.colors.primary.main}></i-icon>
-                        <i-label caption={"Menu"} font={{ color: '#3b3838', weight: 750, size: '18px' }} class="prevent-select"></i-label>
-                    </i-hstack>
-                    <i-vstack id="pnlMenuWrapper" width={320} visible={false}>
-                        <i-vstack id='pnlMenu' class={menuStyle}></i-vstack>
-                    </i-vstack>
+            <i-vstack id="menuWrapper" gap={"0.5rem"}
+                class={menuBtnStyle} zIndex={150}>
+                <i-hstack gap={'1rem'} verticalAlignment='center' class="pointer">
+                    <i-label caption={"Page menu"} font={{ color: 'var(--colors-primary-main)', weight: 750, size: '18px' }} class="prevent-select"></i-label>
+                </i-hstack>
+                <i-vstack id="pnlMenuWrapper" width={320}>
+                    <i-vstack id='pnlMenu' class={menuStyle}></i-vstack>
                 </i-vstack>
-            </i-hstack>
+            </i-vstack>
         )
     }
 }
