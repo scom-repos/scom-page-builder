@@ -272,7 +272,7 @@ export default class Editor extends Module {
     }
 
     private updatePageConfig() {
-        const { backgroundColor, margin, sectionWidth } = getDefaultPageConfig();
+        const { backgroundColor, backgroundImage, margin, sectionWidth } = getDefaultPageConfig();
         this.style.setProperty('--builder-bg', backgroundColor);
         if (this.pnlEditor) {
             this.pnlEditor.maxWidth = '100%'; // maxWidth ?? '100%';
@@ -303,6 +303,11 @@ export default class Editor extends Module {
         )
         this.events.push(
             application.EventBus.register(this, EVENT.ON_FETCH_COMPONENTS, this.onSearch)
+        )
+        this.events.push(
+            application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: { image: string }) => {
+                if (data.image) this.pnlEditor.style.backgroundImage = `url(${data.image})`
+            })
         )
     }
 

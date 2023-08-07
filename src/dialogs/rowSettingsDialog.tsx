@@ -343,7 +343,7 @@ export class RowSettingsDialog extends Module {
         this.formElm.formOptions = formOptions;
         this.formElm.renderForm();
         const { backgroundColor, margin, sectionWidth } = getPageConfig();
-        const config = { align: 'left', margin, sectionWidth, backgroundColor, ...(this.data?.config || {}) };
+        const config = { align: 'left', sectionWidth, ...(this.data?.config || {}) };
         this.formElm.setFormData({...config});
     }
 

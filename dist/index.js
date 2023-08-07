@@ -2639,19 +2639,22 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             return result;
         }
         updateConfig(config, updatedValues) {
-            const { backgroundColor, margin, sectionWidth } = config;
+            const { backgroundColor, backgroundImage, margin, sectionWidth } = config;
             let newConfig = {};
             for (let prop of updatedValues) {
                 newConfig[prop] = config[prop];
             }
             const element = this.element.closest('i-scom-page-builder') || this.element;
-            element.style.setProperty('--builder-bg', backgroundColor);
+            if (updatedValues.includes('backgroundImage')) {
+                components_8.application.EventBus.dispatch(index_22.EVENT.ON_UPDATE_PAGE_BG, { image: backgroundImage });
+            }
             if (updatedValues.includes('backgroundColor')) {
+                element.style.setProperty('--builder-bg', backgroundColor);
                 components_8.application.EventBus.dispatch(index_22.EVENT.ON_UPDATE_PAGE_BG, { color: backgroundColor });
             }
             this.element.maxWidth = '100%'; // maxWidth ?? '100%';
             this.element.margin = (0, index_21.getMargin)(margin);
-            index_21.pageObject.config = { backgroundColor, margin, sectionWidth };
+            index_21.pageObject.config = { backgroundColor, backgroundImage, margin, sectionWidth };
             return newConfig;
         }
         execute() {
@@ -3454,7 +3457,7 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
             this.formElm.formOptions = formOptions;
             this.formElm.renderForm();
             const { backgroundColor, margin, sectionWidth } = (0, index_33.getPageConfig)();
-            const config = Object.assign({ align: 'left', margin, sectionWidth, backgroundColor }, (((_a = this.data) === null || _a === void 0 ? void 0 : _a.config) || {}));
+            const config = Object.assign({ align: 'left', sectionWidth }, (((_a = this.data) === null || _a === void 0 ? void 0 : _a.config) || {}));
             this.formElm.setFormData(Object.assign({}, config));
         }
         close() {
@@ -4077,7 +4080,7 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
         transition: 'translate .3s ease-in',
         border: '1px solid transparent',
         boxSizing: 'border-box',
-        backgroundColor: 'var(--builder-bg)',
+        // backgroundColor: 'var(--builder-bg)',
         $nest: {
             '.page-row-container': {
                 borderRadius: 10,
@@ -4341,11 +4344,19 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            const { image = '', backgroundColor, backdropColor, sectionWidth, margin, align } = config || {};
-            if (image)
-                this.background.image = image;
-            if (backdropColor)
-                this.background.color = backdropColor;
+            const { image = '', backgroundColor, backdropColor, backdropImage, sectionWidth, margin, align, fullWidth } = config || {};
+            if (!fullWidth) {
+                if (image)
+                    this.background.image = image;
+                if (backdropImage)
+                    this.background.image = backdropImage;
+                else if (backdropColor)
+                    this.background.color = backdropColor;
+            }
+            else {
+                if (backgroundColor)
+                    this.background.color = backgroundColor;
+            }
             if (backgroundColor)
                 this.pnlRowContainer.background.color = backgroundColor;
             this.pnlRowContainer.maxWidth = sectionWidth !== null && sectionWidth !== void 0 ? sectionWidth : '100%';
@@ -8176,6 +8187,9 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
         $nest: {
             '.pnl-editor-wrapper': {
                 display: 'block',
+                backgroundRepeat: 'repeat',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
                 boxShadow: 'rgba(50, 50, 105, 0.15) 0px 2px 5px 0px, rgba(0, 0, 0, 0.05) 0px 1px 1px 0px',
             },
             '.custom-input input': {
@@ -8227,8 +8241,14 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
                     }
                 }
             },
-            'ide-rows ide-row:first-child': {
-                marginTop: 50
+            'ide-rows ide-row': {
+                paddingTop: 20,
+                paddingBottom: 20,
+                $nest: {
+                    '&:first-child': {
+                        paddingTop: 50
+                    }
+                }
             }
         }
     });
@@ -8459,7 +8479,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             components_43.application.EventBus.dispatch(index_84.EVENT.ON_UPDATE_MENU);
         }
         updatePageConfig() {
-            const { backgroundColor, margin, sectionWidth } = (0, index_85.getDefaultPageConfig)();
+            const { backgroundColor, backgroundImage, margin, sectionWidth } = (0, index_85.getDefaultPageConfig)();
             this.style.setProperty('--builder-bg', backgroundColor);
             if (this.pnlEditor) {
                 this.pnlEditor.maxWidth = '100%'; // maxWidth ?? '100%';
@@ -8481,6 +8501,10 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.events.push(components_43.application.EventBus.register(this, index_84.EVENT.ON_SET_DRAG_ELEMENT, async (el) => this.currentElement = el));
             this.events.push(components_43.application.EventBus.register(this, index_84.EVENT.ON_TOGGLE_SEARCH_MODAL, this.onToggleSearch));
             this.events.push(components_43.application.EventBus.register(this, index_84.EVENT.ON_FETCH_COMPONENTS, this.onSearch));
+            this.events.push(components_43.application.EventBus.register(this, index_84.EVENT.ON_UPDATE_PAGE_BG, async (data) => {
+                if (data.image)
+                    this.pnlEditor.style.backgroundImage = `url(${data.image})`;
+            }));
         }
         onUpdateWrapper() {
             //     this.contentWrapper.minHeight = `calc((100vh - 6rem) - ${this.builderFooter.offsetHeight}px)`;

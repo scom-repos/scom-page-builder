@@ -9,7 +9,9 @@ export interface IPageData {
 
 export interface IPageConfig {
     backgroundColor?: string;
+    backgroundImage?: string;
     backdropColor?: string;
+    backdropImage?: string;
     sectionWidth?: number|string;
     margin?: {
         x?: number|string;
@@ -73,6 +75,7 @@ export type AlignType = 'left' | 'center' | 'right';
 export interface IPageSectionConfig extends IPageConfig {
     align?: AlignType;
     image?: string;
+    fullWidth?: boolean;
 }
 
 // export interface IRowSettings {
@@ -95,3 +98,9 @@ export interface ICategory {
     title: string;
     icon: string;
 }
+
+export interface IMenuItem {
+    rowId: string,
+    caption: string
+}
+
