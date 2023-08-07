@@ -245,17 +245,9 @@ export default class Editor extends Module {
     }
 
     getData() {
-        const hasData = (el: IPageElement) => Object.keys(el.module || {}).length || el.elements?.length;
         return {
             // header: pageObject.header,
-            sections: pageObject.sections.filter(section => {
-                const hasElements = !!section.elements?.length;
-                if (hasElements) {
-                    const elements = [...section.elements].filter(hasData);
-                    section.elements = elements;
-                }
-                return !!section.elements.length;
-            }),
+            sections: pageObject.getNonNullSections(),
             footer: pageObject.footer,
             config: pageObject.config
         };
@@ -276,7 +268,7 @@ export default class Editor extends Module {
         } catch (error) {
             console.log('setdata', error);
         }
-        pageObject.updateMenu();
+        application.EventBus.dispatch(EVENT.ON_UPDATE_MENU);
     }
 
     private updatePageConfig() {

@@ -22,6 +22,9 @@ Styles.cssRule('ide-toolbar', {
     'i-button': {
       boxShadow: 'none'
     },
+    '.active': {
+      zIndex: 110
+    },
     'i-scom-markdown-editor i-markdown-editor': {
       width: 'auto !important'
     },

@@ -42,7 +42,7 @@ export class PageMenu extends Module {
     }
 
     private initEventBus() {
-        application.EventBus.register(this, EVENT.ON_UPDATE_MENU, async (sections: IPageSection[]) => this.renderMenu(sections));
+        application.EventBus.register(this, EVENT.ON_UPDATE_MENU, async () => this.renderMenu());
         application.EventBus.register(this, EVENT.ON_SELECT_SECTION, async (rowId: string) => this.setfocusCard(rowId));
     }
 
@@ -167,8 +167,9 @@ export class PageMenu extends Module {
         }
     }
 
-    renderMenu(sections: IPageSection[]) {
+    private renderMenu() {
         this.pnlMenu.clearInnerHTML();
+        const sections = pageObject.getNonNullSections();
         const items = sections.map((section: IPageSection) => {
             return {
                 caption: this.getTitle(section),
