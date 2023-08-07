@@ -6,6 +6,9 @@ Styles.cssRule('#editor', {
   $nest: {
     '.pnl-editor-wrapper': {
       display: 'block',
+      backgroundRepeat: 'repeat',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
       boxShadow: 'rgba(50, 50, 105, 0.15) 0px 2px 5px 0px, rgba(0, 0, 0, 0.05) 0px 1px 1px 0px',
     },
     '.custom-input input': {
@@ -57,8 +60,14 @@ Styles.cssRule('#editor', {
         }
       }
     },
-    'ide-rows ide-row:first-child': {
-      marginTop: 50
+    'ide-rows ide-row': {
+      paddingTop: 20,
+      paddingBottom: 20,
+      $nest: {
+       '&:first-child': {
+         paddingTop: 50
+       }
+      }
     }
   }
 });

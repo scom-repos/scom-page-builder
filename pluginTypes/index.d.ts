@@ -345,7 +345,9 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
     }
     export interface IPageConfig {
         backgroundColor?: string;
+        backgroundImage?: string;
         backdropColor?: string;
+        backdropImage?: string;
         sectionWidth?: number | string;
         margin?: {
             x?: number | string;
@@ -395,6 +397,7 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
     export interface IPageSectionConfig extends IPageConfig {
         align?: AlignType;
         image?: string;
+        fullWidth?: boolean;
     }
     export interface IOnFetchComponentsOptions {
         category?: string;
@@ -532,7 +535,9 @@ declare module "@scom/scom-page-builder/store/index.ts" {
     export const getDefaultPageConfig: () => IPageConfig;
     export const getPageConfig: () => {
         backgroundColor?: string;
+        backgroundImage?: string;
         backdropColor?: string;
+        backdropImage?: string;
         sectionWidth?: string | number;
         margin?: {
             x?: string | number;
