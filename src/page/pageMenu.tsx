@@ -221,33 +221,33 @@ export class PageMenu extends Module {
                         id="cardRenameBtn"
                         name='pen'
                         fill={'var(--colors-primary-main)'}
-                        width={22} height={22}
-                        padding={{ top: 4, bottom: 4, left: 4, right: 4 }}
+                        width={28} height={28}
+                        padding={{ top: 7, bottom: 7, left: 7, right: 7 }}
                         margin={{ right: 4 }}
                         class="pointer iconButton"
                         visible={false}
-                        tooltip={{ content: "Rename", placement: "right" }}
+                        tooltip={{ content: "Rename", placement: "top" }}
                         onClick={() => this.onClickRenameBtn(items[i].rowId)}
                     ></i-icon>
                     <i-hstack id="editBtnStack" verticalAlignment="center" visible={false}>
                         <i-icon
                             name='times'
-                            width={22} height={22}
+                            width={28} height={28}
                             fill={'var(--colors-primary-main)'}
-                            padding={{ top: 4, bottom: 4, left: 4, right: 4 }}
+                            padding={{ top: 7, bottom: 7, left: 7, right: 7 }}
                             margin={{ right: 4 }}
                             class="pointer iconButton"
-                            tooltip={{ content: "Cancel", placement: "right" }}
+                            tooltip={{ content: "Cancel", placement: "top" }}
                             onClick={() => this.onClickCancelBtn(items[i].rowId)}
                         ></i-icon>
                         <i-icon
                             name="check"
-                            width={22} height={22}
+                            width={28} height={28}
                             fill={'var(--colors-primary-main)'}
-                            padding={{ top: 4, bottom: 4, left: 4, right: 4 }}
+                            padding={{ top: 7, bottom: 7, left: 7, right: 7 }}
                             margin={{ right: 4 }}
                             class="pointer iconButton"
-                            tooltip={{ content: "Confirm", placement: "right" }}
+                            tooltip={{ content: "Confirm", placement: "top" }}
                             onClick={() => this.onClickConfirmBtn(items[i].rowId)}
                         ></i-icon>
                     </i-hstack>
@@ -336,7 +336,7 @@ export class PageMenu extends Module {
         return (
             <i-vstack id="menuWrapper" gap={"0.5rem"}
                 class={menuBtnStyle} zIndex={150}>
-                <i-hstack gap={'1rem'} verticalAlignment='center' class="pointer">
+                <i-hstack gap={'1rem'} verticalAlignment='center'>
                     <i-label caption={"Page menu"} font={{ color: 'var(--colors-primary-main)', weight: 750, size: '18px' }} class="prevent-select"></i-label>
                 </i-hstack>
                 <i-vstack id="pnlMenuWrapper" width={320}>
