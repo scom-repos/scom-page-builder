@@ -50,6 +50,7 @@ export class PageRow extends Module {
     private actionsBar: VStack;
     private dragStack: VStack;
     private pnlRowContainer: Panel;
+    private pnlRowWrap: Panel;
     private pnlRow: GridLayout;
     private mdRowSetting: RowSettingsDialog;
     private pnlEmty: VStack;
@@ -208,7 +209,7 @@ export class PageRow extends Module {
     }
 
     updateRowConfig(config: IPageSectionConfig) {
-        const {image = '', backgroundColor, backdropColor, backdropImage, sectionWidth, margin, align, fullWidth} = config || {};
+        const {image = '', backgroundColor, backdropColor, backdropImage, sectionWidth, margin, align, fullWidth, pb, pl, pr, pt, ptb, plr} = config || {};
         if (!fullWidth) {
             if (image) this.background.image = image;
             if(backdropImage)
@@ -222,6 +223,12 @@ export class PageRow extends Module {
         this.pnlRowContainer.maxWidth = sectionWidth ?? '100%';
         if (margin) this.pnlRowContainer.margin = getMargin(margin);
         this.pnlRowContainer.width = margin?.x && margin?.x !== 'auto' ? 'auto' : '100%';
+        this.pnlRowWrap.padding = { 
+            top: pt !== undefined ? pt : ptb !== undefined ? ptb : 0,
+            bottom: pb !== undefined ? pb : ptb !== undefined ? ptb : 0,
+            left: pl !== undefined ? pl : plr !== undefined ? plr : 0,
+            right: pr !== undefined ? pr : plr !== undefined ? plr : 0,
+        }
         if (align) this.updateAlign();
     }
 
@@ -1395,7 +1402,7 @@ export class PageRow extends Module {
     render() {
         return (
             <i-panel id="pnlRowContainer" class={'page-row-container'} width="100%" height="100%">
-                <i-panel id="pnlRowWrap" class={'page-row'} width="100%" height="100%" padding={{left: '3rem', right: '3rem'}}>
+                <i-panel id="pnlRowWrap" class={'page-row'} width="100%" height="100%">
                     <i-button
                         caption=""
                         icon={{

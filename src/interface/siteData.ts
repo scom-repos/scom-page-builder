@@ -13,6 +13,8 @@ export interface IPageConfig {
     backdropColor?: string;
     backdropImage?: string;
     sectionWidth?: number|string;
+    plr?: number;
+    ptb?: number;
     margin?: {
         x?: number|string;
         y?: number|string;
@@ -76,6 +78,10 @@ export interface IPageSectionConfig extends IPageConfig {
     align?: AlignType;
     image?: string;
     fullWidth?: boolean;
+    pb?: number;
+    pl?: number;
+    pr?: number;
+    pt?: number
 }
 
 // export interface IRowSettings {
