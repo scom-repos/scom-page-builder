@@ -8426,10 +8426,13 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.initDragEvent(this.pageContent);
         }
         onKeyUp(event) {
-            if (event.code === 'KeyZ' && event.ctrlKey) {
+            const toolbars = Array.from(this.pnlEditor.querySelectorAll('ide-toolbar'));
+            const cannotRedoUndo = toolbars.find((toolbar) => toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting'));
+            console.log("cannotRedoUndo", cannotRedoUndo);
+            if (event.code === 'KeyZ' && event.ctrlKey && !cannotRedoUndo) {
                 index_87.commandHistory.undo();
             }
-            else if (event.code === 'KeyY' && event.ctrlKey) {
+            else if (event.code === 'KeyY' && event.ctrlKey && !cannotRedoUndo) {
                 index_87.commandHistory.redo();
             }
         }
