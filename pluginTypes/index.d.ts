@@ -414,6 +414,10 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         title: string;
         icon: string;
     }
+    export interface IMenuItem {
+        rowId: string;
+        caption: string;
+    }
 }
 /// <amd-module name="@scom/scom-page-builder/interface/jsonSchema.ts" />
 declare module "@scom/scom-page-builder/interface/jsonSchema.ts" {
