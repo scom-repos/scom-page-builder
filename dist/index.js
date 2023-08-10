@@ -2473,7 +2473,8 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
                     showHeader: isMicroDapps,
                     showFooter: isMicroDapps
                 },
-                module: this.data.module
+                module: this.data.module,
+                tag: {}
             };
             if (((_d = (_c = this.data) === null || _c === void 0 ? void 0 : _c.module) === null || _d === void 0 ? void 0 : _d.category) === 'offers') {
                 let scconfig = await (0, index_19.fetchScconfigByRootCid)(this.data.module.path);
@@ -2481,6 +2482,9 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
                 this.data.module.path = widgetData.module.path || widgetData.module.name.replace('@scom/', '');
                 if (widgetData.properties) {
                     Object.assign(newElData.properties, widgetData.properties);
+                }
+                if (widgetData.tag) {
+                    newElData.tag = widgetData.tag;
                 }
             }
             const parentData = (_e = this.parent) === null || _e === void 0 ? void 0 : _e.data;
