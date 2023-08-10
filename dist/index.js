@@ -2639,7 +2639,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             return result;
         }
         updateConfig(config, updatedValues) {
-            const { backgroundColor, backgroundImage, margin, sectionWidth } = config;
+            const { backgroundColor, backgroundImage, margin, sectionWidth, ptb, plr } = config;
             let newConfig = {};
             for (let prop of updatedValues) {
                 newConfig[prop] = config[prop];
@@ -2654,7 +2654,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             }
             this.element.maxWidth = '100%'; // maxWidth ?? '100%';
             this.element.margin = (0, index_21.getMargin)(margin);
-            index_21.pageObject.config = { backgroundColor, backgroundImage, margin, sectionWidth };
+            index_21.pageObject.config = { backgroundColor, backgroundImage, margin, sectionWidth, ptb, plr };
             return newConfig;
         }
         execute() {
@@ -3143,7 +3143,8 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts", ["require", "
                     '.modal': {
                         maxHeight: 'calc(100vh - 48px)',
                         padding: 0,
-                        borderRadius: 5
+                        borderRadius: 5,
+                        overflowY: 'auto',
                     }
                 }
             }
@@ -3495,7 +3496,8 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.css.ts", ["require", 
                     '.modal': {
                         maxHeight: 'calc(100vh - 48px)',
                         padding: 0,
-                        borderRadius: 5
+                        borderRadius: 5,
+                        overflowY: 'auto',
                     }
                 }
             }

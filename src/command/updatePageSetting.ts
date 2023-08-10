@@ -37,7 +37,7 @@ export class UpdatePageSettingsCommand implements ICommand {
   }
 
   private updateConfig(config: IPageConfig, updatedValues: string[]) {
-    const { backgroundColor, backgroundImage, margin, sectionWidth } = config;
+    const { backgroundColor, backgroundImage, margin, sectionWidth, ptb, plr } = config;
     let newConfig: IPageConfig = {};
     for (let prop of updatedValues) {
       newConfig[prop] = config[prop];
@@ -53,7 +53,7 @@ export class UpdatePageSettingsCommand implements ICommand {
     }
     this.element.maxWidth = '100%'; // maxWidth ?? '100%';
     this.element.margin = getMargin(margin);
-    pageObject.config = {backgroundColor, backgroundImage, margin, sectionWidth};
+    pageObject.config = {backgroundColor, backgroundImage, margin, sectionWidth, ptb, plr};
     return newConfig;
   }
 

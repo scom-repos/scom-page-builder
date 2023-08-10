@@ -15,7 +15,8 @@ Styles.cssRule('ide-page-settings-dialog', {
         '.modal': {
           maxHeight: 'calc(100vh - 48px)',
           padding: 0,
-          borderRadius: 5
+          borderRadius: 5,
+          overflowY: 'auto',
         }
       }
     }
