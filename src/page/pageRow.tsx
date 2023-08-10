@@ -29,6 +29,7 @@ import {
 import {IDEToolbar} from '../common/toolbar';
 import {generateUUID} from '../utility/index';
 import {IMergeType} from '../command/index';
+import { getUngroupData, findNearestSection } from '../utility/ungroup'
 const Theme = Styles.Theme.ThemeVars;
 
 declare global {
@@ -488,6 +489,7 @@ export class PageRow extends Module {
                     }
                 }
                 elm.classList.add(className);
+                removeRectangles();
             } else {
                 elm.classList.remove(className);
             }
@@ -617,6 +619,16 @@ export class PageRow extends Module {
             else target = enterTarget.closest('.fixed-grid-item') as Control;
             self.addDottedLines();
             toggleAllToolbarBoarder(true);
+
+            if (self.isUngrouping()) {
+                self.updateGridColumnWidth();
+                const targetRow = target.closest('ide-row') as Control;
+                const nearestDropSection = findNearestSection(targetRow, clientX)
+                const newSectionData = getUngroupData(targetRow, nearestDropSection.element, self.currentElement, nearestDropSection.isFront, self.currentToolbar.data);
+                showRectangle(targetRow, newSectionData.newElmdata.column, newSectionData.newElmdata.columnSpan);
+                return;
+            }
+
             if (target) {
                 const dropRow = target.closest('ide-row');
                 let offsetLeft = 0;
@@ -658,13 +670,13 @@ export class PageRow extends Module {
                         spaces += sectionColumnSpan;
                     }
                 }
-                if (findedSection && (isFromToolbar || self.currentElement.id !== findedSection.id) || MAX_COLUMN - spaces < 1) {
-                    removeRectangles();
-                    return;
-                }
+                // if (findedSection && (isFromToolbar || self.currentElement.id !== findedSection.id) || MAX_COLUMN - spaces < 1) {
+                //     removeRectangles();
+                //     return;
+                // }
                 self.updateGridColumnWidth();
-                const targetRow = target.closest('#pnlRow') as Control;
-                showRectangle(targetRow, colStart, Math.min(columnSpan, MAX_COLUMN - spaces));
+                const targetRowPnl = target.closest('#pnlRow') as Control;
+                showRectangle(targetRowPnl, colStart, Math.min(columnSpan, MAX_COLUMN - spaces));
             } else {
                 removeRectangles();
                 const section = enterTarget.closest('ide-section') as Control;
@@ -912,7 +924,8 @@ export class PageRow extends Module {
             const sortedSections: HTMLElement[] = sections.sort(
                 (a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column)
             );
-
+            
+            const offsetLeft = Math.floor((startX + GAP_WIDTH) / (self.gridColumnWidth + GAP_WIDTH));
             const startOfDragingElm: number = dropColumn;
             const endOfDragingElm: number = dropColumn + parseInt(dragSection.dataset.columnSpan) - 1;
 

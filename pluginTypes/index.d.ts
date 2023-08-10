@@ -746,6 +746,17 @@ declare module "@scom/scom-page-builder/command/groupElement.ts" {
 declare module "@scom/scom-page-builder/command/type.ts" {
     export type IMergeType = "front" | "back" | "top" | "bottom" | "none";
 }
+/// <amd-module name="@scom/scom-page-builder/utility/ungroup.ts" />
+declare module "@scom/scom-page-builder/utility/ungroup.ts" {
+    export const getNewSectionData: (dropRow: any, nearestDropSection: any, dragSection: any, isFront: boolean, data: any) => {
+        newElmdata: any;
+        newRowData: any;
+    };
+    export const findNearestSection: (parent: any, point: number) => {
+        isFront: boolean;
+        element: any;
+    };
+}
 /// <amd-module name="@scom/scom-page-builder/command/ungroupElement.ts" />
 declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
     import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
@@ -768,10 +779,6 @@ declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
         constructor(dragToolbar: Control, dragSection: Control, dropElm: Control, config: any, mergeType: IMergeType, clientX?: number);
         execute(): Promise<void>;
         moveSection(dropRow: any, dragRow: any, nearestDropSection: any, dragSection: any, isFront: boolean): Promise<void>;
-        findNearestSection(parent: any, point: number): {
-            isFront: boolean;
-            element: any;
-        };
         undo(): Promise<void>;
         redo(): void;
     }
