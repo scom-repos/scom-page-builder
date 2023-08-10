@@ -77,6 +77,8 @@ export type AlignType = 'left' | 'center' | 'right';
 export interface IPageSectionConfig extends IPageConfig {
     align?: AlignType;
     image?: string;
+    border?: boolean;
+    borderColor?: string;
     fullWidth?: boolean;
     pb?: number;
     pl?: number;

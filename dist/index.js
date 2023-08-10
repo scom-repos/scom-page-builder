@@ -4350,7 +4350,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            const { image = '', backgroundColor, backdropColor, backdropImage, sectionWidth, margin, align, fullWidth, pb, pl, pr, pt, ptb, plr } = config || {};
+            const { image = '', backgroundColor, backdropColor, backdropImage, border, borderColor, sectionWidth, margin, align, fullWidth, pb, pl, pr, pt, ptb, plr } = config || {};
             if (!fullWidth) {
                 if (image)
                     this.background.image = image;
@@ -4375,6 +4375,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 left: pl !== undefined ? pl : plr !== undefined ? plr : 0,
                 right: pr !== undefined ? pr : plr !== undefined ? plr : 0,
             };
+            if (border) {
+                this.pnlRowWrap.border = { width: 1, style: 'solid', color: borderColor || Theme.divider };
+            }
             if (align)
                 this.updateAlign();
         }
@@ -6370,7 +6373,7 @@ define("@scom/scom-page-builder/page/pageSection.tsx", ["require", "exports", "@
         render() {
             return (this.$render("i-panel", { id: 'pnlPageSection', maxWidth: "100%", maxHeight: "100%", height: "100%" },
                 this.$render("i-panel", { position: "absolute", width: 3, height: "90%", top: "5%", left: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "front-block" }),
-                this.$render("i-panel", { id: "pageSectionWrapper", width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%", padding: { top: '1.5rem', bottom: '1.5rem' } },
+                this.$render("i-panel", { id: "pageSectionWrapper", width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%" },
                     this.$render("i-panel", { id: "pnlMain", maxWidth: "100%", maxHeight: "100%", class: "section-border" })),
                 this.$render("i-panel", { position: "absolute", width: 3, height: "90%", top: "5%", right: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "back-block" })));
         }
