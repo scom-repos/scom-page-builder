@@ -84,7 +84,8 @@ export class AddElementCommand implements ICommand {
         showHeader: isMicroDapps,
         showFooter: isMicroDapps
       },
-      module: this.data.module
+      module: this.data.module,
+      tag: {}
     };
     if (this.data?.module?.category === 'offers') {
       let scconfig = await fetchScconfigByRootCid(this.data.module.path);
@@ -92,6 +93,9 @@ export class AddElementCommand implements ICommand {
       this.data.module.path = widgetData.module.path || widgetData.module.name.replace('@scom/', '');
       if (widgetData.properties) {
         Object.assign(newElData.properties, widgetData.properties);
+      }
+      if (widgetData.tag) {
+        newElData.tag = widgetData.tag;
       }
     }
     const parentData = this.parent?.data;
