@@ -55,56 +55,6 @@ export class RowSettingsDialog extends Module {
     }
 
     private getSchema() {
-        // let jsonSchema: IDataSchema = {
-        //     type: 'object',
-        //     // required: ['columnLayout'],
-        //     properties: {
-        //         //   "columnLayout": {
-        //         //     type: 'string',
-        //         //     enum: [
-        //         //         IColumnLayoutType.FIXED,
-        //         //         IColumnLayoutType.AUTOMATIC
-        //         //     ],
-        //         //     default: IColumnLayoutType.FIXED
-        //         //   },
-        //         //   "columnsNumber": {
-        //         //     type: 'number'
-        //         //   },
-        //         //   "maxColumnsPerRow": {
-        //         //     type: 'number'
-        //         //   },
-        //         //   "columnMinWidth": {
-        //         //     type: 'number'
-        //         //   },
-        //         backgroundColor: {
-        //             type: 'string',
-        //             format: 'color'
-        //         },
-        //         maxWidth: {
-        //             type: 'number',
-        //             title: 'Maximum width'
-        //         },
-        //         margin: {
-        //             type: 'object',
-        //             properties: {
-        //                 x: {
-        //                     type: 'string'
-        //                 },
-        //                 y: {
-        //                     type: 'string'
-        //                 }
-        //             }
-        //         },
-        //         align: {
-        //             type: 'string',
-        //             enum: [
-        //                 'left',
-        //                 'center',
-        //                 'right'
-        //             ]
-        //         }
-        //     }
-        // }
 
         const jsonSchema: IDataSchema = {
             "type": "object",
@@ -145,7 +95,7 @@ export class RowSettingsDialog extends Module {
                     "format": "color"
                 },
                 "border": {
-                    "title": "Border",
+                    "title": "Show border",
                     "type": "boolean"
                 },
                 "borderColor": {
@@ -168,20 +118,50 @@ export class RowSettingsDialog extends Module {
                         },
                         {
                             "type": "Control",
-                            "scope": "#/properties/border"
-                        }
+                            "scope": "#/properties/backgroundColor"
+                        },
+
                     ]
                 },
                 {
                     "type": "HorizontalLayout",
                     "elements": [
                         {
-                            "type": "Control",
-                            "scope": "#/properties/backgroundColor"
-                        },
-                        {
-                            "type": "Control",
-                            "scope": "#/properties/borderColor"
+                            "type": "Group",
+                            "label": "Section border",
+                            "elements": [
+                                {
+                                    "type": "HorizontalLayout",
+                                    "elements": [
+                                        {
+                                            "type": "Control",
+                                            "scope": "#/properties/border"
+                                        },
+                                        {
+                                            "type": "Control",
+                                            "scope": "#/properties/borderColor",
+                                            "rule": {
+                                                "effect": "SHOW",
+                                                "condition": {
+                                                    "scope": "#/properties/border",
+                                                    "schema": {
+                                                        "const": true
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "rule": {
+                                "effect": "HIDE",
+                                "condition": {
+                                    "scope": "#/properties/fullWidth",
+                                    "schema": {
+                                        "const": true
+                                    }
+                                }
+                            }
                         }
                     ]
                 },
