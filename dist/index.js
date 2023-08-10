@@ -2643,7 +2643,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             return result;
         }
         updateConfig(config, updatedValues) {
-            const { backgroundColor, backgroundImage, margin, sectionWidth } = config;
+            const { backgroundColor, backgroundImage, margin, sectionWidth, ptb, plr } = config;
             let newConfig = {};
             for (let prop of updatedValues) {
                 newConfig[prop] = config[prop];
@@ -2658,7 +2658,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             }
             this.element.maxWidth = '100%'; // maxWidth ?? '100%';
             this.element.margin = (0, index_21.getMargin)(margin);
-            index_21.pageObject.config = { backgroundColor, backgroundImage, margin, sectionWidth };
+            index_21.pageObject.config = { backgroundColor, backgroundImage, margin, sectionWidth, ptb, plr };
             return newConfig;
         }
         execute() {
@@ -3147,7 +3147,8 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts", ["require", "
                     '.modal': {
                         maxHeight: 'calc(100vh - 48px)',
                         padding: 0,
-                        borderRadius: 5
+                        borderRadius: 5,
+                        overflowY: 'auto',
                     }
                 }
             }
@@ -3499,7 +3500,8 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.css.ts", ["require", 
                     '.modal': {
                         maxHeight: 'calc(100vh - 48px)',
                         padding: 0,
-                        borderRadius: 5
+                        borderRadius: 5,
+                        overflowY: 'auto',
                     }
                 }
             }
@@ -4348,7 +4350,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            const { image = '', backgroundColor, backdropColor, backdropImage, sectionWidth, margin, align, fullWidth } = config || {};
+            const { image = '', backgroundColor, backdropColor, backdropImage, sectionWidth, margin, align, fullWidth, pb, pl, pr, pt, ptb, plr } = config || {};
             if (!fullWidth) {
                 if (image)
                     this.background.image = image;
@@ -4367,6 +4369,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             if (margin)
                 this.pnlRowContainer.margin = (0, index_43.getMargin)(margin);
             this.pnlRowContainer.width = (margin === null || margin === void 0 ? void 0 : margin.x) && (margin === null || margin === void 0 ? void 0 : margin.x) !== 'auto' ? 'auto' : '100%';
+            this.pnlRowWrap.padding = {
+                top: pt !== undefined ? pt : ptb !== undefined ? ptb : 0,
+                bottom: pb !== undefined ? pb : ptb !== undefined ? ptb : 0,
+                left: pl !== undefined ? pl : plr !== undefined ? plr : 0,
+                right: pr !== undefined ? pr : plr !== undefined ? plr : 0,
+            };
             if (align)
                 this.updateAlign();
         }
@@ -5463,7 +5471,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         }
         render() {
             return (this.$render("i-panel", { id: "pnlRowContainer", class: 'page-row-container', width: "100%", height: "100%" },
-                this.$render("i-panel", { id: "pnlRowWrap", class: 'page-row', width: "100%", height: "100%", padding: { left: '3rem', right: '3rem' } },
+                this.$render("i-panel", { id: "pnlRowWrap", class: 'page-row', width: "100%", height: "100%" },
                     this.$render("i-button", { caption: "", icon: {
                             name: 'plus',
                             width: 14,
