@@ -209,7 +209,7 @@ export class PageRow extends Module {
     }
 
     updateRowConfig(config: IPageSectionConfig) {
-        const {image = '', backgroundColor, backdropColor, backdropImage, sectionWidth, margin, align, fullWidth, pb, pl, pr, pt, ptb, plr} = config || {};
+        const {image = '', backgroundColor, backdropColor, backdropImage, border, borderColor, sectionWidth, margin, align, fullWidth, pb, pl, pr, pt, ptb, plr} = config || {};
         if (!fullWidth) {
             if (image) this.background.image = image;
             if(backdropImage)
@@ -228,6 +228,9 @@ export class PageRow extends Module {
             bottom: pb !== undefined ? pb : ptb !== undefined ? ptb : 0,
             left: pl !== undefined ? pl : plr !== undefined ? plr : 0,
             right: pr !== undefined ? pr : plr !== undefined ? plr : 0,
+        }
+        if (border) {
+            this.pnlRowWrap.border = { width: 1, style: 'solid', color: borderColor || Theme.divider }
         }
         if (align) this.updateAlign();
     }
