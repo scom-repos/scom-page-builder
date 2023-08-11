@@ -934,7 +934,8 @@ export class PageRow extends Module {
             
             const offsetLeft = Math.floor((startX + GAP_WIDTH) / (self.gridColumnWidth + GAP_WIDTH));
             const startOfDragingElm: number = dropColumn - offsetLeft;
-            const endOfDragingElm: number = dropColumn + parseInt(dragSection.dataset.columnSpan) - 1;
+            const endOfDragingElm: number = dropColumn - offsetLeft + parseInt(dragSection.dataset.columnSpan) - 1;
+            let selfCollision: Collision;
 
             for (let i = 0; i < sortedSections.length; i++) {
                 const element = sortedSections[i];
@@ -948,7 +949,6 @@ export class PageRow extends Module {
                     // overlap with other section
                     if (condition1 || condition2) {
                         // check if the dragging toolbar overlap with other toolbar
-                        const dropToolbar = dropTarget.closest('ide-toolbar') as HTMLElement;
                         const nearestToolbar = findClosestToolbarInSection(element as Control, clientY);
                         const toolbarsInDragSec = dragSection.querySelectorAll('ide-toolbar');
                         if (!nearestToolbar.toolbar || (nearestToolbar.toolbar && self.currentToolbar && nearestToolbar.toolbar != self.currentToolbar)) {
@@ -972,20 +972,27 @@ export class PageRow extends Module {
                                 && clientY <= elementRect.bottom);
 
                             const toolbarIdx: number = nearestToolbar.index == 0 ? 1 : nearestToolbar.index - 1;
-                            return mouseOnElm ? {
-                                collisionType: 'self',
-                                section: element,
-                                toolbar: toolbarsInDragSec[toolbarIdx] as Control,
-                                mergeSide: nearestToolbar.index == 0 ? 'top' : 'bottom',
-                            } : {
-                                collisionType: 'self',
-                                section: element,
-                                toolbar: toolbarsInDragSec[toolbarIdx] as Control
+                            if (self.isUngrouping()) {
+                                return {
+                                    collisionType: 'none'
+                                };
+                            } else {
+                                selfCollision = mouseOnElm ? {
+                                    collisionType: 'self',
+                                    section: element,
+                                    toolbar: toolbarsInDragSec[toolbarIdx] as Control,
+                                    mergeSide: nearestToolbar.index == 0 ? 'top' : 'bottom'
+                                } : {
+                                    collisionType: 'self',
+                                    section: element,
+                                    toolbar: toolbarsInDragSec[toolbarIdx] as Control
+                                }
                             }
                         }
                     }
                 }
             }
+            if (selfCollision) return selfCollision;
             // overlap with border
             // if (endOfDragingElm >= self.maxColumn && (self.maxColumn - endOfLastElmInRow < parseInt(dragTargetSection.dataset.columnSpan))) return {
             //     overlapType: "border", section: undefined
@@ -1032,7 +1039,8 @@ export class PageRow extends Module {
             if (!self.currentElement) return;
 
             const isUngrouping: boolean = self.isUngrouping();
-            const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
+            const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
+            const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
 
             let dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
             // drop outside the grid panel of a row (drop on left/right)

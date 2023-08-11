@@ -5057,7 +5057,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const sortedSections = sections.sort((a, b) => Number(a.dataset.column) - Number(b.dataset.column));
                 const offsetLeft = Math.floor((startX + index_43.GAP_WIDTH) / (self.gridColumnWidth + index_43.GAP_WIDTH));
                 const startOfDragingElm = dropColumn - offsetLeft;
-                const endOfDragingElm = dropColumn + parseInt(dragSection.dataset.columnSpan) - 1;
+                const endOfDragingElm = dropColumn - offsetLeft + parseInt(dragSection.dataset.columnSpan) - 1;
+                let selfCollision;
                 for (let i = 0; i < sortedSections.length; i++) {
                     const element = sortedSections[i];
                     const condition = self.isUngrouping() ? true : element.id != dragSection.id;
@@ -5069,7 +5070,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         // overlap with other section
                         if (condition1 || condition2) {
                             // check if the dragging toolbar overlap with other toolbar
-                            const dropToolbar = dropTarget.closest('ide-toolbar');
                             const nearestToolbar = findClosestToolbarInSection(element, clientY);
                             const toolbarsInDragSec = dragSection.querySelectorAll('ide-toolbar');
                             if (!nearestToolbar.toolbar || (nearestToolbar.toolbar && self.currentToolbar && nearestToolbar.toolbar != self.currentToolbar)) {
@@ -5092,20 +5092,29 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                     && clientY >= elementRect.top
                                     && clientY <= elementRect.bottom);
                                 const toolbarIdx = nearestToolbar.index == 0 ? 1 : nearestToolbar.index - 1;
-                                return mouseOnElm ? {
-                                    collisionType: 'self',
-                                    section: element,
-                                    toolbar: toolbarsInDragSec[toolbarIdx],
-                                    mergeSide: nearestToolbar.index == 0 ? 'top' : 'bottom',
-                                } : {
-                                    collisionType: 'self',
-                                    section: element,
-                                    toolbar: toolbarsInDragSec[toolbarIdx]
-                                };
+                                if (self.isUngrouping()) {
+                                    return {
+                                        collisionType: 'none'
+                                    };
+                                }
+                                else {
+                                    selfCollision = mouseOnElm ? {
+                                        collisionType: 'self',
+                                        section: element,
+                                        toolbar: toolbarsInDragSec[toolbarIdx],
+                                        mergeSide: nearestToolbar.index == 0 ? 'top' : 'bottom'
+                                    } : {
+                                        collisionType: 'self',
+                                        section: element,
+                                        toolbar: toolbarsInDragSec[toolbarIdx]
+                                    };
+                                }
                             }
                         }
                     }
                 }
+                if (selfCollision)
+                    return selfCollision;
                 // overlap with border
                 // if (endOfDragingElm >= self.maxColumn && (self.maxColumn - endOfLastElmInRow < parseInt(dragTargetSection.dataset.columnSpan))) return {
                 //     overlapType: "border", section: undefined
@@ -5151,7 +5160,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 if (!self.currentElement)
                     return;
                 const isUngrouping = self.isUngrouping();
-                const collision = checkCollision(eventTarget, dragStartTarget, event.clientX, event.clientY);
+                const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') : undefined;
+                const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
                 let dropElm = parentWrapper.querySelector('.is-dragenter');
                 // drop outside the grid panel of a row (drop on left/right)
                 if (eventTarget && eventTarget.id && eventTarget.id.startsWith("row-")) {
