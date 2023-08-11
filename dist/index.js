@@ -3206,56 +3206,6 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
             this.dialog.visible = true;
         }
         getSchema() {
-            // let jsonSchema: IDataSchema = {
-            //     type: 'object',
-            //     // required: ['columnLayout'],
-            //     properties: {
-            //         //   "columnLayout": {
-            //         //     type: 'string',
-            //         //     enum: [
-            //         //         IColumnLayoutType.FIXED,
-            //         //         IColumnLayoutType.AUTOMATIC
-            //         //     ],
-            //         //     default: IColumnLayoutType.FIXED
-            //         //   },
-            //         //   "columnsNumber": {
-            //         //     type: 'number'
-            //         //   },
-            //         //   "maxColumnsPerRow": {
-            //         //     type: 'number'
-            //         //   },
-            //         //   "columnMinWidth": {
-            //         //     type: 'number'
-            //         //   },
-            //         backgroundColor: {
-            //             type: 'string',
-            //             format: 'color'
-            //         },
-            //         maxWidth: {
-            //             type: 'number',
-            //             title: 'Maximum width'
-            //         },
-            //         margin: {
-            //             type: 'object',
-            //             properties: {
-            //                 x: {
-            //                     type: 'string'
-            //                 },
-            //                 y: {
-            //                     type: 'string'
-            //                 }
-            //             }
-            //         },
-            //         align: {
-            //             type: 'string',
-            //             enum: [
-            //                 'left',
-            //                 'center',
-            //                 'right'
-            //             ]
-            //         }
-            //     }
-            // }
             const jsonSchema = {
                 "type": "object",
                 "properties": {
@@ -3295,7 +3245,7 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                         "format": "color"
                     },
                     "border": {
-                        "title": "Border",
+                        "title": "Show border",
                         "type": "boolean"
                     },
                     "borderColor": {
@@ -3317,20 +3267,49 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                             },
                             {
                                 "type": "Control",
-                                "scope": "#/properties/border"
-                            }
+                                "scope": "#/properties/backgroundColor"
+                            },
                         ]
                     },
                     {
                         "type": "HorizontalLayout",
                         "elements": [
                             {
-                                "type": "Control",
-                                "scope": "#/properties/backgroundColor"
-                            },
-                            {
-                                "type": "Control",
-                                "scope": "#/properties/borderColor"
+                                "type": "Group",
+                                "label": "Section border",
+                                "elements": [
+                                    {
+                                        "type": "HorizontalLayout",
+                                        "elements": [
+                                            {
+                                                "type": "Control",
+                                                "scope": "#/properties/border"
+                                            },
+                                            {
+                                                "type": "Control",
+                                                "scope": "#/properties/borderColor",
+                                                "rule": {
+                                                    "effect": "SHOW",
+                                                    "condition": {
+                                                        "scope": "#/properties/border",
+                                                        "schema": {
+                                                            "const": true
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "rule": {
+                                    "effect": "HIDE",
+                                    "condition": {
+                                        "scope": "#/properties/fullWidth",
+                                        "schema": {
+                                            "const": true
+                                        }
+                                    }
+                                }
                             }
                         ]
                     },
@@ -4117,6 +4096,11 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
         $nest: {
             '.page-row-container': {
                 borderRadius: 10,
+                $nest: {
+                    '.page-row': {
+                        borderRadius: 10,
+                    }
+                }
             },
             '.drag-stack': {
                 visibility: 'hidden',
@@ -4377,16 +4361,24 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            const { image = '', backgroundColor, backdropColor, backdropImage, sectionWidth, margin, align, fullWidth, pb, pl, pr, pt, ptb, plr } = config || {};
+            const { image = '', backgroundColor, backdropColor, backdropImage, border, borderColor, sectionWidth, margin, align, fullWidth, pb, pl, pr, pt, ptb, plr } = config || {};
             if (!fullWidth) {
                 if (image)
                     this.background.image = image;
+                if (border) {
+                    this.pnlRowWrap.border = { width: 2, style: 'solid', color: borderColor || Theme.divider };
+                }
+                else {
+                    this.pnlRowWrap.border.width = 0;
+                }
+                this.background.color = 'transparent';
                 if (backdropImage)
                     this.background.image = backdropImage;
                 else if (backdropColor)
                     this.background.color = backdropColor;
             }
             else {
+                this.pnlRowWrap.border.width = 0;
                 if (backgroundColor)
                     this.background.color = backgroundColor;
             }
@@ -6458,7 +6450,7 @@ define("@scom/scom-page-builder/page/pageSection.tsx", ["require", "exports", "@
         render() {
             return (this.$render("i-panel", { id: 'pnlPageSection', maxWidth: "100%", maxHeight: "100%", height: "100%" },
                 this.$render("i-panel", { position: "absolute", width: 3, height: "90%", top: "5%", left: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "front-block" }),
-                this.$render("i-panel", { id: "pageSectionWrapper", width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%", padding: { top: '1.5rem', bottom: '1.5rem' } },
+                this.$render("i-panel", { id: "pageSectionWrapper", width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%" },
                     this.$render("i-panel", { id: "pnlMain", maxWidth: "100%", maxHeight: "100%", class: "section-border" })),
                 this.$render("i-panel", { position: "absolute", width: 3, height: "90%", top: "5%", right: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "back-block" })));
         }

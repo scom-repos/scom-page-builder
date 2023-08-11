@@ -138,7 +138,6 @@ export class PageSection extends Module {
                     id="pageSectionWrapper"
                     width="100%" height="100%"
                     maxWidth="100%" maxHeight="100%"
-                    padding={{top: '1.5rem', bottom: '1.5rem'}}
                 >
                     <i-panel id="pnlMain" maxWidth="100%" maxHeight="100%" class="section-border"></i-panel>
                 </i-panel>
