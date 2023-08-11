@@ -4069,6 +4069,11 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
         $nest: {
             '.page-row-container': {
                 borderRadius: 10,
+                $nest: {
+                    '.page-row': {
+                        borderRadius: 10,
+                    }
+                }
             },
             '.drag-stack': {
                 visibility: 'hidden',
@@ -4334,7 +4339,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 if (image)
                     this.background.image = image;
                 if (border) {
-                    this.pnlRowWrap.border = { width: 1, style: 'solid', color: borderColor || Theme.divider };
+                    this.pnlRowWrap.border = { width: 2, style: 'solid', color: borderColor || Theme.divider };
+                }
+                else {
+                    this.pnlRowWrap.border.width = 0;
                 }
                 this.background.color = 'transparent';
                 if (backdropImage)
