@@ -51,6 +51,7 @@ export class PageRow extends Module {
     private actionsBar: VStack;
     private dragStack: VStack;
     private pnlRowContainer: Panel;
+    private pnlRowWrap: Panel;
     private pnlRow: GridLayout;
     private mdRowSetting: RowSettingsDialog;
     private pnlEmty: VStack;
@@ -209,7 +210,7 @@ export class PageRow extends Module {
     }
 
     updateRowConfig(config: IPageSectionConfig) {
-        const {image = '', backgroundColor, backdropColor, backdropImage, sectionWidth, margin, align, fullWidth} = config || {};
+        const {image = '', backgroundColor, backdropColor, backdropImage, sectionWidth, margin, align, fullWidth, pb, pl, pr, pt, ptb, plr} = config || {};
         if (!fullWidth) {
             if (image) this.background.image = image;
             if(backdropImage)
@@ -223,6 +224,12 @@ export class PageRow extends Module {
         this.pnlRowContainer.maxWidth = sectionWidth ?? '100%';
         if (margin) this.pnlRowContainer.margin = getMargin(margin);
         this.pnlRowContainer.width = margin?.x && margin?.x !== 'auto' ? 'auto' : '100%';
+        this.pnlRowWrap.padding = { 
+            top: pt !== undefined ? pt : ptb !== undefined ? ptb : 0,
+            bottom: pb !== undefined ? pb : ptb !== undefined ? ptb : 0,
+            left: pl !== undefined ? pl : plr !== undefined ? plr : 0,
+            right: pr !== undefined ? pr : plr !== undefined ? plr : 0,
+        }
         if (align) this.updateAlign();
     }
 
@@ -600,7 +607,7 @@ export class PageRow extends Module {
             self.toggleUI(!!self.data?.elements?.length);
         }
 
-        function dragEnter(enterTarget: Control, clientX: number, clientY: number, collision: Collision) {
+        function dragEnter(enterTarget: Control, clientX: number, clientY: number) {
             if (!enterTarget || !self.currentElement) return;
             if (enterTarget.closest('#pnlEmty')) {
                 self.pnlRow.minHeight = '180px';
@@ -613,10 +620,10 @@ export class PageRow extends Module {
             const dragEnter = parentWrapper.querySelector('.is-dragenter') as Control;
             dragEnter && dragEnter.classList.remove('is-dragenter');
 
-            let target: Control;
+            let target: Control = enterTarget.closest('.fixed-grid-item') as Control;
 
-            if (collision.collisionType == 'self') target = findNearestFixedGridInRow(clientX);
-            else target = enterTarget.closest('.fixed-grid-item') as Control;
+            // if (collision.collisionType == 'self') target = findNearestFixedGridInRow(clientX);
+            // else target = enterTarget.closest('.fixed-grid-item') as Control;
             self.addDottedLines();
             toggleAllToolbarBoarder(true);
 
@@ -766,9 +773,7 @@ export class PageRow extends Module {
         this.addEventListener('dragenter', function (event) { 
             const eventTarget = event.target as HTMLElement;
             if (eventTarget && eventTarget.classList.contains('fixed-grid-item')) {
-                const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
-                const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
-                dragEnter(eventTarget as Control, event.clientX, event.clientY, collision);
+                dragEnter(eventTarget as Control, event.clientX, event.clientY);
             }
         });
 
@@ -838,7 +843,7 @@ export class PageRow extends Module {
             dragLeave(dragOverTarget, event.clientX, true);
 
             // enter current element: enterTarget
-            dragEnter(enterTarget, event.clientX, event.clientY, collision);
+            dragEnter(enterTarget, event.clientX, event.clientY);
 
             dragOverTarget = enterTarget;
         });
@@ -974,7 +979,11 @@ export class PageRow extends Module {
                             const toolbarIdx: number = nearestToolbar.index == 0 ? 1 : nearestToolbar.index - 1;
                             if (self.isUngrouping()) {
                                 return {
-                                    collisionType: 'none'
+                                    collisionType: 'mutual',
+                                    section: element,
+                                    toolbar: nearestToolbar.toolbar,
+                                    // check which side is the merge target
+                                    mergeSide: decideMergeSide(nearestToolbar.toolbar, clientX, clientY),
                                 };
                             } else {
                                 selfCollision = mouseOnElm ? {
@@ -1041,6 +1050,7 @@ export class PageRow extends Module {
             const isUngrouping: boolean = self.isUngrouping();
             const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
             const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
+            console.log("drop collision", collision)
 
             let dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
             // drop outside the grid panel of a row (drop on left/right)
@@ -1435,7 +1445,7 @@ export class PageRow extends Module {
     render() {
         return (
             <i-panel id="pnlRowContainer" class={'page-row-container'} width="100%" height="100%">
-                <i-panel id="pnlRowWrap" class={'page-row'} width="100%" height="100%" padding={{left: '3rem', right: '3rem'}}>
+                <i-panel id="pnlRowWrap" class={'page-row'} width="100%" height="100%">
                     <i-button
                         caption=""
                         icon={{

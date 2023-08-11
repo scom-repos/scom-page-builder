@@ -2500,7 +2500,8 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
                     showHeader: isMicroDapps,
                     showFooter: isMicroDapps
                 },
-                module: this.data.module
+                module: this.data.module,
+                tag: {}
             };
             if (((_d = (_c = this.data) === null || _c === void 0 ? void 0 : _c.module) === null || _d === void 0 ? void 0 : _d.category) === 'offers') {
                 let scconfig = await (0, index_20.fetchScconfigByRootCid)(this.data.module.path);
@@ -2508,6 +2509,9 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
                 this.data.module.path = widgetData.module.path || widgetData.module.name.replace('@scom/', '');
                 if (widgetData.properties) {
                     Object.assign(newElData.properties, widgetData.properties);
+                }
+                if (widgetData.tag) {
+                    newElData.tag = widgetData.tag;
                 }
             }
             const parentData = (_e = this.parent) === null || _e === void 0 ? void 0 : _e.data;
@@ -2666,7 +2670,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             return result;
         }
         updateConfig(config, updatedValues) {
-            const { backgroundColor, backgroundImage, margin, sectionWidth } = config;
+            const { backgroundColor, backgroundImage, margin, sectionWidth, ptb, plr } = config;
             let newConfig = {};
             for (let prop of updatedValues) {
                 newConfig[prop] = config[prop];
@@ -2681,7 +2685,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             }
             this.element.maxWidth = '100%'; // maxWidth ?? '100%';
             this.element.margin = (0, index_22.getMargin)(margin);
-            index_22.pageObject.config = { backgroundColor, backgroundImage, margin, sectionWidth };
+            index_22.pageObject.config = { backgroundColor, backgroundImage, margin, sectionWidth, ptb, plr };
             return newConfig;
         }
         execute() {
@@ -3170,7 +3174,8 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts", ["require", "
                     '.modal': {
                         maxHeight: 'calc(100vh - 48px)',
                         padding: 0,
-                        borderRadius: 5
+                        borderRadius: 5,
+                        overflowY: 'auto',
                     }
                 }
             }
@@ -3522,7 +3527,8 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.css.ts", ["require", 
                     '.modal': {
                         maxHeight: 'calc(100vh - 48px)',
                         padding: 0,
-                        borderRadius: 5
+                        borderRadius: 5,
+                        overflowY: 'auto',
                     }
                 }
             }
@@ -4371,7 +4377,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            const { image = '', backgroundColor, backdropColor, backdropImage, sectionWidth, margin, align, fullWidth } = config || {};
+            const { image = '', backgroundColor, backdropColor, backdropImage, sectionWidth, margin, align, fullWidth, pb, pl, pr, pt, ptb, plr } = config || {};
             if (!fullWidth) {
                 if (image)
                     this.background.image = image;
@@ -4390,6 +4396,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             if (margin)
                 this.pnlRowContainer.margin = (0, index_44.getMargin)(margin);
             this.pnlRowContainer.width = (margin === null || margin === void 0 ? void 0 : margin.x) && (margin === null || margin === void 0 ? void 0 : margin.x) !== 'auto' ? 'auto' : '100%';
+            this.pnlRowWrap.padding = {
+                top: pt !== undefined ? pt : ptb !== undefined ? ptb : 0,
+                bottom: pb !== undefined ? pb : ptb !== undefined ? ptb : 0,
+                left: pl !== undefined ? pl : plr !== undefined ? plr : 0,
+                right: pr !== undefined ? pr : plr !== undefined ? plr : 0,
+            };
             if (align)
                 this.updateAlign();
         }
@@ -4733,7 +4745,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.pnlRow.minHeight = 'auto';
                 self.toggleUI(!!((_b = (_a = self.data) === null || _a === void 0 ? void 0 : _a.elements) === null || _b === void 0 ? void 0 : _b.length));
             }
-            function dragEnter(enterTarget, clientX, clientY, collision) {
+            function dragEnter(enterTarget, clientX, clientY) {
                 var _a, _b, _c, _d, _e, _f;
                 if (!enterTarget || !self.currentElement)
                     return;
@@ -4746,11 +4758,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
                 const dragEnter = parentWrapper.querySelector('.is-dragenter');
                 dragEnter && dragEnter.classList.remove('is-dragenter');
-                let target;
-                if (collision.collisionType == 'self')
-                    target = findNearestFixedGridInRow(clientX);
-                else
-                    target = enterTarget.closest('.fixed-grid-item');
+                let target = enterTarget.closest('.fixed-grid-item');
+                // if (collision.collisionType == 'self') target = findNearestFixedGridInRow(clientX);
+                // else target = enterTarget.closest('.fixed-grid-item') as Control;
                 self.addDottedLines();
                 toggleAllToolbarBoarder(true);
                 if (self.isUngrouping()) {
@@ -4896,9 +4906,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.addEventListener('dragenter', function (event) {
                 const eventTarget = event.target;
                 if (eventTarget && eventTarget.classList.contains('fixed-grid-item')) {
-                    const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') : undefined;
-                    const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
-                    dragEnter(eventTarget, event.clientX, event.clientY, collision);
+                    dragEnter(eventTarget, event.clientX, event.clientY);
                 }
             });
             this.addEventListener('dragover', function (event) {
@@ -4967,7 +4975,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 // leave previous element: dragOverTarget
                 dragLeave(dragOverTarget, event.clientX, true);
                 // enter current element: enterTarget
-                dragEnter(enterTarget, event.clientX, event.clientY, collision);
+                dragEnter(enterTarget, event.clientX, event.clientY);
                 dragOverTarget = enterTarget;
             });
             this.addEventListener('dragleave', function (event) {
@@ -5094,7 +5102,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 const toolbarIdx = nearestToolbar.index == 0 ? 1 : nearestToolbar.index - 1;
                                 if (self.isUngrouping()) {
                                     return {
-                                        collisionType: 'none'
+                                        collisionType: 'mutual',
+                                        section: element,
+                                        toolbar: nearestToolbar.toolbar,
+                                        // check which side is the merge target
+                                        mergeSide: decideMergeSide(nearestToolbar.toolbar, clientX, clientY),
                                     };
                                 }
                                 else {
@@ -5162,6 +5174,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const isUngrouping = self.isUngrouping();
                 const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') : undefined;
                 const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
+                console.log("drop collision", collision);
                 let dropElm = parentWrapper.querySelector('.is-dragenter');
                 // drop outside the grid panel of a row (drop on left/right)
                 if (eventTarget && eventTarget.id && eventTarget.id.startsWith("row-")) {
@@ -5523,7 +5536,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         }
         render() {
             return (this.$render("i-panel", { id: "pnlRowContainer", class: 'page-row-container', width: "100%", height: "100%" },
-                this.$render("i-panel", { id: "pnlRowWrap", class: 'page-row', width: "100%", height: "100%", padding: { left: '3rem', right: '3rem' } },
+                this.$render("i-panel", { id: "pnlRowWrap", class: 'page-row', width: "100%", height: "100%" },
                     this.$render("i-button", { caption: "", icon: {
                             name: 'plus',
                             width: 14,

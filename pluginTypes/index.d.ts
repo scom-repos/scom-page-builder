@@ -349,6 +349,8 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         backdropColor?: string;
         backdropImage?: string;
         sectionWidth?: number | string;
+        plr?: number;
+        ptb?: number;
         margin?: {
             x?: number | string;
             y?: number | string;
@@ -398,6 +400,10 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         align?: AlignType;
         image?: string;
         fullWidth?: boolean;
+        pb?: number;
+        pl?: number;
+        pr?: number;
+        pt?: number;
     }
     export interface IOnFetchComponentsOptions {
         category?: string;
@@ -543,6 +549,8 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         backdropColor?: string;
         backdropImage?: string;
         sectionWidth?: string | number;
+        plr?: number;
+        ptb?: number;
         margin?: {
             x?: string | number;
             y?: string | number;
@@ -1108,6 +1116,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private actionsBar;
         private dragStack;
         private pnlRowContainer;
+        private pnlRowWrap;
         private pnlRow;
         private mdRowSetting;
         private pnlEmty;
