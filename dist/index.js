@@ -5696,6 +5696,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                             this.mdActions.visible = false;
                         }
                     },
+                    customControls: action.customControls,
                     dateTimeFormat: {
                         date: 'YYYY-MM-DD',
                         time: 'HH:mm:ss',
