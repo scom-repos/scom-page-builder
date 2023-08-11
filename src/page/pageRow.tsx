@@ -213,7 +213,9 @@ export class PageRow extends Module {
         if (!fullWidth) {
             if (image) this.background.image = image;
             if (border) {
-                this.pnlRowWrap.border = { width: 1, style: 'solid', color: borderColor || Theme.divider }
+                this.pnlRowWrap.border = { width: 2, style: 'solid', color: borderColor || Theme.divider }
+            } else {
+                this.pnlRowWrap.border.width = 0
             }
             this.background.color = 'transparent';
             if(backdropImage)

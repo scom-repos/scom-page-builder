@@ -22,6 +22,12 @@ Styles.cssRule('ide-row', {
     $nest: {
         '.page-row-container': {
             borderRadius: 10,
+
+            $nest: {
+                '.page-row': {
+                    borderRadius: 10,
+                }
+            }
         },
         '.drag-stack': {
             visibility: 'hidden',
