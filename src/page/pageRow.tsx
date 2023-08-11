@@ -612,6 +612,12 @@ export class PageRow extends Module {
         }
 
         function dragEnter(enterTarget: Control, clientX: number, clientY: number) {
+            const pnlRowWrapRect = self.querySelector('#pnlRowWrap').getBoundingClientRect();
+            const mouseOnPnl = (clientX >= pnlRowWrapRect.left
+                && clientX <= pnlRowWrapRect.right 
+                && clientY >= pnlRowWrapRect.top
+                && clientY <= pnlRowWrapRect.bottom);
+            if (!mouseOnPnl) return;
             if (!enterTarget || !self.currentElement) return;
             if (enterTarget.closest('#pnlEmty')) {
                 self.pnlRow.minHeight = '180px';
@@ -624,7 +630,7 @@ export class PageRow extends Module {
             const dragEnter = parentWrapper.querySelector('.is-dragenter') as Control;
             dragEnter && dragEnter.classList.remove('is-dragenter');
 
-            let target: Control = enterTarget.closest('.fixed-grid-item') as Control;
+            let target: Control = findNearestFixedGridInRow(clientX);
 
             // if (collision.collisionType == 'self') target = findNearestFixedGridInRow(clientX);
             // else target = enterTarget.closest('.fixed-grid-item') as Control;
@@ -784,6 +790,12 @@ export class PageRow extends Module {
         this.addEventListener('dragover', function (event) {
             event.preventDefault();
             const eventTarget = event.target as Control;
+            const pnlRowWrapRect = self.querySelector('#pnlRowWrap').getBoundingClientRect();
+            const mouseOnPnl = (event.clientX >= pnlRowWrapRect.left
+                && event.clientX <= pnlRowWrapRect.right 
+                && event.clientY >= pnlRowWrapRect.top
+                && event.clientY <= pnlRowWrapRect.bottom);
+            if (!mouseOnPnl) return;
             let enterTarget: Control;
             const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
             const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
@@ -812,7 +824,12 @@ export class PageRow extends Module {
                 enterTarget = nearestElement;
             } else if ((collision.collisionType == 'self' && collision.toolbar) || collision.collisionType == 'mutual') {
                 // choose a merge block to display
-                if (collision.mergeSide) {
+                const elementRect = collision.section.getBoundingClientRect();
+                const mouseOnElm = (event.clientX >= elementRect.left 
+                    && event.clientX <= elementRect.right 
+                    && event.clientY >= elementRect.top 
+                    && event.clientY <= elementRect.bottom);
+                if (collision.mergeSide && mouseOnElm) {
                     let blockClass: string = `.${collision.mergeSide}-block`;
                     const block =
                         collision.mergeSide == 'top' || collision.mergeSide == 'bottom'
@@ -1054,7 +1071,6 @@ export class PageRow extends Module {
             const isUngrouping: boolean = self.isUngrouping();
             const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
             const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
-            console.log("drop collision", collision)
 
             let dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
             // drop outside the grid panel of a row (drop on left/right)
@@ -1068,7 +1084,7 @@ export class PageRow extends Module {
 
             // collide with other section
             if (collision.collisionType == 'mutual' && !collision.rowBlock) {
-                if ((!collision.mergeSide && !dropElm) || (collision.section && !dropElm)) return;
+                if ((!collision.mergeSide && !dropElm) || (collision.section && !dropElm && !isUngrouping)) return;
             }
 
             // is ungrouping and draging on the original section

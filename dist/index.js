@@ -2194,7 +2194,7 @@ define("@scom/scom-page-builder/utility/ungroup.ts", ["require", "exports", "@sc
                 // if the current section colSpan != 1, current section collapse to allocate space for new elm
                 const splitIndex = Math.ceil(softEmptySpace / 2);
                 // resize & move the currect section
-                dropRow.clearData();
+                // dropRow.clearData();
                 sortedSectionList[dropSectionIdx].column = isFront ?
                     frontLimit + splitIndex :
                     softFrontLimit;
@@ -4750,6 +4750,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             }
             function dragEnter(enterTarget, clientX, clientY) {
                 var _a, _b, _c, _d, _e, _f;
+                const pnlRowWrapRect = self.querySelector('#pnlRowWrap').getBoundingClientRect();
+                const mouseOnPnl = (clientX >= pnlRowWrapRect.left
+                    && clientX <= pnlRowWrapRect.right
+                    && clientY >= pnlRowWrapRect.top
+                    && clientY <= pnlRowWrapRect.bottom);
+                if (!mouseOnPnl)
+                    return;
                 if (!enterTarget || !self.currentElement)
                     return;
                 if (enterTarget.closest('#pnlEmty')) {
@@ -4761,7 +4768,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
                 const dragEnter = parentWrapper.querySelector('.is-dragenter');
                 dragEnter && dragEnter.classList.remove('is-dragenter');
-                let target = enterTarget.closest('.fixed-grid-item');
+                let target = findNearestFixedGridInRow(clientX);
                 // if (collision.collisionType == 'self') target = findNearestFixedGridInRow(clientX);
                 // else target = enterTarget.closest('.fixed-grid-item') as Control;
                 self.addDottedLines();
@@ -4915,6 +4922,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.addEventListener('dragover', function (event) {
                 event.preventDefault();
                 const eventTarget = event.target;
+                const pnlRowWrapRect = self.querySelector('#pnlRowWrap').getBoundingClientRect();
+                const mouseOnPnl = (event.clientX >= pnlRowWrapRect.left
+                    && event.clientX <= pnlRowWrapRect.right
+                    && event.clientY >= pnlRowWrapRect.top
+                    && event.clientY <= pnlRowWrapRect.bottom);
+                if (!mouseOnPnl)
+                    return;
                 let enterTarget;
                 const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') : undefined;
                 const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
@@ -4942,7 +4956,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
                 else if ((collision.collisionType == 'self' && collision.toolbar) || collision.collisionType == 'mutual') {
                     // choose a merge block to display
-                    if (collision.mergeSide) {
+                    const elementRect = collision.section.getBoundingClientRect();
+                    const mouseOnElm = (event.clientX >= elementRect.left
+                        && event.clientX <= elementRect.right
+                        && event.clientY >= elementRect.top
+                        && event.clientY <= elementRect.bottom);
+                    if (collision.mergeSide && mouseOnElm) {
                         let blockClass = `.${collision.mergeSide}-block`;
                         const block = collision.mergeSide == 'top' || collision.mergeSide == 'bottom'
                             ? collision.toolbar.querySelector(blockClass)
@@ -5177,7 +5196,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const isUngrouping = self.isUngrouping();
                 const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') : undefined;
                 const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
-                console.log("drop collision", collision);
                 let dropElm = parentWrapper.querySelector('.is-dragenter');
                 // drop outside the grid panel of a row (drop on left/right)
                 if (eventTarget && eventTarget.id && eventTarget.id.startsWith("row-")) {
@@ -5190,7 +5208,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     dropElm = null;
                 // collide with other section
                 if (collision.collisionType == 'mutual' && !collision.rowBlock) {
-                    if ((!collision.mergeSide && !dropElm) || (collision.section && !dropElm))
+                    if ((!collision.mergeSide && !dropElm) || (collision.section && !dropElm && !isUngrouping))
                         return;
                 }
                 // is ungrouping and draging on the original section

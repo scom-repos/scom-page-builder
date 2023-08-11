@@ -105,7 +105,7 @@ export const getUngroupData = (dropRow: any, nearestDropSection: any, dragSectio
       const splitIndex = Math.ceil(softEmptySpace / 2);
 
       // resize & move the currect section
-      dropRow.clearData();
+      // dropRow.clearData();
 
       sortedSectionList[dropSectionIdx].column = isFront ?
         frontLimit + splitIndex :
