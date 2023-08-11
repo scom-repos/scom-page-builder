@@ -4333,12 +4333,17 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             if (!fullWidth) {
                 if (image)
                     this.background.image = image;
+                if (border) {
+                    this.pnlRowWrap.border = { width: 1, style: 'solid', color: borderColor || Theme.divider };
+                }
+                this.background.color = 'transparent';
                 if (backdropImage)
                     this.background.image = backdropImage;
                 else if (backdropColor)
                     this.background.color = backdropColor;
             }
             else {
+                this.pnlRowWrap.border.width = 0;
                 if (backgroundColor)
                     this.background.color = backgroundColor;
             }
@@ -4354,9 +4359,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 left: pl !== undefined ? pl : plr !== undefined ? plr : 0,
                 right: pr !== undefined ? pr : plr !== undefined ? plr : 0,
             };
-            if (border) {
-                this.pnlRowWrap.border = { width: 1, style: 'solid', color: borderColor || Theme.divider };
-            }
             if (align)
                 this.updateAlign();
         }
