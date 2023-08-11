@@ -323,6 +323,7 @@ declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
         command: (builder: any, userInputData: any) => ICommand;
         userInputDataSchema: IDataSchema;
         userInputUISchema: IUISchema;
+        customControls?: any;
         customUI?: any;
         isReplacement?: boolean;
     }

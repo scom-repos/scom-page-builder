@@ -22,6 +22,7 @@ export interface IPageBlockAction {
 	command: (builder: any, userInputData: any) => ICommand;
 	userInputDataSchema: IDataSchema;
     userInputUISchema: IUISchema;
+    customControls?: any;
     customUI?: any;
     isReplacement?: boolean;
 }
