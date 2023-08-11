@@ -763,7 +763,14 @@ export class PageRow extends Module {
             }
         }
 
-        this.addEventListener('dragenter', function (event) { });
+        this.addEventListener('dragenter', function (event) { 
+            const eventTarget = event.target as HTMLElement;
+            if (eventTarget && eventTarget.classList.contains('fixed-grid-item')) {
+                const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
+                const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
+                dragEnter(eventTarget as Control, event.clientX, event.clientY, collision);
+            }
+        });
 
         this.addEventListener('dragover', function (event) {
             event.preventDefault();
@@ -791,7 +798,7 @@ export class PageRow extends Module {
                     if (distanceRight < minDistance) {
                         minDistance = distanceRight;
                         nearestElement = element;
-                    }
+                    } 
                 });
                 enterTarget = nearestElement;
             } else if ((collision.collisionType == 'self' && collision.toolbar) || collision.collisionType == 'mutual') {
@@ -926,7 +933,7 @@ export class PageRow extends Module {
             );
             
             const offsetLeft = Math.floor((startX + GAP_WIDTH) / (self.gridColumnWidth + GAP_WIDTH));
-            const startOfDragingElm: number = dropColumn;
+            const startOfDragingElm: number = dropColumn - offsetLeft;
             const endOfDragingElm: number = dropColumn + parseInt(dragSection.dataset.columnSpan) - 1;
 
             for (let i = 0; i < sortedSections.length; i++) {
@@ -944,7 +951,7 @@ export class PageRow extends Module {
                         const dropToolbar = dropTarget.closest('ide-toolbar') as HTMLElement;
                         const nearestToolbar = findClosestToolbarInSection(element as Control, clientY);
                         const toolbarsInDragSec = dragSection.querySelectorAll('ide-toolbar');
-                        if (!dropToolbar || (dropToolbar && self.currentToolbar && dropToolbar != self.currentToolbar)) {
+                        if (!nearestToolbar.toolbar || (nearestToolbar.toolbar && self.currentToolbar && nearestToolbar.toolbar != self.currentToolbar)) {
                             // drop/dragover on a section but not an element,
                             // or drop/dragover on the place which causes the dragging element overlapping with dropping element
                             return {
@@ -956,13 +963,25 @@ export class PageRow extends Module {
                             };
                         } else {
                             // drop/dragover on the toolbar itself, the toolbar is in a composite section
+                            
+                            // check if the mouse is on the section exactly
+                            const elementRect = element.getBoundingClientRect();
+                            const mouseOnElm = (clientX >= elementRect.left 
+                                && clientX <= elementRect.right 
+                                && clientY >= elementRect.top 
+                                && clientY <= elementRect.bottom);
+
                             const toolbarIdx: number = nearestToolbar.index == 0 ? 1 : nearestToolbar.index - 1;
-                            return {
+                            return mouseOnElm ? {
                                 collisionType: 'self',
                                 section: element,
                                 toolbar: toolbarsInDragSec[toolbarIdx] as Control,
                                 mergeSide: nearestToolbar.index == 0 ? 'top' : 'bottom',
-                            };
+                            } : {
+                                collisionType: 'self',
+                                section: element,
+                                toolbar: toolbarsInDragSec[toolbarIdx] as Control
+                            }
                         }
                     }
                 }

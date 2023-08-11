@@ -748,7 +748,7 @@ declare module "@scom/scom-page-builder/command/type.ts" {
 }
 /// <amd-module name="@scom/scom-page-builder/utility/ungroup.ts" />
 declare module "@scom/scom-page-builder/utility/ungroup.ts" {
-    export const getNewSectionData: (dropRow: any, nearestDropSection: any, dragSection: any, isFront: boolean, data: any) => {
+    export const getUngroupData: (dropRow: any, nearestDropSection: any, dragSection: any, isFront: boolean, data: any) => {
         newElmdata: any;
         newRowData: any;
     };
