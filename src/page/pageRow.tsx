@@ -490,15 +490,19 @@ export class PageRow extends Module {
         function updateClass(elm: Control, className: string) {
             if (elm.visible && !elm.classList.contains('is-dragging')) {
                 if (className === 'is-dragenter') {
-                    const blocks = parentWrapper.getElementsByClassName('is-dragenter');
-                    for (let block of blocks) {
-                        block.classList.remove('is-dragenter');
-                    }
+                    removeMergeBlocks();
                 }
                 elm.classList.add(className);
                 removeRectangles();
             } else {
                 elm.classList.remove(className);
+            }
+        }
+
+        function removeMergeBlocks() {
+            const blocks = parentWrapper.getElementsByClassName('is-dragenter');
+            for (let block of blocks) {
+                block.classList.remove('is-dragenter');
             }
         }
 
@@ -1242,6 +1246,7 @@ export class PageRow extends Module {
                     self.isDragging = false;
                 }
             }
+            removeMergeBlocks();
         });
 
         function resetDragTarget() {

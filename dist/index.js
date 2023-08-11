@@ -4634,16 +4634,19 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             function updateClass(elm, className) {
                 if (elm.visible && !elm.classList.contains('is-dragging')) {
                     if (className === 'is-dragenter') {
-                        const blocks = parentWrapper.getElementsByClassName('is-dragenter');
-                        for (let block of blocks) {
-                            block.classList.remove('is-dragenter');
-                        }
+                        removeMergeBlocks();
                     }
                     elm.classList.add(className);
                     removeRectangles();
                 }
                 else {
                     elm.classList.remove(className);
+                }
+            }
+            function removeMergeBlocks() {
+                const blocks = parentWrapper.getElementsByClassName('is-dragenter');
+                for (let block of blocks) {
+                    block.classList.remove('is-dragenter');
                 }
             }
             function findClosestToolbarInSection(section, clientY) {
@@ -5340,6 +5343,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         self.isDragging = false;
                     }
                 }
+                removeMergeBlocks();
             });
             function resetDragTarget() {
                 updateDraggingUI();
