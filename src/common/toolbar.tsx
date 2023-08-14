@@ -115,10 +115,11 @@ export class IDEToolbar extends Module {
     }
 
     private adjustCursorByAction() {
-        if (this.currentAction.name == "Edit")
-            this.contentStack.classList.remove('move');
-        else
-            this.contentStack.classList.add('move');
+        this.contentStack.classList.remove('move');
+        // if (this.currentAction.name == "Edit")
+        //     this.contentStack.classList.remove('move');
+        // else
+        //     this.contentStack.classList.add('move');
     }
 
     private async renderToolbars() {
@@ -397,6 +398,7 @@ export class IDEToolbar extends Module {
             await this.setModule(module, data?.module);
             if (this.isTexbox(data.module)) {
                 this.dragStack.visible = true;
+                this.classList.add('is-textbox');
             } else if (this.isContentBlock()) {
                 const allSingleContentBlockId = Object.keys(data.properties).filter(prop => prop.includes(SINGLE_CONTENT_BLOCK_ID))
                 for (let singleContentBlockId of allSingleContentBlockId) {
@@ -407,7 +409,8 @@ export class IDEToolbar extends Module {
             } else {
                 this.dragStack.visible = false;
             }
-            this.contentStack.classList.add('move');
+            if (!this.isTexbox(data.module))
+                this.contentStack.classList.add('move');
             this.renderResizeStack(data);
         } catch (error) {
             console.log('fetch module error: ', error);
@@ -444,6 +447,8 @@ export class IDEToolbar extends Module {
         this.toolList = this.getActions(data.category) || [];
         this.checkToolbar();
         this.showToolbars();
+        if (this.isTexbox(data) && builderTarget?.setOnConfirm)
+            builderTarget.setOnConfirm(commandHistory, this);
     }
 
     private showToolList() {
@@ -705,17 +710,20 @@ export class IDEToolbar extends Module {
                         <i-vstack
                             id="dragStack"
                             verticalAlignment="center"
+                            horizontalAlignment="center"
                             position="absolute"
                             left="50%" top="0px"
-                            width="auto" height="auto"
+                            width={100}
+                            minHeight={20} zIndex={90}
                             class="dragger"
                         >
                             <i-grid-layout
                                 verticalAlignment="center"
-                                autoFillInHoles={true}
+                                horizontalAlignment="center"
                                 columnsPerRow={4}
+                                width={30} height={8}
+                                margin={{left: 'auto', right: 'auto'}}
                                 gap={{ column: '2px', row: '2px' }}
-                                class="main-drag"
                             >
                                 <i-icon name="circle" width={3} height={3}></i-icon>
                                 <i-icon name="circle" width={3} height={3}></i-icon>

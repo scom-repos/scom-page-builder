@@ -4021,7 +4021,7 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                 cursor: 'grab'
             },
             '.dragger': {
-                cursor: 'move',
+                cursor: 'grab',
                 opacity: 0,
                 visibility: 'hidden',
                 transform: 'translateX(-50%)',
@@ -4069,6 +4069,19 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                             },
                         }
                     },
+                }
+            },
+            '&.is-textbox': {
+                cursor: 'text',
+                userSelect: 'text',
+                $nest: {
+                    '&::selection': {
+                        background: Theme.colors.primary.main,
+                        color: Theme.colors.primary.contrastText
+                    },
+                    'i-scom-markdown-editor': {
+                        padding: '0.75rem 0'
+                    }
                 }
             }
         }
@@ -4509,9 +4522,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             let dragOverTarget;
             const parentWrapper = self.closest('#editor') || document;
             let ghostImage;
+            let mouseDownEl;
             this.addEventListener('mousedown', (e) => {
                 const target = e.target;
                 const section = target.closest('ide-section');
+                mouseDownEl = target;
                 if (section)
                     this._selectedSection = section;
                 else
@@ -4662,7 +4677,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const targetSection = eventTarget.closest && eventTarget.closest('ide-section');
                 const targetToolbar = (_a = findClosestToolbarInSection(targetSection, event.clientY)) === null || _a === void 0 ? void 0 : _a.toolbar;
                 const toolbars = targetSection ? Array.from(targetSection.querySelectorAll('ide-toolbar')) : [];
-                const cannotDrag = toolbars.find((toolbar) => toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting'));
+                const cannotDrag = toolbars.find((toolbar) => {
+                    const result = toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting');
+                    const isTexbox = toolbar.classList.contains('is-textbox');
+                    return result || (isTexbox && (!mouseDownEl || !mouseDownEl.closest('.dragger')));
+                });
                 if (targetSection && !cannotDrag) {
                     self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
                     self.currentElement = targetSection;
@@ -5663,10 +5682,11 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this._readonly = value;
         }
         adjustCursorByAction() {
-            if (this.currentAction.name == "Edit")
-                this.contentStack.classList.remove('move');
-            else
-                this.contentStack.classList.add('move');
+            this.contentStack.classList.remove('move');
+            // if (this.currentAction.name == "Edit")
+            //     this.contentStack.classList.remove('move');
+            // else
+            //     this.contentStack.classList.add('move');
         }
         async renderToolbars() {
             this.toolbar.clearInnerHTML();
@@ -5915,6 +5935,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 await this.setModule(module, data === null || data === void 0 ? void 0 : data.module);
                 if (this.isTexbox(data.module)) {
                     this.dragStack.visible = true;
+                    this.classList.add('is-textbox');
                 }
                 else if (this.isContentBlock()) {
                     const allSingleContentBlockId = Object.keys(data.properties).filter(prop => prop.includes(SINGLE_CONTENT_BLOCK_ID));
@@ -5927,7 +5948,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 else {
                     this.dragStack.visible = false;
                 }
-                this.contentStack.classList.add('move');
+                if (!this.isTexbox(data.module))
+                    this.contentStack.classList.add('move');
                 this.renderResizeStack(data);
             }
             catch (error) {
@@ -5970,6 +5992,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this.toolList = this.getActions(data.category) || [];
             this.checkToolbar();
             this.showToolbars();
+            if (this.isTexbox(data) && (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setOnConfirm))
+                builderTarget.setOnConfirm(index_51.commandHistory, this);
         }
         showToolList() {
             this.toolList = this.getActions() || [];
@@ -6184,8 +6208,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                     this.$render("i-panel", { id: "toolsStack", border: { radius: 5 }, background: { color: '#fff' }, class: "ide-toolbar", visible: false },
                         this.$render("i-hstack", { id: "toolbar", padding: { top: 4, bottom: 4, left: 4, right: 4 }, gap: "0.25rem" })),
                     this.$render("i-panel", { id: "contentStack", height: "100%", position: 'relative', maxWidth: "100%", maxHeight: "100%", class: "ide-component", onClick: this.showToolbars.bind(this) },
-                        this.$render("i-vstack", { id: "dragStack", verticalAlignment: "center", position: "absolute", left: "50%", top: "0px", width: "auto", height: "auto", class: "dragger" },
-                            this.$render("i-grid-layout", { verticalAlignment: "center", autoFillInHoles: true, columnsPerRow: 4, gap: { column: '2px', row: '2px' }, class: "main-drag" },
+                        this.$render("i-vstack", { id: "dragStack", verticalAlignment: "center", horizontalAlignment: "center", position: "absolute", left: "50%", top: "0px", width: 100, minHeight: 20, zIndex: 90, class: "dragger" },
+                            this.$render("i-grid-layout", { verticalAlignment: "center", horizontalAlignment: "center", columnsPerRow: 4, width: 30, height: 10, margin: { left: 'auto', right: 'auto' }, gap: { column: '2px', row: '2px' } },
                                 this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
                                 this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
                                 this.$render("i-icon", { name: "circle", width: 3, height: 3 }),

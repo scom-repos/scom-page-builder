@@ -379,10 +379,12 @@ export class PageRow extends Module {
         };
         const parentWrapper = self.closest('#editor') || document;
         let ghostImage: Control;
+        let mouseDownEl: Control;
 
         this.addEventListener('mousedown', (e) => {
             const target = e.target as Control;
             const section = target.closest('ide-section') as PageSection;
+            mouseDownEl = target;
 
             if (section) this._selectedSection = section;
             else this._selectedSection = undefined;
@@ -534,9 +536,11 @@ export class PageRow extends Module {
             const targetSection = eventTarget.closest && (eventTarget.closest('ide-section') as PageSection);
             const targetToolbar = findClosestToolbarInSection(targetSection, event.clientY)?.toolbar;
             const toolbars = targetSection ? Array.from(targetSection.querySelectorAll('ide-toolbar')) : [];
-            const cannotDrag = toolbars.find(
-                (toolbar) => toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting')
-            );
+            const cannotDrag = toolbars.find((toolbar) => {
+                const result = toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting');
+                const isTexbox = toolbar.classList.contains('is-textbox');
+                return result || (isTexbox && (!mouseDownEl || !mouseDownEl.closest('.dragger')));
+            });
             if (targetSection && !cannotDrag) {
                 self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
                 self.currentElement = targetSection;
