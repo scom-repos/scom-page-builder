@@ -5603,6 +5603,101 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                     elm.setAttribute('tool-name', tool.name);
                 this.toolbar.appendChild(elm);
             }
+            const genericBtn = (this.$render("i-hstack", { class: 'toolbar', tooltip: { trigger: 'hover', content: 'Generic', color: '#555555' }, horizontalAlignment: 'center', verticalAlignment: 'center', onClick: () => {
+                    const propertiesSchema = {
+                        "type": "object",
+                        "properties": {
+                            "pt": {
+                                "title": "Top",
+                                "type": "number"
+                            },
+                            "pb": {
+                                "title": "Bottom",
+                                "type": "number"
+                            },
+                            "pl": {
+                                "title": "Left",
+                                "type": "number"
+                            },
+                            "pr": {
+                                "title": "Right",
+                                "type": "number"
+                            },
+                        }
+                    };
+                    const themesSchema = {
+                        "type": "VerticalLayout",
+                        "elements": [
+                            {
+                                "type": "HorizontalLayout",
+                                "elements": [
+                                    {
+                                        "type": "Group",
+                                        "label": "Padding (px)",
+                                        "elements": [
+                                            {
+                                                "type": "VerticalLayout",
+                                                "elements": [
+                                                    {
+                                                        "type": "HorizontalLayout",
+                                                        "elements": [
+                                                            {
+                                                                "type": "Control",
+                                                                "scope": "#/properties/pt"
+                                                            },
+                                                            {
+                                                                "type": "Control",
+                                                                "scope": "#/properties/pb"
+                                                            },
+                                                            {
+                                                                "type": "Control",
+                                                                "scope": "#/properties/pl"
+                                                            },
+                                                            {
+                                                                "type": "Control",
+                                                                "scope": "#/properties/pr"
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    };
+                    const widgetSettings = {
+                        name: "Widget settings",
+                        icon: "edit",
+                        command: (builder, userInputData) => {
+                            let oldData = { url: '' };
+                            return {
+                                execute: () => {
+                                    oldData = Object.assign({}, this.data);
+                                    console.log('--------------ex: ', userInputData);
+                                    // if (builder?.setData) builder.setData(userInputData);
+                                    // this.setData(userInputData);
+                                },
+                                undo: () => {
+                                    if (builder === null || builder === void 0 ? void 0 : builder.setData)
+                                        builder.setData(oldData);
+                                    this.setData(oldData);
+                                },
+                                redo: () => { }
+                            };
+                        },
+                        userInputDataSchema: propertiesSchema,
+                        userInputUISchema: themesSchema
+                    };
+                    this.currentAction = widgetSettings;
+                    this.mdActions.visible = true;
+                    this.pnlForm.visible = true;
+                    this.adjustCursorByAction();
+                    this.hideToolbars();
+                } },
+                this.$render("i-icon", { width: 16, height: 16, name: 'bible', fill: Theme.text.primary })));
+            this.toolbar.appendChild(genericBtn);
             const removeBtn = (this.$render("i-hstack", { class: 'toolbar', tooltip: { trigger: 'hover', content: 'Delete', color: '#555555' }, horizontalAlignment: 'center', verticalAlignment: 'center', onClick: () => {
                     const removeCmd = new index_50.RemoveToolbarCommand(this);
                     index_50.commandHistory.execute(removeCmd);

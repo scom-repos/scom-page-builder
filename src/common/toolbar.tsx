@@ -9,7 +9,8 @@ import {
     IDataSchema,
     VStack,
     application,
-    Form
+    Form,
+    IUISchema
 } from '@ijstech/components';
 import { EVENT } from '../const/index';
 import { ELEMENT_NAME, IPageBlockAction, IPageBlockData, IPageElement, ThemeType } from '../interface/index';
@@ -153,6 +154,111 @@ export class IDEToolbar extends Module {
             if (tool.name) elm.setAttribute('tool-name', tool.name);
             this.toolbar.appendChild(elm);
         }
+        const genericBtn = (
+            <i-hstack
+                class='toolbar'
+                tooltip={{ trigger: 'hover', content: 'Generic', color: '#555555' }}
+                horizontalAlignment='center'
+                verticalAlignment='center'
+                onClick={
+                    () => {
+                        const propertiesSchema: IDataSchema = {
+                            "type": "object",
+                            "properties": {
+                                "pt": {
+                                    "title": "Top",
+                                    "type": "number"
+                                },
+                                "pb": {
+                                    "title": "Bottom",
+                                    "type": "number"
+                                },
+                                "pl": {
+                                    "title": "Left",
+                                    "type": "number"
+                                },
+                                "pr": {
+                                    "title": "Right",
+                                    "type": "number"
+                                },
+                            }
+                        };
+                        const themesSchema: IUISchema = {
+                            "type": "VerticalLayout",
+                            "elements": [
+                                {
+                                    "type": "HorizontalLayout",
+                                    "elements": [
+                                        {
+                                            "type": "Group",
+                                            "label": "Padding (px)",
+                                            "elements": [
+                                                {
+                                                    "type": "VerticalLayout",
+                                                    "elements": [
+                                                        {
+                                                            "type": "HorizontalLayout",
+                                                            "elements": [
+                                                                {
+                                                                    "type": "Control",
+                                                                    "scope": "#/properties/pt"
+                                                                },
+                                                                {
+                                                                    "type": "Control",
+                                                                    "scope": "#/properties/pb"
+                                                                },
+                                                                {
+                                                                    "type": "Control",
+                                                                    "scope": "#/properties/pl"
+                                                                },
+                                                                {
+                                                                    "type": "Control",
+                                                                    "scope": "#/properties/pr"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        };
+                        const widgetSettings = { 
+                            name: "Widget settings",
+                            icon: "edit",
+                            command: (builder: any, userInputData: any) => {
+                                let oldData = { url: '' };
+                                return {
+                                    execute: () => {
+                                        oldData = { ...this.data };
+                                        console.log('--------------ex: ', userInputData)
+                                        // if (builder?.setData) builder.setData(userInputData);
+                                        // this.setData(userInputData);
+                                    },
+                                    undo: () => {
+                                        if (builder?.setData) builder.setData(oldData);
+                                        this.setData(oldData);
+                                    },
+                                    redo: () => { }
+                                }
+                            },
+                            userInputDataSchema: propertiesSchema,
+                            userInputUISchema: themesSchema
+                        }
+                        this.currentAction = widgetSettings;
+                        this.mdActions.visible = true;
+                        this.pnlForm.visible = true;
+                        this.adjustCursorByAction();
+                        this.hideToolbars();
+                    }
+                }
+            >
+                <i-icon width={16} height={16} name='bible' fill={Theme.text.primary}></i-icon>
+            </i-hstack>
+        )
+        this.toolbar.appendChild(genericBtn);
         const removeBtn = (
             <i-hstack
                 class='toolbar'
