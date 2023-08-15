@@ -322,7 +322,7 @@ declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
         icon: string;
         command: (builder: any, userInputData: any) => ICommand;
         userInputDataSchema: IDataSchema;
-        userInputUISchema: IUISchema;
+        userInputUISchema?: IUISchema;
         customUI?: any;
         isReplacement?: boolean;
     }
@@ -1167,6 +1167,24 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private setActive;
         private onAddSection;
         render(): any;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/command/widgetSettingsToolbar.ts" />
+declare module "@scom/scom-page-builder/command/widgetSettingsToolbar.ts" {
+    import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
+    import { IDEToolbar } from "@scom/scom-page-builder/common/index.ts";
+    export class WidgetSettingsToolbarCommand implements ICommand {
+        private toolbar;
+        private builderTarget;
+        private data;
+        private pageRow;
+        private pageRowId;
+        private section;
+        private sectionId;
+        constructor(toolbar: IDEToolbar, dataInput: any);
+        execute(): void;
+        undo(): void;
+        redo(): void;
     }
 }
 /// <amd-module name="@scom/scom-page-builder/common/toolbar.tsx" />
