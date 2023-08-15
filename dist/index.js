@@ -3986,7 +3986,22 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                             '#pnlForm > * > *:first-child': {
                                 padding: '1rem 1.5rem 0',
                                 maxHeight: 'calc(100vh - 114px)',
-                                overflowY: 'auto'
+                                overflowY: 'auto',
+                                justifyContent: 'start',
+                                $nest: {
+                                    '&::-webkit-scrollbar': {
+                                        width: '7px',
+                                    },
+                                    '&::-webkit-scrollbar-track': {
+                                        borderRadius: '10px',
+                                        border: '1px solid transparent',
+                                    },
+                                    '&::-webkit-scrollbar-thumb': {
+                                        background: Theme.colors.primary.main,
+                                        borderRadius: '10px',
+                                        outline: '1px solid transparent'
+                                    },
+                                }
                             },
                             '#pnlForm > * > *:last-child': {
                                 padding: '0 1.5rem 1rem'
