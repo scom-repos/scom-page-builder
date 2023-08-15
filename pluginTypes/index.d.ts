@@ -1169,6 +1169,24 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         render(): any;
     }
 }
+/// <amd-module name="@scom/scom-page-builder/command/widgetSettingsToolbar.ts" />
+declare module "@scom/scom-page-builder/command/widgetSettingsToolbar.ts" {
+    import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
+    import { IDEToolbar } from "@scom/scom-page-builder/common/index.ts";
+    export class WidgetSettingsToolbarCommand implements ICommand {
+        private toolbar;
+        private builderTarget;
+        private data;
+        private pageRow;
+        private pageRowId;
+        private section;
+        private sectionId;
+        constructor(toolbar: IDEToolbar, dataInput: any);
+        execute(): void;
+        undo(): void;
+        redo(): void;
+    }
+}
 /// <amd-module name="@scom/scom-page-builder/common/toolbar.tsx" />
 declare module "@scom/scom-page-builder/common/toolbar.tsx" {
     import { Module, ControlElement } from '@ijstech/components';

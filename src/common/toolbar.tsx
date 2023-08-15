@@ -10,7 +10,7 @@ import {
     VStack,
     application,
     Form,
-    IUISchema
+    IUISchema,
 } from '@ijstech/components';
 import { EVENT } from '../const/index';
 import { ELEMENT_NAME, IPageBlockAction, IPageBlockData, IPageElement, ThemeType } from '../interface/index';
@@ -21,6 +21,7 @@ import { currentTheme } from '../theme/index';
 import './toolbar.css';
 import { PageSection } from '../page/pageSection';
 import { PageRow } from '../page/pageRow';
+import { WidgetSettingsToolbarCommand } from '../command/widgetSettingsToolbar';
 
 declare global {
     namespace JSX {
@@ -57,7 +58,7 @@ export class IDEToolbar extends Module {
     private pnlForm: Panel;
     private pnlFormMsg: Panel;
     private mdActions: Modal;
-    private backdropStack: VStack
+    private backdropStack: VStack;
     private form: Form;
     private pnlLoading: Panel;
     private mainWrapper: Panel;
@@ -75,7 +76,7 @@ export class IDEToolbar extends Module {
     }
 
     get data() {
-        return pageObject.getElement(this.rowId, this.elementId/*, true*/);
+        return pageObject.getElement(this.rowId, this.elementId /*, true*/);
     }
 
     get currentReplaceData() {
@@ -116,10 +117,8 @@ export class IDEToolbar extends Module {
     }
 
     private adjustCursorByAction() {
-        if (this.currentAction.name == "Edit")
-            this.contentStack.classList.remove('move');
-        else
-            this.contentStack.classList.add('move');
+        if (this.currentAction.name == 'Edit') this.contentStack.classList.remove('move');
+        else this.contentStack.classList.add('move');
     }
 
     private async renderToolbars() {
@@ -128,154 +127,133 @@ export class IDEToolbar extends Module {
             const tool = this.toolList[i];
             let elm = (
                 <i-hstack
-                    class='toolbar'
+                    class="toolbar"
                     tooltip={tool.name ? { trigger: 'hover', content: tool.name, color: '#555555' } : undefined}
                     visible={tool.visible ? tool.visible() : true}
-                    horizontalAlignment='center'
-                    verticalAlignment='center'
-                    onClick={
-                        () => {
-                            this.currentAction = tool;
-                            if (isEmpty(tool.userInputDataSchema) && isEmpty(tool.customUI)) {
-                                const commandIns = this.currentAction.command(this, null);
-                                commandHistory.execute(commandIns);
-                            } else {
-                                this.mdActions.visible = true;
-                                this.pnlForm.visible = true;
-                            }
-                            this.adjustCursorByAction();
-                            this.hideToolbars();
+                    horizontalAlignment="center"
+                    verticalAlignment="center"
+                    onClick={() => {
+                        this.currentAction = tool;
+                        if (isEmpty(tool.userInputDataSchema) && isEmpty(tool.customUI)) {
+                            const commandIns = this.currentAction.command(this, null);
+                            commandHistory.execute(commandIns);
+                        } else {
+                            this.mdActions.visible = true;
+                            this.pnlForm.visible = true;
                         }
-                    }
+                        this.adjustCursorByAction();
+                        this.hideToolbars();
+                    }}
                 >
                     <i-icon width={16} height={16} name={tool.icon} fill={Theme.text.primary}></i-icon>
                 </i-hstack>
-            )
+            );
             if (tool.name) elm.setAttribute('tool-name', tool.name);
             this.toolbar.appendChild(elm);
         }
         const genericBtn = (
             <i-hstack
-                class='toolbar'
+                class="toolbar"
                 tooltip={{ trigger: 'hover', content: 'Generic', color: '#555555' }}
-                horizontalAlignment='center'
-                verticalAlignment='center'
-                onClick={
-                    () => {
-                        const propertiesSchema: IDataSchema = {
-                            "type": "object",
-                            "properties": {
-                                "pt": {
-                                    "title": "Top",
-                                    "type": "number"
-                                },
-                                "pb": {
-                                    "title": "Bottom",
-                                    "type": "number"
-                                },
-                                "pl": {
-                                    "title": "Left",
-                                    "type": "number"
-                                },
-                                "pr": {
-                                    "title": "Right",
-                                    "type": "number"
-                                },
-                            }
-                        };
-                        const themesSchema: IUISchema = {
-                            "type": "VerticalLayout",
-                            "elements": [
-                                {
-                                    "type": "HorizontalLayout",
-                                    "elements": [
-                                        {
-                                            "type": "Group",
-                                            "label": "Padding (px)",
-                                            "elements": [
-                                                {
-                                                    "type": "VerticalLayout",
-                                                    "elements": [
-                                                        {
-                                                            "type": "HorizontalLayout",
-                                                            "elements": [
-                                                                {
-                                                                    "type": "Control",
-                                                                    "scope": "#/properties/pt"
-                                                                },
-                                                                {
-                                                                    "type": "Control",
-                                                                    "scope": "#/properties/pb"
-                                                                },
-                                                                {
-                                                                    "type": "Control",
-                                                                    "scope": "#/properties/pl"
-                                                                },
-                                                                {
-                                                                    "type": "Control",
-                                                                    "scope": "#/properties/pr"
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        };
-                        const widgetSettings = { 
-                            name: "Widget settings",
-                            icon: "edit",
-                            command: (builder: any, userInputData: any) => {
-                                let oldData = { url: '' };
-                                return {
-                                    execute: () => {
-                                        oldData = { ...this.data };
-                                        console.log('--------------ex: ', userInputData)
-                                        // if (builder?.setData) builder.setData(userInputData);
-                                        // this.setData(userInputData);
-                                    },
-                                    undo: () => {
-                                        if (builder?.setData) builder.setData(oldData);
-                                        this.setData(oldData);
-                                    },
-                                    redo: () => { }
-                                }
+                horizontalAlignment="center"
+                verticalAlignment="center"
+                onClick={() => {
+                    const propertiesSchema: IDataSchema = {
+                        type: 'object',
+                        properties: {
+                            pt: {
+                                title: 'Top',
+                                type: 'number',
                             },
-                            userInputDataSchema: propertiesSchema,
-                            userInputUISchema: themesSchema
-                        }
-                        this.currentAction = widgetSettings;
-                        this.mdActions.visible = true;
-                        this.pnlForm.visible = true;
-                        this.adjustCursorByAction();
-                        this.hideToolbars();
-                    }
-                }
+                            pb: {
+                                title: 'Bottom',
+                                type: 'number',
+                            },
+                            pl: {
+                                title: 'Left',
+                                type: 'number',
+                            },
+                            pr: {
+                                title: 'Right',
+                                type: 'number',
+                            },
+                        },
+                    };
+                    const themesSchema: IUISchema = {
+                        type: 'VerticalLayout',
+                        elements: [
+                            {
+                                type: 'HorizontalLayout',
+                                elements: [
+                                    {
+                                        type: 'Group',
+                                        label: 'Padding (px)',
+                                        elements: [
+                                            {
+                                                type: 'VerticalLayout',
+                                                elements: [
+                                                    {
+                                                        type: 'HorizontalLayout',
+                                                        elements: [
+                                                            {
+                                                                type: 'Control',
+                                                                scope: '#/properties/pt',
+                                                            },
+                                                            {
+                                                                type: 'Control',
+                                                                scope: '#/properties/pb',
+                                                            },
+                                                            {
+                                                                type: 'Control',
+                                                                scope: '#/properties/pl',
+                                                            },
+                                                            {
+                                                                type: 'Control',
+                                                                scope: '#/properties/pr',
+                                                            },
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    };
+                    const widgetSettings = {
+                        name: 'Widget settings',
+                        icon: 'edit',
+                        command: (toolbar: IDEToolbar, userInputData: any) => new WidgetSettingsToolbarCommand(toolbar, userInputData),
+                        userInputDataSchema: propertiesSchema,
+                        userInputUISchema: themesSchema,
+                    };
+                    this.currentAction = widgetSettings;
+                    this.mdActions.visible = true;
+                    this.pnlForm.visible = true;
+                    this.adjustCursorByAction();
+                    this.hideToolbars();
+                }}
             >
-                <i-icon width={16} height={16} name='bible' fill={Theme.text.primary}></i-icon>
+                <i-icon width={16} height={16} name="bible" fill={Theme.text.primary}></i-icon>
             </i-hstack>
-        )
+        );
         this.toolbar.appendChild(genericBtn);
         const removeBtn = (
             <i-hstack
-                class='toolbar'
+                class="toolbar"
                 tooltip={{ trigger: 'hover', content: 'Delete', color: '#555555' }}
-                horizontalAlignment='center'
-                verticalAlignment='center'
-                onClick={
-                    () => {
-                        const removeCmd = new RemoveToolbarCommand(this);
-                        commandHistory.execute(removeCmd);
-                        this.hideToolbars();
-                    }
-                }
+                horizontalAlignment="center"
+                verticalAlignment="center"
+                onClick={() => {
+                    const removeCmd = new RemoveToolbarCommand(this);
+                    commandHistory.execute(removeCmd);
+                    this.hideToolbars();
+                }}
             >
-                <i-icon width={16} height={16} name='trash' fill={Theme.text.primary}></i-icon>
+                <i-icon width={16} height={16} name="trash" fill={Theme.text.primary}></i-icon>
             </i-hstack>
-        )
+        );
         this.toolbar.appendChild(removeBtn);
     }
 
@@ -297,9 +275,18 @@ export class IDEToolbar extends Module {
         if (data.width === 'auto') data.width = this.offsetWidth;
         let properties = data;
         if (this.isContentBlock()) {
-            properties = this._currentSingleContentBlockId ? data[this._currentSingleContentBlockId].properties : data
+            properties = this._currentSingleContentBlockId ? data[this._currentSingleContentBlockId].properties : data;
         }
-        const tag = builderTarget?.getTag ? await builderTarget.getTag() : (this.data.tag || {});
+        let elementTag = {};
+        if (action.name === 'Widget settings') {
+            const element = pageObject.getElement(this.rowId, this.elementId);
+            if (element.tag) {
+                const { pt, pb, pl, pr } = element.tag;
+                elementTag = { pt, pb, pl, pr };
+            }
+        }
+        const builderTag = builderTarget?.getTag ? await builderTarget.getTag() : this.data.tag || {};
+        const tag = { ...builderTag, ...elementTag };
         this.mdActions.title = action.name || 'Update Settings';
         if (action.customUI) {
             const customUI = action.customUI;
@@ -310,14 +297,13 @@ export class IDEToolbar extends Module {
                 element = await customUI.render({ ...properties, ...tag }, this.onSave.bind(this));
             }
             this.pnlForm.append(element);
-            this.form.visible = false
-        }
-        else {
+            this.form.visible = false;
+        } else {
             if (typeof tag.width === 'number' && (action.userInputDataSchema.properties?.width as IDataSchema)?.type === 'string') {
-                tag.width = "" + tag.width;
+                tag.width = '' + tag.width;
             }
             if (typeof tag.height === 'number' && (action.userInputDataSchema.properties?.height as IDataSchema)?.type === 'string') {
-                tag.height = "" + tag.height;
+                tag.height = '' + tag.height;
             }
             const options: IRenderUIOptions = {
                 columnWidth: '100%',
@@ -326,8 +312,8 @@ export class IDEToolbar extends Module {
                 confirmButtonFontColor: Theme.colors.primary.contrastText,
                 jsonSchema: action.userInputDataSchema,
                 dateTimeFormat: 'MM/DD/YYYY HH:mm',
-                data: { ...properties, ...tag }
-            }
+                data: { ...properties, ...tag },
+            };
             if (action.userInputUISchema) options.jsonUISchema = action.userInputUISchema;
             // if (action.useRenderUI || action.name === 'Advanced') {
             //     renderUI(this.pnlForm, options, this.onSave.bind(this));
@@ -351,12 +337,12 @@ export class IDEToolbar extends Module {
                         const commandIns = this.currentAction.command(this, data);
                         commandHistory.execute(commandIns);
                         this.mdActions.visible = false;
-                    }
+                    },
                 },
                 dateTimeFormat: {
                     date: 'YYYY-MM-DD',
                     time: 'HH:mm:ss',
-                    dateTime: 'MM/DD/YYYY HH:mm'
+                    dateTime: 'MM/DD/YYYY HH:mm',
                 },
             };
             this.form.renderForm();
@@ -380,10 +366,8 @@ export class IDEToolbar extends Module {
     }
 
     private isTexbox(data: IPageBlockData | undefined) {
-        if (data)
-            return data.name.toLowerCase() === ELEMENT_NAME.TEXTBOX.toLowerCase();
-        else
-            return false;
+        if (data) return data.name.toLowerCase() === ELEMENT_NAME.TEXTBOX.toLowerCase();
+        else return false;
     }
 
     private isContentBlock() {
@@ -391,28 +375,25 @@ export class IDEToolbar extends Module {
     }
 
     showToolbars() {
-        if (this.toolList.length)
-            this.toolsStack.visible = true;
+        if (this.toolList.length) this.toolsStack.visible = true;
         this.contentStack && this.contentStack.classList.add('active');
         this.classList.add('active');
-        let pnl = this.closest('ide-section #pnlMain')
-        if (pnl)
-            pnl.classList.remove('section-border')
+        let pnl = this.closest('ide-section #pnlMain');
+        if (pnl) pnl.classList.remove('section-border');
     }
 
     hideToolbars() {
         this.toolsStack.visible = false;
         this.contentStack && this.contentStack.classList.remove('active');
         this.classList.remove('active');
-        let pnl = this.closest('ide-section #pnlMain')
-        if (pnl)
-            pnl.classList.add('section-border')
+        let pnl = this.closest('ide-section #pnlMain');
+        if (pnl) pnl.classList.add('section-border');
     }
 
     private getActions(category?: string) {
         if (this._component?.getConfigurators) {
             const configs = this._component.getConfigurators() || [];
-            const builderTarget = configs.find(conf => conf.target === 'Builders');
+            const builderTarget = configs.find((conf) => conf.target === 'Builders');
             const _category = category || this.data?.module?.category;
             if (builderTarget?.getActions) return builderTarget.getActions(_category);
         }
@@ -436,19 +417,17 @@ export class IDEToolbar extends Module {
     }
 
     private renderResizer(position: IPosition) {
-        const stack = <i-vstack
-            minWidth={8}
-            verticalAlignment="center" horizontalAlignment="center"
-            zIndex={20}
-            position="absolute"
-            class="resize-stack"
-        ></i-vstack>
-        const iconEl = <i-icon
-            name="circle"
-            fill={Theme.colors.primary.main}
-            height={16} width={16}
-            class="resize-icon"
-        ></i-icon>
+        const stack = (
+            <i-vstack
+                minWidth={8}
+                verticalAlignment="center"
+                horizontalAlignment="center"
+                zIndex={20}
+                position="absolute"
+                class="resize-stack"
+            ></i-vstack>
+        );
+        const iconEl = <i-icon name="circle" fill={Theme.colors.primary.main} height={16} width={16} class="resize-icon"></i-icon>;
         switch (position) {
             case 'left':
                 stack.top = 0;
@@ -465,7 +444,7 @@ export class IDEToolbar extends Module {
             case 'bottom':
                 stack.bottom = -12;
                 stack.left = '50%';
-                stack.style.transform = 'translateX(-50%)'
+                stack.style.transform = 'translateX(-50%)';
                 stack.height = 'auto';
                 iconEl.classList.add('n-resize');
                 stack.visible = false;
@@ -503,10 +482,10 @@ export class IDEToolbar extends Module {
             if (this.isTexbox(data.module)) {
                 this.dragStack.visible = true;
             } else if (this.isContentBlock()) {
-                const allSingleContentBlockId = Object.keys(data.properties).filter(prop => prop.includes(SINGLE_CONTENT_BLOCK_ID))
+                const allSingleContentBlockId = Object.keys(data.properties).filter((prop) => prop.includes(SINGLE_CONTENT_BLOCK_ID));
                 for (let singleContentBlockId of allSingleContentBlockId) {
-                    const singleContentBlock = this.parentElement.querySelector(`#${singleContentBlockId}`) as any
-                    await singleContentBlock.fetchModule(data.properties[singleContentBlockId])
+                    const singleContentBlock = this.parentElement.querySelector(`#${singleContentBlockId}`) as any;
+                    await singleContentBlock.fetchModule(data.properties[singleContentBlockId]);
                 }
                 this.dragStack.visible = false;
             } else {
@@ -527,7 +506,9 @@ export class IDEToolbar extends Module {
         this._component.id = `component-${this.elementId}`;
         this._component.rootParent = this.closest('ide-row');
         this._component.parent = this.contentStack;
-        const builderTarget = this._component?.getConfigurators ? this._component.getConfigurators().find((conf: any) => conf.target === 'Builders') : null;
+        const builderTarget = this._component?.getConfigurators
+            ? this._component.getConfigurators().find((conf: any) => conf.target === 'Builders')
+            : null;
         if (builderTarget?.setRootParent) builderTarget.setRootParent(this.closest('ide-row'));
         if (builderTarget?.setElementId) builderTarget.setElementId(this.elementId);
         this.contentStack.append(this._component);
@@ -536,16 +517,14 @@ export class IDEToolbar extends Module {
         this._component.maxWidth = '100%';
         this._component.maxHeight = '100%';
         // this._component.overflow = 'hidden';
-        if (this.module?.nodeName === 'I-SCOM-IMAGE')
-            this._component.overflow = 'hidden';
+        if (this.module?.nodeName === 'I-SCOM-IMAGE') this._component.overflow = 'hidden';
         this._component.style.display = 'block';
         this.backdropStack.visible = data?.shownBackdrop;
         this._component.addEventListener('click', (event: Event) => {
-            if (data?.disableClicked)
-                event.stopImmediatePropagation();
-            event.preventDefault()
+            if (data?.disableClicked) event.stopImmediatePropagation();
+            event.preventDefault();
             this.showToolList();
-        })
+        });
         this.toolList = this.getActions(data.category) || [];
         this.checkToolbar();
         this.showToolbars();
@@ -562,8 +541,8 @@ export class IDEToolbar extends Module {
         if (!this._component) return;
         this.updateComponent(module ? undefined : properties);
         if (this.isContentBlock()) {
-            const isInitialization = Object.keys(properties)[0].includes(SINGLE_CONTENT_BLOCK_ID)
-            const isContentBlockProps = Object.keys(properties).includes('numberOfBlocks')
+            const isInitialization = Object.keys(properties)[0].includes(SINGLE_CONTENT_BLOCK_ID);
+            const isContentBlockProps = Object.keys(properties).includes('numberOfBlocks');
 
             if (isInitialization) {
                 pageObject.setElement(this.rowId, this.data.id, { properties, module });
@@ -571,9 +550,12 @@ export class IDEToolbar extends Module {
                 if (isContentBlockProps) {
                     pageObject.setElement(this.rowId, this.data.id, { properties: { ...this.data.properties, ...properties }, module });
                 } else {
-                    const element = this.data.properties[this._currentSingleContentBlockId]
-                    if (element) element.properties = properties
-                    pageObject.setElement(this.rowId, this.data.id, { properties: { ...this.data.properties, [this._currentSingleContentBlockId]: element }, module });
+                    const element = this.data.properties[this._currentSingleContentBlockId];
+                    if (element) element.properties = properties;
+                    pageObject.setElement(this.rowId, this.data.id, {
+                        properties: { ...this.data.properties, [this._currentSingleContentBlockId]: element },
+                        module,
+                    });
                 }
             }
         } else {
@@ -592,8 +574,7 @@ export class IDEToolbar extends Module {
                 await builderTarget.setTag(init ? { ...tag, width: '100%' } : { ...tag });
             }
         }
-        if (this.data && !init)
-            pageObject.setElement(this.rowId, this.data.id, { tag });
+        if (this.data && !init) pageObject.setElement(this.rowId, this.data.id, { tag });
     }
 
     async setProperties(data: any) {
@@ -608,8 +589,7 @@ export class IDEToolbar extends Module {
     }
 
     setTheme(value: ThemeType) {
-        if (this.module && value !== this.module.theme)
-            this.module.theme = value;
+        if (this.module && value !== this.module.theme) this.module.theme = value;
     }
 
     private checkToolbar() {
@@ -681,52 +661,53 @@ export class IDEToolbar extends Module {
         let self = this;
 
         this.contentStack.addEventListener('mouseover', function (event) {
-            let pageRow = (self.closest('ide-row') as PageRow)
+            let pageRow = self.closest('ide-row') as PageRow;
             let sectionSelected: boolean = pageRow.selectedElement ? true : false;
-            let compositeSection: boolean = (self.closest('ide-section') as PageSection).data &&
-                (self.closest('ide-section') as PageSection).data?.elements?.length;
+            let compositeSection: boolean =
+                (self.closest('ide-section') as PageSection).data && (self.closest('ide-section') as PageSection).data?.elements?.length;
 
             if (!compositeSection || sectionSelected) {
                 // add section border
                 this.classList.add('hover-border');
             }
-        })
+        });
 
         this.contentStack.addEventListener('mouseleave', function (event) {
-
-            let pageRow = (self.closest('ide-row') as PageRow)
+            let pageRow = self.closest('ide-row') as PageRow;
             let sectionSelected: boolean = pageRow.selectedElement ? true : false;
-            let compositeSection: boolean = (self.closest('ide-section') as PageSection).data &&
-                (self.closest('ide-section') as PageSection).data?.elements?.length;
+            let compositeSection: boolean =
+                (self.closest('ide-section') as PageSection).data && (self.closest('ide-section') as PageSection).data?.elements?.length;
 
             if (!compositeSection || sectionSelected) {
                 // remove section border
                 this.classList.remove('hover-border');
             }
-        })
+        });
     }
 
     private initEventBus() {
+        this.events.push(application.EventBus.register(this, EVENT.ON_UPDATE_TOOLBAR, () => this.updateToolbar()));
         this.events.push(
-            application.EventBus.register(this, EVENT.ON_UPDATE_TOOLBAR, () => this.updateToolbar())
-        )
-        this.events.push(
-            application.EventBus.register(this, EVENT.ON_SET_ACTION_BLOCK, (data: { id: string; element: IPageElement, elementId: string }) => {
-                const { id, element, elementId } = data;
-                if (elementId && elementId === this.elementId) {
-                    this.setData({ ...this.data.properties, [id]: element })
-                    this._currentSingleContentBlockId = id;
+            application.EventBus.register(
+                this,
+                EVENT.ON_SET_ACTION_BLOCK,
+                (data: { id: string; element: IPageElement; elementId: string }) => {
+                    const { id, element, elementId } = data;
+                    if (elementId && elementId === this.elementId) {
+                        this.setData({ ...this.data.properties, [id]: element });
+                        this._currentSingleContentBlockId = id;
+                    }
                 }
-            })
-        )
+            )
+        );
         this.events.push(
             application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: { color: string }) => {
                 await this.updateUI(data);
             })
-        )
+        );
         application.EventBus.register(this, EVENT.ON_CLOSE_BUILDER, () => {
             this.unRegisterEvents();
-        })
+        });
     }
 
     async updateUI(data: { color: string }) {
@@ -768,19 +749,14 @@ export class IDEToolbar extends Module {
             <i-panel>
                 <i-vstack
                     id="pnlLoading"
-                    padding={{top: '0.5rem', bottom: '0.5rem'}}
+                    padding={{ top: '0.5rem', bottom: '0.5rem' }}
                     visible={false}
-                    height="100%" width="100%"
+                    height="100%"
+                    width="100%"
                     class="i-loading-overlay"
                 >
                     <i-vstack class="i-loading-spinner" horizontalAlignment="center" verticalAlignment="center">
-                        <i-icon
-                            class="i-loading-spinner_icon"
-                            name="spinner"
-                            width={24}
-                            height={24}
-                            fill={Theme.colors.primary.main}
-                        />
+                        <i-icon class="i-loading-spinner_icon" name="spinner" width={24} height={24} fill={Theme.colors.primary.main} />
                         <i-label
                             caption="Loading..."
                             font={{ color: Theme.colors.primary.main, size: '1rem' }}
@@ -789,19 +765,13 @@ export class IDEToolbar extends Module {
                     </i-vstack>
                 </i-vstack>
                 <i-vstack id="mainWrapper" width="auto" maxWidth="100%" maxHeight="100%" position="relative">
-                    <i-panel
-                        id="toolsStack"
-                        border={{ radius: 5 }}
-                        background={{ color: '#fff' }}
-                        class="ide-toolbar"
-                        visible={false}
-                    >
+                    <i-panel id="toolsStack" border={{ radius: 5 }} background={{ color: '#fff' }} class="ide-toolbar" visible={false}>
                         <i-hstack id="toolbar" padding={{ top: 4, bottom: 4, left: 4, right: 4 }} gap="0.25rem"></i-hstack>
                     </i-panel>
                     <i-panel
                         id="contentStack"
                         height="100%"
-                        position='relative'
+                        position="relative"
                         maxWidth="100%"
                         maxHeight="100%"
                         class="ide-component"
@@ -811,8 +781,10 @@ export class IDEToolbar extends Module {
                             id="dragStack"
                             verticalAlignment="center"
                             position="absolute"
-                            left="50%" top="0px"
-                            width="auto" height="auto"
+                            left="50%"
+                            top="0px"
+                            width="auto"
+                            height="auto"
                             class="dragger"
                         >
                             <i-grid-layout
@@ -834,9 +806,12 @@ export class IDEToolbar extends Module {
                         </i-vstack>
                         <i-vstack
                             id="backdropStack"
-                            width="100%" height="100%"
+                            width="100%"
+                            height="100%"
                             position="absolute"
-                            top="0px" left="0px" zIndex={15}
+                            top="0px"
+                            left="0px"
+                            zIndex={15}
                             visible={false}
                             onClick={this.showToolList.bind(this)}
                         ></i-vstack>
@@ -867,11 +842,11 @@ export class IDEToolbar extends Module {
                     ></i-panel>
 
                     <i-modal
-                        id='mdActions'
-                        title='Update Settings'
+                        id="mdActions"
+                        title="Update Settings"
                         closeIcon={{ name: 'times' }}
                         minWidth={400}
-                        maxWidth='900px'
+                        maxWidth="900px"
                         closeOnBackdropClick={false}
                         onOpen={this.onShowModal.bind(this)}
                         onClose={this.onCloseModal.bind(this)}
@@ -885,12 +860,11 @@ export class IDEToolbar extends Module {
                                 visible={false}
                             ></i-vstack>
                             <i-panel id="pnlForm" />
-                            <i-form id="form" padding={{ left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' }}/>
+                            <i-form id="form" padding={{ left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' }} />
                         </i-panel>
                     </i-modal>
                 </i-vstack>
             </i-panel>
-            
         );
     }
 }

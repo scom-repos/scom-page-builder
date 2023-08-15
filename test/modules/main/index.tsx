@@ -203,7 +203,7 @@ export class MainModule extends Module {
     return (
       <i-panel width="100%" height="100%">
         <i-button
-          visible={false}
+          visible={true}
           position="fixed"
           caption="Get data"
           right="24px"

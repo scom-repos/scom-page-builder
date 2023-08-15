@@ -5524,7 +5524,31 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
     ], PageRow);
     exports.PageRow = PageRow;
 });
-define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/interface/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/utility/index.ts", "@scom/scom-page-builder/command/index.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/common/toolbar.css.ts"], function (require, exports, components_26, index_46, index_47, index_48, index_49, index_50, index_51) {
+define("@scom/scom-page-builder/command/widgetSettingsToolbar.ts", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.WidgetSettingsToolbarCommand = void 0;
+    class WidgetSettingsToolbarCommand {
+        constructor(toolbar, dataInput) {
+            this.toolbar = toolbar;
+            this.data = dataInput;
+            this.pageRow = this.toolbar.closest('ide-row');
+            this.pageRowId = this.toolbar.rowId;
+            this.section = this.toolbar.closest('ide-section');
+            this.sectionId = this.section.id;
+        }
+        execute() {
+            const { pt, pb, pl, pr } = this.data;
+            this.section.padding = { top: pt, bottom: pb, left: pl, right: pr };
+            const newTag = { pt, pb, pl, pr };
+            this.toolbar.setTag(newTag);
+        }
+        undo() { }
+        redo() { }
+    }
+    exports.WidgetSettingsToolbarCommand = WidgetSettingsToolbarCommand;
+});
+define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/interface/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/utility/index.ts", "@scom/scom-page-builder/command/index.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/command/widgetSettingsToolbar.ts", "@scom/scom-page-builder/common/toolbar.css.ts"], function (require, exports, components_26, index_46, index_47, index_48, index_49, index_50, index_51, widgetSettingsToolbar_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.IDEToolbar = void 0;
@@ -5576,7 +5600,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this._readonly = value;
         }
         adjustCursorByAction() {
-            if (this.currentAction.name == "Edit")
+            if (this.currentAction.name == 'Edit')
                 this.contentStack.classList.remove('move');
             else
                 this.contentStack.classList.add('move');
@@ -5585,7 +5609,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this.toolbar.clearInnerHTML();
             for (let i = 0; i < this.toolList.length; i++) {
                 const tool = this.toolList[i];
-                let elm = (this.$render("i-hstack", { class: 'toolbar', tooltip: tool.name ? { trigger: 'hover', content: tool.name, color: '#555555' } : undefined, visible: tool.visible ? tool.visible() : true, horizontalAlignment: 'center', verticalAlignment: 'center', onClick: () => {
+                let elm = (this.$render("i-hstack", { class: "toolbar", tooltip: tool.name ? { trigger: 'hover', content: tool.name, color: '#555555' } : undefined, visible: tool.visible ? tool.visible() : true, horizontalAlignment: "center", verticalAlignment: "center", onClick: () => {
                         this.currentAction = tool;
                         if ((0, index_49.isEmpty)(tool.userInputDataSchema) && (0, index_49.isEmpty)(tool.customUI)) {
                             const commandIns = this.currentAction.command(this, null);
@@ -5603,92 +5627,76 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                     elm.setAttribute('tool-name', tool.name);
                 this.toolbar.appendChild(elm);
             }
-            const genericBtn = (this.$render("i-hstack", { class: 'toolbar', tooltip: { trigger: 'hover', content: 'Generic', color: '#555555' }, horizontalAlignment: 'center', verticalAlignment: 'center', onClick: () => {
+            const genericBtn = (this.$render("i-hstack", { class: "toolbar", tooltip: { trigger: 'hover', content: 'Generic', color: '#555555' }, horizontalAlignment: "center", verticalAlignment: "center", onClick: () => {
                     const propertiesSchema = {
-                        "type": "object",
-                        "properties": {
-                            "pt": {
-                                "title": "Top",
-                                "type": "number"
+                        type: 'object',
+                        properties: {
+                            pt: {
+                                title: 'Top',
+                                type: 'number',
                             },
-                            "pb": {
-                                "title": "Bottom",
-                                "type": "number"
+                            pb: {
+                                title: 'Bottom',
+                                type: 'number',
                             },
-                            "pl": {
-                                "title": "Left",
-                                "type": "number"
+                            pl: {
+                                title: 'Left',
+                                type: 'number',
                             },
-                            "pr": {
-                                "title": "Right",
-                                "type": "number"
+                            pr: {
+                                title: 'Right',
+                                type: 'number',
                             },
-                        }
+                        },
                     };
                     const themesSchema = {
-                        "type": "VerticalLayout",
-                        "elements": [
+                        type: 'VerticalLayout',
+                        elements: [
                             {
-                                "type": "HorizontalLayout",
-                                "elements": [
+                                type: 'HorizontalLayout',
+                                elements: [
                                     {
-                                        "type": "Group",
-                                        "label": "Padding (px)",
-                                        "elements": [
+                                        type: 'Group',
+                                        label: 'Padding (px)',
+                                        elements: [
                                             {
-                                                "type": "VerticalLayout",
-                                                "elements": [
+                                                type: 'VerticalLayout',
+                                                elements: [
                                                     {
-                                                        "type": "HorizontalLayout",
-                                                        "elements": [
+                                                        type: 'HorizontalLayout',
+                                                        elements: [
                                                             {
-                                                                "type": "Control",
-                                                                "scope": "#/properties/pt"
+                                                                type: 'Control',
+                                                                scope: '#/properties/pt',
                                                             },
                                                             {
-                                                                "type": "Control",
-                                                                "scope": "#/properties/pb"
+                                                                type: 'Control',
+                                                                scope: '#/properties/pb',
                                                             },
                                                             {
-                                                                "type": "Control",
-                                                                "scope": "#/properties/pl"
+                                                                type: 'Control',
+                                                                scope: '#/properties/pl',
                                                             },
                                                             {
-                                                                "type": "Control",
-                                                                "scope": "#/properties/pr"
-                                                            }
-                                                        ]
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        ]
+                                                                type: 'Control',
+                                                                scope: '#/properties/pr',
+                                                            },
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
                     };
                     const widgetSettings = {
-                        name: "Widget settings",
-                        icon: "edit",
-                        command: (builder, userInputData) => {
-                            let oldData = { url: '' };
-                            return {
-                                execute: () => {
-                                    oldData = Object.assign({}, this.data);
-                                    console.log('--------------ex: ', userInputData);
-                                    // if (builder?.setData) builder.setData(userInputData);
-                                    // this.setData(userInputData);
-                                },
-                                undo: () => {
-                                    if (builder === null || builder === void 0 ? void 0 : builder.setData)
-                                        builder.setData(oldData);
-                                    this.setData(oldData);
-                                },
-                                redo: () => { }
-                            };
-                        },
+                        name: 'Widget settings',
+                        icon: 'edit',
+                        command: (toolbar, userInputData) => new widgetSettingsToolbar_1.WidgetSettingsToolbarCommand(toolbar, userInputData),
                         userInputDataSchema: propertiesSchema,
-                        userInputUISchema: themesSchema
+                        userInputUISchema: themesSchema,
                     };
                     this.currentAction = widgetSettings;
                     this.mdActions.visible = true;
@@ -5696,14 +5704,14 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                     this.adjustCursorByAction();
                     this.hideToolbars();
                 } },
-                this.$render("i-icon", { width: 16, height: 16, name: 'bible', fill: Theme.text.primary })));
+                this.$render("i-icon", { width: 16, height: 16, name: "bible", fill: Theme.text.primary })));
             this.toolbar.appendChild(genericBtn);
-            const removeBtn = (this.$render("i-hstack", { class: 'toolbar', tooltip: { trigger: 'hover', content: 'Delete', color: '#555555' }, horizontalAlignment: 'center', verticalAlignment: 'center', onClick: () => {
+            const removeBtn = (this.$render("i-hstack", { class: "toolbar", tooltip: { trigger: 'hover', content: 'Delete', color: '#555555' }, horizontalAlignment: "center", verticalAlignment: "center", onClick: () => {
                     const removeCmd = new index_50.RemoveToolbarCommand(this);
                     index_50.commandHistory.execute(removeCmd);
                     this.hideToolbars();
                 } },
-                this.$render("i-icon", { width: 16, height: 16, name: 'trash', fill: Theme.text.primary })));
+                this.$render("i-icon", { width: 16, height: 16, name: "trash", fill: Theme.text.primary })));
             this.toolbar.appendChild(removeBtn);
         }
         onShowModal() {
@@ -5727,7 +5735,16 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             if (this.isContentBlock()) {
                 properties = this._currentSingleContentBlockId ? data[this._currentSingleContentBlockId].properties : data;
             }
-            const tag = (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getTag) ? await builderTarget.getTag() : (this.data.tag || {});
+            let elementTag = {};
+            if (action.name === 'Widget settings') {
+                const element = index_48.pageObject.getElement(this.rowId, this.elementId);
+                if (element.tag) {
+                    const { pt, pb, pl, pr } = element.tag;
+                    elementTag = { pt, pb, pl, pr };
+                }
+            }
+            const builderTag = (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getTag) ? await builderTarget.getTag() : this.data.tag || {};
+            const tag = Object.assign(Object.assign({}, builderTag), elementTag);
             this.mdActions.title = action.name || 'Update Settings';
             if (action.customUI) {
                 const customUI = action.customUI;
@@ -5743,10 +5760,10 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             }
             else {
                 if (typeof tag.width === 'number' && ((_b = (_a = action.userInputDataSchema.properties) === null || _a === void 0 ? void 0 : _a.width) === null || _b === void 0 ? void 0 : _b.type) === 'string') {
-                    tag.width = "" + tag.width;
+                    tag.width = '' + tag.width;
                 }
                 if (typeof tag.height === 'number' && ((_d = (_c = action.userInputDataSchema.properties) === null || _c === void 0 ? void 0 : _c.height) === null || _d === void 0 ? void 0 : _d.type) === 'string') {
-                    tag.height = "" + tag.height;
+                    tag.height = '' + tag.height;
                 }
                 const options = {
                     columnWidth: '100%',
@@ -5755,7 +5772,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                     confirmButtonFontColor: Theme.colors.primary.contrastText,
                     jsonSchema: action.userInputDataSchema,
                     dateTimeFormat: 'MM/DD/YYYY HH:mm',
-                    data: Object.assign(Object.assign({}, properties), tag)
+                    data: Object.assign(Object.assign({}, properties), tag),
                 };
                 if (action.userInputUISchema)
                     options.jsonUISchema = action.userInputUISchema;
@@ -5781,12 +5798,12 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                             const commandIns = this.currentAction.command(this, data);
                             index_50.commandHistory.execute(commandIns);
                             this.mdActions.visible = false;
-                        }
+                        },
                     },
                     dateTimeFormat: {
                         date: 'YYYY-MM-DD',
                         time: 'HH:mm:ss',
-                        dateTime: 'MM/DD/YYYY HH:mm'
+                        dateTime: 'MM/DD/YYYY HH:mm',
                     },
                 };
                 this.form.renderForm();
@@ -5839,7 +5856,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             var _a, _b, _c;
             if ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) {
                 const configs = this._component.getConfigurators() || [];
-                const builderTarget = configs.find(conf => conf.target === 'Builders');
+                const builderTarget = configs.find((conf) => conf.target === 'Builders');
                 const _category = category || ((_c = (_b = this.data) === null || _b === void 0 ? void 0 : _b.module) === null || _c === void 0 ? void 0 : _c.category);
                 if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getActions)
                     return builderTarget.getActions(_category);
@@ -5864,7 +5881,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 this._nwResizer.visible = showFull;
         }
         renderResizer(position) {
-            const stack = this.$render("i-vstack", { minWidth: 8, verticalAlignment: "center", horizontalAlignment: "center", zIndex: 20, position: "absolute", class: "resize-stack" });
+            const stack = (this.$render("i-vstack", { minWidth: 8, verticalAlignment: "center", horizontalAlignment: "center", zIndex: 20, position: "absolute", class: "resize-stack" }));
             const iconEl = this.$render("i-icon", { name: "circle", fill: Theme.colors.primary.main, height: 16, width: 16, class: "resize-icon" });
             switch (position) {
                 case 'left':
@@ -5924,7 +5941,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                     this.dragStack.visible = true;
                 }
                 else if (this.isContentBlock()) {
-                    const allSingleContentBlockId = Object.keys(data.properties).filter(prop => prop.includes(SINGLE_CONTENT_BLOCK_ID));
+                    const allSingleContentBlockId = Object.keys(data.properties).filter((prop) => prop.includes(SINGLE_CONTENT_BLOCK_ID));
                     for (let singleContentBlockId of allSingleContentBlockId) {
                         const singleContentBlock = this.parentElement.querySelector(`#${singleContentBlockId}`);
                         await singleContentBlock.fetchModule(data.properties[singleContentBlockId]);
@@ -5951,7 +5968,9 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this._component.id = `component-${this.elementId}`;
             this._component.rootParent = this.closest('ide-row');
             this._component.parent = this.contentStack;
-            const builderTarget = ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) ? this._component.getConfigurators().find((conf) => conf.target === 'Builders') : null;
+            const builderTarget = ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators)
+                ? this._component.getConfigurators().find((conf) => conf.target === 'Builders')
+                : null;
             if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setRootParent)
                 builderTarget.setRootParent(this.closest('ide-row'));
             if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setElementId)
@@ -6002,7 +6021,10 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                         const element = this.data.properties[this._currentSingleContentBlockId];
                         if (element)
                             element.properties = properties;
-                        index_48.pageObject.setElement(this.rowId, this.data.id, { properties: Object.assign(Object.assign({}, this.data.properties), { [this._currentSingleContentBlockId]: element }), module });
+                        index_48.pageObject.setElement(this.rowId, this.data.id, {
+                            properties: Object.assign(Object.assign({}, this.data.properties), { [this._currentSingleContentBlockId]: element }),
+                            module,
+                        });
                     }
                 }
             }
@@ -6115,8 +6137,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 var _a, _b;
                 let pageRow = self.closest('ide-row');
                 let sectionSelected = pageRow.selectedElement ? true : false;
-                let compositeSection = self.closest('ide-section').data &&
-                    ((_b = (_a = self.closest('ide-section').data) === null || _a === void 0 ? void 0 : _a.elements) === null || _b === void 0 ? void 0 : _b.length);
+                let compositeSection = self.closest('ide-section').data && ((_b = (_a = self.closest('ide-section').data) === null || _a === void 0 ? void 0 : _a.elements) === null || _b === void 0 ? void 0 : _b.length);
                 if (!compositeSection || sectionSelected) {
                     // add section border
                     this.classList.add('hover-border');
@@ -6126,8 +6147,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 var _a, _b;
                 let pageRow = self.closest('ide-row');
                 let sectionSelected = pageRow.selectedElement ? true : false;
-                let compositeSection = self.closest('ide-section').data &&
-                    ((_b = (_a = self.closest('ide-section').data) === null || _a === void 0 ? void 0 : _a.elements) === null || _b === void 0 ? void 0 : _b.length);
+                let compositeSection = self.closest('ide-section').data && ((_b = (_a = self.closest('ide-section').data) === null || _a === void 0 ? void 0 : _a.elements) === null || _b === void 0 ? void 0 : _b.length);
                 if (!compositeSection || sectionSelected) {
                     // remove section border
                     this.classList.remove('hover-border');
@@ -6190,7 +6210,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 this.$render("i-vstack", { id: "mainWrapper", width: "auto", maxWidth: "100%", maxHeight: "100%", position: "relative" },
                     this.$render("i-panel", { id: "toolsStack", border: { radius: 5 }, background: { color: '#fff' }, class: "ide-toolbar", visible: false },
                         this.$render("i-hstack", { id: "toolbar", padding: { top: 4, bottom: 4, left: 4, right: 4 }, gap: "0.25rem" })),
-                    this.$render("i-panel", { id: "contentStack", height: "100%", position: 'relative', maxWidth: "100%", maxHeight: "100%", class: "ide-component", onClick: this.showToolbars.bind(this) },
+                    this.$render("i-panel", { id: "contentStack", height: "100%", position: "relative", maxWidth: "100%", maxHeight: "100%", class: "ide-component", onClick: this.showToolbars.bind(this) },
                         this.$render("i-vstack", { id: "dragStack", verticalAlignment: "center", position: "absolute", left: "50%", top: "0px", width: "auto", height: "auto", class: "dragger" },
                             this.$render("i-grid-layout", { verticalAlignment: "center", autoFillInHoles: true, columnsPerRow: 4, gap: { column: '2px', row: '2px' }, class: "main-drag" },
                                 this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
@@ -6204,7 +6224,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                         this.$render("i-vstack", { id: "backdropStack", width: "100%", height: "100%", position: "absolute", top: "0px", left: "0px", zIndex: 15, visible: false, onClick: this.showToolList.bind(this) })),
                     this.$render("i-panel", { position: "absolute", width: "90%", height: "3px", left: "5%", bottom: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "bottom-block" }),
                     this.$render("i-panel", { position: "absolute", width: "90%", height: "3px", left: "5%", top: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "top-block" }),
-                    this.$render("i-modal", { id: 'mdActions', title: 'Update Settings', closeIcon: { name: 'times' }, minWidth: 400, maxWidth: '900px', closeOnBackdropClick: false, onOpen: this.onShowModal.bind(this), onClose: this.onCloseModal.bind(this), class: "setting-modal" },
+                    this.$render("i-modal", { id: "mdActions", title: "Update Settings", closeIcon: { name: 'times' }, minWidth: 400, maxWidth: "900px", closeOnBackdropClick: false, onOpen: this.onShowModal.bind(this), onClose: this.onCloseModal.bind(this), class: "setting-modal" },
                         this.$render("i-panel", null,
                             this.$render("i-vstack", { id: "pnlFormMsg", padding: { left: '1.5rem', right: '1.5rem', top: '1rem' }, gap: "0.5rem", visible: false }),
                             this.$render("i-panel", { id: "pnlForm" }),
