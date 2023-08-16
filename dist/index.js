@@ -1080,8 +1080,8 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         searchOptions: defaultSearchOptions,
         categories: [
             {
-                id: 'composables',
-                title: 'Composables',
+                id: 'widgets',
+                title: 'Widgets',
                 icon: 'shapes'
             },
             {
@@ -1095,8 +1095,8 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
                 icon: 'chart-pie'
             },
             {
-                id: 'project-micro-dapps',
-                title: 'Project MicroDApps',
+                id: 'project-widgets',
+                title: 'Project Widgets',
                 icon: 'hashtag'
             }
         ],
@@ -6732,7 +6732,8 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
                     pageRow.border = { top: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' } };
                     this.initDragEvent(pageRow);
                 }
-                pageRow.visible = !!((_a = rowData === null || rowData === void 0 ? void 0 : rowData.elements) === null || _a === void 0 ? void 0 : _a.length);
+                const isInit = i == 0 && index_64.pageObject.sections.length == 1;
+                pageRow.visible = isInit ? true : !!((_a = rowData === null || rowData === void 0 ? void 0 : rowData.elements) === null || _a === void 0 ? void 0 : _a.length);
                 pageRow.parent = this.pnlRows;
                 this.pnlRows.append(pageRow);
                 await pageRow.setData(rowData);
@@ -6890,7 +6891,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
             "module": {
                 "name": "Banner",
                 "path": "scom-banner",
-                "category": "composables",
+                "category": "widgets",
             },
             "properties": {
                 "title": 'Title',
@@ -6919,7 +6920,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
             "module": {
                 "name": "Text box",
                 "path": "scom-markdown-editor",
-                "category": "composables"
+                "category": "widgets"
             },
             "properties": {
                 "content": '## **<span style="color: #036ac4">Title</span>**\n\n* item 1\n* item 2\n* item 3'
@@ -6938,7 +6939,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
             "module": {
                 "name": "Text box",
                 "path": "scom-markdown-editor",
-                "category": "composables"
+                "category": "widgets"
             },
             "properties": {
                 "content": '## **<span style="color: #036ac4">Title</span>**\n\n - [ ] Item 1\n - [ ] Item 2\n - [ ] Item 3'
@@ -6957,7 +6958,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
             "module": {
                 "name": "Banner",
                 "path": "scom-banner",
-                "category": "composables",
+                "category": "widgets",
             },
             "properties": {
                 "title": 'Title',
@@ -6992,7 +6993,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
             "module": {
                 "name": "Text box",
                 "path": "scom-markdown-editor",
-                "category": "composables"
+                "category": "widgets"
             },
             "properties": {
                 "content": "## **<span style='color: #036ac4'>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>**\n\nNulla ac est sit amet urna consectetur semper. Curabitur posuere justo et nibh gravida, non tristique urna fringilla. Vestibulum id velit sed nisl tincidunt aliquet. Morbi viverra sapien eu purus venenatis, vitae vestibulum odio bibendum. Fusce volutpat gravida velit, id efficitur erat luctus id. Nullam malesuada hendrerit orci, a pretium tortor facilisis non. Sed euismod euismod felis. Nunc rhoncus diam in mi placerat efficitur. Aenean pulvinar neque ac nisl consequat, non lacinia lectus dapibus. Phasellus sagittis sagittis massa a luctus. Etiam auctor semper ullamcorper. Suspendisse potenti."
@@ -7011,7 +7012,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
             "module": {
                 "name": "Image",
                 "path": "scom-image",
-                "category": "composables",
+                "category": "widgets",
                 "disableClicked": true
             },
             "properties": {
@@ -7030,7 +7031,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
             "module": {
                 "name": "Text box",
                 "path": "scom-markdown-editor",
-                "category": "composables"
+                "category": "widgets"
             },
             "properties": {
                 "content": "## **<span style='color: #036ac4'>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>**\n\nNulla ac est sit amet urna consectetur semper. Curabitur posuere justo et nibh gravida, non tristique urna fringilla. Vestibulum id velit sed nisl tincidunt aliquet. Morbi viverra sapien eu purus venenatis, vitae vestibulum odio bibendum. Fusce volutpat gravida velit, id efficitur erat luctus id. Nullam malesuada hendrerit orci, a pretium tortor facilisis non. Sed euismod euismod felis. Nunc rhoncus diam in mi placerat efficitur. Aenean pulvinar neque ac nisl consequat, non lacinia lectus dapibus. Phasellus sagittis sagittis massa a luctus. Etiam auctor semper ullamcorper. Suspendisse potenti."
@@ -7049,7 +7050,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
             "module": {
                 "name": "Text box",
                 "path": "scom-markdown-editor",
-                "category": "composables"
+                "category": "widgets"
             },
             "properties": {
                 "content": "## **<span style='color: #036ac4'>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>**\n\nNulla ac est sit amet urna consectetur semper. Curabitur posuere justo et nibh gravida, non tristique urna fringilla. Vestibulum id velit sed nisl tincidunt aliquet. Morbi viverra sapien eu purus venenatis, vitae vestibulum odio bibendum. Fusce volutpat gravida velit, id efficitur erat luctus id. Nullam malesuada hendrerit orci, a pretium tortor facilisis non. Sed euismod euismod felis. Nunc rhoncus diam in mi placerat efficitur. Aenean pulvinar neque ac nisl consequat, non lacinia lectus dapibus. Phasellus sagittis sagittis massa a luctus. Etiam auctor semper ullamcorper. Suspendisse potenti."
@@ -7066,7 +7067,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
             "module": {
                 "name": "Image",
                 "path": "scom-image",
-                "category": "composables",
+                "category": "widgets",
                 "disableClicked": true
             },
             "properties": {
@@ -7091,7 +7092,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
                     "id": "",
                     "column": 1,
                     "columnSpan": 6,
-                    "module": { "name": 'Image', "path": 'scom-image', "category": 'composables', "disableClicked": true },
+                    "module": { "name": 'Image', "path": 'scom-image', "category": 'widgets', "disableClicked": true },
                     "properties": { "showHeader": false, "showFooter": false },
                     "tag": {
                         "width": "100%",
@@ -7102,7 +7103,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
                     "id": "",
                     "column": 1,
                     "columnSpan": 6,
-                    "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'composables' },
+                    "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'widgets' },
                     "properties": { "showHeader": false, "showFooter": false }
                 }
             ],
@@ -7122,7 +7123,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
                     "id": "",
                     "column": 7,
                     "columnSpan": 6,
-                    "module": { "name": 'Image', "path": 'scom-image', "category": 'composables', "disableClicked": true },
+                    "module": { "name": 'Image', "path": 'scom-image', "category": 'widgets', "disableClicked": true },
                     "properties": { "showHeader": false, "showFooter": false },
                     "tag": {
                         "width": "100%",
@@ -7133,7 +7134,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
                     "id": "",
                     "column": 7,
                     "columnSpan": 6,
-                    "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'composables' },
+                    "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'widgets' },
                     "properties": { "showHeader": false, "showFooter": false }
                 }
             ],
@@ -7155,7 +7156,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
                     "id": "",
                     "column": 1,
                     "columnSpan": 4,
-                    "module": { "name": 'Image', "path": 'scom-image', "category": 'composables', "disableClicked": true },
+                    "module": { "name": 'Image', "path": 'scom-image', "category": 'widgets', "disableClicked": true },
                     "properties": { "showHeader": false, "showFooter": false },
                     "tag": {
                         "width": "100%",
@@ -7166,7 +7167,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
                     "id": "",
                     "column": 1,
                     "columnSpan": 4,
-                    "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'composables' },
+                    "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'widgets' },
                     "properties": { "showHeader": false, "showFooter": false }
                 }
             ],
@@ -7186,7 +7187,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
                     "id": "",
                     "column": 5,
                     "columnSpan": 4,
-                    "module": { "name": 'Image', "path": 'scom-image', "category": 'composables', "disableClicked": true },
+                    "module": { "name": 'Image', "path": 'scom-image', "category": 'widgets', "disableClicked": true },
                     "properties": { "showHeader": false, "showFooter": false },
                     "tag": {
                         "width": "100%",
@@ -7197,7 +7198,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
                     "id": "",
                     "column": 5,
                     "columnSpan": 4,
-                    "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'composables' },
+                    "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'widgets' },
                     "properties": { "showHeader": false, "showFooter": false }
                 }
             ],
@@ -7217,7 +7218,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
                     "id": "",
                     "column": 9,
                     "columnSpan": 4,
-                    "module": { "name": 'Image', "path": 'scom-image', "category": 'composables', "disableClicked": true },
+                    "module": { "name": 'Image', "path": 'scom-image', "category": 'widgets', "disableClicked": true },
                     "properties": { "showHeader": false, "showFooter": false },
                     "tag": {
                         "width": "100%",
@@ -7228,7 +7229,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
                     "id": "",
                     "column": 9,
                     "columnSpan": 4,
-                    "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'composables' },
+                    "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'widgets' },
                     "properties": { "showHeader": false, "showFooter": false }
                 }
             ],

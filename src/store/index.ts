@@ -308,8 +308,8 @@ export const state = {
   searchOptions: defaultSearchOptions as IOnFetchComponentsOptions,
   categories: [
     {
-      id: 'composables',
-      title: 'Composables',
+      id: 'widgets',
+      title: 'Widgets',
       icon: 'shapes'
     },
     {
@@ -323,8 +323,8 @@ export const state = {
       icon: 'chart-pie'
     },
     {
-      id: 'project-micro-dapps',
-      title: 'Project MicroDApps',
+      id: 'project-widgets',
+      title: 'Project Widgets',
       icon: 'hashtag'
     }
   ] as ICategory[],
