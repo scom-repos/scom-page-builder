@@ -6,26 +6,16 @@ const title: any = [
         "column": 1,
         "columnSpan": 12,
         "module": {
-            "name": "Banner",
-            "path": "scom-banner",
-            "category": "widgets",
+            "name": "Text box",
+            "path": "scom-markdown-editor",
+            "category": "widgets"
         },
         "properties": {
-            "title": 'Title',
-            "description": 'Short description or subheading',
-            "backgroundInageUrl": ''
+            "content": '**<span style="color: #036ac4; font-size:3.5em">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>**'
         },
         "tag": {
-            "dark": {
-                "descriptionFontColor": "#565656",
-                "linkButtonStyle": undefined,
-                "titleFontColor": "#036ac4"
-            },
-            "light": {
-                "descriptionFontColor": "#565656",
-                "linkButtonStyle": undefined,
-                "titleFontColor": "#036ac4"
-            }
+            "width": "100%",
+            "height": 200
         }
     }
 ]
@@ -70,41 +60,41 @@ const titleWithTaskList: any = [
     }
 ]
 
-const titleWithButton: any = [
-    {
-        "id": "",
-        "column": 1,
-        "columnSpan": 12,
-        "module": {
-            "name": "Banner",
-            "path": "scom-banner",
-            "category": "widgets",
-        },
-        "properties": {
-            "title": 'Title',
-            "description": 'Short description or subheading',
-            "backgroundInageUrl": '',
-            "linkButtons": [
-                {
-                    "caption": "button",
-                    "url": ""
-                }
-            ]
-        },
-        "tag": {
-            "dark": {
-                "descriptionFontColor": "#565656",
-                "linkButtonStyle": undefined,
-                "titleFontColor": "#036ac4"
-            },
-            "light": {
-                "descriptionFontColor": "#565656",
-                "linkButtonStyle": undefined,
-                "titleFontColor": "#036ac4"
-            }
-        }
-    }
-]
+// const titleWithButton: any = [
+//     {
+//         "id": "",
+//         "column": 1,
+//         "columnSpan": 12,
+//         "module": {
+//             "name": "Banner",
+//             "path": "scom-banner",
+//             "category": "widgets",
+//         },
+//         "properties": {
+//             "title": 'Title',
+//             "description": 'Short description or subheading',
+//             "backgroundInageUrl": '',
+//             "linkButtons": [
+//                 {
+//                     "caption": "button",
+//                     "url": ""
+//                 }
+//             ]
+//         },
+//         "tag": {
+//             "dark": {
+//                 "descriptionFontColor": "#565656",
+//                 "linkButtonStyle": undefined,
+//                 "titleFontColor": "#036ac4"
+//             },
+//             "light": {
+//                 "descriptionFontColor": "#565656",
+//                 "linkButtonStyle": undefined,
+//                 "titleFontColor": "#036ac4"
+//             }
+//         }
+//     }
+// ]
 
 const titleWithText: any = [
     {
@@ -370,7 +360,7 @@ export const layouts = {
         "emptySection": emptySection,
         "title": title,
         "titleWithText": titleWithText,
-        "titleWithButton": titleWithButton,
+        // "titleWithButton": titleWithButton,
         "titleWithBulletPoint": titleWithBulletPoint,
         "titleWithTaskList": titleWithTaskList
     },

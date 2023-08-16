@@ -26,11 +26,6 @@ export class MainModule extends Module {
         "category": "widgets"
       },
       {
-        "name": "Banner",
-        "path": "scom-banner",
-        "category": "widgets"
-      },
-      {
         "name": "Blog",
         "path": "scom-blog",
         "category": "widgets",

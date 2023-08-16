@@ -757,7 +757,7 @@ define("@scom/scom-page-builder/interface/index.ts", ["require", "exports", "@sc
         ELEMENT_NAME["VIDEO"] = "Video";
         ELEMENT_NAME["CAROUSEL"] = "Carousel";
         ELEMENT_NAME["MAP"] = "Map";
-        ELEMENT_NAME["BANNER"] = "Banner";
+        // BANNER = "Banner",
         ELEMENT_NAME["BLOG"] = "Blog";
         ELEMENT_NAME["CONTENT_BLOCK"] = "Content Block";
     })(ELEMENT_NAME = exports.ELEMENT_NAME || (exports.ELEMENT_NAME = {}));
@@ -6889,26 +6889,16 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
             "column": 1,
             "columnSpan": 12,
             "module": {
-                "name": "Banner",
-                "path": "scom-banner",
-                "category": "widgets",
+                "name": "Text box",
+                "path": "scom-markdown-editor",
+                "category": "widgets"
             },
             "properties": {
-                "title": 'Title',
-                "description": 'Short description or subheading',
-                "backgroundInageUrl": ''
+                "content": '**<span style="color: #036ac4; font-size:3.5em">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>**'
             },
             "tag": {
-                "dark": {
-                    "descriptionFontColor": "#565656",
-                    "linkButtonStyle": undefined,
-                    "titleFontColor": "#036ac4"
-                },
-                "light": {
-                    "descriptionFontColor": "#565656",
-                    "linkButtonStyle": undefined,
-                    "titleFontColor": "#036ac4"
-                }
+                "width": "100%",
+                "height": 200
             }
         }
     ];
@@ -6950,41 +6940,41 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
             }
         }
     ];
-    const titleWithButton = [
-        {
-            "id": "",
-            "column": 1,
-            "columnSpan": 12,
-            "module": {
-                "name": "Banner",
-                "path": "scom-banner",
-                "category": "widgets",
-            },
-            "properties": {
-                "title": 'Title',
-                "description": 'Short description or subheading',
-                "backgroundInageUrl": '',
-                "linkButtons": [
-                    {
-                        "caption": "button",
-                        "url": ""
-                    }
-                ]
-            },
-            "tag": {
-                "dark": {
-                    "descriptionFontColor": "#565656",
-                    "linkButtonStyle": undefined,
-                    "titleFontColor": "#036ac4"
-                },
-                "light": {
-                    "descriptionFontColor": "#565656",
-                    "linkButtonStyle": undefined,
-                    "titleFontColor": "#036ac4"
-                }
-            }
-        }
-    ];
+    // const titleWithButton: any = [
+    //     {
+    //         "id": "",
+    //         "column": 1,
+    //         "columnSpan": 12,
+    //         "module": {
+    //             "name": "Banner",
+    //             "path": "scom-banner",
+    //             "category": "widgets",
+    //         },
+    //         "properties": {
+    //             "title": 'Title',
+    //             "description": 'Short description or subheading',
+    //             "backgroundInageUrl": '',
+    //             "linkButtons": [
+    //                 {
+    //                     "caption": "button",
+    //                     "url": ""
+    //                 }
+    //             ]
+    //         },
+    //         "tag": {
+    //             "dark": {
+    //                 "descriptionFontColor": "#565656",
+    //                 "linkButtonStyle": undefined,
+    //                 "titleFontColor": "#036ac4"
+    //             },
+    //             "light": {
+    //                 "descriptionFontColor": "#565656",
+    //                 "linkButtonStyle": undefined,
+    //                 "titleFontColor": "#036ac4"
+    //             }
+    //         }
+    //     }
+    // ]
     const titleWithText = [
         {
             "id": "",
@@ -7244,7 +7234,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
             "emptySection": emptySection,
             "title": title,
             "titleWithText": titleWithText,
-            "titleWithButton": titleWithButton,
+            // "titleWithButton": titleWithButton,
             "titleWithBulletPoint": titleWithBulletPoint,
             "titleWithTaskList": titleWithTaskList
         },
