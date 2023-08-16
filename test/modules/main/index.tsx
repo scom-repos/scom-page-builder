@@ -12,28 +12,23 @@ export class MainModule extends Module {
       {
         "name": "Text box",
         "path": "scom-markdown-editor",
-        "category": "composables"
+        "category": "widgets"
       },
       {
         "name": "Image",
         "path": "scom-image",
-        "category": "composables",
+        "category": "widgets",
         "disableClicked": true
       },
       {
         "name": "Carousel",
         "path": "scom-carousel",
-        "category": "composables"
-      },
-      {
-        "name": "Banner",
-        "path": "scom-banner",
-        "category": "composables"
+        "category": "widgets"
       },
       {
         "name": "Blog",
         "path": "scom-blog",
-        "category": "composables",
+        "category": "widgets",
         "disableClicked": true
       },
       {
@@ -143,49 +138,8 @@ export class MainModule extends Module {
         {
           "id": "6876b0ab-a29c-4ed8-905e-51cd515fa26c",
           "row": 0,
-          "name": "My banner",
-          "elements": [
-            {
-              "id": "ff69df4f-ebb0-4446-adde-9bcb8a07f25d",
-              "column": 1,
-              "columnSpan": 12,
-              "type": "composite",
-              "properties": {
-                "url": "https://placehold.co/600x400.png",
-                "showHeader": false,
-                "showFooter": false
-              },
-              "module": {},
-              "tag": {
-                "width": 257,
-                "height": 257
-              },
-              "elements": [
-                {
-                  "id": "da140da9-9701-4928-b0fd-c5af250d5817",
-                  "column": 1,
-                  "columnSpan": 12,
-                  "type": "primitive",
-                  "module": {
-                    "name": "Banner",
-                    "path": "scom-banner",
-                    "category": "composables",
-                  },
-                  "properties": {
-                    "title": 'Page Banner Title',
-                    "description": 'page banner description',
-                    "backgroundImageCid": undefined,
-                    "backgroundInageUrl": '',
-                    "linkButtons": undefined
-                  },
-                  "tag": {
-                    "width": "100%",
-                    "height": 154
-                  }
-                }
-              ]
-            }
-          ]
+          "name": "First section",
+          "elements": []
         }
       ],
       "footer": {

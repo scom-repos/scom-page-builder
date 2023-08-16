@@ -229,7 +229,8 @@ export class PageRows extends Module {
                 pageRow.border = { top: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' } };
                 this.initDragEvent(pageRow);
             }
-            pageRow.visible = !!rowData?.elements?.length;
+            const isInit: boolean = i==0 && pageObject.sections.length == 1;
+            pageRow.visible = isInit? true : !!rowData?.elements?.length;
             pageRow.parent = this.pnlRows;
             this.pnlRows.append(pageRow);
             await pageRow.setData(rowData);

@@ -6,26 +6,16 @@ const title: any = [
         "column": 1,
         "columnSpan": 12,
         "module": {
-            "name": "Banner",
-            "path": "scom-banner",
-            "category": "composables",
+            "name": "Text box",
+            "path": "scom-markdown-editor",
+            "category": "widgets"
         },
         "properties": {
-            "title": 'Title',
-            "description": 'Short description or subheading',
-            "backgroundInageUrl": ''
+            "content": '**<span style="color: #036ac4; font-size:3.5em">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>**'
         },
         "tag": {
-            "dark": {
-                "descriptionFontColor": "#565656",
-                "linkButtonStyle": undefined,
-                "titleFontColor": "#036ac4"
-            },
-            "light": {
-                "descriptionFontColor": "#565656",
-                "linkButtonStyle": undefined,
-                "titleFontColor": "#036ac4"
-            }
+            "width": "100%",
+            "height": 200
         }
     }
 ]
@@ -38,7 +28,7 @@ const titleWithBulletPoint: any = [
         "module": {
             "name": "Text box",
             "path": "scom-markdown-editor",
-            "category": "composables"
+            "category": "widgets"
         },
         "properties": {
             "content": '## **<span style="color: #036ac4">Title</span>**\n\n* item 1\n* item 2\n* item 3'
@@ -58,7 +48,7 @@ const titleWithTaskList: any = [
         "module": {
             "name": "Text box",
             "path": "scom-markdown-editor",
-            "category": "composables"
+            "category": "widgets"
         },
         "properties": {
             "content": '## **<span style="color: #036ac4">Title</span>**\n\n - [ ] Item 1\n - [ ] Item 2\n - [ ] Item 3'
@@ -70,41 +60,41 @@ const titleWithTaskList: any = [
     }
 ]
 
-const titleWithButton: any = [
-    {
-        "id": "",
-        "column": 1,
-        "columnSpan": 12,
-        "module": {
-            "name": "Banner",
-            "path": "scom-banner",
-            "category": "composables",
-        },
-        "properties": {
-            "title": 'Title',
-            "description": 'Short description or subheading',
-            "backgroundInageUrl": '',
-            "linkButtons": [
-                {
-                    "caption": "button",
-                    "url": ""
-                }
-            ]
-        },
-        "tag": {
-            "dark": {
-                "descriptionFontColor": "#565656",
-                "linkButtonStyle": undefined,
-                "titleFontColor": "#036ac4"
-            },
-            "light": {
-                "descriptionFontColor": "#565656",
-                "linkButtonStyle": undefined,
-                "titleFontColor": "#036ac4"
-            }
-        }
-    }
-]
+// const titleWithButton: any = [
+//     {
+//         "id": "",
+//         "column": 1,
+//         "columnSpan": 12,
+//         "module": {
+//             "name": "Banner",
+//             "path": "scom-banner",
+//             "category": "widgets",
+//         },
+//         "properties": {
+//             "title": 'Title',
+//             "description": 'Short description or subheading',
+//             "backgroundInageUrl": '',
+//             "linkButtons": [
+//                 {
+//                     "caption": "button",
+//                     "url": ""
+//                 }
+//             ]
+//         },
+//         "tag": {
+//             "dark": {
+//                 "descriptionFontColor": "#565656",
+//                 "linkButtonStyle": undefined,
+//                 "titleFontColor": "#036ac4"
+//             },
+//             "light": {
+//                 "descriptionFontColor": "#565656",
+//                 "linkButtonStyle": undefined,
+//                 "titleFontColor": "#036ac4"
+//             }
+//         }
+//     }
+// ]
 
 const titleWithText: any = [
     {
@@ -114,7 +104,7 @@ const titleWithText: any = [
         "module": {
             "name": "Text box",
             "path": "scom-markdown-editor",
-            "category": "composables"
+            "category": "widgets"
         },
         "properties": {
             "content": "## **<span style='color: #036ac4'>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>**\n\nNulla ac est sit amet urna consectetur semper. Curabitur posuere justo et nibh gravida, non tristique urna fringilla. Vestibulum id velit sed nisl tincidunt aliquet. Morbi viverra sapien eu purus venenatis, vitae vestibulum odio bibendum. Fusce volutpat gravida velit, id efficitur erat luctus id. Nullam malesuada hendrerit orci, a pretium tortor facilisis non. Sed euismod euismod felis. Nunc rhoncus diam in mi placerat efficitur. Aenean pulvinar neque ac nisl consequat, non lacinia lectus dapibus. Phasellus sagittis sagittis massa a luctus. Etiam auctor semper ullamcorper. Suspendisse potenti."
@@ -134,7 +124,7 @@ const accentLeft: any = [
         "module": {
             "name": "Image",
             "path": "scom-image",
-            "category": "composables",
+            "category": "widgets",
             "disableClicked": true
         },
         "properties": {
@@ -153,7 +143,7 @@ const accentLeft: any = [
         "module": {
             "name": "Text box",
             "path": "scom-markdown-editor",
-            "category": "composables"
+            "category": "widgets"
         },
         "properties": {
             "content": "## **<span style='color: #036ac4'>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>**\n\nNulla ac est sit amet urna consectetur semper. Curabitur posuere justo et nibh gravida, non tristique urna fringilla. Vestibulum id velit sed nisl tincidunt aliquet. Morbi viverra sapien eu purus venenatis, vitae vestibulum odio bibendum. Fusce volutpat gravida velit, id efficitur erat luctus id. Nullam malesuada hendrerit orci, a pretium tortor facilisis non. Sed euismod euismod felis. Nunc rhoncus diam in mi placerat efficitur. Aenean pulvinar neque ac nisl consequat, non lacinia lectus dapibus. Phasellus sagittis sagittis massa a luctus. Etiam auctor semper ullamcorper. Suspendisse potenti."
@@ -173,7 +163,7 @@ const accentRight: any = [
         "module": {
             "name": "Text box",
             "path": "scom-markdown-editor",
-            "category": "composables"
+            "category": "widgets"
         },
         "properties": {
             "content": "## **<span style='color: #036ac4'>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span>**\n\nNulla ac est sit amet urna consectetur semper. Curabitur posuere justo et nibh gravida, non tristique urna fringilla. Vestibulum id velit sed nisl tincidunt aliquet. Morbi viverra sapien eu purus venenatis, vitae vestibulum odio bibendum. Fusce volutpat gravida velit, id efficitur erat luctus id. Nullam malesuada hendrerit orci, a pretium tortor facilisis non. Sed euismod euismod felis. Nunc rhoncus diam in mi placerat efficitur. Aenean pulvinar neque ac nisl consequat, non lacinia lectus dapibus. Phasellus sagittis sagittis massa a luctus. Etiam auctor semper ullamcorper. Suspendisse potenti."
@@ -190,7 +180,7 @@ const accentRight: any = [
         "module": {
             "name": "Image",
             "path": "scom-image",
-            "category": "composables",
+            "category": "widgets",
             "disableClicked": true
         },
         "properties": {
@@ -216,7 +206,7 @@ const twoImageColumn: any = [
                 "id": "",
                 "column": 1,
                 "columnSpan": 6,
-                "module": { "name": 'Image', "path": 'scom-image', "category": 'composables', "disableClicked": true },
+                "module": { "name": 'Image', "path": 'scom-image', "category": 'widgets', "disableClicked": true },
                 "properties": { "showHeader": false, "showFooter": false },
                 "tag": {
                     "width": "100%",
@@ -227,7 +217,7 @@ const twoImageColumn: any = [
                 "id": "",
                 "column": 1,
                 "columnSpan": 6,
-                "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'composables' },
+                "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'widgets' },
                 "properties": { "showHeader": false, "showFooter": false }
             }
         ],
@@ -247,7 +237,7 @@ const twoImageColumn: any = [
                 "id": "",
                 "column": 7,
                 "columnSpan": 6,
-                "module": { "name": 'Image', "path": 'scom-image', "category": 'composables', "disableClicked": true },
+                "module": { "name": 'Image', "path": 'scom-image', "category": 'widgets', "disableClicked": true },
                 "properties": { "showHeader": false, "showFooter": false },
                 "tag": {
                     "width": "100%",
@@ -258,7 +248,7 @@ const twoImageColumn: any = [
                 "id": "",
                 "column": 7,
                 "columnSpan": 6,
-                "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'composables' },
+                "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'widgets' },
                 "properties": { "showHeader": false, "showFooter": false }
             }
         ],
@@ -281,7 +271,7 @@ const threeImageColumn: any = [
                 "id": "",
                 "column": 1,
                 "columnSpan": 4,
-                "module": { "name": 'Image', "path": 'scom-image', "category": 'composables', "disableClicked": true },
+                "module": { "name": 'Image', "path": 'scom-image', "category": 'widgets', "disableClicked": true },
                 "properties": { "showHeader": false, "showFooter": false },
                 "tag": {
                     "width": "100%",
@@ -292,7 +282,7 @@ const threeImageColumn: any = [
                 "id": "",
                 "column": 1,
                 "columnSpan": 4,
-                "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'composables' },
+                "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'widgets' },
                 "properties": { "showHeader": false, "showFooter": false }
             }
         ],
@@ -312,7 +302,7 @@ const threeImageColumn: any = [
                 "id": "",
                 "column": 5,
                 "columnSpan": 4,
-                "module": { "name": 'Image', "path": 'scom-image', "category": 'composables', "disableClicked": true },
+                "module": { "name": 'Image', "path": 'scom-image', "category": 'widgets', "disableClicked": true },
                 "properties": { "showHeader": false, "showFooter": false },
                 "tag": {
                     "width": "100%",
@@ -323,7 +313,7 @@ const threeImageColumn: any = [
                 "id": "",
                 "column": 5,
                 "columnSpan": 4,
-                "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'composables' },
+                "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'widgets' },
                 "properties": { "showHeader": false, "showFooter": false }
             }
         ],
@@ -343,7 +333,7 @@ const threeImageColumn: any = [
                 "id": "",
                 "column": 9,
                 "columnSpan": 4,
-                "module": { "name": 'Image', "path": 'scom-image', "category": 'composables', "disableClicked": true },
+                "module": { "name": 'Image', "path": 'scom-image', "category": 'widgets', "disableClicked": true },
                 "properties": { "showHeader": false, "showFooter": false },
                 "tag": {
                     "width": "100%",
@@ -354,7 +344,7 @@ const threeImageColumn: any = [
                 "id": "",
                 "column": 9,
                 "columnSpan": 4,
-                "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'composables' },
+                "module": { "name": 'Text box', "path": 'scom-markdown-editor', "category": 'widgets' },
                 "properties": { "showHeader": false, "showFooter": false }
             }
         ],
@@ -370,7 +360,7 @@ export const layouts = {
         "emptySection": emptySection,
         "title": title,
         "titleWithText": titleWithText,
-        "titleWithButton": titleWithButton,
+        // "titleWithButton": titleWithButton,
         "titleWithBulletPoint": titleWithBulletPoint,
         "titleWithTaskList": titleWithTaskList
     },

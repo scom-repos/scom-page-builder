@@ -457,7 +457,6 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
         VIDEO = "Video",
         CAROUSEL = "Carousel",
         MAP = "Map",
-        BANNER = "Banner",
         BLOG = "Blog",
         CONTENT_BLOCK = "Content Block"
     }
@@ -1457,7 +1456,6 @@ declare module "@scom/scom-page-builder/utility/layouts.json.ts" {
             emptySection: any;
             title: any;
             titleWithText: any;
-            titleWithButton: any;
             titleWithBulletPoint: any;
             titleWithTaskList: any;
         };
