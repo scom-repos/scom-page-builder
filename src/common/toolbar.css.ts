@@ -136,7 +136,7 @@ Styles.cssRule('ide-toolbar', {
       cursor: 'grab'
     },
     '.dragger': {
-      cursor: 'move',
+      cursor: 'grab',
       opacity: 0,
       visibility: 'hidden',
       transform: 'translateX(-50%)',
@@ -185,6 +185,19 @@ Styles.cssRule('ide-toolbar', {
           }
         },
       }
+    },
+    '&.is-textbox': {
+        cursor: 'text',
+        userSelect: 'text',
+        $nest: {
+          '&::selection': {
+            background: Theme.colors.primary.main,
+            color: Theme.colors.primary.contrastText
+          },
+          'i-scom-markdown-editor': {
+            padding: '0.75rem 0'
+          }
+        }
     }
   }
 })
