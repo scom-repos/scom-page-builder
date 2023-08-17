@@ -690,6 +690,7 @@ export class IDEToolbar extends Module {
                         background={{ color: '#fff' }}
                         class="ide-toolbar"
                         visible={false}
+                        zIndex={980}
                     >
                         <i-hstack id="toolbar" padding={{ top: 4, bottom: 4, left: 4, right: 4 }} gap="0.25rem"></i-hstack>
                     </i-panel>

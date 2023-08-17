@@ -5571,9 +5571,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             width: 14,
                             height: 14,
                             fill: Theme.colors.primary.contrastText,
-                        }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, top: "-12px", left: "50%", zIndex: 95, class: "btn-add", onClick: () => this.onAddSection(-1) }),
+                        }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, top: "-12px", left: "50%", zIndex: 970, class: "btn-add", onClick: () => this.onAddSection(-1) }),
                     this.$render("i-vstack", { id: 'actionsBar', class: "row-actions-bar", verticalAlignment: "center" },
-                        this.$render("i-vstack", { background: { color: '#fff' }, border: { radius: 5 }, maxWidth: "100%", maxHeight: "100%", horizontalAlignment: "center", padding: { top: 4, bottom: 4, left: 4, right: 4 }, gap: "0.25rem", class: "bar-shadow" },
+                        this.$render("i-vstack", { background: { color: '#fff' }, border: { radius: 5 }, maxWidth: "100%", maxHeight: "100%", horizontalAlignment: "center", padding: { top: 4, bottom: 4, left: 4, right: 4 }, gap: "0.25rem", class: "bar-shadow", zIndex: 980 },
                             this.$render("i-panel", { class: "actions", tooltip: { content: 'Section settings', placement: 'right' }, visible: this.isChanged, onClick: () => this.onOpenRowSettingsDialog() },
                                 this.$render("i-icon", { name: "cog", width: 16, height: 16, fill: "#80868b" })),
                             this.$render("i-panel", { id: "btnClone", class: "actions", tooltip: { content: 'Duplicate section', placement: 'right' }, visible: this.isCloned, onClick: this.onClone },
@@ -5612,7 +5612,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             width: 14,
                             height: 14,
                             fill: Theme.colors.primary.contrastText,
-                        }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, bottom: "-12px", left: "50%", zIndex: 95, class: "btn-add", onClick: () => this.onAddSection(1) }))));
+                        }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, bottom: "-12px", left: "50%", zIndex: 970, class: "btn-add", onClick: () => this.onAddSection(1) }))));
         }
     };
     __decorate([
@@ -6196,7 +6196,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                         this.$render("i-icon", { class: "i-loading-spinner_icon", name: "spinner", width: 24, height: 24, fill: Theme.colors.primary.main }),
                         this.$render("i-label", { caption: "Loading...", font: { color: Theme.colors.primary.main, size: '1rem' }, class: "i-loading-spinner_text" }))),
                 this.$render("i-vstack", { id: "mainWrapper", width: "auto", maxWidth: "100%", maxHeight: "100%", position: "relative" },
-                    this.$render("i-panel", { id: "toolsStack", border: { radius: 5 }, background: { color: '#fff' }, class: "ide-toolbar", visible: false },
+                    this.$render("i-panel", { id: "toolsStack", border: { radius: 5 }, background: { color: '#fff' }, class: "ide-toolbar", visible: false, zIndex: 980 },
                         this.$render("i-hstack", { id: "toolbar", padding: { top: 4, bottom: 4, left: 4, right: 4 }, gap: "0.25rem" })),
                     this.$render("i-panel", { id: "contentStack", height: "100%", position: 'relative', maxWidth: "100%", maxHeight: "100%", class: "ide-component", onClick: this.showToolbars.bind(this) },
                         this.$render("i-vstack", { id: "dragStack", verticalAlignment: "center", position: "absolute", left: "50%", top: "0px", width: "auto", height: "auto", class: "dragger" },
@@ -8649,7 +8649,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                             this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
                                 this.$render("ide-rows", { id: "pageRows", draggable: true })),
                             this.$render("builder-footer", { id: "builderFooter" })))),
-                this.$render("i-scom-page-builder-sidebar", { id: "pageSidebar" }),
+                this.$render("i-scom-page-builder-sidebar", { id: "pageSidebar", zIndex: 990 }),
                 this.$render("ide-search-components-dialog", { id: "mdComponentsSearch" })));
         }
     };

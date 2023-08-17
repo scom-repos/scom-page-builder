@@ -1486,7 +1486,7 @@ export class PageRow extends Module {
                         padding={{top: 5, bottom: 5, left: 5, right: 5}}
                         top="-12px"
                         left="50%"
-                        zIndex={95}
+                        zIndex={970}
                         class="btn-add"
                         onClick={() => this.onAddSection(-1)}
                     ></i-button>
@@ -1500,6 +1500,7 @@ export class PageRow extends Module {
                             padding={{top: 4, bottom: 4, left: 4, right: 4}}
                             gap="0.25rem"
                             class="bar-shadow"
+                            zIndex={980}
                         >
                             <i-panel
                                 class="actions"
@@ -1624,7 +1625,7 @@ export class PageRow extends Module {
                         padding={{top: 5, bottom: 5, left: 5, right: 5}}
                         bottom="-12px"
                         left="50%"
-                        zIndex={95}
+                        zIndex={970}
                         class="btn-add"
                         onClick={() => this.onAddSection(1)}
                     ></i-button>
