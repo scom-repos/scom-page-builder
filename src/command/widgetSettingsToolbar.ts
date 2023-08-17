@@ -1,6 +1,7 @@
 import { ICommand } from './interface';
 import { IDEToolbar } from '../common';
 import { PageRow, PageSection } from '../page';
+import { Panel } from '@ijstech/components';
 
 export class WidgetSettingsToolbarCommand implements ICommand {
     private toolbar: any;
@@ -22,8 +23,9 @@ export class WidgetSettingsToolbarCommand implements ICommand {
 
     execute(): void {
         const { pt, pb, pl, pr } = this.data;
-        this.section.padding = { top: pt, bottom: pb, left: pl, right: pr };
-        const newTag = { pt, pb, pl, pr }
+        const contentStack: Panel = this.section.querySelector('#contentStack') as Panel;
+        if (contentStack) contentStack.padding = { top: pt, bottom: pb, left: pl, right: pr };
+        const newTag = { pt, pb, pl, pr };
         this.toolbar.setTag(newTag);
     }
 

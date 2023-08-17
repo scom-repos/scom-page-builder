@@ -5539,7 +5539,9 @@ define("@scom/scom-page-builder/command/widgetSettingsToolbar.ts", ["require", "
         }
         execute() {
             const { pt, pb, pl, pr } = this.data;
-            this.section.padding = { top: pt, bottom: pb, left: pl, right: pr };
+            const contentStack = this.section.querySelector('#contentStack');
+            if (contentStack)
+                contentStack.padding = { top: pt, bottom: pb, left: pl, right: pr };
             const newTag = { pt, pb, pl, pr };
             this.toolbar.setTag(newTag);
         }
