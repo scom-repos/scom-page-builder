@@ -37,7 +37,7 @@ export class UpdatePageSettingsCommand implements ICommand {
   }
 
   private updateConfig(config: IPageConfig, updatedValues: string[]) {
-    const { backgroundColor, backgroundImage, margin, sectionWidth, ptb, plr } = config;
+    const { backgroundColor, backgroundImage, textColor, margin, sectionWidth, ptb, plr } = config;
     let newConfig: IPageConfig = {};
     for (let prop of updatedValues) {
       newConfig[prop] = config[prop];
@@ -49,11 +49,15 @@ export class UpdatePageSettingsCommand implements ICommand {
     }
     if (updatedValues.includes('backgroundColor')) {
       element.style.setProperty('--builder-bg', backgroundColor);
-      application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {color: backgroundColor});
+      application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {backgroundColor});
+    }
+    if (updatedValues.includes('textColor')) {
+      element.style.setProperty('--builder-color', textColor);
+      application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {textColor});
     }
     this.element.maxWidth = '100%'; // maxWidth ?? '100%';
     this.element.margin = getMargin(margin);
-    pageObject.config = {backgroundColor, backgroundImage, margin, sectionWidth, ptb, plr};
+    pageObject.config = {backgroundColor, backgroundImage, margin, sectionWidth, ptb, plr, textColor};
     return newConfig;
   }
 

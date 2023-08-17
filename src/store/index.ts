@@ -409,11 +409,11 @@ export const getDivider = (theme?: ThemeType) => {
 }
 
 export const setDefaultPageConfig = (value: IPageConfig) => {
-  state.defaultPageConfig = {...defaultPageConfig, backgroundColor: getBackgroundColor(), ...(value || {})};
+  state.defaultPageConfig = {...defaultPageConfig, backgroundColor: getBackgroundColor(), textColor: getFontColor(), ...(value || {})};
 }
 
 export const getDefaultPageConfig = (): IPageConfig => {
-  const defaultValue = {...defaultPageConfig, backgroundColor: getBackgroundColor()};
+  const defaultValue = {...defaultPageConfig, backgroundColor: getBackgroundColor(), textColor: getFontColor()};
   return state.defaultPageConfig || defaultValue;
 }
 

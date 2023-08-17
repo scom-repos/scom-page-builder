@@ -94,6 +94,11 @@ export class RowSettingsDialog extends Module {
                     "type": "string",
                     "format": "color"
                 },
+                "textColor": {
+                    "title": "Text color",
+                    "type": "string",
+                    "format": "color"
+                },
                 "border": {
                     "title": "Show border",
                     "type": "boolean"
@@ -120,7 +125,10 @@ export class RowSettingsDialog extends Module {
                             "type": "Control",
                             "scope": "#/properties/backgroundColor"
                         },
-
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/textColor"
+                        },
                     ]
                 },
                 {
