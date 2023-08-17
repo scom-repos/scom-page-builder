@@ -31,6 +31,11 @@
       "path": "scom-carousel",
       "category": "components"
     },
+    "@scom/scom-banner": {
+      "name": "Banner",
+      "path": "scom-banner",
+      "category": "components"
+    },
     "@scom/scom-blog": {
       "name": "Blog",
       "path": "scom-blog",

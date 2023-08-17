@@ -457,6 +457,7 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
         VIDEO = "Video",
         CAROUSEL = "Carousel",
         MAP = "Map",
+        BANNER = "Banner",
         BLOG = "Blog",
         CONTENT_BLOCK = "Content Block"
     }

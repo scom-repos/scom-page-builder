@@ -619,12 +619,12 @@ export class PageRow extends Module {
         }
 
         function dragEnter(enterTarget: Control, clientX: number, clientY: number) {
-            const pnlRowWrapRect = self.querySelector('#pnlRowWrap').getBoundingClientRect();
-            const mouseOnPnl = (clientX >= pnlRowWrapRect.left
-                && clientX <= pnlRowWrapRect.right 
-                && clientY >= pnlRowWrapRect.top
-                && clientY <= pnlRowWrapRect.bottom);
-            if (!mouseOnPnl) return;
+            // const pnlRowWrapRect = self.querySelector('#pnlRowWrap').getBoundingClientRect();
+            // const mouseOnPnl = (clientX >= pnlRowWrapRect.left
+            //     && clientX <= pnlRowWrapRect.right 
+            //     && clientY >= pnlRowWrapRect.top
+            //     && clientY <= pnlRowWrapRect.bottom);
+            // if (!mouseOnPnl) return;
             if (!enterTarget || !self.currentElement) return;
             if (enterTarget.closest('#pnlEmty')) {
                 self.pnlRow.minHeight = '180px';
@@ -676,7 +676,7 @@ export class PageRow extends Module {
                 let spaces = 0;
                 let findedSection = null;
                 let isUpdated: boolean = false;
-                const isFromToolbar = !self.currentElement?.id;
+                // const isFromToolbar = !self.currentElement?.id;
                 for (let i = 0; i < sortedSections.length; i++) {
                     const section = sortedSections[i] as Control;
                     const sectionColumn = Number(section.dataset.column);
@@ -789,7 +789,7 @@ export class PageRow extends Module {
 
         this.addEventListener('dragenter', function (event) { 
             const eventTarget = event.target as HTMLElement;
-            if (eventTarget && eventTarget.classList.contains('fixed-grid-item')) {
+            if (eventTarget && (eventTarget.classList.contains('fixed-grid-item') || eventTarget.classList.contains('fixed-grid'))) {
                 dragEnter(eventTarget as Control, event.clientX, event.clientY);
             }
         });
@@ -797,12 +797,6 @@ export class PageRow extends Module {
         this.addEventListener('dragover', function (event) {
             event.preventDefault();
             const eventTarget = event.target as Control;
-            const pnlRowWrapRect = self.querySelector('#pnlRowWrap').getBoundingClientRect();
-            const mouseOnPnl = (event.clientX >= pnlRowWrapRect.left
-                && event.clientX <= pnlRowWrapRect.right 
-                && event.clientY >= pnlRowWrapRect.top
-                && event.clientY <= pnlRowWrapRect.bottom);
-            if (!mouseOnPnl) return;
             let enterTarget: Control;
             const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
             const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
@@ -831,12 +825,11 @@ export class PageRow extends Module {
                 enterTarget = nearestElement;
             } else if ((collision.collisionType == 'self' && collision.toolbar) || collision.collisionType == 'mutual') {
                 // choose a merge block to display
-                const elementRect = collision.section.getBoundingClientRect();
-                const mouseOnElm = (event.clientX >= elementRect.left 
-                    && event.clientX <= elementRect.right 
-                    && event.clientY >= elementRect.top 
-                    && event.clientY <= elementRect.bottom);
-                if (collision.mergeSide && mouseOnElm) {
+                if (collision.rowBlock) {
+                    updateClass(collision.rowBlock as Control, 'is-dragenter');
+                    removeRectangles();
+                    return;
+                } else if (collision.mergeSide/* && mouseOnElm*/) {
                     let blockClass: string = `.${collision.mergeSide}-block`;
                     const block =
                         collision.mergeSide == 'top' || collision.mergeSide == 'bottom'
@@ -859,10 +852,6 @@ export class PageRow extends Module {
                             return;
                         }
                     }
-                } else if (collision.rowBlock) {
-                    updateClass(collision.rowBlock as Control, 'is-dragenter');
-                    removeRectangles();
-                    return;
                 }
             } else return;
 
@@ -1486,7 +1475,7 @@ export class PageRow extends Module {
                         padding={{top: 5, bottom: 5, left: 5, right: 5}}
                         top="-12px"
                         left="50%"
-                        zIndex={95}
+                        zIndex={970}
                         class="btn-add"
                         onClick={() => this.onAddSection(-1)}
                     ></i-button>
@@ -1500,6 +1489,7 @@ export class PageRow extends Module {
                             padding={{top: 4, bottom: 4, left: 4, right: 4}}
                             gap="0.25rem"
                             class="bar-shadow"
+                            zIndex={980}
                         >
                             <i-panel
                                 class="actions"
@@ -1624,7 +1614,7 @@ export class PageRow extends Module {
                         padding={{top: 5, bottom: 5, left: 5, right: 5}}
                         bottom="-12px"
                         left="50%"
-                        zIndex={95}
+                        zIndex={970}
                         class="btn-add"
                         onClick={() => this.onAddSection(1)}
                     ></i-button>
