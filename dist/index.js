@@ -4756,14 +4756,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.toggleUI(!!((_b = (_a = self.data) === null || _a === void 0 ? void 0 : _a.elements) === null || _b === void 0 ? void 0 : _b.length));
             }
             function dragEnter(enterTarget, clientX, clientY) {
-                var _a, _b, _c, _d, _e, _f;
-                const pnlRowWrapRect = self.querySelector('#pnlRowWrap').getBoundingClientRect();
-                const mouseOnPnl = (clientX >= pnlRowWrapRect.left
-                    && clientX <= pnlRowWrapRect.right
-                    && clientY >= pnlRowWrapRect.top
-                    && clientY <= pnlRowWrapRect.bottom);
-                if (!mouseOnPnl)
-                    return;
+                var _a, _b, _c, _d, _e;
+                // const pnlRowWrapRect = self.querySelector('#pnlRowWrap').getBoundingClientRect();
+                // const mouseOnPnl = (clientX >= pnlRowWrapRect.left
+                //     && clientX <= pnlRowWrapRect.right 
+                //     && clientY >= pnlRowWrapRect.top
+                //     && clientY <= pnlRowWrapRect.bottom);
+                // if (!mouseOnPnl) return;
                 if (!enterTarget || !self.currentElement)
                     return;
                 if (enterTarget.closest('#pnlEmty')) {
@@ -4809,7 +4808,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     let spaces = 0;
                     let findedSection = null;
                     let isUpdated = false;
-                    const isFromToolbar = !((_b = self.currentElement) === null || _b === void 0 ? void 0 : _b.id);
+                    // const isFromToolbar = !self.currentElement?.id;
                     for (let i = 0; i < sortedSections.length; i++) {
                         const section = sortedSections[i];
                         const sectionColumn = Number(section.dataset.column);
@@ -4823,7 +4822,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         if ((colStart >= sectionColumn && colData <= sectionData) || (colStart < sectionData && colData > sectionData)) {
                             findedSection = section;
                         }
-                        if (((_c = self.currentElement) === null || _c === void 0 ? void 0 : _c.id) !== section.id) {
+                        if (((_b = self.currentElement) === null || _b === void 0 ? void 0 : _b.id) !== section.id) {
                             spaces += sectionColumnSpan;
                         }
                     }
@@ -4854,9 +4853,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 updateClass(topBlock, 'is-dragenter');
                             }
                         }
-                        const curElmCol = Number((_d = section === null || section === void 0 ? void 0 : section.dataset) === null || _d === void 0 ? void 0 : _d.column);
-                        const curElmColSpan = Number((_e = section === null || section === void 0 ? void 0 : section.dataset) === null || _e === void 0 ? void 0 : _e.columnSpan);
-                        const sections = Array.from((_f = section.closest('#pnlRow')) === null || _f === void 0 ? void 0 : _f.querySelectorAll('ide-section'));
+                        const curElmCol = Number((_c = section === null || section === void 0 ? void 0 : section.dataset) === null || _c === void 0 ? void 0 : _c.column);
+                        const curElmColSpan = Number((_d = section === null || section === void 0 ? void 0 : section.dataset) === null || _d === void 0 ? void 0 : _d.columnSpan);
+                        const sections = Array.from((_e = section.closest('#pnlRow')) === null || _e === void 0 ? void 0 : _e.querySelectorAll('ide-section'));
                         const nextElm = sections.find((el) => {
                             const column = Number(el.dataset.column);
                             return !isNaN(column) && curElmCol + curElmColSpan === column;
@@ -4921,21 +4920,16 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
             }
             this.addEventListener('dragenter', function (event) {
+                console.log("row dragenter event");
                 const eventTarget = event.target;
-                if (eventTarget && eventTarget.classList.contains('fixed-grid-item')) {
+                if (eventTarget && (eventTarget.classList.contains('fixed-grid-item') || eventTarget.classList.contains('fixed-grid'))) {
+                    console.log("row dragEnter function");
                     dragEnter(eventTarget, event.clientX, event.clientY);
                 }
             });
             this.addEventListener('dragover', function (event) {
                 event.preventDefault();
                 const eventTarget = event.target;
-                const pnlRowWrapRect = self.querySelector('#pnlRowWrap').getBoundingClientRect();
-                const mouseOnPnl = (event.clientX >= pnlRowWrapRect.left
-                    && event.clientX <= pnlRowWrapRect.right
-                    && event.clientY >= pnlRowWrapRect.top
-                    && event.clientY <= pnlRowWrapRect.bottom);
-                if (!mouseOnPnl)
-                    return;
                 let enterTarget;
                 const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') : undefined;
                 const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
@@ -4963,12 +4957,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
                 else if ((collision.collisionType == 'self' && collision.toolbar) || collision.collisionType == 'mutual') {
                     // choose a merge block to display
-                    const elementRect = collision.section.getBoundingClientRect();
-                    const mouseOnElm = (event.clientX >= elementRect.left
-                        && event.clientX <= elementRect.right
-                        && event.clientY >= elementRect.top
-                        && event.clientY <= elementRect.bottom);
-                    if (collision.mergeSide && mouseOnElm) {
+                    if (collision.rowBlock) {
+                        updateClass(collision.rowBlock, 'is-dragenter');
+                        removeRectangles();
+                        return;
+                    }
+                    else if (collision.mergeSide /* && mouseOnElm*/) {
                         let blockClass = `.${collision.mergeSide}-block`;
                         const block = collision.mergeSide == 'top' || collision.mergeSide == 'bottom'
                             ? collision.toolbar.querySelector(blockClass)
@@ -4990,11 +4984,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 return;
                             }
                         }
-                    }
-                    else if (collision.rowBlock) {
-                        updateClass(collision.rowBlock, 'is-dragenter');
-                        removeRectangles();
-                        return;
                     }
                 }
                 else
