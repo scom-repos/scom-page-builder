@@ -757,7 +757,7 @@ define("@scom/scom-page-builder/interface/index.ts", ["require", "exports", "@sc
         ELEMENT_NAME["VIDEO"] = "Video";
         ELEMENT_NAME["CAROUSEL"] = "Carousel";
         ELEMENT_NAME["MAP"] = "Map";
-        // BANNER = "Banner",
+        ELEMENT_NAME["BANNER"] = "Banner";
         ELEMENT_NAME["BLOG"] = "Blog";
         ELEMENT_NAME["CONTENT_BLOCK"] = "Content Block";
     })(ELEMENT_NAME = exports.ELEMENT_NAME || (exports.ELEMENT_NAME = {}));
@@ -4920,10 +4920,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
             }
             this.addEventListener('dragenter', function (event) {
-                console.log("row dragenter event");
                 const eventTarget = event.target;
                 if (eventTarget && (eventTarget.classList.contains('fixed-grid-item') || eventTarget.classList.contains('fixed-grid'))) {
-                    console.log("row dragEnter function");
                     dragEnter(eventTarget, event.clientX, event.clientY);
                 }
             });

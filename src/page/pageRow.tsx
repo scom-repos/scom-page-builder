@@ -788,10 +788,8 @@ export class PageRow extends Module {
         }
 
         this.addEventListener('dragenter', function (event) { 
-            console.log("row dragenter event")
             const eventTarget = event.target as HTMLElement;
             if (eventTarget && (eventTarget.classList.contains('fixed-grid-item') || eventTarget.classList.contains('fixed-grid'))) {
-                console.log("row dragEnter function")
                 dragEnter(eventTarget as Control, event.clientX, event.clientY);
             }
         });
