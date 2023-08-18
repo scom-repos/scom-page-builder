@@ -729,18 +729,19 @@ export class IDEToolbar extends Module {
                                 verticalAlignment="center"
                                 horizontalAlignment="center"
                                 columnsPerRow={4}
-                                width={30} height={8}
+                                autoFillInHoles={true}
+                                width={28} height={8}
                                 margin={{left: 'auto', right: 'auto'}}
                                 gap={{ column: '2px', row: '2px' }}
                             >
-                                <i-icon name="circle" width={3} height={3}></i-icon>
-                                <i-icon name="circle" width={3} height={3}></i-icon>
-                                <i-icon name="circle" width={3} height={3}></i-icon>
-                                <i-icon name="circle" width={3} height={3}></i-icon>
-                                <i-icon name="circle" width={3} height={3}></i-icon>
-                                <i-icon name="circle" width={3} height={3}></i-icon>
-                                <i-icon name="circle" width={3} height={3}></i-icon>
-                                <i-icon name="circle" width={3} height={3}></i-icon>
+                                <i-icon name="circle" width={3} height={3} fill={'#222'}></i-icon>
+                                <i-icon name="circle" width={3} height={3} fill={'#222'}></i-icon>
+                                <i-icon name="circle" width={3} height={3} fill={'#222'}></i-icon>
+                                <i-icon name="circle" width={3} height={3} fill={'#222'}></i-icon>
+                                <i-icon name="circle" width={3} height={3} fill={'#222'}></i-icon>
+                                <i-icon name="circle" width={3} height={3} fill={'#222'}></i-icon>
+                                <i-icon name="circle" width={3} height={3} fill={'#222'}></i-icon>
+                                <i-icon name="circle" width={3} height={3} fill={'#222'}></i-icon>
                             </i-grid-layout>
                         </i-vstack>
                         <i-vstack

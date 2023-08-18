@@ -557,11 +557,10 @@ export class PageRow extends Module {
             const targetToolbar = findClosestToolbarInSection(targetSection, event.clientY)?.toolbar;
             const toolbars = targetSection ? Array.from(targetSection.querySelectorAll('ide-toolbar')) : [];
             const cannotDrag = toolbars.find((toolbar) => {
-                const result = toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting');
-                const isTexbox = toolbar.classList.contains('is-textbox');
-                return result || (isTexbox && (!mouseDownEl || !mouseDownEl.closest('.dragger')));
+                return toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting');
             });
-            if (targetSection && !cannotDrag) {
+            const isCurrentTxt = targetToolbar.classList.contains('is-textbox') && (!mouseDownEl || !mouseDownEl.closest('.dragger'));
+            if (targetSection && (!cannotDrag && !isCurrentTxt)) {
                 self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
                 self.currentElement = targetSection;
                 startX = event.offsetX;

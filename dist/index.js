@@ -4727,11 +4727,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const targetToolbar = (_a = findClosestToolbarInSection(targetSection, event.clientY)) === null || _a === void 0 ? void 0 : _a.toolbar;
                 const toolbars = targetSection ? Array.from(targetSection.querySelectorAll('ide-toolbar')) : [];
                 const cannotDrag = toolbars.find((toolbar) => {
-                    const result = toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting');
-                    const isTexbox = toolbar.classList.contains('is-textbox');
-                    return result || (isTexbox && (!mouseDownEl || !mouseDownEl.closest('.dragger')));
+                    return toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting');
                 });
-                if (targetSection && !cannotDrag) {
+                const isCurrentTxt = targetToolbar.classList.contains('is-textbox') && (!mouseDownEl || !mouseDownEl.closest('.dragger'));
+                if (targetSection && (!cannotDrag && !isCurrentTxt)) {
                     self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
                     self.currentElement = targetSection;
                     startX = event.offsetX;
@@ -6254,15 +6253,15 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                         this.$render("i-hstack", { id: "toolbar", padding: { top: 4, bottom: 4, left: 4, right: 4 }, gap: "0.25rem" })),
                     this.$render("i-panel", { id: "contentStack", height: "100%", position: 'relative', maxWidth: "100%", maxHeight: "100%", class: "ide-component", onClick: this.showToolbars.bind(this) },
                         this.$render("i-vstack", { id: "dragStack", verticalAlignment: "center", horizontalAlignment: "center", position: "absolute", left: "50%", top: "0px", width: 100, minHeight: 20, zIndex: 90, class: "dragger" },
-                            this.$render("i-grid-layout", { verticalAlignment: "center", horizontalAlignment: "center", columnsPerRow: 4, width: 30, height: 8, margin: { left: 'auto', right: 'auto' }, gap: { column: '2px', row: '2px' } },
-                                this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                                this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                                this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                                this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                                this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                                this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                                this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
-                                this.$render("i-icon", { name: "circle", width: 3, height: 3 }))),
+                            this.$render("i-grid-layout", { verticalAlignment: "center", horizontalAlignment: "center", columnsPerRow: 4, autoFillInHoles: true, width: 28, height: 8, margin: { left: 'auto', right: 'auto' }, gap: { column: '2px', row: '2px' } },
+                                this.$render("i-icon", { name: "circle", width: 3, height: 3, fill: '#222' }),
+                                this.$render("i-icon", { name: "circle", width: 3, height: 3, fill: '#222' }),
+                                this.$render("i-icon", { name: "circle", width: 3, height: 3, fill: '#222' }),
+                                this.$render("i-icon", { name: "circle", width: 3, height: 3, fill: '#222' }),
+                                this.$render("i-icon", { name: "circle", width: 3, height: 3, fill: '#222' }),
+                                this.$render("i-icon", { name: "circle", width: 3, height: 3, fill: '#222' }),
+                                this.$render("i-icon", { name: "circle", width: 3, height: 3, fill: '#222' }),
+                                this.$render("i-icon", { name: "circle", width: 3, height: 3, fill: '#222' }))),
                         this.$render("i-vstack", { id: "backdropStack", width: "100%", height: "100%", position: "absolute", top: "0px", left: "0px", zIndex: 15, visible: false, onClick: this.showToolList.bind(this) })),
                     this.$render("i-panel", { position: "absolute", width: "90%", height: "3px", left: "5%", bottom: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "bottom-block" }),
                     this.$render("i-panel", { position: "absolute", width: "90%", height: "3px", left: "5%", top: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "top-block" }),
@@ -8649,7 +8648,6 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 event.unregister();
             }
             this.events = [];
-            console.log('onHide');
             components_43.application.EventBus.dispatch(index_85.EVENT.ON_CLOSE_BUILDER);
             document.removeEventListener('keyup', this.boundHandleKeyUp);
         }
