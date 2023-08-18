@@ -1182,11 +1182,11 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
     };
     exports.getDivider = getDivider;
     const setDefaultPageConfig = (value) => {
-        exports.state.defaultPageConfig = Object.assign(Object.assign(Object.assign({}, defaultPageConfig), { backgroundColor: (0, exports.getBackgroundColor)() }), (value || {}));
+        exports.state.defaultPageConfig = Object.assign(Object.assign(Object.assign({}, defaultPageConfig), { backgroundColor: (0, exports.getBackgroundColor)(), textColor: (0, exports.getFontColor)() }), (value || {}));
     };
     exports.setDefaultPageConfig = setDefaultPageConfig;
     const getDefaultPageConfig = () => {
-        const defaultValue = Object.assign(Object.assign({}, defaultPageConfig), { backgroundColor: (0, exports.getBackgroundColor)() });
+        const defaultValue = Object.assign(Object.assign({}, defaultPageConfig), { backgroundColor: (0, exports.getBackgroundColor)(), textColor: (0, exports.getFontColor)() });
         return exports.state.defaultPageConfig || defaultValue;
     };
     exports.getDefaultPageConfig = getDefaultPageConfig;
@@ -1360,11 +1360,15 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
             const newConfig = Object.assign(Object.assign({}, config), { margin: { x: marginStyle.left, y: marginStyle.top } });
             index_5.pageObject.updateSection(id, { config: Object.assign({}, newConfig) });
             this.element.updateRowConfig(index_5.pageObject.getRowConfig(id));
-            if (updatedValues.includes('backgroundColor')) {
-                const color = (newConfig === null || newConfig === void 0 ? void 0 : newConfig.backgroundColor) || '';
+            if (updatedValues.includes('backgroundColor') || updatedValues.includes('textColor')) {
+                const newValue = {};
+                if (updatedValues.includes('backgroundColor'))
+                    newValue.backgroundColor = (newConfig === null || newConfig === void 0 ? void 0 : newConfig.backgroundColor) || '';
+                if (updatedValues.includes('textColor'))
+                    newValue.textColor = (newConfig === null || newConfig === void 0 ? void 0 : newConfig.textColor) || '';
                 const toolbars = this.element.querySelectorAll('ide-toolbar');
                 for (let toolbar of toolbars) {
-                    toolbar.updateUI({ color });
+                    toolbar.updateUI(newValue);
                 }
             }
         }
@@ -2670,7 +2674,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             return result;
         }
         updateConfig(config, updatedValues) {
-            const { backgroundColor, backgroundImage, margin, sectionWidth, ptb, plr } = config;
+            const { backgroundColor, backgroundImage, textColor, margin, sectionWidth, ptb, plr } = config;
             let newConfig = {};
             for (let prop of updatedValues) {
                 newConfig[prop] = config[prop];
@@ -2681,11 +2685,15 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             }
             if (updatedValues.includes('backgroundColor')) {
                 element.style.setProperty('--builder-bg', backgroundColor);
-                components_8.application.EventBus.dispatch(index_23.EVENT.ON_UPDATE_PAGE_BG, { color: backgroundColor });
+                components_8.application.EventBus.dispatch(index_23.EVENT.ON_UPDATE_PAGE_BG, { backgroundColor });
+            }
+            if (updatedValues.includes('textColor')) {
+                element.style.setProperty('--builder-color', textColor);
+                components_8.application.EventBus.dispatch(index_23.EVENT.ON_UPDATE_PAGE_BG, { textColor });
             }
             this.element.maxWidth = '100%'; // maxWidth ?? '100%';
             this.element.margin = (0, index_22.getMargin)(margin);
-            index_22.pageObject.config = { backgroundColor, backgroundImage, margin, sectionWidth, ptb, plr };
+            index_22.pageObject.config = { backgroundColor, backgroundImage, margin, sectionWidth, ptb, plr, textColor };
             return newConfig;
         }
         execute() {
@@ -3244,6 +3252,11 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                         "type": "string",
                         "format": "color"
                     },
+                    "textColor": {
+                        "title": "Text color",
+                        "type": "string",
+                        "format": "color"
+                    },
                     "border": {
                         "title": "Show border",
                         "type": "boolean"
@@ -3268,6 +3281,10 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                             {
                                 "type": "Control",
                                 "scope": "#/properties/backgroundColor"
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/textColor"
                             },
                         ]
                     },
@@ -3467,8 +3484,8 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
             this.formElm.uiSchema = jsonUISchema;
             this.formElm.formOptions = formOptions;
             this.formElm.renderForm();
-            const { backgroundColor, margin, sectionWidth } = (0, index_34.getPageConfig)();
-            const config = Object.assign({ align: 'left', sectionWidth }, (((_a = this.data) === null || _a === void 0 ? void 0 : _a.config) || {}));
+            const { backgroundColor, margin, sectionWidth, textColor } = (0, index_34.getPageConfig)();
+            const config = Object.assign({ align: 'left', sectionWidth, textColor }, (((_a = this.data) === null || _a === void 0 ? void 0 : _a.config) || {}));
             this.formElm.setFormData(Object.assign({}, config));
         }
         close() {
@@ -3565,6 +3582,11 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                         "type": "string",
                         "format": "color"
                     },
+                    "textColor": {
+                        "title": "Text color",
+                        "type": "string",
+                        "format": "color"
+                    },
                     "backgroundImage": {
                         "title": "Background image",
                         "type": "string",
@@ -3606,6 +3628,10 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                             {
                                 "type": "Control",
                                 "scope": "#/properties/backgroundColor"
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/textColor"
                             }
                         ]
                     },
@@ -4087,12 +4113,16 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                 }
             },
             '&.is-textbox': {
-                cursor: 'text',
-                userSelect: 'text',
                 $nest: {
-                    '&::selection': {
-                        background: Theme.colors.primary.main,
-                        color: Theme.colors.primary.contrastText
+                    'i-markdown-editor': {
+                        cursor: 'text',
+                        userSelect: 'text',
+                        $nest: {
+                            '&::selection': {
+                                background: Theme.colors.primary.main,
+                                color: Theme.colors.primary.contrastText
+                            }
+                        }
                     },
                     'i-scom-markdown-editor': {
                         padding: '0.75rem 0'
@@ -4389,7 +4419,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            const { image = '', backgroundColor, backdropColor, backdropImage, border, borderColor, sectionWidth, margin, align, fullWidth, pb, pl, pr, pt, ptb, plr } = config || {};
+            const { image = '', backgroundColor, backdropColor, backdropImage, border, borderColor, sectionWidth, margin, align, fullWidth, pb, pl, pr, pt, ptb, plr, textColor } = config || {};
             if (!fullWidth) {
                 if (image)
                     this.background.image = image;
@@ -4404,6 +4434,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     this.background.image = backdropImage;
                 else if (backdropColor)
                     this.background.color = backdropColor;
+                if (!image && !backdropImage)
+                    this.background.image = undefined;
             }
             else {
                 this.pnlRowWrap.border.width = 0;
@@ -4412,6 +4444,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             }
             if (backgroundColor)
                 this.pnlRowContainer.background.color = backgroundColor;
+            if (textColor)
+                this.pnlRowContainer.font = { color: textColor };
             this.pnlRowContainer.maxWidth = sectionWidth !== null && sectionWidth !== void 0 ? sectionWidth : '100%';
             if (margin)
                 this.pnlRowContainer.margin = (0, index_44.getMargin)(margin);
@@ -5970,7 +6004,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this._component.parent = this.contentStack;
             const builderTarget = ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) ? this._component.getConfigurators().find((conf) => conf.target === 'Builders') : null;
             if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setRootParent)
-                builderTarget.setRootParent(this.closest('ide-row'));
+                builderTarget.setRootParent(this.closest('#pnlRowContainer'));
             if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setElementId)
                 builderTarget.setElementId(this.elementId);
             this.contentStack.append(this._component);
@@ -6174,8 +6208,14 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             if ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) {
                 const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
                 if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setTag) {
+                    const { backgroundColor, textColor } = data;
                     const oldTag = (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getTag) ? await builderTarget.getTag() : {};
-                    await builderTarget.setTag(Object.assign(Object.assign({}, oldTag), { background: (data === null || data === void 0 ? void 0 : data.color) || '' }), true);
+                    const newData = {};
+                    if (backgroundColor !== undefined)
+                        newData.backgroundColor = backgroundColor || '';
+                    if (textColor !== undefined)
+                        newData.textColor = textColor || '';
+                    await builderTarget.setTag(Object.assign(Object.assign({}, oldTag), newData), true);
                 }
             }
         }
@@ -6190,6 +6230,9 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 event.unregister();
             }
             this.events = [];
+            if (this.isTexbox && this.module) {
+                this.module.onHide();
+            }
         }
         init() {
             super.init();
@@ -6211,7 +6254,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                         this.$render("i-hstack", { id: "toolbar", padding: { top: 4, bottom: 4, left: 4, right: 4 }, gap: "0.25rem" })),
                     this.$render("i-panel", { id: "contentStack", height: "100%", position: 'relative', maxWidth: "100%", maxHeight: "100%", class: "ide-component", onClick: this.showToolbars.bind(this) },
                         this.$render("i-vstack", { id: "dragStack", verticalAlignment: "center", horizontalAlignment: "center", position: "absolute", left: "50%", top: "0px", width: 100, minHeight: 20, zIndex: 90, class: "dragger" },
-                            this.$render("i-grid-layout", { verticalAlignment: "center", horizontalAlignment: "center", columnsPerRow: 4, width: 30, height: 10, margin: { left: 'auto', right: 'auto' }, gap: { column: '2px', row: '2px' } },
+                            this.$render("i-grid-layout", { verticalAlignment: "center", horizontalAlignment: "center", columnsPerRow: 4, width: 30, height: 8, margin: { left: 'auto', right: 'auto' }, gap: { column: '2px', row: '2px' } },
                                 this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
                                 this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
                                 this.$render("i-icon", { name: "circle", width: 3, height: 3 }),
@@ -8606,6 +8649,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 event.unregister();
             }
             this.events = [];
+            console.log('onHide');
             components_43.application.EventBus.dispatch(index_85.EVENT.ON_CLOSE_BUILDER);
             document.removeEventListener('keyup', this.boundHandleKeyUp);
         }

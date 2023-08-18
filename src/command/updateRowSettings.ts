@@ -37,11 +37,15 @@ export class UpdateRowSettingsCommand implements ICommand {
     const newConfig = {...config, margin: {x: marginStyle.left , y: marginStyle.top}};
     pageObject.updateSection(id, {config: {...newConfig}});
     this.element.updateRowConfig(pageObject.getRowConfig(id));
-    if (updatedValues.includes('backgroundColor')) {
-      const color = newConfig?.backgroundColor || '';
+    if (updatedValues.includes('backgroundColor') || updatedValues.includes('textColor')) {
+      const newValue: any = {};
+      if (updatedValues.includes('backgroundColor'))
+        newValue.backgroundColor = newConfig?.backgroundColor || '';
+      if (updatedValues.includes('textColor'))
+        newValue.textColor = newConfig?.textColor || '';
       const toolbars = this.element.querySelectorAll('ide-toolbar');
       for (let toolbar of toolbars) {
-        toolbar.updateUI({ color });
+        toolbar.updateUI(newValue);
       }
     }
   }

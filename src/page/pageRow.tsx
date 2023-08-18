@@ -210,7 +210,25 @@ export class PageRow extends Module {
     }
 
     updateRowConfig(config: IPageSectionConfig) {
-        const {image = '', backgroundColor, backdropColor, backdropImage, border, borderColor, sectionWidth, margin, align, fullWidth, pb, pl, pr, pt, ptb, plr} = config || {};
+        const {
+            image = '',
+            backgroundColor,
+            backdropColor,
+            backdropImage,
+            border,
+            borderColor,
+            sectionWidth,
+            margin,
+            align,
+            fullWidth,
+            pb,
+            pl,
+            pr,
+            pt,
+            ptb,
+            plr,
+            textColor
+        } = config || {};
         if (!fullWidth) {
             if (image) this.background.image = image;
             if (border) {
@@ -223,11 +241,13 @@ export class PageRow extends Module {
                 this.background.image = backdropImage;
             else if (backdropColor)
                 this.background.color = backdropColor;
+            if (!image && !backdropImage) this.background.image = undefined
         } else {
             this.pnlRowWrap.border.width = 0
             if (backgroundColor) this.background.color = backgroundColor;
         }
         if (backgroundColor) this.pnlRowContainer.background.color = backgroundColor;
+        if (textColor) this.pnlRowContainer.font = {color: textColor};
         this.pnlRowContainer.maxWidth = sectionWidth ?? '100%';
         if (margin) this.pnlRowContainer.margin = getMargin(margin);
         this.pnlRowContainer.width = margin?.x && margin?.x !== 'auto' ? 'auto' : '100%';

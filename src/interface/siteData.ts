@@ -11,6 +11,7 @@ export interface IPageConfig {
     backgroundColor?: string;
     backgroundImage?: string;
     backdropColor?: string;
+    textColor?: string;
     backdropImage?: string;
     sectionWidth?: number|string;
     plr?: number;

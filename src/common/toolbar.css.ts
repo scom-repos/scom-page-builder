@@ -187,12 +187,16 @@ Styles.cssRule('ide-toolbar', {
       }
     },
     '&.is-textbox': {
-        cursor: 'text',
-        userSelect: 'text',
         $nest: {
-          '&::selection': {
-            background: Theme.colors.primary.main,
-            color: Theme.colors.primary.contrastText
+          'i-markdown-editor': {
+            cursor: 'text',
+            userSelect: 'text',
+            $nest: {
+              '&::selection': {
+                background: Theme.colors.primary.main,
+                color: Theme.colors.primary.contrastText
+              }
+            }
           },
           'i-scom-markdown-editor': {
             padding: '0.75rem 0'

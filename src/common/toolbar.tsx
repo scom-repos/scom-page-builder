@@ -426,7 +426,7 @@ export class IDEToolbar extends Module {
         this._component.rootParent = this.closest('ide-row');
         this._component.parent = this.contentStack;
         const builderTarget = this._component?.getConfigurators ? this._component.getConfigurators().find((conf: any) => conf.target === 'Builders') : null;
-        if (builderTarget?.setRootParent) builderTarget.setRootParent(this.closest('ide-row'));
+        if (builderTarget?.setRootParent) builderTarget.setRootParent(this.closest('#pnlRowContainer'));
         if (builderTarget?.setElementId) builderTarget.setElementId(this.elementId);
         this.contentStack.append(this._component);
         if (builderTarget?.setRootDir) builderTarget.setRootDir(getRootDir());
@@ -620,7 +620,7 @@ export class IDEToolbar extends Module {
             })
         )
         this.events.push(
-            application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: { color: string }) => {
+            application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: { backgroundColor?: string, textColor?: string }) => {
                 await this.updateUI(data);
             })
         )
@@ -629,12 +629,16 @@ export class IDEToolbar extends Module {
         })
     }
 
-    async updateUI(data: { color: string }) {
+    async updateUI(data: { backgroundColor?: string, textColor?: string }) {
         if (this._component?.getConfigurators) {
             const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
             if (builderTarget?.setTag) {
+                const { backgroundColor, textColor } = data;
                 const oldTag = builderTarget?.getTag ? await builderTarget.getTag() : {};
-                await builderTarget.setTag({ ...oldTag, background: data?.color || '' }, true);
+                const newData: any = {}
+                if (backgroundColor !== undefined) newData.backgroundColor = backgroundColor || '';
+                if (textColor !== undefined) newData.textColor = textColor || '';
+                await builderTarget.setTag({ ...oldTag, ...newData }, true);
             }
         }
     }
@@ -652,6 +656,9 @@ export class IDEToolbar extends Module {
             event.unregister();
         }
         this.events = [];
+        if (this.isTexbox && this.module) {
+            this.module.onHide();
+        }
     }
 
     init() {

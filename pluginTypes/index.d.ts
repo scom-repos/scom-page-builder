@@ -348,6 +348,7 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         backgroundColor?: string;
         backgroundImage?: string;
         backdropColor?: string;
+        textColor?: string;
         backdropImage?: string;
         sectionWidth?: number | string;
         plr?: number;
@@ -550,6 +551,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         backgroundColor?: string;
         backgroundImage?: string;
         backdropColor?: string;
+        textColor?: string;
         backdropImage?: string;
         sectionWidth?: string | number;
         plr?: number;
@@ -1259,7 +1261,8 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private initEventListener;
         private initEventBus;
         updateUI(data: {
-            color: string;
+            backgroundColor?: string;
+            textColor?: string;
         }): Promise<void>;
         onShow(options?: any): void;
         onHide(): void;
