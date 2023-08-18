@@ -30,12 +30,13 @@ import {IDEToolbar} from '../common/toolbar';
 import {generateUUID} from '../utility/index';
 import {IMergeType} from '../command/index';
 import { getUngroupData, findNearestSection } from '../utility/ungroup'
+import { checkDragDropResult } from '../utility/dragDrop'
 const Theme = Styles.Theme.ThemeVars;
 
 declare global {
     namespace JSX {
         interface IntrinsicElements {
-            ['ide-row']: PageRowElement;
+            ['ide-row']: PageRowElement
         }
     }
 }
@@ -66,7 +67,7 @@ export class PageRow extends Module {
     private rowId: string = '';
     private rowData: IPageSection;
     private isDragging: boolean = false;
-    private gridColumnWidth: number = 0;
+    private _gridColumnWidth: number = 0;
     private _selectedSection: PageSection;
 
     @observable()
@@ -96,6 +97,10 @@ export class PageRow extends Module {
         const rowId = this.id?.replace('row-', '');
         const config = pageObject.getRowConfig(rowId);
         return config?.align || 'left';
+    }
+
+    get gridColumnWidth() {
+        return this._gridColumnWidth
     }
 
     init() {
@@ -302,14 +307,14 @@ export class PageRow extends Module {
             const unitWidth = Number((1 / this.maxColumn).toFixed(3)) * 100;
             for (let section of sections) {
                 const columnSpan = Number((section as HTMLElement).dataset.columnSpan);
-                const widthNumber = columnSpan * this.gridColumnWidth + (columnSpan - 1) * GAP_WIDTH;
+                const widthNumber = columnSpan * this._gridColumnWidth + (columnSpan - 1) * GAP_WIDTH;
                 (section as Control).width = widthNumber ? `${widthNumber}px` : `${columnSpan * unitWidth}%`;
             }
         }
     }
 
     private updateGridColumnWidth() {
-        this.gridColumnWidth = (this.pnlRow.offsetWidth - GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
+        this._gridColumnWidth = (this.pnlRow.offsetWidth - GAP_WIDTH * (this.maxColumn - 1)) / this.maxColumn;
     }
 
     private async onClone() {
@@ -683,7 +688,7 @@ export class PageRow extends Module {
                 if (!getDragData()?.module) {
                     const dragRow = self.currentElement.closest('ide-row');
                     if (dragRow?.id && dropRow?.id && dragRow.id === dropRow.id) {
-                        offsetLeft = Math.floor((startX + GAP_WIDTH) / (self.gridColumnWidth + GAP_WIDTH));
+                        offsetLeft = Math.floor((startX + GAP_WIDTH) / (self._gridColumnWidth + GAP_WIDTH));
                     }
                 }
                 const targetCol = Number(target.dataset.column);
@@ -824,6 +829,15 @@ export class PageRow extends Module {
             let enterTarget: Control;
             const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
             const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
+            const dragDropResult = checkDragDropResult({
+                dropTarget: eventTarget,
+                dragSection: dragStartTargetSection,
+                dragToolbardata: self.currentElement.dataset,
+                clientX: event.clientX,
+                clientY: event.clientY,
+                startX: startX,
+                isUngroup: self.isUngrouping()
+            });
             // if target overlap with itself
             if ((collision.collisionType == 'self' && !collision.toolbar) || collision.collisionType == 'none') {
                 const cursorPosition = {x: event.clientX, y: event.clientY};
@@ -978,7 +992,7 @@ export class PageRow extends Module {
                 (a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column)
             );
             
-            const offsetLeft = Math.floor((startX + GAP_WIDTH) / (self.gridColumnWidth + GAP_WIDTH));
+            const offsetLeft = Math.floor((startX + GAP_WIDTH) / (self._gridColumnWidth + GAP_WIDTH));
             const startOfDragingElm: number = dropColumn - offsetLeft;
             const endOfDragingElm: number = dropColumn - offsetLeft + parseInt(dragSection.dataset.columnSpan) - 1;
             let selfCollision: Collision;
@@ -1091,6 +1105,15 @@ export class PageRow extends Module {
             const isUngrouping: boolean = self.isUngrouping();
             const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
             const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
+            const dragDropResult = checkDragDropResult({
+                dropTarget: eventTarget,
+                dragSection: dragStartTargetSection,
+                dragToolbardata: self.currentElement.dataset,
+                clientX: event.clientX,
+                clientY: event.clientY,
+                startX: startX,
+                isUngroup: self.isUngrouping()
+            });
 
             let dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
             // drop outside the grid panel of a row (drop on left/right)
@@ -1121,7 +1144,7 @@ export class PageRow extends Module {
             const config = {id: generateUUID()};
             // check if drop on a fixed-panel
             if (nearestFixedItem) {
-                const offsetLeft = Math.floor((startX + GAP_WIDTH) / (self.gridColumnWidth + GAP_WIDTH));
+                const offsetLeft = Math.floor((startX + GAP_WIDTH) / (self._gridColumnWidth + GAP_WIDTH));
                 let column = Number(nearestFixedItem.dataset.column);
                 if (column - offsetLeft > 0) {
                     nearestFixedItem = pageRow.querySelector(`.fixed-grid-item[data-column='${column - offsetLeft}']`)
@@ -1315,8 +1338,8 @@ export class PageRow extends Module {
             const rectangle = targetRow.querySelector(`.rectangle`) as Control;
             if (!rectangle) return;
             rectangle.style.display = 'block';
-            rectangle.style.left = (self.gridColumnWidth + GAP_WIDTH) * (colStart - 1) + 'px';
-            rectangle.style.width = self.gridColumnWidth * columnSpan + GAP_WIDTH * (columnSpan - 1) + 'px';
+            rectangle.style.left = (self._gridColumnWidth + GAP_WIDTH) * (colStart - 1) + 'px';
+            rectangle.style.width = self._gridColumnWidth * columnSpan + GAP_WIDTH * (columnSpan - 1) + 'px';
         }
 
         function removeRectangles() {

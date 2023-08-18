@@ -1101,6 +1101,36 @@ declare module "@scom/scom-page-builder/page/pageSection.css.ts" { }
 declare module "@scom/scom-page-builder/common/toolbar.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/page/pageRow.css.ts" />
 declare module "@scom/scom-page-builder/page/pageRow.css.ts" { }
+/// <amd-module name="@scom/scom-page-builder/utility/type.ts" />
+declare module "@scom/scom-page-builder/utility/type.ts" {
+    export type IMergeDropSide = "front" | "back" | "top" | "bottom";
+    export type DragDropResultDetails = {
+        section?: HTMLElement;
+        toolbar?: HTMLElement;
+        dropSide?: IMergeDropSide;
+        rowBlock?: HTMLElement;
+        column?: number;
+        columnSpan?: number;
+    };
+    export type DragDropResult = {
+        canDrop: boolean;
+        details?: DragDropResultDetails;
+    };
+    export interface checkDragDropResultParams {
+        dropTarget: HTMLElement;
+        dragSection: HTMLElement;
+        dragToolbardata: any;
+        clientX: number;
+        clientY: number;
+        startX: number;
+        isUngroup: boolean;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/utility/dragDrop.ts" />
+declare module "@scom/scom-page-builder/utility/dragDrop.ts" {
+    import { DragDropResult, checkDragDropResultParams } from "@scom/scom-page-builder/utility/type.ts";
+    export function checkDragDropResult(dragDrop: checkDragDropResultParams): DragDropResult;
+}
 /// <amd-module name="@scom/scom-page-builder/page/pageRow.tsx" />
 declare module "@scom/scom-page-builder/page/pageRow.tsx" {
     import { Module, ControlElement } from '@ijstech/components';
@@ -1135,7 +1165,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private rowId;
         private rowData;
         private isDragging;
-        private gridColumnWidth;
+        private _gridColumnWidth;
         private _selectedSection;
         private isCloned;
         private isChanged;
@@ -1144,6 +1174,7 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         get selectedElement(): PageSection;
         private get maxColumn();
         private get align();
+        get gridColumnWidth(): number;
         init(): void;
         toggleUI(value: boolean): void;
         private createNewElement;
