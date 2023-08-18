@@ -5629,7 +5629,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                     elm.setAttribute('tool-name', tool.name);
                 this.toolbar.appendChild(elm);
             }
-            const genericBtn = (this.$render("i-hstack", { class: "toolbar", tooltip: { trigger: 'hover', content: 'Generic', color: '#555555' }, horizontalAlignment: "center", verticalAlignment: "center", onClick: () => {
+            const widgetSettingsBtn = (this.$render("i-hstack", { class: "toolbar", tooltip: { trigger: 'hover', content: 'Widget Settings', color: '#555555' }, horizontalAlignment: "center", verticalAlignment: "center", onClick: () => {
                     const propertiesSchema = {
                         type: 'object',
                         properties: {
@@ -5694,7 +5694,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                         ],
                     };
                     const widgetSettings = {
-                        name: 'Widget settings',
+                        name: 'Widget Settings',
                         icon: 'edit',
                         command: (toolbar, userInputData) => new widgetSettingsToolbar_1.WidgetSettingsToolbarCommand(toolbar, userInputData),
                         userInputDataSchema: propertiesSchema,
@@ -5706,8 +5706,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                     this.adjustCursorByAction();
                     this.hideToolbars();
                 } },
-                this.$render("i-icon", { width: 16, height: 16, name: "bible", fill: Theme.text.primary })));
-            this.toolbar.appendChild(genericBtn);
+                this.$render("i-icon", { width: 16, height: 16, name: "cog", fill: Theme.text.primary })));
+            this.toolbar.appendChild(widgetSettingsBtn);
             const removeBtn = (this.$render("i-hstack", { class: "toolbar", tooltip: { trigger: 'hover', content: 'Delete', color: '#555555' }, horizontalAlignment: "center", verticalAlignment: "center", onClick: () => {
                     const removeCmd = new index_50.RemoveToolbarCommand(this);
                     index_50.commandHistory.execute(removeCmd);
@@ -5738,7 +5738,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 properties = this._currentSingleContentBlockId ? data[this._currentSingleContentBlockId].properties : data;
             }
             let elementTag = {};
-            if (action.name === 'Widget settings') {
+            if (action.name === 'Widget Settings') {
                 const element = index_48.pageObject.getElement(this.rowId, this.elementId);
                 if (element.tag) {
                     const { pt, pb, pl, pr } = element.tag;

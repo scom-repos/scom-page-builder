@@ -151,10 +151,10 @@ export class IDEToolbar extends Module {
             if (tool.name) elm.setAttribute('tool-name', tool.name);
             this.toolbar.appendChild(elm);
         }
-        const genericBtn = (
+        const widgetSettingsBtn = (
             <i-hstack
                 class="toolbar"
-                tooltip={{ trigger: 'hover', content: 'Generic', color: '#555555' }}
+                tooltip={{ trigger: 'hover', content: 'Widget Settings', color: '#555555' }}
                 horizontalAlignment="center"
                 verticalAlignment="center"
                 onClick={() => {
@@ -222,7 +222,7 @@ export class IDEToolbar extends Module {
                         ],
                     };
                     const widgetSettings = {
-                        name: 'Widget settings',
+                        name: 'Widget Settings',
                         icon: 'edit',
                         command: (toolbar: IDEToolbar, userInputData: any) => new WidgetSettingsToolbarCommand(toolbar, userInputData),
                         userInputDataSchema: propertiesSchema,
@@ -235,10 +235,10 @@ export class IDEToolbar extends Module {
                     this.hideToolbars();
                 }}
             >
-                <i-icon width={16} height={16} name="bible" fill={Theme.text.primary}></i-icon>
+                <i-icon width={16} height={16} name="cog" fill={Theme.text.primary}></i-icon>
             </i-hstack>
         );
-        this.toolbar.appendChild(genericBtn);
+        this.toolbar.appendChild(widgetSettingsBtn);
         const removeBtn = (
             <i-hstack
                 class="toolbar"
@@ -278,7 +278,7 @@ export class IDEToolbar extends Module {
             properties = this._currentSingleContentBlockId ? data[this._currentSingleContentBlockId].properties : data;
         }
         let elementTag = {};
-        if (action.name === 'Widget settings') {
+        if (action.name === 'Widget Settings') {
             const element = pageObject.getElement(this.rowId, this.elementId);
             if (element.tag) {
                 const { pt, pb, pl, pr } = element.tag;
