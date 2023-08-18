@@ -6,7 +6,7 @@ import { IDEToolbar } from '../common'
 import { pageObject } from "../store/index";
 
 export function checkDragDropResult(dragDrop: checkDragDropResultParams): DragDropResult {
-    if (!dragDrop.dropTarget || !dragDrop.dragSection) return { canDrop: false };
+    if (!dragDrop.dropTarget) return { canDrop: false };
 
     const dropRow = dragDrop.dropTarget.closest('ide-row') as PageRow;
     const rowRect = dropRow.getBoundingClientRect();
@@ -34,10 +34,11 @@ export function checkDragDropResult(dragDrop: checkDragDropResultParams): DragDr
 
     // case 0: drag from toolbar
     // if (!dragDrop.dragSection) {
+
     // }
 
     // if it is ungroup, need to include the current section
-    const mouseOnSection = dragDrop.isUngroup ?
+    const mouseOnSection = dragDrop.isUngroup || !dragDrop.dragSection ?
         findNearestSectionInRow(dropRow, dragDrop.clientX, dragDrop.clientY, true) :
         findNearestSectionInRow(dropRow, dragDrop.clientX, dragDrop.clientY, true, [dragDrop.dragSection.id]);
 
@@ -58,7 +59,9 @@ export function checkDragDropResult(dragDrop: checkDragDropResultParams): DragDr
             };
         } else if (mergeSide == "back" || mergeSide == "front") {
             const isFront = mergeSide == "front" ? true : false;
-            const dropFrontBackResult = getDropFrontBackResult(dropRow, mouseOnSection, dragDrop.dragSection, isFront, dragDrop.dragToolbardata);
+            const dragSectionCol = dragDrop.dragSection ? parseInt((dragDrop.dragSection as PageSection).dataset.column) : 4;
+            const dragSectionColSpan = dragDrop.dragSection ? parseInt((dragDrop.dragSection as PageSection).dataset.columnSpan) : 4;
+            const dropFrontBackResult = getDropFrontBackResult(dropRow, mouseOnSection, dragSectionCol, dragSectionColSpan, isFront, dragDrop.dragToolbardata);
             // check if it can merge with the drop section
             if (dropFrontBackResult) {
                 return {
@@ -82,7 +85,9 @@ export function checkDragDropResult(dragDrop: checkDragDropResultParams): DragDr
         if (collidedSection) {
             const collidedSectionBound = collidedSection.getBoundingClientRect();
             const isFront = (dragDrop.clientX < collidedSectionBound.left) ? true : false;
-            const dropFrontBackResult = getDropFrontBackResult(dropRow, collidedSection, dragDrop.dragSection, isFront, dragDrop.dragToolbardata);
+            const dragSectionCol = dragDrop.dragSection ? parseInt((dragDrop.dragSection as PageSection).dataset.column) : 4;
+            const dragSectionColSpan = dragDrop.dragSection ? parseInt((dragDrop.dragSection as PageSection).dataset.columnSpan) : 4;
+            const dropFrontBackResult = getDropFrontBackResult(dropRow, collidedSection, dragSectionCol, dragSectionColSpan, isFront, dragDrop.dragToolbardata);
             return {
                 canDrop: true,
                 details: {
@@ -113,7 +118,7 @@ function checkCollisionIfDropOnGrid(dragDrop: checkDragDropResultParams, dropRow
 
     const offsetLeft = Math.floor((dragDrop.startX + GAP_WIDTH) / (gridColumnWidth + GAP_WIDTH));
     const startOfDragingElm: number = dropColumn - offsetLeft;
-    const endOfDragingElm: number = dropColumn - offsetLeft + parseInt(dragDrop.dragSection.dataset.columnSpan) - 1;
+    const endOfDragingElm: number = dragDrop.dragSection ? (dropColumn - offsetLeft + parseInt(dragDrop.dragSection.dataset.columnSpan) - 1) : (dropColumn - offsetLeft + 4 - 1);
 
     for (let i = 0; i < sortedSections.length; i++) {
         const element = sortedSections[i];
@@ -239,7 +244,8 @@ function decideMergeSide(dropToolbar: HTMLElement, clientX: number, clientY: num
     else return 'back';
 }
 
-function getDropFrontBackResult(dropRow: any, nearestDropSection: any, dragSection: any, isFront: boolean, data: any): { newElmdata: any, newRowData: any } {
+function getDropFrontBackResult(dropRow: any, nearestDropSection: any, dragSectionCol: number,
+    dragSectionColSpan: number, isFront: boolean, data: any): { newElmdata: any, newRowData: any } {
     // drop on the back/front block of a section
     const dropRowId = dropRow.id.replace('row-', '')
     const dropRowData = pageObject.getRow(dropRowId);
@@ -262,7 +268,7 @@ function getDropFrontBackResult(dropRow: any, nearestDropSection: any, dragSecti
     const emptySpace = backLimit - frontLimit + 1;
 
     // the columnSpan of new element should be same with the original section's
-    if (emptySpace >= dragSection.columnSpan) {
+    if (emptySpace >= dragSectionColSpan) {
         // have enough space to place the dragging toolbar
         const newColumn = isFront ?
             sortedSectionList[dropSectionIdx].column - data.columnSpan :
@@ -305,13 +311,13 @@ function getDropFrontBackResult(dropRow: any, nearestDropSection: any, dragSecti
             softBackLimit - frontLimit + 1 :
             backLimit - softFrontLimit + 1;
 
-        if (softEmptySpace >= dragSection.columnSpan + sortedSectionList[dropSectionIdx].columnSpan) {
+        if (softEmptySpace >= dragSectionColSpan + sortedSectionList[dropSectionIdx].columnSpan) {
             // if moving the current section can allocate enough space for the new section, do it
 
             // move the currect section
             sortedSectionList[dropSectionIdx].column = isFront ?
-                frontLimit + dragSection.columnSpan :
-                MAX_COLUMN - dragSection.columnSpan * 2 + 1;
+                frontLimit + dragSectionColSpan :
+                MAX_COLUMN - dragSectionColSpan * 2 + 1;
             dropRowData.elements = sortedSectionList
 
             // add new section
@@ -322,7 +328,7 @@ function getDropFrontBackResult(dropRow: any, nearestDropSection: any, dragSecti
             const newElData = {
                 id: data.id,
                 column: newColumn,
-                columnSpan: dragSection.columnSpan,
+                columnSpan: dragSectionColSpan,
                 properties: data.properties,
                 module: data.module,
                 tag: data.tag

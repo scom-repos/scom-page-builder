@@ -4305,7 +4305,7 @@ define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@s
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.checkDragDropResult = void 0;
     function checkDragDropResult(dragDrop) {
-        if (!dragDrop.dropTarget || !dragDrop.dragSection)
+        if (!dragDrop.dropTarget)
             return { canDrop: false };
         const dropRow = dragDrop.dropTarget.closest('ide-row');
         const rowRect = dropRow.getBoundingClientRect();
@@ -4334,7 +4334,7 @@ define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@s
         // if (!dragDrop.dragSection) {
         // }
         // if it is ungroup, need to include the current section
-        const mouseOnSection = dragDrop.isUngroup ?
+        const mouseOnSection = dragDrop.isUngroup || !dragDrop.dragSection ?
             findNearestSectionInRow(dropRow, dragDrop.clientX, dragDrop.clientY, true) :
             findNearestSectionInRow(dropRow, dragDrop.clientX, dragDrop.clientY, true, [dragDrop.dragSection.id]);
         if (mouseOnSection) {
@@ -4356,7 +4356,9 @@ define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@s
             }
             else if (mergeSide == "back" || mergeSide == "front") {
                 const isFront = mergeSide == "front" ? true : false;
-                const dropFrontBackResult = getDropFrontBackResult(dropRow, mouseOnSection, dragDrop.dragSection, isFront, dragDrop.dragToolbardata);
+                const dragSectionCol = dragDrop.dragSection ? parseInt(dragDrop.dragSection.dataset.column) : 4;
+                const dragSectionColSpan = dragDrop.dragSection ? parseInt(dragDrop.dragSection.dataset.columnSpan) : 4;
+                const dropFrontBackResult = getDropFrontBackResult(dropRow, mouseOnSection, dragSectionCol, dragSectionColSpan, isFront, dragDrop.dragToolbardata);
                 // check if it can merge with the drop section
                 if (dropFrontBackResult) {
                     return {
@@ -4381,7 +4383,9 @@ define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@s
             if (collidedSection) {
                 const collidedSectionBound = collidedSection.getBoundingClientRect();
                 const isFront = (dragDrop.clientX < collidedSectionBound.left) ? true : false;
-                const dropFrontBackResult = getDropFrontBackResult(dropRow, collidedSection, dragDrop.dragSection, isFront, dragDrop.dragToolbardata);
+                const dragSectionCol = dragDrop.dragSection ? parseInt(dragDrop.dragSection.dataset.column) : 4;
+                const dragSectionColSpan = dragDrop.dragSection ? parseInt(dragDrop.dragSection.dataset.columnSpan) : 4;
+                const dropFrontBackResult = getDropFrontBackResult(dropRow, collidedSection, dragSectionCol, dragSectionColSpan, isFront, dragDrop.dragToolbardata);
                 return {
                     canDrop: true,
                     details: {
@@ -4408,7 +4412,7 @@ define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@s
         const gridColumnWidth = dropRow.gridColumnWidth;
         const offsetLeft = Math.floor((dragDrop.startX + index_42.GAP_WIDTH) / (gridColumnWidth + index_42.GAP_WIDTH));
         const startOfDragingElm = dropColumn - offsetLeft;
-        const endOfDragingElm = dropColumn - offsetLeft + parseInt(dragDrop.dragSection.dataset.columnSpan) - 1;
+        const endOfDragingElm = dragDrop.dragSection ? (dropColumn - offsetLeft + parseInt(dragDrop.dragSection.dataset.columnSpan) - 1) : (dropColumn - offsetLeft + 4 - 1);
         for (let i = 0; i < sortedSections.length; i++) {
             const element = sortedSections[i];
             const condition = dragDrop.isUngroup ? true : element.id != dragDrop.dragSection.id;
@@ -4522,7 +4526,7 @@ define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@s
         else
             return 'back';
     }
-    function getDropFrontBackResult(dropRow, nearestDropSection, dragSection, isFront, data) {
+    function getDropFrontBackResult(dropRow, nearestDropSection, dragSectionCol, dragSectionColSpan, isFront, data) {
         // drop on the back/front block of a section
         const dropRowId = dropRow.id.replace('row-', '');
         const dropRowData = index_43.pageObject.getRow(dropRowId);
@@ -4540,7 +4544,7 @@ define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@s
             (dropSectionIdx == sortedSectionList.length - 1) ? MAX_COLUMN : sortedSectionList[dropSectionIdx + 1].column - 1;
         const emptySpace = backLimit - frontLimit + 1;
         // the columnSpan of new element should be same with the original section's
-        if (emptySpace >= dragSection.columnSpan) {
+        if (emptySpace >= dragSectionColSpan) {
             // have enough space to place the dragging toolbar
             const newColumn = isFront ?
                 sortedSectionList[dropSectionIdx].column - data.columnSpan :
@@ -4581,12 +4585,12 @@ define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@s
             const softEmptySpace = isFront ?
                 softBackLimit - frontLimit + 1 :
                 backLimit - softFrontLimit + 1;
-            if (softEmptySpace >= dragSection.columnSpan + sortedSectionList[dropSectionIdx].columnSpan) {
+            if (softEmptySpace >= dragSectionColSpan + sortedSectionList[dropSectionIdx].columnSpan) {
                 // if moving the current section can allocate enough space for the new section, do it
                 // move the currect section
                 sortedSectionList[dropSectionIdx].column = isFront ?
-                    frontLimit + dragSection.columnSpan :
-                    MAX_COLUMN - dragSection.columnSpan * 2 + 1;
+                    frontLimit + dragSectionColSpan :
+                    MAX_COLUMN - dragSectionColSpan * 2 + 1;
                 dropRowData.elements = sortedSectionList;
                 // add new section
                 const newColumn = isFront ?
@@ -4595,7 +4599,7 @@ define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@s
                 const newElData = {
                     id: data.id,
                     column: newColumn,
-                    columnSpan: dragSection.columnSpan,
+                    columnSpan: dragSectionColSpan,
                     properties: data.properties,
                     module: data.module,
                     tag: data.tag
