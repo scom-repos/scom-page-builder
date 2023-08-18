@@ -154,7 +154,7 @@ export class IDEToolbar extends Module {
         const widgetSettingsBtn = (
             <i-hstack
                 class="toolbar"
-                tooltip={{ trigger: 'hover', content: 'Settings', color: '#555555' }}
+                tooltip={{ trigger: 'hover', content: 'Widget Settings', color: '#555555' }}
                 horizontalAlignment="center"
                 verticalAlignment="center"
                 onClick={() => {
@@ -222,7 +222,7 @@ export class IDEToolbar extends Module {
                         ],
                     };
                     const widgetSettings = {
-                        name: 'Widget settings',
+                        name: 'Widget Settings',
                         icon: 'edit',
                         command: (toolbar: IDEToolbar, userInputData: any) => new WidgetSettingsToolbarCommand(toolbar, userInputData),
                         userInputDataSchema: propertiesSchema,
@@ -278,7 +278,7 @@ export class IDEToolbar extends Module {
             properties = this._currentSingleContentBlockId ? data[this._currentSingleContentBlockId].properties : data;
         }
         let elementTag = {};
-        if (action.name === 'Widget settings') {
+        if (action.name === 'Widget Settings') {
             const element = pageObject.getElement(this.rowId, this.elementId);
             if (element.tag) {
                 const { pt, pb, pl, pr } = element.tag;
