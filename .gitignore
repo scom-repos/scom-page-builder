@@ -5,3 +5,4 @@ modules/pageblocks/
 test/ref
 test/pageblocks
 test/dist
+dist
