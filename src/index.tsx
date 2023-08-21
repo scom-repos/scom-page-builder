@@ -218,9 +218,13 @@ export default class Editor extends Module {
     }
 
     private onKeyUp(event: KeyboardEvent) {
-        if (event.code === 'KeyZ' && event.ctrlKey) {
+        const toolbars = Array.from(this.pnlEditor.querySelectorAll('ide-toolbar'))
+        const cannotRedoUndo = toolbars.find(
+            (toolbar) => toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting')
+        );
+        if (event.code === 'KeyZ' && event.ctrlKey && !cannotRedoUndo) {
             commandHistory.undo();
-        } else if (event.code === 'KeyY' && event.ctrlKey) {
+        } else if (event.code === 'KeyY' && event.ctrlKey && !cannotRedoUndo) {
             commandHistory.redo();
         }
     }
@@ -410,7 +414,7 @@ export default class Editor extends Module {
                         ></ide-sidebar>
                     </i-panel> */}
                 {/* </i-grid-layout> */}
-                <i-scom-page-builder-sidebar id="pageSidebar"></i-scom-page-builder-sidebar>
+                <i-scom-page-builder-sidebar id="pageSidebar" zIndex={990}></i-scom-page-builder-sidebar>
                 <ide-search-components-dialog
                     id="mdComponentsSearch"
                 ></ide-search-components-dialog>

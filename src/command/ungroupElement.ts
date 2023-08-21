@@ -3,7 +3,8 @@ import { pageObject } from "../store/index";
 import { Control } from "@ijstech/components";
 import { application } from "@ijstech/components";
 import { EVENT } from "../const/index";
-import { IMergeType } from "./type"
+import { IMergeType } from "./type";
+import { getUngroupData, findNearestSection } from '../utility/ungroup'
 
 export class UngroupElementCommand implements ICommand {
   private dragToolbarId: string;
@@ -128,7 +129,7 @@ export class UngroupElementCommand implements ICommand {
         const dropSectionData = pageObject.getRow(this.dropRowId);
         dropRow.toggleUI(!!dropSectionData?.elements?.length);
       } else {
-        const nearestSection = this.findNearestSection(dropRow, this.clientX);
+        const nearestSection = findNearestSection(dropRow, this.clientX);
         const isFront = nearestSection.isFront;
         const targetSection = nearestSection.element;
         await this.moveSection(dropRow, dragRow, targetSection, dragSection, isFront);
@@ -141,184 +142,22 @@ export class UngroupElementCommand implements ICommand {
   }
 
   async moveSection(dropRow: any, dragRow: any, nearestDropSection: any, dragSection: any, isFront: boolean) {
-    // drop on the back/front block of a section
-    const dropRowData = pageObject.getRow(this.dropRowId);
-    const MAX_COLUMN = pageObject.getColumnsNumber(this.dropRowId);
 
-    // if the space left is enough: simply ungroup it
-    const sortedSectionList = dropRowData.elements.sort((a, b) => a.column - b.column);
-    // const dragSectionIdx = sortedSectionList.findIndex((e) => e.column === parseInt(this.data.column));
-    const dropSectionIdx = sortedSectionList.findIndex((e) => e.column === parseInt(nearestDropSection.data.column));
+    const newData = getUngroupData(dropRow, nearestDropSection, dragSection, isFront, this.data);
 
-    // drag to front block and ungroup
-    const frontLimit: number = isFront ?
-      (dropSectionIdx == 0) ? 1 : sortedSectionList[dropSectionIdx - 1].column + sortedSectionList[dropSectionIdx - 1].columnSpan :
-      sortedSectionList[dropSectionIdx].column + sortedSectionList[dropSectionIdx].columnSpan;
-
-    const backLimit: number = isFront ?
-      sortedSectionList[dropSectionIdx].column - 1 :
-      (dropSectionIdx == sortedSectionList.length - 1) ? MAX_COLUMN : sortedSectionList[dropSectionIdx + 1].column - 1;
-
-    const emptySpace = backLimit - frontLimit + 1;
-
-    // the columnSpan of new element should be same with the original section's
-    if (emptySpace >= dragSection.columnSpan) {
-      // have enough space to place the dragging toolbar
-      const newColumn = isFront ?
-        sortedSectionList[dropSectionIdx].column - this.data.columnSpan :
-        sortedSectionList[dropSectionIdx].column + sortedSectionList[dropSectionIdx].columnSpan;
-      const newElData = {
-        id: this.data.id,
-        column: newColumn,
-        columnSpan: this.data.columnSpan,
-        properties: this.data.properties,
-        module: this.data.module,
-        tag: this.data.tag
-      };
-      this.appendElm = await dropRow.addElement(newElData);
-      pageObject.addElement(this.dropRowId, newElData);
-
-    } else if (emptySpace >= 1) {
-      // no enough space to place the dragging toolbar
-      // if emptySpace>=1, resize the dragging element to fit the space
-
-      const newElData = {
-        id: this.data.id,
-        column: frontLimit,
-        columnSpan: emptySpace,
-        properties: this.data.properties,
-        module: this.data.module,
-        tag: this.data.tag
-      };
-      this.appendElm = await dropRow.addElement(newElData);
-      pageObject.addElement(this.dropRowId, newElData);
-
+    if (newData) {
+      if (newData.newRowData) {
+        dropRow.setData(newData.newRowData);
+      }
+      this.appendElm = await dropRow.addElement(newData.newElmdata);
+      pageObject.addElement(this.dropRowId, newData.newElmdata);
     } else {
-      // if no any space, check if moving the current section can allocate enough space for the new section
-      const softBackLimit = (dropSectionIdx == sortedSectionList.length - 1) ? MAX_COLUMN : sortedSectionList[dropSectionIdx + 1].column - 1;
-      const softFrontLimit = (dropSectionIdx == 0) ? 1 : sortedSectionList[dropSectionIdx - 1].column + sortedSectionList[dropSectionIdx - 1].columnSpan;
-      const softEmptySpace = isFront ?
-        softBackLimit - frontLimit + 1 :
-        backLimit - softFrontLimit + 1;
+      dropRow.setData(this.oriDropRowData)
+      pageObject.setRow(this.oriDropRowData, this.dropRowId)
 
-      if (softEmptySpace >= dragSection.columnSpan + sortedSectionList[dropSectionIdx].columnSpan) {
-        // if moving the current section can allocate enough space for the new section, do it
-
-        // move the currect section
-        sortedSectionList[dropSectionIdx].column = isFront ?
-          frontLimit + dragSection.columnSpan :
-          MAX_COLUMN - dragSection.columnSpan * 2 + 1;
-        dropRowData.elements = sortedSectionList
-        dropRow.setData(dropRowData);
-
-        // add new section
-        const newColumn = isFront ?
-          frontLimit :
-          MAX_COLUMN - sortedSectionList[dropSectionIdx].columnSpan + 1;
-
-        const newElData = {
-          id: this.data.id,
-          column: newColumn,
-          columnSpan: dragSection.columnSpan,
-          properties: this.data.properties,
-          module: this.data.module,
-          tag: this.data.tag
-        };
-        this.appendElm = await dropRow.addElement(newElData);
-        pageObject.addElement(this.dropRowId, newElData);
-
-      } else if (sortedSectionList[dropSectionIdx].columnSpan != 1) {
-        // if moving the current section cannot allocate enough space for the new section,
-        // check if the current section colSpan = 1
-
-        // if the current section colSpan != 1, current section collapse to allocate space for new elm
-
-        const splitIndex = Math.ceil(softEmptySpace / 2);
-
-        // resize & move the currect section
-        dropRow.clearData();
-
-        sortedSectionList[dropSectionIdx].column = isFront ?
-          frontLimit + splitIndex :
-          softFrontLimit;
-
-        sortedSectionList[dropSectionIdx].columnSpan = isFront ?
-          softEmptySpace - splitIndex :
-          splitIndex;
-
-        const newRowData = {
-          id: (dropRowData as any).id,
-          row: (dropRowData as any).row,
-          elements: sortedSectionList
-        }
-        dropRow.setData(newRowData);
-
-        // add new section
-        const newColumn = isFront ?
-          frontLimit :
-          softFrontLimit + splitIndex;
-
-        const newColumnSpan = isFront ?
-          splitIndex :
-          softEmptySpace - splitIndex;
-
-        const newElData = {
-          id: this.data.id,
-          column: newColumn,
-          columnSpan: newColumnSpan,
-          properties: this.data.properties,
-          module: this.data.module,
-          tag: this.data.tag
-        };
-        this.appendElm = await dropRow.addElement(newElData);
-        pageObject.addElement(this.dropRowId, newElData);
-      } else {
-        // if the current section colSpan == 1, cannot resize and ungroup
-        dropRow.setData(this.oriDropRowData)
-        pageObject.setRow(this.oriDropRowData, this.dropRowId)
-
-        dragRow.setData(this.oriDragRowData)
-        pageObject.setRow(this.oriDragRowData, this.dragRowId)
-      }
+      dragRow.setData(this.oriDragRowData)
+      pageObject.setRow(this.oriDragRowData, this.dragRowId)
     }
-  }
-
-  findNearestSection(parent: any, point: number) {
-    const sections = parent.querySelectorAll('ide-section');
-    if (sections.length === 0) {
-      return null; // Return null for an empty list of elements
-    }
-
-    let isFront = false;
-    let nearestDistance = Infinity;
-    let nearestSection = null;
-
-    for (const section of sections) {
-
-      const sectionRect = (section as HTMLElement).getBoundingClientRect();
-      const leftPoint = sectionRect.left;
-      const rightPoint = sectionRect.right;
-
-      // Calculate the distances between the point and both the left and right points of the element
-      const leftDistance = Math.abs(leftPoint - point);
-      const rightDistance = Math.abs(rightPoint - point);
-
-      // Check if the left point is nearer than the current nearest point
-      if (leftDistance < nearestDistance) {
-        isFront = true;
-        nearestDistance = leftDistance;
-        nearestSection = section;
-      }
-
-      // Check if the right point is nearer than the current nearest point
-      if (rightDistance < nearestDistance) {
-        isFront = false;
-        nearestDistance = rightDistance;
-        nearestSection = section;
-      }
-    }
-
-    return { isFront: isFront, element: nearestSection };
   }
 
   async undo() {

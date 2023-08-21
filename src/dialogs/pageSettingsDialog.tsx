@@ -82,6 +82,11 @@ export class PageSettingsDialog extends Module {
                     "type": "string",
                     "format": "color"
                 },
+                "textColor": {
+                    "title": "Text color",
+                    "type": "string",
+                    "format": "color"
+                },
                 "backgroundImage": {
                     "title": "Background image",
                     "type": "string",
@@ -124,6 +129,10 @@ export class PageSettingsDialog extends Module {
                         {
                             "type": "Control",
                             "scope": "#/properties/backgroundColor"
+                        },
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/textColor"
                         }
                     ]
                 },

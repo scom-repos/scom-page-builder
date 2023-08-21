@@ -308,8 +308,8 @@ export const state = {
   searchOptions: defaultSearchOptions as IOnFetchComponentsOptions,
   categories: [
     {
-      id: 'composables',
-      title: 'Composables',
+      id: 'widgets',
+      title: 'Widgets',
       icon: 'shapes'
     },
     {
@@ -323,8 +323,8 @@ export const state = {
       icon: 'chart-pie'
     },
     {
-      id: 'project-micro-dapps',
-      title: 'Project MicroDApps',
+      id: 'project-widgets',
+      title: 'Project Widgets',
       icon: 'hashtag'
     }
   ] as ICategory[],
@@ -409,11 +409,11 @@ export const getDivider = (theme?: ThemeType) => {
 }
 
 export const setDefaultPageConfig = (value: IPageConfig) => {
-  state.defaultPageConfig = {...defaultPageConfig, backgroundColor: getBackgroundColor(), ...(value || {})};
+  state.defaultPageConfig = {...defaultPageConfig, backgroundColor: getBackgroundColor(), textColor: getFontColor(), ...(value || {})};
 }
 
 export const getDefaultPageConfig = (): IPageConfig => {
-  const defaultValue = {...defaultPageConfig, backgroundColor: getBackgroundColor()};
+  const defaultValue = {...defaultPageConfig, backgroundColor: getBackgroundColor(), textColor: getFontColor()};
   return state.defaultPageConfig || defaultValue;
 }
 

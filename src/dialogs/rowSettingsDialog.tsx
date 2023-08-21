@@ -94,6 +94,11 @@ export class RowSettingsDialog extends Module {
                     "type": "string",
                     "format": "color"
                 },
+                "textColor": {
+                    "title": "Text color",
+                    "type": "string",
+                    "format": "color"
+                },
                 "border": {
                     "title": "Show border",
                     "type": "boolean"
@@ -120,7 +125,10 @@ export class RowSettingsDialog extends Module {
                             "type": "Control",
                             "scope": "#/properties/backgroundColor"
                         },
-
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/textColor"
+                        },
                     ]
                 },
                 {
@@ -322,8 +330,8 @@ export class RowSettingsDialog extends Module {
         this.formElm.uiSchema = jsonUISchema;
         this.formElm.formOptions = formOptions;
         this.formElm.renderForm();
-        const { backgroundColor, margin, sectionWidth } = getPageConfig();
-        const config = { align: 'left', sectionWidth, ...(this.data?.config || {}) };
+        const { backgroundColor, margin, sectionWidth, textColor } = getPageConfig();
+        const config = { align: 'left', sectionWidth, textColor, ...(this.data?.config || {}) };
         this.formElm.setFormData({...config});
     }
 

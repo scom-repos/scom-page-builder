@@ -322,7 +322,8 @@ declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
         icon: string;
         command: (builder: any, userInputData: any) => ICommand;
         userInputDataSchema: IDataSchema;
-        userInputUISchema?: IUISchema;
+        userInputUISchema: IUISchema;
+        customControls?: any;
         customUI?: any;
         isReplacement?: boolean;
     }
@@ -347,6 +348,7 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         backgroundColor?: string;
         backgroundImage?: string;
         backdropColor?: string;
+        textColor?: string;
         backdropImage?: string;
         sectionWidth?: number | string;
         plr?: number;
@@ -549,6 +551,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         backgroundColor?: string;
         backgroundImage?: string;
         backdropColor?: string;
+        textColor?: string;
         backdropImage?: string;
         sectionWidth?: string | number;
         plr?: number;
@@ -756,6 +759,17 @@ declare module "@scom/scom-page-builder/command/groupElement.ts" {
 declare module "@scom/scom-page-builder/command/type.ts" {
     export type IMergeType = "front" | "back" | "top" | "bottom" | "none";
 }
+/// <amd-module name="@scom/scom-page-builder/utility/ungroup.ts" />
+declare module "@scom/scom-page-builder/utility/ungroup.ts" {
+    export const getUngroupData: (dropRow: any, nearestDropSection: any, dragSection: any, isFront: boolean, data: any) => {
+        newElmdata: any;
+        newRowData: any;
+    };
+    export const findNearestSection: (parent: any, point: number) => {
+        isFront: boolean;
+        element: any;
+    };
+}
 /// <amd-module name="@scom/scom-page-builder/command/ungroupElement.ts" />
 declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
     import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
@@ -778,10 +792,6 @@ declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
         constructor(dragToolbar: Control, dragSection: Control, dropElm: Control, config: any, mergeType: IMergeType, clientX?: number);
         execute(): Promise<void>;
         moveSection(dropRow: any, dragRow: any, nearestDropSection: any, dragSection: any, isFront: boolean): Promise<void>;
-        findNearestSection(parent: any, point: number): {
-            isFront: boolean;
-            element: any;
-        };
         undo(): Promise<void>;
         redo(): void;
     }
@@ -1269,7 +1279,8 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private initEventListener;
         private initEventBus;
         updateUI(data: {
-            color: string;
+            backgroundColor?: string;
+            textColor?: string;
         }): Promise<void>;
         onShow(options?: any): void;
         onHide(): void;
@@ -1467,7 +1478,6 @@ declare module "@scom/scom-page-builder/utility/layouts.json.ts" {
             emptySection: any;
             title: any;
             titleWithText: any;
-            titleWithButton: any;
             titleWithBulletPoint: any;
             titleWithTaskList: any;
         };
