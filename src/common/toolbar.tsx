@@ -9,7 +9,8 @@ import {
     IDataSchema,
     VStack,
     application,
-    Form
+    Form,
+    IUISchema,
 } from '@ijstech/components';
 import { EVENT } from '../const/index';
 import { ELEMENT_NAME, IPageBlockAction, IPageBlockData, IPageElement, ThemeType } from '../interface/index';
@@ -20,6 +21,7 @@ import { currentTheme } from '../theme/index';
 import './toolbar.css';
 import { PageSection } from '../page/pageSection';
 import { PageRow } from '../page/pageRow';
+import { WidgetSettingsToolbarCommand } from '../command/widgetSettingsToolbar';
 
 declare global {
     namespace JSX {
@@ -154,6 +156,94 @@ export class IDEToolbar extends Module {
             if (tool.name) elm.setAttribute('tool-name', tool.name);
             this.toolbar.appendChild(elm);
         }
+        const widgetSettingsBtn = (
+            <i-hstack
+                class="toolbar"
+                tooltip={{ trigger: 'hover', content: 'Widget Settings', color: '#555555' }}
+                horizontalAlignment="center"
+                verticalAlignment="center"
+                onClick={() => {
+                    const propertiesSchema: IDataSchema = {
+                        type: 'object',
+                        properties: {
+                            pt: {
+                                title: 'Top',
+                                type: 'number',
+                            },
+                            pb: {
+                                title: 'Bottom',
+                                type: 'number',
+                            },
+                            pl: {
+                                title: 'Left',
+                                type: 'number',
+                            },
+                            pr: {
+                                title: 'Right',
+                                type: 'number',
+                            },
+                        },
+                    };
+                    const themesSchema: IUISchema = {
+                        type: 'VerticalLayout',
+                        elements: [
+                            {
+                                type: 'HorizontalLayout',
+                                elements: [
+                                    {
+                                        type: 'Group',
+                                        label: 'Padding (px)',
+                                        elements: [
+                                            {
+                                                type: 'VerticalLayout',
+                                                elements: [
+                                                    {
+                                                        type: 'HorizontalLayout',
+                                                        elements: [
+                                                            {
+                                                                type: 'Control',
+                                                                scope: '#/properties/pt',
+                                                            },
+                                                            {
+                                                                type: 'Control',
+                                                                scope: '#/properties/pb',
+                                                            },
+                                                            {
+                                                                type: 'Control',
+                                                                scope: '#/properties/pl',
+                                                            },
+                                                            {
+                                                                type: 'Control',
+                                                                scope: '#/properties/pr',
+                                                            },
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    };
+                    const widgetSettings = {
+                        name: 'Widget Settings',
+                        icon: 'edit',
+                        command: (toolbar: IDEToolbar, userInputData: any) => new WidgetSettingsToolbarCommand(toolbar, userInputData),
+                        userInputDataSchema: propertiesSchema,
+                        userInputUISchema: themesSchema,
+                    };
+                    this.currentAction = widgetSettings;
+                    this.mdActions.visible = true;
+                    this.pnlForm.visible = true;
+                    this.adjustCursorByAction();
+                    this.hideToolbars();
+                }}
+            >
+                <i-icon width={16} height={16} name="cog" fill={Theme.text.primary}></i-icon>
+            </i-hstack>
+        );
+        this.toolbar.appendChild(widgetSettingsBtn);
         const removeBtn = (
             <i-hstack
                 class='toolbar'
@@ -192,9 +282,18 @@ export class IDEToolbar extends Module {
         if (data.width === 'auto') data.width = this.offsetWidth;
         let properties = data;
         if (this.isContentBlock()) {
-            properties = this._currentSingleContentBlockId ? data[this._currentSingleContentBlockId].properties : data
+            properties = this._currentSingleContentBlockId ? data[this._currentSingleContentBlockId].properties : data;
         }
-        const tag = builderTarget?.getTag ? await builderTarget.getTag() : (this.data.tag || {});
+        let elementTag = {};
+        if (action.name === 'Widget Settings') {
+            const element = pageObject.getElement(this.rowId, this.elementId);
+            if (element.tag) {
+                const { pt, pb, pl, pr } = element.tag;
+                elementTag = { pt, pb, pl, pr };
+            }
+        }
+        const builderTag = builderTarget?.getTag ? await builderTarget.getTag() : this.data.tag || {};
+        const tag = { ...builderTag, ...elementTag };
         this.mdActions.title = action.name || 'Update Settings';
         if (action.customUI) {
             const customUI = action.customUI;

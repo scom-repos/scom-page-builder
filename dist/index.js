@@ -1193,6 +1193,8 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
     const getPageConfig = () => {
         const defaultConfig = (0, exports.getDefaultPageConfig)();
         const pageConfig = (exports.pageObject === null || exports.pageObject === void 0 ? void 0 : exports.pageObject.config) || {};
+        console.log('defaultConfig', defaultConfig);
+        console.log('pageConfig', pageConfig);
         pageConfig.margin = Object.assign(Object.assign({}, defaultConfig.margin), pageConfig.margin);
         return Object.assign(Object.assign({}, defaultConfig), pageConfig);
     };
@@ -3577,10 +3579,18 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
             const jsonSchema = {
                 "type": "object",
                 "properties": {
+                    "customBackgroundColor": {
+                        "title": "Custom background color",
+                        "type": "boolean"
+                    },
                     "backgroundColor": {
                         "title": "Background color",
                         "type": "string",
                         "format": "color"
+                    },
+                    "customTextColor": {
+                        "title": "Custom text color",
+                        "type": "boolean"
                     },
                     "textColor": {
                         "title": "Text color",
@@ -3627,11 +3637,42 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                         "elements": [
                             {
                                 "type": "Control",
-                                "scope": "#/properties/backgroundColor"
+                                "scope": "#/properties/customBackgroundColor"
                             },
                             {
                                 "type": "Control",
-                                "scope": "#/properties/textColor"
+                                "scope": "#/properties/backgroundColor",
+                                "rule": {
+                                    "effect": "ENABLE",
+                                    "condition": {
+                                        "scope": "#/properties/customBackgroundColor",
+                                        "schema": {
+                                            "const": true
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/customTextColor"
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/textColor",
+                                "rule": {
+                                    "effect": "ENABLE",
+                                    "condition": {
+                                        "scope": "#/properties/customTextColor",
+                                        "schema": {
+                                            "const": true
+                                        }
+                                    }
+                                }
                             }
                         ]
                     },
@@ -3732,6 +3773,8 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
             this.formElm.uiSchema = jsonUISchema;
             this.formElm.formOptions = formOptions;
             this.formElm.renderForm();
+            const config = (0, index_36.getPageConfig)();
+            console.log('config', config);
             this.formElm.setFormData(Object.assign({}, (0, index_36.getPageConfig)()));
         }
         close() {
@@ -5665,7 +5708,33 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
     ], PageRow);
     exports.PageRow = PageRow;
 });
-define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/interface/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/utility/index.ts", "@scom/scom-page-builder/command/index.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/common/toolbar.css.ts"], function (require, exports, components_26, index_47, index_48, index_49, index_50, index_51, index_52) {
+define("@scom/scom-page-builder/command/widgetSettingsToolbar.ts", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.WidgetSettingsToolbarCommand = void 0;
+    class WidgetSettingsToolbarCommand {
+        constructor(toolbar, dataInput) {
+            this.toolbar = toolbar;
+            this.data = dataInput;
+            this.pageRow = this.toolbar.closest('ide-row');
+            this.pageRowId = this.toolbar.rowId;
+            this.section = this.toolbar.closest('ide-section');
+            this.sectionId = this.section.id;
+        }
+        execute() {
+            const { pt, pb, pl, pr } = this.data;
+            const contentStack = this.section.querySelector('#contentStack');
+            if (contentStack)
+                contentStack.padding = { top: pt, bottom: pb, left: pl, right: pr };
+            const newTag = { pt, pb, pl, pr };
+            this.toolbar.setTag(newTag);
+        }
+        undo() { }
+        redo() { }
+    }
+    exports.WidgetSettingsToolbarCommand = WidgetSettingsToolbarCommand;
+});
+define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/interface/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/utility/index.ts", "@scom/scom-page-builder/command/index.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/command/widgetSettingsToolbar.ts", "@scom/scom-page-builder/common/toolbar.css.ts"], function (require, exports, components_26, index_47, index_48, index_49, index_50, index_51, index_52, widgetSettingsToolbar_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.IDEToolbar = void 0;
@@ -5745,6 +5814,85 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                     elm.setAttribute('tool-name', tool.name);
                 this.toolbar.appendChild(elm);
             }
+            const widgetSettingsBtn = (this.$render("i-hstack", { class: "toolbar", tooltip: { trigger: 'hover', content: 'Widget Settings', color: '#555555' }, horizontalAlignment: "center", verticalAlignment: "center", onClick: () => {
+                    const propertiesSchema = {
+                        type: 'object',
+                        properties: {
+                            pt: {
+                                title: 'Top',
+                                type: 'number',
+                            },
+                            pb: {
+                                title: 'Bottom',
+                                type: 'number',
+                            },
+                            pl: {
+                                title: 'Left',
+                                type: 'number',
+                            },
+                            pr: {
+                                title: 'Right',
+                                type: 'number',
+                            },
+                        },
+                    };
+                    const themesSchema = {
+                        type: 'VerticalLayout',
+                        elements: [
+                            {
+                                type: 'HorizontalLayout',
+                                elements: [
+                                    {
+                                        type: 'Group',
+                                        label: 'Padding (px)',
+                                        elements: [
+                                            {
+                                                type: 'VerticalLayout',
+                                                elements: [
+                                                    {
+                                                        type: 'HorizontalLayout',
+                                                        elements: [
+                                                            {
+                                                                type: 'Control',
+                                                                scope: '#/properties/pt',
+                                                            },
+                                                            {
+                                                                type: 'Control',
+                                                                scope: '#/properties/pb',
+                                                            },
+                                                            {
+                                                                type: 'Control',
+                                                                scope: '#/properties/pl',
+                                                            },
+                                                            {
+                                                                type: 'Control',
+                                                                scope: '#/properties/pr',
+                                                            },
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    };
+                    const widgetSettings = {
+                        name: 'Widget Settings',
+                        icon: 'edit',
+                        command: (toolbar, userInputData) => new widgetSettingsToolbar_1.WidgetSettingsToolbarCommand(toolbar, userInputData),
+                        userInputDataSchema: propertiesSchema,
+                        userInputUISchema: themesSchema,
+                    };
+                    this.currentAction = widgetSettings;
+                    this.mdActions.visible = true;
+                    this.pnlForm.visible = true;
+                    this.adjustCursorByAction();
+                    this.hideToolbars();
+                } },
+                this.$render("i-icon", { width: 16, height: 16, name: "cog", fill: Theme.text.primary })));
+            this.toolbar.appendChild(widgetSettingsBtn);
             const removeBtn = (this.$render("i-hstack", { class: 'toolbar', tooltip: { trigger: 'hover', content: 'Delete', color: '#555555' }, horizontalAlignment: 'center', verticalAlignment: 'center', onClick: () => {
                     const removeCmd = new index_51.RemoveToolbarCommand(this);
                     index_51.commandHistory.execute(removeCmd);
@@ -5774,7 +5922,16 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             if (this.isContentBlock()) {
                 properties = this._currentSingleContentBlockId ? data[this._currentSingleContentBlockId].properties : data;
             }
-            const tag = (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getTag) ? await builderTarget.getTag() : (this.data.tag || {});
+            let elementTag = {};
+            if (action.name === 'Widget Settings') {
+                const element = index_49.pageObject.getElement(this.rowId, this.elementId);
+                if (element.tag) {
+                    const { pt, pb, pl, pr } = element.tag;
+                    elementTag = { pt, pb, pl, pr };
+                }
+            }
+            const builderTag = (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getTag) ? await builderTarget.getTag() : this.data.tag || {};
+            const tag = Object.assign(Object.assign({}, builderTag), elementTag);
             this.mdActions.title = action.name || 'Update Settings';
             if (action.customUI) {
                 const customUI = action.customUI;
