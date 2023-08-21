@@ -64,6 +64,10 @@ export class RowSettingsDialog extends Module {
                     "type": "string",
                     "format": "data-url"
                 },
+                "customBackdrop": {
+                    "title": "Custom backdrop",
+                    "type": "boolean"
+                },
                 "backdropColor": {
                     "title": "Backdrop color",
                     "type": "string",
@@ -89,10 +93,18 @@ export class RowSettingsDialog extends Module {
                     "title": "Full width",
                     "type": "boolean"
                 },
+                "customBackgroundColor": {
+                    "title": "Custom background color",
+                    "type": "boolean"
+                },
                 "backgroundColor": {
                     "title": "Background color",
                     "type": "string",
                     "format": "color"
+                },
+                "customTextColor": {
+                    "title": "Custom text color",
+                    "type": "boolean"
                 },
                 "textColor": {
                     "title": "Text color",
@@ -120,14 +132,50 @@ export class RowSettingsDialog extends Module {
                         {
                             "type": "Control",
                             "scope": "#/properties/fullWidth"
+                        }
+                    ]
+                },
+                {
+                    "type": "HorizontalLayout",
+                    "elements": [
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/customBackgroundColor"
                         },
                         {
                             "type": "Control",
-                            "scope": "#/properties/backgroundColor"
+                            "scope": "#/properties/backgroundColor",
+                            "rule": {
+                                "effect": "ENABLE",
+                                "condition": {
+                                    "scope": "#/properties/customBackgroundColor",
+                                    "schema": {
+                                        "const": true
+                                    }
+                                }
+                            }
+                        },
+                    ]
+                },
+                {
+                    "type": "HorizontalLayout",
+                    "elements": [
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/customTextColor"
                         },
                         {
                             "type": "Control",
-                            "scope": "#/properties/textColor"
+                            "scope": "#/properties/textColor",
+                            "rule": {
+                                "effect": "ENABLE",
+                                "condition": {
+                                    "scope": "#/properties/customTextColor",
+                                    "schema": {
+                                        "const": true
+                                    }
+                                }
+                            }
                         },
                     ]
                 },
@@ -197,11 +245,38 @@ export class RowSettingsDialog extends Module {
                                             "elements": [
                                                 {
                                                     "type": "Control",
-                                                    "scope": "#/properties/backdropImage"
+                                                    "scope": "#/properties/customBackdrop"
+                                                },
+                                            ]
+                                        },
+                                        {
+                                            "type": "HorizontalLayout",
+                                            "elements": [
+                                                {
+                                                    "type": "Control",
+                                                    "scope": "#/properties/backdropImage",
+                                                    "rule": {
+                                                        "effect": "ENABLE",
+                                                        "condition": {
+                                                            "scope": "#/properties/customBackdrop",
+                                                            "schema": {
+                                                                "const": true
+                                                            }
+                                                        }
+                                                    }
                                                 },
                                                 {
                                                     "type": "Control",
-                                                    "scope": "#/properties/backdropColor"
+                                                    "scope": "#/properties/backdropColor",
+                                                    "rule": {
+                                                        "effect": "ENABLE",
+                                                        "condition": {
+                                                            "scope": "#/properties/customBackdrop",
+                                                            "schema": {
+                                                                "const": true
+                                                            }
+                                                        }
+                                                    }
                                                 }
                                             ]
                                         }
