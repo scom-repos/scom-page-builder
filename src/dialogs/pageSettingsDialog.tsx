@@ -276,6 +276,7 @@ export class PageSettingsDialog extends Module {
         this.formElm.uiSchema = jsonUISchema;
         this.formElm.formOptions = formOptions;
         this.formElm.renderForm();
+        const config = getPageConfig();
         this.formElm.setFormData({ ...getPageConfig() });
     }
 

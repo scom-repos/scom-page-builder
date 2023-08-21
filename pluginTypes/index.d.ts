@@ -345,9 +345,11 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         config?: IPageConfig;
     }
     export interface IPageConfig {
+        customBackgroundColor?: boolean;
         backgroundColor?: string;
         backgroundImage?: string;
         backdropColor?: string;
+        customTextColor?: boolean;
         textColor?: string;
         backdropImage?: string;
         sectionWidth?: number | string;
@@ -548,9 +550,11 @@ declare module "@scom/scom-page-builder/store/index.ts" {
     export const setDefaultPageConfig: (value: IPageConfig) => void;
     export const getDefaultPageConfig: () => IPageConfig;
     export const getPageConfig: () => {
+        customBackgroundColor?: boolean;
         backgroundColor?: string;
         backgroundImage?: string;
         backdropColor?: string;
+        customTextColor?: boolean;
         textColor?: string;
         backdropImage?: string;
         sectionWidth?: string | number;

@@ -1193,6 +1193,8 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
     const getPageConfig = () => {
         const defaultConfig = (0, exports.getDefaultPageConfig)();
         const pageConfig = (exports.pageObject === null || exports.pageObject === void 0 ? void 0 : exports.pageObject.config) || {};
+        console.log('defaultConfig', defaultConfig);
+        console.log('pageConfig', pageConfig);
         pageConfig.margin = Object.assign(Object.assign({}, defaultConfig.margin), pageConfig.margin);
         return Object.assign(Object.assign({}, defaultConfig), pageConfig);
     };
@@ -3771,6 +3773,8 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
             this.formElm.uiSchema = jsonUISchema;
             this.formElm.formOptions = formOptions;
             this.formElm.renderForm();
+            const config = (0, index_36.getPageConfig)();
+            console.log('config', config);
             this.formElm.setFormData(Object.assign({}, (0, index_36.getPageConfig)()));
         }
         close() {
