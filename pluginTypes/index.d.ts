@@ -835,6 +835,26 @@ declare module "@scom/scom-page-builder/command/replaceElement.ts" {
         redo(): void;
     }
 }
+/// <amd-module name="@scom/scom-page-builder/theme/light.theme.ts" />
+declare module "@scom/scom-page-builder/theme/light.theme.ts" {
+    import { Styles } from '@ijstech/components';
+    const Theme: Styles.Theme.ITheme;
+    export default Theme;
+}
+/// <amd-module name="@scom/scom-page-builder/theme/dark.theme.ts" />
+declare module "@scom/scom-page-builder/theme/dark.theme.ts" {
+    import { Styles } from '@ijstech/components';
+    const Theme: Styles.Theme.ITheme;
+    export default Theme;
+}
+/// <amd-module name="@scom/scom-page-builder/theme/index.ts" />
+declare module "@scom/scom-page-builder/theme/index.ts" {
+    import { Styles } from '@ijstech/components';
+    import LightTheme from "@scom/scom-page-builder/theme/light.theme.ts";
+    import DarkTheme from "@scom/scom-page-builder/theme/dark.theme.ts";
+    const currentTheme: Styles.Theme.ITheme;
+    export { currentTheme, LightTheme, DarkTheme };
+}
 /// <amd-module name="@scom/scom-page-builder/command/updatePageSetting.ts" />
 declare module "@scom/scom-page-builder/command/updatePageSetting.ts" {
     import { Control } from "@ijstech/components";
@@ -869,26 +889,6 @@ declare module "@scom/scom-page-builder/command/index.ts" {
     export { ICommand, IDataColumn } from "@scom/scom-page-builder/command/interface.ts";
     export { UpdatePageSettingsCommand } from "@scom/scom-page-builder/command/updatePageSetting.ts";
     export { IMergeType } from "@scom/scom-page-builder/command/type.ts";
-}
-/// <amd-module name="@scom/scom-page-builder/theme/light.theme.ts" />
-declare module "@scom/scom-page-builder/theme/light.theme.ts" {
-    import { Styles } from '@ijstech/components';
-    const Theme: Styles.Theme.ITheme;
-    export default Theme;
-}
-/// <amd-module name="@scom/scom-page-builder/theme/dark.theme.ts" />
-declare module "@scom/scom-page-builder/theme/dark.theme.ts" {
-    import { Styles } from '@ijstech/components';
-    const Theme: Styles.Theme.ITheme;
-    export default Theme;
-}
-/// <amd-module name="@scom/scom-page-builder/theme/index.ts" />
-declare module "@scom/scom-page-builder/theme/index.ts" {
-    import { Styles } from '@ijstech/components';
-    import LightTheme from "@scom/scom-page-builder/theme/light.theme.ts";
-    import DarkTheme from "@scom/scom-page-builder/theme/dark.theme.ts";
-    const currentTheme: Styles.Theme.ITheme;
-    export { currentTheme, LightTheme, DarkTheme };
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageHeader.css.ts" />
 declare module "@scom/scom-page-builder/page/pageHeader.css.ts" { }
