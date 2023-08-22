@@ -3,6 +3,9 @@ import { getMargin, getPageConfig, pageObject } from "../store/index";
 import { ICommand } from "./interface";
 import { IPageConfig, IPageSectionConfig } from '../interface/index';
 import { EVENT } from "../const/index";
+import { currentTheme  } from '../theme/index';
+
+const Theme = currentTheme;
 
 export class UpdatePageSettingsCommand implements ICommand {
   private element: any;
@@ -37,7 +40,7 @@ export class UpdatePageSettingsCommand implements ICommand {
   }
 
   private updateConfig(config: IPageConfig, updatedValues: string[]) {
-    const { backgroundColor, backgroundImage, textColor, margin, sectionWidth, ptb, plr } = config;
+    const { backgroundColor, backgroundImage, customBackgroundColor, customTextColor, textColor, margin } = config;
     let newConfig: IPageConfig = {};
     for (let prop of updatedValues) {
       newConfig[prop] = config[prop];
@@ -47,17 +50,29 @@ export class UpdatePageSettingsCommand implements ICommand {
     if (updatedValues.includes('backgroundImage')) {
       application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {image: backgroundImage});
     }
-    if (updatedValues.includes('backgroundColor')) {
-      element.style.setProperty('--builder-bg', backgroundColor);
-      application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {backgroundColor});
+    const defaultBackgroundColor = Theme.background.main
+    const defaultTextColor = Theme.text.primary
+    if (customBackgroundColor) {
+      if (updatedValues.includes('backgroundColor')) {
+        element.style.setProperty('--builder-bg', backgroundColor);
+        application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {backgroundColor});
+      }
+    } else {
+      element.style.setProperty('--builder-bg', defaultBackgroundColor);
+      application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {backgroundColor: defaultBackgroundColor});
     }
-    if (updatedValues.includes('textColor')) {
-      element.style.setProperty('--builder-color', textColor);
-      application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {textColor});
+    if (customTextColor) {
+      if (updatedValues.includes('textColor')) {
+        element.style.setProperty('--builder-color', textColor);
+        application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {textColor});
+      }
+    } else {
+      element.style.setProperty('--builder-color', defaultTextColor);
+      application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {textColor: defaultTextColor});
     }
     this.element.maxWidth = '100%'; // maxWidth ?? '100%';
     this.element.margin = getMargin(margin);
-    pageObject.config = {backgroundColor, backgroundImage, margin, sectionWidth, ptb, plr, textColor};
+    pageObject.config = { ...config };
     return newConfig;
   }
 
