@@ -1,5 +1,7 @@
 export type IMergeDropSide = "front" | "back" | "top" | "bottom";
+export type DragDropResultType = "move" | "merge";
 export type DragDropResultDetails = {
+    type: DragDropResultType;
     row?: HTMLElement;
     section?: HTMLElement;
     toolbar?: HTMLElement;
@@ -8,6 +10,7 @@ export type DragDropResultDetails = {
     column?: number;
     columnSpan?: number;
     isMouseOn?: boolean;
+    nearestPanel?: HTMLElement;
 }
 
 export type DragDropResult = {

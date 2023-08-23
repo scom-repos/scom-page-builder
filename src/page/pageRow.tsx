@@ -801,73 +801,71 @@ export class PageRow extends Module {
                 startX: startX,
                 isUngroup: self.isUngrouping()
             });
-            if (dragDropResult.canDrop) {
+            if (dragDropResult.canDrop && dragDropResult.details) {
 
-                if (dragDropResult.details) {
-                    // dragover rowBlock
-                    if (dragDropResult.details.rowBlock) {
-                        updateClass(dragDropResult.details.rowBlock as Control, 'is-dragenter');
-                    }
+                // dragover rowBlock
+                if (dragDropResult.details.rowBlock) {
+                    updateClass(dragDropResult.details.rowBlock as Control, 'is-dragenter');
+                }
 
-                    // dragover section
-                    else if (dragDropResult.details.section && dragDropResult.details.dropSide) {
+                // dragover section
+                else if (dragDropResult.details.section && dragDropResult.details.dropSide) {
 
-                        // show section's front/back block
-                        if (dragDropResult.details.isMouseOn) {
-                            const section = dragDropResult.details.section;
-                            if (dragDropResult.details.dropSide == "front") {
-                                const frontBlock = section.querySelector('.front-block') as Control;
-                                if (frontBlock) {
-                                    frontBlock.visible = true;
-                                    updateClass(frontBlock, 'is-dragenter');
-                                }
-                            } else if (dragDropResult.details.dropSide == "back") {
-                                const backBlock = section.querySelector('.back-block') as Control;
-                                if (backBlock) {
-                                    backBlock.visible = true;
-                                    updateClass(backBlock, 'is-dragenter');
-                                }
-                            } else {
-                                console.error("Section's dropSide can only be 'front' or 'back'")
+                    // show section's front/back block
+                    if (dragDropResult.details.isMouseOn) {
+                        const section = dragDropResult.details.section;
+                        if (dragDropResult.details.dropSide == "front") {
+                            const frontBlock = section.querySelector('.front-block') as Control;
+                            if (frontBlock) {
+                                frontBlock.visible = true;
+                                updateClass(frontBlock, 'is-dragenter');
                             }
-                        } 
-
-                        // show frame
-                        else {
-                            // if (enterTarget == dragOverTarget) return;
-                            // leave previous element: dragOverTarget
-                            dragLeave(dragOverTarget, event.clientX, true);
-
-                            // enter current element: enterTarget
-                            dragEnter(enterTarget, event.clientX, event.clientY);
-
-                            dragOverTarget = enterTarget;
-                        }
-                    }
-
-                    // dragover toolbar(element)
-                    else if (dragDropResult.details.toolbar && dragDropResult.details.dropSide) {
-                        const toolbar = dragDropResult.details.toolbar;
-                        if (dragDropResult.details.dropSide == "top") {
-                            const topBlock = toolbar.querySelector('.top-block') as Control;
-                            if (topBlock) {
-                                topBlock.visible = true;
-                                updateClass(topBlock, 'is-dragenter');
-                            }
-                        } else if (dragDropResult.details.dropSide == "bottom") {
-                            const bottomBlock = toolbar.querySelector('.bottom-block') as Control;
-                            if (bottomBlock) {
-                                bottomBlock.visible = true;
-                                updateClass(bottomBlock, 'is-dragenter');
+                        } else if (dragDropResult.details.dropSide == "back") {
+                            const backBlock = section.querySelector('.back-block') as Control;
+                            if (backBlock) {
+                                backBlock.visible = true;
+                                updateClass(backBlock, 'is-dragenter');
                             }
                         } else {
-                            console.error("Toolbar(element)'s dropSide can only be 'top' or 'bottom'")
+                            console.error("Section's dropSide can only be 'front' or 'back'")
                         }
+                    } 
+
+                    // show frame
+                    else { // TODO
+                        // if (enterTarget == dragOverTarget) return;
+                        // leave previous element: dragOverTarget
+                        dragLeave(dragOverTarget, event.clientX, true);
+
+                        // enter current element: enterTarget
+                        dragEnter(enterTarget, event.clientX, event.clientY);
+
+                        dragOverTarget = enterTarget;
+                    }
+                }
+
+                // dragover toolbar(element)
+                else if (dragDropResult.details.toolbar && dragDropResult.details.dropSide) {
+                    const toolbar = dragDropResult.details.toolbar;
+                    if (dragDropResult.details.dropSide == "top") {
+                        const topBlock = toolbar.querySelector('.top-block') as Control;
+                        if (topBlock) {
+                            topBlock.visible = true;
+                            updateClass(topBlock, 'is-dragenter');
+                        }
+                    } else if (dragDropResult.details.dropSide == "bottom") {
+                        const bottomBlock = toolbar.querySelector('.bottom-block') as Control;
+                        if (bottomBlock) {
+                            bottomBlock.visible = true;
+                            updateClass(bottomBlock, 'is-dragenter');
+                        }
+                    } else {
+                        console.error("Toolbar(element)'s dropSide can only be 'top' or 'bottom'")
                     }
                 }
 
                 // dragover empty space, show frame
-                else {
+                else { // TODO
                     // if (enterTarget == dragOverTarget) return;
                     // leave previous element: dragOverTarget
                     dragLeave(dragOverTarget, event.clientX, true);
@@ -908,154 +906,6 @@ export class PageRow extends Module {
             return nearestElement;
         }
 
-        function checkCollision(dropTarget: HTMLElement, dragSection: HTMLElement, clientX: number, clientY: number): Collision {
-            if (!dropTarget) return {collisionType: 'none'};
-
-            const pageRow = dropTarget.closest('ide-row');
-            const rowRect = pageRow.getBoundingClientRect();
-
-            // drop/dragover near the top/bottom block of row
-            const INNER_LIMIT = 15;
-            const OUTER_LIMIT = 3;
-            if (clientY >= rowRect.top - OUTER_LIMIT && clientY <= rowRect.top + INNER_LIMIT) {
-                // mouse is on the top row block
-                return {
-                    collisionType: 'mutual',
-                    rowBlock: pageRow.querySelector('.row-top-block'),
-                };
-            } else if (clientY >= rowRect.bottom - INNER_LIMIT && clientY <= rowRect.bottom + OUTER_LIMIT) {
-                // mouse is on the bottom row block
-                return {
-                    collisionType: 'mutual',
-                    rowBlock: pageRow.querySelector('.row-bottom-block'),
-                };
-            }
-
-            if (!dragSection) {
-                const dropSection = dropTarget.closest('ide-section') as HTMLElement;
-                const dropToolbar = dropTarget.closest('ide-toolbar') as HTMLElement;
-                if (dropToolbar) {
-                    // drop/dragover on an element
-                    return {
-                        collisionType: 'mutual',
-                        section: dropSection,
-                        toolbar: dropToolbar,
-                        // check which side is the merge target
-                        mergeSide: decideMergeSide(dropToolbar, clientX, clientY),
-                    };
-                } else if (dropSection) {
-                    // drop/dragover on a section but not an element
-                    const nearestToolbar = findClosestToolbarInSection(dropSection as Control, clientY);
-                    return {
-                        collisionType: 'mutual',
-                        section: dropSection,
-                        toolbar: nearestToolbar.toolbar,
-                        // check which side is the merge target
-                        mergeSide: decideMergeSide(nearestToolbar.toolbar, clientX, clientY),
-                    };
-                } else return {collisionType: 'none'};
-            }
-
-            if (dragSection == null || dragSection == undefined) return {collisionType: 'mutual'};
-            const nearestCol = findNearestFixedGridInRow(clientX);
-            if (!nearestCol) return {collisionType: 'none'};
-            const dropColumn: number = parseInt(nearestCol.getAttribute('data-column'));
-            const grid = dropTarget.closest('.grid');
-            // drop/dragover outside grid
-            if (!grid) return {collisionType: 'none'};
-
-            const sections: HTMLElement[] = Array.from(grid?.querySelectorAll('ide-section'));
-            const sortedSections: HTMLElement[] = sections.sort(
-                (a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column)
-            );
-            
-            const offsetLeft = Math.floor((startX + GAP_WIDTH) / (self._gridColumnWidth + GAP_WIDTH));
-            const startOfDragingElm: number = dropColumn - offsetLeft;
-            const endOfDragingElm: number = dropColumn - offsetLeft + parseInt(dragSection.dataset.columnSpan) - 1;
-            let selfCollision: Collision;
-
-            for (let i = 0; i < sortedSections.length; i++) {
-                const element = sortedSections[i];
-                const condition = self.isUngrouping() ? true : element.id != dragSection.id;
-                if (condition && element) {
-                    const startOfDroppingElm: number = parseInt(element.dataset.column);
-                    const endOfDroppingElm: number = parseInt(element.dataset.column) + parseInt(element.dataset.columnSpan) - 1;
-                    const condition1: boolean = startOfDragingElm >= startOfDroppingElm && startOfDragingElm <= endOfDroppingElm;
-                    const condition2: boolean = startOfDroppingElm >= startOfDragingElm && startOfDroppingElm <= endOfDragingElm;
-
-                    // overlap with other section
-                    if (condition1 || condition2) {
-                        // check if the dragging toolbar overlap with other toolbar
-                        const nearestToolbar = findClosestToolbarInSection(element as Control, clientY);
-                        const toolbarsInDragSec = dragSection.querySelectorAll('ide-toolbar');
-                        if (!nearestToolbar.toolbar || (nearestToolbar.toolbar && self.currentToolbar && nearestToolbar.toolbar != self.currentToolbar)) {
-                            // drop/dragover on a section but not an element,
-                            // or drop/dragover on the place which causes the dragging element overlapping with dropping element
-                            return {
-                                collisionType: 'mutual',
-                                section: element,
-                                toolbar: nearestToolbar.toolbar,
-                                // check which side is the merge target
-                                mergeSide: decideMergeSide(nearestToolbar.toolbar, clientX, clientY),
-                            };
-                        } else {
-                            // drop/dragover on the toolbar itself, the toolbar is in a composite section
-                            
-                            // check if the mouse is on the section exactly
-                            const elementRect = element.getBoundingClientRect();
-                            const mouseOnElm = (clientX >= elementRect.left 
-                                && clientX <= elementRect.right 
-                                && clientY >= elementRect.top 
-                                && clientY <= elementRect.bottom);
-
-                            const toolbarIdx: number = nearestToolbar.index == 0 ? 1 : nearestToolbar.index - 1;
-                            if (self.isUngrouping()) {
-                                return {
-                                    collisionType: 'mutual',
-                                    section: element,
-                                    toolbar: nearestToolbar.toolbar,
-                                    // check which side is the merge target
-                                    mergeSide: decideMergeSide(nearestToolbar.toolbar, clientX, clientY),
-                                };
-                            } else {
-                                selfCollision = mouseOnElm ? {
-                                    collisionType: 'self',
-                                    section: element,
-                                    toolbar: toolbarsInDragSec[toolbarIdx] as Control,
-                                    mergeSide: nearestToolbar.index == 0 ? 'top' : 'bottom'
-                                } : {
-                                    collisionType: 'self',
-                                    section: element,
-                                    toolbar: toolbarsInDragSec[toolbarIdx] as Control
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (selfCollision) return selfCollision;
-            // overlap with border
-            // if (endOfDragingElm >= self.maxColumn && (self.maxColumn - endOfLastElmInRow < parseInt(dragTargetSection.dataset.columnSpan))) return {
-            //     overlapType: "border", section: undefined
-            // }
-            // drop/dragover on the toolbar itself, the toolbar is in a primitive section
-            if (dropTarget == dragSection || dragSection.contains(dropTarget) || dropTarget.contains(dragSection))
-                return {collisionType: 'self'};
-            // otherwise, no overlap
-            return {collisionType: 'none'};
-        }
-
-        function decideMergeSide(dropToolbar: HTMLElement, clientX: number, clientY: number): IMergeType {
-            let rect = dropToolbar.getBoundingClientRect();
-            let offsetX = clientX - rect.left;
-            let offsetY = clientY - rect.top;
-
-            if (offsetY <= rect.height * 0.3) return 'top';
-            else if (offsetY >= rect.height * 0.7) return 'bottom';
-            else if (offsetX <= rect.width * 0.5) return 'front';
-            else return 'back';
-        }
-
         this.addEventListener('drop', async function (event) {
             self.pnlRow.minHeight = 'auto';
             const elementConfig = getDragData();
@@ -1081,7 +931,6 @@ export class PageRow extends Module {
 
             const isUngrouping: boolean = self.isUngrouping();
             const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
-            const collision = checkCollision(eventTarget, dragStartTargetSection, event.clientX, event.clientY);
             const dragDropResult = checkDragDropResult({
                 dropTarget: eventTarget,
                 dragSection: dragStartTargetSection,
@@ -1092,194 +941,123 @@ export class PageRow extends Module {
                 isUngroup: self.isUngrouping()
             });
 
-            let dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
-            // drop outside the grid panel of a row (drop on left/right)
-            if (eventTarget && eventTarget.id && eventTarget.id.startsWith("row-")) {
-                const pnlRow = eventTarget.closest('#pnlRow')
-                if (!pnlRow && !dropElm) return;
-            }
-            
-            const dropToolbar = dropElm?.closest('ide-toolbar');
-            if (self.currentToolbar && dropToolbar == self.currentToolbar) dropElm = null;
+            if (dragDropResult.canDrop && dragDropResult.details) {
 
-            // collide with other section
-            if (collision.collisionType == 'mutual' && !collision.rowBlock) {
-                if ((!collision.mergeSide && !dropElm) || (collision.section && !dropElm && !isUngrouping)) return;
-            }
+                // let dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
+                const dropSection = dragDropResult.details.section as Control;
 
-            // is ungrouping and draging on the original section
-            if (collision.collisionType == 'self' && isUngrouping) return;
-
-            let nearestFixedItem = eventTarget.closest('.fixed-grid-item') as Control;
-            // if target overlap with itself
-            if (
-                collision.collisionType == 'self' ||
-                // drag on the gap of fixed panel
-                (collision.collisionType == 'none' && eventTarget.classList.contains('fixed-grid'))
-            )
-                nearestFixedItem = findNearestFixedGridInRow(event.clientX);
-            const config = {id: generateUUID()};
-            // check if drop on a fixed-panel
-            if (nearestFixedItem) {
-                const offsetLeft = Math.floor((startX + GAP_WIDTH) / (self._gridColumnWidth + GAP_WIDTH));
-                let column = Number(nearestFixedItem.dataset.column);
-                if (column - offsetLeft > 0) {
-                    nearestFixedItem = pageRow.querySelector(`.fixed-grid-item[data-column='${column - offsetLeft}']`)
-                }
-                column = Number(nearestFixedItem.dataset.column);
-                const columnSpan = self.currentElement.dataset.columnSpan
-                    ? Number(self.currentElement.dataset.columnSpan)
-                    : INIT_COLUMN_SPAN;
-                const colSpan = Math.min(columnSpan, self.maxColumn);
-                const colStart = Math.min(column, self.maxColumn - colSpan + 1);
-                const grid = nearestFixedItem.closest('.grid');
-                const sections = Array.from(grid?.querySelectorAll('ide-section'));
-                const sortedSections = sections.sort(
-                    (a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column)
-                );
-                const findedSection = sortedSections.find((section: Control) => {
-                    const sectionColumn = Number(section.dataset.column);
-                    const sectionColumnSpan = Number(section.dataset.columnSpan);
-                    const colData = colStart + colSpan;
-                    const sectionData = sectionColumn + sectionColumnSpan;
-                    return colStart >= sectionColumn && colData <= sectionData;
-                });
-                if (findedSection || self.isDragging) return;
-                self.isDragging = true;
-
-                // ungrouping elm
-                if (isUngrouping) {
-                    const dragCmd = new UngroupElementCommand(self.currentToolbar, self.currentElement, nearestFixedItem, config, 'none', event.clientX);
-                    dragCmd && commandHistory.execute(dragCmd);
-                    updateDraggingUI();
-                } else if (self.currentElement.data) {
-                    const dragCmd = new DragElementCommand(self.currentElement, nearestFixedItem);
-                    commandHistory.execute(dragCmd);
-                } else if (elementConfig) {
-                    const dragCmd = new AddElementCommand(self.getNewElementData(), true, false, nearestFixedItem);
-                    commandHistory.execute(dragCmd);
-
-                    // dragging elm (no group/ungroup)
-                } else {
-                    if (self.currentElement.data) {
-                        const dragCmd = new DragElementCommand(self.currentElement, nearestFixedItem);
-                        commandHistory.execute(dragCmd);
-                    } else if (getDragData()) {
-                        const dragCmd = new AddElementCommand(self.getNewElementData(), true, false, nearestFixedItem);
-                        commandHistory.execute(dragCmd);
+                // drop on rowBlock
+                if (dragDropResult.details.rowBlock) {
+                    const targetRow = dragDropResult.details.rowBlock.closest('ide-row') as PageRow;
+                    if (dragDropResult.details.rowBlock.classList.contains('row-top-block')) {
+                        targetRow && self.onPrependRow(targetRow);
+                    } else if (dragDropResult.details.rowBlock.classList.contains('row-bottom-block')) {
+                        targetRow && self.onAppendRow(targetRow);
+                    } else {
+                        console.error("no rowBlock found")
                     }
                 }
-                self.isDragging = false;
 
-                // if not drop on a fixed-panel
-            } else {
-                if (self.isDragging) return;
-                const inEmptyPnl = eventTarget.closest('#pnlEmty');
-                if (dropElm && !inEmptyPnl) {
-                    self.isDragging = true;
-                    if (dropElm.classList.contains('bottom-block') || collision.mergeSide == 'bottom') {
+                else if (dragDropResult.details.section && dragDropResult.details.dropSide) {
+                    // drop on section && merge with section's front/back block
+                    if (dragDropResult.details.isMouseOn) {
                         if (isUngrouping) {
-                            const dropElement = eventTarget;
                             const dragCmd = new UngroupElementCommand(
                                 self.currentToolbar,
                                 self.currentElement,
-                                dropElement,
-                                config,
-                                'bottom', 
+                                eventTarget,
+                                {id: generateUUID()},
+                                dragDropResult.details.dropSide, 
                                 event.clientX
                             );
                             dragCmd && commandHistory.execute(dragCmd);
                             resetDragTarget();
                         } else {
-                            const newConfig = self.getNewElementData();
-                            const dragCmd = new GroupElementCommand(
-                                dropElm,
-                                elementConfig ? null : self.currentElement,
-                                {...newConfig, firstId: generateUUID()},
-                                true
-                            );
-                            commandHistory.execute(dragCmd);
-                        }
-                    } else if (dropElm.classList.contains('top-block') || collision.mergeSide == 'top') {
-                        if (isUngrouping) {
-                            const dropElement = eventTarget;
-                            const dragCmd = new UngroupElementCommand(self.currentToolbar, self.currentElement, dropElement, config, 'top', event.clientX);
-                            dragCmd && commandHistory.execute(dragCmd);
-                            resetDragTarget();
-                        } else {
-                            const newConfig = self.getNewElementData();
-                            const dragCmd = new GroupElementCommand(
-                                dropElm,
-                                elementConfig ? null : self.currentElement,
-                                {...newConfig, firstId: generateUUID()},
-                                false
-                            );
-                            commandHistory.execute(dragCmd);
-                        }
-                    } else if (
-                        dropElm.classList.contains(ROW_BOTTOM_CLASS) ||
-                        (collision.rowBlock && collision.rowBlock.classList.contains('row-bottom-block'))
-                    ) {
-                        const targetRow = (collision?.rowBlock?.closest('ide-row') || dropElm?.closest('ide-row')) as PageRow;
-                        targetRow && self.onAppendRow(targetRow);
-                    } else if (
-                        dropElm.classList.contains(ROW_TOP_CLASS) ||
-                        (collision.rowBlock && collision.rowBlock.classList.contains('row-top-block'))
-                    ) {
-                        const targetRow = collision?.rowBlock?.closest('ide-row') as PageRow;
-                        targetRow && self.onPrependRow(targetRow);
-                    } else {
-                        const isAppend = dropElm.classList.contains('back-block') || collision.mergeSide == 'back';
-                        // ungroup & drop on front/back
-                        if (isUngrouping) {
-                            const dropElement = eventTarget;
-                            const dragCmd = new UngroupElementCommand(
-                                self.currentToolbar,
-                                self.currentElement,
-                                dropElement,
-                                config,
-                                collision.mergeSide, 
-                                event.clientX
-                            );
-                            dragCmd && commandHistory.execute(dragCmd);
-                            resetDragTarget();
-                        } else {
+                            const isAppend = dragDropResult.details.dropSide == "back";
+                            const dropBlock = isAppend? dropSection.querySelector('.front-block') : dropSection.querySelector('.back-block');
+
                             const dragCmd = elementConfig
-                                ? new AddElementCommand(self.getNewElementData(), isAppend, false, dropElm, null)
-                                : new DragElementCommand(self.currentElement, dropElm, isAppend);
+                                ? new AddElementCommand(self.getNewElementData(), isAppend, false, dropSection, null)
+                                : new DragElementCommand(self.currentElement, dropBlock as Control, isAppend);
                             await commandHistory.execute(dragCmd);
                         }
                     }
-                    dropElm.classList.remove('is-dragenter');
-                    self.isDragging = false;
-                } else if (pageRow && !self.isDragging) {
-                    self.isDragging = true;
-                    if (elementConfig) {
-                        const parentId = pageRow?.id.replace('row-', '');
-                        const elements = parentId ? pageObject.getRow(parentId)?.elements || [] : [];
-                        const hasData = elements.find((el: IPageElement) => Object.keys(el.module || {}).length || el.elements?.length);
-                        const dragCmd = !hasData && new AddElementCommand(self.getNewElementData(), true, true, null, pageRow);
-                        // drag new element on a new row
-                        await commandHistory.execute(dragCmd);
-                    } else {
+
+                    // ungroup/drag elm to empty space + collision
+                    else {
                         if (isUngrouping) {
-                            const dropElement = eventTarget;
                             const dragCmd = new UngroupElementCommand(
                                 self.currentToolbar,
                                 self.currentElement,
-                                dropElement,
-                                config,
-                                collision.mergeSide, 
+                                eventTarget,
+                                {id: generateUUID()},
+                                'none', // Todo
                                 event.clientX
                             );
                             dragCmd && commandHistory.execute(dragCmd);
                             resetDragTarget();
                         } else {
-                            const dragCmd = new DragElementCommand(self.currentElement, pageRow, true, true);
-                            commandHistory.execute(dragCmd);
+                            const isAppend = dragDropResult.details.dropSide == "back";
+                            const dropBlock = isAppend? dropSection.querySelector('.front-block') : dropSection.querySelector('.back-block');
+                            const dragCmd = elementConfig
+                                ? new AddElementCommand(self.getNewElementData(), isAppend, false, dropSection, null)
+                                : new DragElementCommand(self.currentElement, dropBlock as Control, isAppend);
+                            await commandHistory.execute(dragCmd);
                         }
                     }
-                    self.isDragging = false;
+                }
+
+                // drop on toolbar(element)
+                else if (dragDropResult.details.toolbar && dragDropResult.details.dropSide) {
+                    if (isUngrouping) {
+                        const dropElement = eventTarget;
+                        const config = {id: generateUUID()};
+                        const dragCmd = new UngroupElementCommand(
+                            self.currentToolbar, self.currentElement, dropElement, 
+                            config, dragDropResult.details.dropSide, event.clientX);
+                        dragCmd && commandHistory.execute(dragCmd);
+                        resetDragTarget();
+                    } else {
+                        const newConfig = self.getNewElementData();
+                        const dragCmd = new GroupElementCommand(
+                            dragDropResult.details.toolbar as Control,
+                            elementConfig ? null : self.currentElement,
+                            {...newConfig, firstId: generateUUID()},
+                            dragDropResult.details.dropSide == "bottom"
+                        );
+                        commandHistory.execute(dragCmd);
+                    }
+                }
+
+                // ungroup/drag elm to empty space + no collision
+                else {
+                    if (isUngrouping) {
+                        const config = {id: generateUUID()};
+                        const dragCmd = new UngroupElementCommand(
+                            self.currentToolbar, 
+                            self.currentElement, 
+                            eventTarget, 
+                            config, 
+                            'none',
+                            event.clientX
+                        );
+                        dragCmd && commandHistory.execute(dragCmd);
+                        resetDragTarget();
+                    } else {
+                        const dragCmd = (elementConfig)? 
+                            new AddElementCommand(
+                                self.getNewElementData(),
+                                true, false,
+                                dragDropResult.details.nearestPanel as Control, 
+                                pageRow
+                            ) : 
+                            new DragElementCommand(
+                                self.currentElement, 
+                                dragDropResult.details.nearestPanel as Control, 
+                                true, false
+                            );
+                        dragCmd && commandHistory.execute(dragCmd);
+                    }
                 }
             }
             removeMergeBlocks();

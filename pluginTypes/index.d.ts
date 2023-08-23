@@ -1104,7 +1104,9 @@ declare module "@scom/scom-page-builder/page/pageRow.css.ts" { }
 /// <amd-module name="@scom/scom-page-builder/utility/type.ts" />
 declare module "@scom/scom-page-builder/utility/type.ts" {
     export type IMergeDropSide = "front" | "back" | "top" | "bottom";
+    export type DragDropResultType = "move" | "merge";
     export type DragDropResultDetails = {
+        type: DragDropResultType;
         row?: HTMLElement;
         section?: HTMLElement;
         toolbar?: HTMLElement;
@@ -1113,6 +1115,7 @@ declare module "@scom/scom-page-builder/utility/type.ts" {
         column?: number;
         columnSpan?: number;
         isMouseOn?: boolean;
+        nearestPanel?: HTMLElement;
     };
     export type DragDropResult = {
         canDrop: boolean;
