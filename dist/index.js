@@ -3284,6 +3284,21 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                         "type": "string",
                         "format": "color"
                     },
+                    "customTextSize": {
+                        "title": "Custom text size",
+                        "type": "boolean"
+                    },
+                    "textSize": {
+                        "title": "Text size",
+                        "type": "string",
+                        "oneOf": [
+                            { "const": "xs", "title": "Extra Small" },
+                            { "const": "sm", "title": "Small" },
+                            { "const": "md", "title": "Normal" },
+                            { "const": "lg", "title": "Large" },
+                            { "const": "xl", "title": "Extra Large" },
+                        ]
+                    },
                     "border": {
                         "title": "Show border",
                         "type": "boolean"
@@ -3343,6 +3358,28 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                                     "effect": "ENABLE",
                                     "condition": {
                                         "scope": "#/properties/customTextColor",
+                                        "schema": {
+                                            "const": true
+                                        }
+                                    }
+                                }
+                            },
+                        ]
+                    },
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/customTextSize"
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/textSize",
+                                "rule": {
+                                    "effect": "ENABLE",
+                                    "condition": {
+                                        "scope": "#/properties/customTextSize",
                                         "schema": {
                                             "const": true
                                         }
@@ -3685,6 +3722,21 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                         "type": "string",
                         "format": "color"
                     },
+                    "customTextSize": {
+                        "title": "Custom text size",
+                        "type": "boolean"
+                    },
+                    "textSize": {
+                        "title": "Text size",
+                        "type": "string",
+                        "oneOf": [
+                            { "title": "Extra Small", "const": "xs" },
+                            { "title": "Small", "const": "sm" },
+                            { "title": "Normal", "const": "md" },
+                            { "title": "Large", "const": "lg" },
+                            { "title": "Extra Large", "const": "xl" }
+                        ]
+                    },
                     "backgroundImage": {
                         "title": "Background image",
                         "type": "string",
@@ -3756,6 +3808,28 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                                     "effect": "ENABLE",
                                     "condition": {
                                         "scope": "#/properties/customTextColor",
+                                        "schema": {
+                                            "const": true
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "type": "HorizontalLayout",
+                        "elements": [
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/customTextSize"
+                            },
+                            {
+                                "type": "Control",
+                                "scope": "#/properties/textSize",
+                                "rule": {
+                                    "effect": "ENABLE",
+                                    "condition": {
+                                        "scope": "#/properties/customTextSize",
                                         "schema": {
                                             "const": true
                                         }
