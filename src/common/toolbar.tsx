@@ -719,7 +719,7 @@ export class IDEToolbar extends Module {
             })
         )
         this.events.push(
-            application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: { backgroundColor?: string, textColor?: string }) => {
+            application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: { backgroundColor?: string, textColor?: string, textSize?: string }) => {
                 await this.updateUI(data);
             })
         )
@@ -728,15 +728,16 @@ export class IDEToolbar extends Module {
         })
     }
 
-    async updateUI(data: { backgroundColor?: string, textColor?: string }) {
+    async updateUI(data: { backgroundColor?: string, textColor?: string, textSize?: string }) {
         if (this._component?.getConfigurators) {
             const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
             if (builderTarget?.setTag) {
-                const { backgroundColor, textColor } = data;
+                const { backgroundColor, textColor, textSize } = data;
                 const oldTag = builderTarget?.getTag ? await builderTarget.getTag() : {};
                 const newData: any = {}
                 if (backgroundColor !== undefined) newData.backgroundColor = backgroundColor || '';
                 if (textColor !== undefined) newData.textColor = textColor || '';
+                if (textSize !== undefined) newData.textSize = textColor || '';
                 await builderTarget.setTag({ ...oldTag, ...newData }, true);
             }
         }

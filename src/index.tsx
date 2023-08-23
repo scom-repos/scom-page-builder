@@ -4,7 +4,7 @@ import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
 import { IPageData, IPageBlockData, IPageElement, IOnFetchComponentsOptions, IOnFetchComponentsResult, ICategory, ThemeType } from './interface/index';
 import { PageRow, PageRows, PageSidebar, PageMenu } from './page/index';
-import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData, getPageBlocks, getCategories, setCategories, setTheme, getBackgroundColor, getFontColor, getDivider, getDefaultPageConfig, getMargin, setDefaultPageConfig } from './store/index';
+import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData, getPageBlocks, getCategories, setCategories, setTheme, getBackgroundColor, getFontColor, getDivider, getDefaultPageConfig, getMargin, setDefaultPageConfig, getFontSize } from './store/index';
 import { currentTheme } from './theme/index';
 import './index.css';
 import { SearchComponentsDialog } from './dialogs/index';
@@ -92,9 +92,11 @@ export default class Editor extends Module {
         setTheme(this.theme);
         const bgColor = getBackgroundColor(this.theme);
         const fontColor = getFontColor(this.theme);
+        const fontSize = getFontSize();
         const dividerColor = getDivider(this.theme);
         this.style.setProperty('--builder-bg', bgColor);
         this.style.setProperty('--builder-color', fontColor);
+        this.style.setProperty('--builder-font-size', fontSize)
         this.style.setProperty('--builder-divider', dividerColor);
     }
 

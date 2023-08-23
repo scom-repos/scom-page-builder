@@ -351,6 +351,8 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         backdropColor?: string;
         customTextColor?: boolean;
         textColor?: string;
+        customTextSize?: boolean;
+        textSize?: string;
         backdropImage?: string;
         sectionWidth?: number | string;
         plr?: number;
@@ -546,6 +548,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
     export const getTheme: () => ThemeType;
     export const getBackgroundColor: (theme?: ThemeType) => string;
     export const getFontColor: (theme?: ThemeType) => string;
+    export const getFontSize: () => string;
     export const getDivider: (theme?: ThemeType) => string;
     export const setDefaultPageConfig: (value: IPageConfig) => void;
     export const getDefaultPageConfig: () => IPageConfig;
@@ -556,6 +559,8 @@ declare module "@scom/scom-page-builder/store/index.ts" {
         backdropColor?: string;
         customTextColor?: boolean;
         textColor?: string;
+        customTextSize?: boolean;
+        textSize?: string;
         backdropImage?: string;
         sectionWidth?: string | number;
         plr?: number;
@@ -1285,6 +1290,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         updateUI(data: {
             backgroundColor?: string;
             textColor?: string;
+            textSize?: string;
         }): Promise<void>;
         onShow(options?: any): void;
         onHide(): void;
