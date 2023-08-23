@@ -95,7 +95,21 @@ export class PageSettingsDialog extends Module {
                     "type": "string",
                     "format": "color"
                 },
-
+                "customTextSize": {
+                  "title": "Custom text size",
+                  "type": "boolean"
+                },
+                "textSize": {
+                  "title": "Text size",
+                    "type": "string",
+                    "oneOf": [
+                        {"title": "Extra Small", "const": "xs"},
+                        {"title": "Small", "const": "sm"},
+                        {"title": "Normal", "const": "md"},
+                        {"title": "Large", "const": "lg"},
+                        {"title": "Extra Large", "const": "xl"}
+                    ]
+                },
                 "backgroundImage": {
                     "title": "Background image",
                     "type": "string",
@@ -168,6 +182,28 @@ export class PageSettingsDialog extends Module {
                                 "effect": "ENABLE",
                                 "condition": {
                                     "scope": "#/properties/customTextColor",
+                                    "schema": {
+                                        "const": true
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "HorizontalLayout",
+                    "elements": [
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/customTextSize"
+                        },
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/textSize",
+                            "rule": {
+                                "effect": "ENABLE",
+                                "condition": {
+                                    "scope": "#/properties/customTextSize",
                                     "schema": {
                                         "const": true
                                     }
