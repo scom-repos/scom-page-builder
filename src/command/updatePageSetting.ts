@@ -40,7 +40,7 @@ export class UpdatePageSettingsCommand implements ICommand {
   }
 
   private updateConfig(config: IPageConfig, updatedValues: string[]) {
-    const { backgroundColor, backgroundImage, customBackgroundColor, customTextColor, textColor, margin } = config;
+    const { backgroundColor, backgroundImage, customBackgroundColor, customTextColor, textColor, customTextSize, textSize, margin } = config;
     let newConfig: IPageConfig = {};
     for (let prop of updatedValues) {
       newConfig[prop] = config[prop];
@@ -52,6 +52,7 @@ export class UpdatePageSettingsCommand implements ICommand {
     }
     const defaultBackgroundColor = Theme.background.main
     const defaultTextColor = Theme.text.primary
+    const defaultTextSize = 'md'
     if (customBackgroundColor) {
       if (updatedValues.includes('backgroundColor')) {
         element.style.setProperty('--builder-bg', backgroundColor);
@@ -69,6 +70,15 @@ export class UpdatePageSettingsCommand implements ICommand {
     } else {
       element.style.setProperty('--builder-color', defaultTextColor);
       application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {textColor: defaultTextColor});
+    }
+    if (customTextSize) {
+      if (updatedValues.includes('textSize')) {
+        document.body.style.setProperty('--builder-font-size', textSize);
+        application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {textSize});
+      }
+    } else {
+      document.body.style.setProperty('--builder-font-size', defaultTextSize);
+      application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {textSize: defaultTextSize});
     }
     this.element.maxWidth = '100%'; // maxWidth ?? '100%';
     this.element.margin = getMargin(margin);
