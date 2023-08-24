@@ -1,14 +1,12 @@
 import { IMergeDropSide, DragDropResult, DragDropResultDetails, checkDragDropResultParams } from './type'
-import { GAP_WIDTH, INIT_COLUMN_SPAN, MAX_COLUMN } from '../interface/index';
-import { PageRow, PageSection } from '../page'
+// import { GAP_WIDTH } from '../interface/index';
 import { Control } from '@ijstech/components'
-import { IDEToolbar } from '../common'
 import { pageObject } from "../store/index";
 
-export function checkDragDropResult(dragDrop: checkDragDropResultParams): DragDropResult {
+export const checkDragDropResult = (dragDrop: checkDragDropResultParams): DragDropResult => {
     if (!dragDrop.dropTarget) return { canDrop: false };
 
-    const dropRow = dragDrop.dropTarget.closest('ide-row') as PageRow;
+    const dropRow = dragDrop.dropTarget.closest('ide-row') as any;
     const rowRect = dropRow.getBoundingClientRect();
 
     // case 1: mouse on/near the top/bottom block of row
@@ -63,8 +61,8 @@ export function checkDragDropResult(dragDrop: checkDragDropResultParams): DragDr
             };
         } else if (mergeSide == "back" || mergeSide == "front") {
             const isFront = mergeSide == "front" ? true : false;
-            const dragSectionCol = dragDrop.dragSection ? parseInt((dragDrop.dragSection as PageSection).dataset.column) : 4;
-            const dragSectionColSpan = dragDrop.dragSection ? parseInt((dragDrop.dragSection as PageSection).dataset.columnSpan) : 4;
+            const dragSectionCol = dragDrop.dragSection ? parseInt((dragDrop.dragSection as any).dataset.column) : 4;
+            const dragSectionColSpan = dragDrop.dragSection ? parseInt((dragDrop.dragSection as any).dataset.columnSpan) : 4;
             const dropFrontBackResult = getDropFrontBackResult(dropRow, mouseOnSection, dragSectionCol, dragSectionColSpan, isFront, dragDrop.dragToolbar?.dataset);
             // check if it can merge with the drop section
             if (dropFrontBackResult) {
@@ -86,9 +84,19 @@ export function checkDragDropResult(dragDrop: checkDragDropResultParams): DragDr
     } else {
         const fromSidebar: boolean = (!dragDrop.dragSection) ? true : false;
         const nearestPanel = findNearestFixedGridInRow(dragDrop.clientX, dragDrop.dropTarget);
+        const nearestPanelCol = parseInt(nearestPanel.getAttribute("data-column"))
+        const rowId = dragDrop.dropTarget.closest('ide-row').id.replace('row-', "")
+        const rowData = pageObject.getSection(rowId);
+
+        let dropOutSide = false;
+        if (nearestPanelCol == 1) {
+            if (rowData.elements.find(elm => elm.column == 1)) dropOutSide = true;
+        } else if (nearestPanelCol == 12) {
+            if (rowData.elements.find(elm => (elm.column + elm.columnSpan == 12))) dropOutSide = true;
+        }
 
         // case 4: mouse on empty space
-        if (nearestPanel) {
+        if (nearestPanel && !dropOutSide) {
             if (fromSidebar) {
                 return { canDrop: true, details: { type: 'move', nearestPanel: nearestPanel } }
             } else {
@@ -97,8 +105,8 @@ export function checkDragDropResult(dragDrop: checkDragDropResultParams): DragDr
                 if (collidedSection) {
                     const collidedSectionBound = collidedSection.getBoundingClientRect();
                     const isFront = (dragDrop.clientX < collidedSectionBound.left) ? true : false;
-                    const dragSectionCol = dragDrop.dragSection ? parseInt((dragDrop.dragSection as PageSection).dataset.column) : 4;
-                    const dragSectionColSpan = dragDrop.dragSection ? parseInt((dragDrop.dragSection as PageSection).dataset.columnSpan) : 4;
+                    const dragSectionCol = dragDrop.dragSection ? parseInt((dragDrop.dragSection as any).dataset.column) : 4;
+                    const dragSectionColSpan = dragDrop.dragSection ? parseInt((dragDrop.dragSection as any).dataset.columnSpan) : 4;
                     const dropFrontBackResult = getDropFrontBackResult(dropRow, collidedSection, dragSectionCol, dragSectionColSpan, isFront, dragDrop.dragToolbar?.dataset);
                     return {
                         canDrop: true,
@@ -116,7 +124,18 @@ export function checkDragDropResult(dragDrop: checkDragDropResultParams): DragDr
                     return { canDrop: true, details: { type: 'move', nearestPanel: nearestPanel } }
                 }
             }
+        } else if (dropOutSide) {
+            // if drop outside of grid, append a new row
+            const dropRow = dragDrop.dropTarget.closest('ide-row');
+            return {
+                canDrop: true,
+                details: {
+                    type: 'move',
+                    rowBlock: dropRow.querySelector('.row-bottom-block')
+                }
+            };
         } else {
+            // if drop under all rows, append a new row
             const pnlEditor = dragDrop.dropTarget.closest('#pnlEditor');
             const rows = pnlEditor.querySelectorAll('ide-row');
             const lastRow = rows[rows.length - 1];
@@ -131,55 +150,55 @@ export function checkDragDropResult(dragDrop: checkDragDropResultParams): DragDr
     }
 }
 
-function getDropResultOnEmptyRow(dragDrop: checkDragDropResultParams): { column: number, columnSpan: number } {
+// const getDropResultOnEmptyRow = (dragDrop: checkDragDropResultParams): { column: number, columnSpan: number } => {
 
-    let target: Control = findNearestFixedGridInRow(dragDrop.clientX, dragDrop.dropTarget);
+//     let target: Control = findNearestFixedGridInRow(dragDrop.clientX, dragDrop.dropTarget);
 
-    // if (collision.collisionType == 'self') target = findNearestFixedGridInRow(clientX);
-    // else target = enterTarget.closest('.fixed-grid-item') as Control;
-    const dropRow = target.closest('ide-row') as PageRow;
-    let offsetLeft = Math.floor((dragDrop.startX + GAP_WIDTH) / (dropRow.gridColumnWidth + GAP_WIDTH));
+//     // if (collision.collisionType == 'self') target = findNearestFixedGridInRow(clientX);
+//     // else target = enterTarget.closest('.fixed-grid-item') as Control;
+//     const dropRow = target.closest('ide-row') as any;
+//     let offsetLeft = Math.floor((dragDrop.startX + GAP_WIDTH) / (dropRow.gridColumnWidth + GAP_WIDTH));
 
-    const targetCol = Number(target.dataset.column);
-    const column = targetCol - offsetLeft > 0 ? targetCol - offsetLeft : targetCol
-    const columnSpan = dragDrop.dragSection && dragDrop.dragSection.dataset.columnSpan
-        ? Number(dragDrop.dragSection.dataset.columnSpan)
-        : INIT_COLUMN_SPAN;
-    let colSpan = Math.min(columnSpan, dropRow.maxColumn);
-    let colStart = Math.min(column, dropRow.maxColumn);
-    const sections = Array.from(dropRow?.querySelectorAll('ide-section'));
-    const sortedSections = sections.sort(
-        (a: HTMLElement, b: HTMLElement) => Number(b.dataset.column) - Number(a.dataset.column)
-    );
-    let spaces = 0;
-    let findedSection = null;
-    let isUpdated: boolean = false;
-    // const isFromToolbar = !self.currentElement?.id;
-    for (let i = 0; i < sortedSections.length; i++) {
-        const section = sortedSections[i] as Control;
-        const sectionColumn = Number(section.dataset.column);
-        const sectionColumnSpan = Number(section.dataset.columnSpan);
-        const sectionData = sectionColumn + sectionColumnSpan;
-        if (colStart >= sectionData && (dropRow.maxColumn - colStart) + 1 < colSpan && !isUpdated) {
-            colStart = sectionData;
-            isUpdated = true;
-        }
-        const colData = colStart + colSpan;
-        if ((colStart >= sectionColumn && colData <= sectionData) || (colStart < sectionData && colData > sectionData)) {
-            findedSection = section;
-        }
-        if (dragDrop.dragSection?.id !== section.id) {
-            spaces += sectionColumnSpan;
-        }
-    }
+//     const targetCol = Number(target.dataset.column);
+//     const column = targetCol - offsetLeft > 0 ? targetCol - offsetLeft : targetCol
+//     const columnSpan = dragDrop.dragSection && dragDrop.dragSection.dataset.columnSpan
+//         ? Number(dragDrop.dragSection.dataset.columnSpan)
+//         : INIT_COLUMN_SPAN;
+//     let colSpan = Math.min(columnSpan, dropRow.maxColumn);
+//     let colStart = Math.min(column, dropRow.maxColumn);
+//     const sections = Array.from(dropRow?.querySelectorAll('ide-section'));
+//     const sortedSections = sections.sort(
+//         (a: HTMLElement, b: HTMLElement) => Number(b.dataset.column) - Number(a.dataset.column)
+//     );
+//     let spaces = 0;
+//     let findedSection = null;
+//     let isUpdated: boolean = false;
+//     // const isFromToolbar = !self.currentElement?.id;
+//     for (let i = 0; i < sortedSections.length; i++) {
+//         const section = sortedSections[i] as Control;
+//         const sectionColumn = Number(section.dataset.column);
+//         const sectionColumnSpan = Number(section.dataset.columnSpan);
+//         const sectionData = sectionColumn + sectionColumnSpan;
+//         if (colStart >= sectionData && (dropRow.maxColumn - colStart) + 1 < colSpan && !isUpdated) {
+//             colStart = sectionData;
+//             isUpdated = true;
+//         }
+//         const colData = colStart + colSpan;
+//         if ((colStart >= sectionColumn && colData <= sectionData) || (colStart < sectionData && colData > sectionData)) {
+//             findedSection = section;
+//         }
+//         if (dragDrop.dragSection?.id !== section.id) {
+//             spaces += sectionColumnSpan;
+//         }
+//     }
 
-    return {
-        column: colStart,
-        columnSpan: Math.min(columnSpan, MAX_COLUMN - spaces)
-    }
-}
+//     return {
+//         column: colStart,
+//         columnSpan: Math.min(columnSpan, MAX_COLUMN - spaces)
+//     }
+// }
 
-function checkCollisionIfDropOnGrid(dragDrop: checkDragDropResultParams, dropRow: PageRow) {
+const checkCollisionIfDropOnGrid = (dragDrop: checkDragDropResultParams, dropRow: any) => {
     const nearestCol = findNearestFixedGridInRow(dragDrop.clientX, dragDrop.dropTarget);
     // drop/dragover outside grid
     if (!nearestCol) return;
@@ -194,9 +213,9 @@ function checkCollisionIfDropOnGrid(dragDrop: checkDragDropResultParams, dropRow
         (a: HTMLElement, b: HTMLElement) => Number(a.dataset.column) - Number(b.dataset.column)
     );
 
-    const gridColumnWidth = (dropRow as PageRow).gridColumnWidth
+    const gridColumnWidth = (dropRow as any).gridColumnWidth
 
-    const offsetLeft = Math.floor((dragDrop.startX + GAP_WIDTH) / (gridColumnWidth + GAP_WIDTH));
+    const offsetLeft = Math.floor((dragDrop.startX + 15/*GAP_WIDTH*/) / (gridColumnWidth + 15/*GAP_WIDTH*/));
     const startOfDragingElm: number = dropColumn - offsetLeft;
     const endOfDragingElm: number = dragDrop.dragSection ? (dropColumn - offsetLeft + parseInt(dragDrop.dragSection.dataset.columnSpan) - 1) : (dropColumn - offsetLeft + 4 - 1);
 
@@ -217,7 +236,7 @@ function checkCollisionIfDropOnGrid(dragDrop: checkDragDropResultParams, dropRow
     }
 }
 
-function findNearestFixedGridInRow(clientX: number, dropTarget: HTMLElement) {
+const findNearestFixedGridInRow = (clientX: number, dropTarget: HTMLElement) => {
     const pnlRow = dropTarget.closest('ide-row');
     const elements = pnlRow.querySelectorAll('.fixed-grid-item');
 
@@ -240,7 +259,7 @@ function findNearestFixedGridInRow(clientX: number, dropTarget: HTMLElement) {
     return nearestElement;
 }
 
-function findNearestToolbarInSection(section: Control, clientY: number, clientX: number, mouseOn: boolean, excludingToolbarId?: string[]): IDEToolbar {
+const findNearestToolbarInSection = (section: Control, clientY: number, clientX: number, mouseOn: boolean, excludingToolbarId?: string[]): any => {
     if (mouseOn) {
         const toolbars = section.querySelectorAll('ide-toolbar');
         for (let i = 0; i < toolbars.length; i++) {
@@ -249,7 +268,7 @@ function findNearestToolbarInSection(section: Control, clientY: number, clientX:
             if (checkExcludingToolbar &&
                 sectionBound.top <= clientY && sectionBound.bottom >= clientY &&
                 sectionBound.left <= clientX && sectionBound.right >= clientX) {
-                return toolbars[i] as IDEToolbar;
+                return toolbars[i] as any;
             }
         }
     } else {
@@ -287,11 +306,11 @@ function findNearestToolbarInSection(section: Control, clientY: number, clientX:
                 }
             }
         }
-        return nearestToolbar as IDEToolbar;
+        return nearestToolbar as any;
     }
 }
 
-function findNearestSectionInRow(row: PageRow, clientX: number, clientY: number, mouseOn: boolean, excludingSectionId?: string[]) {
+export const findNearestSectionInRow = (row: any, clientX: number, clientY: number, mouseOn: boolean, excludingSectionId?: string[]) => {
     if (mouseOn) {
         const sections = row.querySelectorAll('ide-section');
         for (let i = 0; i < sections.length; i++) {
@@ -300,7 +319,7 @@ function findNearestSectionInRow(row: PageRow, clientX: number, clientY: number,
             if (checkExcludingSection &&
                 sectionBound.top <= clientY && sectionBound.bottom >= clientY &&
                 sectionBound.left <= clientX && sectionBound.right >= clientX) {
-                return sections[i] as PageSection;
+                return sections[i] as any;
             }
         }
     } else {
@@ -338,11 +357,11 @@ function findNearestSectionInRow(row: PageRow, clientX: number, clientY: number,
                 }
             }
         }
-        return nearestSection as PageSection;
+        return nearestSection as any;
     }
 }
 
-function decideMergeSide(dropToolbar: HTMLElement, clientX: number, clientY: number): IMergeDropSide {
+const decideMergeSide = (dropToolbar: HTMLElement, clientX: number, clientY: number): IMergeDropSide => {
     let rect = dropToolbar.getBoundingClientRect();
     let offsetX = clientX - rect.left;
     let offsetY = clientY - rect.top;
@@ -353,8 +372,8 @@ function decideMergeSide(dropToolbar: HTMLElement, clientX: number, clientY: num
     else return 'back';
 }
 
-function getDropFrontBackResult(dropRow: any, nearestDropSection: any, dragSectionCol: number,
-    dragSectionColSpan: number, isFront: boolean, data: any): { newElmdata: any, newRowData: any } {
+export const getDropFrontBackResult = (dropRow: any, nearestDropSection: any, dragSectionCol: number,
+    dragSectionColSpan: number, isFront: boolean, data: any): { newElmdata: any, newRowData: any } => {
     // drop on the back/front block of a section
     const dropRowId = dropRow.id.replace('row-', '')
     const dropRowData = pageObject.getRow(dropRowId);

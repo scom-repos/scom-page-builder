@@ -27,11 +27,8 @@ import {
     UngroupElementCommand,
 } from '../command/index';
 import {IDEToolbar} from '../common/toolbar';
-import {generateUUID} from '../utility/index';
+import {generateUUID, checkDragDropResult, findNearestSectionInRow, getDropFrontBackResult} from '../utility/index';
 import {IMergeType} from '../command/index';
-import { getUngroupData, findNearestSection } from '../utility/ungroup'
-import { checkDragDropResult } from '../utility/dragDrop'
-import { DragDropResultDetails, DragDropResult } from '../utility/type'
 const Theme = Styles.Theme.ThemeVars;
 
 declare global {
@@ -669,8 +666,12 @@ export class PageRow extends Module {
             if (self.isUngrouping()) {
                 self.updateGridColumnWidth();
                 const targetRow = target.closest('ide-row') as Control;
-                const nearestDropSection = findNearestSection(targetRow, clientX)
-                const newSectionData = getUngroupData(targetRow, nearestDropSection.element, self.currentElement, nearestDropSection.isFront, self.currentToolbar.data);
+                const nearestDropSection = findNearestSectionInRow(targetRow as PageRow, clientX, clientY, false)
+                const nearestDropSectionBound = nearestDropSection.getBoundingClientRect();
+                const isFront = (clientX < nearestDropSectionBound.left) ? true : false;
+                const dragSectionCol = parseInt(self.currentElement.dataset.column);
+                const dragSectionColSpan = parseInt(self.currentElement.dataset.columnSpan);
+                const newSectionData = getDropFrontBackResult(targetRow, nearestDropSection, dragSectionCol, dragSectionColSpan, isFront, self.currentToolbar.data);
                 showRectangle(targetRow, newSectionData.newElmdata.column, newSectionData.newElmdata.columnSpan);
                 return;
             }
@@ -968,7 +969,8 @@ export class PageRow extends Module {
                                 eventTarget,
                                 {id: generateUUID()},
                                 dragDropResult.details.dropSide, 
-                                event.clientX
+                                event.clientX,
+                                event.clientY
                             );
                             dragCmd && commandHistory.execute(dragCmd);
                             resetDragTarget();
@@ -992,7 +994,8 @@ export class PageRow extends Module {
                                 eventTarget,
                                 {id: generateUUID()},
                                 'none', // Todo
-                                event.clientX
+                                event.clientX,
+                                event.clientY
                             );
                             dragCmd && commandHistory.execute(dragCmd);
                             resetDragTarget();
@@ -1013,8 +1016,14 @@ export class PageRow extends Module {
                         const dropElement = eventTarget;
                         const config = {id: generateUUID()};
                         const dragCmd = new UngroupElementCommand(
-                            self.currentToolbar, self.currentElement, dropElement, 
-                            config, dragDropResult.details.dropSide, event.clientX);
+                            self.currentToolbar, 
+                            self.currentElement, 
+                            dropElement, 
+                            config, 
+                            dragDropResult.details.dropSide, 
+                            event.clientX,
+                            event.clientY
+                        );
                         dragCmd && commandHistory.execute(dragCmd);
                         resetDragTarget();
                     } else {
@@ -1039,7 +1048,8 @@ export class PageRow extends Module {
                             eventTarget, 
                             config, 
                             'none',
-                            event.clientX
+                            event.clientX,
+                            event.clientY
                         );
                         dragCmd && commandHistory.execute(dragCmd);
                         resetDragTarget();

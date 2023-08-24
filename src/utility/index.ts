@@ -3,6 +3,7 @@ import { BigNumber } from '@ijstech/eth-wallet';
 // import { getRootDir } from '../store/index';
 import { IPFS_UPLOAD_END_POINT, IPFS_GATEWAY_IJS } from '../const/index';
 import { match, MatchFunction, compile } from './pathToRegexp';
+import { checkDragDropResult, findNearestSectionInRow, getDropFrontBackResult } from './dragDrop'
 
 const assignAttr = (module: any) => {
     const attrs = module.attrs;
@@ -166,9 +167,6 @@ const fetchScconfigByRootCid = async (cid: string) => {
 export {
     assignAttr,
     uploadToIPFS,
-    match,
-    MatchFunction,
-    compile,
     formatNumber,
     formatNumberWithSeparators,
     isCID,
@@ -177,5 +175,9 @@ export {
     updatePagePath,
     generateUUID,
     isEmpty,
-    fetchScconfigByRootCid
+    MatchFunction,
+    fetchScconfigByRootCid,
+    checkDragDropResult,
+    findNearestSectionInRow,
+    getDropFrontBackResult
 };
