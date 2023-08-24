@@ -217,9 +217,149 @@ declare module "@scom/scom-page-builder/utility/pathToRegexp.ts" {
      */
     export function pathToRegexp(path: Path, keys?: Key[], options?: TokensToRegexpOptions & ParseOptions): RegExp;
 }
+/// <amd-module name="@scom/scom-page-builder/utility/type.ts" />
+declare module "@scom/scom-page-builder/utility/type.ts" {
+    export type IMergeDropSide = "front" | "back" | "top" | "bottom";
+    export type DragDropResultType = "move" | "merge";
+    export type DragDropResultDetails = {
+        type: DragDropResultType;
+        row?: HTMLElement;
+        section?: HTMLElement;
+        toolbar?: HTMLElement;
+        dropSide?: IMergeDropSide;
+        rowBlock?: HTMLElement;
+        column?: number;
+        columnSpan?: number;
+        isMouseOn?: boolean;
+        nearestPanel?: HTMLElement;
+    };
+    export type DragDropResult = {
+        canDrop: boolean;
+        details?: DragDropResultDetails;
+    };
+    export interface checkDragDropResultParams {
+        dropTarget: HTMLElement;
+        dragSection: HTMLElement;
+        dragToolbar: HTMLElement;
+        clientX: number;
+        clientY: number;
+        startX: number;
+        isUngroup: boolean;
+    }
+}
+/// <amd-module name="@scom/scom-page-builder/store/index.ts" />
+declare module "@scom/scom-page-builder/store/index.ts" {
+    import { IPageHeader, IPageSection, IPageFooter, IPageElement, IPageBlockData, IElementConfig, IOnFetchComponentsResult, IOnFetchComponentsOptions, ICategory, ThemeType, IPageConfig } from "@scom/scom-page-builder/interface/index.ts";
+    export class PageObject {
+        private _header;
+        private _sections;
+        private _footer;
+        private _config;
+        set header(value: IPageHeader);
+        get header(): IPageHeader;
+        set sections(value: IPageSection[]);
+        get sections(): IPageSection[];
+        set footer(value: IPageFooter);
+        get footer(): IPageFooter;
+        set config(value: IPageConfig);
+        get config(): IPageConfig;
+        getNonNullSections(): IPageSection[];
+        addSection(value: IPageSection, index?: number): void;
+        removeSection(id: string): void;
+        getSection(id: string): IPageSection;
+        updateSection(id: string, data: any): void;
+        getRow(rowId: string): IPageSection | IPageFooter;
+        removeRow(id: string): void;
+        addRow(data: any, id?: string, index?: number): void;
+        setRow(data: any, rowId: string): void;
+        private findElement;
+        getElement(sectionId: string, elementId: string, getLeafOnly?: boolean): any;
+        setElement(sectionId: string, elementId: string, value: any): void;
+        private sortFn;
+        private removeElementFn;
+        removeElement(sectionId: string, elementId: string, removeLeafOnly?: boolean): void;
+        addElement(sectionId: string, value: IPageElement, parentElmId?: string, elementIndex?: number): void;
+        getRowConfig(sectionId: string): import("@scom/scom-page-builder/interface/siteData.ts").IPageSectionConfig;
+        getColumnsNumber(sectionId: string): number;
+    }
+    export const pageObject: PageObject;
+    export const state: {
+        pageBlocks: any[];
+        rootDir: string;
+        dragData: any;
+        searchData: IOnFetchComponentsResult;
+        searchOptions: IOnFetchComponentsOptions;
+        categories: ICategory[];
+        theme: ThemeType;
+        defaultPageConfig: any;
+    };
+    export const setPageBlocks: (value: IPageBlockData[]) => void;
+    export const getPageBlocks: () => any[];
+    export const addPageBlock: (value: IPageBlockData) => void;
+    export const setRootDir: (value: string) => void;
+    export const getRootDir: () => string;
+    export const setDragData: (value: IElementConfig | null) => void;
+    export const getDragData: () => any;
+    export const setSearchData: (value: IOnFetchComponentsResult) => void;
+    export const getSearchData: () => IOnFetchComponentsResult;
+    export const setSearchOptions: (value: IOnFetchComponentsOptions) => void;
+    export const getSearchOptions: () => {
+        category: any;
+        pageNumber: any;
+        pageSize: any;
+    } | IOnFetchComponentsOptions;
+    export const getCategories: () => ICategory[];
+    export const setCategories: (value: ICategory[]) => void;
+    export const setTheme: (value: ThemeType) => void;
+    export const getTheme: () => ThemeType;
+    export const getBackgroundColor: (theme?: ThemeType) => string;
+    export const getFontColor: (theme?: ThemeType) => string;
+    export const getFontSize: () => string;
+    export const getDivider: (theme?: ThemeType) => string;
+    export const setDefaultPageConfig: (value: IPageConfig) => void;
+    export const getDefaultPageConfig: () => IPageConfig;
+    export const getPageConfig: () => {
+        customBackgroundColor?: boolean;
+        backgroundColor?: string;
+        backgroundImage?: string;
+        backdropColor?: string;
+        customTextColor?: boolean;
+        textColor?: string;
+        customTextSize?: boolean;
+        textSize?: string;
+        backdropImage?: string;
+        sectionWidth?: string | number;
+        plr?: number;
+        ptb?: number;
+        margin?: {
+            x?: string | number;
+            y?: string | number;
+        };
+    };
+    export const getMargin: (margin: {
+        x?: number | string;
+        y?: number | string;
+    }) => {
+        top: string | number;
+        left: string | number;
+        right: string | number;
+        bottom: string | number;
+    };
+}
+/// <amd-module name="@scom/scom-page-builder/utility/dragDrop.ts" />
+declare module "@scom/scom-page-builder/utility/dragDrop.ts" {
+    import { DragDropResult, checkDragDropResultParams } from "@scom/scom-page-builder/utility/type.ts";
+    export const checkDragDropResult: (dragDrop: checkDragDropResultParams) => DragDropResult;
+    export const findNearestSectionInRow: (row: any, clientX: number, clientY: number, mouseOn: boolean, excludingSectionId?: string[]) => any;
+    export const getDropFrontBackResult: (dropRow: any, nearestDropSection: any, dragSectionCol: number, dragSectionColSpan: number, isFront: boolean, data: any) => {
+        newElmdata: any;
+        newRowData: any;
+    };
+}
 /// <amd-module name="@scom/scom-page-builder/utility/index.ts" />
 declare module "@scom/scom-page-builder/utility/index.ts" {
-    import { match, MatchFunction, compile } from "@scom/scom-page-builder/utility/pathToRegexp.ts";
+    import { MatchFunction } from "@scom/scom-page-builder/utility/pathToRegexp.ts";
+    import { checkDragDropResult, findNearestSectionInRow, getDropFrontBackResult } from "@scom/scom-page-builder/utility/dragDrop.ts";
     const assignAttr: (module: any) => void;
     const uploadToIPFS: (data: any) => Promise<string>;
     const formatNumber: (value: any, decimals?: number) => string;
@@ -231,7 +371,7 @@ declare module "@scom/scom-page-builder/utility/index.ts" {
     const generateUUID: () => string;
     const isEmpty: (value: any) => boolean;
     const fetchScconfigByRootCid: (cid: string) => any;
-    export { assignAttr, uploadToIPFS, match, MatchFunction, compile, formatNumber, formatNumberWithSeparators, isCID, getCID, getPagePath, updatePagePath, generateUUID, isEmpty, fetchScconfigByRootCid };
+    export { assignAttr, uploadToIPFS, formatNumber, formatNumberWithSeparators, isCID, getCID, getPagePath, updatePagePath, generateUUID, isEmpty, MatchFunction, fetchScconfigByRootCid, checkDragDropResult, findNearestSectionInRow, getDropFrontBackResult };
 }
 /// <amd-module name="@scom/scom-page-builder/interface/core.ts" />
 declare module "@scom/scom-page-builder/interface/core.ts" {
@@ -767,17 +907,6 @@ declare module "@scom/scom-page-builder/command/groupElement.ts" {
 declare module "@scom/scom-page-builder/command/type.ts" {
     export type IMergeType = "front" | "back" | "top" | "bottom" | "none";
 }
-/// <amd-module name="@scom/scom-page-builder/utility/ungroup.ts" />
-declare module "@scom/scom-page-builder/utility/ungroup.ts" {
-    export const getUngroupData: (dropRow: any, nearestDropSection: any, dragSection: any, isFront: boolean, data: any) => {
-        newElmdata: any;
-        newRowData: any;
-    };
-    export const findNearestSection: (parent: any, point: number) => {
-        isFront: boolean;
-        element: any;
-    };
-}
 /// <amd-module name="@scom/scom-page-builder/command/ungroupElement.ts" />
 declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
     import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
@@ -797,7 +926,8 @@ declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
         private config;
         private mergeType;
         private clientX;
-        constructor(dragToolbar: Control, dragSection: Control, dropElm: Control, config: any, mergeType: IMergeType, clientX?: number);
+        private clientY;
+        constructor(dragToolbar: Control, dragSection: Control, dropElm: Control, config: any, mergeType: IMergeType, clientX?: number, clientY?: number);
         execute(): Promise<void>;
         moveSection(dropRow: any, dragRow: any, nearestDropSection: any, dragSection: any, isFront: boolean): Promise<void>;
         undo(): Promise<void>;
@@ -1143,15 +1273,16 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         private rowId;
         private rowData;
         private isDragging;
-        private gridColumnWidth;
+        private _gridColumnWidth;
         private _selectedSection;
         private isCloned;
         private isChanged;
         constructor(parent?: any);
         get data(): any;
         get selectedElement(): PageSection;
-        private get maxColumn();
+        get maxColumn(): number;
         private get align();
+        get gridColumnWidth(): number;
         init(): void;
         toggleUI(value: boolean): void;
         private createNewElement;

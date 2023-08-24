@@ -4,7 +4,7 @@ import { Control } from "@ijstech/components";
 import { application } from "@ijstech/components";
 import { EVENT } from "../const/index";
 import { IMergeType } from "./type";
-import { getUngroupData, findNearestSection } from '../utility/ungroup'
+import { findNearestSectionInRow, getDropFrontBackResult } from '../utility/index'
 
 export class UngroupElementCommand implements ICommand {
   private dragToolbarId: string;
@@ -22,8 +22,9 @@ export class UngroupElementCommand implements ICommand {
   private config: any;
   private mergeType: IMergeType;
   private clientX: number;
+  private clientY: number;
 
-  constructor(dragToolbar: Control, dragSection: Control, dropElm: Control, config: any, mergeType: IMergeType, clientX?: number) {
+  constructor(dragToolbar: Control, dragSection: Control, dropElm: Control, config: any, mergeType: IMergeType, clientX?: number, clientY?: number) {
     // set dragging related params
     this.dragToolbarId = dragToolbar.id.replace('elm-', '');
     this.dragRowId = dragToolbar.closest('ide-row').id.replace('row-', '');
@@ -40,6 +41,7 @@ export class UngroupElementCommand implements ICommand {
     this.config = config;
     this.mergeType = mergeType;
     this.clientX = clientX;
+    this.clientY = clientY;
   }
 
   async execute() {
@@ -102,7 +104,7 @@ export class UngroupElementCommand implements ICommand {
     } else if (this.mergeType == "none") {
       // simple ungroup
       const MAX_COLUMN = pageObject.getColumnsNumber(this.dropRowId);
-      if (!this.clientX) {
+      if (!this.clientX && !this.clientY) {
         let dropColumn = parseInt(this.dropElm?.dataset?.column) || 1
         const emptySpace = this.data.columnSpan - ((MAX_COLUMN - dropColumn) + 1)
         if (emptySpace > 0) dropColumn = dropColumn - emptySpace
@@ -129,9 +131,11 @@ export class UngroupElementCommand implements ICommand {
         const dropSectionData = pageObject.getRow(this.dropRowId);
         dropRow.toggleUI(!!dropSectionData?.elements?.length);
       } else {
-        const nearestSection = findNearestSection(dropRow, this.clientX);
-        const isFront = nearestSection.isFront;
-        const targetSection = nearestSection.element;
+        const nearestDropSection = findNearestSectionInRow(dropRow, this.clientX, this.clientY, false)
+        const nearestDropSectionBound = nearestDropSection.getBoundingClientRect();
+        const middleLine = nearestDropSectionBound.left + nearestDropSectionBound.width/2;
+        const isFront = (this.clientX < middleLine) ? true : false;
+        const targetSection = nearestDropSection;
         await this.moveSection(dropRow, dragRow, targetSection, dragSection, isFront);
       }
     } else {
@@ -143,7 +147,9 @@ export class UngroupElementCommand implements ICommand {
 
   async moveSection(dropRow: any, dragRow: any, nearestDropSection: any, dragSection: any, isFront: boolean) {
 
-    const newData = getUngroupData(dropRow, nearestDropSection, dragSection, isFront, this.data);
+    const dragSectionCol = parseInt(nearestDropSection.dataset.column);
+    const dragSectionColSpan = parseInt(nearestDropSection.dataset.columnSpan);
+    const newData = getDropFrontBackResult(dropRow, nearestDropSection, dragSectionCol, dragSectionColSpan, isFront, this.data);
 
     if (newData) {
       if (newData.newRowData) {
