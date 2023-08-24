@@ -54,13 +54,17 @@ export class UpdatePageSettingsCommand implements ICommand {
     const defaultTextColor = Theme.text.primary
     const defaultTextSize = 'md'
     let data = {
+      customBackgroundColor: false,
       backgroundColor: defaultBackgroundColor,
+      customTextColor: false,
       textColor: defaultTextColor,
+      customTextSize: false,
       textSize: defaultTextSize 
     }
     if (customBackgroundColor) {
       if (updatedValues.includes('backgroundColor')) {
         element.style.setProperty('--builder-bg', backgroundColor);
+        data.customBackgroundColor = customBackgroundColor
         data.backgroundColor = backgroundColor;
       }
     } else {
@@ -69,6 +73,7 @@ export class UpdatePageSettingsCommand implements ICommand {
     if (customTextColor) {
       if (updatedValues.includes('textColor')) {
         element.style.setProperty('--builder-color', textColor);
+        data.customTextColor = customTextColor
         data.textColor = textColor;
       }
     } else {
@@ -76,6 +81,7 @@ export class UpdatePageSettingsCommand implements ICommand {
     }
     if (customTextSize) {
       if (updatedValues.includes('textSize')) {
+        data.customTextSize = customTextSize
         data.textSize = textSize;
       }
     }

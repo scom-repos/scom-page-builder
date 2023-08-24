@@ -403,21 +403,17 @@ export const getFontColor = (theme?: ThemeType) => {
   return theme === 'light' ? lightTheme.text.primary : darkTheme.text.primary;
 }
 
-export const getFontSize = () => {
-  return 'md';
-}
-
 export const getDivider = (theme?: ThemeType) => {
   theme = theme ?? getTheme();
   return theme === 'light' ? lightTheme.divider : darkTheme.divider;
 }
 
 export const setDefaultPageConfig = (value: IPageConfig) => {
-  state.defaultPageConfig = {...defaultPageConfig, backgroundColor: getBackgroundColor(), textColor: getFontColor(), textSize: getFontSize(), ...(value || {})};
+  state.defaultPageConfig = {...defaultPageConfig, backgroundColor: getBackgroundColor(), textColor: getFontColor(), ...(value || {})};
 }
 
 export const getDefaultPageConfig = (): IPageConfig => {
-  const defaultValue = {...defaultPageConfig, backgroundColor: getBackgroundColor(), textColor: getFontColor(), textSize: getFontSize() };
+  const defaultValue = {...defaultPageConfig, backgroundColor: getBackgroundColor(), textColor: getFontColor() };
   return state.defaultPageConfig || defaultValue;
 }
 

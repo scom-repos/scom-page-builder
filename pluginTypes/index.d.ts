@@ -548,7 +548,6 @@ declare module "@scom/scom-page-builder/store/index.ts" {
     export const getTheme: () => ThemeType;
     export const getBackgroundColor: (theme?: ThemeType) => string;
     export const getFontColor: (theme?: ThemeType) => string;
-    export const getFontSize: () => string;
     export const getDivider: (theme?: ThemeType) => string;
     export const setDefaultPageConfig: (value: IPageConfig) => void;
     export const getDefaultPageConfig: () => IPageConfig;
