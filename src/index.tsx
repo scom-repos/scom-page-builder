@@ -174,7 +174,7 @@ export default class Editor extends Module {
             const elementConfig = getDragData();
             if (elementConfig?.module?.name === 'sectionStack') {
                 // add section
-                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { defaultElements: elementConfig.defaultElements });
+                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { elements: elementConfig.elements });
             } else {
                 const dragEnter = this.pnlEditor.querySelector('.is-dragenter') as Control;
                 const pageRow = dragEnter && dragEnter.closest('ide-row') as PageRow;

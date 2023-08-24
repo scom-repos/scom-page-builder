@@ -540,7 +540,7 @@ define("@scom/scom-page-builder/utility/pathToRegexp.ts", ["require", "exports"]
     }
     exports.pathToRegexp = pathToRegexp;
 });
-define("@scom/scom-page-builder/utility/type.ts", ["require", "exports"], function (require, exports) {
+define("@scom/scom-page-builder/utility/interface.ts", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
 });
@@ -2603,10 +2603,6 @@ define("@scom/scom-page-builder/command/groupElement.ts", ["require", "exports",
     }
     exports.GroupElementCommand = GroupElementCommand;
 });
-define("@scom/scom-page-builder/command/type.ts", ["require", "exports"], function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-});
 define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports", "@scom/scom-page-builder/store/index.ts", "@ijstech/components", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/utility/index.ts"], function (require, exports, index_16, components_6, index_17, index_18) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -2847,6 +2843,7 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
                     showHeader: isMicroDapps,
                     showFooter: isMicroDapps
                 },
+                // elements: this.data.element,
                 module: this.data.module,
                 tag: {}
             };
@@ -5623,7 +5620,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 //     // add section
                 //     application.EventBus.dispatch(EVENT.ON_ADD_SECTION, {
                 //         prependId: pageRow.id,
-                //         defaultElements: elementConfig.defaultElements,
+                //         elements: elementConfig.elements,
                 //     });
                 //     return;
                 // }
@@ -5714,6 +5711,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             resetDragTarget();
                         }
                         else {
+                            console.log("self.getNewElementData()", self.getNewElementData());
                             const dragCmd = (elementConfig) ?
                                 new index_47.AddElementCommand(self.getNewElementData(), true, false, dragDropResult.details.nearestPanel, pageRow) :
                                 new index_47.DragElementCommand(self.currentElement, dragDropResult.details.nearestPanel, true, false);
@@ -7250,7 +7248,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
             await this.appendRow(Object.assign(Object.assign({}, clonedData), { elements: newElements, id: newId, row: this.getRows().length }), id);
         }
         async onCreateSection(params) {
-            const { prependId = '', appendId = '', defaultElements = [] } = params || {};
+            const { prependId = '', appendId = '', elements = [] } = params || {};
             const pageRow = (this.$render("ide-row", { maxWidth: "100%", maxHeight: "100%" }));
             if (!this._readonly) {
                 pageRow.border = { top: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' } };
@@ -7259,7 +7257,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
             const rowData = {
                 id: (0, index_64.generateUUID)(),
                 row: this.getRows().length,
-                elements: defaultElements,
+                elements: elements,
             };
             const addRowCmd = new index_65.UpdateRowCommand(pageRow, this.pnlRows, rowData, false, prependId || '', appendId || '');
             index_65.commandHistory.execute(addRowCmd);
@@ -8040,8 +8038,8 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                 if (eventTarget.id === 'sectionStack') {
                     const layout = eventTarget.getAttribute("layout");
                     const layoutCat = eventTarget.getAttribute("layoutCat");
-                    const defaultElements = this.getDefaultElements(layoutCat, layout);
-                    (0, index_71.setDragData)({ module: { name: 'sectionStack', path: '' }, defaultElements: defaultElements });
+                    const elements = this.getDefaultElements(layoutCat, layout);
+                    (0, index_71.setDragData)({ module: { name: 'sectionStack', path: '' }, elements: elements });
                     eventTarget.classList.add('is-dragging');
                     this.mdWidget.visible = false;
                 }
@@ -8961,7 +8959,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 const elementConfig = (0, index_88.getDragData)();
                 if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
                     // add section
-                    components_43.application.EventBus.dispatch(index_87.EVENT.ON_ADD_SECTION, { defaultElements: elementConfig.defaultElements });
+                    components_43.application.EventBus.dispatch(index_87.EVENT.ON_ADD_SECTION, { elements: elementConfig.elements });
                 }
                 else {
                     const dragEnter = this.pnlEditor.querySelector('.is-dragenter');

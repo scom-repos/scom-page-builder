@@ -3,7 +3,7 @@ import { pageObject } from "../store/index";
 import { Control } from "@ijstech/components";
 import { application } from "@ijstech/components";
 import { EVENT } from "../const/index";
-import { IMergeType } from "./type";
+import { IMergeType } from "./interface";
 import { findNearestSectionInRow, getDropFrontBackResult } from '../utility/index'
 
 export class UngroupElementCommand implements ICommand {

@@ -925,7 +925,7 @@ export class PageRow extends Module {
             //     // add section
             //     application.EventBus.dispatch(EVENT.ON_ADD_SECTION, {
             //         prependId: pageRow.id,
-            //         defaultElements: elementConfig.defaultElements,
+            //         elements: elementConfig.elements,
             //     });
             //     return;
             // }
@@ -1056,6 +1056,7 @@ export class PageRow extends Module {
                         dragCmd && commandHistory.execute(dragCmd);
                         resetDragTarget();
                     } else {
+                        console.log("self.getNewElementData()", self.getNewElementData())
                         const dragCmd = (elementConfig)? 
                             new AddElementCommand(
                                 self.getNewElementData(),

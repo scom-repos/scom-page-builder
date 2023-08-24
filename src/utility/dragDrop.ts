@@ -1,4 +1,4 @@
-import { IMergeDropSide, DragDropResult, DragDropResultDetails, checkDragDropResultParams } from './type'
+import { IMergeDropSide, DragDropResult, DragDropResultDetails, checkDragDropResultParams } from './interface'
 // import { GAP_WIDTH } from '../interface/index';
 import { Control } from '@ijstech/components'
 import { pageObject } from "../store/index";
