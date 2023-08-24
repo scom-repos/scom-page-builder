@@ -403,6 +403,10 @@ export const getFontColor = (theme?: ThemeType) => {
   return theme === 'light' ? lightTheme.text.primary : darkTheme.text.primary;
 }
 
+export const getFontSize = () => {
+  return 'md';
+}
+
 export const getDivider = (theme?: ThemeType) => {
   theme = theme ?? getTheme();
   return theme === 'light' ? lightTheme.divider : darkTheme.divider;

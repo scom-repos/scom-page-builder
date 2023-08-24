@@ -84,15 +84,18 @@ export const checkDragDropResult = (dragDrop: checkDragDropResultParams): DragDr
     } else {
         const fromSidebar: boolean = (!dragDrop.dragSection) ? true : false;
         const nearestPanel = findNearestFixedGridInRow(dragDrop.clientX, dragDrop.dropTarget);
-        const nearestPanelCol = parseInt(nearestPanel.getAttribute("data-column"))
+        
         const rowId = dragDrop.dropTarget.closest('ide-row').id.replace('row-', "")
         const rowData = pageObject.getSection(rowId);
 
         let dropOutSide = false;
-        if (nearestPanelCol == 1) {
-            if (rowData.elements.find(elm => elm.column == 1)) dropOutSide = true;
-        } else if (nearestPanelCol == 12) {
-            if (rowData.elements.find(elm => (elm.column + elm.columnSpan == 12))) dropOutSide = true;
+        if (nearestPanel) {
+            const nearestPanelCol = parseInt(nearestPanel.getAttribute("data-column"))
+            if (nearestPanelCol == 1) {
+                if (rowData.elements.find(elm => elm.column == 1)) dropOutSide = true;
+            } else if (nearestPanelCol == 12) {
+                if (rowData.elements.find(elm => (elm.column + elm.columnSpan - 1 == 12))) dropOutSide = true;
+            }
         }
 
         // case 4: mouse on empty space

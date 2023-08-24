@@ -314,14 +314,19 @@ declare module "@scom/scom-page-builder/store/index.ts" {
     export const getTheme: () => ThemeType;
     export const getBackgroundColor: (theme?: ThemeType) => string;
     export const getFontColor: (theme?: ThemeType) => string;
+    export const getFontSize: () => string;
     export const getDivider: (theme?: ThemeType) => string;
     export const setDefaultPageConfig: (value: IPageConfig) => void;
     export const getDefaultPageConfig: () => IPageConfig;
     export const getPageConfig: () => {
+        customBackgroundColor?: boolean;
         backgroundColor?: string;
         backgroundImage?: string;
         backdropColor?: string;
+        customTextColor?: boolean;
         textColor?: string;
+        customTextSize?: boolean;
+        textSize?: string;
         backdropImage?: string;
         sectionWidth?: string | number;
         plr?: number;
@@ -480,10 +485,14 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         config?: IPageConfig;
     }
     export interface IPageConfig {
+        customBackgroundColor?: boolean;
         backgroundColor?: string;
         backgroundImage?: string;
         backdropColor?: string;
+        customTextColor?: boolean;
         textColor?: string;
+        customTextSize?: boolean;
+        textSize?: string;
         backdropImage?: string;
         sectionWidth?: number | string;
         plr?: number;
@@ -862,6 +871,26 @@ declare module "@scom/scom-page-builder/command/replaceElement.ts" {
         redo(): void;
     }
 }
+/// <amd-module name="@scom/scom-page-builder/theme/light.theme.ts" />
+declare module "@scom/scom-page-builder/theme/light.theme.ts" {
+    import { Styles } from '@ijstech/components';
+    const Theme: Styles.Theme.ITheme;
+    export default Theme;
+}
+/// <amd-module name="@scom/scom-page-builder/theme/dark.theme.ts" />
+declare module "@scom/scom-page-builder/theme/dark.theme.ts" {
+    import { Styles } from '@ijstech/components';
+    const Theme: Styles.Theme.ITheme;
+    export default Theme;
+}
+/// <amd-module name="@scom/scom-page-builder/theme/index.ts" />
+declare module "@scom/scom-page-builder/theme/index.ts" {
+    import { Styles } from '@ijstech/components';
+    import LightTheme from "@scom/scom-page-builder/theme/light.theme.ts";
+    import DarkTheme from "@scom/scom-page-builder/theme/dark.theme.ts";
+    const currentTheme: Styles.Theme.ITheme;
+    export { currentTheme, LightTheme, DarkTheme };
+}
 /// <amd-module name="@scom/scom-page-builder/command/updatePageSetting.ts" />
 declare module "@scom/scom-page-builder/command/updatePageSetting.ts" {
     import { Control } from "@ijstech/components";
@@ -896,26 +925,6 @@ declare module "@scom/scom-page-builder/command/index.ts" {
     export { ICommand, IDataColumn } from "@scom/scom-page-builder/command/interface.ts";
     export { UpdatePageSettingsCommand } from "@scom/scom-page-builder/command/updatePageSetting.ts";
     export { IMergeType } from "@scom/scom-page-builder/command/type.ts";
-}
-/// <amd-module name="@scom/scom-page-builder/theme/light.theme.ts" />
-declare module "@scom/scom-page-builder/theme/light.theme.ts" {
-    import { Styles } from '@ijstech/components';
-    const Theme: Styles.Theme.ITheme;
-    export default Theme;
-}
-/// <amd-module name="@scom/scom-page-builder/theme/dark.theme.ts" />
-declare module "@scom/scom-page-builder/theme/dark.theme.ts" {
-    import { Styles } from '@ijstech/components';
-    const Theme: Styles.Theme.ITheme;
-    export default Theme;
-}
-/// <amd-module name="@scom/scom-page-builder/theme/index.ts" />
-declare module "@scom/scom-page-builder/theme/index.ts" {
-    import { Styles } from '@ijstech/components';
-    import LightTheme from "@scom/scom-page-builder/theme/light.theme.ts";
-    import DarkTheme from "@scom/scom-page-builder/theme/dark.theme.ts";
-    const currentTheme: Styles.Theme.ITheme;
-    export { currentTheme, LightTheme, DarkTheme };
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageHeader.css.ts" />
 declare module "@scom/scom-page-builder/page/pageHeader.css.ts" { }
@@ -1211,6 +1220,24 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
         render(): any;
     }
 }
+/// <amd-module name="@scom/scom-page-builder/command/widgetSettingsToolbar.ts" />
+declare module "@scom/scom-page-builder/command/widgetSettingsToolbar.ts" {
+    import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
+    import { IDEToolbar } from "@scom/scom-page-builder/common/index.ts";
+    export class WidgetSettingsToolbarCommand implements ICommand {
+        private toolbar;
+        private builderTarget;
+        private data;
+        private pageRow;
+        private pageRowId;
+        private section;
+        private sectionId;
+        constructor(toolbar: IDEToolbar, dataInput: any);
+        execute(): void;
+        undo(): void;
+        redo(): void;
+    }
+}
 /// <amd-module name="@scom/scom-page-builder/common/toolbar.tsx" />
 declare module "@scom/scom-page-builder/common/toolbar.tsx" {
     import { Module, ControlElement } from '@ijstech/components';
@@ -1295,6 +1322,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         updateUI(data: {
             backgroundColor?: string;
             textColor?: string;
+            textSize?: string;
         }): Promise<void>;
         onShow(options?: any): void;
         onHide(): void;

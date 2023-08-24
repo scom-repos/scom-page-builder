@@ -8,10 +8,14 @@ export interface IPageData {
 }
 
 export interface IPageConfig {
+    customBackgroundColor?: boolean;
     backgroundColor?: string;
     backgroundImage?: string;
     backdropColor?: string;
+    customTextColor?: boolean;
     textColor?: string;
+    customTextSize?: boolean;
+    textSize?: string;
     backdropImage?: string;
     sectionWidth?: number|string;
     plr?: number;

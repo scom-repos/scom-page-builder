@@ -77,15 +77,38 @@ export class PageSettingsDialog extends Module {
         const jsonSchema: IDataSchema = {
             "type": "object",
             "properties": {
+                "customBackgroundColor": {
+                    "title": "Custom background color",
+                    "type": "boolean"
+                },
                 "backgroundColor": {
                     "title": "Background color",
                     "type": "string",
                     "format": "color"
                 },
+                "customTextColor": {
+                    "title": "Custom text color",
+                    "type": "boolean"
+                },
                 "textColor": {
                     "title": "Text color",
                     "type": "string",
                     "format": "color"
+                },
+                "customTextSize": {
+                  "title": "Custom text size",
+                  "type": "boolean"
+                },
+                "textSize": {
+                  "title": "Text size",
+                    "type": "string",
+                    "oneOf": [
+                        {"title": "Extra Small", "const": "xs"},
+                        {"title": "Small", "const": "sm"},
+                        {"title": "Normal", "const": "md"},
+                        {"title": "Large", "const": "lg"},
+                        {"title": "Extra Large", "const": "xl"}
+                    ]
                 },
                 "backgroundImage": {
                     "title": "Background image",
@@ -128,11 +151,64 @@ export class PageSettingsDialog extends Module {
                     "elements": [
                         {
                             "type": "Control",
-                            "scope": "#/properties/backgroundColor"
+                            "scope": "#/properties/customBackgroundColor"
                         },
                         {
                             "type": "Control",
-                            "scope": "#/properties/textColor"
+                            "scope": "#/properties/backgroundColor",
+                            "rule": {
+                                "effect": "ENABLE",
+                                "condition": {
+                                    "scope": "#/properties/customBackgroundColor",
+                                    "schema": {
+                                        "const": true
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "HorizontalLayout",
+                    "elements": [
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/customTextColor"
+                        },
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/textColor",
+                            "rule": {
+                                "effect": "ENABLE",
+                                "condition": {
+                                    "scope": "#/properties/customTextColor",
+                                    "schema": {
+                                        "const": true
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "HorizontalLayout",
+                    "elements": [
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/customTextSize"
+                        },
+                        {
+                            "type": "Control",
+                            "scope": "#/properties/textSize",
+                            "rule": {
+                                "effect": "ENABLE",
+                                "condition": {
+                                    "scope": "#/properties/customTextSize",
+                                    "schema": {
+                                        "const": true
+                                    }
+                                }
+                            }
                         }
                     ]
                 },
@@ -236,6 +312,7 @@ export class PageSettingsDialog extends Module {
         this.formElm.uiSchema = jsonUISchema;
         this.formElm.formOptions = formOptions;
         this.formElm.renderForm();
+        const config = getPageConfig();
         this.formElm.setFormData({ ...getPageConfig() });
     }
 
