@@ -92,11 +92,9 @@ export default class Editor extends Module {
         setTheme(this.theme);
         const bgColor = getBackgroundColor(this.theme);
         const fontColor = getFontColor(this.theme);
-        const fontSize = getFontSize();
         const dividerColor = getDivider(this.theme);
         this.style.setProperty('--builder-bg', bgColor);
         this.style.setProperty('--builder-color', fontColor);
-        this.style.setProperty('--builder-font-size', fontSize)
         this.style.setProperty('--builder-divider', dividerColor);
     }
 
@@ -278,8 +276,9 @@ export default class Editor extends Module {
     }
 
     private updatePageConfig() {
-        const { backgroundColor, backgroundImage, margin, sectionWidth } = getDefaultPageConfig();
+        const { backgroundColor, margin, textSize } = getDefaultPageConfig();
         this.style.setProperty('--builder-bg', backgroundColor);
+        this.classList.add(`font-${textSize}`)
         if (this.pnlEditor) {
             this.pnlEditor.maxWidth = '100%'; // maxWidth ?? '100%';
             const marginStyle = getMargin(margin);
@@ -311,8 +310,17 @@ export default class Editor extends Module {
             application.EventBus.register(this, EVENT.ON_FETCH_COMPONENTS, this.onSearch)
         )
         this.events.push(
-            application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: { image: string }) => {
+            application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: { image: string, textSize: string }) => {
                 if (data.image) this.pnlEditor.style.backgroundImage = `url(${data.image})`
+                if (data.textSize) {
+                    for (let i = this.classList.length - 1; i >= 0; i--) {
+                        const className = this.classList[i];
+                        if (className.startsWith('font-')) {
+                            this.classList.remove(className);
+                        }
+                    }
+                    this.classList.add(`font-${data.textSize}`)
+                }
             })
         )
     }
