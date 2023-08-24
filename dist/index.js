@@ -4773,7 +4773,8 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
                     },
                     '&:hover': {
                         opacity: '1 !important',
-                        visibility: 'initial'
+                        visibility: 'initial',
+                        zIndex: 980
                     },
                     '.bar-shadow': {
                         boxShadow: 'rgba(0, 0, 0, 0.1) 0px 2px 8px 0px'
@@ -5929,7 +5930,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             fill: Theme.colors.primary.contrastText,
                         }, background: { color: Theme.colors.primary.main }, padding: { top: 5, bottom: 5, left: 5, right: 5 }, top: "-12px", left: "50%", zIndex: 970, class: "btn-add", onClick: () => this.onAddSection(-1) }),
                     this.$render("i-vstack", { id: 'actionsBar', class: "row-actions-bar", verticalAlignment: "center" },
-                        this.$render("i-vstack", { background: { color: '#fff' }, border: { radius: 5 }, maxWidth: "100%", maxHeight: "100%", horizontalAlignment: "center", padding: { top: 4, bottom: 4, left: 4, right: 4 }, gap: "0.25rem", class: "bar-shadow", zIndex: 980 },
+                        this.$render("i-vstack", { background: { color: '#fff' }, border: { radius: 5 }, maxWidth: "100%", maxHeight: "100%", horizontalAlignment: "center", padding: { top: 4, bottom: 4, left: 4, right: 4 }, gap: "0.25rem", class: "bar-shadow", zIndex: 979 },
                             this.$render("i-panel", { class: "actions", tooltip: { content: 'Section settings', placement: 'right' }, visible: this.isChanged, onClick: () => this.onOpenRowSettingsDialog() },
                                 this.$render("i-icon", { name: "cog", width: 16, height: 16, fill: "#80868b" })),
                             this.$render("i-panel", { id: "btnClone", class: "actions", tooltip: { content: 'Duplicate section', placement: 'right' }, visible: this.isCloned, onClick: this.onClone },

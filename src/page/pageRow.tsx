@@ -1301,7 +1301,7 @@ export class PageRow extends Module {
                             padding={{top: 4, bottom: 4, left: 4, right: 4}}
                             gap="0.25rem"
                             class="bar-shadow"
-                            zIndex={980}
+                            zIndex={979}
                         >
                             <i-panel
                                 class="actions"
