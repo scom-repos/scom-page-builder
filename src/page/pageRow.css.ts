@@ -85,7 +85,8 @@ Styles.cssRule('ide-row', {
                 },
                 '&:hover': {
                     opacity: '1 !important',
-                    visibility: 'initial'
+                    visibility: 'initial',
+                    zIndex: 980
                 },
                 '.bar-shadow': {
                     boxShadow: 'rgba(0, 0, 0, 0.1) 0px 2px 8px 0px'
