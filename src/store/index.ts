@@ -413,11 +413,11 @@ export const getDivider = (theme?: ThemeType) => {
 }
 
 export const setDefaultPageConfig = (value: IPageConfig) => {
-  state.defaultPageConfig = {...defaultPageConfig, backgroundColor: getBackgroundColor(), textColor: getFontColor(), ...(value || {})};
+  state.defaultPageConfig = {...defaultPageConfig, backgroundColor: getBackgroundColor(), textColor: getFontColor(), textSize: getFontSize(), ...(value || {})};
 }
 
 export const getDefaultPageConfig = (): IPageConfig => {
-  const defaultValue = {...defaultPageConfig, backgroundColor: getBackgroundColor(), textColor: getFontColor()};
+  const defaultValue = {...defaultPageConfig, backgroundColor: getBackgroundColor(), textColor: getFontColor(), textSize: getFontSize() };
   return state.defaultPageConfig || defaultValue;
 }
 

@@ -53,33 +53,33 @@ export class UpdatePageSettingsCommand implements ICommand {
     const defaultBackgroundColor = Theme.background.main
     const defaultTextColor = Theme.text.primary
     const defaultTextSize = 'md'
+    let data = {
+      backgroundColor: defaultBackgroundColor,
+      textColor: defaultTextColor,
+      textSize: defaultTextSize 
+    }
     if (customBackgroundColor) {
       if (updatedValues.includes('backgroundColor')) {
         element.style.setProperty('--builder-bg', backgroundColor);
-        application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {backgroundColor});
+        data.backgroundColor = backgroundColor;
       }
     } else {
       element.style.setProperty('--builder-bg', defaultBackgroundColor);
-      application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {backgroundColor: defaultBackgroundColor});
     }
     if (customTextColor) {
       if (updatedValues.includes('textColor')) {
         element.style.setProperty('--builder-color', textColor);
-        application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {textColor});
+        data.textColor = textColor;
       }
     } else {
       element.style.setProperty('--builder-color', defaultTextColor);
-      application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {textColor: defaultTextColor});
     }
     if (customTextSize) {
       if (updatedValues.includes('textSize')) {
-        document.body.style.setProperty('--builder-font-size', textSize);
-        application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {textSize});
+        data.textSize = textSize;
       }
-    } else {
-      document.body.style.setProperty('--builder-font-size', defaultTextSize);
-      application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {textSize: defaultTextSize});
     }
+    application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {...data});
     this.element.maxWidth = '100%'; // maxWidth ?? '100%';
     this.element.margin = getMargin(margin);
     pageObject.config = { ...config };

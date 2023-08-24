@@ -728,17 +728,21 @@ export class IDEToolbar extends Module {
         })
     }
 
-    async updateUI(data: { backgroundColor?: string, textColor?: string, textSize?: string }) {
+    async updateUI(data: {
+        backgroundColor?: string;
+        textColor?: string;
+        textSize?: string;
+    }) {
         if (this._component?.getConfigurators) {
             const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
             if (builderTarget?.setTag) {
-                const { backgroundColor, textColor, textSize } = data;
+                const {backgroundColor, textColor, textSize} = data;
                 const oldTag = builderTarget?.getTag ? await builderTarget.getTag() : {};
-                const newData: any = {}
-                if (backgroundColor !== undefined) newData.backgroundColor = backgroundColor || '';
-                if (textColor !== undefined) newData.textColor = textColor || '';
-                if (textSize !== undefined) newData.textSize = textColor || '';
-                await builderTarget.setTag({ ...oldTag, ...newData }, true);
+                const newData: any = {};
+                if (backgroundColor ) newData.backgroundColor = backgroundColor || '';
+                if (textColor) newData.textColor = textColor || '';
+                if (textSize) newData.textSize = textSize || '';
+                await builderTarget.setTag({...oldTag, ...newData}, true);
             }
         }
     }
