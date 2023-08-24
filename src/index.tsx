@@ -4,7 +4,7 @@ import { BuilderFooter, BuilderHeader } from './builder/index';
 import { EVENT } from './const/index';
 import { IPageData, IPageBlockData, IPageElement, IOnFetchComponentsOptions, IOnFetchComponentsResult, ICategory, ThemeType } from './interface/index';
 import { PageRow, PageRows, PageSidebar, PageMenu } from './page/index';
-import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData, getPageBlocks, getCategories, setCategories, setTheme, getBackgroundColor, getFontColor, getDivider, getDefaultPageConfig, getMargin, setDefaultPageConfig, getFontSize } from './store/index';
+import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData, getPageBlocks, getCategories, setCategories, setTheme, getBackgroundColor, getFontColor, getDivider, getDefaultPageConfig, getMargin, setDefaultPageConfig } from './store/index';
 import { currentTheme } from './theme/index';
 import './index.css';
 import { SearchComponentsDialog } from './dialogs/index';
@@ -276,9 +276,8 @@ export default class Editor extends Module {
     }
 
     private updatePageConfig() {
-        const { backgroundColor, margin, textSize } = getDefaultPageConfig();
+        const { backgroundColor, margin } = getDefaultPageConfig();
         this.style.setProperty('--builder-bg', backgroundColor);
-        this.classList.add(`font-${textSize}`)
         if (this.pnlEditor) {
             this.pnlEditor.maxWidth = '100%'; // maxWidth ?? '100%';
             const marginStyle = getMargin(margin);
@@ -310,15 +309,15 @@ export default class Editor extends Module {
             application.EventBus.register(this, EVENT.ON_FETCH_COMPONENTS, this.onSearch)
         )
         this.events.push(
-            application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: { image: string, textSize: string }) => {
+            application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: { image: string, customTextSize: boolean, textSize: string }) => {
                 if (data.image) this.pnlEditor.style.backgroundImage = `url(${data.image})`
-                if (data.textSize) {
-                    for (let i = this.classList.length - 1; i >= 0; i--) {
-                        const className = this.classList[i];
-                        if (className.startsWith('font-')) {
-                            this.classList.remove(className);
-                        }
+                for (let i = this.classList.length - 1; i >= 0; i--) {
+                    const className = this.classList[i];
+                    if (className.startsWith('font-')) {
+                        this.classList.remove(className);
                     }
+                }
+                if (data.customTextSize && data.textSize) {
                     this.classList.add(`font-${data.textSize}`)
                 }
             })

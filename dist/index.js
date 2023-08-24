@@ -772,7 +772,7 @@ define("@scom/scom-page-builder/interface/index.ts", ["require", "exports", "@sc
 define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/const/index.ts"], function (require, exports, components_2, index_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.getMargin = exports.getPageConfig = exports.getDefaultPageConfig = exports.setDefaultPageConfig = exports.getDivider = exports.getFontSize = exports.getFontColor = exports.getBackgroundColor = exports.getTheme = exports.setTheme = exports.setCategories = exports.getCategories = exports.getSearchOptions = exports.setSearchOptions = exports.getSearchData = exports.setSearchData = exports.getDragData = exports.setDragData = exports.getRootDir = exports.setRootDir = exports.addPageBlock = exports.getPageBlocks = exports.setPageBlocks = exports.state = exports.pageObject = exports.PageObject = void 0;
+    exports.getMargin = exports.getPageConfig = exports.getDefaultPageConfig = exports.setDefaultPageConfig = exports.getDivider = exports.getFontColor = exports.getBackgroundColor = exports.getTheme = exports.setTheme = exports.setCategories = exports.getCategories = exports.getSearchOptions = exports.setSearchOptions = exports.getSearchData = exports.setSearchData = exports.getDragData = exports.setDragData = exports.getRootDir = exports.setRootDir = exports.addPageBlock = exports.getPageBlocks = exports.setPageBlocks = exports.state = exports.pageObject = exports.PageObject = void 0;
     const lightTheme = components_2.Styles.Theme.defaultTheme;
     const darkTheme = components_2.Styles.Theme.darkTheme;
     const MAX_COLUMN = 12;
@@ -1176,21 +1176,17 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         return theme === 'light' ? lightTheme.text.primary : darkTheme.text.primary;
     };
     exports.getFontColor = getFontColor;
-    const getFontSize = () => {
-        return 'md';
-    };
-    exports.getFontSize = getFontSize;
     const getDivider = (theme) => {
         theme = theme !== null && theme !== void 0 ? theme : (0, exports.getTheme)();
         return theme === 'light' ? lightTheme.divider : darkTheme.divider;
     };
     exports.getDivider = getDivider;
     const setDefaultPageConfig = (value) => {
-        exports.state.defaultPageConfig = Object.assign(Object.assign(Object.assign({}, defaultPageConfig), { backgroundColor: (0, exports.getBackgroundColor)(), textColor: (0, exports.getFontColor)(), textSize: (0, exports.getFontSize)() }), (value || {}));
+        exports.state.defaultPageConfig = Object.assign(Object.assign(Object.assign({}, defaultPageConfig), { backgroundColor: (0, exports.getBackgroundColor)(), textColor: (0, exports.getFontColor)() }), (value || {}));
     };
     exports.setDefaultPageConfig = setDefaultPageConfig;
     const getDefaultPageConfig = () => {
-        const defaultValue = Object.assign(Object.assign({}, defaultPageConfig), { backgroundColor: (0, exports.getBackgroundColor)(), textColor: (0, exports.getFontColor)(), textSize: (0, exports.getFontSize)() });
+        const defaultValue = Object.assign(Object.assign({}, defaultPageConfig), { backgroundColor: (0, exports.getBackgroundColor)(), textColor: (0, exports.getFontColor)() });
         return exports.state.defaultPageConfig || defaultValue;
     };
     exports.getDefaultPageConfig = getDefaultPageConfig;
@@ -1364,21 +1360,22 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
             const newConfig = Object.assign(Object.assign({}, config), { margin: { x: marginStyle.left, y: marginStyle.top } });
             index_5.pageObject.updateSection(id, { config: Object.assign({}, newConfig) });
             this.element.updateRowConfig(index_5.pageObject.getRowConfig(id));
+            const { textSize, customTextSize } = newConfig;
+            for (let i = this.element.classList.length - 1; i >= 0; i--) {
+                const className = this.element.classList[i];
+                if (className.startsWith('font-')) {
+                    this.element.classList.remove(className);
+                }
+            }
+            if (customTextSize && textSize) {
+                this.element.classList.add(`font-${newConfig.textSize}`);
+            }
             if (updatedValues.includes('backgroundColor') || updatedValues.includes('textColor') || updatedValues.includes('textSize')) {
                 const newValue = {};
                 if (updatedValues.includes('backgroundColor'))
                     newValue.backgroundColor = (newConfig === null || newConfig === void 0 ? void 0 : newConfig.backgroundColor) || '';
                 if (updatedValues.includes('textColor'))
                     newValue.textColor = (newConfig === null || newConfig === void 0 ? void 0 : newConfig.textColor) || '';
-                if (newConfig.textSize) {
-                    for (let i = this.element.classList.length - 1; i >= 0; i--) {
-                        const className = this.element.classList[i];
-                        if (className.startsWith('font-')) {
-                            this.element.classList.remove(className);
-                        }
-                    }
-                    this.element.classList.add(`font-${newConfig.textSize}`);
-                }
                 const toolbars = this.element.querySelectorAll('ide-toolbar');
                 for (let toolbar of toolbars) {
                     toolbar.updateUI(newValue);
@@ -2875,13 +2872,17 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             const defaultTextColor = Theme.text.primary;
             const defaultTextSize = 'md';
             let data = {
+                customBackgroundColor: false,
                 backgroundColor: defaultBackgroundColor,
+                customTextColor: false,
                 textColor: defaultTextColor,
+                customTextSize: false,
                 textSize: defaultTextSize
             };
             if (customBackgroundColor) {
                 if (updatedValues.includes('backgroundColor')) {
                     element.style.setProperty('--builder-bg', backgroundColor);
+                    data.customBackgroundColor = customBackgroundColor;
                     data.backgroundColor = backgroundColor;
                 }
             }
@@ -2891,6 +2892,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             if (customTextColor) {
                 if (updatedValues.includes('textColor')) {
                     element.style.setProperty('--builder-color', textColor);
+                    data.customTextColor = customTextColor;
                     data.textColor = textColor;
                 }
             }
@@ -2899,6 +2901,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             }
             if (customTextSize) {
                 if (updatedValues.includes('textSize')) {
+                    data.customTextSize = customTextSize;
                     data.textSize = textSize;
                 }
             }
@@ -6557,7 +6560,6 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                         newData.textColor = textColor || '';
                     if (textSize)
                         newData.textSize = textSize || '';
-                    console.log('whyyyyyyyyy: ', oldTag, newData);
                     await builderTarget.setTag(Object.assign(Object.assign({}, oldTag), newData), true);
                 }
             }
@@ -8978,9 +8980,8 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             components_43.application.EventBus.dispatch(index_86.EVENT.ON_UPDATE_MENU);
         }
         updatePageConfig() {
-            const { backgroundColor, backgroundImage, margin, sectionWidth, textSize } = (0, index_87.getDefaultPageConfig)();
+            const { backgroundColor, margin } = (0, index_87.getDefaultPageConfig)();
             this.style.setProperty('--builder-bg', backgroundColor);
-            this.classList.add(`font-${textSize}`);
             if (this.pnlEditor) {
                 this.pnlEditor.maxWidth = '100%'; // maxWidth ?? '100%';
                 const marginStyle = (0, index_87.getMargin)(margin);
@@ -9004,13 +9005,13 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.events.push(components_43.application.EventBus.register(this, index_86.EVENT.ON_UPDATE_PAGE_BG, async (data) => {
                 if (data.image)
                     this.pnlEditor.style.backgroundImage = `url(${data.image})`;
-                if (data.textSize) {
-                    for (let i = this.classList.length - 1; i >= 0; i--) {
-                        const className = this.classList[i];
-                        if (className.startsWith('font-')) {
-                            this.classList.remove(className);
-                        }
+                for (let i = this.classList.length - 1; i >= 0; i--) {
+                    const className = this.classList[i];
+                    if (className.startsWith('font-')) {
+                        this.classList.remove(className);
                     }
+                }
+                if (data.customTextSize && data.textSize) {
                     this.classList.add(`font-${data.textSize}`);
                 }
             }));
