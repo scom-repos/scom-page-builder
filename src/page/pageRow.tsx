@@ -1179,7 +1179,7 @@ export class PageRow extends Module {
             if (!config) return;
             const id = this.id.replace('row-', '');
             const sectionConfig = pageObject.getRowConfig(id) || {};
-            let newConfig = {...getPageConfig(), ...sectionConfig, ...config};
+            let newConfig = {...getPageConfig(), ...config, ...sectionConfig};
             if (rowsConfig) {
                 const parsedData = rowsConfig[id] ? JSON.parse(rowsConfig[id]) : {};
                 newConfig = {...newConfig, ...parsedData};

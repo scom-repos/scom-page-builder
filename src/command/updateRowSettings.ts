@@ -37,18 +37,28 @@ export class UpdateRowSettingsCommand implements ICommand {
     const newConfig = {...config, margin: {x: marginStyle.left , y: marginStyle.top}};
     pageObject.updateSection(id, {config: {...newConfig}});
     this.element.updateRowConfig(pageObject.getRowConfig(id));
+
+    const { textSize, customTextSize } = newConfig
+    for (let i = this.element.classList.length - 1; i >= 0; i--) {
+      const className = this.element.classList[i];
+      if (className.startsWith('font-')) {
+          this.element.classList.remove(className);
+      }
+    }
+    if (customTextSize && textSize) {          
+      this.element.classList.add(`font-${newConfig.textSize}`)
+    }
+
     if (updatedValues.includes('backgroundColor') || updatedValues.includes('textColor') || updatedValues.includes('textSize')) {
       const newValue: any = {};
       if (updatedValues.includes('backgroundColor'))
         newValue.backgroundColor = newConfig?.backgroundColor || '';
       if (updatedValues.includes('textColor'))
         newValue.textColor = newConfig?.textColor || '';
-      if (updatedValues.includes('textSize'))
-        newValue.textSize = newConfig?.textSize || '';
+
       const toolbars = this.element.querySelectorAll('ide-toolbar');
       for (let toolbar of toolbars) {
         toolbar.updateUI(newValue);
-        toolbar.module.style.setProperty('--builder-font-size', newConfig?.textSize)
       }
     }
   }
