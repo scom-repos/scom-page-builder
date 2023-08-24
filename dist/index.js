@@ -5369,8 +5369,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.toggleUI(!!((_b = (_a = self.data) === null || _a === void 0 ? void 0 : _a.elements) === null || _b === void 0 ? void 0 : _b.length));
             }
             function dragEnter(enterTarget, clientX, clientY) {
-                var _a, _b, _c, _d, _e;
-                if (!enterTarget || !self.currentElement)
+                var _a, _b, _c, _d, _e, _f;
+                if (!enterTarget /* || !self.currentElement*/)
                     return;
                 if (enterTarget.closest('#pnlEmty')) {
                     self.pnlRow.minHeight = '180px';
@@ -5381,7 +5381,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
                 const dragEnter = parentWrapper.querySelector('.is-dragenter');
                 dragEnter && dragEnter.classList.remove('is-dragenter');
-                let target = findNearestFixedGridInRow(clientX);
+                const target = findNearestFixedGridInRow(clientX);
                 self.addDottedLines();
                 toggleAllToolbarBoarder(true);
                 if (self.isUngrouping()) {
@@ -5397,6 +5397,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     return;
                 }
                 if (target) {
+                    const isFromSidebar = (0, index_46.getDragData)();
                     const dropRow = target.closest('ide-row');
                     let offsetLeft = 0;
                     if (!((_a = (0, index_46.getDragData)()) === null || _a === void 0 ? void 0 : _a.module)) {
@@ -5407,7 +5408,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     }
                     const targetCol = Number(target.dataset.column);
                     const column = targetCol - offsetLeft > 0 ? targetCol - offsetLeft : targetCol;
-                    const columnSpan = self.currentElement.dataset.columnSpan
+                    const columnSpan = ((_b = self.currentElement) === null || _b === void 0 ? void 0 : _b.dataset.columnSpan)
                         ? Number(self.currentElement.dataset.columnSpan)
                         : index_45.INIT_COLUMN_SPAN;
                     let colSpan = Math.min(columnSpan, self.maxColumn);
@@ -5417,7 +5418,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     let spaces = 0;
                     let findedSection = null;
                     let isUpdated = false;
-                    // const isFromToolbar = !self.currentElement?.id;
                     for (let i = 0; i < sortedSections.length; i++) {
                         const section = sortedSections[i];
                         const sectionColumn = Number(section.dataset.column);
@@ -5431,14 +5431,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         if ((colStart >= sectionColumn && colData <= sectionData) || (colStart < sectionData && colData > sectionData)) {
                             findedSection = section;
                         }
-                        if (((_b = self.currentElement) === null || _b === void 0 ? void 0 : _b.id) !== section.id) {
+                        if (((_c = self.currentElement) === null || _c === void 0 ? void 0 : _c.id) !== section.id) {
                             spaces += sectionColumnSpan;
                         }
                     }
-                    // if (findedSection && (isFromToolbar || self.currentElement.id !== findedSection.id) || MAX_COLUMN - spaces < 1) {
-                    //     removeRectangles();
-                    //     return;
-                    // }
                     self.updateGridColumnWidth();
                     const targetRowPnl = target.closest('#pnlRow');
                     showRectangle(targetRowPnl, colStart, Math.min(columnSpan, index_45.MAX_COLUMN - spaces));
@@ -5462,9 +5458,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 updateClass(topBlock, 'is-dragenter');
                             }
                         }
-                        const curElmCol = Number((_c = section === null || section === void 0 ? void 0 : section.dataset) === null || _c === void 0 ? void 0 : _c.column);
-                        const curElmColSpan = Number((_d = section === null || section === void 0 ? void 0 : section.dataset) === null || _d === void 0 ? void 0 : _d.columnSpan);
-                        const sections = Array.from((_e = section.closest('#pnlRow')) === null || _e === void 0 ? void 0 : _e.querySelectorAll('ide-section'));
+                        const curElmCol = Number((_d = section === null || section === void 0 ? void 0 : section.dataset) === null || _d === void 0 ? void 0 : _d.column);
+                        const curElmColSpan = Number((_e = section === null || section === void 0 ? void 0 : section.dataset) === null || _e === void 0 ? void 0 : _e.columnSpan);
+                        const sections = Array.from((_f = section.closest('#pnlRow')) === null || _f === void 0 ? void 0 : _f.querySelectorAll('ide-section'));
                         const nextElm = sections.find((el) => {
                             const column = Number(el.dataset.column);
                             return !isNaN(column) && curElmCol + curElmColSpan === column;
@@ -5515,6 +5511,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     startX: startX,
                     isUngroup: self.isUngrouping()
                 });
+                // const pageRow = eventTarget.closest('ide-row') as PageRow;
+                // const elementConfig = getDragData();
+                // if (pageRow && elementConfig?.module?.name === 'sectionStack') {
+                // }
                 if (dragDropResult.canDrop && dragDropResult.details) {
                     // dragover rowBlock
                     if (dragDropResult.details.rowBlock) {
@@ -5610,7 +5610,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 return nearestElement;
             }
             this.addEventListener('drop', async function (event) {
-                var _a;
                 self.pnlRow.minHeight = 'auto';
                 const elementConfig = (0, index_46.getDragData)();
                 const eventTarget = event.target;
@@ -5620,16 +5619,15 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.removeDottedLines();
                 toggleAllToolbarBoarder(false);
                 removeRectangles();
-                if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
-                    // add section
-                    components_25.application.EventBus.dispatch(index_44.EVENT.ON_ADD_SECTION, {
-                        prependId: pageRow.id,
-                        defaultElements: elementConfig.defaultElements,
-                    });
-                    return;
-                }
-                if (!self.currentElement)
-                    return;
+                // if (pageRow && elementConfig?.module?.name === 'sectionStack') {
+                //     // add section
+                //     application.EventBus.dispatch(EVENT.ON_ADD_SECTION, {
+                //         prependId: pageRow.id,
+                //         defaultElements: elementConfig.defaultElements,
+                //     });
+                //     return;
+                // }
+                // if (!self.currentElement) return;
                 const isUngrouping = self.isUngrouping();
                 const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') : undefined;
                 const dragDropResult = (0, index_48.checkDragDropResult)({
@@ -8921,7 +8919,6 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             const scrollThreshold = 100;
             const self = this;
             containerElement.addEventListener("dragover", (event) => {
-                var _a;
                 event.preventDefault();
                 if (!this.currentElement && !(0, index_88.getDragData)())
                     return;
@@ -8936,22 +8933,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 const pageRowsRect = this.pageRows.getBoundingClientRect();
                 const pnlEditorRect = this.pnlEditor.getBoundingClientRect();
                 // dragover on the below of rows
-                const elementConfig = (0, index_88.getDragData)();
-                if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack'
-                    && event.clientX >= pageRowsRect.x
-                    && event.clientX <= pageRowsRect.x + pageRowsRect.width) {
-                    const rows = self.getElementsByTagName('ide-row');
-                    const rowsArray = Array.from(rows);
-                    const targetRow = rowsArray.find(row => {
-                        const rowRect = row.getBoundingClientRect();
-                        if (rowRect.top <= event.clientY && rowRect.bottom >= event.clientY)
-                            return row;
-                    });
-                    if (targetRow) {
-                        components_43.application.EventBus.dispatch(index_87.EVENT.ON_SHOW_BOTTOM_BLOCK, targetRow);
-                    }
-                }
-                else if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
+                if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
                     const lastRows = this.pageRows.querySelector('ide-row:last-child');
                     components_43.application.EventBus.dispatch(index_87.EVENT.ON_SHOW_BOTTOM_BLOCK, lastRows);
                 }

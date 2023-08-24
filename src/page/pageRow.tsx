@@ -645,7 +645,7 @@ export class PageRow extends Module {
         }
 
         function dragEnter(enterTarget: Control, clientX: number, clientY: number) {
-            if (!enterTarget || !self.currentElement) return;
+            if (!enterTarget /* || !self.currentElement*/) return;
             if (enterTarget.closest('#pnlEmty')) {
                 self.pnlRow.minHeight = '180px';
                 self.toggleUI(true);
@@ -657,7 +657,7 @@ export class PageRow extends Module {
             const dragEnter = parentWrapper.querySelector('.is-dragenter') as Control;
             dragEnter && dragEnter.classList.remove('is-dragenter');
 
-            let target: Control = findNearestFixedGridInRow(clientX);
+            const target: Control = findNearestFixedGridInRow(clientX);
 
             self.addDottedLines();
             toggleAllToolbarBoarder(true);
@@ -676,6 +676,7 @@ export class PageRow extends Module {
             }
 
             if (target) {
+                const isFromSidebar: boolean = getDragData();
                 const dropRow = target.closest('ide-row');
                 let offsetLeft = 0;
                 if (!getDragData()?.module) {
@@ -686,7 +687,7 @@ export class PageRow extends Module {
                 }
                 const targetCol = Number(target.dataset.column);
                 const column = targetCol - offsetLeft > 0 ? targetCol - offsetLeft : targetCol
-                const columnSpan = self.currentElement.dataset.columnSpan
+                const columnSpan = self.currentElement?.dataset.columnSpan
                     ? Number(self.currentElement.dataset.columnSpan)
                     : INIT_COLUMN_SPAN;
                 let colSpan = Math.min(columnSpan, self.maxColumn);
@@ -698,7 +699,6 @@ export class PageRow extends Module {
                 let spaces = 0;
                 let findedSection = null;
                 let isUpdated: boolean = false;
-                // const isFromToolbar = !self.currentElement?.id;
                 for (let i = 0; i < sortedSections.length; i++) {
                     const section = sortedSections[i] as Control;
                     const sectionColumn = Number(section.dataset.column);
@@ -716,10 +716,6 @@ export class PageRow extends Module {
                         spaces += sectionColumnSpan;
                     }
                 }
-                // if (findedSection && (isFromToolbar || self.currentElement.id !== findedSection.id) || MAX_COLUMN - spaces < 1) {
-                //     removeRectangles();
-                //     return;
-                // }
                 self.updateGridColumnWidth();
                 const targetRowPnl = target.closest('#pnlRow') as Control;
                 showRectangle(targetRowPnl, colStart, Math.min(columnSpan, MAX_COLUMN - spaces));
@@ -801,6 +797,13 @@ export class PageRow extends Module {
                 startX: startX,
                 isUngroup: self.isUngrouping()
             });
+
+            // const pageRow = eventTarget.closest('ide-row') as PageRow;
+            // const elementConfig = getDragData();
+            // if (pageRow && elementConfig?.module?.name === 'sectionStack') {
+
+            // }
+
             if (dragDropResult.canDrop && dragDropResult.details) {
 
                 // dragover rowBlock
@@ -918,16 +921,16 @@ export class PageRow extends Module {
             toggleAllToolbarBoarder(false);
             removeRectangles();
 
-            if (pageRow && elementConfig?.module?.name === 'sectionStack') {
-                // add section
-                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, {
-                    prependId: pageRow.id,
-                    defaultElements: elementConfig.defaultElements,
-                });
-                return;
-            }
+            // if (pageRow && elementConfig?.module?.name === 'sectionStack') {
+            //     // add section
+            //     application.EventBus.dispatch(EVENT.ON_ADD_SECTION, {
+            //         prependId: pageRow.id,
+            //         defaultElements: elementConfig.defaultElements,
+            //     });
+            //     return;
+            // }
 
-            if (!self.currentElement) return;
+            // if (!self.currentElement) return;
 
             const isUngrouping: boolean = self.isUngrouping();
             const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
