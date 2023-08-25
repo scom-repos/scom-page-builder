@@ -267,8 +267,8 @@ export class PageRows extends Module {
         );
     }
 
-    private async onCreateSection(params?: {prependId?: string, appendId?: string, defaultElements?: IPageElement[]}) {
-        const { prependId = '', appendId = '', defaultElements = [] } = params || {};
+    private async onCreateSection(params?: {prependId?: string, appendId?: string, elements?: IPageElement[]}) {
+        const { prependId = '', appendId = '', elements = [] } = params || {};
         const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
         if (!this._readonly) {
             pageRow.border = { top: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' } };
@@ -277,7 +277,7 @@ export class PageRows extends Module {
         const rowData = {
             id: generateUUID(),
             row: this.getRows().length,
-            elements: defaultElements,
+            elements: elements,
         };
         const addRowCmd = new UpdateRowCommand(
             pageRow,

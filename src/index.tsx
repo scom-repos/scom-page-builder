@@ -183,6 +183,10 @@ export default class Editor extends Module {
             const pageRowsRect = this.pageRows.getBoundingClientRect();
             const pnlEditorRect = this.pnlEditor.getBoundingClientRect();
             // dragover on the below of rows
+            // if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
+            //     const lastRows = this.pageRows.querySelector('ide-row:last-child');
+            //     application.EventBus.dispatch(EVENT.ON_SHOW_BOTTOM_BLOCK, lastRows);
+            // }
             const elementConfig = getDragData()
             if (elementConfig?.module?.name === 'sectionStack'
                 && event.clientX >= pageRowsRect.x
@@ -197,9 +201,10 @@ export default class Editor extends Module {
                     application.EventBus.dispatch(EVENT.ON_SHOW_BOTTOM_BLOCK, targetRow);
                 }
             } else if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
+            if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
                 const lastRows = this.pageRows.querySelector('ide-row:last-child');
                 application.EventBus.dispatch(EVENT.ON_SHOW_BOTTOM_BLOCK, lastRows);
-            }
+            }}
         });
 
         function adjustScrollSpeed(mouseY: number) {

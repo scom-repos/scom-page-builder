@@ -131,6 +131,8 @@ export class PageRow extends Module {
                 class={ROW_TOP_CLASS}
             ></i-panel>
         );
+        this.style.setProperty('--row-background', 'var(--builder-bg)')
+        this.style.setProperty('--row-font_color', 'var(--builder-color)')
     }
 
     toggleUI(value: boolean) {
@@ -239,18 +241,23 @@ export class PageRow extends Module {
             } else {
                 this.pnlRowWrap.border.width = 0
             }
-            this.background.color = 'transparent';
-            if(backdropImage)
+            // this.background.color = 'transparent';
+            if (backdropImage)
                 this.background.image = backdropImage;
-            else if (backdropColor)
-                this.background.color = backdropColor;
+            else // if (backdropColor) this.background.color = backdropColor;
+                this.style.setProperty('--row-background', backdropColor || 'var(--builder-bg)')
             if (!image && !backdropImage) this.background.image = undefined
         } else {
             this.pnlRowWrap.border.width = 0
-            if (backgroundColor) this.background.color = backgroundColor;
+            // if (backgroundColor)
+                // this.background.color = backgroundColor;
+            this.style.setProperty('--row-background', backgroundColor || 'var(--builder-bg)')
+            this.background.image = ''
         }
-        if (backgroundColor) this.pnlRowContainer.background.color = backgroundColor;
-        if (textColor) this.pnlRowContainer.font = {color: textColor};
+        // if (backgroundColor) {
+        //     this.pnlRowContainer.background.color = backgroundColor;
+        // }
+        // if (textColor) this.pnlRowContainer.font = {color: textColor};
         this.pnlRowContainer.maxWidth = sectionWidth ?? '100%';
         if (margin) this.pnlRowContainer.margin = getMargin(margin);
         this.pnlRowContainer.width = margin?.x && margin?.x !== 'auto' ? 'auto' : '100%';
@@ -562,7 +569,7 @@ export class PageRow extends Module {
             const cannotDrag = toolbars.find((toolbar) => {
                 return toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting');
             });
-            const isCurrentTxt = targetToolbar.classList.contains('is-textbox') && (!mouseDownEl || !mouseDownEl.closest('.dragger'));
+            const isCurrentTxt = targetToolbar?.classList.contains('is-textbox') && (!mouseDownEl || !mouseDownEl.closest('.dragger'));
             if (targetSection && (!cannotDrag && !isCurrentTxt)) {
                 self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
                 self.currentElement = targetSection;
@@ -645,7 +652,7 @@ export class PageRow extends Module {
         }
 
         function dragEnter(enterTarget: Control, clientX: number, clientY: number) {
-            if (!enterTarget || !self.currentElement) return;
+            if (!enterTarget /* || !self.currentElement*/) return;
             if (enterTarget.closest('#pnlEmty')) {
                 self.pnlRow.minHeight = '180px';
                 self.toggleUI(true);
@@ -657,7 +664,7 @@ export class PageRow extends Module {
             const dragEnter = parentWrapper.querySelector('.is-dragenter') as Control;
             dragEnter && dragEnter.classList.remove('is-dragenter');
 
-            let target: Control = findNearestFixedGridInRow(clientX);
+            const target: Control = findNearestFixedGridInRow(clientX);
 
             self.addDottedLines();
             toggleAllToolbarBoarder(true);
@@ -676,6 +683,7 @@ export class PageRow extends Module {
             }
 
             if (target) {
+                const isFromSidebar: boolean = getDragData();
                 const dropRow = target.closest('ide-row');
                 let offsetLeft = 0;
                 if (!getDragData()?.module) {
@@ -686,7 +694,7 @@ export class PageRow extends Module {
                 }
                 const targetCol = Number(target.dataset.column);
                 const column = targetCol - offsetLeft > 0 ? targetCol - offsetLeft : targetCol
-                const columnSpan = self.currentElement.dataset.columnSpan
+                const columnSpan = self.currentElement?.dataset.columnSpan
                     ? Number(self.currentElement.dataset.columnSpan)
                     : INIT_COLUMN_SPAN;
                 let colSpan = Math.min(columnSpan, self.maxColumn);
@@ -698,7 +706,6 @@ export class PageRow extends Module {
                 let spaces = 0;
                 let findedSection = null;
                 let isUpdated: boolean = false;
-                // const isFromToolbar = !self.currentElement?.id;
                 for (let i = 0; i < sortedSections.length; i++) {
                     const section = sortedSections[i] as Control;
                     const sectionColumn = Number(section.dataset.column);
@@ -716,10 +723,6 @@ export class PageRow extends Module {
                         spaces += sectionColumnSpan;
                     }
                 }
-                // if (findedSection && (isFromToolbar || self.currentElement.id !== findedSection.id) || MAX_COLUMN - spaces < 1) {
-                //     removeRectangles();
-                //     return;
-                // }
                 self.updateGridColumnWidth();
                 const targetRowPnl = target.closest('#pnlRow') as Control;
                 showRectangle(targetRowPnl, colStart, Math.min(columnSpan, MAX_COLUMN - spaces));
@@ -782,6 +785,8 @@ export class PageRow extends Module {
 
         this.addEventListener('dragenter', function (event) { 
             const eventTarget = event.target as HTMLElement;
+            const elementConfig = getDragData();
+            if (elementConfig?.module?.name === 'sectionStack') return;
             if (eventTarget && (eventTarget.classList.contains('fixed-grid-item') || eventTarget.classList.contains('fixed-grid'))) {
                 dragEnter(eventTarget as Control, event.clientX, event.clientY);
             }
@@ -792,6 +797,10 @@ export class PageRow extends Module {
             const eventTarget = event.target as Control;
             let enterTarget: Control;
             const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
+            const elementConfig = getDragData();
+            // disable dragging layout to section
+            if (elementConfig?.module?.name === 'sectionStack') return;
+            const isLayout = elementConfig?.module?.name === 'sectionStack';
             const dragDropResult = checkDragDropResult({
                 dropTarget: eventTarget,
                 dragSection: dragStartTargetSection,
@@ -799,8 +808,17 @@ export class PageRow extends Module {
                 clientX: event.clientX,
                 clientY: event.clientY,
                 startX: startX,
-                isUngroup: self.isUngrouping()
+                isUngroup: self.isUngrouping(),
+                isLayout: getDragData()?.module?.name === 'sectionStack',
+                layoutLength: isLayout? elementConfig?.module?.elements?.length : undefined
             });
+
+            // const pageRow = eventTarget.closest('ide-row') as PageRow;
+            // const elementConfig = getDragData();
+            // if (pageRow && elementConfig?.module?.name === 'sectionStack') {
+
+            // }
+
             if (dragDropResult.canDrop && dragDropResult.details) {
 
                 // dragover rowBlock
@@ -922,15 +940,16 @@ export class PageRow extends Module {
                 // add section
                 application.EventBus.dispatch(EVENT.ON_ADD_SECTION, {
                     prependId: pageRow.id,
-                    defaultElements: elementConfig.defaultElements,
+                    elements: elementConfig.elements,
                 });
                 return;
             }
 
-            if (!self.currentElement) return;
+            // if (!self.currentElement) return;
 
             const isUngrouping: boolean = self.isUngrouping();
             const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
+            const isLayout = elementConfig?.module?.name === 'sectionStack';
             const dragDropResult = checkDragDropResult({
                 dropTarget: eventTarget,
                 dragSection: dragStartTargetSection,
@@ -938,7 +957,9 @@ export class PageRow extends Module {
                 clientX: event.clientX,
                 clientY: event.clientY,
                 startX: startX,
-                isUngroup: self.isUngrouping()
+                isUngroup: self.isUngrouping(),
+                isLayout: isLayout,
+                layoutLength: isLayout? elementConfig?.module?.elements?.length : undefined
             });
 
             if (dragDropResult.canDrop && dragDropResult.details) {
@@ -949,6 +970,7 @@ export class PageRow extends Module {
                 // drop on rowBlock
                 if (dragDropResult.details.rowBlock) {
                     const targetRow = dragDropResult.details.rowBlock.closest('ide-row') as PageRow;
+                    // TODO: accept layout
                     if (dragDropResult.details.rowBlock.classList.contains('row-top-block')) {
                         targetRow && self.onPrependRow(targetRow);
                     } else if (dragDropResult.details.rowBlock.classList.contains('row-bottom-block')) {
@@ -978,7 +1000,8 @@ export class PageRow extends Module {
                             const dropBlock = isAppend? dropSection.querySelector('.front-block') : dropSection.querySelector('.back-block');
 
                             const dragCmd = elementConfig
-                                ? new AddElementCommand(self.getNewElementData(), isAppend, false, dropSection, null)
+                                // TODO: accept layout
+                                ? new AddElementCommand(self.getNewElementData(), isAppend, false, dropBlock as Control, null)
                                 : new DragElementCommand(self.currentElement, dropBlock as Control, isAppend);
                             await commandHistory.execute(dragCmd);
                         }
@@ -1002,6 +1025,7 @@ export class PageRow extends Module {
                             const isAppend = dragDropResult.details.dropSide == "back";
                             const dropBlock = isAppend? dropSection.querySelector('.front-block') : dropSection.querySelector('.back-block');
                             const dragCmd = elementConfig
+                                // TODO: accept layout
                                 ? new AddElementCommand(self.getNewElementData(), isAppend, false, dropSection, null)
                                 : new DragElementCommand(self.currentElement, dropBlock as Control, isAppend);
                             await commandHistory.execute(dragCmd);
@@ -1134,6 +1158,7 @@ export class PageRow extends Module {
         const config = {id: generateUUID()};
         if (newPageRow) {
             const dragCmd = getDragData()
+                // TODO: accept layout
                 ? new AddElementCommand(this.getNewElementData(), true, true, null, newPageRow)
                 : this.isUngrouping()
                 ? new UngroupElementCommand(this.currentToolbar, this.currentElement, newPageRow, config, 'none')
@@ -1148,6 +1173,7 @@ export class PageRow extends Module {
         const config = {id: generateUUID()};
         if (newPageRow) {
             const dragCmd = getDragData()
+                // TODO: accept layout
                 ? new AddElementCommand(this.getNewElementData(), true, true, null, newPageRow)
                 : this.isUngrouping()
                 ? new UngroupElementCommand(this.currentToolbar, this.currentElement, newPageRow, config, 'none')
@@ -1185,27 +1211,28 @@ export class PageRow extends Module {
                 newConfig = {...newConfig, ...parsedData};
             }
             pageObject.updateSection(id, {config: newConfig});
+            if (config.backgroundColor)
+                this.pnlRowContainer.style.setProperty('--row-background', config.backgroundColor);
+            if (config.textColor)
+                this.pnlRowContainer.style.setProperty('--row-font_color', config.textColor);
             Reflect.deleteProperty(newConfig, 'backgroundColor')
+            Reflect.deleteProperty(newConfig, 'textColor')
             this.updateRowConfig(newConfig);
             this.updateGridColumnWidth();
         });
         application.EventBus.register(this, EVENT.ON_SHOW_BOTTOM_BLOCK, (targetRow: PageRow) => {
-            function _updateClass(elm: Control, className: string) {
-                if (elm.visible) {
-                    if (className === 'is-dragenter') {
-                        const blocks = self.getElementsByClassName('is-dragenter');
-                        for (let block of blocks) {
-                            block.classList.remove('is-dragenter');
-                        }
-                    }
-                    elm.classList.add(className);
-                } else {
-                    elm.classList.remove(className);
-                }
-            }
 
             const PageRows = this.closest('ide-rows');
             if (!PageRows) return;
+
+            function _updateClass(elm: Control, className: string) {
+                const blocks = PageRows.getElementsByClassName(className);
+                for (let block of blocks) {
+                    block.classList.remove(className);
+                }
+                elm.classList.add(className);
+            }
+
             if (targetRow.id == this.id) {
                 const bottomBlock = targetRow.querySelector('.row-bottom-block') as Control;
                 bottomBlock.visible = true;
@@ -1273,8 +1300,17 @@ export class PageRow extends Module {
 
     render() {
         return (
-            <i-panel id="pnlRowContainer" class={'page-row-container'} width="100%" height="100%">
-                <i-panel id="pnlRowWrap" class={'page-row'} width="100%" height="100%">
+            <i-panel
+                id="pnlRowContainer"
+                class={'page-row-container'}
+                width="100%" height="100%"
+                background={{color: 'var(--row-background, var(--builder-bg))'}}
+                font={{color: 'var(--row-font_color, var(--builder-color))'}}
+            >
+                <i-panel
+                    id="pnlRowWrap"
+                    class={'page-row'} width="100%" height="100%"
+                >
                     <i-button
                         caption=""
                         icon={{

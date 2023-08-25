@@ -9,6 +9,5 @@ export { GroupElementCommand } from './groupElement';
 export { UngroupElementCommand } from './ungroupElement';
 export { AddElementCommand } from './addElement';
 export { ReplaceElementCommand } from './replaceElement';
-export { ICommand, IDataColumn } from "./interface";
+export { ICommand, IDataColumn, IMergeType } from "./interface";
 export { UpdatePageSettingsCommand } from "./updatePageSetting";
-export { IMergeType } from "./type"
