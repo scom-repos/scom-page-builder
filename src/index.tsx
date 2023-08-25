@@ -146,10 +146,28 @@ export default class Editor extends Module {
             const pageRowsRect = this.pageRows.getBoundingClientRect();
             const pnlEditorRect = this.pnlEditor.getBoundingClientRect();
             // dragover on the below of rows
+            // if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
+            //     const lastRows = this.pageRows.querySelector('ide-row:last-child');
+            //     application.EventBus.dispatch(EVENT.ON_SHOW_BOTTOM_BLOCK, lastRows);
+            // }
+            const elementConfig = getDragData()
+            if (elementConfig?.module?.name === 'sectionStack' 
+                && event.clientX >= pageRowsRect.x 
+                && event.clientX <= pageRowsRect.x + pageRowsRect.width) {
+                const rows = self.getElementsByTagName('ide-row');
+                const rowsArray = Array.from(rows);
+                const targetRow = rowsArray.find(row => {
+                    const rowRect = row.getBoundingClientRect();
+                    if (rowRect.top <= event.clientY && rowRect.bottom >= event.clientY) return row;
+                })
+                if (targetRow) {
+                    application.EventBus.dispatch(EVENT.ON_SHOW_BOTTOM_BLOCK, targetRow);
+                }
+            } else if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
             if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
                 const lastRows = this.pageRows.querySelector('ide-row:last-child');
                 application.EventBus.dispatch(EVENT.ON_SHOW_BOTTOM_BLOCK, lastRows);
-            }
+            }}
         });
 
         function adjustScrollSpeed(mouseY: number) {

@@ -778,6 +778,8 @@ export class PageRow extends Module {
 
         this.addEventListener('dragenter', function (event) { 
             const eventTarget = event.target as HTMLElement;
+            const elementConfig = getDragData();
+            if (elementConfig?.module?.name === 'sectionStack') return;
             if (eventTarget && (eventTarget.classList.contains('fixed-grid-item') || eventTarget.classList.contains('fixed-grid'))) {
                 dragEnter(eventTarget as Control, event.clientX, event.clientY);
             }
@@ -1207,22 +1209,18 @@ export class PageRow extends Module {
             this.updateGridColumnWidth();
         });
         application.EventBus.register(this, EVENT.ON_SHOW_BOTTOM_BLOCK, (targetRow: PageRow) => {
-            function _updateClass(elm: Control, className: string) {
-                if (elm.visible) {
-                    if (className === 'is-dragenter') {
-                        const blocks = self.getElementsByClassName('is-dragenter');
-                        for (let block of blocks) {
-                            block.classList.remove('is-dragenter');
-                        }
-                    }
-                    elm.classList.add(className);
-                } else {
-                    elm.classList.remove(className);
-                }
-            }
 
             const PageRows = this.closest('ide-rows');
             if (!PageRows) return;
+
+            function _updateClass(elm: Control, className: string) {
+                const blocks = PageRows.getElementsByClassName(className);
+                for (let block of blocks) {
+                    block.classList.remove(className);
+                }
+                elm.classList.add(className);
+            }
+
             if (targetRow.id == this.id) {
                 const bottomBlock = targetRow.querySelector('.row-bottom-block') as Control;
                 bottomBlock.visible = true;

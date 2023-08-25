@@ -5516,7 +5516,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     removeRectangles();
             }
             this.addEventListener('dragenter', function (event) {
+                var _a;
                 const eventTarget = event.target;
+                const elementConfig = (0, index_46.getDragData)();
+                if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack')
+                    return;
                 if (eventTarget && (eventTarget.classList.contains('fixed-grid-item') || eventTarget.classList.contains('fixed-grid'))) {
                     dragEnter(eventTarget, event.clientX, event.clientY);
                 }
@@ -5528,6 +5532,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 let enterTarget;
                 const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') : undefined;
                 const elementConfig = (0, index_46.getDragData)();
+                // disable dragging layout to section
                 if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack')
                     return;
                 const isLayout = ((_b = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _b === void 0 ? void 0 : _b.name) === 'sectionStack';
@@ -5875,23 +5880,16 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 this.updateGridColumnWidth();
             });
             components_25.application.EventBus.register(this, index_44.EVENT.ON_SHOW_BOTTOM_BLOCK, (targetRow) => {
-                function _updateClass(elm, className) {
-                    if (elm.visible) {
-                        if (className === 'is-dragenter') {
-                            const blocks = self.getElementsByClassName('is-dragenter');
-                            for (let block of blocks) {
-                                block.classList.remove('is-dragenter');
-                            }
-                        }
-                        elm.classList.add(className);
-                    }
-                    else {
-                        elm.classList.remove(className);
-                    }
-                }
                 const PageRows = this.closest('ide-rows');
                 if (!PageRows)
                     return;
+                function _updateClass(elm, className) {
+                    const blocks = PageRows.getElementsByClassName(className);
+                    for (let block of blocks) {
+                        block.classList.remove(className);
+                    }
+                    elm.classList.add(className);
+                }
                 if (targetRow.id == this.id) {
                     const bottomBlock = targetRow.querySelector('.row-bottom-block');
                     bottomBlock.visible = true;
@@ -8959,6 +8957,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             const scrollThreshold = 100;
             const self = this;
             containerElement.addEventListener("dragover", (event) => {
+                var _a;
                 event.preventDefault();
                 if (!this.currentElement && !(0, index_88.getDragData)())
                     return;
@@ -8973,9 +8972,30 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 const pageRowsRect = this.pageRows.getBoundingClientRect();
                 const pnlEditorRect = this.pnlEditor.getBoundingClientRect();
                 // dragover on the below of rows
-                if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
-                    const lastRows = this.pageRows.querySelector('ide-row:last-child');
-                    components_43.application.EventBus.dispatch(index_87.EVENT.ON_SHOW_BOTTOM_BLOCK, lastRows);
+                // if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
+                //     const lastRows = this.pageRows.querySelector('ide-row:last-child');
+                //     application.EventBus.dispatch(EVENT.ON_SHOW_BOTTOM_BLOCK, lastRows);
+                // }
+                const elementConfig = (0, index_88.getDragData)();
+                if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack'
+                    && event.clientX >= pageRowsRect.x
+                    && event.clientX <= pageRowsRect.x + pageRowsRect.width) {
+                    const rows = self.getElementsByTagName('ide-row');
+                    const rowsArray = Array.from(rows);
+                    const targetRow = rowsArray.find(row => {
+                        const rowRect = row.getBoundingClientRect();
+                        if (rowRect.top <= event.clientY && rowRect.bottom >= event.clientY)
+                            return row;
+                    });
+                    if (targetRow) {
+                        components_43.application.EventBus.dispatch(index_87.EVENT.ON_SHOW_BOTTOM_BLOCK, targetRow);
+                    }
+                }
+                else if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
+                    if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
+                        const lastRows = this.pageRows.querySelector('ide-row:last-child');
+                        components_43.application.EventBus.dispatch(index_87.EVENT.ON_SHOW_BOTTOM_BLOCK, lastRows);
+                    }
                 }
             });
             function adjustScrollSpeed(mouseY) {
