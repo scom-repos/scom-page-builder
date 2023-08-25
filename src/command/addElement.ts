@@ -84,7 +84,7 @@ export class AddElementCommand implements ICommand {
         showHeader: isMicroDapps,
         showFooter: isMicroDapps
       },
-      // elements: this.data.element,
+      // elements: this.data.elements,
       module: this.data.module,
       tag: {}
     };
