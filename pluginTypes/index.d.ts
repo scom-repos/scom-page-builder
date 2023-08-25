@@ -245,6 +245,8 @@ declare module "@scom/scom-page-builder/utility/interface.ts" {
         clientY: number;
         startX: number;
         isUngroup: boolean;
+        isLayout: boolean;
+        layoutLength?: number;
     }
 }
 /// <amd-module name="@scom/scom-page-builder/store/index.ts" />
@@ -350,11 +352,13 @@ declare module "@scom/scom-page-builder/store/index.ts" {
 declare module "@scom/scom-page-builder/utility/dragDrop.ts" {
     import { DragDropResult, checkDragDropResultParams } from "@scom/scom-page-builder/utility/interface.ts";
     export const checkDragDropResult: (dragDrop: checkDragDropResultParams) => DragDropResult;
-    export const findNearestSectionInRow: (row: any, clientX: number, clientY: number, mouseOn: boolean, excludingSectionId?: string[]) => any;
-    export const getDropFrontBackResult: (dropRow: any, nearestDropSection: any, dragSectionCol: number, dragSectionColSpan: number, isFront: boolean, data: any) => {
+    const findNearestSectionInRow: (row: any, clientX: number, clientY: number, mouseOn: boolean, excludingSectionId?: string[]) => any;
+    const getDropFrontBackResult: (dropRow: any, nearestDropSection: any, dragSectionCol: number, dragSectionColSpan: number, isFront: boolean, data: any) => {
         newElmdata: any;
         newRowData: any;
     };
+    const resizeDefaultLayout: (column: number, columnSpan: number, elmList: any[]) => any[];
+    export { findNearestSectionInRow, getDropFrontBackResult, resizeDefaultLayout };
 }
 /// <amd-module name="@scom/scom-page-builder/utility/index.ts" />
 declare module "@scom/scom-page-builder/utility/index.ts" {

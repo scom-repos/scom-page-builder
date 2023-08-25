@@ -997,7 +997,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
 define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@scom/scom-page-builder/store/index.ts"], function (require, exports, index_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.getDropFrontBackResult = exports.findNearestSectionInRow = exports.checkDragDropResult = void 0;
+    exports.resizeDefaultLayout = exports.getDropFrontBackResult = exports.findNearestSectionInRow = exports.checkDragDropResult = void 0;
     const checkDragDropResult = (dragDrop) => {
         var _a, _b;
         if (!dragDrop.dropTarget)
@@ -1029,8 +1029,8 @@ define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@s
         }
         // if it is ungroup, need to include the current section
         const mouseOnSection = dragDrop.isUngroup || !dragDrop.dragSection ?
-            (0, exports.findNearestSectionInRow)(dropRow, dragDrop.clientX, dragDrop.clientY, true) :
-            (0, exports.findNearestSectionInRow)(dropRow, dragDrop.clientX, dragDrop.clientY, true, [dragDrop.dragSection.id]);
+            findNearestSectionInRow(dropRow, dragDrop.clientX, dragDrop.clientY, true) :
+            findNearestSectionInRow(dropRow, dragDrop.clientX, dragDrop.clientY, true, [dragDrop.dragSection.id]);
         if (mouseOnSection) {
             // case 0: drag from toolbar to an element
             const nearestToolbar = (!dragDrop.dragSection) ?
@@ -1057,7 +1057,7 @@ define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@s
                 const isFront = mergeSide == "front" ? true : false;
                 const dragSectionCol = dragDrop.dragSection ? parseInt(dragDrop.dragSection.dataset.column) : 4;
                 const dragSectionColSpan = dragDrop.dragSection ? parseInt(dragDrop.dragSection.dataset.columnSpan) : 4;
-                const dropFrontBackResult = (0, exports.getDropFrontBackResult)(dropRow, mouseOnSection, dragSectionCol, dragSectionColSpan, isFront, (_a = dragDrop.dragToolbar) === null || _a === void 0 ? void 0 : _a.dataset);
+                const dropFrontBackResult = getDropFrontBackResult(dropRow, mouseOnSection, dragSectionCol, dragSectionColSpan, isFront, (_a = dragDrop.dragToolbar) === null || _a === void 0 ? void 0 : _a.dataset);
                 // check if it can merge with the drop section
                 if (dropFrontBackResult) {
                     return {
@@ -1107,7 +1107,7 @@ define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@s
                         const isFront = (dragDrop.clientX < collidedSectionBound.left) ? true : false;
                         const dragSectionCol = dragDrop.dragSection ? parseInt(dragDrop.dragSection.dataset.column) : 4;
                         const dragSectionColSpan = dragDrop.dragSection ? parseInt(dragDrop.dragSection.dataset.columnSpan) : 4;
-                        const dropFrontBackResult = (0, exports.getDropFrontBackResult)(dropRow, collidedSection, dragSectionCol, dragSectionColSpan, isFront, (_b = dragDrop.dragToolbar) === null || _b === void 0 ? void 0 : _b.dataset);
+                        const dropFrontBackResult = getDropFrontBackResult(dropRow, collidedSection, dragSectionCol, dragSectionColSpan, isFront, (_b = dragDrop.dragToolbar) === null || _b === void 0 ? void 0 : _b.dataset);
                         return {
                             canDrop: true,
                             details: {
@@ -1464,12 +1464,12 @@ define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@s
                     splitIndex :
                     softEmptySpace - splitIndex;
                 const newElData = {
-                    id: data.id,
+                    id: data === null || data === void 0 ? void 0 : data.id,
                     column: newColumn,
                     columnSpan: newColumnSpan,
-                    properties: data.properties,
-                    module: data.module,
-                    tag: data.tag
+                    properties: data === null || data === void 0 ? void 0 : data.properties,
+                    module: data === null || data === void 0 ? void 0 : data.module,
+                    tag: data === null || data === void 0 ? void 0 : data.tag
                 };
                 return {
                     newElmdata: newElData,
@@ -1483,6 +1483,33 @@ define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@s
         }
     };
     exports.getDropFrontBackResult = getDropFrontBackResult;
+    const distributeElementsEvenly = (numberOfElement, numberOfColumn) => {
+        const elementsPerColumn = Math.floor(numberOfElement / numberOfColumn);
+        const extraElements = numberOfElement % numberOfColumn;
+        const distribution = [];
+        for (let column = 0; column < numberOfColumn; column++) {
+            const columnElements = elementsPerColumn + (column < extraElements ? 1 : 0);
+            distribution.push(columnElements);
+        }
+        return distribution;
+    };
+    const resizeDefaultLayout = (column, columnSpan, elmList) => {
+        const resizedDefaultLayout = elmList;
+        const sortedElmList = elmList.slice().sort((a, b) => Number(a.column) - Number(b.column));
+        // const elmListStartCol = sortedElmList[0].column;
+        // const elmListEndCol = sortedElmList[sortedElmList.length - 1].column + sortedElmList[sortedElmList.length - 1].columnSpan - 1;
+        // const elmListColumn = elmListStartCol;
+        // const elmListColumnSpan = elmListEndCol - elmListStartCol + 1;
+        const distribution = distributeElementsEvenly(sortedElmList.length, columnSpan);
+        let endOfElms = column;
+        for (let i = 0; i < sortedElmList.length; i++) {
+            resizedDefaultLayout[i].column = endOfElms;
+            resizedDefaultLayout[i].columnSpan = endOfElms + distribution[i] - 1;
+            endOfElms += endOfElms + distribution[i];
+        }
+        return resizedDefaultLayout;
+    };
+    exports.resizeDefaultLayout = resizeDefaultLayout;
 });
 define("@scom/scom-page-builder/utility/index.ts", ["require", "exports", "@ijstech/eth-wallet", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/utility/dragDrop.ts"], function (require, exports, eth_wallet_1, index_3, dragDrop_1) {
     "use strict";
@@ -2843,7 +2870,7 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
                     showHeader: isMicroDapps,
                     showFooter: isMicroDapps
                 },
-                // elements: this.data.element,
+                // elements: this.data.elements,
                 module: this.data.module,
                 tag: {}
             };
@@ -5495,10 +5522,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
             });
             this.addEventListener('dragover', function (event) {
+                var _a, _b, _c, _d, _e;
                 event.preventDefault();
                 const eventTarget = event.target;
                 let enterTarget;
                 const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') : undefined;
+                const elementConfig = (0, index_46.getDragData)();
+                const isLayout = ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack';
                 const dragDropResult = (0, index_48.checkDragDropResult)({
                     dropTarget: eventTarget,
                     dragSection: dragStartTargetSection,
@@ -5506,12 +5536,15 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     clientX: event.clientX,
                     clientY: event.clientY,
                     startX: startX,
-                    isUngroup: self.isUngrouping()
+                    isUngroup: self.isUngrouping(),
+                    isLayout: ((_c = (_b = (0, index_46.getDragData)()) === null || _b === void 0 ? void 0 : _b.module) === null || _c === void 0 ? void 0 : _c.name) === 'sectionStack',
+                    layoutLength: isLayout ? (_e = (_d = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _d === void 0 ? void 0 : _d.elements) === null || _e === void 0 ? void 0 : _e.length : undefined
                 });
                 // const pageRow = eventTarget.closest('ide-row') as PageRow;
                 // const elementConfig = getDragData();
                 // if (pageRow && elementConfig?.module?.name === 'sectionStack') {
                 // }
+                // if (elementConfig?.module?.name === 'sectionStack') return;
                 if (dragDropResult.canDrop && dragDropResult.details) {
                     // dragover rowBlock
                     if (dragDropResult.details.rowBlock) {
@@ -5607,6 +5640,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 return nearestElement;
             }
             this.addEventListener('drop', async function (event) {
+                var _a, _b, _c;
                 self.pnlRow.minHeight = 'auto';
                 const elementConfig = (0, index_46.getDragData)();
                 const eventTarget = event.target;
@@ -5627,6 +5661,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 // if (!self.currentElement) return;
                 const isUngrouping = self.isUngrouping();
                 const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') : undefined;
+                const isLayout = ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack';
                 const dragDropResult = (0, index_48.checkDragDropResult)({
                     dropTarget: eventTarget,
                     dragSection: dragStartTargetSection,
@@ -5634,7 +5669,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     clientX: event.clientX,
                     clientY: event.clientY,
                     startX: startX,
-                    isUngroup: self.isUngrouping()
+                    isUngroup: self.isUngrouping(),
+                    isLayout: isLayout,
+                    layoutLength: isLayout ? (_c = (_b = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _b === void 0 ? void 0 : _b.elements) === null || _c === void 0 ? void 0 : _c.length : undefined
                 });
                 if (dragDropResult.canDrop && dragDropResult.details) {
                     // let dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
@@ -5642,6 +5679,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     // drop on rowBlock
                     if (dragDropResult.details.rowBlock) {
                         const targetRow = dragDropResult.details.rowBlock.closest('ide-row');
+                        // TODO: accept layout
                         if (dragDropResult.details.rowBlock.classList.contains('row-top-block')) {
                             targetRow && self.onPrependRow(targetRow);
                         }
@@ -5664,7 +5702,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 const isAppend = dragDropResult.details.dropSide == "back";
                                 const dropBlock = isAppend ? dropSection.querySelector('.front-block') : dropSection.querySelector('.back-block');
                                 const dragCmd = elementConfig
-                                    ? new index_47.AddElementCommand(self.getNewElementData(), isAppend, false, dropSection, null)
+                                    // TODO: accept layout
+                                    ? new index_47.AddElementCommand(self.getNewElementData(), isAppend, false, dropBlock, null)
                                     : new index_47.DragElementCommand(self.currentElement, dropBlock, isAppend);
                                 await index_47.commandHistory.execute(dragCmd);
                             }
@@ -5681,6 +5720,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 const isAppend = dragDropResult.details.dropSide == "back";
                                 const dropBlock = isAppend ? dropSection.querySelector('.front-block') : dropSection.querySelector('.back-block');
                                 const dragCmd = elementConfig
+                                    // TODO: accept layout
                                     ? new index_47.AddElementCommand(self.getNewElementData(), isAppend, false, dropSection, null)
                                     : new index_47.DragElementCommand(self.currentElement, dropBlock, isAppend);
                                 await index_47.commandHistory.execute(dragCmd);
@@ -5711,7 +5751,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             resetDragTarget();
                         }
                         else {
-                            console.log("self.getNewElementData()", self.getNewElementData());
                             const dragCmd = (elementConfig) ?
                                 new index_47.AddElementCommand(self.getNewElementData(), true, false, dragDropResult.details.nearestPanel, pageRow) :
                                 new index_47.DragElementCommand(self.currentElement, dragDropResult.details.nearestPanel, true, false);
@@ -5779,6 +5818,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             const config = { id: (0, index_48.generateUUID)() };
             if (newPageRow) {
                 const dragCmd = (0, index_46.getDragData)()
+                    // TODO: accept layout
                     ? new index_47.AddElementCommand(this.getNewElementData(), true, true, null, newPageRow)
                     : this.isUngrouping()
                         ? new index_47.UngroupElementCommand(this.currentToolbar, this.currentElement, newPageRow, config, 'none')
@@ -5792,6 +5832,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             const config = { id: (0, index_48.generateUUID)() };
             if (newPageRow) {
                 const dragCmd = (0, index_46.getDragData)()
+                    // TODO: accept layout
                     ? new index_47.AddElementCommand(this.getNewElementData(), true, true, null, newPageRow)
                     : this.isUngrouping()
                         ? new index_47.UngroupElementCommand(this.currentToolbar, this.currentElement, newPageRow, config, 'none')

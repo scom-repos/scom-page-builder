@@ -788,6 +788,8 @@ export class PageRow extends Module {
             const eventTarget = event.target as Control;
             let enterTarget: Control;
             const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
+            const elementConfig = getDragData();
+            const isLayout = elementConfig?.module?.name === 'sectionStack';
             const dragDropResult = checkDragDropResult({
                 dropTarget: eventTarget,
                 dragSection: dragStartTargetSection,
@@ -795,7 +797,9 @@ export class PageRow extends Module {
                 clientX: event.clientX,
                 clientY: event.clientY,
                 startX: startX,
-                isUngroup: self.isUngrouping()
+                isUngroup: self.isUngrouping(),
+                isLayout: getDragData()?.module?.name === 'sectionStack',
+                layoutLength: isLayout? elementConfig?.module?.elements?.length : undefined
             });
 
             // const pageRow = eventTarget.closest('ide-row') as PageRow;
@@ -803,6 +807,7 @@ export class PageRow extends Module {
             // if (pageRow && elementConfig?.module?.name === 'sectionStack') {
 
             // }
+            // if (elementConfig?.module?.name === 'sectionStack') return;
 
             if (dragDropResult.canDrop && dragDropResult.details) {
 
@@ -934,6 +939,7 @@ export class PageRow extends Module {
 
             const isUngrouping: boolean = self.isUngrouping();
             const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
+            const isLayout = elementConfig?.module?.name === 'sectionStack';
             const dragDropResult = checkDragDropResult({
                 dropTarget: eventTarget,
                 dragSection: dragStartTargetSection,
@@ -941,7 +947,9 @@ export class PageRow extends Module {
                 clientX: event.clientX,
                 clientY: event.clientY,
                 startX: startX,
-                isUngroup: self.isUngrouping()
+                isUngroup: self.isUngrouping(),
+                isLayout: isLayout,
+                layoutLength: isLayout? elementConfig?.module?.elements?.length : undefined
             });
 
             if (dragDropResult.canDrop && dragDropResult.details) {
@@ -952,6 +960,7 @@ export class PageRow extends Module {
                 // drop on rowBlock
                 if (dragDropResult.details.rowBlock) {
                     const targetRow = dragDropResult.details.rowBlock.closest('ide-row') as PageRow;
+                    // TODO: accept layout
                     if (dragDropResult.details.rowBlock.classList.contains('row-top-block')) {
                         targetRow && self.onPrependRow(targetRow);
                     } else if (dragDropResult.details.rowBlock.classList.contains('row-bottom-block')) {
@@ -981,7 +990,8 @@ export class PageRow extends Module {
                             const dropBlock = isAppend? dropSection.querySelector('.front-block') : dropSection.querySelector('.back-block');
 
                             const dragCmd = elementConfig
-                                ? new AddElementCommand(self.getNewElementData(), isAppend, false, dropSection, null)
+                                // TODO: accept layout
+                                ? new AddElementCommand(self.getNewElementData(), isAppend, false, dropBlock as Control, null)
                                 : new DragElementCommand(self.currentElement, dropBlock as Control, isAppend);
                             await commandHistory.execute(dragCmd);
                         }
@@ -1005,6 +1015,7 @@ export class PageRow extends Module {
                             const isAppend = dragDropResult.details.dropSide == "back";
                             const dropBlock = isAppend? dropSection.querySelector('.front-block') : dropSection.querySelector('.back-block');
                             const dragCmd = elementConfig
+                                // TODO: accept layout
                                 ? new AddElementCommand(self.getNewElementData(), isAppend, false, dropSection, null)
                                 : new DragElementCommand(self.currentElement, dropBlock as Control, isAppend);
                             await commandHistory.execute(dragCmd);
@@ -1056,7 +1067,6 @@ export class PageRow extends Module {
                         dragCmd && commandHistory.execute(dragCmd);
                         resetDragTarget();
                     } else {
-                        console.log("self.getNewElementData()", self.getNewElementData())
                         const dragCmd = (elementConfig)? 
                             new AddElementCommand(
                                 self.getNewElementData(),
@@ -1138,6 +1148,7 @@ export class PageRow extends Module {
         const config = {id: generateUUID()};
         if (newPageRow) {
             const dragCmd = getDragData()
+                // TODO: accept layout
                 ? new AddElementCommand(this.getNewElementData(), true, true, null, newPageRow)
                 : this.isUngrouping()
                 ? new UngroupElementCommand(this.currentToolbar, this.currentElement, newPageRow, config, 'none')
@@ -1152,6 +1163,7 @@ export class PageRow extends Module {
         const config = {id: generateUUID()};
         if (newPageRow) {
             const dragCmd = getDragData()
+                // TODO: accept layout
                 ? new AddElementCommand(this.getNewElementData(), true, true, null, newPageRow)
                 : this.isUngrouping()
                 ? new UngroupElementCommand(this.currentToolbar, this.currentElement, newPageRow, config, 'none')
