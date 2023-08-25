@@ -131,6 +131,8 @@ export class PageRow extends Module {
                 class={ROW_TOP_CLASS}
             ></i-panel>
         );
+        this.style.setProperty('--row-background', 'var(--builder-bg)')
+        this.style.setProperty('--row-font_color', 'var(--builder-color)')
     }
 
     toggleUI(value: boolean) {
@@ -239,18 +241,23 @@ export class PageRow extends Module {
             } else {
                 this.pnlRowWrap.border.width = 0
             }
-            this.background.color = 'transparent';
-            if(backdropImage)
+            // this.background.color = 'transparent';
+            if (backdropImage)
                 this.background.image = backdropImage;
-            else if (backdropColor)
-                this.background.color = backdropColor;
+            else // if (backdropColor) this.background.color = backdropColor;
+                this.style.setProperty('--row-background', backdropColor || 'var(--builder-bg)')
             if (!image && !backdropImage) this.background.image = undefined
         } else {
             this.pnlRowWrap.border.width = 0
-            if (backgroundColor) this.background.color = backgroundColor;
+            // if (backgroundColor)
+                // this.background.color = backgroundColor;
+            this.style.setProperty('--row-background', backgroundColor || 'var(--builder-bg)')
+            this.background.image = ''
         }
-        if (backgroundColor) this.pnlRowContainer.background.color = backgroundColor;
-        if (textColor) this.pnlRowContainer.font = {color: textColor};
+        // if (backgroundColor) {
+        //     this.pnlRowContainer.background.color = backgroundColor;
+        // }
+        // if (textColor) this.pnlRowContainer.font = {color: textColor};
         this.pnlRowContainer.maxWidth = sectionWidth ?? '100%';
         if (margin) this.pnlRowContainer.margin = getMargin(margin);
         this.pnlRowContainer.width = margin?.x && margin?.x !== 'auto' ? 'auto' : '100%';
@@ -562,7 +569,7 @@ export class PageRow extends Module {
             const cannotDrag = toolbars.find((toolbar) => {
                 return toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting');
             });
-            const isCurrentTxt = targetToolbar.classList.contains('is-textbox') && (!mouseDownEl || !mouseDownEl.closest('.dragger'));
+            const isCurrentTxt = targetToolbar?.classList.contains('is-textbox') && (!mouseDownEl || !mouseDownEl.closest('.dragger'));
             if (targetSection && (!cannotDrag && !isCurrentTxt)) {
                 self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
                 self.currentElement = targetSection;
@@ -1185,7 +1192,12 @@ export class PageRow extends Module {
                 newConfig = {...newConfig, ...parsedData};
             }
             pageObject.updateSection(id, {config: newConfig});
+            if (config.backgroundColor)
+                this.pnlRowContainer.style.setProperty('--row-background', config.backgroundColor);
+            if (config.textColor)
+                this.pnlRowContainer.style.setProperty('--row-font_color', config.textColor);
             Reflect.deleteProperty(newConfig, 'backgroundColor')
+            Reflect.deleteProperty(newConfig, 'textColor')
             this.updateRowConfig(newConfig);
             this.updateGridColumnWidth();
         });
@@ -1273,8 +1285,17 @@ export class PageRow extends Module {
 
     render() {
         return (
-            <i-panel id="pnlRowContainer" class={'page-row-container'} width="100%" height="100%">
-                <i-panel id="pnlRowWrap" class={'page-row'} width="100%" height="100%">
+            <i-panel
+                id="pnlRowContainer"
+                class={'page-row-container'}
+                width="100%" height="100%"
+                background={{color: 'var(--row-background, var(--builder-bg))'}}
+                font={{color: 'var(--row-font_color, var(--builder-color))'}}
+            >
+                <i-panel
+                    id="pnlRowWrap"
+                    class={'page-row'} width="100%" height="100%"
+                >
                     <i-button
                         caption=""
                         icon={{

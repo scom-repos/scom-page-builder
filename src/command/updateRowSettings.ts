@@ -51,10 +51,15 @@ export class UpdateRowSettingsCommand implements ICommand {
 
     if (updatedValues.includes('backgroundColor') || updatedValues.includes('textColor') || updatedValues.includes('textSize')) {
       const newValue: any = {};
-      if (updatedValues.includes('backgroundColor'))
+      if (updatedValues.includes('backgroundColor')) {
         newValue.backgroundColor = newConfig?.backgroundColor || '';
-      if (updatedValues.includes('textColor'))
+        const innerEl = this.element.querySelector('#pnlRowContainer')
+        innerEl && innerEl.style.setProperty('--row-background', newValue.backgroundColor)
+      }
+      if (updatedValues.includes('textColor')) {
         newValue.textColor = newConfig?.textColor || '';
+        this.element.style.setProperty('--row-font_color', newValue.textColor)
+      }
 
       const toolbars = this.element.querySelectorAll('ide-toolbar');
       for (let toolbar of toolbars) {
