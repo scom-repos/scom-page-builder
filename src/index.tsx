@@ -144,6 +144,10 @@ export default class Editor extends Module {
             const pageRowsRect = this.pageRows.getBoundingClientRect();
             const pnlEditorRect = this.pnlEditor.getBoundingClientRect();
             // dragover on the below of rows
+            // if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
+            //     const lastRows = this.pageRows.querySelector('ide-row:last-child');
+            //     application.EventBus.dispatch(EVENT.ON_SHOW_BOTTOM_BLOCK, lastRows);
+            // }
             const elementConfig = getDragData()
             if (elementConfig?.module?.name === 'sectionStack' 
                 && event.clientX >= pageRowsRect.x 
@@ -156,11 +160,12 @@ export default class Editor extends Module {
                 })
                 if (targetRow) {
                     application.EventBus.dispatch(EVENT.ON_SHOW_BOTTOM_BLOCK, targetRow);
-                } 
+                }
             } else if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
+            if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
                 const lastRows = this.pageRows.querySelector('ide-row:last-child');
                 application.EventBus.dispatch(EVENT.ON_SHOW_BOTTOM_BLOCK, lastRows);
-            }
+            }}
         });
 
         function adjustScrollSpeed(mouseY: number) {
@@ -185,7 +190,7 @@ export default class Editor extends Module {
             const elementConfig = getDragData();
             if (elementConfig?.module?.name === 'sectionStack') {
                 // add section
-                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { defaultElements: elementConfig.defaultElements });
+                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { elements: elementConfig.elements });
             } else {
                 const dragEnter = this.pnlEditor.querySelector('.is-dragenter') as Control;
                 const pageRow = dragEnter && dragEnter.closest('ide-row') as PageRow;

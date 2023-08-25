@@ -292,8 +292,8 @@ export class PageSidebar extends Module {
         if (eventTarget.id === 'sectionStack') {
             const layout = eventTarget.getAttribute("layout")
             const layoutCat = eventTarget.getAttribute("layoutCat")
-            const defaultElements = this.getDefaultElements(layoutCat, layout);
-            setDragData({ module: { name: 'sectionStack', path: '' }, defaultElements: defaultElements });
+            const elements = this.getDefaultElements(layoutCat, layout);
+            setDragData({ module: { name: 'sectionStack', path: '' }, elements: elements });
             eventTarget.classList.add('is-dragging');
             this.mdWidget.visible = false;
         }

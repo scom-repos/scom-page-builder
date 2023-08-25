@@ -217,8 +217,8 @@ declare module "@scom/scom-page-builder/utility/pathToRegexp.ts" {
      */
     export function pathToRegexp(path: Path, keys?: Key[], options?: TokensToRegexpOptions & ParseOptions): RegExp;
 }
-/// <amd-module name="@scom/scom-page-builder/utility/type.ts" />
-declare module "@scom/scom-page-builder/utility/type.ts" {
+/// <amd-module name="@scom/scom-page-builder/utility/interface.ts" />
+declare module "@scom/scom-page-builder/utility/interface.ts" {
     export type IMergeDropSide = "front" | "back" | "top" | "bottom";
     export type DragDropResultType = "move" | "merge";
     export type DragDropResultDetails = {
@@ -245,6 +245,8 @@ declare module "@scom/scom-page-builder/utility/type.ts" {
         clientY: number;
         startX: number;
         isUngroup: boolean;
+        isLayout: boolean;
+        layoutLength?: number;
     }
 }
 /// <amd-module name="@scom/scom-page-builder/store/index.ts" />
@@ -347,13 +349,15 @@ declare module "@scom/scom-page-builder/store/index.ts" {
 }
 /// <amd-module name="@scom/scom-page-builder/utility/dragDrop.ts" />
 declare module "@scom/scom-page-builder/utility/dragDrop.ts" {
-    import { DragDropResult, checkDragDropResultParams } from "@scom/scom-page-builder/utility/type.ts";
+    import { DragDropResult, checkDragDropResultParams } from "@scom/scom-page-builder/utility/interface.ts";
     export const checkDragDropResult: (dragDrop: checkDragDropResultParams) => DragDropResult;
-    export const findNearestSectionInRow: (row: any, clientX: number, clientY: number, mouseOn: boolean, excludingSectionId?: string[]) => any;
-    export const getDropFrontBackResult: (dropRow: any, nearestDropSection: any, dragSectionCol: number, dragSectionColSpan: number, isFront: boolean, data: any) => {
+    const findNearestSectionInRow: (row: any, clientX: number, clientY: number, mouseOn: boolean, excludingSectionId?: string[]) => any;
+    const getDropFrontBackResult: (dropRow: any, nearestDropSection: any, dragSectionCol: number, dragSectionColSpan: number, isFront: boolean, data: any) => {
         newElmdata: any;
         newRowData: any;
     };
+    const resizeDefaultLayout: (column: number, columnSpan: number, elmList: any[]) => any[];
+    export { findNearestSectionInRow, getDropFrontBackResult, resizeDefaultLayout };
 }
 /// <amd-module name="@scom/scom-page-builder/utility/index.ts" />
 declare module "@scom/scom-page-builder/utility/index.ts" {
@@ -609,7 +613,7 @@ declare module "@scom/scom-page-builder/interface/index.ts" {
         module: IPageBlockData;
         prependId?: string;
         appendId?: string;
-        defaultElements?: IPageElement[];
+        elements?: IPageElement[];
     }
     export const TEXTBOX_PATH = "scom-markdown-editor";
     export const IMAGE_PATH = "scom-image";
@@ -631,6 +635,7 @@ declare module "@scom/scom-page-builder/command/interface.ts" {
         column: number;
         columnSpan: number;
     }
+    export type IMergeType = "front" | "back" | "top" | "bottom" | "none";
 }
 /// <amd-module name="@scom/scom-page-builder/command/updateRow.ts" />
 declare module "@scom/scom-page-builder/command/updateRow.ts" {
@@ -804,15 +809,11 @@ declare module "@scom/scom-page-builder/command/groupElement.ts" {
         redo(): void;
     }
 }
-/// <amd-module name="@scom/scom-page-builder/command/type.ts" />
-declare module "@scom/scom-page-builder/command/type.ts" {
-    export type IMergeType = "front" | "back" | "top" | "bottom" | "none";
-}
 /// <amd-module name="@scom/scom-page-builder/command/ungroupElement.ts" />
 declare module "@scom/scom-page-builder/command/ungroupElement.ts" {
     import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
     import { Control } from "@ijstech/components";
-    import { IMergeType } from "@scom/scom-page-builder/command/type.ts";
+    import { IMergeType } from "@scom/scom-page-builder/command/interface.ts";
     export class UngroupElementCommand implements ICommand {
         private dragToolbarId;
         private dragSectionId;
@@ -921,9 +922,8 @@ declare module "@scom/scom-page-builder/command/index.ts" {
     export { UngroupElementCommand } from "@scom/scom-page-builder/command/ungroupElement.ts";
     export { AddElementCommand } from "@scom/scom-page-builder/command/addElement.ts";
     export { ReplaceElementCommand } from "@scom/scom-page-builder/command/replaceElement.ts";
-    export { ICommand, IDataColumn } from "@scom/scom-page-builder/command/interface.ts";
+    export { ICommand, IDataColumn, IMergeType } from "@scom/scom-page-builder/command/interface.ts";
     export { UpdatePageSettingsCommand } from "@scom/scom-page-builder/command/updatePageSetting.ts";
-    export { IMergeType } from "@scom/scom-page-builder/command/type.ts";
 }
 /// <amd-module name="@scom/scom-page-builder/page/pageHeader.css.ts" />
 declare module "@scom/scom-page-builder/page/pageHeader.css.ts" { }

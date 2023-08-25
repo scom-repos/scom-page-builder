@@ -32,7 +32,7 @@ export interface IElementConfig {
   // type: ElementType;
   prependId?: string;
   appendId?: string;
-  defaultElements?: IPageElement[];
+  elements?: IPageElement[];
 }
 export const TEXTBOX_PATH = 'scom-markdown-editor';
 export const IMAGE_PATH = 'scom-image';

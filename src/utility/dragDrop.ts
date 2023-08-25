@@ -1,4 +1,4 @@
-import { IMergeDropSide, DragDropResult, DragDropResultDetails, checkDragDropResultParams } from './type'
+import { IMergeDropSide, DragDropResult, DragDropResultDetails, checkDragDropResultParams } from './interface'
 // import { GAP_WIDTH } from '../interface/index';
 import { Control } from '@ijstech/components'
 import { pageObject } from "../store/index";
@@ -84,7 +84,7 @@ export const checkDragDropResult = (dragDrop: checkDragDropResultParams): DragDr
     } else {
         const fromSidebar: boolean = (!dragDrop.dragSection) ? true : false;
         const nearestPanel = findNearestFixedGridInRow(dragDrop.clientX, dragDrop.dropTarget);
-        
+
         const rowId = dragDrop.dropTarget.closest('ide-row').id.replace('row-', "")
         const rowData = pageObject.getSection(rowId);
 
@@ -313,7 +313,7 @@ const findNearestToolbarInSection = (section: Control, clientY: number, clientX:
     }
 }
 
-export const findNearestSectionInRow = (row: any, clientX: number, clientY: number, mouseOn: boolean, excludingSectionId?: string[]) => {
+const findNearestSectionInRow = (row: any, clientX: number, clientY: number, mouseOn: boolean, excludingSectionId?: string[]) => {
     if (mouseOn) {
         const sections = row.querySelectorAll('ide-section');
         for (let i = 0; i < sections.length; i++) {
@@ -375,7 +375,7 @@ const decideMergeSide = (dropToolbar: HTMLElement, clientX: number, clientY: num
     else return 'back';
 }
 
-export const getDropFrontBackResult = (dropRow: any, nearestDropSection: any, dragSectionCol: number,
+const getDropFrontBackResult = (dropRow: any, nearestDropSection: any, dragSectionCol: number,
     dragSectionColSpan: number, isFront: boolean, data: any): { newElmdata: any, newRowData: any } => {
     // drop on the back/front block of a section
     const dropRowId = dropRow.id.replace('row-', '')
@@ -505,12 +505,12 @@ export const getDropFrontBackResult = (dropRow: any, nearestDropSection: any, dr
                 softEmptySpace - splitIndex;
 
             const newElData = {
-                id: data.id,
+                id: data?.id,
                 column: newColumn,
                 columnSpan: newColumnSpan,
-                properties: data.properties,
-                module: data.module,
-                tag: data.tag
+                properties: data?.properties,
+                module: data?.module,
+                tag: data?.tag
             };
             return {
                 newElmdata: newElData,
@@ -522,4 +522,45 @@ export const getDropFrontBackResult = (dropRow: any, nearestDropSection: any, dr
             return;
         }
     }
+}
+
+const distributeElementsEvenly = (numberOfElement: number, numberOfColumn: number): number[] => {
+    const elementsPerColumn = Math.floor(numberOfElement / numberOfColumn);
+    const extraElements = numberOfElement % numberOfColumn;
+
+    const distribution: number[] = [];
+
+    for (let column = 0; column < numberOfColumn; column++) {
+        const columnElements = elementsPerColumn + (column < extraElements ? 1 : 0);
+        distribution.push(columnElements);
+    }
+
+    return distribution;
+}
+
+const resizeDefaultLayout = (column: number, columnSpan: number, elmList: any[]) => {
+    const resizedDefaultLayout = elmList;
+    const sortedElmList = elmList.slice().sort((a, b) => Number(a.column) - Number(b.column));
+
+    // const elmListStartCol = sortedElmList[0].column;
+    // const elmListEndCol = sortedElmList[sortedElmList.length - 1].column + sortedElmList[sortedElmList.length - 1].columnSpan - 1;
+    // const elmListColumn = elmListStartCol;
+    // const elmListColumnSpan = elmListEndCol - elmListStartCol + 1;
+
+    const distribution = distributeElementsEvenly(sortedElmList.length, columnSpan);
+
+    let endOfElms = column;
+    for (let i = 0; i < sortedElmList.length; i++) {
+        resizedDefaultLayout[i].column = endOfElms;
+        resizedDefaultLayout[i].columnSpan = endOfElms + distribution[i] - 1;
+        endOfElms += endOfElms + distribution[i];
+    }
+
+    return resizedDefaultLayout;
+}
+
+export {
+    findNearestSectionInRow,
+    getDropFrontBackResult,
+    resizeDefaultLayout
 }

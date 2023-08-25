@@ -22,8 +22,10 @@ export interface checkDragDropResultParams {
     dropTarget: HTMLElement,
     dragSection: HTMLElement,
     dragToolbar: HTMLElement,
-    clientX: number, 
-    clientY: number, 
+    clientX: number,
+    clientY: number,
     startX: number,
-    isUngroup: boolean
+    isUngroup: boolean,
+    isLayout: boolean,
+    layoutLength?: number
 }

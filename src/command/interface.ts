@@ -8,3 +8,5 @@ export interface IDataColumn {
   column: number;
   columnSpan: number;
 }
+
+export type IMergeType = "front" | "back" | "top" | "bottom" | "none";
