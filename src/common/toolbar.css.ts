@@ -199,7 +199,7 @@ Styles.cssRule('ide-toolbar', {
             }
           },
           'i-scom-markdown-editor': {
-            padding: '0.75rem 0'
+            padding: '0.75rem 0 0'
           }
         }
     }

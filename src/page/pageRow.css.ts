@@ -18,7 +18,7 @@ Styles.cssRule('ide-row', {
     transition: 'translate .3s ease-in',
     border: '1px solid transparent',
     boxSizing: 'border-box',
-    // backgroundColor: 'var(--builder-bg)',
+    backgroundColor: 'var(--row-background)',
     $nest: {
         '.page-row-container': {
             borderRadius: 10,
