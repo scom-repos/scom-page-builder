@@ -3650,21 +3650,26 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                         "type": "string",
                         "format": "color"
                     },
-                    "pt": {
-                        "title": "Top",
-                        "type": "number"
-                    },
-                    "pb": {
-                        "title": "Bottom",
-                        "type": "number"
-                    },
-                    "pl": {
-                        "title": "Left",
-                        "type": "number"
-                    },
-                    "pr": {
-                        "title": "Right",
-                        "type": "number"
+                    "padding": {
+                        "type": "object",
+                        "properties": {
+                            "bottom": {
+                                "title": "Bottom",
+                                "type": "number"
+                            },
+                            "left": {
+                                "title": "Left",
+                                "type": "number"
+                            },
+                            "right": {
+                                "title": "Right",
+                                "type": "number"
+                            },
+                            "top": {
+                                "title": "Top",
+                                "type": "number"
+                            },
+                        }
                     },
                     "fullWidth": {
                         "title": "Full width",
@@ -3914,19 +3919,19 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                                                 "elements": [
                                                     {
                                                         "type": "Control",
-                                                        "scope": "#/properties/pt"
+                                                        "scope": "#/properties/padding/properties/top"
                                                     },
                                                     {
                                                         "type": "Control",
-                                                        "scope": "#/properties/pb"
+                                                        "scope": "#/properties/padding/properties/bottom"
                                                     },
                                                     {
                                                         "type": "Control",
-                                                        "scope": "#/properties/pl"
+                                                        "scope": "#/properties/padding/properties/left"
                                                     },
                                                     {
                                                         "type": "Control",
-                                                        "scope": "#/properties/pr"
+                                                        "scope": "#/properties/padding/properties/right"
                                                     }
                                                 ]
                                             }
@@ -5033,7 +5038,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            const { image = '', backgroundColor, backdropColor, backdropImage, border, borderColor, sectionWidth, margin, align, fullWidth, pb, pl, pr, pt, ptb, plr, textColor } = config || {};
+            const { image = '', backgroundColor, backdropColor, backdropImage, border, borderColor, sectionWidth, margin, align, fullWidth, padding, ptb, plr, textColor } = config || {};
             if (!fullWidth) {
                 if (image)
                     this.background.image = image;
@@ -5066,12 +5071,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             if (margin)
                 this.pnlRowContainer.margin = (0, index_46.getMargin)(margin);
             this.pnlRowContainer.width = (margin === null || margin === void 0 ? void 0 : margin.x) && (margin === null || margin === void 0 ? void 0 : margin.x) !== 'auto' ? 'auto' : '100%';
-            this.pnlRowWrap.padding = {
-                top: pt !== undefined ? pt : ptb !== undefined ? ptb : 0,
-                bottom: pb !== undefined ? pb : ptb !== undefined ? ptb : 0,
-                left: pl !== undefined ? pl : plr !== undefined ? plr : 0,
-                right: pr !== undefined ? pr : plr !== undefined ? plr : 0,
-            };
+            // this.pnlRowWrap.padding = { 
+            //     top: pt !== undefined ? pt : ptb !== undefined ? ptb : 0,
+            //     bottom: pb !== undefined ? pb : ptb !== undefined ? ptb : 0,
+            //     left: pl !== undefined ? pl : plr !== undefined ? plr : 0,
+            //     right: pr !== undefined ? pr : plr !== undefined ? plr : 0,
+            // }
+            this.pnlRowWrap.padding = padding || {};
             if (align)
                 this.updateAlign();
         }
