@@ -1,15 +1,54 @@
-import { application, Container, Control, ControlElement, customElements, customModule, Module, Panel, Styles, VStack } from '@ijstech/components';
+import {
+    application,
+    Container,
+    Control,
+    ControlElement,
+    customElements,
+    customModule,
+    Module,
+    Panel,
+    Styles,
+    VStack
+} from '@ijstech/components';
 // import { } from '@ijstech/eth-contract'
-import { BuilderFooter, BuilderHeader } from './builder/index';
-import { EVENT } from './const/index';
-import { IPageData, IPageBlockData, IPageElement, IOnFetchComponentsOptions, IOnFetchComponentsResult, ICategory, ThemeType } from './interface/index';
-import { PageRow, PageRows, PageSidebar, PageMenu } from './page/index';
-import { getDragData, getRootDir, setRootDir as _setRootDir, pageObject, setPageBlocks, setSearchData, setSearchOptions, getSearchData, getPageBlocks, getCategories, setCategories, setTheme, getBackgroundColor, getFontColor, getDivider, getDefaultPageConfig, getMargin, setDefaultPageConfig } from './store/index';
-import { currentTheme } from './theme/index';
+import {BuilderFooter, BuilderHeader} from './builder/index';
+import {EVENT} from './const/index';
+import {
+    IPageData,
+    IPageBlockData,
+    IPageElement,
+    IOnFetchComponentsOptions,
+    IOnFetchComponentsResult,
+    ICategory,
+    ThemeType
+} from './interface/index';
+import {PageRow, PageRows, PageSidebar, PageMenu} from './page/index';
+import {
+    getDragData,
+    getRootDir,
+    setRootDir as _setRootDir,
+    pageObject,
+    setPageBlocks,
+    setSearchData,
+    setSearchOptions,
+    getSearchData,
+    getPageBlocks,
+    getCategories,
+    setCategories,
+    setTheme,
+    getBackgroundColor,
+    getFontColor,
+    getDivider,
+    getDefaultPageConfig,
+    getMargin,
+    setDefaultPageConfig
+} from './store/index';
+import {currentTheme} from './theme/index';
 import './index.css';
-import { SearchComponentsDialog } from './dialogs/index';
-import { commandHistory } from './command/index';
-export { IOnFetchComponentsOptions, IOnFetchComponentsResult };
+import {SearchComponentsDialog} from './dialogs/index';
+import {commandHistory} from './command/index';
+
+export {IOnFetchComponentsOptions, IOnFetchComponentsResult};
 
 const Theme = currentTheme;
 type onFetchComponentsCallback = (options: IOnFetchComponentsOptions) => Promise<IOnFetchComponentsResult>
@@ -103,9 +142,9 @@ export default class Editor extends Module {
     }
 
     isChanged(index?: number): boolean {
-        return commandHistory.commandIndex !== (index??-1);
+        return commandHistory.commandIndex !== (index ?? -1);
     }
-    
+
     async reset() {
         pageObject.sections = [];
         pageObject.footer = undefined;
@@ -121,7 +160,7 @@ export default class Editor extends Module {
     }
 
     async onFetchComponents(options: IOnFetchComponentsOptions): Promise<IOnFetchComponentsResult> {
-        return { items: [], total: 0 };
+        return {items: [], total: 0};
     }
 
     private initScrollEvent(containerElement: Control) {
@@ -149,8 +188,8 @@ export default class Editor extends Module {
             //     application.EventBus.dispatch(EVENT.ON_SHOW_BOTTOM_BLOCK, lastRows);
             // }
             const elementConfig = getDragData()
-            if (elementConfig?.module?.name === 'sectionStack' 
-                && event.clientX >= pageRowsRect.x 
+            if (elementConfig?.module?.name === 'sectionStack'
+                && event.clientX >= pageRowsRect.x
                 && event.clientX <= pageRowsRect.x + pageRowsRect.width) {
                 const rows = self.getElementsByTagName('ide-row');
                 const rowsArray = Array.from(rows);
@@ -169,7 +208,7 @@ export default class Editor extends Module {
         });
 
         function adjustScrollSpeed(mouseY: number) {
-            const { top, bottom } = containerElement.getBoundingClientRect();
+            const {top, bottom} = containerElement.getBoundingClientRect();
             const isNearTop = mouseY < top + scrollThreshold;
             const isNearBottom = mouseY > bottom - scrollThreshold;
             const isNearWindowTop = mouseY <= scrollThreshold;
@@ -182,7 +221,7 @@ export default class Editor extends Module {
                 // const scrollFactor = 1 + (scrollThreshold - scrollAmountBottom) / scrollThreshold;
                 containerElement.scrollTop += scrollSpeed;
             } else {
-                containerElement.scrollTo({ behavior: 'smooth', top: containerElement.scrollTop });
+                containerElement.scrollTo({behavior: 'smooth', top: containerElement.scrollTop});
             }
         }
 
@@ -190,12 +229,12 @@ export default class Editor extends Module {
             const elementConfig = getDragData();
             if (elementConfig?.module?.name === 'sectionStack') {
                 // add section
-                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { elements: elementConfig.elements });
+                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, {defaultElements: elementConfig.defaultElements});
             } else {
                 const dragEnter = this.pnlEditor.querySelector('.is-dragenter') as Control;
                 const pageRow = dragEnter && dragEnter.closest('ide-row') as PageRow;
                 if (pageRow) {
-                    const customDropEvent = new Event('drop', { bubbles: true, cancelable: true });
+                    const customDropEvent = new Event('drop', {bubbles: true, cancelable: true});
                     pageRow.dispatchEvent(customDropEvent);
                 } else if (!pageObject.sections?.length) {
                     // add section
@@ -281,9 +320,37 @@ export default class Editor extends Module {
     }
 
     private updatePageConfig() {
-        const { backgroundColor, margin } = getDefaultPageConfig();
-        this.style.setProperty('--builder-bg', backgroundColor);
+        const config = getDefaultPageConfig();
+        const {
+            backgroundColor,
+            margin,
+            textColor,
+            textSize,
+            customTextSize,
+            customBackgroundColor,
+            customTextColor,
+            backgroundImage,
+            ptb,
+            plr,
+            sectionWidth
+        } = config;
+        application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {...config});
+        // if (backgroundImage) {
+        //     this.style.setProperty('--builder-bg', `url("${backgroundImage}") center center fixed`);
+        // } else if (customBackgroundColor && backgroundColor) {
+        //     this.style.setProperty('--builder-bg', backgroundColor);
+        // }
+
+        // if (customTextSize && textSize && ["xs", "sm", "md", "lg", "xl"].includes(textSize)) {
+        //     this.classList.add(`font-${textSize}`);
+        // }
         if (this.pnlEditor) {
+            this.pnlEditor.padding = {
+                left: plr,
+                right: plr,
+                top: ptb,
+                bottom: ptb
+            };
             this.pnlEditor.maxWidth = '100%'; // maxWidth ?? '100%';
             const marginStyle = getMargin(margin);
             this.pnlEditor.margin = marginStyle;
@@ -314,7 +381,16 @@ export default class Editor extends Module {
             application.EventBus.register(this, EVENT.ON_FETCH_COMPONENTS, this.onSearch)
         )
         this.events.push(
-            application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: { image: string, customTextSize: boolean, textSize: string }) => {
+            application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: {
+                image: string,
+                customBackgroundColor?: boolean,
+                customTextColor?: boolean,
+                customTextSize: boolean,
+                backgroundColor?: string,
+                textColor?: string,
+                textSize?: string
+            }) => {
+                const {customBackgroundColor, customTextColor, customTextSize, backgroundColor, textColor, textSize} = data;
                 if (data.image) this.pnlEditor.style.backgroundImage = `url(${data.image})`
                 for (let i = this.classList.length - 1; i >= 0; i--) {
                     const className = this.classList[i];
@@ -322,8 +398,12 @@ export default class Editor extends Module {
                         this.classList.remove(className);
                     }
                 }
-                if (data.customTextSize && data.textSize) {
-                    this.classList.add(`font-${data.textSize}`)
+                if(customBackgroundColor && backgroundColor)
+                    this.style.setProperty('--builder-bg', backgroundColor);
+                if(customTextColor && textColor)
+                    this.style.setProperty('--builder-color', textColor);
+                if (customTextSize && textSize) {
+                    this.classList.add(`font-${textSize}`)
                 }
             })
         )
@@ -342,13 +422,13 @@ export default class Editor extends Module {
     }
 
     private async onSearch(options?: IOnFetchComponentsOptions) {
-        const params = {...options } || {
+        const params = {...options} || {
             category: undefined,
             pageNumber: undefined,
             pageSize: undefined
         };
-        const { items = [], total = 0 } = await this.onFetchComponents(params);
-        setSearchData({ items, total })
+        const {items = [], total = 0} = await this.onFetchComponents(params);
+        setSearchData({items, total})
         setSearchOptions(params);
         this.mdComponentsSearch.renderUI();
     }
@@ -379,43 +459,43 @@ export default class Editor extends Module {
                     height="calc(100% -64px)"
                     overflow="hidden"
                 > */}
-                    <i-panel
-                        id="pnlWrap"
-                        height="100%"
+                <i-panel
+                    id="pnlWrap"
+                    height="100%"
+                    width="100%"
+                    overflow={{y: 'auto', x: 'hidden'}}
+                    background={{color: '#f7f3ef'}}
+                >
+                    <i-vstack
+                        id="pageContent"
+                        // maxWidth="calc(100% - 6em)"
                         width="100%"
-                        overflow={{ y: 'auto', x: 'hidden' }}
-                        background={{ color: '#f7f3ef' }}
+                        horizontalAlignment='center'
+                        // margin={{ top: '3.5rem', left: 'auto', right: 'auto' }}
+                        // padding={{top: '1rem', bottom: '1rem'}}
                     >
-                        <i-vstack
-                            id="pageContent"
-                            // maxWidth="calc(100% - 6em)"
+                        <i-panel
+                            id="pnlEditor"
+                            // maxWidth={1024}
+                            minHeight="100vh"
                             width="100%"
-                            horizontalAlignment='center'
-                            // margin={{ top: '3.5rem', left: 'auto', right: 'auto' }}
-                            // padding={{top: '1rem', bottom: '1rem'}}
+                            margin={{top: 8, bottom: 8, left: 60, right: 60}}
+                            background={{color: 'var(--builder-bg)'}}
+                            class="pnl-editor-wrapper"
                         >
                             <i-panel
-                                id="pnlEditor"
-                                // maxWidth={1024}
-                                minHeight="100vh"
-                                width="100%"
-                                margin={{ top: 8, bottom: 8, left: 60, right: 60 }}
-                                background={{ color: 'var(--builder-bg)' }}
-                                class="pnl-editor-wrapper"
+                                id="contentWrapper"
+                                padding={{bottom: '12rem'}}
+                                minHeight="calc((100vh - 6rem) - 12rem)"
                             >
-                                <i-panel
-                                    id="contentWrapper"
-                                    padding={{ bottom: '12rem' }}
-                                    minHeight="calc((100vh - 6rem) - 12rem)"
-                                >
-                                    {/* <builder-header id="builderHeader"></builder-header> */}
-                                    <ide-rows id="pageRows" draggable={true}></ide-rows>
-                                </i-panel>
-                                <builder-footer id="builderFooter"></builder-footer>
+                                {/* <builder-header id="builderHeader"></builder-header> */}
+                                <ide-rows id="pageRows" draggable={true}></ide-rows>
                             </i-panel>
-                        </i-vstack>
-                    </i-panel>
-                    {/* <i-panel
+                            <builder-footer id="builderFooter"></builder-footer>
+                        </i-panel>
+                    </i-vstack>
+                </i-panel>
+                {/* <i-panel
                         id="pnlSidebar"
                         height="100%"
                         overflow={{ x: 'hidden', y: 'auto' }}

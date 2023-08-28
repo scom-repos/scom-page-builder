@@ -719,7 +719,10 @@ export class IDEToolbar extends Module {
             })
         )
         this.events.push(
-            application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: { backgroundColor?: string, textColor?: string, textSize?: string }) => {
+            application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: {
+                customBackgroundColor?: boolean, backgroundColor?: string,
+                customTextColor?: boolean, textColor?: string,
+                customTextSize?: boolean, textSize?: string }) => {
                 await this.updateUI(data);
             })
         )
@@ -729,19 +732,25 @@ export class IDEToolbar extends Module {
     }
 
     async updateUI(data: {
+        customBackgroundColor?: boolean,
         backgroundColor?: string;
+        customTextColor?: boolean,
         textColor?: string;
+        customTextSize?: boolean,
         textSize?: string;
     }) {
         if (this._component?.getConfigurators) {
             const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
             if (builderTarget?.setTag) {
-                const {backgroundColor, textColor, textSize} = data;
+                const {customBackgroundColor, backgroundColor, customTextColor, textColor, customTextSize, textSize} = data;
                 const oldTag = builderTarget?.getTag ? await builderTarget.getTag() : {};
                 const newData: any = {};
-                if (backgroundColor ) newData.backgroundColor = backgroundColor || '';
-                if (textColor) newData.textColor = textColor || '';
-                if (textSize) newData.textSize = textSize || '';
+                if(customBackgroundColor) newData.customBackgroundColor = customBackgroundColor;
+                if (customBackgroundColor && backgroundColor) newData.backgroundColor = backgroundColor || '';
+                if(customTextColor) newData.customTextColor = customTextColor;
+                if (customTextColor && textColor) newData.textColor = textColor || '';
+                if(customTextSize) newData.customTextSize = customTextSize;
+                if (customTextSize && textSize) newData.textSize = textSize || '';
                 await builderTarget.setTag({...oldTag, ...newData}, true);
             }
         }
