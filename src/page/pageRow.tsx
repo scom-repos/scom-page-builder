@@ -226,10 +226,7 @@ export class PageRow extends Module {
             margin,
             align,
             fullWidth,
-            pb,
-            pl,
-            pr,
-            pt,
+            padding,
             ptb,
             plr,
             textColor
@@ -261,12 +258,13 @@ export class PageRow extends Module {
         this.pnlRowContainer.maxWidth = sectionWidth ?? '100%';
         if (margin) this.pnlRowContainer.margin = getMargin(margin);
         this.pnlRowContainer.width = margin?.x && margin?.x !== 'auto' ? 'auto' : '100%';
-        this.pnlRowWrap.padding = { 
-            top: pt !== undefined ? pt : ptb !== undefined ? ptb : 0,
-            bottom: pb !== undefined ? pb : ptb !== undefined ? ptb : 0,
-            left: pl !== undefined ? pl : plr !== undefined ? plr : 0,
-            right: pr !== undefined ? pr : plr !== undefined ? plr : 0,
-        }
+        // this.pnlRowWrap.padding = { 
+        //     top: pt !== undefined ? pt : ptb !== undefined ? ptb : 0,
+        //     bottom: pb !== undefined ? pb : ptb !== undefined ? ptb : 0,
+        //     left: pl !== undefined ? pl : plr !== undefined ? plr : 0,
+        //     right: pr !== undefined ? pr : plr !== undefined ? plr : 0,
+        // }
+        this.pnlRowWrap.padding = padding || {};
         if (align) this.updateAlign();
     }
 

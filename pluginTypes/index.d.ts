@@ -551,10 +551,12 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         border?: boolean;
         borderColor?: string;
         fullWidth?: boolean;
-        pb?: number;
-        pl?: number;
-        pr?: number;
-        pt?: number;
+        padding?: {
+            top?: number | string;
+            bottom?: number | string;
+            left?: number | string;
+            right?: number | string;
+        };
     }
     export interface IOnFetchComponentsOptions {
         category?: string;
