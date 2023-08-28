@@ -5119,12 +5119,20 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         onDeleteRow() {
             const prependRow = this.previousElementSibling;
             const appendRow = this.nextElementSibling;
-            if (!prependRow && !appendRow) {
-                // Reject delete
-                return;
-            }
             const rowCmd = new index_47.UpdateRowCommand(this, this.parent, this.data, true, (prependRow === null || prependRow === void 0 ? void 0 : prependRow.id) || '', (appendRow === null || appendRow === void 0 ? void 0 : appendRow.id) || '');
             index_47.commandHistory.execute(rowCmd);
+            if (!prependRow && !appendRow) {
+                // create empty section
+                const newId = (0, index_48.generateUUID)();
+                const pageRows = this.parent.closest('ide-rows');
+                pageRows.setRows([
+                    {
+                        "id": `${newId}`,
+                        "row": 0,
+                        "elements": []
+                    }
+                ]);
+            }
         }
         onMoveUp() {
             this.actionsBar.classList.add('hidden');
@@ -7298,13 +7306,12 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
             }
         }
         async appendRow(rowData, prependId) {
-            var _a;
             const pageRow = (this.$render("ide-row", { maxWidth: "100%", maxHeight: "100%" }));
             if (!this._readonly) {
                 pageRow.border = { top: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' } };
                 this.initDragEvent(pageRow);
             }
-            pageRow.visible = !!((_a = rowData === null || rowData === void 0 ? void 0 : rowData.elements) === null || _a === void 0 ? void 0 : _a.length);
+            pageRow.visible = true; // !!rowData?.elements?.length;
             const addRowCmd = new index_65.UpdateRowCommand(pageRow, this.pnlRows, rowData, false, prependId);
             index_65.commandHistory.execute(addRowCmd);
             await pageRow.setData(rowData);

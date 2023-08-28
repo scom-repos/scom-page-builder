@@ -331,12 +331,20 @@ export class PageRow extends Module {
     onDeleteRow() {
         const prependRow = this.previousElementSibling;
         const appendRow = this.nextElementSibling;
-        if(!prependRow && !appendRow) {
-            // Reject delete
-            return;
-        }
         const rowCmd = new UpdateRowCommand(this, this.parent, this.data, true, prependRow?.id || '', appendRow?.id || '');
         commandHistory.execute(rowCmd);
+        if(!prependRow && !appendRow) {
+            // create empty section
+            const newId = generateUUID();
+            const pageRows = this.parent.closest('ide-rows') as any;
+            pageRows.setRows([
+                {
+                  "id": `${newId}`,
+                  "row": 0,
+                  "elements": []
+                }
+            ]);
+        }
     }
 
     onMoveUp() {
