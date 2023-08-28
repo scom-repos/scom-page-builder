@@ -5022,7 +5022,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         }
         async setData(rowData) {
             var _a, _b, _c, _d;
-            console.dir(rowData);
             this.clearData();
             const { id, row, elements, config } = rowData;
             this.id = `row-${id}`;
@@ -5032,7 +5031,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.updateRowConfig(config || (0, index_46.getPageConfig)());
             this.isCloned = ((_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.nodeName) !== 'BUILDER-HEADER';
             this.isChanged = ((_b = this.parentElement) === null || _b === void 0 ? void 0 : _b.nodeName) !== 'BUILDER-HEADER';
-            if (config.customTextSize && config.textSize) {
+            if ((config === null || config === void 0 ? void 0 : config.customTextSize) && (config === null || config === void 0 ? void 0 : config.textSize)) {
                 this.classList.add(`font-${config.textSize}`);
             }
             if (elements && elements.length > 0) {
@@ -5046,7 +5045,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            console.dir(config);
             const { image = '', backgroundColor, backdropColor, backdropImage, border, borderColor, sectionWidth, margin, align, fullWidth, padding, ptb, plr, textColor } = config || {};
             if (!fullWidth) {
                 if (image)
@@ -7298,7 +7296,6 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
             return index_66.pageObject.sections;
         }
         async setRows(rows) {
-            console.dir(rows);
             index_66.pageObject.sections = rows;
             await this.renderRows();
         }
