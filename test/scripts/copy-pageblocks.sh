@@ -9,7 +9,6 @@ mkdir dist/libs/@scom/scom-randomizer && cp -r node_modules/@scom/scom-randomize
 mkdir dist/libs/@scom/scom-video && cp -r node_modules/@scom/scom-video/dist/* dist/libs/@scom/scom-video &&
 mkdir dist/libs/@scom/scom-map && cp -r node_modules/@scom/scom-map/dist/* dist/libs/@scom/scom-map &&
 mkdir dist/libs/@scom/scom-content-block && cp -r node_modules/@scom/scom-content-block/dist/* dist/libs/@scom/scom-content-block &&
-mkdir dist/libs/@scom/scom-dune && cp -r node_modules/@scom/scom-dune/dist/* dist/libs/@scom/scom-dune &&
 mkdir dist/libs/@scom/scom-counter && cp -r node_modules/@scom/scom-counter/dist/* dist/libs/@scom/scom-counter &&
 mkdir dist/libs/@scom/scom-table && cp -r node_modules/@scom/scom-table/dist/* dist/libs/@scom/scom-table &&
 mkdir dist/libs/@scom/scom-pie-chart && cp -r node_modules/@scom/scom-pie-chart/dist/* dist/libs/@scom/scom-pie-chart &&

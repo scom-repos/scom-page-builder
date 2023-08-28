@@ -89,11 +89,6 @@
       "name": "Pie Chart",
       "path": "scom-pie-chart",
       "category": "charts"
-    },
-    "@scom/scom-dune": {
-      "name": "Dune Blocks",
-      "path": "scom-dune",
-      "category": "charts"
     }
   }
 }

@@ -2838,7 +2838,7 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
                 (0, columnUtils_2.getDropColumnData)(this.dropElm, sortedSections);
         }
         async execute() {
-            var _a, _b, _c, _d, _e, _f, _g, _h;
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
             if (!this.parent)
                 return;
             let column = 1;
@@ -2893,13 +2893,17 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
                     newElData.tag = widgetData.tag;
                 }
             }
-            const parentData = (_e = this.parent) === null || _e === void 0 ? void 0 : _e.data;
+            if (((_f = (_e = this.data) === null || _e === void 0 ? void 0 : _e.module) === null || _f === void 0 ? void 0 : _f.category) === 'project-widgets') {
+                newElData.properties.guid = (_h = (_g = this.data) === null || _g === void 0 ? void 0 : _g.module) === null || _h === void 0 ? void 0 : _h.guid;
+                newElData.properties.name = (_k = (_j = this.data) === null || _j === void 0 ? void 0 : _j.module) === null || _k === void 0 ? void 0 : _k.name;
+            }
+            const parentData = (_l = this.parent) === null || _l === void 0 ? void 0 : _l.data;
             // Remove any elements that are not currently listed
             if (parentData === null || parentData === void 0 ? void 0 : parentData.elements) {
                 const selections = this.parent.querySelectorAll('ide-section');
                 for (const section of selections) {
                     const elm = parentData.elements.find((f) => f.id === section.id);
-                    if (!elm || (Object.keys(elm.module || {}).length === 0 && !((_f = elm.elements) === null || _f === void 0 ? void 0 : _f.length))) {
+                    if (!elm || (Object.keys(elm.module || {}).length === 0 && !((_m = elm.elements) === null || _m === void 0 ? void 0 : _m.length))) {
                         section.remove();
                     }
                 }
@@ -2907,9 +2911,9 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
             this.element = await this.parent.addElement(newElData);
             const parentId = this.parent.id.replace('row-', '');
             index_19.pageObject.addElement(parentId, newElData);
-            const elementRowId = (((_g = this.parent) === null || _g === void 0 ? void 0 : _g.id) || '').replace('row-', '');
+            const elementRowId = (((_o = this.parent) === null || _o === void 0 ? void 0 : _o.id) || '').replace('row-', '');
             const elementSection = index_19.pageObject.getRow(elementRowId);
-            this.parent.toggleUI(!!((_h = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _h === void 0 ? void 0 : _h.length));
+            this.parent.toggleUI(!!((_p = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _p === void 0 ? void 0 : _p.length));
         }
         undo() {
             var _a;

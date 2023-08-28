@@ -66,11 +66,6 @@ export class MainModule extends Module {
         "shownBackdrop": true
       },
       {
-        "name": "Dune Blocks",
-        "path": "scom-dune",
-        "category": "project-micro-dapps"
-      },
-      {
         "name": "Table",
         "path": "scom-table",
         "category": "charts"
