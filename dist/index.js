@@ -3638,21 +3638,26 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                         "type": "string",
                         "format": "color"
                     },
-                    "pt": {
-                        "title": "Top",
-                        "type": "number"
-                    },
-                    "pb": {
-                        "title": "Bottom",
-                        "type": "number"
-                    },
-                    "pl": {
-                        "title": "Left",
-                        "type": "number"
-                    },
-                    "pr": {
-                        "title": "Right",
-                        "type": "number"
+                    "padding": {
+                        "type": "object",
+                        "properties": {
+                            "bottom": {
+                                "title": "Bottom",
+                                "type": "number"
+                            },
+                            "left": {
+                                "title": "Left",
+                                "type": "number"
+                            },
+                            "right": {
+                                "title": "Right",
+                                "type": "number"
+                            },
+                            "top": {
+                                "title": "Top",
+                                "type": "number"
+                            },
+                        }
                     },
                     "fullWidth": {
                         "title": "Full width",
@@ -3902,19 +3907,19 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                                                 "elements": [
                                                     {
                                                         "type": "Control",
-                                                        "scope": "#/properties/pt"
+                                                        "scope": "#/properties/padding/properties/top"
                                                     },
                                                     {
                                                         "type": "Control",
-                                                        "scope": "#/properties/pb"
+                                                        "scope": "#/properties/padding/properties/bottom"
                                                     },
                                                     {
                                                         "type": "Control",
-                                                        "scope": "#/properties/pl"
+                                                        "scope": "#/properties/padding/properties/left"
                                                     },
                                                     {
                                                         "type": "Control",
-                                                        "scope": "#/properties/pr"
+                                                        "scope": "#/properties/padding/properties/right"
                                                     }
                                                 ]
                                             }
@@ -5021,7 +5026,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            debugger;
             const { image = '', backgroundColor, backdropColor, backdropImage, border, borderColor, sectionWidth, margin, align, fullWidth, pb, pl, pr, pt, ptb, plr, textColor } = config || {};
             if (!fullWidth) {
                 if (image)
@@ -9050,7 +9054,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 const elementConfig = (0, index_88.getDragData)();
                 if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
                     // add section
-                    components_43.application.EventBus.dispatch(index_87.EVENT.ON_ADD_SECTION, { elements: elementConfig.elements });
+                    components_43.application.EventBus.dispatch(index_87.EVENT.ON_ADD_SECTION, { defaultElements: elementConfig.defaultElements });
                 }
                 else {
                     const dragEnter = this.pnlEditor.querySelector('.is-dragenter');
@@ -9123,7 +9127,6 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         }
         async setData(value) {
             // pageObject.header = value.header;
-            console.log("[SCOM-PAGE-BUILDER] SET DATA", value);
             document.addEventListener('keyup', this.boundHandleKeyUp);
             index_88.pageObject.sections = (value === null || value === void 0 ? void 0 : value.sections) || [];
             index_88.pageObject.footer = value === null || value === void 0 ? void 0 : value.footer;
@@ -9143,7 +9146,6 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         updatePageConfig() {
             const config = (0, index_88.getDefaultPageConfig)();
             const { backgroundColor, margin, textColor, textSize, customTextSize, customBackgroundColor, customTextColor, backgroundImage, ptb, plr, sectionWidth } = config;
-            console.log('page config', config);
             components_43.application.EventBus.dispatch(index_87.EVENT.ON_UPDATE_PAGE_BG, Object.assign({}, config));
             // if (backgroundImage) {
             //     this.style.setProperty('--builder-bg', `url("${backgroundImage}") center center fixed`);
@@ -9180,7 +9182,6 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.events.push(components_43.application.EventBus.register(this, index_87.EVENT.ON_TOGGLE_SEARCH_MODAL, this.onToggleSearch));
             this.events.push(components_43.application.EventBus.register(this, index_87.EVENT.ON_FETCH_COMPONENTS, this.onSearch));
             this.events.push(components_43.application.EventBus.register(this, index_87.EVENT.ON_UPDATE_PAGE_BG, async (data) => {
-                console.log('ON_UPDATE_PAGE_BG index.tsx', data);
                 const { customBackgroundColor, customTextColor, customTextSize, backgroundColor, textColor, textSize } = data;
                 if (data.image)
                     this.pnlEditor.style.backgroundImage = `url(${data.image})`;
