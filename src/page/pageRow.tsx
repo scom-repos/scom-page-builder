@@ -1208,7 +1208,7 @@ export class PageRow extends Module {
                 const parsedData = rowsConfig[id] ? JSON.parse(rowsConfig[id]) : {};
                 newConfig = {...newConfig, ...parsedData};
             }
-            pageObject.updateSection(id, {config: newConfig});
+            pageObject.updateSection(id, {config: JSON.parse(JSON.stringify(newConfig))});
             if (config.backgroundColor)
                 this.pnlRowContainer.style.setProperty('--row-background', config.backgroundColor);
             if (config.textColor)

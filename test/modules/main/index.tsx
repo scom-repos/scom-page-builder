@@ -147,7 +147,11 @@ export class MainModule extends Module {
         "elements": []
       },
       config: {
-        sectionWidth: 1000
+        sectionWidth: 1000,
+        customBackgroundColor: true,
+        backgroundColor: '#ddd',
+        customTextColor: true,
+        textColor: '#000',
       }
     }
     this.pageBuilder.setData(data);
