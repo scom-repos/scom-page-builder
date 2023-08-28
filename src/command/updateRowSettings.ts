@@ -18,6 +18,9 @@ export class UpdateRowSettingsCommand implements ICommand {
 
   private getChangedValues(newValue: IPageSectionConfig, oldValue: IPageSectionConfig) {
     let result = [];
+    if (newValue.backgroundColor === undefined) newValue.backgroundColor = ''
+    if (newValue.textColor === undefined) newValue.textColor = ''
+    if (newValue.textSize === undefined) newValue.textSize = ''
     for (let prop in newValue) {
       if (prop === 'margin') {
         const { x: newX, y: newY } = newValue.margin;
@@ -48,20 +51,20 @@ export class UpdateRowSettingsCommand implements ICommand {
     if (customTextSize && textSize) {          
       this.element.classList.add(`font-${newConfig.textSize}`)
     }
-
-    console.log('updatedValues', updatedValues)
     if (updatedValues.includes('backgroundColor') || updatedValues.includes('textColor') || updatedValues.includes('textSize')) {
       const newValue: any = {};
       if (updatedValues.includes('backgroundColor')) {
         newValue.backgroundColor = newConfig?.backgroundColor || '';
+        newValue.customBackgroundColor = newConfig?.customBackgroundColor ?? false
         const innerEl = this.element.querySelector('#pnlRowContainer')
         innerEl && innerEl.style.setProperty('--row-background', newValue.backgroundColor)
       }
       if (updatedValues.includes('textColor')) {
         newValue.textColor = newConfig?.textColor || '';
+        newValue.customTextColor = newConfig?.customTextColor ?? false
         this.element.style.setProperty('--row-font_color', newValue.textColor)
       }
-
+      newValue.customTextSize = newConfig?.customTextSize ?? false
       const toolbars = this.element.querySelectorAll('ide-toolbar');
       for (let toolbar of toolbars) {
         toolbar.updateUI(newValue);
