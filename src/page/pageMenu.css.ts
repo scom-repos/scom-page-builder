@@ -11,13 +11,10 @@ export const menuBtnStyle = Styles.style({
 })
 
 export const menuCardStyle = Styles.style({
-    cursor: 'grab',
+    cursor: 'pointer',
     opacity: 1,
     transition: '0.3s',
     $nest: {
-        '&.is-dragging': {
-            opacity: 0.7
-        },
         '&:hover': {
             backgroundColor: "#b8e4f2"
         },

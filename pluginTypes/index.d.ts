@@ -1556,6 +1556,7 @@ declare module "@scom/scom-page-builder/page/pageMenu.tsx" {
         private draggingSectionId;
         private isEditing;
         private focusRowId;
+        private noDataTxt;
         init(): void;
         private initEventBus;
         private initEventListener;
@@ -1600,7 +1601,7 @@ declare module "@scom/scom-page-builder/page/pageSidebar.tsx" {
         renderToolbar(): void;
         renderWidgetCategories(): void;
         convertCamelCaseToString(input: string): string;
-        renderMenu(): void;
+        createMenu(): void;
         renderWidgets(category: ICategory): void;
         getLayoutIcon(layoutName: string): string;
         openWidgetModal(target: Control, category: ICategory): void;

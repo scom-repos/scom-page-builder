@@ -7826,13 +7826,10 @@ define("@scom/scom-page-builder/page/pageMenu.css.ts", ["require", "exports", "@
         }
     });
     exports.menuCardStyle = components_35.Styles.style({
-        cursor: 'grab',
+        cursor: 'pointer',
         opacity: 1,
         transition: '0.3s',
         $nest: {
-            '&.is-dragging': {
-                opacity: 0.7
-            },
             '&:hover': {
                 backgroundColor: "#b8e4f2"
             },
@@ -7885,6 +7882,7 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
         constructor() {
             super(...arguments);
             this.isEditing = false;
+            this.noDataTxt = "No section";
         }
         init() {
             super.init();
@@ -7918,6 +7916,7 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
                 this.draggingSectionId = undefined;
             });
             this.addEventListener('dragover', (event) => {
+                event.preventDefault();
                 if (!this.draggingSectionId) {
                     event.preventDefault();
                     return;
@@ -8004,6 +8003,7 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
             }
         }
         renderMenu() {
+            var _a;
             this.pnlMenu.clearInnerHTML();
             const sections = index_68.pageObject.getNonNullSections();
             const items = sections.map((section) => {
@@ -8012,14 +8012,23 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
                     rowId: section.id.replace("row-", "")
                 };
             });
+            if (!items.length) {
+                const txt = (this.$render("i-hstack", { verticalAlignment: "center", horizontalAlignment: 'start', width: "100%", overflow: "hidden" },
+                    this.$render("i-label", { caption: this.noDataTxt, font: { size: '16px', color: '#3b3838', weight: 530 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" })));
+                this.pnlMenu.appendChild(txt);
+                return;
+            }
+            const activeElm = document.querySelector('ide-toolbar.active') || document.querySelector('ide-row.active');
+            const activeSectionId = (_a = activeElm === null || activeElm === void 0 ? void 0 : activeElm.closest('ide-row')) === null || _a === void 0 ? void 0 : _a.id.replace('row-', "");
             // set the titles here
             const dropLine = (this.$render("i-panel", { id: `menuDropLine-0`, width: '100%', height: '5px' }));
             this.pnlMenu.appendChild(dropLine);
             for (let i = 0; i < items.length; i++) {
+                const isActive = activeSectionId == items[i].rowId;
                 const menuCard = (this.$render("i-hstack", { id: "menuCard", class: pageMenu_css_1.menuCardStyle, verticalAlignment: "center", horizontalAlignment: 'space-between', width: "100%", border: { radius: 5 }, overflow: "hidden", onClick: () => this.goToSection(items[i].rowId) },
                     this.$render("i-hstack", { verticalAlignment: "center", horizontalAlignment: 'start' },
-                        this.$render("i-label", { id: "cardDot", caption: "•", font: { size: '16px', color: '#3b3838', weight: 530 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" }),
-                        this.$render("i-label", { id: "cardTitle", caption: items[i].caption, font: { size: '16px', color: '#3b3838', weight: 530 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" }),
+                        this.$render("i-label", { id: "cardDot", caption: "•", font: { size: '16px', color: '#3b3838', weight: 530 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden", class: isActive ? "focused-card" : "" }),
+                        this.$render("i-label", { id: "cardTitle", caption: items[i].caption, font: { size: '16px', color: '#3b3838', weight: 530 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, class: isActive ? "focused-card" : "", overflow: "hidden" }),
                         this.$render("i-input", { id: "cardInput", visible: false, width: '90%', height: '40px', padding: { left: '0.5rem', top: '0.5rem', bottom: '0.5rem', right: '0.5rem' } })),
                     this.$render("i-icon", { id: "cardRenameBtn", name: 'pen', fill: 'var(--colors-primary-main)', width: 28, height: 28, padding: { top: 7, bottom: 7, left: 7, right: 7 }, margin: { right: 4 }, class: "pointer iconButton", visible: false, tooltip: { content: "Rename", placement: "top" }, onClick: () => this.onClickRenameBtn(items[i].rowId) }),
                     this.$render("i-hstack", { id: "editBtnStack", verticalAlignment: "center", visible: false },
@@ -8217,7 +8226,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
             });
             return capitalizedStrings.join(' ');
         }
-        renderMenu() {
+        createMenu() {
             this.pnlWidgets.clearInnerHTML();
             const menu = (this.$render("i-scom-page-builder-menu", null));
             this.pnlWidgets.appendChild(menu);
@@ -8276,7 +8285,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
             this.mdWidget.width = 'auto';
             this.pnlWidgets.removeEventListener("dragstart", this.pnlWidgetsDragStartEvent);
             this.mdWidget.parent = target;
-            this.renderMenu();
+            this.createMenu();
             this.mdWidget.visible = true;
         }
         initDrag(module, data) {
