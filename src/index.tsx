@@ -93,9 +93,9 @@ export default class Editor extends Module {
         const bgColor = getBackgroundColor(this.theme);
         const fontColor = getFontColor(this.theme);
         const dividerColor = getDivider(this.theme);
-        this.style.setProperty('--builder-bg', bgColor);
-        this.style.setProperty('--builder-color', fontColor);
-        this.style.setProperty('--builder-divider', dividerColor);
+        this.pnlEditor.style.setProperty('--builder-bg', bgColor);
+        this.pnlEditor.style.setProperty('--builder-color', fontColor);
+        this.pnlEditor.style.setProperty('--builder-divider', dividerColor);
     }
 
     get commandHistoryIndex(): number {

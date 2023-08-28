@@ -49,6 +49,7 @@ export class UpdateRowSettingsCommand implements ICommand {
       this.element.classList.add(`font-${newConfig.textSize}`)
     }
 
+    console.log('updatedValues', updatedValues)
     if (updatedValues.includes('backgroundColor') || updatedValues.includes('textColor') || updatedValues.includes('textSize')) {
       const newValue: any = {};
       if (updatedValues.includes('backgroundColor')) {

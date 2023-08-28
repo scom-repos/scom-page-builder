@@ -1892,6 +1892,7 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
             if (customTextSize && textSize) {
                 this.element.classList.add(`font-${newConfig.textSize}`);
             }
+            console.log('updatedValues', updatedValues);
             if (updatedValues.includes('backgroundColor') || updatedValues.includes('textColor') || updatedValues.includes('textSize')) {
                 const newValue = {};
                 if (updatedValues.includes('backgroundColor')) {
@@ -3246,23 +3247,23 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             };
             if (customBackgroundColor) {
                 if (updatedValues.includes('backgroundColor')) {
-                    element.style.setProperty('--builder-bg', backgroundColor);
+                    this.element.style.setProperty('--builder-bg', backgroundColor);
                     data.customBackgroundColor = customBackgroundColor;
                     data.backgroundColor = backgroundColor;
                 }
             }
             else {
-                element.style.setProperty('--builder-bg', defaultBackgroundColor);
+                this.element.style.setProperty('--builder-bg', defaultBackgroundColor);
             }
             if (customTextColor) {
                 if (updatedValues.includes('textColor')) {
-                    element.style.setProperty('--builder-color', textColor);
+                    this.element.style.setProperty('--builder-color', textColor);
                     data.customTextColor = customTextColor;
                     data.textColor = textColor;
                 }
             }
             else {
-                element.style.setProperty('--builder-color', defaultTextColor);
+                this.element.style.setProperty('--builder-color', defaultTextColor);
             }
             if (customTextSize) {
                 if (updatedValues.includes('textSize')) {
@@ -8944,9 +8945,9 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             const bgColor = (0, index_88.getBackgroundColor)(this.theme);
             const fontColor = (0, index_88.getFontColor)(this.theme);
             const dividerColor = (0, index_88.getDivider)(this.theme);
-            this.style.setProperty('--builder-bg', bgColor);
-            this.style.setProperty('--builder-color', fontColor);
-            this.style.setProperty('--builder-divider', dividerColor);
+            this.pnlEditor.style.setProperty('--builder-bg', bgColor);
+            this.pnlEditor.style.setProperty('--builder-color', fontColor);
+            this.pnlEditor.style.setProperty('--builder-divider', dividerColor);
         }
         get commandHistoryIndex() {
             return index_90.commandHistory.commandIndex;
