@@ -54,36 +54,37 @@ export class UpdatePageSettingsCommand implements ICommand {
     const defaultTextColor = Theme.text.primary
     const defaultTextSize = 'md'
     let data = {
-      customBackgroundColor: false,
+      customBackgroundColor: customBackgroundColor,
       backgroundColor: defaultBackgroundColor,
-      customTextColor: false,
+      customTextColor: customTextColor,
       textColor: defaultTextColor,
-      customTextSize: false,
-      textSize: defaultTextSize 
+      customTextSize: customTextSize,
+      textSize: defaultTextSize
     }
     if (customBackgroundColor) {
-      if (updatedValues.includes('backgroundColor')) {
+      if (updatedValues.includes('backgroundColor') || updatedValues.includes('customBackgroundColor')) {
         element.style.setProperty('--builder-bg', backgroundColor);
-        data.customBackgroundColor = customBackgroundColor
         data.backgroundColor = backgroundColor;
       }
     } else {
       element.style.setProperty('--builder-bg', defaultBackgroundColor);
     }
     if (customTextColor) {
-      if (updatedValues.includes('textColor')) {
+      if (updatedValues.includes('textColor') || updatedValues.includes('customTextColor')) {
         element.style.setProperty('--builder-color', textColor);
-        data.customTextColor = customTextColor
         data.textColor = textColor;
       }
     } else {
       element.style.setProperty('--builder-color', defaultTextColor);
     }
     if (customTextSize) {
-      if (updatedValues.includes('textSize')) {
-        data.customTextSize = customTextSize
+      if (updatedValues.includes('textSize') || updatedValues.includes('customTextSize')) {
+        element.classList.add(`font-${textSize}`);
         data.textSize = textSize;
       }
+    }
+    else {
+      element.classList.remove('font-xs', 'font-sm', 'font-md', 'font-lg', 'font-xl');
     }
     application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {...data});
     this.element.maxWidth = '100%'; // maxWidth ?? '100%';

@@ -1319,8 +1319,11 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private initEventListener;
         private initEventBus;
         updateUI(data: {
+            customBackgroundColor?: boolean;
             backgroundColor?: string;
+            customTextColor?: boolean;
             textColor?: string;
+            customTextSize?: boolean;
             textSize?: string;
         }): Promise<void>;
         onShow(options?: any): void;
