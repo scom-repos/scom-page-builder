@@ -5021,7 +5021,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            debugger;
             const { image = '', backgroundColor, backdropColor, backdropImage, border, borderColor, sectionWidth, margin, align, fullWidth, pb, pl, pr, pt, ptb, plr, textColor } = config || {};
             if (!fullWidth) {
                 if (image)
@@ -5777,9 +5776,15 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             resetDragTarget();
                         }
                         else {
+                            const offsetLeft = Math.floor((startX + index_45.GAP_WIDTH) / (self.gridColumnWidth + index_45.GAP_WIDTH));
+                            let nearestFixedItem = dragDropResult.details.nearestPanel;
+                            let column = Number(nearestFixedItem.dataset.column);
+                            if (column - offsetLeft > 0) {
+                                nearestFixedItem = pageRow.querySelector(`.fixed-grid-item[data-column='${column - offsetLeft}']`);
+                            }
                             const dragCmd = (elementConfig) ?
-                                new index_47.AddElementCommand(self.getNewElementData(), true, false, dragDropResult.details.nearestPanel, pageRow) :
-                                new index_47.DragElementCommand(self.currentElement, dragDropResult.details.nearestPanel, true, false);
+                                new index_47.AddElementCommand(self.getNewElementData(), true, false, nearestFixedItem, pageRow) :
+                                new index_47.DragElementCommand(self.currentElement, nearestFixedItem, true, false);
                             dragCmd && index_47.commandHistory.execute(dragCmd);
                         }
                     }
@@ -9050,7 +9055,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 const elementConfig = (0, index_88.getDragData)();
                 if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
                     // add section
-                    components_43.application.EventBus.dispatch(index_87.EVENT.ON_ADD_SECTION, { elements: elementConfig.elements });
+                    components_43.application.EventBus.dispatch(index_87.EVENT.ON_ADD_SECTION, { defaultElements: elementConfig.defaultElements });
                 }
                 else {
                     const dragEnter = this.pnlEditor.querySelector('.is-dragenter');
@@ -9123,7 +9128,6 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         }
         async setData(value) {
             // pageObject.header = value.header;
-            console.log("[SCOM-PAGE-BUILDER] SET DATA", value);
             document.addEventListener('keyup', this.boundHandleKeyUp);
             index_88.pageObject.sections = (value === null || value === void 0 ? void 0 : value.sections) || [];
             index_88.pageObject.footer = value === null || value === void 0 ? void 0 : value.footer;
@@ -9143,7 +9147,6 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         updatePageConfig() {
             const config = (0, index_88.getDefaultPageConfig)();
             const { backgroundColor, margin, textColor, textSize, customTextSize, customBackgroundColor, customTextColor, backgroundImage, ptb, plr, sectionWidth } = config;
-            console.log('page config', config);
             components_43.application.EventBus.dispatch(index_87.EVENT.ON_UPDATE_PAGE_BG, Object.assign({}, config));
             // if (backgroundImage) {
             //     this.style.setProperty('--builder-bg', `url("${backgroundImage}") center center fixed`);
@@ -9180,7 +9183,6 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.events.push(components_43.application.EventBus.register(this, index_87.EVENT.ON_TOGGLE_SEARCH_MODAL, this.onToggleSearch));
             this.events.push(components_43.application.EventBus.register(this, index_87.EVENT.ON_FETCH_COMPONENTS, this.onSearch));
             this.events.push(components_43.application.EventBus.register(this, index_87.EVENT.ON_UPDATE_PAGE_BG, async (data) => {
-                console.log('ON_UPDATE_PAGE_BG index.tsx', data);
                 const { customBackgroundColor, customTextColor, customTextSize, backgroundColor, textColor, textSize } = data;
                 if (data.image)
                     this.pnlEditor.style.backgroundImage = `url(${data.image})`;

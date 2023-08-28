@@ -1077,16 +1077,23 @@ export class PageRow extends Module {
                         dragCmd && commandHistory.execute(dragCmd);
                         resetDragTarget();
                     } else {
+                        const offsetLeft = Math.floor((startX + GAP_WIDTH) / (self.gridColumnWidth + GAP_WIDTH));
+                        let nearestFixedItem = dragDropResult.details.nearestPanel;
+                        let column = Number(nearestFixedItem.dataset.column);
+                        if (column - offsetLeft > 0) {
+                            nearestFixedItem = pageRow.querySelector(`.fixed-grid-item[data-column='${column - offsetLeft}']`)
+                        }
+
                         const dragCmd = (elementConfig)? 
                             new AddElementCommand(
                                 self.getNewElementData(),
                                 true, false,
-                                dragDropResult.details.nearestPanel as Control, 
+                                nearestFixedItem as Control, 
                                 pageRow
                             ) : 
                             new DragElementCommand(
                                 self.currentElement, 
-                                dragDropResult.details.nearestPanel as Control, 
+                                nearestFixedItem as Control, 
                                 true, false
                             );
                         dragCmd && commandHistory.execute(dragCmd);
