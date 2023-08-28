@@ -746,7 +746,7 @@ export class IDEToolbar extends Module {
                 const oldTag = builderTarget?.getTag ? await builderTarget.getTag() : {};
                 const newData: any = {};
                 if(customBackgroundColor) newData.customBackgroundColor = customBackgroundColor;
-                if (customBackgroundColor && backgroundColor) newData.backgroundColor = backgroundColor || '';
+                if (customBackgroundColor && backgroundColor !== undefined) newData.backgroundColor = backgroundColor || '';
                 if(customTextColor) newData.customTextColor = customTextColor;
                 if (customTextColor && textColor) newData.textColor = textColor || '';
                 if(customTextSize) newData.customTextSize = customTextSize;

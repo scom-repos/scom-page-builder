@@ -202,7 +202,8 @@ export class PageRow extends Module {
         this.updateRowConfig(config || getPageConfig());
         this.isCloned = this.parentElement?.nodeName !== 'BUILDER-HEADER';
         this.isChanged = this.parentElement?.nodeName !== 'BUILDER-HEADER';
-
+        if (config?.customTextSize && config?.textSize){
+            this.classList.add(`font-${config.textSize}`)}
         if (elements && elements.length > 0) {
             for (let i = 0; i < elements.length; i++) {
                 await this.createNewElement(elements[i]);
@@ -226,10 +227,7 @@ export class PageRow extends Module {
             margin,
             align,
             fullWidth,
-            pb,
-            pl,
-            pr,
-            pt,
+            padding,
             ptb,
             plr,
             textColor
@@ -261,12 +259,13 @@ export class PageRow extends Module {
         this.pnlRowContainer.maxWidth = sectionWidth ?? '100%';
         if (margin) this.pnlRowContainer.margin = getMargin(margin);
         this.pnlRowContainer.width = margin?.x && margin?.x !== 'auto' ? 'auto' : '100%';
-        this.pnlRowWrap.padding = { 
-            top: pt !== undefined ? pt : ptb !== undefined ? ptb : 0,
-            bottom: pb !== undefined ? pb : ptb !== undefined ? ptb : 0,
-            left: pl !== undefined ? pl : plr !== undefined ? plr : 0,
-            right: pr !== undefined ? pr : plr !== undefined ? plr : 0,
-        }
+        // this.pnlRowWrap.padding = { 
+        //     top: pt !== undefined ? pt : ptb !== undefined ? ptb : 0,
+        //     bottom: pb !== undefined ? pb : ptb !== undefined ? ptb : 0,
+        //     left: pl !== undefined ? pl : plr !== undefined ? plr : 0,
+        //     right: pr !== undefined ? pr : plr !== undefined ? plr : 0,
+        // }
+        this.pnlRowWrap.padding = padding || {};
         if (align) this.updateAlign();
     }
 
@@ -1225,7 +1224,7 @@ export class PageRow extends Module {
                 const parsedData = rowsConfig[id] ? JSON.parse(rowsConfig[id]) : {};
                 newConfig = {...newConfig, ...parsedData};
             }
-            pageObject.updateSection(id, {config: newConfig});
+            pageObject.updateSection(id, {config: JSON.parse(JSON.stringify(newConfig))});
             if (config.backgroundColor)
                 this.pnlRowContainer.style.setProperty('--row-background', config.backgroundColor);
             if (config.textColor)

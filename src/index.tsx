@@ -132,9 +132,9 @@ export default class Editor extends Module {
         const bgColor = getBackgroundColor(this.theme);
         const fontColor = getFontColor(this.theme);
         const dividerColor = getDivider(this.theme);
-        this.style.setProperty('--builder-bg', bgColor);
-        this.style.setProperty('--builder-color', fontColor);
-        this.style.setProperty('--builder-divider', dividerColor);
+        this.pnlEditor.style.setProperty('--builder-bg', bgColor);
+        this.pnlEditor.style.setProperty('--builder-color', fontColor);
+        this.pnlEditor.style.setProperty('--builder-divider', dividerColor);
     }
 
     get commandHistoryIndex(): number {
@@ -399,9 +399,9 @@ export default class Editor extends Module {
                     }
                 }
                 if(customBackgroundColor && backgroundColor)
-                    this.style.setProperty('--builder-bg', backgroundColor);
+                    this.pnlEditor.style.setProperty('--builder-bg', backgroundColor);
                 if(customTextColor && textColor)
-                    this.style.setProperty('--builder-color', textColor);
+                this.pnlEditor.style.setProperty('--builder-color', textColor);
                 if (customTextSize && textSize) {
                     this.classList.add(`font-${textSize}`)
                 }

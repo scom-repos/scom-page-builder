@@ -73,21 +73,26 @@ export class RowSettingsDialog extends Module {
                     "type": "string",
                     "format": "color"
                 },
-                "pt": {
-                    "title": "Top",
-                    "type": "number"
-                },
-                "pb": {
-                    "title": "Bottom",
-                    "type": "number"
-                },
-                "pl": {
-                    "title": "Left",
-                    "type": "number"
-                },
-                "pr": {
-                    "title": "Right",
-                    "type": "number"
+                "padding": {
+                    "type": "object",
+                    "properties": {
+                        "bottom": {
+                            "title": "Bottom",
+                            "type": "number"
+                        },
+                        "left": {
+                            "title": "Left",
+                            "type": "number"
+                        },
+                        "right": {
+                            "title": "Right",
+                            "type": "number"
+                        },
+                        "top": {
+                            "title": "Top",
+                            "type": "number"
+                        },
+                    }
                 },
                 "fullWidth": {
                     "title": "Full width",
@@ -338,19 +343,19 @@ export class RowSettingsDialog extends Module {
                                             "elements": [
                                                 {
                                                     "type": "Control",
-                                                    "scope": "#/properties/pt"
+                                                    "scope": "#/properties/padding/properties/top"
                                                 },
                                                 {
                                                     "type": "Control",
-                                                    "scope": "#/properties/pb"
+                                                    "scope": "#/properties/padding/properties/bottom"
                                                 },
                                                 {
                                                     "type": "Control",
-                                                    "scope": "#/properties/pl"
+                                                    "scope": "#/properties/padding/properties/left"
                                                 },
                                                 {
                                                     "type": "Control",
-                                                    "scope": "#/properties/pr"
+                                                    "scope": "#/properties/padding/properties/right"
                                                 }
                                             ]
                                         }

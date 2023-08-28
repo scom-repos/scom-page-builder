@@ -66,11 +66,6 @@ export class MainModule extends Module {
         "shownBackdrop": true
       },
       {
-        "name": "Dune Blocks",
-        "path": "scom-dune",
-        "category": "project-micro-dapps"
-      },
-      {
         "name": "Table",
         "path": "scom-table",
         "category": "charts"
@@ -152,7 +147,11 @@ export class MainModule extends Module {
         "elements": []
       },
       config: {
-        sectionWidth: 1000
+        sectionWidth: 1000,
+        customBackgroundColor: true,
+        backgroundColor: '#ddd',
+        customTextColor: true,
+        textColor: '#000',
       }
     }
     this.pageBuilder.setData(data);

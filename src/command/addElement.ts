@@ -75,7 +75,7 @@ export class AddElementCommand implements ICommand {
     //     module: this.data.module
     //   }]
     // };
-    const newElData = {
+    const newElData: any = {
       id: this.data.id,
       column,
       columnSpan,
@@ -98,6 +98,10 @@ export class AddElementCommand implements ICommand {
       if (widgetData.tag) {
         newElData.tag = widgetData.tag;
       }
+    }
+    if (this.data?.module?.category === 'project-widgets') {
+      newElData.properties.guid = this.data?.module?.guid;
+      newElData.properties.name = this.data?.module?.name;
     }
     const parentData = this.parent?.data;
     // Remove any elements that are not currently listed
