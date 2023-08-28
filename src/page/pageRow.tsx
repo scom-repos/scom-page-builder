@@ -202,7 +202,8 @@ export class PageRow extends Module {
         this.updateRowConfig(config || getPageConfig());
         this.isCloned = this.parentElement?.nodeName !== 'BUILDER-HEADER';
         this.isChanged = this.parentElement?.nodeName !== 'BUILDER-HEADER';
-
+        if (config.customTextSize && config.textSize){
+            this.classList.add(`font-${config.textSize}`)}
         if (elements && elements.length > 0) {
             for (let i = 0; i < elements.length; i++) {
                 await this.createNewElement(elements[i]);

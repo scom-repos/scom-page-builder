@@ -5022,6 +5022,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         }
         async setData(rowData) {
             var _a, _b, _c, _d;
+            console.dir(rowData);
             this.clearData();
             const { id, row, elements, config } = rowData;
             this.id = `row-${id}`;
@@ -5031,6 +5032,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.updateRowConfig(config || (0, index_46.getPageConfig)());
             this.isCloned = ((_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.nodeName) !== 'BUILDER-HEADER';
             this.isChanged = ((_b = this.parentElement) === null || _b === void 0 ? void 0 : _b.nodeName) !== 'BUILDER-HEADER';
+            if (config.customTextSize && config.textSize) {
+                this.classList.add(`font-${config.textSize}`);
+            }
             if (elements && elements.length > 0) {
                 for (let i = 0; i < elements.length; i++) {
                     await this.createNewElement(elements[i]);
@@ -5042,6 +5046,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
+            console.dir(config);
             const { image = '', backgroundColor, backdropColor, backdropImage, border, borderColor, sectionWidth, margin, align, fullWidth, padding, ptb, plr, textColor } = config || {};
             if (!fullWidth) {
                 if (image)
@@ -7293,6 +7298,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
             return index_66.pageObject.sections;
         }
         async setRows(rows) {
+            console.dir(rows);
             index_66.pageObject.sections = rows;
             await this.renderRows();
         }
@@ -7301,7 +7307,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
             this.clearRows();
             for (let i = 0; i < index_66.pageObject.sections.length; i++) {
                 const rowData = index_66.pageObject.sections[i];
-                const pageRow = (this.$render("ide-row", { maxWidth: "100%", maxHeight: "100%" }));
+                const pageRow = (this.$render("ide-row", { class: "i-page-section", maxWidth: "100%", maxHeight: "100%" }));
                 if (!this._readonly) {
                     pageRow.border = { top: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' } };
                     this.initDragEvent(pageRow);

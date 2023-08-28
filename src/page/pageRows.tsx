@@ -224,7 +224,7 @@ export class PageRows extends Module {
         this.clearRows();
         for (let i = 0; i < pageObject.sections.length; i++) {
             const rowData = pageObject.sections[i];
-            const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
+            const pageRow = (<ide-row class="i-page-section" maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
             if (!this._readonly) {
                 pageRow.border = { top: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' } };
                 this.initDragEvent(pageRow);
