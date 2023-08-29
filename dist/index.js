@@ -9213,18 +9213,6 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             const config = (0, index_88.getDefaultPageConfig)();
             const { backgroundColor, margin, textColor, textSize, customTextSize, customBackgroundColor, customTextColor, backgroundImage, ptb, plr, sectionWidth } = config;
             components_43.application.EventBus.dispatch(index_87.EVENT.ON_UPDATE_PAGE_BG, Object.assign({}, config));
-            if (backgroundImage) {
-                this.style.setProperty('--builder-bg', `url("${backgroundImage}") center center fixed`);
-            }
-            else if (customBackgroundColor && backgroundColor) {
-                this.style.setProperty('--custom-background-color', backgroundColor);
-            }
-            else
-                this.style.removeProperty('--custom-background-color');
-            if (customTextColor && textColor)
-                this.style.setProperty('--custom-text-color', textColor);
-            else
-                this.style.removeProperty('--custom-text-color');
             if (this.pnlEditor) {
                 this.pnlEditor.padding = {
                     left: plr,
@@ -9236,6 +9224,18 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 const marginStyle = (0, index_88.getMargin)(margin);
                 this.pnlEditor.margin = marginStyle;
                 this.pnlEditor.style.width = `calc(100% - (2 * ${marginStyle.left}))`;
+                if (backgroundImage) {
+                    this.pnlEditor.style.setProperty('--builder-bg', `url("${backgroundImage}") center center fixed`);
+                }
+                else if (customBackgroundColor && backgroundColor) {
+                    this.pnlEditor.style.setProperty('--custom-background-color', backgroundColor);
+                }
+                else
+                    this.pnlEditor.style.removeProperty('--custom-background-color');
+                if (customTextColor && textColor)
+                    this.pnlEditor.style.setProperty('--custom-text-color', textColor);
+                else
+                    this.pnlEditor.style.removeProperty('--custom-text-color');
             }
         }
         onHide() {

@@ -328,17 +328,7 @@ export default class Editor extends Module {
             sectionWidth
         } = config;
         application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {...config});
-        if (backgroundImage) {
-            this.style.setProperty('--builder-bg', `url("${backgroundImage}") center center fixed`);
-        } else if (customBackgroundColor && backgroundColor) {
-            this.style.setProperty('--custom-background-color', backgroundColor);
-        }
-        else
-            this.style.removeProperty('--custom-background-color');
-        if (customTextColor && textColor) 
-            this.style.setProperty('--custom-text-color', textColor)
-        else
-            this.style.removeProperty('--custom-text-color');
+        
         if (this.pnlEditor) {
             this.pnlEditor.padding = {
                 left: plr,
@@ -350,6 +340,18 @@ export default class Editor extends Module {
             const marginStyle = getMargin(margin);
             this.pnlEditor.margin = marginStyle;
             this.pnlEditor.style.width = `calc(100% - (2 * ${marginStyle.left}))`;
+
+            if (backgroundImage) {
+                this.pnlEditor.style.setProperty('--builder-bg', `url("${backgroundImage}") center center fixed`);
+            } else if (customBackgroundColor && backgroundColor) {
+                this.pnlEditor.style.setProperty('--custom-background-color', backgroundColor);
+            }
+            else
+                this.pnlEditor.style.removeProperty('--custom-background-color');
+            if (customTextColor && textColor) 
+                this.pnlEditor.style.setProperty('--custom-text-color', textColor)
+            else
+                this.pnlEditor.style.removeProperty('--custom-text-color');
         }
     }
 
