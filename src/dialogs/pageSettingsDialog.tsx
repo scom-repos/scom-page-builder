@@ -113,7 +113,7 @@ export class PageSettingsDialog extends Module {
                 "backgroundImage": {
                     "title": "Background image",
                     "type": "string",
-                    "format": "data-url"
+                    "format": "data-cid"
                 },
                 "ptb": {
                     "title": "Section padding top / bottom (px)",
