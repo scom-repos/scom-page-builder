@@ -479,8 +479,8 @@ export default class Editor extends Module {
                             id="pnlEditor"
                             // maxWidth={1024}
                             minHeight="100vh"
-                            width="100%"
-                            margin={{top: 8, bottom: 8, left: 60, right: 60}}
+                            width="90%"
+                            // margin={{top: 8, bottom: 8, left: 60, right: 60}}
                             background={{color: 'var(--custom-background-color, var(--background-main))'}}
                             class="pnl-editor-wrapper"
                         >
