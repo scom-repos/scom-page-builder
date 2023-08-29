@@ -342,7 +342,8 @@ export default class Editor extends Module {
             this.pnlEditor.style.width = `calc(100% - (2 * ${marginStyle.left}))`;
 
             if (backgroundImage) {
-                this.pnlEditor.style.setProperty('--builder-bg', `url("${backgroundImage}") center center fixed`);
+                const ipfsUrl = 'https://ipfs.scom.dev/ipfs';
+                this.pnlEditor.style.setProperty('--builder-bg', `url("${ipfsUrl}/${backgroundImage}") center center fixed`);
             } else if (customBackgroundColor && backgroundColor) {
                 this.pnlEditor.style.setProperty('--custom-background-color', backgroundColor);
             }
@@ -388,7 +389,8 @@ export default class Editor extends Module {
                 textSize?: string
             }) => {
                 const {customBackgroundColor, customTextColor, customTextSize, backgroundColor, textColor, textSize} = data;
-                if (data.image) this.pnlEditor.style.backgroundImage = `url(${data.image})`
+                const ipfsUrl = `https://ipfs.scom.dev/ipfs`
+                if (data.image) this.pnlEditor.style.backgroundImage = `url("${ipfsUrl}/${data.image}")`;
                 for (let i = this.classList.length - 1; i >= 0; i--) {
                     const className = this.classList[i];
                     if (className.startsWith('font-')) {
@@ -479,8 +481,8 @@ export default class Editor extends Module {
                             id="pnlEditor"
                             // maxWidth={1024}
                             minHeight="100vh"
-                            width="100%"
-                            margin={{top: 8, bottom: 8, left: 60, right: 60}}
+                            width="90%"
+                            // margin={{top: 8, bottom: 8, left: 60, right: 60}}
                             background={{color: 'var(--custom-background-color, var(--background-main))'}}
                             class="pnl-editor-wrapper"
                         >

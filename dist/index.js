@@ -4173,7 +4173,7 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                     "backgroundImage": {
                         "title": "Background image",
                         "type": "string",
-                        "format": "data-url"
+                        "format": "data-cid"
                     },
                     "ptb": {
                         "title": "Section padding top / bottom (px)",
@@ -9073,6 +9073,7 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 boxShadow: 'rgba(50, 50, 105, 0.15) 0px 2px 5px 0px, rgba(0, 0, 0, 0.05) 0px 1px 1px 0px',
+                margin: '50px auto !important'
             },
             '.custom-input input': {
                 paddingLeft: 10
@@ -9380,7 +9381,8 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 this.pnlEditor.margin = marginStyle;
                 this.pnlEditor.style.width = `calc(100% - (2 * ${marginStyle.left}))`;
                 if (backgroundImage) {
-                    this.pnlEditor.style.setProperty('--builder-bg', `url("${backgroundImage}") center center fixed`);
+                    const ipfsUrl = 'https://ipfs.scom.dev/ipfs';
+                    this.pnlEditor.style.setProperty('--builder-bg', `url("${ipfsUrl}/${backgroundImage}") center center fixed`);
                 }
                 else if (customBackgroundColor && backgroundColor) {
                     this.pnlEditor.style.setProperty('--custom-background-color', backgroundColor);
@@ -9408,8 +9410,9 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.events.push(components_43.application.EventBus.register(this, index_88.EVENT.ON_FETCH_COMPONENTS, this.onSearch));
             this.events.push(components_43.application.EventBus.register(this, index_88.EVENT.ON_UPDATE_PAGE_BG, async (data) => {
                 const { customBackgroundColor, customTextColor, customTextSize, backgroundColor, textColor, textSize } = data;
+                const ipfsUrl = `https://ipfs.scom.dev/ipfs`;
                 if (data.image)
-                    this.pnlEditor.style.backgroundImage = `url(${data.image})`;
+                    this.pnlEditor.style.backgroundImage = `url("${ipfsUrl}/${data.image}")`;
                 for (let i = this.classList.length - 1; i >= 0; i--) {
                     const className = this.classList[i];
                     if (className.startsWith('font-')) {
@@ -9466,7 +9469,9 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                         width: "100%", horizontalAlignment: 'center' },
                         this.$render("i-panel", { id: "pnlEditor", 
                             // maxWidth={1024}
-                            minHeight: "100vh", width: "100%", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--custom-background-color, var(--background-main))' }, class: "pnl-editor-wrapper" },
+                            minHeight: "100vh", width: "90%", 
+                            // margin={{top: 8, bottom: 8, left: 60, right: 60}}
+                            background: { color: 'var(--custom-background-color, var(--background-main))' }, class: "pnl-editor-wrapper" },
                             this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
                                 this.$render("ide-rows", { id: "pageRows", draggable: true })),
                             this.$render("builder-footer", { id: "builderFooter" })))),
