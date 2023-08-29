@@ -243,7 +243,7 @@ export class PageRows extends Module {
             pageRow.border = { top: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' } };
             this.initDragEvent(pageRow);
         }
-        pageRow.visible = !!rowData?.elements?.length;
+        pageRow.visible = true; // !!rowData?.elements?.length;
         const addRowCmd = new UpdateRowCommand(pageRow, this.pnlRows, rowData, false, prependId);
         commandHistory.execute(addRowCmd);
         await pageRow.setData(rowData);

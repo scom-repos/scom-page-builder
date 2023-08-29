@@ -146,7 +146,7 @@ export class PageSidebar extends Module {
         return capitalizedStrings.join(' ');
     }
 
-    renderMenu() {
+    createMenu() {
         this.pnlWidgets.clearInnerHTML();
         const menu = (<i-scom-page-builder-menu></i-scom-page-builder-menu>) as PageMenu;
         this.pnlWidgets.appendChild(menu);
@@ -248,7 +248,7 @@ export class PageSidebar extends Module {
         this.mdWidget.width = 'auto'
         this.pnlWidgets.removeEventListener("dragstart", this.pnlWidgetsDragStartEvent)
         this.mdWidget.parent = target;
-        this.renderMenu();
+        this.createMenu();
         this.mdWidget.visible = true;
     }
 

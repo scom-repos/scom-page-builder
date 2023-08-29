@@ -35,6 +35,8 @@ export class PageMenu extends Module {
     private isEditing: boolean = false;
     private focusRowId: string;
 
+    private noDataTxt = "No section";
+
     init() {
         super.init();
         this.initEventBus();
@@ -72,6 +74,7 @@ export class PageMenu extends Module {
         });
 
         this.addEventListener('dragover', (event) => {
+            event.preventDefault();
             if (!this.draggingSectionId) {
                 event.preventDefault();
                 return;
@@ -176,11 +179,34 @@ export class PageMenu extends Module {
                 rowId: section.id.replace("row-", "")
             };
         })
+        if (!items.length) {
+            const txt = (
+                <i-hstack
+                    verticalAlignment="center"
+                    horizontalAlignment='start'
+                    width="100%"
+                    overflow="hidden"
+                >
+                    <i-label
+                        caption={this.noDataTxt}
+                        font={{ size: '16px', color: '#3b3838', weight: 530 }}
+                        padding={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        maxHeight={34}
+                        overflow={"hidden"}
+                    ></i-label>
+                </i-hstack>);
+            this.pnlMenu.appendChild(txt);
+            return;
+        }
+
+        const activeElm = document.querySelector('ide-toolbar.active') || document.querySelector('ide-row.active');
+        const activeSectionId = activeElm?.closest('ide-row')?.id.replace('row-', "");
 
         // set the titles here
         const dropLine = (<i-panel id={`menuDropLine-0`} width={'100%'} height={'5px'}></i-panel>);
         this.pnlMenu.appendChild(dropLine);
         for (let i = 0; i < items.length; i++) {
+            const isActive = activeSectionId == items[i].rowId;
             const menuCard = (
                 <i-hstack
                     id="menuCard"
@@ -200,6 +226,7 @@ export class PageMenu extends Module {
                             padding={{ top: 8, bottom: 8, left: 8, right: 8 }}
                             maxHeight={34}
                             overflow={"hidden"}
+                            class={isActive ? "focused-card" : ""}
                         ></i-label>
                         <i-label
                             id="cardTitle"
@@ -207,6 +234,7 @@ export class PageMenu extends Module {
                             font={{ size: '16px', color: '#3b3838', weight: 530 }}
                             padding={{ top: 8, bottom: 8, left: 8, right: 8 }}
                             maxHeight={34}
+                            class={isActive ? "focused-card" : ""}
                             overflow={"hidden"}
                         ></i-label>
                         <i-input

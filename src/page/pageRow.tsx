@@ -330,12 +330,20 @@ export class PageRow extends Module {
     onDeleteRow() {
         const prependRow = this.previousElementSibling;
         const appendRow = this.nextElementSibling;
-        if(!prependRow && !appendRow) {
-            // Reject delete
-            return;
-        }
         const rowCmd = new UpdateRowCommand(this, this.parent, this.data, true, prependRow?.id || '', appendRow?.id || '');
         commandHistory.execute(rowCmd);
+        if(!prependRow && !appendRow) {
+            // create empty section
+            const newId = generateUUID();
+            const pageRows = this.parent.closest('ide-rows') as any;
+            pageRows.setRows([
+                {
+                  "id": `${newId}`,
+                  "row": 0,
+                  "elements": []
+                }
+            ]);
+        }
     }
 
     onMoveUp() {
@@ -1076,16 +1084,23 @@ export class PageRow extends Module {
                         dragCmd && commandHistory.execute(dragCmd);
                         resetDragTarget();
                     } else {
+                        const offsetLeft = Math.floor((startX + GAP_WIDTH) / (self.gridColumnWidth + GAP_WIDTH));
+                        let nearestFixedItem = dragDropResult.details.nearestPanel;
+                        let column = Number(nearestFixedItem.dataset.column);
+                        if (column - offsetLeft > 0) {
+                            nearestFixedItem = pageRow.querySelector(`.fixed-grid-item[data-column='${column - offsetLeft}']`)
+                        }
+
                         const dragCmd = (elementConfig)? 
                             new AddElementCommand(
                                 self.getNewElementData(),
                                 true, false,
-                                dragDropResult.details.nearestPanel as Control, 
+                                nearestFixedItem as Control, 
                                 pageRow
                             ) : 
                             new DragElementCommand(
                                 self.currentElement, 
-                                dragDropResult.details.nearestPanel as Control, 
+                                nearestFixedItem as Control, 
                                 true, false
                             );
                         dragCmd && commandHistory.execute(dragCmd);
