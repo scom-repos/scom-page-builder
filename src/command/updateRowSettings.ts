@@ -57,13 +57,33 @@ export class UpdateRowSettingsCommand implements ICommand {
         newValue.backgroundColor = newConfig?.backgroundColor || '';
         newValue.customBackgroundColor = newConfig?.customBackgroundColor ?? false
         const innerEl = this.element.querySelector('#pnlRowContainer')
-        innerEl && innerEl.style.setProperty('--row-background', newValue.backgroundColor)
+        if (innerEl){
+          if (newValue.customBackgroundColor)
+            innerEl.style.setProperty('--custom-background-color', newValue.backgroundColor)
+          else
+            innerEl.style.removeProperty('--custom-background-color')
+        }
       }
+      else{
+        const innerEl = this.element.querySelector('#pnlRowContainer')
+        if (innerEl){
+          if (newValue.customBackgroundColor)
+            innerEl.style.setProperty('--custom-background-color', newValue.backgroundColor)
+          else
+            innerEl.style.removeProperty('--custom-background-color')
+        }
+      };
+
       if (updatedValues.includes('textColor')) {
         newValue.textColor = newConfig?.textColor || '';
         newValue.customTextColor = newConfig?.customTextColor ?? false
-        this.element.style.setProperty('--row-font_color', newValue.textColor)
+        if (newValue.customTextColor)
+          this.element.style.setProperty('--custom-text-color', newValue.textColor)
+        else
+          this.element.style.removeProperty('--custom-text-color')
       }
+      else
+        this.element.style.removeProperty('--custom-text-color')
       newValue.customTextSize = newConfig?.customTextSize ?? false
       const toolbars = this.element.querySelectorAll('ide-toolbar');
       for (let toolbar of toolbars) {

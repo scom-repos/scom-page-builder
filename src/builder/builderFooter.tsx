@@ -74,7 +74,7 @@ export class BuilderFooter extends Module {
     private async updateFooter() {
         this.pnlFooterMain.clearInnerHTML();
         this.showAddStack = this._elements?.length === 0 && !this._image;
-        this.pnlFooter.background = this.showAddStack ? {color: 'var(--builder-bg)', image: ''} : {image: this._image};
+        this.pnlFooter.background = this.showAddStack ? {color: 'var(--custom-background-color, var(background-main))', image: ''} : {image: this._image};
         this.pnlEditOverlay.visible = !this.showAddStack;
         this.pnlEditOverlay.classList.remove('flex');
         this.pnlConfig.visible = !this.showAddStack;

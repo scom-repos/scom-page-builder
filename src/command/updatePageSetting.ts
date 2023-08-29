@@ -50,34 +50,34 @@ export class UpdatePageSettingsCommand implements ICommand {
     if (updatedValues.includes('backgroundImage')) {
       application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {image: backgroundImage});
     }
-    const defaultBackgroundColor = Theme.background.main
-    const defaultTextColor = Theme.text.primary
     const defaultTextSize = 'md'
     let data: any = {
       customBackgroundColor: customBackgroundColor,
-      backgroundColor: backgroundColor ?? defaultBackgroundColor,
+      backgroundColor: backgroundColor,
       customTextColor: customTextColor,
-      textColor: textColor ?? defaultTextColor,
+      textColor: textColor,
       customTextSize: customTextSize,
       textSize: textSize ?? defaultTextSize
     }
     if (customBackgroundColor) {
       if (updatedValues.includes('backgroundColor')) {
-        this.element.style.setProperty('--builder-bg', backgroundColor);
+        this.element.style.setProperty('--custom-background-color', backgroundColor);
         data.customBackgroundColor = customBackgroundColor
         data.backgroundColor = backgroundColor;
       }
     } else {
-      this.element.style.setProperty('--builder-bg', defaultBackgroundColor);
+      this.element.style.removeProperty('--custom-background-color');
     }
     if (customTextColor) {
       if (updatedValues.includes('textColor')) {
-        this.element.style.setProperty('--builder-color', textColor);
+        this.element.style.setProperty('--custom-text-color', textColor);
         data.customTextColor = customTextColor
         data.textColor = textColor;
       }
+      else
+        this.element.style.removeProperty('--custom-text-color');
     } else {
-      this.element.style.setProperty('--builder-color', defaultTextColor);
+      this.element.style.removeProperty('--custom-text-color');
     }
     if (customTextSize) {
       if (updatedValues.includes('textSize') || updatedValues.includes('customTextSize')) {
