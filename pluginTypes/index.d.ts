@@ -1780,7 +1780,7 @@ declare module "@scom/scom-page-builder" {
         private initDragEvent;
         private initEventListeners;
         private onKeyUp;
-        init(): void;
+        init(): Promise<void>;
         setRootDir(value: string): void;
         getData(): {
             sections: import("@scom/scom-page-builder/interface/siteData.ts").IPageSection[];

@@ -224,7 +224,17 @@ export class PageRows extends Module {
         this.clearRows();
         for (let i = 0; i < pageObject.sections.length; i++) {
             const rowData = pageObject.sections[i];
-            const pageRow = (<ide-row class="i-page-section" maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
+            const pageRow = (<ide-row class="i-page-section" 
+                background={{color: `var(--custom-background-color, var(--background-main))` }}
+                font={{color: `var(--custom-text-color, var(--text-primary))`}} 
+                maxWidth="100%" 
+                maxHeight="100%"></ide-row>) as PageRow;
+            const {
+                backgroundColor,
+                textColor,
+                customBackgroundColor,
+                customTextColor,
+            } = rowData.config || {};
             if (!this._readonly) {
                 pageRow.border = { top: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' } };
                 this.initDragEvent(pageRow);
@@ -232,6 +242,10 @@ export class PageRows extends Module {
             const isInit: boolean = i==0 && pageObject.sections.length == 1;
             pageRow.visible = isInit? true : !!rowData?.elements?.length;
             pageRow.parent = this.pnlRows;
+            if (customBackgroundColor && backgroundColor)
+                pageRow.style.setProperty('--custom-background-color', backgroundColor);
+            if (customTextColor && textColor)
+                pageRow.style.setProperty('--custom-text-color', textColor);
             this.pnlRows.append(pageRow);
             await pageRow.setData(rowData);
         }

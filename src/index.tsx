@@ -36,9 +36,6 @@ import {
     getCategories,
     setCategories,
     setTheme,
-    getBackgroundColor,
-    getFontColor,
-    getDivider,
     getDefaultPageConfig,
     getMargin,
     setDefaultPageConfig
@@ -129,12 +126,6 @@ export default class Editor extends Module {
     set theme(value: ThemeType) {
         this._theme = value ?? 'light';
         setTheme(this.theme);
-        const bgColor = getBackgroundColor(this.theme);
-        const fontColor = getFontColor(this.theme);
-        const dividerColor = getDivider(this.theme);
-        this.pnlEditor.style.setProperty('--builder-bg', bgColor);
-        this.pnlEditor.style.setProperty('--builder-color', fontColor);
-        this.pnlEditor.style.setProperty('--builder-divider', dividerColor);
     }
 
     get commandHistoryIndex(): number {
@@ -273,7 +264,7 @@ export default class Editor extends Module {
         }
     }
 
-    init() {
+    async init() {
         const rootDir = this.getAttribute('rootDir', true);
         if (rootDir) this.setRootDir(rootDir);
         const components = this.getAttribute('components', true);
@@ -282,7 +273,9 @@ export default class Editor extends Module {
         if (categories) setCategories(categories);
         const onFetchComponents = this.getAttribute('onFetchComponents', true);
         if (onFetchComponents) this.onFetchComponents = onFetchComponents.bind(this);
-        super.init();
+        await super.init();
+        this.style.setProperty('--custom-background-color', '#ffffff');
+        this.style.setProperty('--custom-text-color', '#000000');
         this.initEventListeners();
         this.initData();
         this.theme = this.getAttribute('theme', true);
@@ -335,15 +328,17 @@ export default class Editor extends Module {
             sectionWidth
         } = config;
         application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {...config});
-        // if (backgroundImage) {
-        //     this.style.setProperty('--builder-bg', `url("${backgroundImage}") center center fixed`);
-        // } else if (customBackgroundColor && backgroundColor) {
-        //     this.style.setProperty('--builder-bg', backgroundColor);
-        // }
-
-        // if (customTextSize && textSize && ["xs", "sm", "md", "lg", "xl"].includes(textSize)) {
-        //     this.classList.add(`font-${textSize}`);
-        // }
+        if (backgroundImage) {
+            this.style.setProperty('--builder-bg', `url("${backgroundImage}") center center fixed`);
+        } else if (customBackgroundColor && backgroundColor) {
+            this.style.setProperty('--custom-background-color', backgroundColor);
+        }
+        else
+            this.style.removeProperty('--custom-background-color');
+        if (customTextColor && textColor) 
+            this.style.setProperty('--custom-text-color', textColor)
+        else
+            this.style.removeProperty('--custom-text-color');
         if (this.pnlEditor) {
             this.pnlEditor.padding = {
                 left: plr,
@@ -399,9 +394,13 @@ export default class Editor extends Module {
                     }
                 }
                 if(customBackgroundColor && backgroundColor)
-                    this.pnlEditor.style.setProperty('--builder-bg', backgroundColor);
+                    this.pnlEditor.style.setProperty('--custom-background-color', backgroundColor)
+                else
+                    this.pnlEditor.style.removeProperty('--custom-background-color');
                 if(customTextColor && textColor)
-                this.pnlEditor.style.setProperty('--builder-color', textColor);
+                    this.pnlEditor.style.setProperty('--custom-text-color', textColor)
+                else
+                    this.pnlEditor.style.removeProperty('--custom-text-color');
                 if (customTextSize && textSize) {
                     this.classList.add(`font-${textSize}`)
                 }
@@ -480,7 +479,7 @@ export default class Editor extends Module {
                             minHeight="100vh"
                             width="100%"
                             margin={{top: 8, bottom: 8, left: 60, right: 60}}
-                            background={{color: 'var(--builder-bg)'}}
+                            background={{color: 'var(--custom-background-color, var(--background-main))'}}
                             class="pnl-editor-wrapper"
                         >
                             <i-panel
