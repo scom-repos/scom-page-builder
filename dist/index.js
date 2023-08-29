@@ -8890,6 +8890,7 @@ define("@scom/scom-page-builder/index.css.ts", ["require", "exports", "@ijstech/
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 boxShadow: 'rgba(50, 50, 105, 0.15) 0px 2px 5px 0px, rgba(0, 0, 0, 0.05) 0px 1px 1px 0px',
+                margin: '50px auto !important'
             },
             '.custom-input input': {
                 paddingLeft: 10
@@ -9279,7 +9280,9 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                         width: "100%", horizontalAlignment: 'center' },
                         this.$render("i-panel", { id: "pnlEditor", 
                             // maxWidth={1024}
-                            minHeight: "100vh", width: "100%", margin: { top: 8, bottom: 8, left: 60, right: 60 }, background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
+                            minHeight: "100vh", width: "90%", 
+                            // margin={{top: 50, bottom: 50, left: 60, right: 60}}
+                            background: { color: 'var(--builder-bg)' }, class: "pnl-editor-wrapper" },
                             this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
                                 this.$render("ide-rows", { id: "pageRows", draggable: true })),
                             this.$render("builder-footer", { id: "builderFooter" })))),
