@@ -47,17 +47,18 @@ export class UpdatePageSettingsCommand implements ICommand {
     }
     // const element = this.element.closest('i-scom-page-builder') || this.element;
 
-    if (updatedValues.includes('backgroundImage')) {
-      application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {image: backgroundImage});
-    }
     const defaultTextSize = 'md'
     let data: any = {
+      backgroundImage: '',
       customBackgroundColor: customBackgroundColor,
       backgroundColor: backgroundColor,
       customTextColor: customTextColor,
       textColor: textColor,
       customTextSize: customTextSize,
       textSize: textSize ?? defaultTextSize
+    }
+    if(updatedValues.includes('backgroundImage')) {
+      data.backgroundImage = backgroundImage;
     }
     if (customBackgroundColor) {
       if (updatedValues.includes('backgroundColor')) {

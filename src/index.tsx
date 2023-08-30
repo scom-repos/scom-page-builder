@@ -387,7 +387,7 @@ export default class Editor extends Module {
         )
         this.events.push(
             application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: {
-                image: string,
+                backgroundImage: string,
                 customBackgroundColor?: boolean,
                 customTextColor?: boolean,
                 customTextSize: boolean,
@@ -395,9 +395,10 @@ export default class Editor extends Module {
                 textColor?: string,
                 textSize?: string
             }) => {
-                const {customBackgroundColor, customTextColor, customTextSize, backgroundColor, textColor, textSize} = data;
+                const {customBackgroundColor, backgroundImage, customTextColor, customTextSize, backgroundColor, textColor, textSize} = data;
                 const ipfsUrl = `https://ipfs.scom.dev/ipfs`
-                if (data.image) this.pnlEditor.style.backgroundImage = `url("${ipfsUrl}/${data.image}")`;
+                if (backgroundImage) this.pnlEditor.style.backgroundImage = `url("${ipfsUrl}/${backgroundImage}")`;
+                else this.pnlEditor.style.backgroundImage = '';
                 for (let i = this.classList.length - 1; i >= 0; i--) {
                     const className = this.classList[i];
                     if (className.startsWith('font-')) {

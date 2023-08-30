@@ -3234,11 +3234,12 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
                 newConfig[prop] = config[prop];
             }
             // const element = this.element.closest('i-scom-page-builder') || this.element;
-            if (updatedValues.includes('backgroundImage')) {
-                components_10.application.EventBus.dispatch(index_24.EVENT.ON_UPDATE_PAGE_BG, { image: backgroundImage });
-            }
+            // if (updatedValues.includes('backgroundImage')) {
+            //   application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {image: backgroundImage});
+            // }
             const defaultTextSize = 'md';
             let data = {
+                backgroundImage: '',
                 customBackgroundColor: customBackgroundColor,
                 backgroundColor: backgroundColor,
                 customTextColor: customTextColor,
@@ -3246,6 +3247,9 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
                 customTextSize: customTextSize,
                 textSize: textSize !== null && textSize !== void 0 ? textSize : defaultTextSize
             };
+            if (updatedValues.includes('backgroundImage')) {
+                data.backgroundImage = backgroundImage;
+            }
             if (customBackgroundColor) {
                 if (updatedValues.includes('backgroundColor')) {
                     this.element.style.setProperty('--custom-background-color', backgroundColor);
@@ -9372,10 +9376,12 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.events.push(components_43.application.EventBus.register(this, index_88.EVENT.ON_TOGGLE_SEARCH_MODAL, this.onToggleSearch));
             this.events.push(components_43.application.EventBus.register(this, index_88.EVENT.ON_FETCH_COMPONENTS, this.onSearch));
             this.events.push(components_43.application.EventBus.register(this, index_88.EVENT.ON_UPDATE_PAGE_BG, async (data) => {
-                const { customBackgroundColor, customTextColor, customTextSize, backgroundColor, textColor, textSize } = data;
+                const { customBackgroundColor, backgroundImage, customTextColor, customTextSize, backgroundColor, textColor, textSize } = data;
                 const ipfsUrl = `https://ipfs.scom.dev/ipfs`;
-                if (data.image)
-                    this.pnlEditor.style.backgroundImage = `url("${ipfsUrl}/${data.image}")`;
+                if (backgroundImage)
+                    this.pnlEditor.style.backgroundImage = `url("${ipfsUrl}/${backgroundImage}")`;
+                else
+                    this.pnlEditor.style.backgroundImage = '';
                 for (let i = this.classList.length - 1; i >= 0; i--) {
                     const className = this.classList[i];
                     if (className.startsWith('font-')) {
