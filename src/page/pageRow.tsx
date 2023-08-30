@@ -227,11 +227,11 @@ export class PageRow extends Module {
             align,
             fullWidth,
             padding,
-            ptb,
-            plr,
             textColor
         } = config || {};
+
         if (!fullWidth) {
+            this.style.removeProperty('--background-main')
             if (image) this.background.image = image;
             if (border) {
                 this.pnlRowWrap.border = { width: 2, style: 'solid', color: borderColor || Theme.divider }
@@ -247,9 +247,9 @@ export class PageRow extends Module {
             // if (backgroundColor)
                 // this.background.color = backgroundColor;
             if (customBackgroundColor)
-                this.style.setProperty('--custom-background-color', backgroundColor)
+                this.style.setProperty('--background-main', backgroundColor)
             else
-                this.style.removeProperty('--custom-background-color')
+                this.style.removeProperty('--background-main')
             this.background.image = ''
         }
         // if (backgroundColor) {
@@ -1226,13 +1226,13 @@ export class PageRow extends Module {
             }
             pageObject.updateSection(id, {config: JSON.parse(JSON.stringify(newConfig))});
             if (config.backgroundColor && config.customBackgroundColor)
-                this.pnlRowContainer.style.setProperty('--custom-background-color', config.backgroundColor)
+                this.pnlRowContainer.style.setProperty('--background-main', config.backgroundColor)
             else
-                this.pnlRowContainer.style.removeProperty('--custom-background-color')
+                this.pnlRowContainer.style.removeProperty('--background-main')
             if (config.customTextColor && config.textColor)
-                this.pnlRowContainer.style.setProperty('--custom-text-color', config.textColor)
+                this.pnlRowContainer.style.setProperty('--text-primary', config.textColor)
             else
-                this.pnlRowContainer.style.removeProperty('--custom-text-color')
+                this.pnlRowContainer.style.removeProperty('--text-primary')
             Reflect.deleteProperty(newConfig, 'backgroundColor')
             Reflect.deleteProperty(newConfig, 'textColor')
             this.updateRowConfig(newConfig);
@@ -1322,8 +1322,8 @@ export class PageRow extends Module {
                 id="pnlRowContainer"
                 class={'page-row-container'}
                 width="100%" height="100%"
-                background={{color: 'var(--custom-background-color, var(--background-main))'}}
-                font={{color: 'var(--custom-text-color, var(--text-primary))'}}
+                background={{color: 'var(--background-main)'}}
+                font={{color: 'var(--text-primary)'}}
             >
                 <i-panel
                     id="pnlRowWrap"
@@ -1450,7 +1450,7 @@ export class PageRow extends Module {
                                 caption="Drag Elements Here"
                                 font={{
                                     transform: 'uppercase',
-                                    color: 'var(--custom-text-color, var(--text-primary))',
+                                    color: 'var(--text-primary, var(--text-primary))',
                                     size: '1.25rem',
                                 }}
                                 opacity={0.5}

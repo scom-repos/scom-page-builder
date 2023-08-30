@@ -274,8 +274,8 @@ export default class Editor extends Module {
         const onFetchComponents = this.getAttribute('onFetchComponents', true);
         if (onFetchComponents) this.onFetchComponents = onFetchComponents.bind(this);
         await super.init();
-        this.style.setProperty('--custom-background-color', '#ffffff');
-        this.style.setProperty('--custom-text-color', '#000000');
+        // this.style.setProperty('--background-main', '#ffffff');
+        // this.style.setProperty('--text-primary', '#000000');
         this.initEventListeners();
         this.initData();
         this.theme = this.getAttribute('theme', true);
@@ -345,14 +345,14 @@ export default class Editor extends Module {
                 const ipfsUrl = 'https://ipfs.scom.dev/ipfs';
                 this.pnlEditor.style.setProperty('--builder-bg', `url("${ipfsUrl}/${backgroundImage}") center center fixed`);
             } else if (customBackgroundColor && backgroundColor) {
-                this.pnlEditor.style.setProperty('--custom-background-color', backgroundColor);
+                this.pnlEditor.style.setProperty('--background-main', backgroundColor);
             }
             else
-                this.pnlEditor.style.removeProperty('--custom-background-color');
+                this.pnlEditor.style.removeProperty('--background-main');
             if (customTextColor && textColor) 
-                this.pnlEditor.style.setProperty('--custom-text-color', textColor)
+                this.pnlEditor.style.setProperty('--text-primary', textColor)
             else
-                this.pnlEditor.style.removeProperty('--custom-text-color');
+                this.pnlEditor.style.removeProperty('--text-primary');
         }
     }
 
@@ -398,13 +398,13 @@ export default class Editor extends Module {
                     }
                 }
                 if(customBackgroundColor && backgroundColor)
-                    this.pnlEditor.style.setProperty('--custom-background-color', backgroundColor)
+                    this.pnlEditor.style.setProperty('--background-main', backgroundColor)
                 else
-                    this.pnlEditor.style.removeProperty('--custom-background-color');
+                    this.pnlEditor.style.removeProperty('--background-main');
                 if(customTextColor && textColor)
-                    this.pnlEditor.style.setProperty('--custom-text-color', textColor)
+                    this.pnlEditor.style.setProperty('--text-primary', textColor)
                 else
-                    this.pnlEditor.style.removeProperty('--custom-text-color');
+                    this.pnlEditor.style.removeProperty('--text-primary');
                 if (customTextSize && textSize) {
                     this.classList.add(`font-${textSize}`)
                 }
@@ -483,7 +483,7 @@ export default class Editor extends Module {
                             minHeight="100vh"
                             width="90%"
                             // margin={{top: 8, bottom: 8, left: 60, right: 60}}
-                            background={{color: 'var(--custom-background-color, var(--background-main))'}}
+                            background={{color: 'var(--background-main)'}}
                             class="pnl-editor-wrapper"
                         >
                             <i-panel

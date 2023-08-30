@@ -1789,6 +1789,12 @@ define("@scom/scom-page-builder/command/updateRow.ts", ["require", "exports", "@
                     const prependId = this.prependId.replace('row-', '');
                     const prependIndex = prependId ? index_5.pageObject.sections.findIndex(section => section.id === prependId) : -1;
                     index = prependIndex === -1 ? -1 : prependIndex + 1;
+                    const prependRowContainer = prependRow.querySelector('#pnlRowContainer');
+                    const rowContainer = this.element.querySelector('#pnlRowContainer');
+                    if (this.element.getAttribute('data-cloned') && prependRowContainer && rowContainer) {
+                        rowContainer.style.setProperty('--background-main', prependRowContainer.style.getPropertyValue('--background-main'));
+                        rowContainer.style.setProperty('--text-primary', prependRowContainer.style.getPropertyValue('--text-primary'));
+                    }
                 }
                 else if (this.appendId) {
                     const appendRow = this.parent.querySelector(`#${this.appendId}`);
@@ -1907,18 +1913,18 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
                     const innerEl = this.element.querySelector('#pnlRowContainer');
                     if (innerEl) {
                         if (newValue.customBackgroundColor)
-                            innerEl.style.setProperty('--custom-background-color', newValue.backgroundColor);
+                            innerEl.style.setProperty('--background-main', newValue.backgroundColor);
                         else
-                            innerEl.style.removeProperty('--custom-background-color');
+                            innerEl.style.removeProperty('--background-main');
                     }
                 }
                 else {
                     const innerEl = this.element.querySelector('#pnlRowContainer');
                     if (innerEl) {
                         if (newValue.customBackgroundColor)
-                            innerEl.style.setProperty('--custom-background-color', newValue.backgroundColor);
+                            innerEl.style.setProperty('--background-main', newValue.backgroundColor);
                         else
-                            innerEl.style.removeProperty('--custom-background-color');
+                            innerEl.style.removeProperty('--background-main');
                     }
                 }
                 ;
@@ -1926,12 +1932,12 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
                     newValue.textColor = (newConfig === null || newConfig === void 0 ? void 0 : newConfig.textColor) || '';
                     newValue.customTextColor = (_b = newConfig === null || newConfig === void 0 ? void 0 : newConfig.customTextColor) !== null && _b !== void 0 ? _b : false;
                     if (newValue.customTextColor)
-                        this.element.style.setProperty('--custom-text-color', newValue.textColor);
+                        this.element.style.setProperty('--text-primary', newValue.textColor);
                     else
-                        this.element.style.removeProperty('--custom-text-color');
+                        this.element.style.removeProperty('--text-primary');
                 }
                 else
-                    this.element.style.removeProperty('--custom-text-color');
+                    this.element.style.removeProperty('--text-primary');
                 newValue.customTextSize = (_c = newConfig === null || newConfig === void 0 ? void 0 : newConfig.customTextSize) !== null && _c !== void 0 ? _c : false;
                 const toolbars = this.element.querySelectorAll('ide-toolbar');
                 for (let toolbar of toolbars) {
@@ -3278,25 +3284,25 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             };
             if (customBackgroundColor) {
                 if (updatedValues.includes('backgroundColor')) {
-                    this.element.style.setProperty('--custom-background-color', backgroundColor);
+                    this.element.style.setProperty('--background-main', backgroundColor);
                     data.customBackgroundColor = customBackgroundColor;
                     data.backgroundColor = backgroundColor;
                 }
             }
             else {
-                this.element.style.removeProperty('--custom-background-color');
+                this.element.style.removeProperty('--background-main');
             }
             if (customTextColor) {
                 if (updatedValues.includes('textColor')) {
-                    this.element.style.setProperty('--custom-text-color', textColor);
+                    this.element.style.setProperty('--text-primary', textColor);
                     data.customTextColor = customTextColor;
                     data.textColor = textColor;
                 }
                 else
-                    this.element.style.removeProperty('--custom-text-color');
+                    this.element.style.removeProperty('--text-primary');
             }
             else {
-                this.element.style.removeProperty('--custom-text-color');
+                this.element.style.removeProperty('--text-primary');
             }
             if (customTextSize) {
                 if (updatedValues.includes('textSize') || updatedValues.includes('customTextSize')) {
@@ -3610,25 +3616,22 @@ define("@scom/scom-page-builder/dialogs/searchComponentsDialog.tsx", ["require",
 define("@scom/scom-page-builder/dialogs/rowSettingsDialog.css.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_17) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    components_17.Styles.cssRule('ide-row-settings-dialog', {
+    components_17.Styles.cssRule('.custom-modal', {
+        visibility: 'hidden',
         $nest: {
-            '.custom-modal': {
-                $nest: {
-                    '.i-modal_header': {
-                        padding: '1rem 1.5rem 0.5rem',
-                        fontSize: '1rem',
-                        fontWeight: 600
-                    },
-                    'i-button': {
-                        padding: '0.5rem 1rem'
-                    },
-                    '.modal': {
-                        maxHeight: 'calc(100vh - 48px)',
-                        padding: 0,
-                        borderRadius: 5,
-                        overflowY: 'auto',
-                    }
-                }
+            '.i-modal_header': {
+                padding: '1rem 1.5rem 0.5rem',
+                fontSize: '1rem',
+                fontWeight: 600
+            },
+            'i-button': {
+                padding: '0.5rem 1rem'
+            },
+            '.modal': {
+                maxHeight: 'calc(100vh - 48px)',
+                padding: 0,
+                borderRadius: 5,
+                overflowY: 'auto',
             }
         }
     });
@@ -3649,6 +3652,10 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
         }
         init() {
             super.init();
+            this.dialog.linkTo = this;
+            this.dialog.position = 'fixed';
+            this.dialog.visible = false;
+            document.body.appendChild(this.dialog);
         }
         show(id) {
             this.rowId = id || '';
@@ -4044,8 +4051,8 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
             this.formElm.uiSchema = jsonUISchema;
             this.formElm.formOptions = formOptions;
             this.formElm.renderForm();
-            const { backgroundColor, margin, sectionWidth, textColor } = (0, index_36.getPageConfig)();
-            const config = Object.assign({ align: 'left', sectionWidth, textColor, backgroundColor }, (((_a = this.data) === null || _a === void 0 ? void 0 : _a.config) || {}));
+            const { backgroundColor, sectionWidth, customBackgroundColor, customTextColor, textColor, customTextSize, textSize } = (0, index_36.getPageConfig)();
+            const config = Object.assign({ align: 'left', sectionWidth, textColor, backgroundColor, customBackgroundColor, customTextColor, customTextSize, textSize }, (((_a = this.data) === null || _a === void 0 ? void 0 : _a.config) || {}));
             this.formElm.setFormData(Object.assign({}, config));
         }
         close() {
@@ -4618,61 +4625,6 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
             '#form > i-vstack > i-panel': {
                 width: '100%'
             },
-            '.setting-modal': {
-                $nest: {
-                    '.i-modal_header': {
-                        padding: '1rem 1.5rem 0.5rem',
-                        fontSize: '1rem',
-                        fontWeight: 600
-                    },
-                    'i-button': {
-                        padding: '0.5rem 1rem'
-                    },
-                    'i-color': {
-                        display: 'flex',
-                        $nest: {
-                            '.i-color': {
-                                height: '30px !important',
-                                marginBlock: 'auto'
-                            }
-                        }
-                    },
-                    'i-input': {
-                    // border: `1px solid var(--builder-divider)`,
-                    // marginBottom: '1rem'
-                    },
-                    '.modal': {
-                        padding: 0,
-                        borderRadius: 5,
-                        // boxShadow: 'rgba(0, 0, 0, 0.15) 0px 10px 50px -5px',
-                        $nest: {
-                            '#pnlForm > * > *:first-child': {
-                                padding: '1rem 1.5rem 0',
-                                maxHeight: 'calc(100vh - 114px)',
-                                overflowY: 'auto',
-                                justifyContent: 'start',
-                                $nest: {
-                                    '&::-webkit-scrollbar': {
-                                        width: '7px',
-                                    },
-                                    '&::-webkit-scrollbar-track': {
-                                        borderRadius: '10px',
-                                        border: '1px solid transparent',
-                                    },
-                                    '&::-webkit-scrollbar-thumb': {
-                                        background: Theme.colors.primary.main,
-                                        borderRadius: '10px',
-                                        outline: '1px solid transparent'
-                                    },
-                                }
-                            },
-                            '#pnlForm > * > *:last-child': {
-                                padding: '0 1.5rem 1rem'
-                            }
-                        }
-                    }
-                }
-            },
             '.resize-icon': {
                 cursor: 'ew-resize',
                 opacity: 0,
@@ -4714,7 +4666,80 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                     }
                 }
             },
-            '.setting-modal i-tabs': {
+            '&.is-textbox': {
+                $nest: {
+                    'i-markdown-editor': {
+                        cursor: 'text',
+                        userSelect: 'text',
+                        $nest: {
+                            '&::selection': {
+                                background: Theme.colors.primary.main,
+                                color: Theme.colors.primary.contrastText
+                            }
+                        }
+                    },
+                    'i-scom-markdown-editor': {
+                        padding: '0.75rem 0 0'
+                    }
+                }
+            }
+        }
+    });
+    components_23.Styles.cssRule('.setting-modal', {
+        visibility: 'hidden',
+        $nest: {
+            '.i-modal_header': {
+                padding: '1rem 1.5rem 0.5rem',
+                fontSize: '1rem',
+                fontWeight: 600
+            },
+            'i-button': {
+                padding: '0.5rem 1rem'
+            },
+            'i-color': {
+                display: 'flex',
+                $nest: {
+                    '.i-color': {
+                        height: '30px !important',
+                        marginBlock: 'auto'
+                    }
+                }
+            },
+            'i-input': {
+            // border: `1px solid var(--builder-divider)`,
+            // marginBottom: '1rem'
+            },
+            '.modal': {
+                // padding: 0,
+                borderRadius: 5,
+                // boxShadow: 'rgba(0, 0, 0, 0.15) 0px 10px 50px -5px',
+                $nest: {
+                    '#pnlForm > * > *:first-child': {
+                        padding: '1rem 1.5rem 0',
+                        maxHeight: 'calc(100vh - 114px)',
+                        overflowY: 'auto',
+                        justifyContent: 'start',
+                        $nest: {
+                            '&::-webkit-scrollbar': {
+                                width: '7px',
+                            },
+                            '&::-webkit-scrollbar-track': {
+                                borderRadius: '10px',
+                                border: '1px solid transparent',
+                            },
+                            '&::-webkit-scrollbar-thumb': {
+                                background: Theme.colors.primary.main,
+                                borderRadius: '10px',
+                                outline: '1px solid transparent'
+                            },
+                        }
+                    },
+                    '#pnlForm > * > *:last-child': {
+                        padding: '0 1.5rem 1rem'
+                    }
+                }
+            },
+            'i-tabs': {
                 $nest: {
                     '> .tabs-nav-wrap': {
                         margin: 0,
@@ -4748,23 +4773,6 @@ define("@scom/scom-page-builder/common/toolbar.css.ts", ["require", "exports", "
                         }
                     },
                 }
-            },
-            '&.is-textbox': {
-                $nest: {
-                    'i-markdown-editor': {
-                        cursor: 'text',
-                        userSelect: 'text',
-                        $nest: {
-                            '&::selection': {
-                                background: Theme.colors.primary.main,
-                                color: Theme.colors.primary.contrastText
-                            }
-                        }
-                    },
-                    'i-scom-markdown-editor': {
-                        padding: '0.75rem 0 0'
-                    }
-                }
             }
         }
     });
@@ -4787,7 +4795,7 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
         transition: 'translate .3s ease-in',
         border: '1px solid transparent',
         boxSizing: 'border-box',
-        backgroundColor: 'var(--custom-background-color, var(--background-main))',
+        backgroundColor: 'var(--background-main)',
         $nest: {
             '.page-row-container': {
                 borderRadius: 10,
@@ -5063,8 +5071,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            const { image = '', customBackgroundColor, backgroundColor, backdropColor, backdropImage, border, borderColor, sectionWidth, margin, align, fullWidth, padding, ptb, plr, textColor } = config || {};
+            const { image = '', customBackgroundColor, backgroundColor, backdropColor, backdropImage, border, borderColor, sectionWidth, margin, align, fullWidth, padding, textColor } = config || {};
             if (!fullWidth) {
+                this.style.removeProperty('--background-main');
                 if (image)
                     this.background.image = image;
                 if (border) {
@@ -5084,9 +5093,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 // if (backgroundColor)
                 // this.background.color = backgroundColor;
                 if (customBackgroundColor)
-                    this.style.setProperty('--custom-background-color', backgroundColor);
+                    this.style.setProperty('--background-main', backgroundColor);
                 else
-                    this.style.removeProperty('--custom-background-color');
+                    this.style.removeProperty('--background-main');
                 this.background.image = '';
             }
             // if (backgroundColor) {
@@ -5953,13 +5962,13 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
                 index_46.pageObject.updateSection(id, { config: JSON.parse(JSON.stringify(newConfig)) });
                 if (config.backgroundColor && config.customBackgroundColor)
-                    this.pnlRowContainer.style.setProperty('--custom-background-color', config.backgroundColor);
+                    this.pnlRowContainer.style.setProperty('--background-main', config.backgroundColor);
                 else
-                    this.pnlRowContainer.style.removeProperty('--custom-background-color');
+                    this.pnlRowContainer.style.removeProperty('--background-main');
                 if (config.customTextColor && config.textColor)
-                    this.pnlRowContainer.style.setProperty('--custom-text-color', config.textColor);
+                    this.pnlRowContainer.style.setProperty('--text-primary', config.textColor);
                 else
-                    this.pnlRowContainer.style.removeProperty('--custom-text-color');
+                    this.pnlRowContainer.style.removeProperty('--text-primary');
                 Reflect.deleteProperty(newConfig, 'backgroundColor');
                 Reflect.deleteProperty(newConfig, 'textColor');
                 this.updateRowConfig(newConfig);
@@ -6042,7 +6051,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             components_25.application.EventBus.dispatch(index_44.EVENT.ON_ADD_SECTION, { prependId, appendId });
         }
         render() {
-            return (this.$render("i-panel", { id: "pnlRowContainer", class: 'page-row-container', width: "100%", height: "100%", background: { color: 'var(--custom-background-color, var(--background-main))' }, font: { color: 'var(--custom-text-color, var(--text-primary))' } },
+            return (this.$render("i-panel", { id: "pnlRowContainer", class: 'page-row-container', width: "100%", height: "100%", background: { color: 'var(--background-main)' }, font: { color: 'var(--text-primary)' } },
                 this.$render("i-panel", { id: "pnlRowWrap", class: 'page-row', width: "100%", height: "100%" },
                     this.$render("i-button", { caption: "", icon: {
                             name: 'plus',
@@ -6080,7 +6089,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             }, class: "text-center" },
                             this.$render("i-label", { caption: "Drag Elements Here", font: {
                                     transform: 'uppercase',
-                                    color: 'var(--custom-text-color, var(--text-primary))',
+                                    color: 'var(--text-primary, var(--text-primary))',
                                     size: '1.25rem',
                                 }, opacity: 0.5 }))),
                     this.$render("i-grid-layout", { id: "pnlRow", width: "100%", height: "100%", maxWidth: "100%", maxHeight: "100%", position: "relative", class: "grid", opacity: 0 }),
@@ -6802,6 +6811,10 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this.setAttribute('draggable', 'true');
             this.initEventBus();
             this.initEventListener();
+            this.mdActions.linkTo = this;
+            this.mdActions.position = 'fixed';
+            this.mdActions.visible = false;
+            document.body.appendChild(this.mdActions);
         }
         render() {
             return (this.$render("i-panel", null,
@@ -6830,7 +6843,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                         this.$render("i-panel", null,
                             this.$render("i-vstack", { id: "pnlFormMsg", padding: { left: '1.5rem', right: '1.5rem', top: '1rem' }, gap: "0.5rem", visible: false }),
                             this.$render("i-panel", { id: "pnlForm" }),
-                            this.$render("i-form", { id: "form", padding: { left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' } }))))));
+                            this.$render("i-panel", { padding: { left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' } },
+                                this.$render("i-form", { id: "form" })))))));
         }
     };
     IDEToolbar = __decorate([
@@ -7341,7 +7355,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
             this.clearRows();
             for (let i = 0; i < index_66.pageObject.sections.length; i++) {
                 const rowData = index_66.pageObject.sections[i];
-                const pageRow = (this.$render("ide-row", { class: "i-page-section", background: { color: `var(--custom-background-color, var(--background-main))` }, font: { color: `var(--custom-text-color, var(--text-primary))` }, maxWidth: "100%", maxHeight: "100%" }));
+                const pageRow = (this.$render("ide-row", { class: "i-page-section", background: { color: 'var(--background-main)' }, font: { color: 'var(--text-primary)' }, maxWidth: "100%", maxHeight: "100%" }));
                 const { backgroundColor, textColor, customBackgroundColor, customTextColor, } = rowData.config || {};
                 if (!this._readonly) {
                     pageRow.border = { top: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' } };
@@ -7351,9 +7365,9 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
                 pageRow.visible = isInit ? true : !!((_a = rowData === null || rowData === void 0 ? void 0 : rowData.elements) === null || _a === void 0 ? void 0 : _a.length);
                 pageRow.parent = this.pnlRows;
                 if (customBackgroundColor && backgroundColor)
-                    pageRow.style.setProperty('--custom-background-color', backgroundColor);
+                    pageRow.style.setProperty('--background-main', backgroundColor);
                 if (customTextColor && textColor)
-                    pageRow.style.setProperty('--custom-text-color', textColor);
+                    pageRow.style.setProperty('--text-primary', textColor);
                 this.pnlRows.append(pageRow);
                 await pageRow.setData(rowData);
             }
@@ -7365,9 +7379,10 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
                 this.initDragEvent(pageRow);
             }
             pageRow.visible = true; // !!rowData?.elements?.length;
+            pageRow.setAttribute('data-cloned', `${prependId}`);
+            await pageRow.setData(rowData);
             const addRowCmd = new index_65.UpdateRowCommand(pageRow, this.pnlRows, rowData, false, prependId);
             index_65.commandHistory.execute(addRowCmd);
-            await pageRow.setData(rowData);
             return pageRow;
         }
         async onClone(data) {
@@ -8788,7 +8803,7 @@ define("@scom/scom-page-builder/builder/builderFooter.tsx", ["require", "exports
             var _a;
             this.pnlFooterMain.clearInnerHTML();
             this.showAddStack = ((_a = this._elements) === null || _a === void 0 ? void 0 : _a.length) === 0 && !this._image;
-            this.pnlFooter.background = this.showAddStack ? { color: 'var(--custom-background-color, var(background-main))', image: '' } : { image: this._image };
+            this.pnlFooter.background = this.showAddStack ? { color: 'var(--background-main)', image: '' } : { image: this._image };
             this.pnlEditOverlay.visible = !this.showAddStack;
             this.pnlEditOverlay.classList.remove('flex');
             this.pnlConfig.visible = !this.showAddStack;
@@ -9175,8 +9190,8 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             if (onFetchComponents)
                 this.onFetchComponents = onFetchComponents.bind(this);
             await super.init();
-            this.style.setProperty('--custom-background-color', '#ffffff');
-            this.style.setProperty('--custom-text-color', '#000000');
+            // this.style.setProperty('--background-main', '#ffffff');
+            // this.style.setProperty('--text-primary', '#000000');
             this.initEventListeners();
             this.initData();
             this.theme = this.getAttribute('theme', true);
@@ -9230,14 +9245,14 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                     this.pnlEditor.style.setProperty('--builder-bg', `url("${ipfsUrl}/${backgroundImage}") center center fixed`);
                 }
                 else if (customBackgroundColor && backgroundColor) {
-                    this.pnlEditor.style.setProperty('--custom-background-color', backgroundColor);
+                    this.pnlEditor.style.setProperty('--background-main', backgroundColor);
                 }
                 else
-                    this.pnlEditor.style.removeProperty('--custom-background-color');
+                    this.pnlEditor.style.removeProperty('--background-main');
                 if (customTextColor && textColor)
-                    this.pnlEditor.style.setProperty('--custom-text-color', textColor);
+                    this.pnlEditor.style.setProperty('--text-primary', textColor);
                 else
-                    this.pnlEditor.style.removeProperty('--custom-text-color');
+                    this.pnlEditor.style.removeProperty('--text-primary');
             }
         }
         onHide() {
@@ -9265,13 +9280,13 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                     }
                 }
                 if (customBackgroundColor && backgroundColor)
-                    this.pnlEditor.style.setProperty('--custom-background-color', backgroundColor);
+                    this.pnlEditor.style.setProperty('--background-main', backgroundColor);
                 else
-                    this.pnlEditor.style.removeProperty('--custom-background-color');
+                    this.pnlEditor.style.removeProperty('--background-main');
                 if (customTextColor && textColor)
-                    this.pnlEditor.style.setProperty('--custom-text-color', textColor);
+                    this.pnlEditor.style.setProperty('--text-primary', textColor);
                 else
-                    this.pnlEditor.style.removeProperty('--custom-text-color');
+                    this.pnlEditor.style.removeProperty('--text-primary');
                 if (customTextSize && textSize) {
                     this.classList.add(`font-${textSize}`);
                 }
@@ -9316,7 +9331,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                             // maxWidth={1024}
                             minHeight: "100vh", width: "90%", 
                             // margin={{top: 8, bottom: 8, left: 60, right: 60}}
-                            background: { color: 'var(--custom-background-color, var(--background-main))' }, class: "pnl-editor-wrapper" },
+                            background: { color: 'var(--background-main)' }, class: "pnl-editor-wrapper" },
                             this.$render("i-panel", { id: "contentWrapper", padding: { bottom: '12rem' }, minHeight: "calc((100vh - 6rem) - 12rem)" },
                                 this.$render("ide-rows", { id: "pageRows", draggable: true })),
                             this.$render("builder-footer", { id: "builderFooter" })))),

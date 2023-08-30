@@ -225,8 +225,8 @@ export class PageRows extends Module {
         for (let i = 0; i < pageObject.sections.length; i++) {
             const rowData = pageObject.sections[i];
             const pageRow = (<ide-row class="i-page-section" 
-                background={{color: `var(--custom-background-color, var(--background-main))` }}
-                font={{color: `var(--custom-text-color, var(--text-primary))`}} 
+                background={{color: 'var(--background-main)'}}
+                font={{color: 'var(--text-primary)'}}
                 maxWidth="100%" 
                 maxHeight="100%"></ide-row>) as PageRow;
             const {
@@ -243,9 +243,9 @@ export class PageRows extends Module {
             pageRow.visible = isInit? true : !!rowData?.elements?.length;
             pageRow.parent = this.pnlRows;
             if (customBackgroundColor && backgroundColor)
-                pageRow.style.setProperty('--custom-background-color', backgroundColor);
+                pageRow.style.setProperty('--background-main', backgroundColor);
             if (customTextColor && textColor)
-                pageRow.style.setProperty('--custom-text-color', textColor);
+                pageRow.style.setProperty('--text-primary', textColor);
             this.pnlRows.append(pageRow);
             await pageRow.setData(rowData);
         }
@@ -258,9 +258,10 @@ export class PageRows extends Module {
             this.initDragEvent(pageRow);
         }
         pageRow.visible = true; // !!rowData?.elements?.length;
+        pageRow.setAttribute('data-cloned', `${prependId}`)
+        await pageRow.setData(rowData);
         const addRowCmd = new UpdateRowCommand(pageRow, this.pnlRows, rowData, false, prependId);
         commandHistory.execute(addRowCmd);
-        await pageRow.setData(rowData);
         return pageRow;
     }
 

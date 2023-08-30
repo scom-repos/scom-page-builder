@@ -53,6 +53,12 @@ export class UpdateRowCommand implements ICommand {
         const prependId = this.prependId.replace('row-', '');
         const prependIndex = prependId ? pageObject.sections.findIndex(section => section.id === prependId) : -1;
         index = prependIndex === -1 ? -1 : prependIndex + 1;
+        const prependRowContainer = prependRow.querySelector('#pnlRowContainer');
+        const rowContainer = this.element.querySelector('#pnlRowContainer');
+        if (this.element.getAttribute('data-cloned') && prependRowContainer && rowContainer) {
+          rowContainer.style.setProperty('--background-main', prependRowContainer.style.getPropertyValue('--background-main'))
+          rowContainer.style.setProperty('--text-primary', prependRowContainer.style.getPropertyValue('--text-primary'))
+        }
       } else if (this.appendId) {
         const appendRow = this.parent.querySelector(`#${this.appendId}`);
         if (appendRow) {

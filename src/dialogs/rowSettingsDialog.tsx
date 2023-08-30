@@ -45,6 +45,10 @@ export class RowSettingsDialog extends Module {
 
     init() {
         super.init();
+        this.dialog.linkTo = this
+        this.dialog.position = 'fixed'
+        this.dialog.visible = false
+        document.body.appendChild(this.dialog)
     }
 
     show(id: string) {
@@ -447,8 +451,8 @@ export class RowSettingsDialog extends Module {
         this.formElm.uiSchema = jsonUISchema;
         this.formElm.formOptions = formOptions;
         this.formElm.renderForm();
-        const { backgroundColor, margin, sectionWidth, textColor } = getPageConfig();
-        const config = { align: 'left', sectionWidth, textColor, backgroundColor, ...(this.data?.config || {}) };
+        const { backgroundColor, sectionWidth, customBackgroundColor, customTextColor, textColor, customTextSize, textSize } = getPageConfig();
+        const config = { align: 'left', sectionWidth, textColor, backgroundColor, customBackgroundColor, customTextColor, customTextSize, textSize, ...(this.data?.config || {}) };
         this.formElm.setFormData({...config});
     }
 

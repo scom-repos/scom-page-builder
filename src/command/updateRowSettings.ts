@@ -59,18 +59,18 @@ export class UpdateRowSettingsCommand implements ICommand {
         const innerEl = this.element.querySelector('#pnlRowContainer')
         if (innerEl){
           if (newValue.customBackgroundColor)
-            innerEl.style.setProperty('--custom-background-color', newValue.backgroundColor)
+            innerEl.style.setProperty('--background-main', newValue.backgroundColor)
           else
-            innerEl.style.removeProperty('--custom-background-color')
+            innerEl.style.removeProperty('--background-main')
         }
       }
       else{
         const innerEl = this.element.querySelector('#pnlRowContainer')
         if (innerEl){
           if (newValue.customBackgroundColor)
-            innerEl.style.setProperty('--custom-background-color', newValue.backgroundColor)
+            innerEl.style.setProperty('--background-main', newValue.backgroundColor)
           else
-            innerEl.style.removeProperty('--custom-background-color')
+            innerEl.style.removeProperty('--background-main')
         }
       };
 
@@ -78,12 +78,12 @@ export class UpdateRowSettingsCommand implements ICommand {
         newValue.textColor = newConfig?.textColor || '';
         newValue.customTextColor = newConfig?.customTextColor ?? false
         if (newValue.customTextColor)
-          this.element.style.setProperty('--custom-text-color', newValue.textColor)
+          this.element.style.setProperty('--text-primary', newValue.textColor)
         else
-          this.element.style.removeProperty('--custom-text-color')
+          this.element.style.removeProperty('--text-primary')
       }
       else
-        this.element.style.removeProperty('--custom-text-color')
+        this.element.style.removeProperty('--text-primary')
       newValue.customTextSize = newConfig?.customTextSize ?? false
       const toolbars = this.element.querySelectorAll('ide-toolbar');
       for (let toolbar of toolbars) {

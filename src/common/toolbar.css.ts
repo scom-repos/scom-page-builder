@@ -55,61 +55,6 @@ Styles.cssRule('ide-toolbar', {
     '#form > i-vstack > i-panel': {
       width: '100%'
     },
-    '.setting-modal': {
-      $nest: {
-        '.i-modal_header': {
-          padding: '1rem 1.5rem 0.5rem',
-          fontSize: '1rem',
-          fontWeight: 600
-        },
-        'i-button': {
-          padding: '0.5rem 1rem'
-        },
-        'i-color': {
-          display: 'flex',
-          $nest: {
-            '.i-color': {
-              height: '30px !important',
-              marginBlock: 'auto'
-            }
-          }
-        },
-        'i-input': {
-          // border: `1px solid var(--builder-divider)`,
-          // marginBottom: '1rem'
-        },
-        '.modal': {
-          padding: 0,
-          borderRadius: 5,
-          // boxShadow: 'rgba(0, 0, 0, 0.15) 0px 10px 50px -5px',
-          $nest: {
-            '#pnlForm > * > *:first-child': {
-              padding: '1rem 1.5rem 0',
-              maxHeight: 'calc(100vh - 114px)',
-              overflowY: 'auto',
-              justifyContent: 'start',
-              $nest: {
-                '&::-webkit-scrollbar': {
-                  width: '7px',
-                },
-                '&::-webkit-scrollbar-track': {
-                  borderRadius: '10px',
-                  border: '1px solid transparent',
-                },
-                '&::-webkit-scrollbar-thumb': {
-                  background: Theme.colors.primary.main,
-                  borderRadius: '10px',
-                  outline: '1px solid transparent'
-                },
-              }
-            },
-            '#pnlForm > * > *:last-child': {
-              padding: '0 1.5rem 1rem'
-            }
-          }
-        }
-      }
-    },
     '.resize-icon': {
       cursor: 'ew-resize',
       opacity: 0,
@@ -151,7 +96,82 @@ Styles.cssRule('ide-toolbar', {
         }
       }
     },
-    '.setting-modal i-tabs': {
+    '&.is-textbox': {
+        $nest: {
+          'i-markdown-editor': {
+            cursor: 'text',
+            userSelect: 'text',
+            $nest: {
+              '&::selection': {
+                background: Theme.colors.primary.main,
+                color: Theme.colors.primary.contrastText
+              }
+            }
+          },
+          'i-scom-markdown-editor': {
+            padding: '0.75rem 0 0'
+          }
+        }
+    }
+  }
+})
+
+
+Styles.cssRule('.setting-modal', {
+  visibility: 'hidden',
+  $nest: {
+    '.i-modal_header': {
+      padding: '1rem 1.5rem 0.5rem',
+      fontSize: '1rem',
+      fontWeight: 600
+    },
+    'i-button': {
+      padding: '0.5rem 1rem'
+    },
+    'i-color': {
+      display: 'flex',
+      $nest: {
+        '.i-color': {
+          height: '30px !important',
+          marginBlock: 'auto'
+        }
+      }
+    },
+    'i-input': {
+      // border: `1px solid var(--builder-divider)`,
+      // marginBottom: '1rem'
+    },
+    '.modal': {
+      // padding: 0,
+      borderRadius: 5,
+      // boxShadow: 'rgba(0, 0, 0, 0.15) 0px 10px 50px -5px',
+      $nest: {
+        '#pnlForm > * > *:first-child': {
+          padding: '1rem 1.5rem 0',
+          maxHeight: 'calc(100vh - 114px)',
+          overflowY: 'auto',
+          justifyContent: 'start',
+          $nest: {
+            '&::-webkit-scrollbar': {
+              width: '7px',
+            },
+            '&::-webkit-scrollbar-track': {
+              borderRadius: '10px',
+              border: '1px solid transparent',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: Theme.colors.primary.main,
+              borderRadius: '10px',
+              outline: '1px solid transparent'
+            },
+          }
+        },
+        '#pnlForm > * > *:last-child': {
+          padding: '0 1.5rem 1rem'
+        }
+      }
+    },
+    'i-tabs': {
       $nest: {
         '> .tabs-nav-wrap': {
           margin: 0,
@@ -185,23 +205,6 @@ Styles.cssRule('ide-toolbar', {
           }
         },
       }
-    },
-    '&.is-textbox': {
-        $nest: {
-          'i-markdown-editor': {
-            cursor: 'text',
-            userSelect: 'text',
-            $nest: {
-              '&::selection': {
-                background: Theme.colors.primary.main,
-                color: Theme.colors.primary.contrastText
-              }
-            }
-          },
-          'i-scom-markdown-editor': {
-            padding: '0.75rem 0 0'
-          }
-        }
     }
   }
 })

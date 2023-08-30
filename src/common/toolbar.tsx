@@ -781,6 +781,10 @@ export class IDEToolbar extends Module {
         this.setAttribute('draggable', 'true');
         this.initEventBus();
         this.initEventListener();
+        this.mdActions.linkTo = this
+        this.mdActions.position = 'fixed'
+        this.mdActions.visible = false
+        document.body.appendChild(this.mdActions)
     }
 
     render() {
@@ -910,7 +914,9 @@ export class IDEToolbar extends Module {
                                 visible={false}
                             ></i-vstack>
                             <i-panel id="pnlForm" />
-                            <i-form id="form" padding={{ left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' }}/>
+                            <i-panel padding={{ left: '1.5rem', right: '1.5rem', top: '1rem', bottom: '1rem' }}>
+                                <i-form id="form" />
+                            </i-panel>
                         </i-panel>
                     </i-modal>
                 </i-vstack>
