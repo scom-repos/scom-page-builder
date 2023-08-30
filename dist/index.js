@@ -4197,10 +4197,6 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                     "sectionWidth": {
                         "title": "Section width (px)",
                         "type": "number"
-                    },
-                    "scrollToTop": {
-                        "title": "Show scroll to top button",
-                        "type": "boolean"
                     }
                 }
             };
@@ -4302,15 +4298,6 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                                         "scope": "#/properties/sectionWidth"
                                     }
                                 ]
-                            }
-                        ]
-                    },
-                    {
-                        "type": "HorizontalLayout",
-                        "elements": [
-                            {
-                                "type": "Control",
-                                "scope": "#/properties/scrollToTop"
                             }
                         ]
                     }
