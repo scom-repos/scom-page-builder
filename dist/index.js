@@ -1882,7 +1882,6 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
             return result;
         }
         updateConfig(config, updatedValues) {
-            var _a, _b, _c;
             const id = this.element.id.replace('row-', '');
             const { margin } = config;
             const marginStyle = (0, index_6.getMargin)(margin);
@@ -1900,56 +1899,20 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
                 this.element.classList.add(`font-${newConfig.textSize}`);
             }
             ;
-            if (updatedValues.includes('backgroundColor') || updatedValues.includes('textColor') || updatedValues.includes('textSize')) {
-                const newValue = {};
-                if (updatedValues.includes('backgroundColor')) {
-                    newValue.backgroundColor = (newConfig === null || newConfig === void 0 ? void 0 : newConfig.backgroundColor) || '';
-                    newValue.customBackgroundColor = (_a = newConfig === null || newConfig === void 0 ? void 0 : newConfig.customBackgroundColor) !== null && _a !== void 0 ? _a : false;
-                    const innerEl = this.element.querySelector('#pnlRowContainer');
-                    if (innerEl) {
-                        if (newValue.customBackgroundColor)
-                            innerEl.style.setProperty('--custom-background-color', newValue.backgroundColor);
-                        else
-                            innerEl.style.removeProperty('--custom-background-color');
-                    }
-                }
-                else {
-                    const innerEl = this.element.querySelector('#pnlRowContainer');
-                    if (innerEl) {
-                        if (newValue.customBackgroundColor)
-                            innerEl.style.setProperty('--custom-background-color', newValue.backgroundColor);
-                        else
-                            innerEl.style.removeProperty('--custom-background-color');
-                    }
-                }
-                ;
-                if (updatedValues.includes('textColor')) {
-                    newValue.textColor = (newConfig === null || newConfig === void 0 ? void 0 : newConfig.textColor) || '';
-                    newValue.customTextColor = (_b = newConfig === null || newConfig === void 0 ? void 0 : newConfig.customTextColor) !== null && _b !== void 0 ? _b : false;
-                    if (newValue.customTextColor)
-                        this.element.style.setProperty('--custom-text-color', newValue.textColor);
-                    else
-                        this.element.style.removeProperty('--custom-text-color');
-                }
+            const innerEl = this.element.querySelector('#pnlRowContainer');
+            if (innerEl) {
+                if (newConfig.customBackgroundColor)
+                    innerEl.style.setProperty('--custom-background-color', newConfig.backgroundColor);
                 else
-                    this.element.style.removeProperty('--custom-text-color');
-                newValue.customTextSize = (_c = newConfig === null || newConfig === void 0 ? void 0 : newConfig.customTextSize) !== null && _c !== void 0 ? _c : false;
-                const toolbars = this.element.querySelectorAll('ide-toolbar');
-                for (let toolbar of toolbars) {
-                    toolbar.updateUI(newValue);
-                }
+                    innerEl.style.removeProperty('--custom-background-color');
             }
-            else {
-                if (!config.customBackgroundColor) {
-                    const innerEl = this.element.querySelector('#pnlRowContainer');
-                    if (innerEl)
-                        innerEl.style.removeProperty('--custom-background-color');
-                }
-                ;
-                if (!config.customTextColor)
-                    this.element.style.removeProperty('--custom-text-color');
-            }
+            ;
+            if (newConfig.customTextColor)
+                this.element.style.setProperty('--custom-text-color', newConfig.textColor);
+            else
+                this.element.style.removeProperty('--custom-text-color');
         }
+        ;
         execute() {
             const updatedValues = this.getChangedValues(this.settings, this.oldSettings);
             this.updateConfig(this.settings, updatedValues);
