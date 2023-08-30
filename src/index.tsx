@@ -340,9 +340,8 @@ export default class Editor extends Module {
             const marginStyle = getMargin(margin);
             this.pnlEditor.margin = marginStyle;
             this.pnlEditor.style.width = `calc(100% - (2 * ${marginStyle.left}))`;
-
             if (backgroundImage) {
-                const ipfsUrl = 'https://ipfs.scom.dev/ipfs';
+                const ipfsUrl = '/ipfs';
                 this.pnlEditor.style.setProperty('--builder-bg', `url("${ipfsUrl}/${backgroundImage}") center center fixed`);
             } else if (customBackgroundColor && backgroundColor) {
                 this.pnlEditor.style.setProperty('--custom-background-color', backgroundColor);
@@ -350,7 +349,7 @@ export default class Editor extends Module {
             else
                 this.pnlEditor.style.removeProperty('--custom-background-color');
             if (customTextColor && textColor) 
-                this.pnlEditor.style.setProperty('--custom-text-color', textColor)
+                this.pnlEditor.style.setProperty('--custom-text-color', textColor);
             else
                 this.pnlEditor.style.removeProperty('--custom-text-color');
         }

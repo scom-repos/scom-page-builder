@@ -48,9 +48,9 @@ export class UpdateRowSettingsCommand implements ICommand {
           this.element.classList.remove(className);
       }
     }
-    if (customTextSize && textSize) {          
+    if (customTextSize && textSize) {       
       this.element.classList.add(`font-${newConfig.textSize}`)
-    }
+    };
     if (updatedValues.includes('backgroundColor') || updatedValues.includes('textColor') || updatedValues.includes('textSize')) {
       const newValue: any = {};
       if (updatedValues.includes('backgroundColor')) {
@@ -89,6 +89,15 @@ export class UpdateRowSettingsCommand implements ICommand {
       for (let toolbar of toolbars) {
         toolbar.updateUI(newValue);
       }
+    }
+    else{
+      if (!config.customBackgroundColor){
+        const innerEl = this.element.querySelector('#pnlRowContainer')
+        if (innerEl)
+            innerEl.style.removeProperty('--custom-background-color');
+      };
+      if (!config.customTextColor)
+        this.element.style.removeProperty('--custom-text-color');
     }
   }
 

@@ -1899,6 +1899,7 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
             if (customTextSize && textSize) {
                 this.element.classList.add(`font-${newConfig.textSize}`);
             }
+            ;
             if (updatedValues.includes('backgroundColor') || updatedValues.includes('textColor') || updatedValues.includes('textSize')) {
                 const newValue = {};
                 if (updatedValues.includes('backgroundColor')) {
@@ -1937,6 +1938,16 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
                 for (let toolbar of toolbars) {
                     toolbar.updateUI(newValue);
                 }
+            }
+            else {
+                if (!config.customBackgroundColor) {
+                    const innerEl = this.element.querySelector('#pnlRowContainer');
+                    if (innerEl)
+                        innerEl.style.removeProperty('--custom-background-color');
+                }
+                ;
+                if (!config.customTextColor)
+                    this.element.style.removeProperty('--custom-text-color');
             }
         }
         execute() {
@@ -7352,8 +7363,12 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
                 pageRow.parent = this.pnlRows;
                 if (customBackgroundColor && backgroundColor)
                     pageRow.style.setProperty('--custom-background-color', backgroundColor);
+                else
+                    pageRow.style.removeProperty('--custom-background-color');
                 if (customTextColor && textColor)
                     pageRow.style.setProperty('--custom-text-color', textColor);
+                else
+                    pageRow.style.removeProperty('--custom-text-color');
                 this.pnlRows.append(pageRow);
                 await pageRow.setData(rowData);
             }
@@ -9226,7 +9241,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 this.pnlEditor.margin = marginStyle;
                 this.pnlEditor.style.width = `calc(100% - (2 * ${marginStyle.left}))`;
                 if (backgroundImage) {
-                    const ipfsUrl = 'https://ipfs.scom.dev/ipfs';
+                    const ipfsUrl = '/ipfs';
                     this.pnlEditor.style.setProperty('--builder-bg', `url("${ipfsUrl}/${backgroundImage}") center center fixed`);
                 }
                 else if (customBackgroundColor && backgroundColor) {
