@@ -113,7 +113,7 @@ export class PageSettingsDialog extends Module {
                 "backgroundImage": {
                     "title": "Background image",
                     "type": "string",
-                    "format": "data-url"
+                    "format": "data-cid"
                 },
                 "ptb": {
                     "title": "Section padding top / bottom (px)",
@@ -126,10 +126,6 @@ export class PageSettingsDialog extends Module {
                 "sectionWidth": {
                     "title": "Section width (px)",
                     "type": "number"
-                },
-                "scrollToTop": {
-                    "title": "Show scroll to top button",
-                    "type": "boolean"
                 }
             }
         };
@@ -232,15 +228,6 @@ export class PageSettingsDialog extends Module {
                                     "scope": "#/properties/sectionWidth"
                                 }
                             ]
-                        }
-                    ]
-                },
-                {
-                    "type": "HorizontalLayout",
-                    "elements": [
-                        {
-                            "type": "Control",
-                            "scope": "#/properties/scrollToTop"
                         }
                     ]
                 }

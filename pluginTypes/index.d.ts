@@ -634,6 +634,15 @@ declare module "@scom/scom-page-builder/command/interface.ts" {
         columnSpan: number;
     }
     export type IMergeType = "front" | "back" | "top" | "bottom" | "none";
+    export interface IWidgetSettings {
+        pt?: number;
+        pb?: number;
+        pr?: number;
+        pl?: number;
+        maxWidth?: number;
+        align?: 'left' | 'center' | 'right';
+        link?: string;
+    }
 }
 /// <amd-module name="@scom/scom-page-builder/command/updateRow.ts" />
 declare module "@scom/scom-page-builder/command/updateRow.ts" {
@@ -1265,17 +1274,16 @@ declare module "@scom/scom-page-builder/page/pageRow.tsx" {
 }
 /// <amd-module name="@scom/scom-page-builder/command/widgetSettingsToolbar.ts" />
 declare module "@scom/scom-page-builder/command/widgetSettingsToolbar.ts" {
-    import { ICommand } from "@scom/scom-page-builder/command/interface.ts";
+    import { ICommand, IWidgetSettings } from "@scom/scom-page-builder/command/interface.ts";
     import { IDEToolbar } from "@scom/scom-page-builder/common/index.ts";
     export class WidgetSettingsToolbarCommand implements ICommand {
         private toolbar;
-        private builderTarget;
         private data;
         private pageRow;
         private pageRowId;
         private section;
-        private sectionId;
-        constructor(toolbar: IDEToolbar, dataInput: any);
+        private oldData;
+        constructor(toolbar: IDEToolbar, dataInput: IWidgetSettings);
         execute(): void;
         undo(): void;
         redo(): void;
@@ -1336,6 +1344,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         set readonly(value: boolean);
         private adjustCursorByAction;
         private renderToolbars;
+        private getWidgetToolbar;
         private onShowModal;
         private onCloseModal;
         private renderToolbarAction;

@@ -243,9 +243,13 @@ export class PageRows extends Module {
             pageRow.visible = isInit? true : !!rowData?.elements?.length;
             pageRow.parent = this.pnlRows;
             if (customBackgroundColor && backgroundColor)
-                pageRow.style.setProperty('--custom-background-color', backgroundColor);
+                pageRow.style.setProperty('--custom-background-color', backgroundColor)
+            else
+                pageRow.style.removeProperty('--custom-background-color');
             if (customTextColor && textColor)
-                pageRow.style.setProperty('--custom-text-color', textColor);
+                pageRow.style.setProperty('--custom-text-color', textColor)
+            else
+                pageRow.style.removeProperty('--custom-text-color');
             this.pnlRows.append(pageRow);
             await pageRow.setData(rowData);
         }
