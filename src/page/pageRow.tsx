@@ -782,7 +782,7 @@ export class PageRow extends Module {
             if (target) removeRectangles();
         }
 
-        this.addEventListener('dragenter', function (event) { 
+        this.addEventListener('dragenter', function (event) {
             const eventTarget = event.target as HTMLElement;
             const elementConfig = getDragData();
             if (elementConfig?.module?.name === 'sectionStack') return;
@@ -794,7 +794,7 @@ export class PageRow extends Module {
         this.addEventListener('dragover', function (event) {
             event.preventDefault();
             const eventTarget = event.target as Control;
-            
+
             // prevent bad performance
             if (dragOverTarget == eventTarget && eventTarget.classList.contains('fixed-grid-item')) return;
 
@@ -845,7 +845,7 @@ export class PageRow extends Module {
                         } else {
                             console.error("Section's dropSide can only be 'front' or 'back'")
                         }
-                    } 
+                    }
 
                     // show frame
                     else { // TODO
@@ -983,7 +983,7 @@ export class PageRow extends Module {
                                 self.currentElement,
                                 eventTarget,
                                 {id: generateUUID()},
-                                dragDropResult.details.dropSide, 
+                                dragDropResult.details.dropSide,
                                 event.clientX,
                                 event.clientY
                             );
@@ -1033,11 +1033,11 @@ export class PageRow extends Module {
                         const dropElement = eventTarget;
                         const config = {id: generateUUID()};
                         const dragCmd = new UngroupElementCommand(
-                            self.currentToolbar, 
-                            self.currentElement, 
-                            dropElement, 
-                            config, 
-                            dragDropResult.details.dropSide, 
+                            self.currentToolbar,
+                            self.currentElement,
+                            dropElement,
+                            config,
+                            dragDropResult.details.dropSide,
                             event.clientX,
                             event.clientY
                         );
@@ -1060,10 +1060,10 @@ export class PageRow extends Module {
                     if (isUngrouping) {
                         const config = {id: generateUUID()};
                         const dragCmd = new UngroupElementCommand(
-                            self.currentToolbar, 
-                            self.currentElement, 
-                            eventTarget, 
-                            config, 
+                            self.currentToolbar,
+                            self.currentElement,
+                            eventTarget,
+                            config,
                             'none',
                             event.clientX,
                             event.clientY
@@ -1078,16 +1078,16 @@ export class PageRow extends Module {
                             nearestFixedItem = pageRow.querySelector(`.fixed-grid-item[data-column='${column - offsetLeft}']`)
                         }
 
-                        const dragCmd = (elementConfig)? 
+                        const dragCmd = (elementConfig)?
                             new AddElementCommand(
                                 self.getNewElementData(),
                                 true, false,
-                                nearestFixedItem as Control, 
+                                nearestFixedItem as Control,
                                 pageRow
-                            ) : 
+                            ) :
                             new DragElementCommand(
-                                self.currentElement, 
-                                nearestFixedItem as Control, 
+                                self.currentElement,
+                                nearestFixedItem as Control,
                                 true, false
                             );
                         dragCmd && commandHistory.execute(dragCmd);
@@ -1206,23 +1206,29 @@ export class PageRow extends Module {
             if (!config) return;
             const id = this.id.replace('row-', '');
             const sectionConfig = pageObject.getRowConfig(id) || {};
-            let newConfig = {...getPageConfig(), ...config, ...sectionConfig};
-            if (rowsConfig) {
-                const parsedData = rowsConfig[id] ? JSON.parse(rowsConfig[id]) : {};
-                newConfig = {...newConfig, ...parsedData};
+            const pageConfig = getPageConfig();
+            const combinedPageConfig = {...pageConfig, ...config};
+            sectionConfig.sectionWidth = combinedPageConfig.sectionWidth || 1000;
+            if(sectionConfig.padding) {
+                if(sectionConfig.padding.top === undefined && sectionConfig.padding.bottom === undefined && combinedPageConfig.ptb !== undefined) {
+                    sectionConfig.padding.top = sectionConfig.padding.bottom = combinedPageConfig.ptb;
+                }
+                if(sectionConfig.padding.left === undefined && sectionConfig.padding.right === undefined && combinedPageConfig.plr !== undefined) {
+                    sectionConfig.padding.left = sectionConfig.padding.right = combinedPageConfig.plr;
+                }
             }
-            pageObject.updateSection(id, {config: JSON.parse(JSON.stringify(newConfig))});
-            if (config.backgroundColor && config.customBackgroundColor)
+            pageObject.updateSection(id, {config: JSON.parse(JSON.stringify(sectionConfig))});
+            if (sectionConfig.backgroundColor && sectionConfig.customBackgroundColor)
                 this.pnlRowContainer.style.setProperty('--custom-background-color', config.backgroundColor)
             else
                 this.pnlRowContainer.style.removeProperty('--custom-background-color')
-            if (config.customTextColor && config.textColor)
+            if (sectionConfig.customTextColor && sectionConfig.textColor)
                 this.pnlRowContainer.style.setProperty('--custom-text-color', config.textColor)
             else
                 this.pnlRowContainer.style.removeProperty('--custom-text-color')
-            Reflect.deleteProperty(newConfig, 'backgroundColor')
-            Reflect.deleteProperty(newConfig, 'textColor')
-            this.updateRowConfig(newConfig);
+            Reflect.deleteProperty(sectionConfig, 'backgroundColor')
+            Reflect.deleteProperty(sectionConfig, 'textColor')
+            this.updateRowConfig(sectionConfig);
             this.updateGridColumnWidth();
         });
     }
@@ -1238,7 +1244,7 @@ export class PageRow extends Module {
         if (!PageRows) return;
 
         const bottomBlock = this.querySelector('.row-bottom-block') as Control;
-        
+
         if (bottomBlock) {
             bottomBlock.visible = true;
 
