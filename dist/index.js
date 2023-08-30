@@ -6199,7 +6199,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const { config, rowsConfig } = data;
                 if (!config)
                     return;
-                const { plr, ptb, sectionWidth } = config;
                 const id = this.id.replace('row-', '');
                 const sectionConfig = index_49.pageObject.getRowConfig(id) || {};
                 const pageConfig = (0, index_49.getPageConfig)();
@@ -6212,21 +6211,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     if (sectionConfig.padding.left === undefined && sectionConfig.padding.right === undefined && combinedPageConfig.plr !== undefined) {
                         sectionConfig.padding.left = sectionConfig.padding.right = combinedPageConfig.plr;
                     }
-                }
-                console.log('config', config);
-                console.log('sectionConfig', sectionConfig);
-                console.log('pageConfig', pageConfig);
-                // let newConfig = {...getPageConfig(), sectionWidth, padding: {
-                //         left: plr || 0,
-                //         right: plr || 0,
-                //         top: ptb || 0,
-                //         bottom: ptb || 0
-                //     }, ...sectionConfig};
-                let newConfig = Object.assign(Object.assign(Object.assign({}, (0, index_49.getPageConfig)()), config), sectionConfig);
-                console.log('newConfig', newConfig);
-                if (rowsConfig) {
-                    const parsedData = rowsConfig[id] ? JSON.parse(rowsConfig[id]) : {};
-                    newConfig = Object.assign(Object.assign({}, newConfig), parsedData);
                 }
                 index_49.pageObject.updateSection(id, { config: JSON.parse(JSON.stringify(sectionConfig)) });
                 if (sectionConfig.backgroundColor && sectionConfig.customBackgroundColor)
