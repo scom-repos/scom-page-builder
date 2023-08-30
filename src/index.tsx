@@ -340,10 +340,9 @@ export default class Editor extends Module {
             const marginStyle = getMargin(margin);
             this.pnlEditor.margin = marginStyle;
             this.pnlEditor.style.width = `calc(100% - (2 * ${marginStyle.left}))`;
-
             if (backgroundImage) {
-                const ipfsUrl = 'https://ipfs.scom.dev/ipfs';
-                this.pnlEditor.style.setProperty('--builder-bg', `url("${ipfsUrl}/${backgroundImage}") center center fixed`);
+                const ipfsUrl = '/ipfs';
+                this.pnlEditor.style.setProperty('--background-main', `url("${ipfsUrl}/${backgroundImage}") center center fixed`);
             } else if (customBackgroundColor && backgroundColor) {
                 this.pnlEditor.style.setProperty('--background-main', backgroundColor);
             }

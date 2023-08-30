@@ -40,7 +40,7 @@ export class UpdateRowSettingsCommand implements ICommand {
     const newConfig = {...config, margin: {x: marginStyle.left , y: marginStyle.top}};
     pageObject.updateSection(id, {config: {...newConfig}});
     this.element.updateRowConfig(pageObject.getRowConfig(id));
-
+  
     const { textSize, customTextSize } = newConfig
     for (let i = this.element.classList.length - 1; i >= 0; i--) {
       const className = this.element.classList[i];
@@ -48,49 +48,21 @@ export class UpdateRowSettingsCommand implements ICommand {
           this.element.classList.remove(className);
       }
     }
-    if (customTextSize && textSize) {          
+    if (customTextSize && textSize) {       
       this.element.classList.add(`font-${newConfig.textSize}`)
-    }
-    if (updatedValues.includes('backgroundColor') || updatedValues.includes('textColor') || updatedValues.includes('textSize')) {
-      const newValue: any = {};
-      if (updatedValues.includes('backgroundColor')) {
-        newValue.backgroundColor = newConfig?.backgroundColor || '';
-        newValue.customBackgroundColor = newConfig?.customBackgroundColor ?? false
-        const innerEl = this.element.querySelector('#pnlRowContainer')
-        if (innerEl){
-          if (newValue.customBackgroundColor)
-            innerEl.style.setProperty('--background-main', newValue.backgroundColor)
-          else
-            innerEl.style.removeProperty('--background-main')
-        }
-      }
-      else{
-        const innerEl = this.element.querySelector('#pnlRowContainer')
-        if (innerEl){
-          if (newValue.customBackgroundColor)
-            innerEl.style.setProperty('--background-main', newValue.backgroundColor)
-          else
-            innerEl.style.removeProperty('--background-main')
-        }
-      };
-
-      if (updatedValues.includes('textColor')) {
-        newValue.textColor = newConfig?.textColor || '';
-        newValue.customTextColor = newConfig?.customTextColor ?? false
-        if (newValue.customTextColor)
-          this.element.style.setProperty('--text-primary', newValue.textColor)
-        else
-          this.element.style.removeProperty('--text-primary')
-      }
+    };
+    const innerEl = this.element.querySelector('#pnlRowContainer')
+    if (innerEl){
+      if (newConfig.customBackgroundColor)
+        innerEl.style.setProperty('--background-main', newConfig.backgroundColor)
       else
-        this.element.style.removeProperty('--text-primary')
-      newValue.customTextSize = newConfig?.customTextSize ?? false
-      const toolbars = this.element.querySelectorAll('ide-toolbar');
-      for (let toolbar of toolbars) {
-        toolbar.updateUI(newValue);
-      }
-    }
-  }
+        innerEl.style.removeProperty('--background-main');
+    };
+    if (newConfig.customTextColor)
+      this.element.style.setProperty('--text-primary', newConfig.textColor)
+    else
+      this.element.style.removeProperty('--text-primary');
+  };
 
   execute(): void {
     const updatedValues = this.getChangedValues(this.settings, this.oldSettings);

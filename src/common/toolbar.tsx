@@ -125,9 +125,18 @@ export class IDEToolbar extends Module {
     }
 
     private async renderToolbars() {
+        const toolList = [...this.toolList]
         this.toolbar.clearInnerHTML();
-        for (let i = 0; i < this.toolList.length; i++) {
-            const tool = this.toolList[i];
+        let widgetToolbar = this.getWidgetToolbar()
+        let findedWidgetToolbar = this.toolList.find(toolbar => toolbar.name === 'Widget Settings');
+        if (findedWidgetToolbar) {
+            findedWidgetToolbar.command = widgetToolbar.command
+            findedWidgetToolbar.icon = widgetToolbar.icon
+        } else {
+            toolList.push(widgetToolbar)
+        }
+        for (let i = 0; i < toolList.length; i++) {
+            const tool = toolList[i];
             let elm = (
                 <i-hstack
                     class='toolbar'
@@ -156,94 +165,146 @@ export class IDEToolbar extends Module {
             if (tool.name) elm.setAttribute('tool-name', tool.name);
             this.toolbar.appendChild(elm);
         }
-        const widgetSettingsBtn = (
-            <i-hstack
-                class="toolbar"
-                tooltip={{ trigger: 'hover', content: 'Widget Settings', color: '#555555' }}
-                horizontalAlignment="center"
-                verticalAlignment="center"
-                onClick={() => {
-                    const propertiesSchema: IDataSchema = {
-                        type: 'object',
-                        properties: {
-                            pt: {
-                                title: 'Top',
-                                type: 'number',
-                            },
-                            pb: {
-                                title: 'Bottom',
-                                type: 'number',
-                            },
-                            pl: {
-                                title: 'Left',
-                                type: 'number',
-                            },
-                            pr: {
-                                title: 'Right',
-                                type: 'number',
-                            },
-                        },
-                    };
-                    const themesSchema: IUISchema = {
-                        type: 'VerticalLayout',
-                        elements: [
-                            {
-                                type: 'HorizontalLayout',
-                                elements: [
-                                    {
-                                        type: 'Group',
-                                        label: 'Padding (px)',
-                                        elements: [
-                                            {
-                                                type: 'VerticalLayout',
-                                                elements: [
-                                                    {
-                                                        type: 'HorizontalLayout',
-                                                        elements: [
-                                                            {
-                                                                type: 'Control',
-                                                                scope: '#/properties/pt',
-                                                            },
-                                                            {
-                                                                type: 'Control',
-                                                                scope: '#/properties/pb',
-                                                            },
-                                                            {
-                                                                type: 'Control',
-                                                                scope: '#/properties/pl',
-                                                            },
-                                                            {
-                                                                type: 'Control',
-                                                                scope: '#/properties/pr',
-                                                            },
-                                                        ],
-                                                    },
-                                                ],
-                                            },
-                                        ],
-                                    },
-                                ],
-                            },
-                        ],
-                    };
-                    const widgetSettings = {
-                        name: 'Widget Settings',
-                        icon: 'edit',
-                        command: (toolbar: IDEToolbar, userInputData: any) => new WidgetSettingsToolbarCommand(toolbar, userInputData),
-                        userInputDataSchema: propertiesSchema,
-                        userInputUISchema: themesSchema,
-                    };
-                    this.currentAction = widgetSettings;
-                    this.mdActions.visible = true;
-                    this.pnlForm.visible = true;
-                    this.adjustCursorByAction();
-                    this.hideToolbars();
-                }}
-            >
-                <i-icon width={16} height={16} name="cog" fill={Theme.text.primary}></i-icon>
-            </i-hstack>
-        );
-        this.toolbar.appendChild(widgetSettingsBtn);
+        // const widgetSettingsBtn = (
+        //     <i-hstack
+        //         class="toolbar"
+        //         tooltip={{ trigger: 'hover', content: 'Widget Settings', color: '#555555' }}
+        //         horizontalAlignment="center"
+        //         verticalAlignment="center"
+        //         onClick={() => {
+        //             const customProperties: any = this.isImage(this.data?.module) ? {
+        //                 align: {
+        //                     type: 'string',
+        //                     title: 'Alignment',
+        //                     enum: [
+        //                         'left',
+        //                         'center',
+        //                         'right'
+        //                     ]
+        //                 },
+        //                 maxWidth: {
+        //                     type: 'number'
+        //                 },
+        //                 link: {
+        //                     title: 'URL',
+        //                     type: 'string'
+        //                 }
+        //             } : {}
+        //             const customSchema: any = this.isImage(this.data?.module) ? [
+        //                 {
+        //                     type: 'HorizontalLayout',
+        //                     elements: [
+        //                         {
+        //                             type: 'Control',
+        //                             label: 'Max Width',
+        //                             scope: '#/properties/maxWidth',
+        //                         }
+        //                     ]
+        //                 },
+        //                 {
+        //                     type: 'HorizontalLayout',
+        //                     elements: [
+        //                         {
+        //                             type: 'Control',
+        //                             label: 'Alignment',
+        //                             scope: '#/properties/align',
+        //                         }
+        //                     ]
+        //                 },
+        //                 {
+        //                     type: 'HorizontalLayout',
+        //                     elements: [
+        //                         {
+        //                             type: 'Control',
+        //                             label: 'URL',
+        //                             scope: '#/properties/link',
+        //                         }
+        //                     ]
+        //                 }
+        //             ] : []
+        //             const propertiesSchema: IDataSchema = {
+        //                 type: 'object',
+        //                 properties: {
+        //                     pt: {
+        //                         title: 'Top',
+        //                         type: 'number',
+        //                     },
+        //                     pb: {
+        //                         title: 'Bottom',
+        //                         type: 'number',
+        //                     },
+        //                     pl: {
+        //                         title: 'Left',
+        //                         type: 'number',
+        //                     },
+        //                     pr: {
+        //                         title: 'Right',
+        //                         type: 'number',
+        //                     },
+        //                     ...customProperties
+        //                 },
+        //             };
+        //             const themesSchema: IUISchema = {
+        //                 type: 'VerticalLayout',
+        //                 elements: [
+        //                     {
+        //                         type: 'HorizontalLayout',
+        //                         elements: [
+        //                             {
+        //                                 type: 'Group',
+        //                                 label: 'Padding (px)',
+        //                                 elements: [
+        //                                     {
+        //                                         type: 'VerticalLayout',
+        //                                         elements: [
+        //                                             {
+        //                                                 type: 'HorizontalLayout',
+        //                                                 elements: [
+        //                                                     {
+        //                                                         type: 'Control',
+        //                                                         scope: '#/properties/pt',
+        //                                                     },
+        //                                                     {
+        //                                                         type: 'Control',
+        //                                                         scope: '#/properties/pb',
+        //                                                     },
+        //                                                     {
+        //                                                         type: 'Control',
+        //                                                         scope: '#/properties/pl',
+        //                                                     },
+        //                                                     {
+        //                                                         type: 'Control',
+        //                                                         scope: '#/properties/pr',
+        //                                                     },
+        //                                                 ],
+        //                                             },
+        //                                         ],
+        //                                     },
+        //                                 ],
+        //                             },
+        //                         ],
+        //                     },
+        //                     ...customSchema
+        //                 ]
+        //             };
+        //             const widgetSettings = {
+        //                 name: 'Widget Settings',
+        //                 icon: 'edit',
+        //                 command: (toolbar: IDEToolbar, userInputData: any) => new WidgetSettingsToolbarCommand(toolbar, userInputData),
+        //                 userInputDataSchema: propertiesSchema,
+        //                 userInputUISchema: themesSchema,
+        //             };
+        //             this.currentAction = widgetSettings;
+        //             this.mdActions.visible = true;
+        //             this.pnlForm.visible = true;
+        //             this.adjustCursorByAction();
+        //             this.hideToolbars();
+        //         }}
+        //     >
+        //         <i-icon width={16} height={16} name="cog" fill={Theme.text.primary}></i-icon>
+        //     </i-hstack>
+        // );
+        // this.toolbar.appendChild(widgetSettingsBtn);
         const removeBtn = (
             <i-hstack
                 class='toolbar'
@@ -262,6 +323,80 @@ export class IDEToolbar extends Module {
             </i-hstack>
         )
         this.toolbar.appendChild(removeBtn);
+    }
+
+    private getWidgetToolbar() {
+        const propertiesSchema: IDataSchema = {
+            type: 'object',
+            properties: {
+                pt: {
+                    title: 'Top',
+                    type: 'number',
+                },
+                pb: {
+                    title: 'Bottom',
+                    type: 'number',
+                },
+                pl: {
+                    title: 'Left',
+                    type: 'number',
+                },
+                pr: {
+                    title: 'Right',
+                    type: 'number',
+                }
+            },
+        };
+        const themesSchema: IUISchema = {
+            type: 'VerticalLayout',
+            elements: [
+                {
+                    type: 'HorizontalLayout',
+                    elements: [
+                        {
+                            type: 'Group',
+                            label: 'Padding (px)',
+                            elements: [
+                                {
+                                    type: 'VerticalLayout',
+                                    elements: [
+                                        {
+                                            type: 'HorizontalLayout',
+                                            elements: [
+                                                {
+                                                    type: 'Control',
+                                                    scope: '#/properties/pt',
+                                                },
+                                                {
+                                                    type: 'Control',
+                                                    scope: '#/properties/pb',
+                                                },
+                                                {
+                                                    type: 'Control',
+                                                    scope: '#/properties/pl',
+                                                },
+                                                {
+                                                    type: 'Control',
+                                                    scope: '#/properties/pr',
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                }
+            ]
+        };
+        const widgetSettings = {
+            name: 'Widget Settings',
+            icon: 'cog',
+            command: (toolbar: IDEToolbar, userInputData: any) => new WidgetSettingsToolbarCommand(toolbar, userInputData),
+            userInputDataSchema: propertiesSchema,
+            userInputUISchema: themesSchema,
+        };
+        return widgetSettings;
     }
 
     private onShowModal() {
@@ -288,8 +423,8 @@ export class IDEToolbar extends Module {
         if (action.name === 'Widget Settings') {
             const element = pageObject.getElement(this.rowId, this.elementId);
             if (element.tag) {
-                const { pt, pb, pl, pr } = element.tag;
-                elementTag = { pt, pb, pl, pr };
+                const { pt, pb, pl, pr, maxWidth, align, link } = element.tag;
+                elementTag = { pt, pb, pl, pr, maxWidth, align, link };
             }
         }
         const builderTag = builderTarget?.getTag ? await builderTarget.getTag() : this.data.tag || {};
@@ -769,7 +904,7 @@ export class IDEToolbar extends Module {
             event.unregister();
         }
         this.events = [];
-        if (this.isTexbox && this.module) {
+        if (this.isTexbox(this.data?.module) && this.module) {
             this.module.onHide();
         }
     }
