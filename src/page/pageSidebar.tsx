@@ -150,7 +150,7 @@ export class PageSidebar extends Module {
         this.pnlWidgets.clearInnerHTML();
         const menu = (<i-scom-page-builder-menu></i-scom-page-builder-menu>) as PageMenu;
         this.pnlWidgets.appendChild(menu);
-        application.EventBus.dispatch(EVENT.ON_UPDATE_MENU);
+        menu.renderMenu();
     }
 
     renderWidgets(category: ICategory) {

@@ -175,8 +175,11 @@ export default class Editor extends Module {
             const pnlEditorRect = this.pnlEditor.getBoundingClientRect();
             // dragover on the below of rows
             // if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
-            //     const lastRows = this.pageRows.querySelector('ide-row:last-child');
-            //     application.EventBus.dispatch(EVENT.ON_SHOW_BOTTOM_BLOCK, lastRows);
+            //     const lastRow = this.pageRows.querySelector('ide-row:last-child');
+            //     if (lastRow) {
+            //         const row = this.querySelector(`#${lastRow.id}`) as PageRow
+            //         row.showBottomBlock();
+            //     }
             // }
             const elementConfig = getDragData()
             if (elementConfig?.module?.name === 'sectionStack'
@@ -189,13 +192,18 @@ export default class Editor extends Module {
                     if (rowRect.top <= event.clientY && rowRect.bottom >= event.clientY) return row;
                 })
                 if (targetRow) {
-                    application.EventBus.dispatch(EVENT.ON_SHOW_BOTTOM_BLOCK, targetRow);
+                    const row = this.querySelector(`#${targetRow.id}`) as PageRow
+                    row.showBottomBlock();
                 }
             } else if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
-            if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
-                const lastRows = this.pageRows.querySelector('ide-row:last-child');
-                application.EventBus.dispatch(EVENT.ON_SHOW_BOTTOM_BLOCK, lastRows);
-            }}
+                if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
+                    const lastRow = this.pageRows.querySelector('ide-row:last-child');
+                    if (lastRow) {
+                        const row = this.querySelector(`#${lastRow.id}`) as PageRow
+                        row.showBottomBlock();
+                    }
+                }
+            }
         });
 
         function adjustScrollSpeed(mouseY: number) {

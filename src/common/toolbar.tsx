@@ -842,9 +842,6 @@ export class IDEToolbar extends Module {
 
     private initEventBus() {
         this.events.push(
-            application.EventBus.register(this, EVENT.ON_UPDATE_TOOLBAR, () => this.updateToolbar())
-        )
-        this.events.push(
             application.EventBus.register(this, EVENT.ON_SET_ACTION_BLOCK, (data: { id: string; element: IPageElement, elementId: string }) => {
                 const { id, element, elementId } = data;
                 if (elementId && elementId === this.elementId) {

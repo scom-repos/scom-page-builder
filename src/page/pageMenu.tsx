@@ -16,6 +16,7 @@ import { EVENT } from '../const/index';
 import { IPageSection, IPageElement } from '../interface/index';
 import { menuBtnStyle, menuCardStyle, menuStyle } from './pageMenu.css';
 import { commandHistory, MoveElementCommand } from '../command/index';
+import { PageRow } from './pageRow';
 
 const Theme = Styles.Theme.ThemeVars;
 
@@ -45,7 +46,6 @@ export class PageMenu extends Module {
 
     private initEventBus() {
         application.EventBus.register(this, EVENT.ON_UPDATE_MENU, async () => this.renderMenu());
-        application.EventBus.register(this, EVENT.ON_SELECT_SECTION, async (rowId: string) => this.setfocusCard(rowId));
     }
 
     private initEventListener() {
@@ -101,7 +101,7 @@ export class PageMenu extends Module {
         });
     }
 
-    private setfocusCard(rowId: string) {
+    setfocusCard(rowId: string) {
         this.focusRowId = rowId;
         const menuCards = this.pnlMenu.querySelectorAll('#menuCard');
         for (let i = 0; i < menuCards.length; i++) {
@@ -170,7 +170,7 @@ export class PageMenu extends Module {
         }
     }
 
-    private renderMenu() {
+    renderMenu() {
         this.pnlMenu.clearInnerHTML();
         const sections = pageObject.getNonNullSections();
         const items = sections.map((section: IPageSection) => {
@@ -341,8 +341,10 @@ export class PageMenu extends Module {
     }
 
     private goToSection(rowId: string) {
-        document.getElementById(`row-${rowId}`).scrollIntoView();
-        application.EventBus.dispatch(EVENT.ON_SHOW_SECTION, rowId);
+        const parent = this.closest('#editor') || document;
+        const row = parent.querySelector(`#row-${rowId}`) as PageRow;
+        row.scrollIntoView();
+        row.showSection(rowId);
     }
 
     private getTitle(data: IPageSection): string {
