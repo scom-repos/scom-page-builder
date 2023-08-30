@@ -10,3 +10,13 @@ export interface IDataColumn {
 }
 
 export type IMergeType = "front" | "back" | "top" | "bottom" | "none";
+
+export interface IWidgetSettings {
+  pt?: number;
+  pb?: number;
+  pr?: number;
+  pl?: number;
+  maxWidth?: number;
+  align?: 'left' | 'center' | 'right';
+  link?: string;
+}
