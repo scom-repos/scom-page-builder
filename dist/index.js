@@ -3234,9 +3234,6 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
                 newConfig[prop] = config[prop];
             }
             // const element = this.element.closest('i-scom-page-builder') || this.element;
-            // if (updatedValues.includes('backgroundImage')) {
-            //   application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {image: backgroundImage});
-            // }
             const defaultTextSize = 'md';
             let data = {
                 backgroundImage: '',
@@ -6204,23 +6201,29 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     return;
                 const id = this.id.replace('row-', '');
                 const sectionConfig = index_49.pageObject.getRowConfig(id) || {};
-                let newConfig = Object.assign(Object.assign(Object.assign({}, (0, index_49.getPageConfig)()), config), sectionConfig);
-                if (rowsConfig) {
-                    const parsedData = rowsConfig[id] ? JSON.parse(rowsConfig[id]) : {};
-                    newConfig = Object.assign(Object.assign({}, newConfig), parsedData);
+                const pageConfig = (0, index_49.getPageConfig)();
+                const combinedPageConfig = Object.assign(Object.assign({}, pageConfig), config);
+                sectionConfig.sectionWidth = combinedPageConfig.sectionWidth || 1000;
+                if (sectionConfig.padding) {
+                    if (sectionConfig.padding.top === undefined && sectionConfig.padding.bottom === undefined && combinedPageConfig.ptb !== undefined) {
+                        sectionConfig.padding.top = sectionConfig.padding.bottom = combinedPageConfig.ptb;
+                    }
+                    if (sectionConfig.padding.left === undefined && sectionConfig.padding.right === undefined && combinedPageConfig.plr !== undefined) {
+                        sectionConfig.padding.left = sectionConfig.padding.right = combinedPageConfig.plr;
+                    }
                 }
-                index_49.pageObject.updateSection(id, { config: JSON.parse(JSON.stringify(newConfig)) });
-                if (config.backgroundColor && config.customBackgroundColor)
+                index_49.pageObject.updateSection(id, { config: JSON.parse(JSON.stringify(sectionConfig)) });
+                if (sectionConfig.backgroundColor && sectionConfig.customBackgroundColor)
                     this.pnlRowContainer.style.setProperty('--custom-background-color', config.backgroundColor);
                 else
                     this.pnlRowContainer.style.removeProperty('--custom-background-color');
-                if (config.customTextColor && config.textColor)
+                if (sectionConfig.customTextColor && sectionConfig.textColor)
                     this.pnlRowContainer.style.setProperty('--custom-text-color', config.textColor);
                 else
                     this.pnlRowContainer.style.removeProperty('--custom-text-color');
-                Reflect.deleteProperty(newConfig, 'backgroundColor');
-                Reflect.deleteProperty(newConfig, 'textColor');
-                this.updateRowConfig(newConfig);
+                Reflect.deleteProperty(sectionConfig, 'backgroundColor');
+                Reflect.deleteProperty(sectionConfig, 'textColor');
+                this.updateRowConfig(sectionConfig);
                 this.updateGridColumnWidth();
             });
         }
