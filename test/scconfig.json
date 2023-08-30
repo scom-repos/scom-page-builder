@@ -42,6 +42,12 @@
       "category": "components",
       "disableClicked": true
     },
+    "@scom/scom-buttons": {
+      "name": "Buttons",
+      "path": "scom-buttons",
+      "category": "components",
+      "disableClicked": true
+    },
     "@scom/scom-content-block": {
       "name": "Content Block",
       "path": "scom-content-block",

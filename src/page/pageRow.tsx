@@ -11,6 +11,7 @@ import {
     Panel,
 } from '@ijstech/components';
 import {PageSection} from './pageSection';
+import {PageMenu} from './pageMenu'
 import {RowSettingsDialog} from '../dialogs/index';
 import './pageRow.css';
 import {EVENT} from '../const/index';
@@ -28,7 +29,6 @@ import {
 } from '../command/index';
 import {IDEToolbar} from '../common/toolbar';
 import {generateUUID, checkDragDropResult, findNearestSectionInRow, getDropFrontBackResult} from '../utility/index';
-import {IMergeType} from '../command/index';
 const Theme = Styles.Theme.ThemeVars;
 
 declare global {
@@ -406,14 +406,6 @@ export class PageRow extends Module {
         let toolbar: Control;
         let dragStartTarget: Control;
         let dragOverTarget: Control;
-        type OverlapType = 'none' | 'self' | 'mutual'; // | "border";
-        type Collision = {
-            collisionType: OverlapType;
-            section?: HTMLElement; // the section overlapped
-            toolbar?: HTMLElement; // the toolbar overlapped
-            mergeSide?: IMergeType; // if the cursor is on an element directly, which side should be merged
-            rowBlock?: HTMLElement; // check if need to trigger the row top/bottom block
-        };
         const parentWrapper = self.closest('#editor') || document;
         let ghostImage: Control;
         let mouseDownEl: Control;
@@ -802,12 +794,17 @@ export class PageRow extends Module {
         this.addEventListener('dragover', function (event) {
             event.preventDefault();
             const eventTarget = event.target as Control;
-            let enterTarget: Control;
-            const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
+            
+            // prevent bad performance
+            if (dragOverTarget == eventTarget && eventTarget.classList.contains('fixed-grid-item')) return;
+
             const elementConfig = getDragData();
-            // disable dragging layout to section
-            if (elementConfig?.module?.name === 'sectionStack') return;
             const isLayout = elementConfig?.module?.name === 'sectionStack';
+
+            // temporary disable dragging layout to section
+            if (isLayout) return;
+
+            const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') as HTMLElement : undefined;
             const dragDropResult = checkDragDropResult({
                 dropTarget: eventTarget,
                 dragSection: dragStartTargetSection,
@@ -816,15 +813,9 @@ export class PageRow extends Module {
                 clientY: event.clientY,
                 startX: startX,
                 isUngroup: self.isUngrouping(),
-                isLayout: getDragData()?.module?.name === 'sectionStack',
+                isLayout: isLayout,
                 layoutLength: isLayout? elementConfig?.module?.elements?.length : undefined
             });
-
-            // const pageRow = eventTarget.closest('ide-row') as PageRow;
-            // const elementConfig = getDragData();
-            // if (pageRow && elementConfig?.module?.name === 'sectionStack') {
-
-            // }
 
             if (dragDropResult.canDrop && dragDropResult.details) {
 
@@ -858,14 +849,11 @@ export class PageRow extends Module {
 
                     // show frame
                     else { // TODO
-                        // if (enterTarget == dragOverTarget) return;
                         // leave previous element: dragOverTarget
                         dragLeave(dragOverTarget, event.clientX, true);
 
                         // enter current element: enterTarget
-                        dragEnter(enterTarget, event.clientX, event.clientY);
-
-                        dragOverTarget = enterTarget;
+                        dragEnter(eventTarget, event.clientX, event.clientY);
                     }
                 }
 
@@ -897,10 +885,9 @@ export class PageRow extends Module {
 
                     // enter current element: enterTarget
                     dragEnter(eventTarget , event.clientX, event.clientY);
-
-                    dragOverTarget = enterTarget;
                 }
             }
+            dragOverTarget = eventTarget;
         });
 
         this.addEventListener('dragleave', function (event) {
@@ -1238,30 +1225,29 @@ export class PageRow extends Module {
             this.updateRowConfig(newConfig);
             this.updateGridColumnWidth();
         });
-        application.EventBus.register(this, EVENT.ON_SHOW_BOTTOM_BLOCK, (targetRow: PageRow) => {
+    }
 
-            const PageRows = this.closest('ide-rows');
-            if (!PageRows) return;
+    showSection(rowId: string) {
+        if (rowId == this.rowId)
+            this.setActive();
+        this.currentToolbar = undefined;
+    }
 
-            function _updateClass(elm: Control, className: string) {
-                const blocks = PageRows.getElementsByClassName(className);
-                for (let block of blocks) {
-                    block.classList.remove(className);
-                }
-                elm.classList.add(className);
+    showBottomBlock() {
+        const PageRows = this.closest('ide-rows');
+        if (!PageRows) return;
+
+        const bottomBlock = this.querySelector('.row-bottom-block') as Control;
+        
+        if (bottomBlock) {
+            bottomBlock.visible = true;
+
+            const blocks = PageRows.getElementsByClassName('is-dragenter');
+            for (let block of blocks) {
+                block.classList.remove('is-dragenter');
             }
-
-            if (targetRow.id == this.id) {
-                const bottomBlock = targetRow.querySelector('.row-bottom-block') as Control;
-                bottomBlock.visible = true;
-                bottomBlock && _updateClass(bottomBlock, 'is-dragenter');
-            }
-        });
-        application.EventBus.register(this, EVENT.ON_SHOW_SECTION, async (rowId: string) => {
-            if (rowId == this.rowId)
-                this.setActive();
-            self.currentToolbar = undefined;
-        })
+            bottomBlock.classList.add('is-dragenter');
+        }
     }
 
     private getNewElementData() {
@@ -1307,7 +1293,9 @@ export class PageRow extends Module {
             }
         }
         this.classList.add('active');
-        application.EventBus.dispatch(EVENT.ON_SELECT_SECTION, this.rowId);
+        const parent = this.closest('#editor') || document;
+        const menu = parent.querySelector('i-scom-page-builder-menu') as PageMenu;
+        menu?.setfocusCard(this.rowId);
     }
 
     private onAddSection(type: number) {

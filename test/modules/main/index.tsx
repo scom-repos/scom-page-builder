@@ -21,6 +21,12 @@ export class MainModule extends Module {
         "disableClicked": true
       },
       {
+        "name": "Buttons",
+        "path": "scom-buttons",
+        "category": "widgets",
+        "disableClicked": true
+      },
+      {
         "name": "Carousel",
         "path": "scom-carousel",
         "category": "widgets"
