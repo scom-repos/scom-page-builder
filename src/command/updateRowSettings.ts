@@ -62,6 +62,12 @@ export class UpdateRowSettingsCommand implements ICommand {
       this.element.style.setProperty('--custom-text-color', newConfig.textColor)
     else
       this.element.style.removeProperty('--custom-text-color');
+
+    // To update markdown
+    const toolbars = this.element.querySelectorAll('ide-toolbar');
+    for (let toolbar of toolbars) {
+      toolbar.updateUI(newConfig);
+    }
   };
 
   execute(): void {
