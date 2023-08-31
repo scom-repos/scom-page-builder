@@ -50,30 +50,6 @@ export class PageSettingsDialog extends Module {
     }
 
     private getSchema() {
-        // const jsonSchema: IDataSchema = {
-        //     type: 'object',
-        //     properties: {
-        //         backgroundColor: {
-        //             type: 'string',
-        //             format: 'color'
-        //         },
-        //         maxWidth: {
-        //             type: 'number',
-        //             title: 'Maximum width'
-        //         },
-        //         margin: {
-        //             type: 'object',
-        //             properties: {
-        //                 x: {
-        //                     type: 'string'
-        //                 },
-        //                 y: {
-        //                     type: 'string'
-        //                 }
-        //             }
-        //         }
-        //     },
-        // };
         const jsonSchema: IDataSchema = {
             "type": "object",
             "properties": {
@@ -108,7 +84,8 @@ export class PageSettingsDialog extends Module {
                         {"title": "Normal", "const": "md"},
                         {"title": "Large", "const": "lg"},
                         {"title": "Extra Large", "const": "xl"}
-                    ]
+                    ],
+                    "default": "md"
                 },
                 "backgroundImage": {
                     "title": "Background image",

@@ -90,7 +90,10 @@ export interface IPageSectionConfig extends IPageConfig {
         bottom?: number|string;
         left?: number|string;
         right?: number|string;
-    }
+    },
+    customBackdrop?: boolean;
+    backdropColor?: string;
+    backdropImage?: string;
 }
 
 // export interface IRowSettings {

@@ -620,6 +620,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         }
         updateSection(id, data) {
             const section = this.getRow(id);
+            console.log('[index.ts] updateSection', section, id, data);
             if (!section)
                 return;
             if (data === null || data === void 0 ? void 0 : data.config)
@@ -1879,34 +1880,75 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
         }
         updateConfig(config, updatedValues) {
             const id = this.element.id.replace('row-', '');
-            const { margin } = config;
-            const marginStyle = (0, index_6.getMargin)(margin);
-            const newConfig = Object.assign(Object.assign({}, config), { margin: { x: marginStyle.left, y: marginStyle.top } });
-            index_6.pageObject.updateSection(id, { config: Object.assign({}, newConfig) });
-            this.element.updateRowConfig(index_6.pageObject.getRowConfig(id));
-            const { textSize, customTextSize } = newConfig;
-            for (let i = this.element.classList.length - 1; i >= 0; i--) {
-                const className = this.element.classList[i];
-                if (className.startsWith('font-')) {
-                    this.element.classList.remove(className);
+            const { fullWidth, customBackgroundColor, backgroundColor, customTextColor, textColor, customTextSize, textSize, border, borderColor, customBackdrop, backdropColor, backdropImage, padding, sectionWidth, } = config;
+            const sectionEl = this.element;
+            const innerEl = this.element.querySelector('#pnlRowContainer');
+            if (sectionWidth !== undefined) {
+                // innerEl.width = sectionWidth;
+                innerEl.maxWidth = sectionWidth;
+            }
+            if (fullWidth) {
+                if (customBackgroundColor && backgroundColor) {
+                    sectionEl.style.setProperty('--custom-background-color', backgroundColor);
+                    innerEl.style.setProperty('--custom-background-color', backgroundColor);
+                }
+                else {
+                    sectionEl.style.removeProperty('--custom-background-color');
+                    innerEl.style.removeProperty('--custom-background-color');
+                }
+            }
+            else {
+                if (customBackdrop) {
+                    if (backdropImage) {
+                        const ipfsUrl = `https://ipfs.scom.dev/ipfs`;
+                        sectionEl.style.setProperty('--custom-background-color', `url("${ipfsUrl}/${backdropImage}")`);
+                    }
+                    else if (backdropColor) {
+                        sectionEl.style.setProperty('--custom-background-color', backdropColor);
+                    }
+                }
+                else {
+                    sectionEl.style.removeProperty('--custom-background-color');
+                }
+                if (customBackgroundColor) {
+                    // Add background image later
+                    if (backgroundColor) {
+                        innerEl.style.setProperty('--custom-background-color', backgroundColor);
+                    }
+                }
+                else {
+                    innerEl.style.removeProperty('--custom-background-color');
                 }
             }
             if (customTextSize && textSize) {
-                this.element.classList.add(`font-${newConfig.textSize}`);
+                sectionEl.classList.add(`font-${textSize}`);
             }
-            ;
-            const innerEl = this.element.querySelector('#pnlRowContainer');
-            if (innerEl) {
-                if (newConfig.customBackgroundColor)
-                    innerEl.style.setProperty('--custom-background-color', newConfig.backgroundColor);
-                else
-                    innerEl.style.removeProperty('--custom-background-color');
+            else {
+                sectionEl.classList.forEach(v => {
+                    if (v.indexOf('font-') >= 0)
+                        sectionEl.classList.remove(v);
+                });
             }
-            ;
-            if (newConfig.customTextColor)
-                this.element.style.setProperty('--custom-text-color', newConfig.textColor);
-            else
-                this.element.style.removeProperty('--custom-text-color');
+            if (customTextColor && textColor) {
+                sectionEl.style.setProperty('--custom-text-color', textColor);
+            }
+            else {
+                sectionEl.style.removeProperty('--custom-text-color');
+            }
+            if (border && borderColor) {
+                innerEl.border = {
+                    width: 2,
+                    style: 'solid',
+                    color: borderColor,
+                    radius: 10
+                };
+            }
+            if (padding) {
+                innerEl.padding = padding;
+            }
+            index_6.pageObject.updateSection(id, { config });
+            const rowConfig = index_6.pageObject.getRowConfig(id);
+            this.element.updateRowConfig(index_6.pageObject.getRowConfig(id));
         }
         ;
         execute() {
@@ -3634,7 +3676,7 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                     "backdropImage": {
                         "title": "Backdrop image",
                         "type": "string",
-                        "format": "data-url"
+                        "format": "data-cid"
                     },
                     "customBackdrop": {
                         "title": "Custom backdrop",
@@ -3701,7 +3743,8 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                             { "const": "md", "title": "Normal" },
                             { "const": "lg", "title": "Large" },
                             { "const": "xl", "title": "Extra Large" },
-                        ]
+                        ],
+                        "default": "md"
                     },
                     "border": {
                         "title": "Show border",
@@ -4139,7 +4182,8 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                             { "title": "Normal", "const": "md" },
                             { "title": "Large", "const": "lg" },
                             { "title": "Extra Large", "const": "xl" }
-                        ]
+                        ],
+                        "default": "md"
                     },
                     "backgroundImage": {
                         "title": "Background image",
@@ -5322,49 +5366,112 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            const { image = '', customBackgroundColor, backgroundColor, backdropColor, backdropImage, border, borderColor, sectionWidth, margin, align, fullWidth, padding, ptb, plr, textColor } = config || {};
-            if (!fullWidth) {
-                if (image)
-                    this.background.image = image;
-                if (border) {
-                    this.pnlRowWrap.border = { width: 2, style: 'solid', color: borderColor || Theme.divider };
-                }
-                else {
-                    this.pnlRowWrap.border.width = 0;
-                }
-                // this.background.color = 'transparent';
-                if (backdropImage)
-                    this.background.image = backdropImage;
-                if (!image && !backdropImage)
-                    this.background.image = undefined;
+            console.log('updateRowConfig', config);
+            const { align, fullWidth, customBackgroundColor, backgroundColor, customTextColor, textColor, customTextSize, textSize, border, borderColor, customBackdrop, backdropImage, backdropColor, padding, sectionWidth } = config || {};
+            if (sectionWidth) {
+                this.pnlRowContainer.width = sectionWidth;
             }
-            else {
-                this.pnlRowWrap.border.width = 0;
-                // if (backgroundColor)
-                // this.background.color = backgroundColor;
-                if (customBackgroundColor)
-                    this.style.setProperty('--custom-background-color', backgroundColor);
-                else
-                    this.style.removeProperty('--custom-background-color');
-                this.background.image = '';
-            }
+            //
+            // const sectionEl = this;
+            // const innerEl = this.pnlRowContainer;
+            //
+            // if(sectionWidth !== undefined) {
+            //     innerEl.width = sectionWidth;
+            //     innerEl.maxWidth = sectionWidth;
+            // }
+            //
+            // if(fullWidth) {
+            //     if(customBackgroundColor && backgroundColor) {
+            //         sectionEl.style.setProperty('--custom-background-color', backgroundColor);
+            //         innerEl.style.setProperty('--custom-background-color', backgroundColor);
+            //     }
+            //     else {
+            //         sectionEl.style.removeProperty('--custom-background-color');
+            //         innerEl.style.removeProperty('--custom-background-color');
+            //     }
+            // }
+            // else {
+            //     if(customBackdrop) {
+            //         if(backdropImage) {
+            //             const ipfsUrl = `https://ipfs.scom.dev/ipfs`;
+            //             sectionEl.style.setProperty('--custom-background-color', `url("${ipfsUrl}/${backdropImage}")`);
+            //         }
+            //         else if(backdropColor) {
+            //             sectionEl.style.setProperty('--custom-background-color', backdropColor);
+            //         }
+            //     }
+            //     else {
+            //         sectionEl.style.removeProperty('--custom-background-color');
+            //     }
+            //     if(customBackgroundColor) {
+            //         // Add background image later
+            //         if(backgroundColor) {
+            //             innerEl.style.setProperty('--custom-background-color', backgroundColor);
+            //         }
+            //     }
+            //     else {
+            //         innerEl.style.removeProperty('--custom-background-color');
+            //     }
+            // }
+            //
+            // if(customTextSize && textSize) {
+            //     sectionEl.classList.add(`font-${textSize}`);
+            // }
+            // else {
+            //     sectionEl.classList.forEach(v => {
+            //         if(v.indexOf('font-') >= 0)
+            //             sectionEl.classList.remove(v);
+            //     })
+            // }
+            //
+            // if(border && borderColor) {
+            //     innerEl.border = {
+            //         width: 2,
+            //         style: 'solid',
+            //         color: borderColor,
+            //         radius: 10
+            //     }
+            // }
+            //
+            // if(padding) {
+            //     innerEl.padding = padding;
+            // }
+            // if (!fullWidth) {
+            //     if (image) this.background.image = image;
+            //     if (border) {
+            //         this.pnlRowWrap.border = { width: 2, style: 'solid', color: borderColor || Theme.divider }
+            //     } else {
+            //         this.pnlRowWrap.border.width = 0
+            //     }
+            //     // this.background.color = 'transparent';
+            //     if (backdropImage)
+            //         this.background.image = backdropImage;
+            //     if (!image && !backdropImage) this.background.image = undefined
+            // } else {
+            //     this.pnlRowWrap.border.width = 0
+            //     // if (backgroundColor)
+            //         // this.background.color = backgroundColor;
+            //     if (customBackgroundColor)
+            //         this.style.setProperty('--custom-background-color', backgroundColor)
+            //     else
+            //         this.style.removeProperty('--custom-background-color')
+            //     this.background.image = ''
+            // }
             // if (backgroundColor) {
             //     this.pnlRowContainer.background.color = backgroundColor;
             // }
             // if (textColor) this.pnlRowContainer.font = {color: textColor};
-            this.pnlRowContainer.maxWidth = sectionWidth !== null && sectionWidth !== void 0 ? sectionWidth : '100%';
-            if (margin)
-                this.pnlRowContainer.margin = (0, index_49.getMargin)(margin);
-            this.pnlRowContainer.width = (margin === null || margin === void 0 ? void 0 : margin.x) && (margin === null || margin === void 0 ? void 0 : margin.x) !== 'auto' ? 'auto' : '100%';
+            // this.pnlRowContainer.maxWidth = sectionWidth ?? '100%';
+            // if (margin) this.pnlRowContainer.margin = getMargin(margin);
+            // this.pnlRowContainer.width = margin?.x && margin?.x !== 'auto' ? 'auto' : '100%';
             // this.pnlRowWrap.padding = { 
             //     top: pt !== undefined ? pt : ptb !== undefined ? ptb : 0,
             //     bottom: pb !== undefined ? pb : ptb !== undefined ? ptb : 0,
             //     left: pl !== undefined ? pl : plr !== undefined ? plr : 0,
             //     right: pr !== undefined ? pr : plr !== undefined ? plr : 0,
             // }
-            this.pnlRowWrap.padding = padding || {};
-            if (align)
-                this.updateAlign();
+            // this.pnlRowWrap.padding = padding || {};
+            // if (align) this.updateAlign();
         }
         onOpenRowSettingsDialog() {
             this.mdRowSetting.show(this.rowId);
@@ -6302,7 +6409,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             components_27.application.EventBus.dispatch(index_47.EVENT.ON_ADD_SECTION, { prependId, appendId });
         }
         render() {
-            return (this.$render("i-panel", { id: "pnlRowContainer", class: 'page-row-container', width: "100%", height: "100%", background: { color: 'var(--custom-background-color, var(--background-main))' }, font: { color: 'var(--custom-text-color, var(--text-primary))' } },
+            return (this.$render("i-panel", { id: "pnlRowContainer", class: 'page-row-container', height: "100%", margin: {
+                    top: 0,
+                    bottom: 0,
+                    left: 'auto',
+                    right: 'auto'
+                }, background: { color: 'var(--custom-background-color, var(--background-main))' }, font: { color: 'var(--custom-text-color, var(--text-primary))' } },
                 this.$render("i-panel", { id: "pnlRowWrap", class: 'page-row', width: "100%", height: "100%" },
                     this.$render("i-button", { caption: "", icon: {
                             name: 'plus',
@@ -7755,7 +7867,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
             this.clearRows();
             for (let i = 0; i < index_70.pageObject.sections.length; i++) {
                 const rowData = index_70.pageObject.sections[i];
-                const pageRow = (this.$render("ide-row", { class: "i-page-section", background: { color: `var(--custom-background-color, var(--background-main))` }, font: { color: `var(--custom-text-color, var(--text-primary))` }, maxWidth: "100%", maxHeight: "100%" }));
+                const pageRow = (this.$render("ide-row", { width: "100%", class: "i-page-section", background: { color: `var(--custom-background-color, var(--background-main))` }, font: { color: `var(--custom-text-color, var(--text-primary))` }, maxWidth: "100%", maxHeight: "100%" }));
                 const { backgroundColor, textColor, customBackgroundColor, customTextColor, } = rowData.config || {};
                 if (!this._readonly) {
                     pageRow.border = { top: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' } };
@@ -7777,7 +7889,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
             }
         }
         async appendRow(rowData, prependId) {
-            const pageRow = (this.$render("ide-row", { maxWidth: "100%", maxHeight: "100%" }));
+            const pageRow = (this.$render("ide-row", { width: "100%", class: "i-page-section", background: { color: `var(--custom-background-color, var(--background-main))` }, font: { color: `var(--custom-text-color, var(--text-primary))` }, maxWidth: "100%", maxHeight: "100%" }));
             if (!this._readonly) {
                 pageRow.border = { top: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' } };
                 this.initDragEvent(pageRow);
@@ -7803,7 +7915,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
         }
         async onCreateSection(params) {
             const { prependId = '', appendId = '', elements = [] } = params || {};
-            const pageRow = (this.$render("ide-row", { maxWidth: "100%", maxHeight: "100%" }));
+            const pageRow = (this.$render("ide-row", { width: "100%", class: "i-page-section", background: { color: `var(--custom-background-color, var(--background-main))` }, font: { color: `var(--custom-text-color, var(--text-primary))` }, maxWidth: "100%", maxHeight: "100%" }));
             if (!this._readonly) {
                 pageRow.border = { top: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' } };
                 this.initDragEvent(pageRow);
