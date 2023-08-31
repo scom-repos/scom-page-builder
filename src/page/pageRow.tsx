@@ -1254,7 +1254,6 @@ export class PageRow extends Module {
     }
 
     private initEventBus() {
-        const self = this;
         application.EventBus.register(this, EVENT.ON_SET_DRAG_ELEMENT, async (el: any) => (this.currentElement = el));
         application.EventBus.register(this, EVENT.ON_SET_DRAG_TOOLBAR, async (el: any) => (this.currentToolbar = el));
         application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_CONFIG, async (data: any) => {
@@ -1282,6 +1281,12 @@ export class PageRow extends Module {
                 this.pnlRowContainer.style.setProperty('--custom-text-color', config.textColor)
             else
                 this.pnlRowContainer.style.removeProperty('--custom-text-color')
+            for (let i = this.classList.length - 1; i >= 0; i--) {
+                const className = this.classList[i];
+                if (className.startsWith('font-')) {
+                    this.classList.remove(className);
+                }
+            }
             Reflect.deleteProperty(sectionConfig, 'backgroundColor')
             Reflect.deleteProperty(sectionConfig, 'textColor')
             this.updateRowConfig(sectionConfig);
