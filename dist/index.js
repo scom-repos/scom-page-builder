@@ -6197,7 +6197,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             return toolbars && toolbars.length && toolbars.length > 1 ? true : false;
         }
         initEventBus() {
-            const self = this;
             components_27.application.EventBus.register(this, index_47.EVENT.ON_SET_DRAG_ELEMENT, async (el) => (this.currentElement = el));
             components_27.application.EventBus.register(this, index_47.EVENT.ON_SET_DRAG_TOOLBAR, async (el) => (this.currentToolbar = el));
             components_27.application.EventBus.register(this, index_47.EVENT.ON_UPDATE_PAGE_CONFIG, async (data) => {
@@ -6226,6 +6225,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     this.pnlRowContainer.style.setProperty('--custom-text-color', config.textColor);
                 else
                     this.pnlRowContainer.style.removeProperty('--custom-text-color');
+                for (let i = this.classList.length - 1; i >= 0; i--) {
+                    const className = this.classList[i];
+                    if (className.startsWith('font-')) {
+                        this.classList.remove(className);
+                    }
+                }
                 Reflect.deleteProperty(sectionConfig, 'backgroundColor');
                 Reflect.deleteProperty(sectionConfig, 'textColor');
                 this.updateRowConfig(sectionConfig);
