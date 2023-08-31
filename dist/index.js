@@ -4124,30 +4124,6 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
             this.settingsDialog.visible = true;
         }
         getSchema() {
-            // const jsonSchema: IDataSchema = {
-            //     type: 'object',
-            //     properties: {
-            //         backgroundColor: {
-            //             type: 'string',
-            //             format: 'color'
-            //         },
-            //         maxWidth: {
-            //             type: 'number',
-            //             title: 'Maximum width'
-            //         },
-            //         margin: {
-            //             type: 'object',
-            //             properties: {
-            //                 x: {
-            //                     type: 'string'
-            //                 },
-            //                 y: {
-            //                     type: 'string'
-            //                 }
-            //             }
-            //         }
-            //     },
-            // };
             const jsonSchema = {
                 "type": "object",
                 "properties": {
@@ -7090,7 +7066,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 builderTarget.setRootParent(this.closest('#pnlRowContainer'));
             if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setElementId)
                 builderTarget.setElementId(this.elementId);
-            this.contentStack.append(this._component);
+            // this.contentStack.append(this._component);
             if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setRootDir)
                 builderTarget.setRootDir((0, index_55.getRootDir)());
             if (this._component.ready)
@@ -7313,6 +7289,9 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this.initEventBus();
         }
         onHide() {
+            var _a;
+            if ((_a = this._component) === null || _a === void 0 ? void 0 : _a.onHide)
+                this._component.onHide();
             this.unRegisterEvents();
         }
         unRegisterEvents() {

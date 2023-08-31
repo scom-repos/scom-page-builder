@@ -662,7 +662,7 @@ export class IDEToolbar extends Module {
         const builderTarget = this._component?.getConfigurators ? this._component.getConfigurators().find((conf: any) => conf.target === 'Builders') : null;
         if (builderTarget?.setRootParent) builderTarget.setRootParent(this.closest('#pnlRowContainer'));
         if (builderTarget?.setElementId) builderTarget.setElementId(this.elementId);
-        this.contentStack.append(this._component);
+        // this.contentStack.append(this._component);
         if (builderTarget?.setRootDir) builderTarget.setRootDir(getRootDir());
         if (this._component.ready) await this._component.ready();
         this._component.maxWidth = '100%';
@@ -893,6 +893,7 @@ export class IDEToolbar extends Module {
     }
 
     onHide(): void {
+        if (this._component?.onHide) this._component.onHide();
         this.unRegisterEvents();
     }
 
