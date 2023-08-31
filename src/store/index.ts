@@ -80,6 +80,7 @@ export class PageObject {
 
   updateSection(id: string, data: any) {
     const section = this.getRow(id);
+    console.log('[index.ts] updateSection', section, id, data);
     if (!section) return;
     if (data?.config) section.config = data.config;
     // const oldColumnsNumber = this.getColumnsNumber(id);

@@ -35,39 +35,84 @@ export class UpdateRowSettingsCommand implements ICommand {
 
   private updateConfig(config: IPageSectionConfig, updatedValues: string[]) {
     const id = this.element.id.replace('row-', '');
-    const { margin } = config;
-    const marginStyle = getMargin(margin);
-    const newConfig = {...config, margin: {x: marginStyle.left , y: marginStyle.top}};
-    pageObject.updateSection(id, {config: {...newConfig}});
-    this.element.updateRowConfig(pageObject.getRowConfig(id));
-  
-    const { textSize, customTextSize } = newConfig
-    for (let i = this.element.classList.length - 1; i >= 0; i--) {
-      const className = this.element.classList[i];
-      if (className.startsWith('font-')) {
-          this.element.classList.remove(className);
+    const {fullWidth, customBackgroundColor, backgroundColor, customTextColor, textColor, customTextSize, textSize,
+      border, borderColor, customBackdrop, backdropColor, backdropImage, padding, sectionWidth,  } = config;
+
+    const sectionEl = this.element;
+    const innerEl = this.element.querySelector('#pnlRowContainer');
+
+    if(sectionWidth !== undefined) {
+      // innerEl.width = sectionWidth;
+      innerEl.maxWidth = sectionWidth;
+    }
+
+    if(fullWidth) {
+      if(customBackgroundColor && backgroundColor) {
+        sectionEl.style.setProperty('--custom-background-color', backgroundColor);
+        innerEl.style.setProperty('--custom-background-color', backgroundColor);
+      }
+      else {
+        sectionEl.style.removeProperty('--custom-background-color');
+        innerEl.style.removeProperty('--custom-background-color');
       }
     }
-    if (customTextSize && textSize) {       
-      this.element.classList.add(`font-${newConfig.textSize}`)
-    };
-    const innerEl = this.element.querySelector('#pnlRowContainer')
-    if (innerEl){
-      if (newConfig.customBackgroundColor)
-        innerEl.style.setProperty('--custom-background-color', newConfig.backgroundColor)
-      else
+    else {
+      if(customBackdrop) {
+        if(backdropImage) {
+          const ipfsUrl = `https://ipfs.scom.dev/ipfs`;
+          sectionEl.style.setProperty('--custom-background-color', `url("${ipfsUrl}/${backdropImage}")`);
+        }
+        else if(backdropColor) {
+          sectionEl.style.setProperty('--custom-background-color', backdropColor);
+        }
+      }
+      else {
+        sectionEl.style.removeProperty('--custom-background-color');
+      }
+      if(customBackgroundColor) {
+        // Add background image later
+        if(backgroundColor) {
+          innerEl.style.setProperty('--custom-background-color', backgroundColor);
+        }
+      }
+      else {
         innerEl.style.removeProperty('--custom-background-color');
-    };
-    if (newConfig.customTextColor)
-      this.element.style.setProperty('--custom-text-color', newConfig.textColor)
-    else
-      this.element.style.removeProperty('--custom-text-color');
-
-    // To update markdown
-    const toolbars = this.element.querySelectorAll('ide-toolbar');
-    for (let toolbar of toolbars) {
-      toolbar.updateUI(newConfig);
+      }
     }
+
+    if(customTextSize && textSize) {
+      sectionEl.classList.add(`font-${textSize}`);
+    }
+    else {
+      sectionEl.classList.forEach(v => {
+        if(v.indexOf('font-') >= 0)
+          sectionEl.classList.remove(v);
+      })
+    }
+
+    if(customTextColor && textColor) {
+      sectionEl.style.setProperty('--custom-text-color', textColor);
+    }
+    else {
+      sectionEl.style.removeProperty('--custom-text-color');
+    }
+
+    if(border && borderColor) {
+      innerEl.border = {
+        width: 2,
+        style: 'solid',
+        color: borderColor,
+        radius: 10
+      }
+    }
+
+    if(padding) {
+      innerEl.padding = padding;
+    }
+
+    pageObject.updateSection(id, {config});
+    const rowConfig = pageObject.getRowConfig(id);
+    this.element.updateRowConfig(pageObject.getRowConfig(id));
   };
 
   execute(): void {

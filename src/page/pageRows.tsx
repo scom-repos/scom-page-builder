@@ -224,7 +224,9 @@ export class PageRows extends Module {
         this.clearRows();
         for (let i = 0; i < pageObject.sections.length; i++) {
             const rowData = pageObject.sections[i];
-            const pageRow = (<ide-row class="i-page-section" 
+            const pageRow = (
+                <ide-row width={"100%"}
+                class="i-page-section"
                 background={{color: `var(--custom-background-color, var(--background-main))` }}
                 font={{color: `var(--custom-text-color, var(--text-primary))`}} 
                 maxWidth="100%" 
@@ -256,7 +258,12 @@ export class PageRows extends Module {
     }
 
     async appendRow(rowData: IPageSection, prependId?: string) {
-        const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
+        const pageRow = (<ide-row width={"100%"}
+                                  class="i-page-section"
+                                  background={{color: `var(--custom-background-color, var(--background-main))` }}
+                                  font={{color: `var(--custom-text-color, var(--text-primary))`}}
+                                  maxWidth="100%"
+                                  maxHeight="100%"></ide-row>) as PageRow;
         if (!this._readonly) {
             pageRow.border = { top: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' } };
             this.initDragEvent(pageRow);
@@ -287,7 +294,12 @@ export class PageRows extends Module {
 
     private async onCreateSection(params?: {prependId?: string, appendId?: string, elements?: IPageElement[]}) {
         const { prependId = '', appendId = '', elements = [] } = params || {};
-        const pageRow = (<ide-row maxWidth="100%" maxHeight="100%"></ide-row>) as PageRow;
+        const pageRow = (<ide-row width={"100%"}
+                                  class="i-page-section"
+                                  background={{color: `var(--custom-background-color, var(--background-main))` }}
+                                  font={{color: `var(--custom-text-color, var(--text-primary))`}}
+                                  maxWidth="100%"
+                                  maxHeight="100%"></ide-row>) as PageRow;
         if (!this._readonly) {
             pageRow.border = { top: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' } };
             this.initDragEvent(pageRow);

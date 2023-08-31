@@ -62,7 +62,7 @@ export class RowSettingsDialog extends Module {
                 "backdropImage": {
                     "title": "Backdrop image",
                     "type": "string",
-                    "format": "data-url"
+                    "format": "data-cid"
                 },
                 "customBackdrop": {
                     "title": "Custom backdrop",
@@ -129,7 +129,8 @@ export class RowSettingsDialog extends Module {
                         { "const": "md", "title": "Normal" },
                         { "const": "lg", "title": "Large" },
                         { "const": "xl", "title": "Extra Large" },
-                    ]
+                    ],
+                    "default": "md"
                 },
                 "border": {
                     "title": "Show border",

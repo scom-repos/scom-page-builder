@@ -553,6 +553,9 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
             left?: number | string;
             right?: number | string;
         };
+        customBackdrop?: boolean;
+        backdropColor?: string;
+        backdropImage?: string;
     }
     export interface IOnFetchComponentsOptions {
         category?: string;
