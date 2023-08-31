@@ -57,7 +57,8 @@ define("@scom/scom-page-builder/assets.ts", ["require", "exports", "@ijstech/com
                 accentRight: fullPath('img/layouts/twoWidget/accent_right.svg'),
                 twoImageColumn: fullPath('img/layouts/twoWidget/two_image_column.svg'),
                 threeImageColumn: fullPath('img/layouts/multipleWidget/three_image_column.svg')
-            }
+            },
+            grip: fullPath('img/grip.svg')
         },
         fullPath
     };
@@ -6493,7 +6494,7 @@ define("@scom/scom-page-builder/command/widgetSettingsToolbar.ts", ["require", "
     }
     exports.WidgetSettingsToolbarCommand = WidgetSettingsToolbarCommand;
 });
-define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/interface/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/utility/index.ts", "@scom/scom-page-builder/command/index.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/command/widgetSettingsToolbar.ts", "@scom/scom-page-builder/common/toolbar.css.ts"], function (require, exports, components_28, index_53, index_54, index_55, index_56, index_57, index_58, widgetSettingsToolbar_1) {
+define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/interface/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/utility/index.ts", "@scom/scom-page-builder/command/index.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/command/widgetSettingsToolbar.ts", "@scom/scom-page-builder/assets.ts", "@scom/scom-page-builder/common/toolbar.css.ts"], function (require, exports, components_28, index_53, index_54, index_55, index_56, index_57, index_58, widgetSettingsToolbar_1, assets_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.IDEToolbar = void 0;
@@ -7324,15 +7325,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                         this.$render("i-hstack", { id: "toolbar", padding: { top: 4, bottom: 4, left: 4, right: 4 }, gap: "0.25rem" })),
                     this.$render("i-panel", { id: "contentStack", height: "100%", position: 'relative', maxWidth: "100%", maxHeight: "100%", class: "ide-component", onClick: this.showToolbars.bind(this) },
                         this.$render("i-vstack", { id: "dragStack", verticalAlignment: "center", horizontalAlignment: "center", position: "absolute", left: "50%", top: "0px", width: 100, minHeight: 20, zIndex: 90, class: "dragger" },
-                            this.$render("i-grid-layout", { verticalAlignment: "center", horizontalAlignment: "center", columnsPerRow: 4, autoFillInHoles: true, width: 28, height: 8, margin: { left: 'auto', right: 'auto' }, gap: { column: '2px', row: '2px' } },
-                                this.$render("i-icon", { name: "circle", width: 3, height: 3, fill: '#222' }),
-                                this.$render("i-icon", { name: "circle", width: 3, height: 3, fill: '#222' }),
-                                this.$render("i-icon", { name: "circle", width: 3, height: 3, fill: '#222' }),
-                                this.$render("i-icon", { name: "circle", width: 3, height: 3, fill: '#222' }),
-                                this.$render("i-icon", { name: "circle", width: 3, height: 3, fill: '#222' }),
-                                this.$render("i-icon", { name: "circle", width: 3, height: 3, fill: '#222' }),
-                                this.$render("i-icon", { name: "circle", width: 3, height: 3, fill: '#222' }),
-                                this.$render("i-icon", { name: "circle", width: 3, height: 3, fill: '#222' }))),
+                            this.$render("i-panel", { width: 28, margin: { left: 'auto', right: 'auto' } },
+                                this.$render("i-image", { width: 28, url: assets_2.default.img.grip }))),
                         this.$render("i-vstack", { id: "backdropStack", width: "100%", height: "100%", position: "absolute", top: "0px", left: "0px", zIndex: 15, visible: false, onClick: this.showToolList.bind(this) })),
                     this.$render("i-panel", { position: "absolute", width: "90%", height: "3px", left: "5%", bottom: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "bottom-block" }),
                     this.$render("i-panel", { position: "absolute", width: "90%", height: "3px", left: "5%", top: "-8px", zIndex: 999, border: { radius: '4px' }, visible: false, class: "top-block" }),
@@ -7616,7 +7610,7 @@ define("@scom/scom-page-builder/page/pageFooter.css.ts", ["require", "exports", 
         }
     });
 });
-define("@scom/scom-page-builder/page/pageFooter.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/assets.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/page/pageFooter.css.ts"], function (require, exports, components_33, assets_2, index_66) {
+define("@scom/scom-page-builder/page/pageFooter.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/assets.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/page/pageFooter.css.ts"], function (require, exports, components_33, assets_3, index_66) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.PageFooter = void 0;
@@ -7647,7 +7641,7 @@ define("@scom/scom-page-builder/page/pageFooter.tsx", ["require", "exports", "@i
         }
         render() {
             return (this.$render("i-hstack", { class: "footer", justifyContent: "start", alignItems: "center", padding: { left: 20, right: 20, top: 10, bottom: 10 } },
-                this.$render("i-image", { height: 30, width: 30, url: assets_2.default.icons.logo, margin: { right: 10 } }),
+                this.$render("i-image", { height: 30, width: 30, url: assets_3.default.icons.logo, margin: { right: 10 } }),
                 this.$render("i-panel", null,
                     this.$render("i-label", { id: "lbFooter", font: { color: Theme.text.primary } })),
                 this.$render("i-panel", null)));
@@ -8380,7 +8374,7 @@ define("@scom/scom-page-builder/utility/layouts.json.ts", ["require", "exports"]
         }
     };
 });
-define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/page/pageSidebar.css.ts", "@scom/scom-page-builder/command/index.ts", "@scom/scom-page-builder/assets.ts", "@scom/scom-page-builder/utility/layouts.json.ts", "@scom/scom-page-builder/utility/index.ts"], function (require, exports, components_37, index_72, index_73, pageSidebar_css_1, index_74, assets_3, layouts_json_1, index_75) {
+define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/page/pageSidebar.css.ts", "@scom/scom-page-builder/command/index.ts", "@scom/scom-page-builder/assets.ts", "@scom/scom-page-builder/utility/layouts.json.ts", "@scom/scom-page-builder/utility/index.ts"], function (require, exports, components_37, index_72, index_73, pageSidebar_css_1, index_74, assets_4, layouts_json_1, index_75) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.PageSidebar = void 0;
@@ -8511,7 +8505,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                         for (const key1 in layouts_json_1.layouts[key]) {
                             if (Object.prototype.hasOwnProperty.call(layouts_json_1.layouts[key], key1)) {
                                 const moduleCard = (this.$render("i-grid-layout", { id: "sectionStack", class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", width: "100%", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, tooltip: { content: '✊ Drag to insert', placement: 'top' }, templateColumns: ["80px", "1fr"], overflow: "hidden" },
-                                    this.$render("i-image", { url: this.getLayoutIcon(key1) || assets_3.default.icons.logo, padding: { top: 8, bottom: 8, left: 8, right: 8 } }),
+                                    this.$render("i-image", { url: this.getLayoutIcon(key1) || assets_4.default.icons.logo, padding: { top: 8, bottom: 8, left: 8, right: 8 } }),
                                     this.$render("i-label", { caption: this.convertCamelCaseToString(key1), font: { size: '0.813rem', color: '#3b3838', weight: 600 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" })));
                                 moduleCard.setAttribute('draggable', 'true');
                                 moduleCard.setAttribute('layout', key1);
@@ -8529,7 +8523,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                 for (const module of matchedModules) {
                     const lblDesc = module.description ? (this.$render("i-label", { caption: module.description, font: { size: '0.813rem', color: '#8b8585' } })) : [];
                     const moduleCard = (this.$render("i-grid-layout", { class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", width: "100%", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, tooltip: { content: '✊ Drag to insert', placement: 'top' }, templateColumns: ["56px", "1fr"], overflow: "hidden" },
-                        this.$render("i-image", { url: module.imgUrl || assets_3.default.icons.logo, padding: { top: 8, bottom: 8, left: 8, right: 8 } }),
+                        this.$render("i-image", { url: module.imgUrl || assets_4.default.icons.logo, padding: { top: 8, bottom: 8, left: 8, right: 8 } }),
                         this.$render("i-vstack", { gap: "0.25rem", padding: { top: 8, bottom: 8, left: 8, right: 8 }, overflow: "hidden" },
                             this.$render("i-label", { caption: module.name, font: { size: '0.813rem', color: '#3b3838', weight: 600 } }),
                             lblDesc)));
@@ -8539,7 +8533,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
             }
         }
         getLayoutIcon(layoutName) {
-            return assets_3.default.img.layout[layoutName];
+            return assets_4.default.img.layout[layoutName];
         }
         openWidgetModal(target, category) {
             this.mdWidget.width = '320px';
@@ -8709,7 +8703,7 @@ define("@scom/scom-page-builder/builder/builderHeader.css.ts", ["require", "expo
         }
     });
 });
-define("@scom/scom-page-builder/builder/builderHeader.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/assets.ts", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/interface/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/utility/index.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/builder/builderHeader.css.ts"], function (require, exports, components_39, assets_4, index_77, index_78, index_79, index_80, index_81) {
+define("@scom/scom-page-builder/builder/builderHeader.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-page-builder/assets.ts", "@scom/scom-page-builder/const/index.ts", "@scom/scom-page-builder/interface/index.ts", "@scom/scom-page-builder/store/index.ts", "@scom/scom-page-builder/utility/index.ts", "@scom/scom-page-builder/theme/index.ts", "@scom/scom-page-builder/builder/builderHeader.css.ts"], function (require, exports, components_39, assets_5, index_77, index_78, index_79, index_80, index_81) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.BuilderHeader = void 0;
@@ -8868,22 +8862,22 @@ define("@scom/scom-page-builder/builder/builderHeader.tsx", ["require", "exports
                 {
                     caption: 'Cover',
                     type: index_78.HeaderType.COVER,
-                    image: assets_4.default.fullPath('img/components/cover.svg')
+                    image: assets_5.default.fullPath('img/components/cover.svg')
                 },
                 {
                     caption: 'Large Banner',
                     type: index_78.HeaderType.LARGE,
-                    image: assets_4.default.fullPath('img/components/large.svg')
+                    image: assets_5.default.fullPath('img/components/large.svg')
                 },
                 {
                     caption: 'Banner',
                     type: index_78.HeaderType.NORMAL,
-                    image: assets_4.default.fullPath('img/components/banner.svg')
+                    image: assets_5.default.fullPath('img/components/banner.svg')
                 },
                 {
                     caption: 'Title Only',
                     type: index_78.HeaderType.TITLE,
-                    image: assets_4.default.fullPath('img/components/title.svg')
+                    image: assets_5.default.fullPath('img/components/title.svg')
                 }
             ];
             this.pnlHeaderTypeMain.clearInnerHTML();

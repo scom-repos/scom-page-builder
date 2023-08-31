@@ -22,6 +22,7 @@ import './toolbar.css';
 import { PageSection } from '../page/pageSection';
 import { PageRow } from '../page/pageRow';
 import { WidgetSettingsToolbarCommand } from '../command/widgetSettingsToolbar';
+import assets from '../assets';
 
 declare global {
     namespace JSX {
@@ -971,24 +972,9 @@ export class IDEToolbar extends Module {
                             minHeight={20} zIndex={90}
                             class="dragger"
                         >
-                            <i-grid-layout
-                                verticalAlignment="center"
-                                horizontalAlignment="center"
-                                columnsPerRow={4}
-                                autoFillInHoles={true}
-                                width={28} height={8}
-                                margin={{left: 'auto', right: 'auto'}}
-                                gap={{ column: '2px', row: '2px' }}
-                            >
-                                <i-icon name="circle" width={3} height={3} fill={'#222'}></i-icon>
-                                <i-icon name="circle" width={3} height={3} fill={'#222'}></i-icon>
-                                <i-icon name="circle" width={3} height={3} fill={'#222'}></i-icon>
-                                <i-icon name="circle" width={3} height={3} fill={'#222'}></i-icon>
-                                <i-icon name="circle" width={3} height={3} fill={'#222'}></i-icon>
-                                <i-icon name="circle" width={3} height={3} fill={'#222'}></i-icon>
-                                <i-icon name="circle" width={3} height={3} fill={'#222'}></i-icon>
-                                <i-icon name="circle" width={3} height={3} fill={'#222'}></i-icon>
-                            </i-grid-layout>
+                            <i-panel width={28} margin={{left: 'auto', right: 'auto'}}>
+                                <i-image width={28} url={assets.img.grip}></i-image>
+                            </i-panel>
                         </i-vstack>
                         <i-vstack
                             id="backdropStack"
