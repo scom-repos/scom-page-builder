@@ -214,7 +214,6 @@ export class PageRow extends Module {
     }
 
     updateRowConfig(config: IPageSectionConfig) {
-        console.log('updateRowConfig', config);
         const { align, fullWidth, customBackgroundColor, backgroundColor, customTextColor, textColor, customTextSize, textSize, border, borderColor,
         customBackdrop, backdropImage, backdropColor, padding, sectionWidth } = config || {};
 
@@ -706,8 +705,9 @@ export class PageRow extends Module {
             self.toggleUI(!!self.data?.elements?.length);
         }
 
-        function dragEnter(enterTarget: Control, clientX: number, clientY: number) {
+        function updateDropBlocksAndRectangle(enterTarget: Control, clientX: number, clientY: number) {
             if (!enterTarget /* || !self.currentElement*/) return;
+            removeRectangles();
             if (enterTarget.closest('#pnlEmty')) {
                 self.pnlRow.minHeight = '180px';
                 self.toggleUI(true);
@@ -738,7 +738,6 @@ export class PageRow extends Module {
             }
 
             if (target) {
-                const isFromSidebar: boolean = getDragData();
                 const dropRow = target.closest('ide-row');
                 let offsetLeft = 0;
                 if (!getDragData()?.module) {
@@ -748,11 +747,20 @@ export class PageRow extends Module {
                     }
                 }
                 const targetCol = Number(target.dataset.column);
-                const column = targetCol - offsetLeft > 0 ? targetCol - offsetLeft : targetCol
+                let column: number;
+                const exceedFrontLimit: boolean = targetCol - offsetLeft <= 0;
+                const exceedBackLimit: boolean = targetCol - offsetLeft + Number(self.currentElement.dataset.columnSpan) > 12;
+                if (exceedFrontLimit && !exceedBackLimit) {
+                    column = 1;
+                } else if (!exceedFrontLimit && exceedBackLimit) {
+                    column = self.maxColumn - Number(self.currentElement.dataset.columnSpan) + 1;
+                } else {
+                    column = targetCol - offsetLeft;
+                }
                 const columnSpan = self.currentElement?.dataset.columnSpan
                     ? Number(self.currentElement.dataset.columnSpan)
                     : INIT_COLUMN_SPAN;
-                let colSpan = Math.min(columnSpan, self.maxColumn);
+                const colSpan = Math.min(columnSpan, self.maxColumn);
                 let colStart = Math.min(column, self.maxColumn);
                 const sections = Array.from(dropRow?.querySelectorAll('ide-section'));
                 const sortedSections = sections.sort(
@@ -782,7 +790,6 @@ export class PageRow extends Module {
                 const targetRowPnl = target.closest('#pnlRow') as Control;
                 showRectangle(targetRowPnl, colStart, Math.min(columnSpan, MAX_COLUMN - spaces));
             } else {
-                removeRectangles();
                 const section = enterTarget.closest('ide-section') as Control;
                 const isDraggingEl = section && section.classList.contains('is-dragging');
                 if (section && section.id !== self.currentElement.id && !isDraggingEl) {
@@ -832,18 +839,12 @@ export class PageRow extends Module {
             }
         }
 
-        function dragLeave(leaveTarget: Control, clientX: number, isOverlap: boolean = false) {
-            if (!leaveTarget) return;
-            let target: Control = (isOverlap)? findNearestFixedGridInRow(clientX) : leaveTarget.closest('.fixed-grid-item');
-            if (target) removeRectangles();
-        }
-
         this.addEventListener('dragenter', function (event) {
             const eventTarget = event.target as HTMLElement;
             const elementConfig = getDragData();
             if (elementConfig?.module?.name === 'sectionStack') return;
             if (eventTarget && (eventTarget.classList.contains('fixed-grid-item') || eventTarget.classList.contains('fixed-grid'))) {
-                dragEnter(eventTarget as Control, event.clientX, event.clientY);
+                updateDropBlocksAndRectangle(eventTarget as Control, event.clientX, event.clientY);
             }
         });
 
@@ -904,12 +905,8 @@ export class PageRow extends Module {
                     }
 
                     // show frame
-                    else { // TODO
-                        // leave previous element: dragOverTarget
-                        dragLeave(dragOverTarget, event.clientX, true);
-
-                        // enter current element: enterTarget
-                        dragEnter(eventTarget, event.clientX, event.clientY);
+                    else {
+                        updateDropBlocksAndRectangle(eventTarget, event.clientX, event.clientY);
                     }
                 }
 
@@ -934,21 +931,11 @@ export class PageRow extends Module {
                 }
 
                 // dragover empty space, show frame
-                else { // TODO
-                    // if (enterTarget == dragOverTarget) return;
-                    // leave previous element: dragOverTarget
-                    dragLeave(dragOverTarget, event.clientX, true);
-
-                    // enter current element: enterTarget
-                    dragEnter(eventTarget , event.clientX, event.clientY);
+                else { 
+                    updateDropBlocksAndRectangle(eventTarget , event.clientX, event.clientY);
                 }
             }
             dragOverTarget = eventTarget;
-        });
-
-        this.addEventListener('dragleave', function (event) {
-            const eventTarget = event.target as Control;
-            dragLeave(eventTarget, event.clientX);
         });
 
         function findNearestFixedGridInRow(clientX: number) {
@@ -1130,9 +1117,19 @@ export class PageRow extends Module {
                         const offsetLeft = Math.floor((startX + GAP_WIDTH) / (self.gridColumnWidth + GAP_WIDTH));
                         let nearestFixedItem = dragDropResult.details.nearestPanel;
                         let column = Number(nearestFixedItem.dataset.column);
-                        if (column - offsetLeft > 0) {
-                            nearestFixedItem = pageRow.querySelector(`.fixed-grid-item[data-column='${column - offsetLeft}']`)
+
+                        const exceedFrontLimit: boolean = column - offsetLeft <= 0;
+                        const exceedBackLimit: boolean = column - offsetLeft + Number(self.currentElement.dataset.columnSpan) > 12;
+                        let targetCol: number;
+                        if (exceedFrontLimit && !exceedBackLimit) {
+                            targetCol = 1;
+                        } else if (!exceedFrontLimit && exceedBackLimit) {
+                            targetCol = self.maxColumn - Number(self.currentElement.dataset.columnSpan) + 1;
+                        } else {
+                            targetCol = column - offsetLeft;
                         }
+
+                        nearestFixedItem = pageRow.querySelector(`.fixed-grid-item[data-column='${targetCol}']`)
 
                         const dragCmd = (elementConfig)?
                             new AddElementCommand(

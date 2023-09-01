@@ -5342,7 +5342,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            console.log('updateRowConfig', config);
             const { align, fullWidth, customBackgroundColor, backgroundColor, customTextColor, textColor, customTextSize, textSize, border, borderColor, customBackdrop, backdropImage, backdropColor, padding, sectionWidth } = config || {};
             if (sectionWidth) {
                 this.pnlRowContainer.width = sectionWidth;
@@ -5805,10 +5804,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.pnlRow.minHeight = 'auto';
                 self.toggleUI(!!((_b = (_a = self.data) === null || _a === void 0 ? void 0 : _a.elements) === null || _b === void 0 ? void 0 : _b.length));
             }
-            function dragEnter(enterTarget, clientX, clientY) {
+            function updateDropBlocksAndRectangle(enterTarget, clientX, clientY) {
                 var _a, _b, _c, _d, _e, _f;
                 if (!enterTarget /* || !self.currentElement*/)
                     return;
+                removeRectangles();
                 if (enterTarget.closest('#pnlEmty')) {
                     self.pnlRow.minHeight = '180px';
                     self.toggleUI(true);
@@ -5834,7 +5834,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     return;
                 }
                 if (target) {
-                    const isFromSidebar = (0, index_49.getDragData)();
                     const dropRow = target.closest('ide-row');
                     let offsetLeft = 0;
                     if (!((_a = (0, index_49.getDragData)()) === null || _a === void 0 ? void 0 : _a.module)) {
@@ -5844,11 +5843,22 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         }
                     }
                     const targetCol = Number(target.dataset.column);
-                    const column = targetCol - offsetLeft > 0 ? targetCol - offsetLeft : targetCol;
+                    let column;
+                    const exceedFrontLimit = targetCol - offsetLeft <= 0;
+                    const exceedBackLimit = targetCol - offsetLeft + Number(self.currentElement.dataset.columnSpan) > 12;
+                    if (exceedFrontLimit && !exceedBackLimit) {
+                        column = 1;
+                    }
+                    else if (!exceedFrontLimit && exceedBackLimit) {
+                        column = self.maxColumn - Number(self.currentElement.dataset.columnSpan) + 1;
+                    }
+                    else {
+                        column = targetCol - offsetLeft;
+                    }
                     const columnSpan = ((_b = self.currentElement) === null || _b === void 0 ? void 0 : _b.dataset.columnSpan)
                         ? Number(self.currentElement.dataset.columnSpan)
                         : index_48.INIT_COLUMN_SPAN;
-                    let colSpan = Math.min(columnSpan, self.maxColumn);
+                    const colSpan = Math.min(columnSpan, self.maxColumn);
                     let colStart = Math.min(column, self.maxColumn);
                     const sections = Array.from(dropRow === null || dropRow === void 0 ? void 0 : dropRow.querySelectorAll('ide-section'));
                     const sortedSections = sections.sort((a, b) => Number(b.dataset.column) - Number(a.dataset.column));
@@ -5877,7 +5887,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     showRectangle(targetRowPnl, colStart, Math.min(columnSpan, index_48.MAX_COLUMN - spaces));
                 }
                 else {
-                    removeRectangles();
                     const section = enterTarget.closest('ide-section');
                     const isDraggingEl = section && section.classList.contains('is-dragging');
                     if (section && section.id !== self.currentElement.id && !isDraggingEl) {
@@ -5921,13 +5930,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     }
                 }
             }
-            function dragLeave(leaveTarget, clientX, isOverlap = false) {
-                if (!leaveTarget)
-                    return;
-                let target = (isOverlap) ? findNearestFixedGridInRow(clientX) : leaveTarget.closest('.fixed-grid-item');
-                if (target)
-                    removeRectangles();
-            }
             this.addEventListener('dragenter', function (event) {
                 var _a;
                 const eventTarget = event.target;
@@ -5935,7 +5937,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack')
                     return;
                 if (eventTarget && (eventTarget.classList.contains('fixed-grid-item') || eventTarget.classList.contains('fixed-grid'))) {
-                    dragEnter(eventTarget, event.clientX, event.clientY);
+                    updateDropBlocksAndRectangle(eventTarget, event.clientX, event.clientY);
                 }
             });
             this.addEventListener('dragover', function (event) {
@@ -5991,11 +5993,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             }
                         }
                         // show frame
-                        else { // TODO
-                            // leave previous element: dragOverTarget
-                            dragLeave(dragOverTarget, event.clientX, true);
-                            // enter current element: enterTarget
-                            dragEnter(eventTarget, event.clientX, event.clientY);
+                        else {
+                            updateDropBlocksAndRectangle(eventTarget, event.clientX, event.clientY);
                         }
                     }
                     // dragover toolbar(element)
@@ -6020,19 +6019,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         }
                     }
                     // dragover empty space, show frame
-                    else { // TODO
-                        // if (enterTarget == dragOverTarget) return;
-                        // leave previous element: dragOverTarget
-                        dragLeave(dragOverTarget, event.clientX, true);
-                        // enter current element: enterTarget
-                        dragEnter(eventTarget, event.clientX, event.clientY);
+                    else {
+                        updateDropBlocksAndRectangle(eventTarget, event.clientX, event.clientY);
                     }
                 }
                 dragOverTarget = eventTarget;
-            });
-            this.addEventListener('dragleave', function (event) {
-                const eventTarget = event.target;
-                dragLeave(eventTarget, event.clientX);
             });
             function findNearestFixedGridInRow(clientX) {
                 const elements = self.pnlRow.querySelectorAll('.fixed-grid-item');
@@ -6169,9 +6160,19 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                             const offsetLeft = Math.floor((startX + index_48.GAP_WIDTH) / (self.gridColumnWidth + index_48.GAP_WIDTH));
                             let nearestFixedItem = dragDropResult.details.nearestPanel;
                             let column = Number(nearestFixedItem.dataset.column);
-                            if (column - offsetLeft > 0) {
-                                nearestFixedItem = pageRow.querySelector(`.fixed-grid-item[data-column='${column - offsetLeft}']`);
+                            const exceedFrontLimit = column - offsetLeft <= 0;
+                            const exceedBackLimit = column - offsetLeft + Number(self.currentElement.dataset.columnSpan) > 12;
+                            let targetCol;
+                            if (exceedFrontLimit && !exceedBackLimit) {
+                                targetCol = 1;
                             }
+                            else if (!exceedFrontLimit && exceedBackLimit) {
+                                targetCol = self.maxColumn - Number(self.currentElement.dataset.columnSpan) + 1;
+                            }
+                            else {
+                                targetCol = column - offsetLeft;
+                            }
+                            nearestFixedItem = pageRow.querySelector(`.fixed-grid-item[data-column='${targetCol}']`);
                             const dragCmd = (elementConfig) ?
                                 new index_50.AddElementCommand(self.getNewElementData(), true, false, nearestFixedItem, pageRow) :
                                 new index_50.DragElementCommand(self.currentElement, nearestFixedItem, true, false);
