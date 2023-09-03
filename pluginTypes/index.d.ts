@@ -34,6 +34,7 @@ declare module "@scom/scom-page-builder/assets.ts" {
                 twoImageColumn: string;
                 threeImageColumn: string;
             };
+            grip: string;
         };
         fullPath: typeof fullPath;
     };

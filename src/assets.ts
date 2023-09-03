@@ -38,7 +38,8 @@ export default {
             twoImageColumn: fullPath('img/layouts/twoWidget/two_image_column.svg'),
 
             threeImageColumn: fullPath('img/layouts/multipleWidget/three_image_column.svg')
-        }
+        },
+        grip: fullPath('img/grip.svg')
     },
     fullPath
 }
