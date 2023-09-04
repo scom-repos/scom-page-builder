@@ -22,7 +22,10 @@ Styles.cssRule('ide-row', {
     $nest: {
         '.page-row-container': {
             borderRadius: 10,
-
+            paddingTop: 'var(--custom-padding-top, 0)',
+            paddingBottom: 'var(--custom-padding-bottom, 0)',
+            paddingLeft: 'var(--custom-padding-left, 0)',
+            paddingRight: 'var(--custom-padding-right, 0)',
             $nest: {
                 '.page-row': {
                     borderRadius: 10,

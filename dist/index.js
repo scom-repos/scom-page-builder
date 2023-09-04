@@ -1944,8 +1944,37 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
                     radius: 10
                 };
             }
-            if (padding) {
-                innerEl.padding = padding;
+            if (padding && (padding.top !== undefined || padding.bottom !== undefined || padding.left !== undefined || padding.right !== undefined)) {
+                if (padding.top !== undefined) {
+                    sectionEl.style.setProperty('--custom-padding-top', `${padding.top}px`);
+                }
+                else {
+                    sectionEl.style.setProperty('--custom-padding-top', '0px');
+                }
+                if (padding.bottom !== undefined) {
+                    sectionEl.style.setProperty('--custom-padding-bottom', `${padding.bottom}px`);
+                }
+                else {
+                    sectionEl.style.setProperty('--custom-padding-bottom', '0px');
+                }
+                if (padding.left !== undefined) {
+                    sectionEl.style.setProperty('--custom-padding-left', `${padding.left}px`);
+                }
+                else {
+                    sectionEl.style.setProperty('--custom-padding-left', '0px');
+                }
+                if (padding.right !== undefined) {
+                    sectionEl.style.setProperty('--custom-padding-right', `${padding.right}px`);
+                }
+                else {
+                    sectionEl.style.setProperty('--custom-padding-right', '0px');
+                }
+            }
+            else {
+                sectionEl.style.removeProperty('--custom-padding-top');
+                sectionEl.style.removeProperty('--custom-padding-bottom');
+                sectionEl.style.removeProperty('--custom-padding-left');
+                sectionEl.style.removeProperty('--custom-padding-right');
             }
             index_6.pageObject.updateSection(id, { config });
             const rowConfig = index_6.pageObject.getRowConfig(id);
@@ -3271,7 +3300,8 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             return result;
         }
         updateConfig(config, updatedValues) {
-            const { backgroundColor, backgroundImage, customBackgroundColor, customTextColor, textColor, customTextSize, textSize, margin } = config;
+            const { backgroundColor, backgroundImage, customBackgroundColor, customTextColor, textColor, customTextSize, textSize, margin, plr, ptb } = config;
+            console.log('[updatePageSettings.ts] updateConfig', plr, ptb);
             let newConfig = {};
             for (let prop of updatedValues) {
                 newConfig[prop] = config[prop];
@@ -3280,6 +3310,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             const defaultTextSize = 'md';
             let data = {
                 backgroundImage: '',
+                plr, ptb,
                 customBackgroundColor: customBackgroundColor,
                 backgroundColor: backgroundColor,
                 customTextColor: customTextColor,
@@ -3320,6 +3351,14 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             }
             else {
                 this.element.classList.remove('font-xs', 'font-sm', 'font-md', 'font-lg', 'font-xl');
+            }
+            if (plr !== undefined) {
+                this.element.style.setProperty('--custom-padding-left', `${plr}px`);
+                this.element.style.setProperty('--custom-padding-right', `${plr}px`);
+            }
+            if (ptb !== undefined) {
+                this.element.style.setProperty('--custom-padding-top', `${ptb}px`);
+                this.element.style.setProperty('--custom-padding-bottom', `${ptb}px`);
             }
             components_10.application.EventBus.dispatch(index_24.EVENT.ON_UPDATE_PAGE_BG, Object.assign({}, data));
             this.element.maxWidth = '100%'; // maxWidth ?? '100%';
@@ -5071,6 +5110,10 @@ define("@scom/scom-page-builder/page/pageRow.css.ts", ["require", "exports", "@i
         $nest: {
             '.page-row-container': {
                 borderRadius: 10,
+                paddingTop: 'var(--custom-padding-top, 0)',
+                paddingBottom: 'var(--custom-padding-bottom, 0)',
+                paddingLeft: 'var(--custom-padding-left, 0)',
+                paddingRight: 'var(--custom-padding-right, 0)',
                 $nest: {
                     '.page-row': {
                         borderRadius: 10,
