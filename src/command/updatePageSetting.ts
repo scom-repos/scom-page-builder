@@ -40,7 +40,7 @@ export class UpdatePageSettingsCommand implements ICommand {
   }
 
   private updateConfig(config: IPageConfig, updatedValues: string[]) {
-    const { backgroundColor, backgroundImage, customBackgroundColor, customTextColor, textColor, customTextSize, textSize, margin } = config;
+    const { backgroundColor, backgroundImage, customBackgroundColor, customTextColor, textColor, customTextSize, textSize, margin, plr, ptb } = config;
     let newConfig: IPageConfig = {};
     for (let prop of updatedValues) {
       newConfig[prop] = config[prop];
@@ -50,6 +50,7 @@ export class UpdatePageSettingsCommand implements ICommand {
     const defaultTextSize = 'md'
     let data: any = {
       backgroundImage: '',
+      plr, ptb,
       customBackgroundColor: customBackgroundColor,
       backgroundColor: backgroundColor,
       customTextColor: customTextColor,
@@ -88,6 +89,14 @@ export class UpdatePageSettingsCommand implements ICommand {
     }
     else {
       this.element.classList.remove('font-xs', 'font-sm', 'font-md', 'font-lg', 'font-xl');
+    }
+    if(plr !== undefined) {
+      this.element.style.setProperty('--custom-padding-left', `${plr}px`);
+      this.element.style.setProperty('--custom-padding-right', `${plr}px`);
+    }
+    if(ptb !== undefined) {
+      this.element.style.setProperty('--custom-padding-top', `${ptb}px`);
+      this.element.style.setProperty('--custom-padding-bottom', `${ptb}px`);
     }
     application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {...data});
     this.element.maxWidth = '100%'; // maxWidth ?? '100%';

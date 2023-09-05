@@ -106,8 +106,38 @@ export class UpdateRowSettingsCommand implements ICommand {
       }
     }
 
-    if(padding) {
-      innerEl.padding = padding;
+    if(padding && (padding.top !== undefined || padding.bottom !== undefined || padding.left !== undefined || padding.right !== undefined)) {
+      if(padding.top !== undefined) {
+        sectionEl.style.setProperty('--custom-padding-top', `${padding.top}px`)
+      }
+      else {
+        sectionEl.style.setProperty('--custom-padding-top', '0px')
+      }
+      if(padding.bottom !== undefined) {
+        sectionEl.style.setProperty('--custom-padding-bottom', `${padding.bottom}px`)
+      }
+      else {
+        sectionEl.style.setProperty('--custom-padding-bottom', '0px')
+      }
+      if(padding.left !== undefined) {
+        sectionEl.style.setProperty('--custom-padding-left', `${padding.left}px`)
+      }
+      else {
+        sectionEl.style.setProperty('--custom-padding-left', '0px')
+      }
+      if(padding.right !== undefined) {
+        sectionEl.style.setProperty('--custom-padding-right', `${padding.right}px`)
+      }
+      else {
+        sectionEl.style.setProperty('--custom-padding-right', '0px')
+      }
+    }
+    else {
+      sectionEl.style.removeProperty('--custom-padding-top');
+      sectionEl.style.removeProperty('--custom-padding-bottom');
+      sectionEl.style.removeProperty('--custom-padding-left');
+      sectionEl.style.removeProperty('--custom-padding-right');
+
     }
 
     pageObject.updateSection(id, {config});
