@@ -3301,7 +3301,6 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
         }
         updateConfig(config, updatedValues) {
             const { backgroundColor, backgroundImage, customBackgroundColor, customTextColor, textColor, customTextSize, textSize, margin, plr, ptb } = config;
-            console.log('[updatePageSettings.ts] updateConfig', plr, ptb);
             let newConfig = {};
             for (let prop of updatedValues) {
                 newConfig[prop] = config[prop];
