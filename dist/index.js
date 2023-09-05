@@ -1977,8 +1977,11 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
                 sectionEl.style.removeProperty('--custom-padding-right');
             }
             index_6.pageObject.updateSection(id, { config });
-            const rowConfig = index_6.pageObject.getRowConfig(id);
             this.element.updateRowConfig(index_6.pageObject.getRowConfig(id));
+            const toolbars = this.element.querySelectorAll('ide-toolbar');
+            for (let toolbar of toolbars) {
+                toolbar.updateUI(config);
+            }
         }
         ;
         execute() {
@@ -3301,7 +3304,6 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
         }
         updateConfig(config, updatedValues) {
             const { backgroundColor, backgroundImage, customBackgroundColor, customTextColor, textColor, customTextSize, textSize, margin, plr, ptb } = config;
-            console.log('[updatePageSettings.ts] updateConfig', plr, ptb);
             let newConfig = {};
             for (let prop of updatedValues) {
                 newConfig[prop] = config[prop];

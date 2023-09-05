@@ -11,8 +11,7 @@
     "@scom/scom-token-list": "*",
     "@scom/scom-page-builder": "*",
     "@scom/scom-network-picker": "*",
-    "@scom/scom-dapp-container": "*",
-    "@scom/scom-configurator-settings": "*"
+    "@scom/scom-dapp-container": "*"
   },
   "components": {
     "@scom/scom-markdown-editor": {
