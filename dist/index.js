@@ -6340,11 +6340,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
                 index_49.pageObject.updateSection(id, { config: JSON.parse(JSON.stringify(sectionConfig)) });
                 if (sectionConfig.backgroundColor && sectionConfig.customBackgroundColor)
-                    this.pnlRowContainer.style.setProperty('--custom-background-color', config.backgroundColor);
+                    this.pnlRowContainer.style.setProperty('--custom-background-color', sectionConfig.backgroundColor);
                 else
                     this.pnlRowContainer.style.removeProperty('--custom-background-color');
                 if (sectionConfig.customTextColor && sectionConfig.textColor)
-                    this.pnlRowContainer.style.setProperty('--custom-text-color', config.textColor);
+                    this.pnlRowContainer.style.setProperty('--custom-text-color', sectionConfig.textColor);
                 else
                     this.pnlRowContainer.style.removeProperty('--custom-text-color');
                 for (let i = this.classList.length - 1; i >= 0; i--) {
