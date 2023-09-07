@@ -55,7 +55,6 @@ export class RowSettingsDialog extends Module {
     }
 
     private getSchema() {
-
         const jsonSchema: IDataSchema = {
             "type": "object",
             "properties": {
@@ -98,14 +97,19 @@ export class RowSettingsDialog extends Module {
                     "title": "Full width",
                     "type": "boolean"
                 },
-                "customBackgroundColor": {
-                    "title": "Custom background color",
+                "customBackground": {
+                    "title": "Custom background",
                     "type": "boolean"
                 },
                 "backgroundColor": {
                     "title": "Background color",
                     "type": "string",
                     "format": "color"
+                },
+                "backgroundImage": {
+                    "title": "Background image",
+                    "type": "string",
+                    "format": "data-cid"
                 },
                 "customTextColor": {
                     "title": "Custom text color",
@@ -160,22 +164,51 @@ export class RowSettingsDialog extends Module {
                     "type": "HorizontalLayout",
                     "elements": [
                         {
-                            "type": "Control",
-                            "scope": "#/properties/customBackgroundColor"
-                        },
-                        {
-                            "type": "Control",
-                            "scope": "#/properties/backgroundColor",
-                            "rule": {
-                                "effect": "ENABLE",
-                                "condition": {
-                                    "scope": "#/properties/customBackgroundColor",
-                                    "schema": {
-                                        "const": true
-                                    }
+                            "type": "VerticalLayout",
+                            "elements": [
+                                {
+                                    "type": "HorizontalLayout",
+                                    "elements": [
+                                        {
+                                            "type": "Control",
+                                            "scope": "#/properties/customBackground"
+                                        },
+                                    ]
+                                },
+                                {
+                                    "type": "HorizontalLayout",
+                                    "elements": [                        
+                                        {
+                                            "type": "Control",
+                                            "scope": "#/properties/backgroundImage",
+                                            "rule": {
+                                                "effect": "ENABLE",
+                                                "condition": {
+                                                    "scope": "#/properties/customBackground",
+                                                    "schema": {
+                                                        "const": true
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "type": "Control",
+                                            "scope": "#/properties/backgroundColor",
+                                            "rule": {
+                                                "effect": "ENABLE",
+                                                "condition": {
+                                                    "scope": "#/properties/customBackground",
+                                                    "schema": {
+                                                        "const": true
+                                                    }
+                                                }
+                                            }
+                                        },
+                                    ]
                                 }
-                            }
-                        },
+
+                            ]
+                        }
                     ]
                 },
                 {

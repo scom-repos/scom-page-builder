@@ -1881,7 +1881,7 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
         }
         updateConfig(config, updatedValues) {
             const id = this.element.id.replace('row-', '');
-            const { fullWidth, customBackgroundColor, backgroundColor, customTextColor, textColor, customTextSize, textSize, border, borderColor, customBackdrop, backdropColor, backdropImage, padding, sectionWidth, } = config;
+            const { fullWidth, customBackground, backgroundColor, customTextColor, textColor, customTextSize, textSize, border, borderColor, customBackdrop, backdropColor, backdropImage, padding, sectionWidth, } = config;
             const sectionEl = this.element;
             const innerEl = this.element.querySelector('#pnlRowContainer');
             if (sectionWidth !== undefined) {
@@ -1889,7 +1889,7 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
                 innerEl.maxWidth = sectionWidth;
             }
             if (fullWidth) {
-                if (customBackgroundColor && backgroundColor) {
+                if (customBackground && backgroundColor) {
                     sectionEl.style.setProperty('--custom-background-color', backgroundColor);
                     innerEl.style.setProperty('--custom-background-color', backgroundColor);
                 }
@@ -1911,7 +1911,7 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
                 else {
                     sectionEl.style.removeProperty('--custom-background-color');
                 }
-                if (customBackgroundColor) {
+                if (customBackground) {
                     // Add background image later
                     if (backgroundColor) {
                         innerEl.style.setProperty('--custom-background-color', backgroundColor);
@@ -3300,7 +3300,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             return result;
         }
         updateConfig(config, updatedValues) {
-            const { backgroundColor, backgroundImage, customBackgroundColor, customTextColor, textColor, customTextSize, textSize, margin, plr, ptb } = config;
+            const { backgroundColor, backgroundImage, customBackground, customTextColor, textColor, customTextSize, textSize, margin, plr, ptb } = config;
             let newConfig = {};
             for (let prop of updatedValues) {
                 newConfig[prop] = config[prop];
@@ -3310,7 +3310,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             let data = {
                 backgroundImage: '',
                 plr, ptb,
-                customBackgroundColor: customBackgroundColor,
+                customBackground: customBackground,
                 backgroundColor: backgroundColor,
                 customTextColor: customTextColor,
                 textColor: textColor,
@@ -3320,10 +3320,10 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             if (updatedValues.includes('backgroundImage')) {
                 data.backgroundImage = backgroundImage;
             }
-            if (customBackgroundColor) {
+            if (customBackground) {
                 if (updatedValues.includes('backgroundColor')) {
                     this.element.style.setProperty('--custom-background-color', backgroundColor);
-                    data.customBackgroundColor = customBackgroundColor;
+                    data.customBackground = customBackground;
                     data.backgroundColor = backgroundColor;
                 }
             }
@@ -3751,14 +3751,19 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                         "title": "Full width",
                         "type": "boolean"
                     },
-                    "customBackgroundColor": {
-                        "title": "Custom background color",
+                    "customBackground": {
+                        "title": "Custom background",
                         "type": "boolean"
                     },
                     "backgroundColor": {
                         "title": "Background color",
                         "type": "string",
                         "format": "color"
+                    },
+                    "backgroundImage": {
+                        "title": "Background image",
+                        "type": "string",
+                        "format": "data-cid"
                     },
                     "customTextColor": {
                         "title": "Custom text color",
@@ -3812,22 +3817,50 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
                         "type": "HorizontalLayout",
                         "elements": [
                             {
-                                "type": "Control",
-                                "scope": "#/properties/customBackgroundColor"
-                            },
-                            {
-                                "type": "Control",
-                                "scope": "#/properties/backgroundColor",
-                                "rule": {
-                                    "effect": "ENABLE",
-                                    "condition": {
-                                        "scope": "#/properties/customBackgroundColor",
-                                        "schema": {
-                                            "const": true
-                                        }
+                                "type": "VerticalLayout",
+                                "elements": [
+                                    {
+                                        "type": "HorizontalLayout",
+                                        "elements": [
+                                            {
+                                                "type": "Control",
+                                                "scope": "#/properties/customBackground"
+                                            },
+                                        ]
+                                    },
+                                    {
+                                        "type": "HorizontalLayout",
+                                        "elements": [
+                                            {
+                                                "type": "Control",
+                                                "scope": "#/properties/backgroundImage",
+                                                "rule": {
+                                                    "effect": "ENABLE",
+                                                    "condition": {
+                                                        "scope": "#/properties/customBackground",
+                                                        "schema": {
+                                                            "const": true
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "type": "Control",
+                                                "scope": "#/properties/backgroundColor",
+                                                "rule": {
+                                                    "effect": "ENABLE",
+                                                    "condition": {
+                                                        "scope": "#/properties/customBackground",
+                                                        "schema": {
+                                                            "const": true
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                        ]
                                     }
-                                }
-                            },
+                                ]
+                            }
                         ]
                     },
                     {
@@ -4166,8 +4199,8 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
             const jsonSchema = {
                 "type": "object",
                 "properties": {
-                    "customBackgroundColor": {
-                        "title": "Custom background color",
+                    "customBackground": {
+                        "title": "Custom background",
                         "type": "boolean"
                     },
                     "backgroundColor": {
@@ -4236,7 +4269,7 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                         "elements": [
                             {
                                 "type": "Control",
-                                "scope": "#/properties/customBackgroundColor"
+                                "scope": "#/properties/customBackground"
                             },
                             {
                                 "type": "Control",
@@ -4244,7 +4277,7 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                                 "rule": {
                                     "effect": "ENABLE",
                                     "condition": {
-                                        "scope": "#/properties/customBackgroundColor",
+                                        "scope": "#/properties/customBackground",
                                         "schema": {
                                             "const": true
                                         }
@@ -5385,7 +5418,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
-            const { align, fullWidth, customBackgroundColor, backgroundColor, customTextColor, textColor, customTextSize, textSize, border, borderColor, customBackdrop, backdropImage, backdropColor, padding, sectionWidth } = config || {};
+            const { align, fullWidth, customBackground, backgroundColor, customTextColor, textColor, customTextSize, textSize, border, borderColor, customBackdrop, backdropImage, backdropColor, padding, sectionWidth } = config || {};
             if (sectionWidth) {
                 this.pnlRowContainer.width = sectionWidth;
             }
@@ -5399,7 +5432,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             // }
             //
             // if(fullWidth) {
-            //     if(customBackgroundColor && backgroundColor) {
+            //     if(customBackground && backgroundColor) {
             //         sectionEl.style.setProperty('--custom-background-color', backgroundColor);
             //         innerEl.style.setProperty('--custom-background-color', backgroundColor);
             //     }
@@ -5421,7 +5454,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             //     else {
             //         sectionEl.style.removeProperty('--custom-background-color');
             //     }
-            //     if(customBackgroundColor) {
+            //     if(customBackground) {
             //         // Add background image later
             //         if(backgroundColor) {
             //             innerEl.style.setProperty('--custom-background-color', backgroundColor);
@@ -5469,7 +5502,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             //     this.pnlRowWrap.border.width = 0
             //     // if (backgroundColor)
             //         // this.background.color = backgroundColor;
-            //     if (customBackgroundColor)
+            //     if (customBackground)
             //         this.style.setProperty('--custom-background-color', backgroundColor)
             //     else
             //         this.style.removeProperty('--custom-background-color')
@@ -6339,7 +6372,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     }
                 }
                 index_49.pageObject.updateSection(id, { config: JSON.parse(JSON.stringify(sectionConfig)) });
-                if (sectionConfig.backgroundColor && sectionConfig.customBackgroundColor)
+                if (sectionConfig.backgroundColor && sectionConfig.customBackground)
                     this.pnlRowContainer.style.setProperty('--custom-background-color', sectionConfig.backgroundColor);
                 else
                     this.pnlRowContainer.style.removeProperty('--custom-background-color');
@@ -7310,12 +7343,12 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             if ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) {
                 const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
                 if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setTag) {
-                    const { customBackgroundColor, backgroundColor, customTextColor, textColor, customTextSize, textSize } = data;
+                    const { customBackground, backgroundColor, customTextColor, textColor, customTextSize, textSize } = data;
                     const oldTag = (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getTag) ? await builderTarget.getTag() : {};
                     const newData = {};
-                    if (customBackgroundColor)
-                        newData.customBackgroundColor = customBackgroundColor;
-                    if (customBackgroundColor && backgroundColor !== undefined)
+                    if (customBackground)
+                        newData.customBackground = customBackground;
+                    if (customBackground && backgroundColor !== undefined)
                         newData.backgroundColor = backgroundColor || '';
                     if (customTextColor)
                         newData.customTextColor = customTextColor;
@@ -7889,7 +7922,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
             for (let i = 0; i < index_70.pageObject.sections.length; i++) {
                 const rowData = index_70.pageObject.sections[i];
                 const pageRow = (this.$render("ide-row", { width: "100%", class: "i-page-section", background: { color: `var(--custom-background-color, var(--background-main))` }, font: { color: `var(--custom-text-color, var(--text-primary))` }, maxWidth: "100%", maxHeight: "100%" }));
-                const { backgroundColor, textColor, customBackgroundColor, customTextColor, } = rowData.config || {};
+                const { backgroundColor, textColor, customBackground, customTextColor, } = rowData.config || {};
                 if (!this._readonly) {
                     pageRow.border = { top: { width: '1px', style: 'dashed', color: 'var(--builder-divider)' } };
                     this.initDragEvent(pageRow);
@@ -7897,7 +7930,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
                 const isInit = i == 0 && index_70.pageObject.sections.length == 1;
                 pageRow.visible = isInit ? true : !!((_a = rowData === null || rowData === void 0 ? void 0 : rowData.elements) === null || _a === void 0 ? void 0 : _a.length);
                 pageRow.parent = this.pnlRows;
-                if (customBackgroundColor && backgroundColor)
+                if (customBackground && backgroundColor)
                     pageRow.style.setProperty('--custom-background-color', backgroundColor);
                 else
                     pageRow.style.removeProperty('--custom-background-color');
@@ -9470,7 +9503,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         }
         updatePageConfig() {
             const config = (0, index_89.getDefaultPageConfig)();
-            const { backgroundColor, margin, textColor, textSize, customTextSize, customBackgroundColor, customTextColor, backgroundImage, ptb, plr, sectionWidth } = config;
+            const { backgroundColor, margin, textColor, textSize, customTextSize, customBackground, customTextColor, backgroundImage, ptb, plr, sectionWidth } = config;
             components_43.application.EventBus.dispatch(index_88.EVENT.ON_UPDATE_PAGE_BG, Object.assign({}, config));
             if (this.pnlEditor) {
                 this.pnlEditor.padding = {
@@ -9487,7 +9520,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                     const ipfsUrl = '/ipfs';
                     this.pnlEditor.style.setProperty('--builder-bg', `url("${ipfsUrl}/${backgroundImage}") center center fixed`);
                 }
-                else if (customBackgroundColor && backgroundColor) {
+                else if (customBackground && backgroundColor) {
                     this.pnlEditor.style.setProperty('--custom-background-color', backgroundColor);
                 }
                 else
@@ -9512,7 +9545,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.events.push(components_43.application.EventBus.register(this, index_88.EVENT.ON_TOGGLE_SEARCH_MODAL, this.onToggleSearch));
             this.events.push(components_43.application.EventBus.register(this, index_88.EVENT.ON_FETCH_COMPONENTS, this.onSearch));
             this.events.push(components_43.application.EventBus.register(this, index_88.EVENT.ON_UPDATE_PAGE_BG, async (data) => {
-                const { customBackgroundColor, backgroundImage, customTextColor, customTextSize, backgroundColor, textColor, textSize } = data;
+                const { customBackground, backgroundImage, customTextColor, customTextSize, backgroundColor, textColor, textSize } = data;
                 const ipfsUrl = `https://ipfs.scom.dev/ipfs`;
                 if (backgroundImage)
                     this.pnlEditor.style.backgroundImage = `url("${ipfsUrl}/${backgroundImage}")`;
@@ -9524,7 +9557,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                         this.classList.remove(className);
                     }
                 }
-                if (customBackgroundColor && backgroundColor)
+                if (customBackground && backgroundColor)
                     this.pnlEditor.style.setProperty('--custom-background-color', backgroundColor);
                 else
                     this.pnlEditor.style.removeProperty('--custom-background-color');

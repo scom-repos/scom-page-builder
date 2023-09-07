@@ -35,7 +35,7 @@ export class UpdateRowSettingsCommand implements ICommand {
 
   private updateConfig(config: IPageSectionConfig, updatedValues: string[]) {
     const id = this.element.id.replace('row-', '');
-    const {fullWidth, customBackgroundColor, backgroundColor, customTextColor, textColor, customTextSize, textSize,
+    const {fullWidth, customBackground, backgroundColor, customTextColor, textColor, customTextSize, textSize,
       border, borderColor, customBackdrop, backdropColor, backdropImage, padding, sectionWidth,  } = config;
 
     const sectionEl = this.element;
@@ -47,7 +47,7 @@ export class UpdateRowSettingsCommand implements ICommand {
     }
 
     if(fullWidth) {
-      if(customBackgroundColor && backgroundColor) {
+      if(customBackground && backgroundColor) {
         sectionEl.style.setProperty('--custom-background-color', backgroundColor);
         innerEl.style.setProperty('--custom-background-color', backgroundColor);
       }
@@ -69,7 +69,7 @@ export class UpdateRowSettingsCommand implements ICommand {
       else {
         sectionEl.style.removeProperty('--custom-background-color');
       }
-      if(customBackgroundColor) {
+      if(customBackground) {
         // Add background image later
         if(backgroundColor) {
           innerEl.style.setProperty('--custom-background-color', backgroundColor);

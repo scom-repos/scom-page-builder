@@ -234,7 +234,7 @@ export class PageRows extends Module {
             const {
                 backgroundColor,
                 textColor,
-                customBackgroundColor,
+                customBackground,
                 customTextColor,
             } = rowData.config || {};
             if (!this._readonly) {
@@ -244,7 +244,7 @@ export class PageRows extends Module {
             const isInit: boolean = i==0 && pageObject.sections.length == 1;
             pageRow.visible = isInit? true : !!rowData?.elements?.length;
             pageRow.parent = this.pnlRows;
-            if (customBackgroundColor && backgroundColor)
+            if (customBackground && backgroundColor)
                 pageRow.style.setProperty('--custom-background-color', backgroundColor)
             else
                 pageRow.style.removeProperty('--custom-background-color');

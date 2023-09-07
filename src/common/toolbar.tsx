@@ -853,7 +853,7 @@ export class IDEToolbar extends Module {
         )
         this.events.push(
             application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: {
-                customBackgroundColor?: boolean, backgroundColor?: string,
+                customBackground?: boolean, backgroundColor?: string,
                 customTextColor?: boolean, textColor?: string,
                 customTextSize?: boolean, textSize?: string }) => {
                 await this.updateUI(data);
@@ -865,7 +865,7 @@ export class IDEToolbar extends Module {
     }
 
     async updateUI(data: {
-        customBackgroundColor?: boolean,
+        customBackground?: boolean,
         backgroundColor?: string;
         customTextColor?: boolean,
         textColor?: string;
@@ -875,11 +875,11 @@ export class IDEToolbar extends Module {
         if (this._component?.getConfigurators) {
             const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
             if (builderTarget?.setTag) {
-                const {customBackgroundColor, backgroundColor, customTextColor, textColor, customTextSize, textSize} = data;
+                const {customBackground, backgroundColor, customTextColor, textColor, customTextSize, textSize} = data;
                 const oldTag = builderTarget?.getTag ? await builderTarget.getTag() : {};
                 const newData: any = {};
-                if(customBackgroundColor) newData.customBackgroundColor = customBackgroundColor;
-                if (customBackgroundColor && backgroundColor !== undefined) newData.backgroundColor = backgroundColor || '';
+                if(customBackground) newData.customBackground = customBackground;
+                if (customBackground && backgroundColor !== undefined) newData.backgroundColor = backgroundColor || '';
                 if(customTextColor) newData.customTextColor = customTextColor;
                 if (customTextColor && textColor) newData.textColor = textColor || '';
                 if(customTextSize) newData.customTextSize = customTextSize;

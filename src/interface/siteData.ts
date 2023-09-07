@@ -8,7 +8,7 @@ export interface IPageData {
 }
 
 export interface IPageConfig {
-    customBackgroundColor?: boolean;
+    customBackground?: boolean;
     backgroundColor?: string;
     backgroundImage?: string;
     backdropColor?: string;
