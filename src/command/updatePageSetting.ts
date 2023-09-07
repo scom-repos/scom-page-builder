@@ -40,7 +40,7 @@ export class UpdatePageSettingsCommand implements ICommand {
   }
 
   private updateConfig(config: IPageConfig, updatedValues: string[]) {
-    const { backgroundColor, backgroundImage, customBackgroundColor, customTextColor, textColor, customTextSize, textSize, margin, plr, ptb } = config;
+    const { backgroundColor, backgroundImage, customBackground, customTextColor, textColor, customTextSize, textSize, margin, plr, ptb } = config;
     let newConfig: IPageConfig = {};
     for (let prop of updatedValues) {
       newConfig[prop] = config[prop];
@@ -51,7 +51,7 @@ export class UpdatePageSettingsCommand implements ICommand {
     let data: any = {
       backgroundImage: '',
       plr, ptb,
-      customBackgroundColor: customBackgroundColor,
+      customBackground: customBackground,
       backgroundColor: backgroundColor,
       customTextColor: customTextColor,
       textColor: textColor,
@@ -61,10 +61,10 @@ export class UpdatePageSettingsCommand implements ICommand {
     if(updatedValues.includes('backgroundImage')) {
       data.backgroundImage = backgroundImage;
     }
-    if (customBackgroundColor) {
+    if (customBackground) {
       if (updatedValues.includes('backgroundColor')) {
         this.element.style.setProperty('--custom-background-color', backgroundColor);
-        data.customBackgroundColor = customBackgroundColor
+        data.customBackground = customBackground
         data.backgroundColor = backgroundColor;
       }
     } else {

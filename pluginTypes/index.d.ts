@@ -317,7 +317,7 @@ declare module "@scom/scom-page-builder/store/index.ts" {
     export const setDefaultPageConfig: (value: IPageConfig) => void;
     export const getDefaultPageConfig: () => IPageConfig;
     export const getPageConfig: () => {
-        customBackgroundColor?: boolean;
+        customBackground?: boolean;
         backgroundColor?: string;
         backgroundImage?: string;
         backdropColor?: string;
@@ -485,7 +485,7 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
         config?: IPageConfig;
     }
     export interface IPageConfig {
-        customBackgroundColor?: boolean;
+        customBackground?: boolean;
         backgroundColor?: string;
         backgroundImage?: string;
         backdropColor?: string;
@@ -1376,7 +1376,7 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
         private initEventListener;
         private initEventBus;
         updateUI(data: {
-            customBackgroundColor?: boolean;
+            customBackground?: boolean;
             backgroundColor?: string;
             customTextColor?: boolean;
             textColor?: string;

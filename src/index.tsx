@@ -328,7 +328,7 @@ export default class Editor extends Module {
             textColor,
             textSize,
             customTextSize,
-            customBackgroundColor,
+            customBackground,
             customTextColor,
             backgroundImage,
             ptb,
@@ -351,7 +351,7 @@ export default class Editor extends Module {
             if (backgroundImage) {
                 const ipfsUrl = '/ipfs';
                 this.pnlEditor.style.setProperty('--builder-bg', `url("${ipfsUrl}/${backgroundImage}") center center fixed`);
-            } else if (customBackgroundColor && backgroundColor) {
+            } else if (customBackground && backgroundColor) {
                 this.pnlEditor.style.setProperty('--custom-background-color', backgroundColor);
             }
             else
@@ -388,14 +388,14 @@ export default class Editor extends Module {
         this.events.push(
             application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: {
                 backgroundImage: string,
-                customBackgroundColor?: boolean,
+                customBackground?: boolean,
                 customTextColor?: boolean,
                 customTextSize: boolean,
                 backgroundColor?: string,
                 textColor?: string,
                 textSize?: string
             }) => {
-                const {customBackgroundColor, backgroundImage, customTextColor, customTextSize, backgroundColor, textColor, textSize} = data;
+                const {customBackground, backgroundImage, customTextColor, customTextSize, backgroundColor, textColor, textSize} = data;
                 const ipfsUrl = `https://ipfs.scom.dev/ipfs`
                 if (backgroundImage) this.pnlEditor.style.backgroundImage = `url("${ipfsUrl}/${backgroundImage}")`;
                 else this.pnlEditor.style.backgroundImage = '';
@@ -405,7 +405,7 @@ export default class Editor extends Module {
                         this.classList.remove(className);
                     }
                 }
-                if(customBackgroundColor && backgroundColor)
+                if(customBackground && backgroundColor)
                     this.pnlEditor.style.setProperty('--custom-background-color', backgroundColor)
                 else
                     this.pnlEditor.style.removeProperty('--custom-background-color');

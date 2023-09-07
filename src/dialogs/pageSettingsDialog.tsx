@@ -53,8 +53,8 @@ export class PageSettingsDialog extends Module {
         const jsonSchema: IDataSchema = {
             "type": "object",
             "properties": {
-                "customBackgroundColor": {
-                    "title": "Custom background color",
+                "customBackground": {
+                    "title": "Custom background",
                     "type": "boolean"
                 },
                 "backgroundColor": {
@@ -124,7 +124,7 @@ export class PageSettingsDialog extends Module {
                     "elements": [
                         {
                             "type": "Control",
-                            "scope": "#/properties/customBackgroundColor"
+                            "scope": "#/properties/customBackground"
                         },
                         {
                             "type": "Control",
@@ -132,7 +132,7 @@ export class PageSettingsDialog extends Module {
                             "rule": {
                                 "effect": "ENABLE",
                                 "condition": {
-                                    "scope": "#/properties/customBackgroundColor",
+                                    "scope": "#/properties/customBackground",
                                     "schema": {
                                         "const": true
                                     }

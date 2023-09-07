@@ -214,7 +214,7 @@ export class PageRow extends Module {
     }
 
     updateRowConfig(config: IPageSectionConfig) {
-        const { align, fullWidth, customBackgroundColor, backgroundColor, customTextColor, textColor, customTextSize, textSize, border, borderColor,
+        const { align, fullWidth, customBackground, backgroundColor, customTextColor, textColor, customTextSize, textSize, border, borderColor,
         customBackdrop, backdropImage, backdropColor, padding, sectionWidth } = config || {};
 
         if(sectionWidth) {
@@ -230,7 +230,7 @@ export class PageRow extends Module {
         // }
         //
         // if(fullWidth) {
-        //     if(customBackgroundColor && backgroundColor) {
+        //     if(customBackground && backgroundColor) {
         //         sectionEl.style.setProperty('--custom-background-color', backgroundColor);
         //         innerEl.style.setProperty('--custom-background-color', backgroundColor);
         //     }
@@ -252,7 +252,7 @@ export class PageRow extends Module {
         //     else {
         //         sectionEl.style.removeProperty('--custom-background-color');
         //     }
-        //     if(customBackgroundColor) {
+        //     if(customBackground) {
         //         // Add background image later
         //         if(backgroundColor) {
         //             innerEl.style.setProperty('--custom-background-color', backgroundColor);
@@ -301,7 +301,7 @@ export class PageRow extends Module {
         //     this.pnlRowWrap.border.width = 0
         //     // if (backgroundColor)
         //         // this.background.color = backgroundColor;
-        //     if (customBackgroundColor)
+        //     if (customBackground)
         //         this.style.setProperty('--custom-background-color', backgroundColor)
         //     else
         //         this.style.removeProperty('--custom-background-color')
@@ -1270,12 +1270,12 @@ export class PageRow extends Module {
                 }
             }
             pageObject.updateSection(id, {config: JSON.parse(JSON.stringify(sectionConfig))});
-            if (sectionConfig.backgroundColor && sectionConfig.customBackgroundColor)
-                this.pnlRowContainer.style.setProperty('--custom-background-color', config.backgroundColor)
+            if (sectionConfig.backgroundColor && sectionConfig.customBackground)
+                this.pnlRowContainer.style.setProperty('--custom-background-color', sectionConfig.backgroundColor)
             else
                 this.pnlRowContainer.style.removeProperty('--custom-background-color')
             if (sectionConfig.customTextColor && sectionConfig.textColor)
-                this.pnlRowContainer.style.setProperty('--custom-text-color', config.textColor)
+                this.pnlRowContainer.style.setProperty('--custom-text-color', sectionConfig.textColor)
             else
                 this.pnlRowContainer.style.removeProperty('--custom-text-color')
             for (let i = this.classList.length - 1; i >= 0; i--) {
