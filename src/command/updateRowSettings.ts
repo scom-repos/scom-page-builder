@@ -141,8 +141,11 @@ export class UpdateRowSettingsCommand implements ICommand {
     }
 
     pageObject.updateSection(id, {config});
-    const rowConfig = pageObject.getRowConfig(id);
     this.element.updateRowConfig(pageObject.getRowConfig(id));
+    const toolbars = this.element.querySelectorAll('ide-toolbar');
+    for (let toolbar of toolbars) {
+      toolbar.updateUI(config);
+    }
   };
 
   execute(): void {
