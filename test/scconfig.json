@@ -47,6 +47,12 @@
       "category": "components",
       "disableClicked": true
     },
+    "@scom/scom-quiz": {
+      "name": "Quiz",
+      "path": "scom-quiz",
+      "category": "components",
+      "disableClicked": true
+    },
     "@scom/scom-content-block": {
       "name": "Content Block",
       "path": "scom-content-block",
