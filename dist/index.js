@@ -1881,7 +1881,7 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
         }
         updateConfig(config, updatedValues) {
             const id = this.element.id.replace('row-', '');
-            const { fullWidth, customBackground, backgroundColor, customTextColor, textColor, customTextSize, textSize, border, borderColor, customBackdrop, backdropColor, backdropImage, padding, sectionWidth, } = config;
+            const { fullWidth, customBackground, backgroundImage, backgroundColor, customTextColor, textColor, customTextSize, textSize, border, borderColor, customBackdrop, backdropColor, backdropImage, padding, sectionWidth, } = config;
             const sectionEl = this.element;
             const innerEl = this.element.querySelector('#pnlRowContainer');
             if (sectionWidth !== undefined) {
@@ -1889,12 +1889,20 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
                 innerEl.maxWidth = sectionWidth;
             }
             if (fullWidth) {
-                if (customBackground && backgroundColor) {
-                    sectionEl.style.setProperty('--custom-background-color', backgroundColor);
-                    innerEl.style.setProperty('--custom-background-color', backgroundColor);
+                if (customBackground) {
+                    if (backgroundImage) {
+                        const ipfsUrl = `https://ipfs.scom.dev/ipfs`;
+                        sectionEl.style.setProperty('--custom-background-color', `url("${ipfsUrl}/${backgroundImage}")`);
+                        sectionEl.style.backgroundImage = `url("${ipfsUrl}/${backgroundImage}")`;
+                    }
+                    else if (backdropColor) {
+                        sectionEl.style.setProperty('--custom-background-color', backgroundColor);
+                        innerEl.style.setProperty('--custom-background-color', backgroundColor);
+                    }
                 }
                 else {
                     sectionEl.style.removeProperty('--custom-background-color');
+                    sectionEl.style.backgroundImage = '';
                     innerEl.style.removeProperty('--custom-background-color');
                 }
             }
@@ -1912,13 +1920,18 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
                     sectionEl.style.removeProperty('--custom-background-color');
                 }
                 if (customBackground) {
-                    // Add background image later
-                    if (backgroundColor) {
+                    if (backgroundImage) {
+                        const ipfsUrl = `https://ipfs.scom.dev/ipfs`;
+                        innerEl.style.setProperty('--custom-background-color', `url("${ipfsUrl}/${backgroundImage}")`);
+                        innerEl.style.backgroundImage = `url("${ipfsUrl}/${backgroundImage}")`;
+                    }
+                    else if (backgroundColor) {
                         innerEl.style.setProperty('--custom-background-color', backgroundColor);
                     }
                 }
                 else {
                     innerEl.style.removeProperty('--custom-background-color');
+                    innerEl.style.backgroundImage = '';
                 }
             }
             if (customTextSize && textSize) {
