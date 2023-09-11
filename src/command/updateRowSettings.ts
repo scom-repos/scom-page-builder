@@ -52,7 +52,7 @@ export class UpdateRowSettingsCommand implements ICommand {
           const ipfsUrl = `https://ipfs.scom.dev/ipfs`;
           sectionEl.style.setProperty('--custom-background-color', `url("${ipfsUrl}/${backgroundImage}")`);
           sectionEl.style.backgroundImage = `url("${ipfsUrl}/${backgroundImage}")`;
-        } else if(backdropColor) {
+        } else if(backgroundColor) {
           sectionEl.style.setProperty('--custom-background-color', backgroundColor);
           innerEl.style.setProperty('--custom-background-color', backgroundColor);
         }
