@@ -8517,7 +8517,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
             const iconList = [
                 {
                     name: 'bars',
-                    tooltip: { content: 'Page menu', placement: 'left' },
+                    tooltip: { content: 'Sections', placement: 'left' },
                     onClick: (target) => {
                         this.openMenuModal(target.parent);
                     }
@@ -9369,18 +9369,8 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 }
                 const pageRowsRect = this.pageRows.getBoundingClientRect();
                 const pnlEditorRect = this.pnlEditor.getBoundingClientRect();
-                // dragover on the below of rows
-                // if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
-                //     const lastRow = this.pageRows.querySelector('ide-row:last-child');
-                //     if (lastRow) {
-                //         const row = this.querySelector(`#${lastRow.id}`) as PageRow
-                //         row.showBottomBlock();
-                //     }
-                // }
                 const elementConfig = (0, index_89.getDragData)();
-                if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack'
-                    && event.clientX >= pageRowsRect.x
-                    && event.clientX <= pageRowsRect.x + pageRowsRect.width) {
+                if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
                     const rows = self.getElementsByTagName('ide-row');
                     const rowsArray = Array.from(rows);
                     const targetRow = rowsArray.find(row => {
@@ -9392,14 +9382,19 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                         const row = this.querySelector(`#${targetRow.id}`);
                         row.showBottomBlock();
                     }
-                }
-                else if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
-                    if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
+                    else {
                         const lastRow = this.pageRows.querySelector('ide-row:last-child');
                         if (lastRow) {
                             const row = this.querySelector(`#${lastRow.id}`);
                             row.showBottomBlock();
                         }
+                    }
+                }
+                else if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
+                    const lastRow = this.pageRows.querySelector('ide-row:last-child');
+                    if (lastRow) {
+                        const row = this.querySelector(`#${lastRow.id}`);
+                        row.showBottomBlock();
                     }
                 }
             });
@@ -9421,42 +9416,49 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                     containerElement.scrollTo({ behavior: 'smooth', top: containerElement.scrollTop });
                 }
             }
+        }
+        initDragDropEvent(containerElement) {
+            const self = this;
             containerElement.addEventListener('drop', (event) => {
-                var _a, _b;
+                var _a;
+                const pageRowsRect = this.pageRows.getBoundingClientRect();
                 const elementConfig = (0, index_89.getDragData)();
-                if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
-                    // add section
-                    components_43.application.EventBus.dispatch(index_88.EVENT.ON_ADD_SECTION, { defaultElements: elementConfig.defaultElements });
+                const isLayout = ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack';
+                const rows = self.getElementsByTagName('ide-row');
+                const rowsArray = Array.from(rows);
+                const targetRow = rowsArray.find(row => {
+                    const rowRect = row.getBoundingClientRect();
+                    if (rowRect.top <= event.clientY && rowRect.bottom >= event.clientY)
+                        return row;
+                });
+                if (targetRow) {
+                    if (isLayout)
+                        components_43.application.EventBus.dispatch(index_88.EVENT.ON_ADD_SECTION, { elements: elementConfig.elements, prependId: targetRow.id });
+                    else {
+                        if (event.clientX < pageRowsRect.left || event.clientX > pageRowsRect.right) {
+                            components_43.application.EventBus.dispatch(index_88.EVENT.ON_ADD_SECTION, { prependId: targetRow.id });
+                            targetRow.nextElementSibling.onAddRow();
+                        }
+                    }
                 }
                 else {
-                    const dragEnter = this.pnlEditor.querySelector('.is-dragenter');
-                    const pageRow = dragEnter && dragEnter.closest('ide-row');
-                    if (pageRow) {
-                        const customDropEvent = new Event('drop', { bubbles: true, cancelable: true });
-                        pageRow.dispatchEvent(customDropEvent);
-                    }
-                    else if (!((_b = index_89.pageObject.sections) === null || _b === void 0 ? void 0 : _b.length)) {
-                        // add section
-                        components_43.application.EventBus.dispatch(index_88.EVENT.ON_ADD_SECTION);
-                        const pageRow = this.pnlEditor.querySelector('ide-row');
-                        if (pageRow && pageRow.onAddRow)
-                            pageRow.onAddRow();
+                    const lastRow = this.pageRows.querySelector('ide-row:last-child');
+                    if (lastRow) {
+                        if (isLayout)
+                            components_43.application.EventBus.dispatch(index_88.EVENT.ON_ADD_SECTION, { elements: elementConfig.elements });
+                        else {
+                            if (event.clientX < pageRowsRect.left || event.clientX > pageRowsRect.right || event.clientY > pageRowsRect.bottom) {
+                                components_43.application.EventBus.dispatch(index_88.EVENT.ON_ADD_SECTION);
+                                lastRow.nextElementSibling.onAddRow();
+                            }
+                        }
                     }
                 }
             });
         }
-        initDragEvent(containerElement) {
-            // remove ghost image when dragging
-            // containerElement.addEventListener("dragstart", async ( event ) => {
-            //     const img = new Image();
-            //     img.src = "http://placehold.it/150/000000/ffffff";
-            //     img.style.opacity = '0'
-            //     event.dataTransfer.setDragImage(img, window.outerWidth, window.outerHeight);
-            // }, false);
-        }
         initEventListeners() {
             this.initScrollEvent(this.pnlWrap);
-            this.initDragEvent(this.pageContent);
+            this.initDragDropEvent(this.pnlWrap);
         }
         onKeyUp(event) {
             const toolbars = Array.from(this.pnlEditor.querySelectorAll('ide-toolbar'));

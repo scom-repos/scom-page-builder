@@ -54,7 +54,7 @@ export class PageSidebar extends Module {
         const iconList: any[] = [
             {
                 name: 'bars',
-                tooltip: { content: 'Page menu', placement: 'left' },
+                tooltip: { content: 'Sections', placement: 'left' },
                 onClick: (target: Control) => {
                     this.openMenuModal(target.parent);
                 }
