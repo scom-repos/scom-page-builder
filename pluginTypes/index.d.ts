@@ -1768,7 +1768,6 @@ declare module "@scom/scom-page-builder" {
         private pageMenu;
         private mdComponentsSearch;
         private pnlEditor;
-        private pageContent;
         private events;
         private currentElement;
         private isFirstLoad;
@@ -1788,7 +1787,7 @@ declare module "@scom/scom-page-builder" {
         reset(): Promise<void>;
         onFetchComponents(options: IOnFetchComponentsOptions): Promise<IOnFetchComponentsResult>;
         private initScrollEvent;
-        private initDragEvent;
+        private initDragDropEvent;
         private initEventListeners;
         private onKeyUp;
         init(): Promise<void>;

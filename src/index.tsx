@@ -77,7 +77,6 @@ export default class Editor extends Module {
     private pageMenu: PageMenu;
     private mdComponentsSearch: SearchComponentsDialog;
     private pnlEditor: Panel;
-    private pageContent: VStack;
 
     private events: any[] = [];
     private currentElement: any;
@@ -173,18 +172,8 @@ export default class Editor extends Module {
             }
             const pageRowsRect = this.pageRows.getBoundingClientRect();
             const pnlEditorRect = this.pnlEditor.getBoundingClientRect();
-            // dragover on the below of rows
-            // if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
-            //     const lastRow = this.pageRows.querySelector('ide-row:last-child');
-            //     if (lastRow) {
-            //         const row = this.querySelector(`#${lastRow.id}`) as PageRow
-            //         row.showBottomBlock();
-            //     }
-            // }
             const elementConfig = getDragData()
-            if (elementConfig?.module?.name === 'sectionStack'
-                && event.clientX >= pageRowsRect.x
-                && event.clientX <= pageRowsRect.x + pageRowsRect.width) {
+            if (elementConfig?.module?.name === 'sectionStack') {
                 const rows = self.getElementsByTagName('ide-row');
                 const rowsArray = Array.from(rows);
                 const targetRow = rowsArray.find(row => {
@@ -194,14 +183,18 @@ export default class Editor extends Module {
                 if (targetRow) {
                     const row = this.querySelector(`#${targetRow.id}`) as PageRow
                     row.showBottomBlock();
-                }
-            } else if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
-                if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
+                } else {
                     const lastRow = this.pageRows.querySelector('ide-row:last-child');
                     if (lastRow) {
                         const row = this.querySelector(`#${lastRow.id}`) as PageRow
                         row.showBottomBlock();
                     }
+                }
+            } else if (event.clientY <= pnlEditorRect.height + pnlEditorRect.y && event.clientY >= pageRowsRect.height + pageRowsRect.y) {
+                const lastRow = this.pageRows.querySelector('ide-row:last-child');
+                if (lastRow) {
+                    const row = this.querySelector(`#${lastRow.id}`) as PageRow
+                    row.showBottomBlock();
                 }
             }
         });
@@ -223,41 +216,47 @@ export default class Editor extends Module {
                 containerElement.scrollTo({behavior: 'smooth', top: containerElement.scrollTop});
             }
         }
+    }
 
+    private initDragDropEvent(containerElement: Control) {
+        const self = this;
         containerElement.addEventListener('drop', (event) => {
-            const elementConfig = getDragData();
-            if (elementConfig?.module?.name === 'sectionStack') {
-                // add section
-                application.EventBus.dispatch(EVENT.ON_ADD_SECTION, {defaultElements: elementConfig.defaultElements});
+
+            const pageRowsRect = this.pageRows.getBoundingClientRect();
+            const elementConfig = getDragData()
+            const isLayout = elementConfig?.module?.name === 'sectionStack';
+            const rows = self.getElementsByTagName('ide-row');
+            const rowsArray = Array.from(rows);
+            const targetRow = rowsArray.find(row => {
+                const rowRect = row.getBoundingClientRect();
+                if (rowRect.top <= event.clientY && rowRect.bottom >= event.clientY) return row;
+            })
+            if (targetRow) {
+                if (isLayout) application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { elements: elementConfig.elements, prependId: targetRow.id })
+                else {
+                    if (event.clientX < pageRowsRect.left || event.clientX > pageRowsRect.right) {
+                        application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: targetRow.id });
+                        (targetRow.nextElementSibling as PageRow).onAddRow();
+                    }
+                }
             } else {
-                const dragEnter = this.pnlEditor.querySelector('.is-dragenter') as Control;
-                const pageRow = dragEnter && dragEnter.closest('ide-row') as PageRow;
-                if (pageRow) {
-                    const customDropEvent = new Event('drop', {bubbles: true, cancelable: true});
-                    pageRow.dispatchEvent(customDropEvent);
-                } else if (!pageObject.sections?.length) {
-                    // add section
-                    application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
-                    const pageRow = this.pnlEditor.querySelector('ide-row') as PageRow;
-                    if (pageRow && pageRow.onAddRow) pageRow.onAddRow();
+                const lastRow = this.pageRows.querySelector('ide-row:last-child');
+                if (lastRow) {
+                    if (isLayout) application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { elements: elementConfig.elements });
+                    else {
+                        if (event.clientX < pageRowsRect.left || event.clientX > pageRowsRect.right || event.clientY > pageRowsRect.bottom) {
+                            application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
+                            (lastRow.nextElementSibling as PageRow).onAddRow();
+                        }
+                    }
                 }
             }
         });
     }
 
-    private initDragEvent(containerElement: Control) {
-        // remove ghost image when dragging
-        // containerElement.addEventListener("dragstart", async ( event ) => {
-        //     const img = new Image();
-        //     img.src = "http://placehold.it/150/000000/ffffff";
-        //     img.style.opacity = '0'
-        //     event.dataTransfer.setDragImage(img, window.outerWidth, window.outerHeight);
-        // }, false);
-    }
-
     private initEventListeners() {
         this.initScrollEvent(this.pnlWrap);
-        this.initDragEvent(this.pageContent);
+        this.initDragDropEvent(this.pnlWrap);
     }
 
     private onKeyUp(event: KeyboardEvent) {
