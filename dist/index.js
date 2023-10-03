@@ -4872,7 +4872,13 @@ define("@scom/scom-page-builder/page/pageMenu.css.ts", ["require", "exports", "@
             },
             '.focused-card': {
                 color: "#0247bf !important",
-                fontWeight: "600 !important"
+                fontWeight: "600 !important",
+                $nest: {
+                    'svg': {
+                        fill: "#0247bf !important",
+                        fontWeight: "600 !important"
+                    }
+                }
             },
             '.iconButton:hover': {
                 backgroundColor: '#abccd4 !important'
@@ -4978,7 +4984,7 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
             }
         }
         getActiveDropLineIdx() {
-            const dropLines = document.querySelectorAll('[id^="menuDropLine"]');
+            const dropLines = this.pnlMenu.querySelectorAll('[id^="menuDropLine"]');
             for (let i = 0; i < dropLines.length; i++) {
                 if (dropLines[i].classList.contains('active-drop-line')) {
                     return (i >= dropLines.length - 1) ? i - 1 : i;
@@ -5048,7 +5054,7 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
                 const isActive = activeSectionId == items[i].rowId;
                 const menuCard = (this.$render("i-hstack", { id: "menuCard", class: pageMenu_css_1.menuCardStyle, verticalAlignment: "center", horizontalAlignment: 'space-between', width: "100%", border: { radius: 5 }, overflow: "hidden", onClick: () => this.goToSection(items[i].rowId) },
                     this.$render("i-hstack", { verticalAlignment: "center", horizontalAlignment: 'start' },
-                        this.$render("i-label", { id: "cardDot", caption: "•", font: { size: '16px', color: '#3b3838', weight: 530 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden", class: isActive ? "focused-card" : "" }),
+                        this.$render("i-icon", { id: "cardDot", name: 'circle', width: '15px', height: '15px', margin: { left: '1rem' }, padding: { top: 4.5, bottom: 4.5, left: 4.5, right: 4.5 }, maxHeight: 34, overflow: "hidden", fill: '#3b3838', class: isActive ? "focused-card" : "" }),
                         this.$render("i-label", { id: "cardTitle", caption: items[i].caption, font: { size: '16px', color: '#3b3838', weight: 530 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, class: isActive ? "focused-card" : "", overflow: "hidden" }),
                         this.$render("i-input", { id: "cardInput", visible: false, width: '90%', height: '40px', padding: { left: '0.5rem', top: '0.5rem', bottom: '0.5rem', right: '0.5rem' } })),
                     this.$render("i-icon", { id: "cardRenameBtn", name: 'pen', fill: 'var(--colors-primary-main)', width: 28, height: 28, padding: { top: 7, bottom: 7, left: 7, right: 7 }, margin: { right: 4 }, class: "pointer iconButton", visible: false, tooltip: { content: "Rename", placement: "top" }, onClick: () => this.onClickRenameBtn(items[i].rowId) }),
@@ -5126,7 +5132,7 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
         render() {
             return (this.$render("i-vstack", { id: "menuWrapper", gap: "0.5rem", class: pageMenu_css_1.menuBtnStyle, zIndex: 150 },
                 this.$render("i-hstack", { gap: '1rem', verticalAlignment: 'center' },
-                    this.$render("i-label", { caption: "Page menu", font: { color: 'var(--colors-primary-main)', weight: 750, size: '18px' }, class: "prevent-select" })),
+                    this.$render("i-label", { caption: "Sections", font: { color: 'var(--colors-primary-main)', weight: 750, size: '18px' }, class: "prevent-select" })),
                 this.$render("i-vstack", { id: "pnlMenuWrapper", width: 320 },
                     this.$render("i-vstack", { id: 'pnlMenu', class: pageMenu_css_1.menuStyle }))));
         }
@@ -9421,6 +9427,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             const self = this;
             containerElement.addEventListener('drop', (event) => {
                 var _a;
+                const contentWrapperRect = this.contentWrapper.getBoundingClientRect();
                 const pageRowsRect = this.pageRows.getBoundingClientRect();
                 const elementConfig = (0, index_89.getDragData)();
                 const isLayout = ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack';
@@ -9435,21 +9442,27 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                     if (isLayout)
                         components_43.application.EventBus.dispatch(index_88.EVENT.ON_ADD_SECTION, { elements: elementConfig.elements, prependId: targetRow.id });
                     else {
-                        if (event.clientX < pageRowsRect.left || event.clientX > pageRowsRect.right) {
+                        if (event.clientX < contentWrapperRect.left || event.clientX > contentWrapperRect.right) {
                             components_43.application.EventBus.dispatch(index_88.EVENT.ON_ADD_SECTION, { prependId: targetRow.id });
                             targetRow.nextElementSibling.onAddRow();
                         }
                     }
                 }
                 else {
-                    const lastRow = this.pageRows.querySelector('ide-row:last-child');
-                    if (lastRow) {
-                        if (isLayout)
-                            components_43.application.EventBus.dispatch(index_88.EVENT.ON_ADD_SECTION, { elements: elementConfig.elements });
-                        else {
-                            if (event.clientX < pageRowsRect.left || event.clientX > pageRowsRect.right || event.clientY > pageRowsRect.bottom) {
-                                components_43.application.EventBus.dispatch(index_88.EVENT.ON_ADD_SECTION);
+                    if (isLayout)
+                        components_43.application.EventBus.dispatch(index_88.EVENT.ON_ADD_SECTION, { elements: elementConfig.elements });
+                    else {
+                        const isOutside = this.pageRows ? event.clientX < contentWrapperRect.left || event.clientX > contentWrapperRect.right || event.clientY > pageRowsRect.bottom :
+                            event.clientX < contentWrapperRect.left || event.clientX > contentWrapperRect.right;
+                        if (isOutside) {
+                            const lastRow = this.pageRows.querySelector('ide-row:last-child');
+                            components_43.application.EventBus.dispatch(index_88.EVENT.ON_ADD_SECTION);
+                            if (lastRow) {
                                 lastRow.nextElementSibling.onAddRow();
+                            }
+                            else {
+                                const pageRow = this.pageRows.querySelector('ide-row:last-child');
+                                pageRow.onAddRow();
                             }
                         }
                     }

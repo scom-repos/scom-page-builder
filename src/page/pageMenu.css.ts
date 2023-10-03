@@ -35,7 +35,13 @@ export const menuCardStyle = Styles.style({
         },
         '.focused-card': {
             color: "#0247bf !important",
-            fontWeight: "600 !important"
+            fontWeight: "600 !important",
+            $nest: {
+                'svg': {
+                    fill: "#0247bf !important",
+                    fontWeight: "600 !important"
+                }
+            }
         },
         '.iconButton:hover': {
             backgroundColor: '#abccd4 !important'
