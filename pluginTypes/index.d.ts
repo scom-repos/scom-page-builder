@@ -1773,6 +1773,7 @@ declare module "@scom/scom-page-builder" {
         private isFirstLoad;
         private _theme;
         private boundHandleKeyUp;
+        private contentWrapper;
         constructor(parent?: Container, options?: any);
         get rootDir(): string;
         set rootDir(value: string);

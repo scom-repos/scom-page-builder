@@ -83,6 +83,7 @@ export default class Editor extends Module {
     private isFirstLoad: boolean = false;
     private _theme: ThemeType = 'light';
     private boundHandleKeyUp = this.onKeyUp.bind(this);
+    private contentWrapper: Panel;
 
     constructor(parent?: Container, options?: any) {
         super(parent, options);
@@ -221,7 +222,7 @@ export default class Editor extends Module {
     private initDragDropEvent(containerElement: Control) {
         const self = this;
         containerElement.addEventListener('drop', (event) => {
-
+            const contentWrapperRect = this.contentWrapper.getBoundingClientRect();
             const pageRowsRect = this.pageRows.getBoundingClientRect();
             const elementConfig = getDragData()
             const isLayout = elementConfig?.module?.name === 'sectionStack';
@@ -234,19 +235,24 @@ export default class Editor extends Module {
             if (targetRow) {
                 if (isLayout) application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { elements: elementConfig.elements, prependId: targetRow.id })
                 else {
-                    if (event.clientX < pageRowsRect.left || event.clientX > pageRowsRect.right) {
+                    if (event.clientX < contentWrapperRect.left || event.clientX > contentWrapperRect.right) {
                         application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { prependId: targetRow.id });
                         (targetRow.nextElementSibling as PageRow).onAddRow();
                     }
                 }
             } else {
-                const lastRow = this.pageRows.querySelector('ide-row:last-child');
-                if (lastRow) {
-                    if (isLayout) application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { elements: elementConfig.elements });
-                    else {
-                        if (event.clientX < pageRowsRect.left || event.clientX > pageRowsRect.right || event.clientY > pageRowsRect.bottom) {
-                            application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
+                if (isLayout) application.EventBus.dispatch(EVENT.ON_ADD_SECTION, { elements: elementConfig.elements });
+                else {
+                    const isOutside = this.pageRows ? event.clientX < contentWrapperRect.left || event.clientX > contentWrapperRect.right || event.clientY > pageRowsRect.bottom :
+                        event.clientX < contentWrapperRect.left || event.clientX > contentWrapperRect.right;
+                    if (isOutside) {
+                        const lastRow = this.pageRows.querySelector('ide-row:last-child');
+                        application.EventBus.dispatch(EVENT.ON_ADD_SECTION);
+                        if (lastRow) {
                             (lastRow.nextElementSibling as PageRow).onAddRow();
+                        } else {
+                            const pageRow = this.pageRows.querySelector('ide-row:last-child');
+                            (pageRow as PageRow).onAddRow();
                         }
                     }
                 }

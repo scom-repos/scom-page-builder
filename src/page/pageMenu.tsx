@@ -117,7 +117,7 @@ export class PageMenu extends Module {
     }
 
     private getActiveDropLineIdx(): number {
-        const dropLines = document.querySelectorAll('[id^="menuDropLine"]');
+        const dropLines = this.pnlMenu.querySelectorAll('[id^="menuDropLine"]');
         for (let i = 0; i < dropLines.length; i++) {
             if (dropLines[i].classList.contains('active-drop-line')) {
                 return (i >= dropLines.length - 1) ? i - 1 : i;
@@ -219,15 +219,18 @@ export class PageMenu extends Module {
                     onClick={() => this.goToSection(items[i].rowId)}
                 >
                     <i-hstack verticalAlignment="center" horizontalAlignment='start'>
-                        <i-label
+                        <i-icon
                             id="cardDot"
-                            caption={"•"}
-                            font={{ size: '16px', color: '#3b3838', weight: 530 }}
-                            padding={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                            name={'circle'}
+                            width={'15px'}
+                            height={'15px'}
+                            margin={{ left: '1rem' }}
+                            padding={{ top: 4.5, bottom: 4.5, left: 4.5, right: 4.5 }}
                             maxHeight={34}
                             overflow={"hidden"}
+                            fill={'#3b3838'}
                             class={isActive ? "focused-card" : ""}
-                        ></i-label>
+                        ></i-icon>
                         <i-label
                             id="cardTitle"
                             caption={items[i].caption}
@@ -367,7 +370,7 @@ export class PageMenu extends Module {
             <i-vstack id="menuWrapper" gap={"0.5rem"}
                 class={menuBtnStyle} zIndex={150}>
                 <i-hstack gap={'1rem'} verticalAlignment='center'>
-                    <i-label caption={"Page menu"} font={{ color: 'var(--colors-primary-main)', weight: 750, size: '18px' }} class="prevent-select"></i-label>
+                    <i-label caption={"Sections"} font={{ color: 'var(--colors-primary-main)', weight: 750, size: '18px' }} class="prevent-select"></i-label>
                 </i-hstack>
                 <i-vstack id="pnlMenuWrapper" width={320}>
                     <i-vstack id='pnlMenu' class={menuStyle}></i-vstack>
