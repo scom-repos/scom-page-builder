@@ -674,6 +674,8 @@ export class IDEToolbar extends Module {
         this._component.style.display = 'block';
         this.backdropStack.visible = data?.shownBackdrop;
         this._component.addEventListener('click', (event: Event) => {
+            const target = event.target as HTMLElement;
+            if (target && target.tagName === 'INPUT' && ['time', 'date', 'datetime-local'].includes(target.getAttribute('type'))) return;
             if (data?.disableClicked)
                 event.stopImmediatePropagation();
             event.preventDefault()
@@ -855,7 +857,9 @@ export class IDEToolbar extends Module {
             application.EventBus.register(this, EVENT.ON_UPDATE_PAGE_BG, async (data: {
                 customBackground?: boolean, backgroundColor?: string,
                 customTextColor?: boolean, textColor?: string,
-                customTextSize?: boolean, textSize?: string }) => {
+                customTextSize?: boolean, textSize?: string,
+                customWidgetsBackground?: boolean, widgetsBackground?: string,
+                customWidgetsColor?: boolean, widgetsColor?: string }) => {
                 await this.updateUI(data);
             })
         )
@@ -871,19 +875,27 @@ export class IDEToolbar extends Module {
         textColor?: string;
         customTextSize?: boolean,
         textSize?: string;
+        customWidgetsBackground?: boolean,
+        widgetsBackground?: string;
+        customWidgetsColor?: boolean,
+        widgetsColor?: string;
     }) {
         if (this._component?.getConfigurators) {
             const builderTarget = this._component.getConfigurators().find((conf: any) => conf.target === 'Builders');
             if (builderTarget?.setTag) {
-                const {customBackground, backgroundColor, customTextColor, textColor, customTextSize, textSize} = data;
+                const {customBackground, backgroundColor, customTextColor, textColor, customTextSize, textSize, customWidgetsBackground, widgetsBackground, customWidgetsColor, widgetsColor} = data;
                 const oldTag = builderTarget?.getTag ? await builderTarget.getTag() : {};
                 const newData: any = {};
                 if(customBackground) newData.customBackground = customBackground;
-                if (customBackground && backgroundColor !== undefined) newData.backgroundColor = backgroundColor || '';
+                if (customBackground && backgroundColor !== undefined) newData.backgroundColor = backgroundColor;
                 if(customTextColor) newData.customTextColor = customTextColor;
-                if (customTextColor && textColor) newData.textColor = textColor || '';
+                if (customTextColor && textColor) newData.textColor = textColor;
                 if(customTextSize) newData.customTextSize = customTextSize;
-                if (customTextSize && textSize) newData.textSize = textSize || '';
+                if (customTextSize && textSize) newData.textSize = textSize;
+                newData.customWidgetsBackground = customWidgetsBackground;
+                newData.widgetsBackground = widgetsBackground;
+                newData.customWidgetsColor = customWidgetsColor;
+                newData.widgetsColor = widgetsColor;
                 await builderTarget.setTag({...oldTag, ...newData}, true);
             }
         }

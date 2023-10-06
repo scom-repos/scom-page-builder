@@ -1261,6 +1261,10 @@ export class PageRow extends Module {
             const pageConfig = getPageConfig();
             const combinedPageConfig = {...pageConfig, ...config};
             sectionConfig.sectionWidth = combinedPageConfig.sectionWidth || 1000;
+            sectionConfig.customWidgetsBackground = combinedPageConfig.customWidgetsBackground;
+            sectionConfig.customWidgetsColor = combinedPageConfig.customWidgetsColor;
+            sectionConfig.widgetsBackground = combinedPageConfig.widgetsBackground;
+            sectionConfig.widgetsColor = combinedPageConfig.widgetsColor;
             if(sectionConfig.padding) {
                 if(sectionConfig.padding.top === undefined && sectionConfig.padding.bottom === undefined && combinedPageConfig.ptb !== undefined) {
                     sectionConfig.padding.top = sectionConfig.padding.bottom = combinedPageConfig.ptb;

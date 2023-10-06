@@ -333,6 +333,10 @@ declare module "@scom/scom-page-builder/store/index.ts" {
             x?: string | number;
             y?: string | number;
         };
+        customWidgetsBackground?: boolean;
+        widgetsBackground?: string;
+        customWidgetsColor?: boolean;
+        widgetsColor?: string;
     };
     export const getMargin: (margin: {
         x?: number | string;
@@ -501,6 +505,10 @@ declare module "@scom/scom-page-builder/interface/siteData.ts" {
             x?: number | string;
             y?: number | string;
         };
+        customWidgetsBackground?: boolean;
+        widgetsBackground?: string;
+        customWidgetsColor?: boolean;
+        widgetsColor?: string;
     }
     export enum HeaderType {
         'COVER' = "cover",
@@ -1382,6 +1390,10 @@ declare module "@scom/scom-page-builder/common/toolbar.tsx" {
             textColor?: string;
             customTextSize?: boolean;
             textSize?: string;
+            customWidgetsBackground?: boolean;
+            widgetsBackground?: string;
+            customWidgetsColor?: boolean;
+            widgetsColor?: string;
         }): Promise<void>;
         onShow(options?: any): void;
         onHide(): void;

@@ -24,6 +24,10 @@ export interface IPageConfig {
         x?: number|string;
         y?: number|string;
     };
+    customWidgetsBackground?: boolean;
+    widgetsBackground?: string;
+    customWidgetsColor?: boolean;
+    widgetsColor?: string;
 }
 
 export enum HeaderType {
