@@ -3316,7 +3316,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             return result;
         }
         updateConfig(config, updatedValues) {
-            const { backgroundColor, backgroundImage, customBackground, customTextColor, textColor, customTextSize, textSize, margin, plr, ptb } = config;
+            const { backgroundColor, backgroundImage, customBackground, customTextColor, textColor, customTextSize, textSize, margin, plr, ptb, customWidgetsBackground, widgetsBackground, customWidgetsColor, widgetsColor } = config;
             let newConfig = {};
             for (let prop of updatedValues) {
                 newConfig[prop] = config[prop];
@@ -3331,7 +3331,11 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
                 customTextColor: customTextColor,
                 textColor: textColor,
                 customTextSize: customTextSize,
-                textSize: textSize !== null && textSize !== void 0 ? textSize : defaultTextSize
+                textSize: textSize !== null && textSize !== void 0 ? textSize : defaultTextSize,
+                customWidgetsBackground,
+                customWidgetsColor,
+                widgetsBackground,
+                widgetsColor
             };
             if (updatedValues.includes('backgroundImage')) {
                 data.backgroundImage = backgroundImage;
@@ -3374,6 +3378,14 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
             if (ptb !== undefined) {
                 this.element.style.setProperty('--custom-padding-top', `${ptb}px`);
                 this.element.style.setProperty('--custom-padding-bottom', `${ptb}px`);
+            }
+            if (customWidgetsBackground && updatedValues.includes('widgetsBackground')) {
+                data.customWidgetsBackground = customWidgetsBackground;
+                data.widgetsBackground = widgetsBackground;
+            }
+            if (customWidgetsColor && updatedValues.includes('widgetsColor')) {
+                data.customWidgetsColor = customWidgetsColor;
+                data.widgetsColor = widgetsColor;
             }
             components_10.application.EventBus.dispatch(index_24.EVENT.ON_UPDATE_PAGE_BG, Object.assign({}, data));
             this.element.maxWidth = '100%'; // maxWidth ?? '100%';
@@ -4265,6 +4277,24 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                     "sectionWidth": {
                         "title": "Section width (px)",
                         "type": "number"
+                    },
+                    "customWidgetsBackground": {
+                        "title": "Custom widgets background",
+                        "type": "boolean"
+                    },
+                    "widgetsBackground": {
+                        "title": "Widgets background",
+                        "type": "string",
+                        "format": "color"
+                    },
+                    "customWidgetsColor": {
+                        "title": "Custom widgets text color",
+                        "type": "boolean"
+                    },
+                    "widgetsColor": {
+                        "title": "Widgets text color",
+                        "type": "string",
+                        "format": "color"
                     }
                 }
             };
@@ -4364,6 +4394,56 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
                                     {
                                         "type": "Control",
                                         "scope": "#/properties/sectionWidth"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "Group",
+                        "label": "Widgets settings",
+                        "elements": [
+                            {
+                                "type": "HorizontalLayout",
+                                "elements": [
+                                    {
+                                        "type": "Control",
+                                        "scope": "#/properties/customWidgetsBackground"
+                                    },
+                                    {
+                                        "type": "Control",
+                                        "scope": "#/properties/widgetsBackground",
+                                        "rule": {
+                                            "effect": "ENABLE",
+                                            "condition": {
+                                                "scope": "#/properties/customWidgetsBackground",
+                                                "schema": {
+                                                    "const": true
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "HorizontalLayout",
+                                "elements": [
+                                    {
+                                        "type": "Control",
+                                        "scope": "#/properties/customWidgetsColor"
+                                    },
+                                    {
+                                        "type": "Control",
+                                        "scope": "#/properties/widgetsColor",
+                                        "rule": {
+                                            "effect": "ENABLE",
+                                            "condition": {
+                                                "scope": "#/properties/customWidgetsColor",
+                                                "schema": {
+                                                    "const": true
+                                                }
+                                            }
+                                        }
                                     }
                                 ]
                             }
@@ -6385,6 +6465,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const pageConfig = (0, index_49.getPageConfig)();
                 const combinedPageConfig = Object.assign(Object.assign({}, pageConfig), config);
                 sectionConfig.sectionWidth = combinedPageConfig.sectionWidth || 1000;
+                sectionConfig.customWidgetsBackground = combinedPageConfig.customWidgetsBackground;
+                sectionConfig.customWidgetsColor = combinedPageConfig.customWidgetsColor;
+                sectionConfig.widgetsBackground = combinedPageConfig.widgetsBackground;
+                sectionConfig.widgetsColor = combinedPageConfig.widgetsColor;
                 if (sectionConfig.padding) {
                     if (sectionConfig.padding.top === undefined && sectionConfig.padding.bottom === undefined && combinedPageConfig.ptb !== undefined) {
                         sectionConfig.padding.top = sectionConfig.padding.bottom = combinedPageConfig.ptb;
@@ -7178,6 +7262,9 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this._component.style.display = 'block';
             this.backdropStack.visible = data === null || data === void 0 ? void 0 : data.shownBackdrop;
             this._component.addEventListener('click', (event) => {
+                const target = event.target;
+                if (target && target.tagName === 'INPUT' && ['time', 'date', 'datetime-local'].includes(target.getAttribute('type')))
+                    return;
                 if (data === null || data === void 0 ? void 0 : data.disableClicked)
                     event.stopImmediatePropagation();
                 event.preventDefault();
@@ -7365,21 +7452,25 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             if ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) {
                 const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
                 if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setTag) {
-                    const { customBackground, backgroundColor, customTextColor, textColor, customTextSize, textSize } = data;
+                    const { customBackground, backgroundColor, customTextColor, textColor, customTextSize, textSize, customWidgetsBackground, widgetsBackground, customWidgetsColor, widgetsColor } = data;
                     const oldTag = (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getTag) ? await builderTarget.getTag() : {};
                     const newData = {};
                     if (customBackground)
                         newData.customBackground = customBackground;
                     if (customBackground && backgroundColor !== undefined)
-                        newData.backgroundColor = backgroundColor || '';
+                        newData.backgroundColor = backgroundColor;
                     if (customTextColor)
                         newData.customTextColor = customTextColor;
                     if (customTextColor && textColor)
-                        newData.textColor = textColor || '';
+                        newData.textColor = textColor;
                     if (customTextSize)
                         newData.customTextSize = customTextSize;
                     if (customTextSize && textSize)
-                        newData.textSize = textSize || '';
+                        newData.textSize = textSize;
+                    newData.customWidgetsBackground = customWidgetsBackground;
+                    newData.widgetsBackground = widgetsBackground;
+                    newData.customWidgetsColor = customWidgetsColor;
+                    newData.widgetsColor = widgetsColor;
                     await builderTarget.setTag(Object.assign(Object.assign({}, oldTag), newData), true);
                 }
             }

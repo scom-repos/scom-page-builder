@@ -103,6 +103,24 @@ export class PageSettingsDialog extends Module {
                 "sectionWidth": {
                     "title": "Section width (px)",
                     "type": "number"
+                },
+                "customWidgetsBackground": {
+                    "title": "Custom widgets background",
+                    "type": "boolean"
+                },
+                "widgetsBackground": {
+                    "title": "Widgets background",
+                    "type": "string",
+                    "format": "color"
+                },
+                "customWidgetsColor": {
+                    "title": "Custom widgets text color",
+                    "type": "boolean"
+                },
+                "widgetsColor": {
+                    "title": "Widgets text color",
+                    "type": "string",
+                    "format": "color"
                 }
             }
         };
@@ -203,6 +221,56 @@ export class PageSettingsDialog extends Module {
                                 {
                                     "type": "Control",
                                     "scope": "#/properties/sectionWidth"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Group",
+                    "label": "Widgets settings",
+                    "elements": [
+                        {
+                            "type": "HorizontalLayout",
+                            "elements": [
+                                {
+                                    "type": "Control",
+                                    "scope": "#/properties/customWidgetsBackground"
+                                },
+                                {
+                                    "type": "Control",
+                                    "scope": "#/properties/widgetsBackground",
+                                    "rule": {
+                                        "effect": "ENABLE",
+                                        "condition": {
+                                            "scope": "#/properties/customWidgetsBackground",
+                                            "schema": {
+                                                "const": true
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "HorizontalLayout",
+                            "elements": [
+                                {
+                                    "type": "Control",
+                                    "scope": "#/properties/customWidgetsColor"
+                                },
+                                {
+                                    "type": "Control",
+                                    "scope": "#/properties/widgetsColor",
+                                    "rule": {
+                                        "effect": "ENABLE",
+                                        "condition": {
+                                            "scope": "#/properties/customWidgetsColor",
+                                            "schema": {
+                                                "const": true
+                                            }
+                                        }
+                                    }
                                 }
                             ]
                         }

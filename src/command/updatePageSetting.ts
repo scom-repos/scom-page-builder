@@ -40,7 +40,12 @@ export class UpdatePageSettingsCommand implements ICommand {
   }
 
   private updateConfig(config: IPageConfig, updatedValues: string[]) {
-    const { backgroundColor, backgroundImage, customBackground, customTextColor, textColor, customTextSize, textSize, margin, plr, ptb } = config;
+    const {
+      backgroundColor, backgroundImage, customBackground,
+      customTextColor, textColor, customTextSize,
+      textSize, margin, plr, ptb,
+      customWidgetsBackground, widgetsBackground, customWidgetsColor, widgetsColor
+    } = config;
     let newConfig: IPageConfig = {};
     for (let prop of updatedValues) {
       newConfig[prop] = config[prop];
@@ -56,7 +61,11 @@ export class UpdatePageSettingsCommand implements ICommand {
       customTextColor: customTextColor,
       textColor: textColor,
       customTextSize: customTextSize,
-      textSize: textSize ?? defaultTextSize
+      textSize: textSize ?? defaultTextSize,
+      customWidgetsBackground,
+      customWidgetsColor,
+      widgetsBackground,
+      widgetsColor
     }
     if(updatedValues.includes('backgroundImage')) {
       data.backgroundImage = backgroundImage;
@@ -97,6 +106,14 @@ export class UpdatePageSettingsCommand implements ICommand {
     if(ptb !== undefined) {
       this.element.style.setProperty('--custom-padding-top', `${ptb}px`);
       this.element.style.setProperty('--custom-padding-bottom', `${ptb}px`);
+    }
+    if (customWidgetsBackground && updatedValues.includes('widgetsBackground')) {
+      data.customWidgetsBackground = customWidgetsBackground
+      data.widgetsBackground = widgetsBackground;
+    }
+    if (customWidgetsColor && updatedValues.includes('widgetsColor')) {
+      data.customWidgetsColor = customWidgetsColor
+      data.widgetsColor = widgetsColor;
     }
     application.EventBus.dispatch(EVENT.ON_UPDATE_PAGE_BG, {...data});
     this.element.maxWidth = '100%'; // maxWidth ?? '100%';
