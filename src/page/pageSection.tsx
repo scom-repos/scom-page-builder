@@ -42,7 +42,19 @@ export class PageSection extends Module {
                 if (!pageElement) return;
                 this.pageElementMap.delete(entry.target);
                 if (!isEmpty(pageElement.properties)) (entry.target as any).setProperties(pageElement.properties);
-                pageElement.tag && (entry.target as any).setTag(pageElement.tag, true);
+                let widgetsTag: { widgetsBackground: string, widgetsColor: string, customWidgetsBackground: boolean, customWidgetsColor: boolean };
+                if (pageObject.config) {
+                    const { widgetsBackground, widgetsColor, customWidgetsBackground, customWidgetsColor } = pageObject.config;
+                    widgetsTag = {
+                        widgetsBackground,
+                        widgetsColor,
+                        customWidgetsBackground,
+                        customWidgetsColor
+                    }
+                }
+                if (pageElement.tag || widgetsTag) {
+                    (entry.target as any).setTag({ ...pageElement.tag, ...widgetsTag }, true);
+                }
                 (entry.target as any).setTheme(getTheme());
                 observer.unobserve(entry.target);
             }

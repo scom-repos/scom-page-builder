@@ -7702,7 +7702,19 @@ define("@scom/scom-page-builder/page/pageSection.tsx", ["require", "exports", "@
                         this.pageElementMap.delete(entry.target);
                         if (!(0, index_63.isEmpty)(pageElement.properties))
                             entry.target.setProperties(pageElement.properties);
-                        pageElement.tag && entry.target.setTag(pageElement.tag, true);
+                        let widgetsTag;
+                        if (index_64.pageObject.config) {
+                            const { widgetsBackground, widgetsColor, customWidgetsBackground, customWidgetsColor } = index_64.pageObject.config;
+                            widgetsTag = {
+                                widgetsBackground,
+                                widgetsColor,
+                                customWidgetsBackground,
+                                customWidgetsColor
+                            };
+                        }
+                        if (pageElement.tag || widgetsTag) {
+                            entry.target.setTag(Object.assign(Object.assign({}, pageElement.tag), widgetsTag), true);
+                        }
                         entry.target.setTheme((0, index_64.getTheme)());
                         observer.unobserve(entry.target);
                     }
