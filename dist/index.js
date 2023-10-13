@@ -5852,6 +5852,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.currentElement.style.left = 'initial';
                 self.currentElement = null;
                 toolbar = null;
+                startX = 0;
             }
             function updateDimension(newWidth, newHeight) {
                 toolbar.width = newWidth || 'auto';
@@ -6003,7 +6004,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     self.updateGridColumnWidth();
                     const targetRow = target.closest('ide-row');
                     const nearestDropSection = (0, index_51.findNearestSectionInRow)(targetRow, clientX, clientY, false);
-                    const nearestDropSectionBound = nearestDropSection.getBoundingClientRect();
+                    const nearestDropSectionBound = (nearestDropSection === null || nearestDropSection === void 0 ? void 0 : nearestDropSection.getBoundingClientRect()) || {};
                     const isFront = (clientX < nearestDropSectionBound.left) ? true : false;
                     const dragSectionCol = parseInt(self.currentElement.dataset.column);
                     const dragSectionColSpan = parseInt(self.currentElement.dataset.columnSpan);
@@ -7018,7 +7019,13 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             }
             const builderTag = (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getTag) ? await builderTarget.getTag() : this.data.tag || {};
             const tag = Object.assign(Object.assign({}, builderTag), elementTag);
+            const customMaxWidth = action.customMaxWidth || 900;
             this.mdActions.title = action.name || 'Update Settings';
+            this.mdActions.maxWidth = customMaxWidth;
+            const modalDiv = this.mdActions.querySelector('div.modal');
+            if (modalDiv) {
+                modalDiv.style.maxWidth = typeof customMaxWidth === 'number' ? `${customMaxWidth}px` : customMaxWidth;
+            }
             if (action.customUI) {
                 const customUI = action.customUI;
                 let element = null;
@@ -7100,8 +7107,9 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             }
         }
         isTexbox(data) {
+            var _a;
             if (data)
-                return data.name.toLowerCase() === index_54.ELEMENT_NAME.TEXTBOX.toLowerCase();
+                return ((_a = data.name) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === index_54.ELEMENT_NAME.TEXTBOX.toLowerCase();
             else
                 return false;
         }

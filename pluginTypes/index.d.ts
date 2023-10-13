@@ -469,6 +469,7 @@ declare module "@scom/scom-page-builder/interface/pageBlock.ts" {
         userInputUISchema: IUISchema;
         customControls?: any;
         customUI?: any;
+        customMaxWidth?: string | number;
         isReplacement?: boolean;
     }
     export interface IPageBlock {

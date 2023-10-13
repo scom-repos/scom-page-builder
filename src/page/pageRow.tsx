@@ -568,6 +568,7 @@ export class PageRow extends Module {
             self.currentElement.style.left = 'initial';
             self.currentElement = null;
             toolbar = null;
+            startX = 0;
         }
 
         function updateDimension(newWidth?: number, newHeight?: number) {
@@ -728,7 +729,7 @@ export class PageRow extends Module {
                 self.updateGridColumnWidth();
                 const targetRow = target.closest('ide-row') as Control;
                 const nearestDropSection = findNearestSectionInRow(targetRow as PageRow, clientX, clientY, false)
-                const nearestDropSectionBound = nearestDropSection.getBoundingClientRect();
+                const nearestDropSectionBound = nearestDropSection?.getBoundingClientRect() || {};
                 const isFront = (clientX < nearestDropSectionBound.left) ? true : false;
                 const dragSectionCol = parseInt(self.currentElement.dataset.column);
                 const dragSectionColSpan = parseInt(self.currentElement.dataset.columnSpan);

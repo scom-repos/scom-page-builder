@@ -24,6 +24,7 @@ export interface IPageBlockAction {
     userInputUISchema: IUISchema;
     customControls?: any;
     customUI?: any;
+    customMaxWidth?: string | number;
     isReplacement?: boolean;
 }
 
