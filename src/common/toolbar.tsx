@@ -430,7 +430,13 @@ export class IDEToolbar extends Module {
         }
         const builderTag = builderTarget?.getTag ? await builderTarget.getTag() : this.data.tag || {};
         const tag = { ...builderTag, ...elementTag };
+        const customMaxWidth = action.customMaxWidth || 900;
         this.mdActions.title = action.name || 'Update Settings';
+        this.mdActions.maxWidth = customMaxWidth;
+        const modalDiv = this.mdActions.querySelector('div.modal') as HTMLElement;
+        if (modalDiv) {
+            modalDiv.style.maxWidth = typeof customMaxWidth === 'number' ? `${customMaxWidth}px` : customMaxWidth;
+        }
         if (action.customUI) {
             const customUI = action.customUI;
             let element = null;
@@ -512,7 +518,7 @@ export class IDEToolbar extends Module {
 
     private isTexbox(data: IPageBlockData | undefined) {
         if (data)
-            return data.name.toLowerCase() === ELEMENT_NAME.TEXTBOX.toLowerCase();
+            return data.name?.toLowerCase() === ELEMENT_NAME.TEXTBOX.toLowerCase();
         else
             return false;
     }
