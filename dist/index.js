@@ -592,10 +592,9 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
             return this._config;
         }
         getNonNullSections() {
-            const hasData = (el) => { var _a; return Object.keys(el.module || {}).length || ((_a = el.elements) === null || _a === void 0 ? void 0 : _a.length); };
+            const hasData = (el) => Object.keys(el.module || {}).length || el.elements?.length;
             return this._sections.filter(section => {
-                var _a;
-                const hasElements = !!((_a = section.elements) === null || _a === void 0 ? void 0 : _a.length);
+                const hasElements = !!section.elements?.length;
                 if (hasElements) {
                     const elements = [...section.elements].filter(hasData);
                     section.elements = elements;
@@ -624,7 +623,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
             console.log('[index.ts] updateSection', section, id, data);
             if (!section)
                 return;
-            if (data === null || data === void 0 ? void 0 : data.config)
+            if (data?.config)
                 section.config = data.config;
             // const oldColumnsNumber = this.getColumnsNumber(id);
             // const elements = this.getRow(id)?.elements || [];
@@ -671,7 +670,6 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
             components_2.application.EventBus.dispatch(index_1.EVENT.ON_UPDATE_MENU);
         }
         findElement(elements, elementId, findLeafOnly = false) {
-            var _a;
             if (!elements || !elements.length)
                 return null;
             for (let i = 0; i < elements.length; i++) {
@@ -685,7 +683,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
                     else
                         return element;
                 }
-                else if ((_a = element === null || element === void 0 ? void 0 : element.elements) === null || _a === void 0 ? void 0 : _a.length) {
+                else if (element?.elements?.length) {
                     const elm = this.findElement(element.elements, elementId, findLeafOnly);
                     if (elm)
                         return elm;
@@ -694,13 +692,12 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
             return null;
         }
         getElement(sectionId, elementId, getLeafOnly = false) {
-            var _a, _b;
             if (sectionId === 'header') {
-                const elements = ((_a = exports.pageObject.header) === null || _a === void 0 ? void 0 : _a.elements) || [];
+                const elements = exports.pageObject.header?.elements || [];
                 return elements[0] || null;
             }
             if (sectionId === 'footer') {
-                const elements = ((_b = exports.pageObject.footer) === null || _b === void 0 ? void 0 : _b.elements) || [];
+                const elements = exports.pageObject.footer?.elements || [];
                 return elements[0] || null;
             }
             const section = this.getSection(sectionId);
@@ -710,7 +707,6 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
             return elm;
         }
         setElement(sectionId, elementId, value) {
-            var _a;
             let elm = this.getElement(sectionId, elementId);
             if (!elm)
                 return;
@@ -743,7 +739,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
             }
             if (value.elements !== undefined) {
                 elm.elements = value.elements;
-                if ((_a = value.elements) === null || _a === void 0 ? void 0 : _a.length)
+                if (value.elements?.length)
                     elm.module = {};
             }
             if (value.column !== undefined && value.column !== elm.column) {
@@ -758,20 +754,19 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
             return [...elements].sort((a, b) => Number(a.column) - Number(b.column));
         }
         removeElementFn(elements, elementId, removeLeafOnly = false) {
-            var _a, _b;
             if (!elements || !elements.length)
                 return;
             for (let i = 0; i < elements.length; i++) {
                 const element = elements[i];
                 if (element && element.id === elementId) {
-                    if (removeLeafOnly && ((_a = element === null || element === void 0 ? void 0 : element.elements) === null || _a === void 0 ? void 0 : _a.length))
+                    if (removeLeafOnly && element?.elements?.length)
                         this.removeElementFn(element.elements, elementId, removeLeafOnly);
                     else {
                         elements = elements.splice(i, 1);
                         break;
                     }
                 }
-                else if ((_b = element === null || element === void 0 ? void 0 : element.elements) === null || _b === void 0 ? void 0 : _b.length) {
+                else if (element?.elements?.length) {
                     this.removeElementFn(element.elements, elementId, removeLeafOnly);
                 }
             }
@@ -786,7 +781,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
             }
             else {
                 const section = this.getSection(sectionId);
-                elements = (section === null || section === void 0 ? void 0 : section.elements) || [];
+                elements = section?.elements || [];
             }
             this.removeElementFn(elements, elementId, removeLeafOnly);
             components_2.application.EventBus.dispatch(index_1.EVENT.ON_UPDATE_MENU);
@@ -821,7 +816,7 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
         }
         getRowConfig(sectionId) {
             const section = this.getRow(sectionId);
-            return section === null || section === void 0 ? void 0 : section.config;
+            return section?.config;
         }
         getColumnsNumber(sectionId) {
             return MAX_COLUMN;
@@ -931,50 +926,49 @@ define("@scom/scom-page-builder/store/index.ts", ["require", "exports", "@ijstec
     };
     exports.setCategories = setCategories;
     const setTheme = (value) => {
-        exports.state.theme = value !== null && value !== void 0 ? value : 'light';
+        exports.state.theme = value ?? 'light';
     };
     exports.setTheme = setTheme;
     const getTheme = () => {
-        var _a;
-        return (_a = exports.state.theme) !== null && _a !== void 0 ? _a : 'light';
+        return exports.state.theme ?? 'light';
     };
     exports.getTheme = getTheme;
     const getBackgroundColor = (theme) => {
-        theme = theme !== null && theme !== void 0 ? theme : (0, exports.getTheme)();
+        theme = theme ?? (0, exports.getTheme)();
         return theme === 'light' ? lightTheme.background.main : darkTheme.background.main;
     };
     exports.getBackgroundColor = getBackgroundColor;
     const getFontColor = (theme) => {
-        theme = theme !== null && theme !== void 0 ? theme : (0, exports.getTheme)();
+        theme = theme ?? (0, exports.getTheme)();
         return theme === 'light' ? lightTheme.text.primary : darkTheme.text.primary;
     };
     exports.getFontColor = getFontColor;
     const getDivider = (theme) => {
-        theme = theme !== null && theme !== void 0 ? theme : (0, exports.getTheme)();
+        theme = theme ?? (0, exports.getTheme)();
         return theme === 'light' ? lightTheme.divider : darkTheme.divider;
     };
     exports.getDivider = getDivider;
     const setDefaultPageConfig = (value) => {
-        exports.state.defaultPageConfig = Object.assign(Object.assign(Object.assign({}, defaultPageConfig), { backgroundColor: (0, exports.getBackgroundColor)(), textColor: (0, exports.getFontColor)() }), (value || {}));
+        exports.state.defaultPageConfig = { ...defaultPageConfig, backgroundColor: (0, exports.getBackgroundColor)(), textColor: (0, exports.getFontColor)(), ...(value || {}) };
     };
     exports.setDefaultPageConfig = setDefaultPageConfig;
     const getDefaultPageConfig = () => {
-        const defaultValue = Object.assign(Object.assign({}, defaultPageConfig), { backgroundColor: (0, exports.getBackgroundColor)(), textColor: (0, exports.getFontColor)() });
+        const defaultValue = { ...defaultPageConfig, backgroundColor: (0, exports.getBackgroundColor)(), textColor: (0, exports.getFontColor)() };
         return exports.state.defaultPageConfig || defaultValue;
     };
     exports.getDefaultPageConfig = getDefaultPageConfig;
     const getPageConfig = () => {
         const defaultConfig = (0, exports.getDefaultPageConfig)();
-        const pageConfig = (exports.pageObject === null || exports.pageObject === void 0 ? void 0 : exports.pageObject.config) || {};
-        pageConfig.margin = Object.assign(Object.assign({}, defaultConfig.margin), pageConfig.margin);
-        return Object.assign(Object.assign({}, defaultConfig), pageConfig);
+        const pageConfig = exports.pageObject?.config || {};
+        pageConfig.margin = { ...defaultConfig.margin, ...pageConfig.margin };
+        return { ...defaultConfig, ...pageConfig };
     };
     exports.getPageConfig = getPageConfig;
     const getMargin = (margin) => {
         const { margin: defaultMargin } = (0, exports.getDefaultPageConfig)();
         let { x, y } = margin || {};
-        x = x !== null && x !== void 0 ? x : defaultMargin.x;
-        y = y !== null && y !== void 0 ? y : defaultMargin.y;
+        x = x ?? defaultMargin.x;
+        y = y ?? defaultMargin.y;
         const xNumber = Number(x);
         const yNumber = Number(y);
         x = isNaN(xNumber) ? x : xNumber + 'px';
@@ -993,7 +987,6 @@ define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@s
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.resizeDefaultLayout = exports.getDropFrontBackResult = exports.findNearestSectionInRow = exports.checkDragDropResult = void 0;
     const checkDragDropResult = (dragDrop) => {
-        var _a, _b;
         if (!dragDrop.dropTarget)
             return { canDrop: false };
         const dropRow = dragDrop.dropTarget.closest('ide-row');
@@ -1051,7 +1044,7 @@ define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@s
                 const isFront = mergeSide == "front" ? true : false;
                 const dragSectionCol = dragDrop.dragSection ? parseInt(dragDrop.dragSection.dataset.column) : 4;
                 const dragSectionColSpan = dragDrop.dragSection ? parseInt(dragDrop.dragSection.dataset.columnSpan) : 4;
-                const dropFrontBackResult = getDropFrontBackResult(dropRow, mouseOnSection, dragSectionCol, dragSectionColSpan, isFront, (_a = dragDrop.dragToolbar) === null || _a === void 0 ? void 0 : _a.dataset);
+                const dropFrontBackResult = getDropFrontBackResult(dropRow, mouseOnSection, dragSectionCol, dragSectionColSpan, isFront, dragDrop.dragToolbar?.dataset);
                 // check if it can merge with the drop section
                 if (dropFrontBackResult) {
                     return {
@@ -1101,7 +1094,7 @@ define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@s
                         const isFront = (dragDrop.clientX < collidedSectionBound.left) ? true : false;
                         const dragSectionCol = dragDrop.dragSection ? parseInt(dragDrop.dragSection.dataset.column) : 4;
                         const dragSectionColSpan = dragDrop.dragSection ? parseInt(dragDrop.dragSection.dataset.columnSpan) : 4;
-                        const dropFrontBackResult = getDropFrontBackResult(dropRow, collidedSection, dragSectionCol, dragSectionColSpan, isFront, (_b = dragDrop.dragToolbar) === null || _b === void 0 ? void 0 : _b.dataset);
+                        const dropFrontBackResult = getDropFrontBackResult(dropRow, collidedSection, dragSectionCol, dragSectionColSpan, isFront, dragDrop.dragToolbar?.dataset);
                         return {
                             canDrop: true,
                             details: {
@@ -1458,12 +1451,12 @@ define("@scom/scom-page-builder/utility/dragDrop.ts", ["require", "exports", "@s
                     splitIndex :
                     softEmptySpace - splitIndex;
                 const newElData = {
-                    id: data === null || data === void 0 ? void 0 : data.id,
+                    id: data?.id,
                     column: newColumn,
                     columnSpan: newColumnSpan,
-                    properties: data === null || data === void 0 ? void 0 : data.properties,
-                    module: data === null || data === void 0 ? void 0 : data.module,
-                    tag: data === null || data === void 0 ? void 0 : data.tag
+                    properties: data?.properties,
+                    module: data?.module,
+                    tag: data?.tag
                 };
                 return {
                     newElmdata: newElData,
@@ -1650,24 +1643,23 @@ define("@scom/scom-page-builder/utility/index.ts", ["require", "exports", "@ijst
     };
     exports.isEmpty = isEmpty;
     const fetchScconfigByRootCid = async (cid) => {
-        var _a, _b;
         try {
             let path = index_3.IPFS_GATEWAY_IJS + cid;
             let cidInfo = await (await fetch(path)).json();
-            let hasScconfig = (_a = cidInfo.links) === null || _a === void 0 ? void 0 : _a.find(link => link.name === 'scconfig.json');
+            let hasScconfig = cidInfo.links?.find(link => link.name === 'scconfig.json');
             if (hasScconfig) {
                 path += '/scconfig.json';
                 let scconfig = await (await fetch(path)).json();
                 return scconfig;
             }
             else {
-                cid = (_b = cidInfo.links.find(link => link.name !== 'index.html')) === null || _b === void 0 ? void 0 : _b.cid;
+                cid = cidInfo.links.find(link => link.name !== 'index.html')?.cid;
                 if (cid)
                     return fetchScconfigByRootCid(cid);
             }
             return null;
         }
-        catch (_c) {
+        catch {
             return null;
         }
     };
@@ -1769,7 +1761,6 @@ define("@scom/scom-page-builder/command/updateRow.ts", ["require", "exports", "@
             }
         }
         execute() {
-            var _a, _b, _c;
             this.element.parent = this.parent;
             if (this.isDeleted) {
                 this.removeEventBus();
@@ -1799,13 +1790,12 @@ define("@scom/scom-page-builder/command/updateRow.ts", ["require", "exports", "@
                 }
                 index_5.pageObject.addRow(this.data, this.rowId, index);
             }
-            if ((_a = this.element) === null || _a === void 0 ? void 0 : _a.toggleUI) {
-                const hasData = (_c = (_b = this.data) === null || _b === void 0 ? void 0 : _b.elements) === null || _c === void 0 ? void 0 : _c.length;
+            if (this.element?.toggleUI) {
+                const hasData = this.data?.elements?.length;
                 this.element.toggleUI(hasData);
             }
         }
         undo() {
-            var _a, _b, _c, _d;
             if (this.isDeleted) {
                 this.element.parent = this.parent;
                 this.parent.appendChild(this.element);
@@ -1836,8 +1826,8 @@ define("@scom/scom-page-builder/command/updateRow.ts", ["require", "exports", "@
                 this.element.remove();
                 this.data && index_5.pageObject.removeRow(this.rowId);
             }
-            if ((_a = this.element) === null || _a === void 0 ? void 0 : _a.toggleUI) {
-                const isEmpty = !((_c = (_b = this.data) === null || _b === void 0 ? void 0 : _b.elements) === null || _c === void 0 ? void 0 : _c.length) || ((_d = this.data) === null || _d === void 0 ? void 0 : _d.elements.every(el => { var _a; return el.type === "composite" && !((_a = el.elements) === null || _a === void 0 ? void 0 : _a.length); }));
+            if (this.element?.toggleUI) {
+                const isEmpty = !this.data?.elements?.length || this.data?.elements.every(el => el.type === "composite" && !el.elements?.length);
                 this.element.toggleUI(!isEmpty);
             }
         }
@@ -1855,7 +1845,7 @@ define("@scom/scom-page-builder/command/updateRowSettings.ts", ["require", "expo
             const id = this.element.id.replace('row-', '');
             const data = index_6.pageObject.getRowConfig(id) || (0, index_6.getPageConfig)();
             this.settings = Object.assign({}, data, settings);
-            this.oldSettings = Object.assign({}, data);
+            this.oldSettings = { ...data };
         }
         getChangedValues(newValue, oldValue) {
             let result = [];
@@ -2127,12 +2117,10 @@ define("@scom/scom-page-builder/command/resize.ts", ["require", "exports", "@sco
     exports.ResizeElementCommand = void 0;
     class ResizeElementCommand {
         get maxColumn() {
-            var _a;
-            const rowId = (_a = this.parent) === null || _a === void 0 ? void 0 : _a.id.replace('row-', '');
+            const rowId = this.parent?.id.replace('row-', '');
             return index_8.pageObject.getColumnsNumber(rowId);
         }
         constructor(element, toolbar, initialWidth, initialHeight, finalWidth, finalHeight) {
-            var _a, _b;
             this.gapWidth = index_9.GAP_WIDTH;
             this.gridColumnWidth = 0;
             this.element = element;
@@ -2147,7 +2135,7 @@ define("@scom/scom-page-builder/command/resize.ts", ["require", "exports", "@sco
                 column: Number(this.element.dataset.column),
                 columnSpan: Number(this.element.dataset.columnSpan)
             };
-            const grid = (_b = (_a = this.element) === null || _a === void 0 ? void 0 : _a.parentElement) === null || _b === void 0 ? void 0 : _b.closest('.grid');
+            const grid = this.element?.parentElement?.closest('.grid');
             if (grid) {
                 this.gridColumnWidth = (grid.offsetWidth - this.gapWidth * (this.maxColumn - 1)) / this.maxColumn;
             }
@@ -2196,14 +2184,13 @@ define("@scom/scom-page-builder/command/resize.ts", ["require", "exports", "@sco
             this.element.style.gridColumn = `${column} / span ${columnSpan}`;
         }
         updateToolbars(isChangedColumn, rowId, columnData, changedHeight) {
-            var _a, _b;
             const { column, columnSpan } = columnData;
             const toolbars = this.element.querySelectorAll('ide-toolbar');
             for (const toolbar of toolbars) {
-                const currentTag = ((_a = toolbar === null || toolbar === void 0 ? void 0 : toolbar.data) === null || _a === void 0 ? void 0 : _a.tag) || {};
+                const currentTag = toolbar?.data?.tag || {};
                 const height = toolbar.id === this.toolbar.id ? changedHeight : '100%';
-                const isImage = ((_b = toolbar.module) === null || _b === void 0 ? void 0 : _b.nodeName) === 'I-SCOM-IMAGE';
-                const tag = Object.assign(Object.assign({}, currentTag), { width: '100%', height: isImage ? 'auto' : height });
+                const isImage = toolbar.module?.nodeName === 'I-SCOM-IMAGE';
+                const tag = { ...currentTag, width: '100%', height: isImage ? 'auto' : height };
                 toolbar.setTag(tag);
                 const elementId = toolbar.elementId;
                 if (isChangedColumn && elementId !== this.element.id)
@@ -2211,7 +2198,6 @@ define("@scom/scom-page-builder/command/resize.ts", ["require", "exports", "@sco
             }
         }
         execute() {
-            var _a, _b;
             this.element = this.parent && this.parent.querySelector(`[id='${this.element.id}']`);
             if (!this.element)
                 return;
@@ -2219,24 +2205,23 @@ define("@scom/scom-page-builder/command/resize.ts", ["require", "exports", "@sco
             if (!columnData)
                 return;
             this.updateElement(columnData);
-            const rowId = (_a = this.parent) === null || _a === void 0 ? void 0 : _a.id.replace('row-', '');
+            const rowId = this.parent?.id.replace('row-', '');
             const elementId = this.element.id;
             const isChangedColumn = columnData.column !== this.oldDataColumn.column || columnData.columnSpan !== this.oldDataColumn.columnSpan;
             if (isChangedColumn)
-                index_8.pageObject.setElement(rowId, elementId, Object.assign({}, columnData));
+                index_8.pageObject.setElement(rowId, elementId, { ...columnData });
             this.updateToolbars(isChangedColumn, rowId, columnData, this.finalHeight);
-            if ((_b = this.parent) === null || _b === void 0 ? void 0 : _b.toggleUI)
+            if (this.parent?.toggleUI)
                 this.parent.toggleUI(true);
         }
         undo() {
-            var _a, _b;
             const { column, columnSpan } = this.oldDataColumn;
             this.updateElement({ column, columnSpan });
-            const rowId = (_a = this.parent) === null || _a === void 0 ? void 0 : _a.id.replace('row-', '');
+            const rowId = this.parent?.id.replace('row-', '');
             const elementId = this.element.id;
             index_8.pageObject.setElement(rowId, elementId, { column, columnSpan });
             this.updateToolbars(true, rowId, { column, columnSpan }, this.initialHeight);
-            if ((_b = this.parent) === null || _b === void 0 ? void 0 : _b.toggleUI)
+            if (this.parent?.toggleUI)
                 this.parent.toggleUI(true);
         }
         redo() { }
@@ -2275,7 +2260,7 @@ define("@scom/scom-page-builder/command/columnUtils.ts", ["require", "exports", 
         const dropRow = dropElm.closest('ide-row');
         const dropElmCol = getColumn(dropElm);
         let columnSpan = element ? getColumnSpan(element) : index_11.INIT_COLUMN_SPAN;
-        const dropRowId = ((dropRow === null || dropRow === void 0 ? void 0 : dropRow.id) || '').replace('row-', '');
+        const dropRowId = (dropRow?.id || '').replace('row-', '');
         const MAX_COLUMN = index_10.pageObject.getColumnsNumber(dropRowId);
         const maxColumn = (MAX_COLUMN - columnSpan) + 1;
         let newColumn = (columnSpan > 1 && dropElmCol > maxColumn) ? maxColumn : dropElmCol;
@@ -2316,11 +2301,11 @@ define("@scom/scom-page-builder/command/columnUtils.ts", ["require", "exports", 
     };
     const getAppendColumnData = (grid, dropElm, sortedSections, updateData, element, isAppend = true) => {
         let dropSection = dropElm.closest('ide-section');
-        if (!(dropSection === null || dropSection === void 0 ? void 0 : dropSection.id))
+        if (!dropSection?.id)
             return null;
         dropSection = grid.querySelector(`[id='${dropSection.id}']`);
         const pageRow = dropSection.closest('ide-row');
-        const pageRowId = ((pageRow === null || pageRow === void 0 ? void 0 : pageRow.id) || '').replace('row-', '');
+        const pageRowId = (pageRow?.id || '').replace('row-', '');
         const MAX_COLUMN = index_10.pageObject.getColumnsNumber(pageRowId);
         const oldDropColumn = getColumn(dropSection);
         let newColumn = getNewColumn(dropSection, oldDropColumn, isAppend);
@@ -2464,7 +2449,6 @@ define("@scom/scom-page-builder/command/dragElement.ts", ["require", "exports", 
                 (0, columnUtils_1.getDropColumnData)(this.dropElm, sortedSections, this.element);
         }
         execute() {
-            var _a, _b;
             if (!this.parent || !this.dropRow)
                 return;
             this.element = this.parent.querySelector(`[id='${this.data.id}']`);
@@ -2484,10 +2468,10 @@ define("@scom/scom-page-builder/command/dragElement.ts", ["require", "exports", 
             this.element.setAttribute('data-column', `${column}`);
             this.element.setAttribute('data-column-span', `${columnSpan}`);
             const dropRowId = this.dropRow.id.replace('row-', '');
-            const elementRowId = (((_a = this.parent) === null || _a === void 0 ? void 0 : _a.id) || '').replace('row-', '');
+            const elementRowId = (this.parent?.id || '').replace('row-', '');
             index_12.pageObject.setElement(elementRowId, this.element.id, { column, columnSpan });
             if (this.parent && !this.parent.isEqualNode(this.dropRow)) {
-                index_12.pageObject.addElement(dropRowId, Object.assign(Object.assign({}, this.data), { column, columnSpan }));
+                index_12.pageObject.addElement(dropRowId, { ...this.data, column, columnSpan });
                 index_12.pageObject.removeElement(elementRowId, this.element.id);
                 if (this.dropGrid)
                     this.dropGrid.appendChild(this.element);
@@ -2500,11 +2484,10 @@ define("@scom/scom-page-builder/command/dragElement.ts", ["require", "exports", 
             }
             if (this.parent) {
                 const elementSection = index_12.pageObject.getRow(elementRowId);
-                this.parent.visible = !!((_b = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _b === void 0 ? void 0 : _b.length);
+                this.parent.visible = !!elementSection?.elements?.length;
             }
         }
         undo() {
-            var _a, _b, _c;
             if (!this.parent || !this.element)
                 return;
             this.element.style.gridRow = '1';
@@ -2512,13 +2495,13 @@ define("@scom/scom-page-builder/command/dragElement.ts", ["require", "exports", 
             this.element.setAttribute('data-column', `${this.oldDataColumn.column}`);
             this.element.setAttribute('data-column-span', `${this.oldDataColumn.columnSpan}`);
             const elementRow = this.element.parent.closest('ide-row');
-            const elementRowId = ((elementRow === null || elementRow === void 0 ? void 0 : elementRow.id) || '').replace('row-', '');
-            index_12.pageObject.setElement(elementRowId, this.element.id, Object.assign({}, this.oldDataColumn));
+            const elementRowId = (elementRow?.id || '').replace('row-', '');
+            index_12.pageObject.setElement(elementRowId, this.element.id, { ...this.oldDataColumn });
             if (!this.parent.id)
                 return;
-            const oldRowId = (((_a = this.parent) === null || _a === void 0 ? void 0 : _a.id) || '').replace('row-', '');
+            const oldRowId = (this.parent?.id || '').replace('row-', '');
             if (this.parent && elementRow && !elementRow.isEqualNode(this.parent)) {
-                index_12.pageObject.addElement(oldRowId, Object.assign(Object.assign({}, this.data), this.oldDataColumn));
+                index_12.pageObject.addElement(oldRowId, { ...this.data, ...this.oldDataColumn });
                 index_12.pageObject.removeElement(elementRowId, this.element.id);
                 const oldGrid = this.parent.querySelector('.grid');
                 if (oldGrid) {
@@ -2532,8 +2515,8 @@ define("@scom/scom-page-builder/command/dragElement.ts", ["require", "exports", 
             }
             if (this.parent) {
                 const oldElementSection = index_12.pageObject.getRow(oldRowId);
-                this.parent.visible = !!((_b = oldElementSection === null || oldElementSection === void 0 ? void 0 : oldElementSection.elements) === null || _b === void 0 ? void 0 : _b.length);
-                this.parent.toggleUI(!!((_c = oldElementSection === null || oldElementSection === void 0 ? void 0 : oldElementSection.elements) === null || _c === void 0 ? void 0 : _c.length));
+                this.parent.visible = !!oldElementSection?.elements?.length;
+                this.parent.toggleUI(!!oldElementSection?.elements?.length);
             }
             for (let columnData of this.oldDataColumnMap) {
                 const { el, rowId, column, columnSpan } = columnData;
@@ -2566,9 +2549,8 @@ define("@scom/scom-page-builder/command/removeToolbar.ts", ["require", "exports"
             }
         }
         execute() {
-            var _a, _b, _c, _d;
-            const currentElm = (_a = this.pageRow) === null || _a === void 0 ? void 0 : _a.querySelector(`ide-toolbar#${this.element.id}`);
-            if (currentElm === null || currentElm === void 0 ? void 0 : currentElm.data) {
+            const currentElm = this.pageRow?.querySelector(`ide-toolbar#${this.element.id}`);
+            if (currentElm?.data) {
                 this.data = JSON.parse(JSON.stringify(currentElm.data));
             }
             if (!this.element.closest('ide-row') && currentElm) {
@@ -2579,16 +2561,16 @@ define("@scom/scom-page-builder/command/removeToolbar.ts", ["require", "exports"
             const sectionEl = this.element.closest('ide-section');
             this.element.remove();
             const section = index_14.pageObject.getRow(this.rowId);
-            const isEmpty = !((_b = section === null || section === void 0 ? void 0 : section.elements) === null || _b === void 0 ? void 0 : _b.length) || (section === null || section === void 0 ? void 0 : section.elements.every(el => { var _a; return !Object.keys(el.module || {}).length && !((_a = el.elements) === null || _a === void 0 ? void 0 : _a.length); }));
+            const isEmpty = !section?.elements?.length || section?.elements.every(el => !Object.keys(el.module || {}).length && !el.elements?.length);
             this.pageRow && this.pageRow.toggleUI(!isEmpty);
             if (!this.sectionId || this.sectionId === this.elementId) {
-                const hasSectionData = !!((_c = section === null || section === void 0 ? void 0 : section.elements) === null || _c === void 0 ? void 0 : _c.find(elm => elm.id === (sectionEl === null || sectionEl === void 0 ? void 0 : sectionEl.id)));
+                const hasSectionData = !!section?.elements?.find(elm => elm.id === sectionEl?.id);
                 if (sectionEl && !hasSectionData)
                     sectionEl.remove();
             }
             else {
-                const parentElement = ((section === null || section === void 0 ? void 0 : section.elements) || []).find(elm => elm.id === this.sectionId);
-                const hasSectionData = !!((_d = parentElement === null || parentElement === void 0 ? void 0 : parentElement.elements) === null || _d === void 0 ? void 0 : _d.length);
+                const parentElement = (section?.elements || []).find(elm => elm.id === this.sectionId);
+                const hasSectionData = !!parentElement?.elements?.length;
                 if (sectionEl && !hasSectionData)
                     sectionEl.remove();
             }
@@ -2599,7 +2581,7 @@ define("@scom/scom-page-builder/command/removeToolbar.ts", ["require", "exports"
             const section = index_14.pageObject.getRow(this.rowId);
             const clonedSection = JSON.parse(JSON.stringify(section));
             if (this.pageRow && (this.rowId !== 'header' && this.rowId !== 'footer')) {
-                this.pageRow.setData(Object.assign(Object.assign({}, clonedSection), { id: this.rowId }));
+                this.pageRow.setData({ ...clonedSection, id: this.rowId });
                 this.pageRow.toggleUI(true);
             }
             components_5.application.EventBus.dispatch(index_13.EVENT.ON_UPDATE_SECTIONS);
@@ -2614,17 +2596,16 @@ define("@scom/scom-page-builder/command/groupElement.ts", ["require", "exports",
     exports.GroupElementCommand = void 0;
     class GroupElementCommand {
         constructor(dropElm, element, config, isAppend = true) {
-            var _a, _b;
             this.element = element || null;
             this.elementParent = (element ? element.closest('ide-row') : dropElm.closest('ide-row'));
             this.dropParent = dropElm.closest('ide-row');
             this.data = element ? JSON.parse(JSON.stringify(element.data)) : null;
             this.config = config ? JSON.parse(JSON.stringify(config)) : null;
-            const dropRowId = (_a = this.dropParent) === null || _a === void 0 ? void 0 : _a.id.replace('row-', '');
+            const dropRowId = this.dropParent?.id.replace('row-', '');
             const dropSection = dropElm.closest('ide-section');
-            this.dropSectionId = ((dropSection === null || dropSection === void 0 ? void 0 : dropSection.id) || '');
+            this.dropSectionId = (dropSection?.id || '');
             const toolbars = dropSection.querySelectorAll('ide-toolbar');
-            const dropElementId = (_b = dropElm.closest('ide-toolbar')) === null || _b === void 0 ? void 0 : _b.id.replace('elm-', '');
+            const dropElementId = dropElm.closest('ide-toolbar')?.id.replace('elm-', '');
             this.dropElementIndex = Array.from(toolbars).findIndex(toolbar => dropElementId && toolbar.elementId === dropElementId);
             this.oldDropData = JSON.parse(JSON.stringify(index_15.pageObject.getElement(dropRowId, this.dropSectionId)));
             this.isNew = !this.element;
@@ -2633,9 +2614,8 @@ define("@scom/scom-page-builder/command/groupElement.ts", ["require", "exports",
             this.isAppend = isAppend;
         }
         getElements() {
-            var _a, _b, _c, _d, _e;
             if (this.isNew) {
-                const isMicroDapps = ((_b = (_a = this.config) === null || _a === void 0 ? void 0 : _a.module) === null || _b === void 0 ? void 0 : _b.category) === 'micro-dapps' || ((_d = (_c = this.config) === null || _c === void 0 ? void 0 : _c.module) === null || _d === void 0 ? void 0 : _d.category) === 'offers';
+                const isMicroDapps = this.config?.module?.category === 'micro-dapps' || this.config?.module?.category === 'offers';
                 const newElData = {
                     id: this.config.id,
                     column: 1,
@@ -2645,33 +2625,32 @@ define("@scom/scom-page-builder/command/groupElement.ts", ["require", "exports",
                         showHeader: isMicroDapps,
                         showFooter: isMicroDapps
                     },
-                    module: ((_e = this.config) === null || _e === void 0 ? void 0 : _e.module) || {}
+                    module: this.config?.module || {}
                 };
                 return [newElData];
             }
             else {
                 const clonedData = JSON.parse(JSON.stringify(this.data));
-                const isComposite = (clonedData === null || clonedData === void 0 ? void 0 : clonedData.elements) && (clonedData === null || clonedData === void 0 ? void 0 : clonedData.elements.length) && (clonedData === null || clonedData === void 0 ? void 0 : clonedData.elements.length) > 0;
+                const isComposite = clonedData?.elements && clonedData?.elements.length && clonedData?.elements.length > 0;
                 if (isComposite)
-                    return (clonedData === null || clonedData === void 0 ? void 0 : clonedData.elements) || [];
+                    return clonedData?.elements || [];
                 else
                     return [clonedData];
             }
         }
         execute() {
-            var _a, _b, _c, _d;
             if (this.element && this.elementParent) {
                 this.element = this.elementParent.querySelector(`[id='${this.data.id}']`);
                 this.data = JSON.parse(JSON.stringify(this.element.data));
             }
-            const dropRowId = (_a = this.dropParent) === null || _a === void 0 ? void 0 : _a.id.replace('row-', '');
+            const dropRowId = this.dropParent?.id.replace('row-', '');
             const dropSection = this.dropParent.querySelector(`[id='${this.dropSectionId}']`);
             if (this.elementParent) {
-                const elementRowId = (((_b = this.elementParent) === null || _b === void 0 ? void 0 : _b.id) || '').replace('row-', '');
+                const elementRowId = (this.elementParent?.id || '').replace('row-', '');
                 const elementSection = index_15.pageObject.getRow(elementRowId);
                 if (elementRowId && this.element)
                     index_15.pageObject.removeElement(elementRowId, this.element.id);
-                this.elementParent.visible = !!((_c = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _c === void 0 ? void 0 : _c.length);
+                this.elementParent.visible = !!elementSection?.elements?.length;
             }
             if (this.element)
                 this.element.remove();
@@ -2680,7 +2659,7 @@ define("@scom/scom-page-builder/command/groupElement.ts", ["require", "exports",
             if (!this.dropSectionId || !dropRowId || !dropSectionData)
                 return;
             const elementList = this.getElements();
-            const isComposite = (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements) && (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements.length) && (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements.length) > 0;
+            const isComposite = clonedDropSecData?.elements && clonedDropSecData?.elements.length && clonedDropSecData?.elements.length > 0;
             if (isComposite) {
                 for (let i = 0; i < elementList.length; i++) {
                     let newElm = elementList[i];
@@ -2700,26 +2679,25 @@ define("@scom/scom-page-builder/command/groupElement.ts", ["require", "exports",
                 index_15.pageObject.setElement(dropRowId, this.dropSectionId, {
                     // type: ElementType.COMPOSITE, // to be removed
                     elements: this.isAppend ? [clonedDropSecData, ...updatedList] : [...updatedList, clonedDropSecData],
-                    dropId: ((_d = this.data) === null || _d === void 0 ? void 0 : _d.id) || ''
+                    dropId: this.data?.id || ''
                 });
             }
             const newDropData = index_15.pageObject.getElement(dropRowId, this.dropSectionId);
             dropSection.setData(dropRowId, newDropData);
         }
         undo() {
-            var _a, _b, _c;
-            const dropRowId = (_a = this.dropParent) === null || _a === void 0 ? void 0 : _a.id.replace('row-', '');
+            const dropRowId = this.dropParent?.id.replace('row-', '');
             const dropSection = this.dropParent.querySelector(`[id='${this.dropSectionId}']`);
             dropSection && dropSection.setData(dropRowId, this.oldDropData);
             index_15.pageObject.setElement(dropRowId, this.oldDropData.id, this.oldDropData);
             if (this.isNew)
                 return;
             if (this.elementParent) {
-                const rowId = (((_b = this.elementParent) === null || _b === void 0 ? void 0 : _b.id) || '').replace('row-', '');
+                const rowId = (this.elementParent?.id || '').replace('row-', '');
                 index_15.pageObject.addElement(rowId, this.data);
                 this.elementParent.addElement(this.data);
                 const oldElementSection = index_15.pageObject.getRow(rowId);
-                this.elementParent.visible = !!((_c = oldElementSection === null || oldElementSection === void 0 ? void 0 : oldElementSection.elements) === null || _c === void 0 ? void 0 : _c.length);
+                this.elementParent.visible = !!oldElementSection?.elements?.length;
             }
         }
         redo() { }
@@ -2732,7 +2710,6 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
     exports.UngroupElementCommand = void 0;
     class UngroupElementCommand {
         constructor(dragToolbar, dragSection, dropElm, config, mergeType, clientX, clientY) {
-            var _a;
             // set dragging related params
             this.dragToolbarId = dragToolbar.id.replace('elm-', '');
             this.dragRowId = dragToolbar.closest('ide-row').id.replace('row-', '');
@@ -2741,7 +2718,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             // set dropping related params
             this.dropElm = dropElm;
             this.dropRowId = dropElm.closest('ide-row').id.replace('row-', '');
-            this.dropSectionId = (_a = dropElm.closest('ide-section')) === null || _a === void 0 ? void 0 : _a.id;
+            this.dropSectionId = dropElm.closest('ide-section')?.id;
             this.oriDropRowData = JSON.parse(JSON.stringify(index_16.pageObject.getRow(this.dropRowId)));
             this.data = JSON.parse(JSON.stringify(dragToolbar.data));
             this.config = config;
@@ -2750,14 +2727,13 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             this.clientY = clientY;
         }
         async execute() {
-            var _a, _b, _c, _d, _e, _f, _g;
             const dropRow = document.getElementById(`row-${this.dropRowId}`);
             const dragRow = document.getElementById(`row-${this.dragRowId}`);
             if (!dropRow)
                 return;
             const dragSection = dragRow.querySelector(`[id='${this.dragSectionId}']`);
-            const currentElm = dragRow === null || dragRow === void 0 ? void 0 : dragRow.querySelector(`ide-toolbar#elm-${this.dragToolbarId}`);
-            if (currentElm === null || currentElm === void 0 ? void 0 : currentElm.data) {
+            const currentElm = dragRow?.querySelector(`ide-toolbar#elm-${this.dragToolbarId}`);
+            if (currentElm?.data) {
                 this.data = JSON.parse(JSON.stringify(currentElm.data));
             }
             // delete elm in the old section
@@ -2767,13 +2743,13 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
             removeToolbar && removeToolbar.remove();
             const section = JSON.parse(JSON.stringify(index_16.pageObject.getRow(this.dragRowId)));
             if (!this.dragSectionId || this.dragSectionId === this.dragToolbarId) {
-                const hasSectionData = !!((_a = section === null || section === void 0 ? void 0 : section.elements) === null || _a === void 0 ? void 0 : _a.find(elm => elm.id === (removeSection === null || removeSection === void 0 ? void 0 : removeSection.id)));
+                const hasSectionData = !!section?.elements?.find(elm => elm.id === removeSection?.id);
                 if (removeSection && !hasSectionData)
                     removeSection.remove();
             }
             else {
-                const parentElement = ((section === null || section === void 0 ? void 0 : section.elements) || []).find(elm => elm.id === this.dragSectionId);
-                const hasSectionData = !!((_b = parentElement === null || parentElement === void 0 ? void 0 : parentElement.elements) === null || _b === void 0 ? void 0 : _b.length);
+                const parentElement = (section?.elements || []).find(elm => elm.id === this.dragSectionId);
+                const hasSectionData = !!parentElement?.elements?.length;
                 if (removeSection && !hasSectionData)
                     removeSection.remove();
             }
@@ -2787,14 +2763,14 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 const dragEnterElm = dropRow.closest('#pageBuilder').querySelector('.is-dragenter');
                 if (!dragEnterElm)
                     return;
-                const dropToolbarId = (_c = dragEnterElm.closest('ide-toolbar')) === null || _c === void 0 ? void 0 : _c.elementId;
+                const dropToolbarId = dragEnterElm.closest('ide-toolbar')?.elementId;
                 const dropSectionData = index_16.pageObject.getElement(this.dropRowId, this.dropSectionId);
                 const clonedDropSecData = JSON.parse(JSON.stringify(dropSectionData));
                 if (!this.dropSectionId || !this.dropRowId || !dropSectionData)
                     return;
                 this.data.column = clonedDropSecData.column;
                 this.data.columnSpan = clonedDropSecData.columnSpan;
-                const isComposite = (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements) && (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements.length) && (clonedDropSecData === null || clonedDropSecData === void 0 ? void 0 : clonedDropSecData.elements.length) > 0;
+                const isComposite = clonedDropSecData?.elements && clonedDropSecData?.elements.length && clonedDropSecData?.elements.length > 0;
                 if (isComposite) {
                     const elementIndex = dropToolbarId ? dropSectionData.elements.findIndex(elm => elm.id === dropToolbarId) : -1;
                     const idx = (this.mergeType == "bottom") ? elementIndex + 1 : elementIndex;
@@ -2805,7 +2781,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                         clonedDropSecData.id = this.config.id;
                     index_16.pageObject.setElement(this.dropRowId, this.dropSectionId, {
                         elements: [clonedDropSecData, this.data],
-                        dropId: ((_d = this.data) === null || _d === void 0 ? void 0 : _d.id) || ''
+                        dropId: this.data?.id || ''
                     });
                 }
                 const newDropData = index_16.pageObject.getElement(this.dropRowId, this.dropSectionId);
@@ -2815,7 +2791,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                 // simple ungroup
                 const MAX_COLUMN = index_16.pageObject.getColumnsNumber(this.dropRowId);
                 if (!this.clientX && !this.clientY) {
-                    let dropColumn = parseInt((_f = (_e = this.dropElm) === null || _e === void 0 ? void 0 : _e.dataset) === null || _f === void 0 ? void 0 : _f.column) || 1;
+                    let dropColumn = parseInt(this.dropElm?.dataset?.column) || 1;
                     const emptySpace = this.data.columnSpan - ((MAX_COLUMN - dropColumn) + 1);
                     if (emptySpace > 0)
                         dropColumn = dropColumn - emptySpace;
@@ -2839,7 +2815,7 @@ define("@scom/scom-page-builder/command/ungroupElement.ts", ["require", "exports
                     this.appendElm = await dropRow.addElement(newElData);
                     index_16.pageObject.addElement(this.dropRowId, newElData);
                     const dropSectionData = index_16.pageObject.getRow(this.dropRowId);
-                    dropRow.toggleUI(!!((_g = dropSectionData === null || dropSectionData === void 0 ? void 0 : dropSectionData.elements) === null || _g === void 0 ? void 0 : _g.length));
+                    dropRow.toggleUI(!!dropSectionData?.elements?.length);
                 }
                 else {
                     const nearestDropSection = (0, index_18.findNearestSectionInRow)(dropRow, this.clientX, this.clientY, false);
@@ -2926,7 +2902,6 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
                 (0, columnUtils_2.getDropColumnData)(this.dropElm, sortedSections);
         }
         async execute() {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
             if (!this.parent)
                 return;
             let column = 1;
@@ -2938,7 +2913,7 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
                 column = columnData.column;
                 columnSpan = columnData.columnSpan;
             }
-            const isMicroDapps = ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.module) === null || _b === void 0 ? void 0 : _b.category) === 'micro-dapps';
+            const isMicroDapps = this.data?.module?.category === 'micro-dapps';
             // const newElData = {
             //   id: this.data.id,
             //   column,
@@ -2970,7 +2945,7 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
                 module: this.data.module,
                 tag: {}
             };
-            if (((_d = (_c = this.data) === null || _c === void 0 ? void 0 : _c.module) === null || _d === void 0 ? void 0 : _d.category) === 'offers') {
+            if (this.data?.module?.category === 'offers') {
                 let scconfig = await (0, index_21.fetchScconfigByRootCid)(this.data.module.path);
                 let widgetData = scconfig.widgetData;
                 this.data.module.path = widgetData.module.path || widgetData.module.name.replace('@scom/', '');
@@ -2981,17 +2956,17 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
                     newElData.tag = widgetData.tag;
                 }
             }
-            if (((_f = (_e = this.data) === null || _e === void 0 ? void 0 : _e.module) === null || _f === void 0 ? void 0 : _f.category) === 'project-widgets') {
-                newElData.properties.guid = (_h = (_g = this.data) === null || _g === void 0 ? void 0 : _g.module) === null || _h === void 0 ? void 0 : _h.guid;
-                newElData.properties.name = (_k = (_j = this.data) === null || _j === void 0 ? void 0 : _j.module) === null || _k === void 0 ? void 0 : _k.name;
+            if (this.data?.module?.category === 'project-widgets') {
+                newElData.properties.guid = this.data?.module?.guid;
+                newElData.properties.name = this.data?.module?.name;
             }
-            const parentData = (_l = this.parent) === null || _l === void 0 ? void 0 : _l.data;
+            const parentData = this.parent?.data;
             // Remove any elements that are not currently listed
-            if (parentData === null || parentData === void 0 ? void 0 : parentData.elements) {
+            if (parentData?.elements) {
                 const selections = this.parent.querySelectorAll('ide-section');
                 for (const section of selections) {
                     const elm = parentData.elements.find((f) => f.id === section.id);
-                    if (!elm || (Object.keys(elm.module || {}).length === 0 && !((_m = elm.elements) === null || _m === void 0 ? void 0 : _m.length))) {
+                    if (!elm || (Object.keys(elm.module || {}).length === 0 && !elm.elements?.length)) {
                         section.remove();
                     }
                 }
@@ -2999,12 +2974,11 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
             this.element = await this.parent.addElement(newElData);
             const parentId = this.parent.id.replace('row-', '');
             index_19.pageObject.addElement(parentId, newElData);
-            const elementRowId = (((_o = this.parent) === null || _o === void 0 ? void 0 : _o.id) || '').replace('row-', '');
+            const elementRowId = (this.parent?.id || '').replace('row-', '');
             const elementSection = index_19.pageObject.getRow(elementRowId);
-            this.parent.toggleUI(!!((_p = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _p === void 0 ? void 0 : _p.length));
+            this.parent.toggleUI(!!elementSection?.elements?.length);
         }
         undo() {
-            var _a;
             if (!this.element || !this.parent)
                 return;
             this.element = this.parent.querySelector(`[id='${this.element.id}']`);
@@ -3018,7 +2992,7 @@ define("@scom/scom-page-builder/command/addElement.ts", ["require", "exports", "
                 (0, columnUtils_2.updateColumnData)(el, rowId, column, columnSpan);
             }
             const elementSection = index_19.pageObject.getRow(parentId);
-            this.parent.toggleUI(!!((_a = elementSection === null || elementSection === void 0 ? void 0 : elementSection.elements) === null || _a === void 0 ? void 0 : _a.length));
+            this.parent.toggleUI(!!elementSection?.elements?.length);
         }
         redo() { }
     }
@@ -3029,12 +3003,12 @@ define("@scom/scom-page-builder/command/replaceElement.ts", ["require", "exports
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ReplaceElementCommand = void 0;
     const onChangeElement = async (element, data, properties, tag, newData, newCurrentReplaceData) => {
-        element.setData(properties, data === null || data === void 0 ? void 0 : data.module);
+        element.setData(properties, data?.module);
         element.clearComponent();
         await element.fetchModule(data);
-        await element.setProperties(Object.assign({}, properties));
+        await element.setProperties({ ...properties });
         if (tag)
-            await element.setTag(Object.assign({}, tag));
+            await element.setTag({ ...tag });
         components_7.application.EventBus.dispatch(index_22.EVENT.ON_UPDATE_SECTIONS);
         if (newData) {
             newData = JSON.parse(JSON.stringify(element.data));
@@ -3051,22 +3025,24 @@ define("@scom/scom-page-builder/command/replaceElement.ts", ["require", "exports
             this.currentReplaceData = JSON.parse(JSON.stringify(element.currentReplaceData));
         }
         execute() {
-            var _a;
             let isEmpty = false;
             if (!this.element.closest('ide-row')) {
-                const elm = (_a = this.pageRow) === null || _a === void 0 ? void 0 : _a.querySelector(`ide-toolbar#${this.element.id}`);
+                const elm = this.pageRow?.querySelector(`ide-toolbar#${this.element.id}`);
                 if (elm) {
                     this.element = elm;
                     isEmpty = true;
                 }
             }
-            this.oldReplaceData = Object.assign({}, this.data);
+            this.oldReplaceData = { ...this.data };
             let value = this.currentReplaceData;
             if (!value)
                 return;
             const { tag, properties, module, elements } = value;
-            let data = Object.assign(Object.assign({}, this.data), { module,
-                properties });
+            let data = {
+                ...this.data,
+                module,
+                properties
+            };
             // if (type) {
             //   data.type = type;
             // }
@@ -3084,13 +3060,12 @@ define("@scom/scom-page-builder/command/replaceElement.ts", ["require", "exports
             }
         }
         undo() {
-            var _a;
             if (!this.oldReplaceData)
                 return;
             const { properties, tag } = this.oldReplaceData;
             let isEmpty = false;
             if (!this.element.closest('ide-row')) {
-                const elm = (_a = this.pageRow) === null || _a === void 0 ? void 0 : _a.querySelector(`ide-toolbar#${this.element.id}`);
+                const elm = this.pageRow?.querySelector(`ide-toolbar#${this.element.id}`);
                 if (elm) {
                     this.element = elm;
                     isEmpty = true;
@@ -3290,13 +3265,13 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
         constructor(element, settings) {
             this.rowsConfig = {};
             this.element = element;
-            this.oldSettings = Object.assign({}, (0, index_23.getPageConfig)());
-            this.settings = Object.assign(Object.assign({}, (0, index_23.getPageConfig)()), settings);
+            this.oldSettings = { ...(0, index_23.getPageConfig)() };
+            this.settings = { ...(0, index_23.getPageConfig)(), ...settings };
             const rows = this.element.querySelectorAll('ide-row');
             for (let row of rows) {
-                const id = ((row === null || row === void 0 ? void 0 : row.id) || '').replace('row-', '');
+                const id = (row?.id || '').replace('row-', '');
                 const oldConfig = index_23.pageObject.getRowConfig(id) || {};
-                this.rowsConfig[id] = JSON.stringify(Object.assign(Object.assign({}, this.oldSettings), oldConfig));
+                this.rowsConfig[id] = JSON.stringify({ ...this.oldSettings, ...oldConfig });
             }
         }
         getChangedValues(newValue, oldValue) {
@@ -3331,7 +3306,7 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
                 customTextColor: customTextColor,
                 textColor: textColor,
                 customTextSize: customTextSize,
-                textSize: textSize !== null && textSize !== void 0 ? textSize : defaultTextSize,
+                textSize: textSize ?? defaultTextSize,
                 customWidgetsBackground,
                 customWidgetsColor,
                 widgetsBackground,
@@ -3387,10 +3362,10 @@ define("@scom/scom-page-builder/command/updatePageSetting.ts", ["require", "expo
                 data.customWidgetsColor = customWidgetsColor;
                 data.widgetsColor = widgetsColor;
             }
-            components_10.application.EventBus.dispatch(index_24.EVENT.ON_UPDATE_PAGE_BG, Object.assign({}, data));
+            components_10.application.EventBus.dispatch(index_24.EVENT.ON_UPDATE_PAGE_BG, { ...data });
             this.element.maxWidth = '100%'; // maxWidth ?? '100%';
             this.element.margin = (0, index_23.getMargin)(margin);
-            index_23.pageObject.config = Object.assign({}, config);
+            index_23.pageObject.config = { ...config };
             return newConfig;
         }
         execute() {
@@ -3642,12 +3617,10 @@ define("@scom/scom-page-builder/dialogs/searchComponentsDialog.tsx", ["require",
             (0, index_31.assignAttr)(this);
         }
         get components() {
-            var _a;
-            return ((_a = (0, index_32.getSearchData)()) === null || _a === void 0 ? void 0 : _a.items) || [];
+            return (0, index_32.getSearchData)()?.items || [];
         }
         get total() {
-            var _a;
-            return ((_a = (0, index_32.getSearchData)()) === null || _a === void 0 ? void 0 : _a.total) || 0;
+            return (0, index_32.getSearchData)()?.total || 0;
         }
         hide() {
             this.mdSearch.visible = false;
@@ -4152,15 +4125,14 @@ define("@scom/scom-page-builder/dialogs/rowSettingsDialog.tsx", ["require", "exp
             return { jsonSchema, formOptions, jsonUISchema };
         }
         renderForm() {
-            var _a;
             const { jsonSchema, formOptions, jsonUISchema } = this.getSchema();
             this.formElm.jsonSchema = jsonSchema;
             this.formElm.uiSchema = jsonUISchema;
             this.formElm.formOptions = formOptions;
             this.formElm.renderForm();
             const { backgroundColor, margin, sectionWidth, textColor } = (0, index_36.getPageConfig)();
-            const config = Object.assign({ align: 'left', sectionWidth, textColor, backgroundColor }, (((_a = this.data) === null || _a === void 0 ? void 0 : _a.config) || {}));
-            this.formElm.setFormData(Object.assign({}, config));
+            const config = { align: 'left', sectionWidth, textColor, backgroundColor, ...(this.data?.config || {}) };
+            this.formElm.setFormData({ ...config });
         }
         close() {
             this.dialog.visible = false;
@@ -4515,7 +4487,7 @@ define("@scom/scom-page-builder/dialogs/pageSettingsDialog.tsx", ["require", "ex
             this.formElm.formOptions = formOptions;
             this.formElm.renderForm();
             const config = (0, index_38.getPageConfig)();
-            this.formElm.setFormData(Object.assign({}, (0, index_38.getPageConfig)()));
+            this.formElm.setFormData({ ...(0, index_38.getPageConfig)() });
         }
         close() {
             this.settingsDialog.visible = false;
@@ -4567,11 +4539,10 @@ define("@scom/scom-page-builder/page/pageHeader.tsx", ["require", "exports", "@i
             this.imgLogo.visible = !hide;
         }
         onSavePageSettings(data) {
-            var _a;
-            const containerEl = (_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.querySelector('.pnl-editor-wrapper');
+            const containerEl = this.parentElement?.querySelector('.pnl-editor-wrapper');
             if (!containerEl)
                 return;
-            const updateCmd = new index_39.UpdatePageSettingsCommand(containerEl, Object.assign({}, data));
+            const updateCmd = new index_39.UpdatePageSettingsCommand(containerEl, { ...data });
             index_39.commandHistory.execute(updateCmd);
         }
         renderIconList() {
@@ -5110,7 +5081,6 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
             }
         }
         renderMenu() {
-            var _a;
             this.pnlMenu.clearInnerHTML();
             const sections = index_43.pageObject.getNonNullSections();
             const items = sections.map((section) => {
@@ -5126,7 +5096,7 @@ define("@scom/scom-page-builder/page/pageMenu.tsx", ["require", "exports", "@ijs
                 return;
             }
             const activeElm = document.querySelector('ide-toolbar.active') || document.querySelector('ide-row.active');
-            const activeSectionId = (_a = activeElm === null || activeElm === void 0 ? void 0 : activeElm.closest('ide-row')) === null || _a === void 0 ? void 0 : _a.id.replace('row-', "");
+            const activeSectionId = activeElm?.closest('ide-row')?.id.replace('row-', "");
             // set the titles here
             const dropLine = (this.$render("i-panel", { id: `menuDropLine-0`, width: '100%', height: '5px' }));
             this.pnlMenu.appendChild(dropLine);
@@ -5417,24 +5387,21 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             return this._selectedSection;
         }
         get maxColumn() {
-            var _a;
-            const rowId = (_a = this.id) === null || _a === void 0 ? void 0 : _a.replace('row-', '');
+            const rowId = this.id?.replace('row-', '');
             return index_49.pageObject.getColumnsNumber(rowId);
         }
         get align() {
-            var _a;
-            const rowId = (_a = this.id) === null || _a === void 0 ? void 0 : _a.replace('row-', '');
+            const rowId = this.id?.replace('row-', '');
             const config = index_49.pageObject.getRowConfig(rowId);
-            return (config === null || config === void 0 ? void 0 : config.align) || 'left';
+            return config?.align || 'left';
         }
         get gridColumnWidth() {
             return this._gridColumnWidth;
         }
         init() {
-            var _a, _b;
             this._readonly = this.getAttribute('readonly', true, false);
             super.init();
-            const hasData = (_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.elements) === null || _b === void 0 ? void 0 : _b.length;
+            const hasData = this.data?.elements?.length;
             this.toggleUI(hasData);
             this.renderFixedGrid();
             this.initEventListeners();
@@ -5457,8 +5424,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             return this.createElementFn(sectionData);
         }
         async createElementFn(data) {
-            var _a;
-            const isElmExist = (_a = this.pnlRow) === null || _a === void 0 ? void 0 : _a.querySelector(`ide-section[id='${data.id}']`);
+            const isElmExist = this.pnlRow?.querySelector(`ide-section[id='${data.id}']`);
             if (isElmExist)
                 return;
             const pageSection = (this.$render("ide-section", { id: data.id, readonly: this._readonly, display: "block", maxWidth: "100%", maxHeight: "100%", position: "relative", minWidth: 0 }));
@@ -5486,9 +5452,8 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             return element;
         }
         async clearData() {
-            var _a;
-            const children = (_a = this.pnlRow) === null || _a === void 0 ? void 0 : _a.querySelectorAll('ide-section');
-            if (children === null || children === void 0 ? void 0 : children.length) {
+            const children = this.pnlRow?.querySelectorAll('ide-section');
+            if (children?.length) {
                 children.forEach((item) => {
                     item.onHide();
                     item.remove();
@@ -5496,7 +5461,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             }
         }
         async setData(rowData) {
-            var _a, _b, _c, _d;
             this.clearData();
             const { id, row, elements, config } = rowData;
             this.id = `row-${id}`;
@@ -5504,9 +5468,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.rowData = rowData;
             this.setAttribute('data-row', `${row}`);
             this.updateRowConfig(config || (0, index_49.getPageConfig)());
-            this.isCloned = ((_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.nodeName) !== 'BUILDER-HEADER';
-            this.isChanged = ((_b = this.parentElement) === null || _b === void 0 ? void 0 : _b.nodeName) !== 'BUILDER-HEADER';
-            if ((config === null || config === void 0 ? void 0 : config.customTextSize) && (config === null || config === void 0 ? void 0 : config.textSize)) {
+            this.isCloned = this.parentElement?.nodeName !== 'BUILDER-HEADER';
+            this.isChanged = this.parentElement?.nodeName !== 'BUILDER-HEADER';
+            if (config?.customTextSize && config?.textSize) {
                 this.classList.add(`font-${config.textSize}`);
             }
             if (elements && elements.length > 0) {
@@ -5516,7 +5480,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             }
             this.actionsBar.minHeight = '100%';
             this.updateColumn();
-            const hasData = (_d = (_c = this.data) === null || _c === void 0 ? void 0 : _c.elements) === null || _d === void 0 ? void 0 : _d.length;
+            const hasData = this.data?.elements?.length;
             this.toggleUI(hasData);
         }
         updateRowConfig(config) {
@@ -5682,7 +5646,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
         onDeleteRow() {
             const prependRow = this.previousElementSibling;
             const appendRow = this.nextElementSibling;
-            const rowCmd = new index_50.UpdateRowCommand(this, this.parent, this.data, true, (prependRow === null || prependRow === void 0 ? void 0 : prependRow.id) || '', (appendRow === null || appendRow === void 0 ? void 0 : appendRow.id) || '');
+            const rowCmd = new index_50.UpdateRowCommand(this, this.parent, this.data, true, prependRow?.id || '', appendRow?.id || '');
             index_50.commandHistory.execute(rowCmd);
             if (!prependRow && !appendRow) {
                 // create empty section
@@ -5777,8 +5741,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 return (self.currentWidth / self.currentHeight) * newHeight;
             }
             function mouseMoveHandler(e) {
-                var _a;
-                const isImage = ((_a = toolbar.module) === null || _a === void 0 ? void 0 : _a.nodeName) === 'I-SCOM-IMAGE';
+                const isImage = toolbar.module?.nodeName === 'I-SCOM-IMAGE';
                 if (!self.isResizing || !toolbar)
                     return;
                 const deltaX = e.clientX - startX;
@@ -5895,23 +5858,22 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
             }
             this.addEventListener('dragstart', function (event) {
-                var _a;
                 const eventTarget = event.target;
                 if (eventTarget instanceof PageRow_1)
                     return;
                 const targetSection = eventTarget.closest && eventTarget.closest('ide-section');
-                const targetToolbar = (_a = findClosestToolbarInSection(targetSection, event.clientY)) === null || _a === void 0 ? void 0 : _a.toolbar;
+                const targetToolbar = findClosestToolbarInSection(targetSection, event.clientY)?.toolbar;
                 const toolbars = targetSection ? Array.from(targetSection.querySelectorAll('ide-toolbar')) : [];
                 const cannotDrag = toolbars.find((toolbar) => {
                     return toolbar.classList.contains('is-editing') || toolbar.classList.contains('is-setting');
                 });
-                const isCurrentTxt = (targetToolbar === null || targetToolbar === void 0 ? void 0 : targetToolbar.classList.contains('is-textbox')) && (!mouseDownEl || !mouseDownEl.closest('.dragger'));
+                const isCurrentTxt = targetToolbar?.classList.contains('is-textbox') && (!mouseDownEl || !mouseDownEl.closest('.dragger'));
                 if (targetSection && (!cannotDrag && !isCurrentTxt)) {
                     self.pnlRow.templateColumns = [`repeat(${self.maxColumn}, 1fr)`];
                     self.currentElement = targetSection;
                     startX = event.offsetX;
                     startY = event.offsetY;
-                    if ((targetToolbar === null || targetToolbar === void 0 ? void 0 : targetToolbar.classList.contains('active')) || toolbars.length == 1)
+                    if (targetToolbar?.classList.contains('active') || toolbars.length == 1)
                         components_27.application.EventBus.dispatch(index_47.EVENT.ON_SET_DRAG_TOOLBAR, targetToolbar);
                     else
                         self.currentToolbar = undefined;
@@ -5979,12 +5941,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
             }
             function resetPageRow() {
-                var _a, _b;
                 self.pnlRow.minHeight = 'auto';
-                self.toggleUI(!!((_b = (_a = self.data) === null || _a === void 0 ? void 0 : _a.elements) === null || _b === void 0 ? void 0 : _b.length));
+                self.toggleUI(!!self.data?.elements?.length);
             }
             function updateDropBlocksAndRectangle(enterTarget, clientX, clientY) {
-                var _a, _b, _c, _d, _e, _f;
                 if (!enterTarget /* || !self.currentElement*/)
                     return;
                 removeRectangles();
@@ -6004,7 +5964,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     self.updateGridColumnWidth();
                     const targetRow = target.closest('ide-row');
                     const nearestDropSection = (0, index_51.findNearestSectionInRow)(targetRow, clientX, clientY, false);
-                    const nearestDropSectionBound = (nearestDropSection === null || nearestDropSection === void 0 ? void 0 : nearestDropSection.getBoundingClientRect()) || {};
+                    const nearestDropSectionBound = nearestDropSection?.getBoundingClientRect() || {};
                     const isFront = (clientX < nearestDropSectionBound.left) ? true : false;
                     const dragSectionCol = parseInt(self.currentElement.dataset.column);
                     const dragSectionColSpan = parseInt(self.currentElement.dataset.columnSpan);
@@ -6015,9 +5975,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 if (target) {
                     const dropRow = target.closest('ide-row');
                     let offsetLeft = 0;
-                    if (!((_a = (0, index_49.getDragData)()) === null || _a === void 0 ? void 0 : _a.module)) {
+                    if (!(0, index_49.getDragData)()?.module) {
                         const dragRow = self.currentElement.closest('ide-row');
-                        if ((dragRow === null || dragRow === void 0 ? void 0 : dragRow.id) && (dropRow === null || dropRow === void 0 ? void 0 : dropRow.id) && dragRow.id === dropRow.id) {
+                        if (dragRow?.id && dropRow?.id && dragRow.id === dropRow.id) {
                             offsetLeft = Math.floor((startX + index_48.GAP_WIDTH) / (self._gridColumnWidth + index_48.GAP_WIDTH));
                         }
                     }
@@ -6034,12 +5994,12 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     else {
                         column = targetCol - offsetLeft;
                     }
-                    const columnSpan = ((_b = self.currentElement) === null || _b === void 0 ? void 0 : _b.dataset.columnSpan)
+                    const columnSpan = self.currentElement?.dataset.columnSpan
                         ? Number(self.currentElement.dataset.columnSpan)
                         : index_48.INIT_COLUMN_SPAN;
                     const colSpan = Math.min(columnSpan, self.maxColumn);
                     let colStart = Math.min(column, self.maxColumn);
-                    const sections = Array.from(dropRow === null || dropRow === void 0 ? void 0 : dropRow.querySelectorAll('ide-section'));
+                    const sections = Array.from(dropRow?.querySelectorAll('ide-section'));
                     const sortedSections = sections.sort((a, b) => Number(b.dataset.column) - Number(a.dataset.column));
                     let spaces = 0;
                     let findedSection = null;
@@ -6057,7 +6017,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         if ((colStart >= sectionColumn && colData <= sectionData) || (colStart < sectionData && colData > sectionData)) {
                             findedSection = section;
                         }
-                        if (((_c = self.currentElement) === null || _c === void 0 ? void 0 : _c.id) !== section.id) {
+                        if (self.currentElement?.id !== section.id) {
                             spaces += sectionColumnSpan;
                         }
                     }
@@ -6083,9 +6043,9 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                                 updateClass(topBlock, 'is-dragenter');
                             }
                         }
-                        const curElmCol = Number((_d = section === null || section === void 0 ? void 0 : section.dataset) === null || _d === void 0 ? void 0 : _d.column);
-                        const curElmColSpan = Number((_e = section === null || section === void 0 ? void 0 : section.dataset) === null || _e === void 0 ? void 0 : _e.columnSpan);
-                        const sections = Array.from((_f = section.closest('#pnlRow')) === null || _f === void 0 ? void 0 : _f.querySelectorAll('ide-section'));
+                        const curElmCol = Number(section?.dataset?.column);
+                        const curElmColSpan = Number(section?.dataset?.columnSpan);
+                        const sections = Array.from(section.closest('#pnlRow')?.querySelectorAll('ide-section'));
                         const nextElm = sections.find((el) => {
                             const column = Number(el.dataset.column);
                             return !isNaN(column) && curElmCol + curElmColSpan === column;
@@ -6110,24 +6070,22 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 }
             }
             this.addEventListener('dragenter', function (event) {
-                var _a;
                 const eventTarget = event.target;
                 const elementConfig = (0, index_49.getDragData)();
-                if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack')
+                if (elementConfig?.module?.name === 'sectionStack')
                     return;
                 if (eventTarget && (eventTarget.classList.contains('fixed-grid-item') || eventTarget.classList.contains('fixed-grid'))) {
                     updateDropBlocksAndRectangle(eventTarget, event.clientX, event.clientY);
                 }
             });
             this.addEventListener('dragover', function (event) {
-                var _a, _b, _c;
                 event.preventDefault();
                 const eventTarget = event.target;
                 // prevent bad performance
                 if (dragOverTarget == eventTarget && eventTarget.classList.contains('fixed-grid-item'))
                     return;
                 const elementConfig = (0, index_49.getDragData)();
-                const isLayout = ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack';
+                const isLayout = elementConfig?.module?.name === 'sectionStack';
                 // temporary disable dragging layout to section
                 if (isLayout)
                     return;
@@ -6141,7 +6099,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     startX: startX,
                     isUngroup: self.isUngrouping(),
                     isLayout: isLayout,
-                    layoutLength: isLayout ? (_c = (_b = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _b === void 0 ? void 0 : _b.elements) === null || _c === void 0 ? void 0 : _c.length : undefined
+                    layoutLength: isLayout ? elementConfig?.module?.elements?.length : undefined
                 });
                 if (dragDropResult.canDrop && dragDropResult.details) {
                     // dragover rowBlock
@@ -6225,7 +6183,6 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 return nearestElement;
             }
             this.addEventListener('drop', async function (event) {
-                var _a, _b, _c, _d;
                 self.pnlRow.minHeight = 'auto';
                 const elementConfig = (0, index_49.getDragData)();
                 const eventTarget = event.target;
@@ -6235,7 +6192,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 self.removeDottedLines();
                 toggleAllToolbarBoarder(false);
                 removeRectangles();
-                if (pageRow && ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
+                if (pageRow && elementConfig?.module?.name === 'sectionStack') {
                     // add section
                     components_27.application.EventBus.dispatch(index_47.EVENT.ON_ADD_SECTION, {
                         prependId: pageRow.id,
@@ -6246,7 +6203,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 // if (!self.currentElement) return;
                 const isUngrouping = self.isUngrouping();
                 const dragStartTargetSection = (dragStartTarget) ? dragStartTarget.closest('ide-section') : undefined;
-                const isLayout = ((_b = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _b === void 0 ? void 0 : _b.name) === 'sectionStack';
+                const isLayout = elementConfig?.module?.name === 'sectionStack';
                 const dragDropResult = (0, index_51.checkDragDropResult)({
                     dropTarget: eventTarget,
                     dragSection: dragStartTargetSection,
@@ -6256,7 +6213,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     startX: startX,
                     isUngroup: self.isUngrouping(),
                     isLayout: isLayout,
-                    layoutLength: isLayout ? (_d = (_c = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _c === void 0 ? void 0 : _c.elements) === null || _d === void 0 ? void 0 : _d.length : undefined
+                    layoutLength: isLayout ? elementConfig?.module?.elements?.length : undefined
                 });
                 if (dragDropResult.canDrop && dragDropResult.details) {
                     // let dropElm = parentWrapper.querySelector('.is-dragenter') as Control;
@@ -6323,7 +6280,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                         }
                         else {
                             const newConfig = self.getNewElementData();
-                            const dragCmd = new index_50.GroupElementCommand(dragDropResult.details.toolbar, elementConfig ? null : self.currentElement, Object.assign(Object.assign({}, newConfig), { firstId: (0, index_51.generateUUID)() }), dragDropResult.details.dropSide == "bottom");
+                            const dragCmd = new index_50.GroupElementCommand(dragDropResult.details.toolbar, elementConfig ? null : self.currentElement, { ...newConfig, firstId: (0, index_51.generateUUID)() }, dragDropResult.details.dropSide == "bottom");
                             index_50.commandHistory.execute(dragCmd);
                         }
                     }
@@ -6464,7 +6421,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                 const id = this.id.replace('row-', '');
                 const sectionConfig = index_49.pageObject.getRowConfig(id) || {};
                 const pageConfig = (0, index_49.getPageConfig)();
-                const combinedPageConfig = Object.assign(Object.assign({}, pageConfig), config);
+                const combinedPageConfig = { ...pageConfig, ...config };
                 sectionConfig.sectionWidth = combinedPageConfig.sectionWidth || 1000;
                 sectionConfig.customWidgetsBackground = combinedPageConfig.customWidgetsBackground;
                 sectionConfig.customWidgetsColor = combinedPageConfig.customWidgetsColor;
@@ -6519,10 +6476,10 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             }
         }
         getNewElementData() {
-            const elementConfig = Object.assign({}, ((0, index_49.getDragData)() || {}));
+            const elementConfig = { ...((0, index_49.getDragData)() || {}) };
             const id = (0, index_51.generateUUID)();
             const elementId = (0, index_51.generateUUID)();
-            return Object.assign(Object.assign({}, elementConfig), { id, elementId });
+            return { ...elementConfig, id, elementId };
         }
         addDottedLines() {
             const fixedGridItems = document.getElementsByClassName('fixed-grid-item');
@@ -6566,7 +6523,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.classList.add('active');
             const parent = this.closest('#editor') || document;
             const menu = parent.querySelector('i-scom-page-builder-menu');
-            menu === null || menu === void 0 ? void 0 : menu.setfocusCard(this.rowId);
+            menu?.setfocusCard(this.rowId);
         }
         onAddSection(type) {
             const prependId = type === 1 ? this.id : '';
@@ -6647,31 +6604,29 @@ define("@scom/scom-page-builder/command/widgetSettingsToolbar.ts", ["require", "
     exports.WidgetSettingsToolbarCommand = void 0;
     class WidgetSettingsToolbarCommand {
         constructor(toolbar, dataInput) {
-            var _a;
             this.toolbar = toolbar;
             this.data = dataInput;
             this.pageRow = this.toolbar.closest('ide-row');
             this.pageRowId = this.toolbar.rowId;
             this.section = this.toolbar.closest('ide-section');
-            const currentTag = ((_a = index_52.pageObject.getElement(this.pageRowId, this.toolbar.elementId)) === null || _a === void 0 ? void 0 : _a.tag) || {};
+            const currentTag = index_52.pageObject.getElement(this.pageRowId, this.toolbar.elementId)?.tag || {};
             this.oldData = JSON.parse(JSON.stringify(currentTag));
         }
         execute() {
-            var _a;
             const { pt, pb, pl, pr, maxWidth, align, link } = this.data;
             const contentStack = this.section.querySelector('#contentStack');
             if (contentStack)
                 contentStack.padding = { top: pt, bottom: pb, left: pl, right: pr };
             const newTag = { pt, pb, pl, pr, maxWidth, align, link };
-            const currentTag = ((_a = index_52.pageObject.getElement(this.pageRowId, this.toolbar.elementId)) === null || _a === void 0 ? void 0 : _a.tag) || {};
-            this.toolbar.setTag(Object.assign(Object.assign({}, currentTag), newTag));
+            const currentTag = index_52.pageObject.getElement(this.pageRowId, this.toolbar.elementId)?.tag || {};
+            this.toolbar.setTag({ ...currentTag, ...newTag });
         }
         undo() {
             const { pt, pb, pl, pr } = this.oldData;
             const contentStack = this.section.querySelector('#contentStack');
             if (contentStack)
                 contentStack.padding = { top: pt, bottom: pb, left: pl, right: pr };
-            this.toolbar.setTag(Object.assign({}, this.oldData));
+            this.toolbar.setTag({ ...this.oldData });
         }
         redo() { }
     }
@@ -6997,10 +6952,9 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this.classList.remove('is-setting');
         }
         async renderToolbarAction(action) {
-            var _a, _b, _c, _d;
             this.pnlForm.clearInnerHTML();
             const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
-            const data = (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getData) ? await builderTarget.getData() : this.data.properties;
+            const data = builderTarget?.getData ? await builderTarget.getData() : this.data.properties;
             if (data.height === 'auto')
                 data.height = this.offsetHeight;
             if (data.width === 'auto')
@@ -7017,8 +6971,8 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                     elementTag = { pt, pb, pl, pr, maxWidth, align, link };
                 }
             }
-            const builderTag = (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getTag) ? await builderTarget.getTag() : this.data.tag || {};
-            const tag = Object.assign(Object.assign({}, builderTag), elementTag);
+            const builderTag = builderTarget?.getTag ? await builderTarget.getTag() : this.data.tag || {};
+            const tag = { ...builderTag, ...elementTag };
             const customMaxWidth = action.customMaxWidth || 900;
             this.mdActions.title = action.name || 'Update Settings';
             this.mdActions.maxWidth = customMaxWidth;
@@ -7030,19 +6984,19 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 const customUI = action.customUI;
                 let element = null;
                 if (action.isReplacement) {
-                    element = await customUI.render(Object.assign(Object.assign({}, properties), tag), this.replaceComponent.bind(this));
+                    element = await customUI.render({ ...properties, ...tag }, this.replaceComponent.bind(this));
                 }
                 else {
-                    element = await customUI.render(Object.assign(Object.assign({}, properties), tag), this.onSave.bind(this));
+                    element = await customUI.render({ ...properties, ...tag }, this.onSave.bind(this));
                 }
                 this.pnlForm.append(element);
                 this.form.visible = false;
             }
             else {
-                if (typeof tag.width === 'number' && ((_b = (_a = action.userInputDataSchema.properties) === null || _a === void 0 ? void 0 : _a.width) === null || _b === void 0 ? void 0 : _b.type) === 'string') {
+                if (typeof tag.width === 'number' && action.userInputDataSchema.properties?.width?.type === 'string') {
                     tag.width = "" + tag.width;
                 }
-                if (typeof tag.height === 'number' && ((_d = (_c = action.userInputDataSchema.properties) === null || _c === void 0 ? void 0 : _c.height) === null || _d === void 0 ? void 0 : _d.type) === 'string') {
+                if (typeof tag.height === 'number' && action.userInputDataSchema.properties?.height?.type === 'string') {
                     tag.height = "" + tag.height;
                 }
                 const options = {
@@ -7052,7 +7006,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                     confirmButtonFontColor: Theme.colors.primary.contrastText,
                     jsonSchema: action.userInputDataSchema,
                     dateTimeFormat: 'MM/DD/YYYY HH:mm',
-                    data: Object.assign(Object.assign({}, properties), tag)
+                    data: { ...properties, ...tag }
                 };
                 if (action.userInputUISchema)
                     options.jsonUISchema = action.userInputUISchema;
@@ -7090,7 +7044,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 this.form.renderForm();
                 this.form.clearFormData();
                 // const formData = action.name === 'Theme Settings' ? (tag || {}) : (properties || {})
-                this.form.setFormData(Object.assign(Object.assign({}, tag), properties));
+                this.form.setFormData({ ...tag, ...properties });
                 this.form.visible = true;
             }
             this.mdActions.refresh();
@@ -7101,21 +7055,19 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 index_57.commandHistory.execute(commandIns);
                 this.mdActions.visible = false;
             }
-            else if (data === null || data === void 0 ? void 0 : data.errors) {
+            else if (data?.errors) {
                 // this.pnlFormMsg.visible = true;
                 // this.renderError(data.errors || []);
             }
         }
         isTexbox(data) {
-            var _a;
             if (data)
-                return ((_a = data.name) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === index_54.ELEMENT_NAME.TEXTBOX.toLowerCase();
+                return data.name?.toLowerCase() === index_54.ELEMENT_NAME.TEXTBOX.toLowerCase();
             else
                 return false;
         }
         isContentBlock() {
-            var _a, _b;
-            return ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.module) === null || _b === void 0 ? void 0 : _b.name) === index_54.ELEMENT_NAME.CONTENT_BLOCK;
+            return this.data?.module?.name === index_54.ELEMENT_NAME.CONTENT_BLOCK;
         }
         showToolbars() {
             if (this.toolList.length)
@@ -7135,12 +7087,11 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 pnl.classList.add('section-border');
         }
         getActions(category) {
-            var _a, _b, _c;
-            if ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) {
+            if (this._component?.getConfigurators) {
                 const configs = this._component.getConfigurators() || [];
                 const builderTarget = configs.find(conf => conf.target === 'Builders');
-                const _category = category || ((_c = (_b = this.data) === null || _b === void 0 ? void 0 : _b.module) === null || _c === void 0 ? void 0 : _c.category);
-                if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getActions)
+                const _category = category || this.data?.module?.category;
+                if (builderTarget?.getActions)
                     return builderTarget.getActions(_category);
             }
             return [];
@@ -7209,16 +7160,15 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             return stack;
         }
         async fetchModule(data) {
-            var _a;
             if (this._readonly)
                 return;
             if (this.pnlLoading)
                 this.pnlLoading.visible = true;
             try {
-                const module = await components_28.application.createElement(((_a = data === null || data === void 0 ? void 0 : data.module) === null || _a === void 0 ? void 0 : _a.path) || '');
+                const module = await components_28.application.createElement(data?.module?.path || '');
                 if (!module)
                     throw new Error('not found');
-                await this.setModule(module, data === null || data === void 0 ? void 0 : data.module);
+                await this.setModule(module, data?.module);
                 if (this.isTexbox(data.module)) {
                     this.dragStack.visible = true;
                     this.classList.add('is-textbox');
@@ -7247,33 +7197,32 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 this.pnlLoading.visible = hasProps;
         }
         async setModule(module, data) {
-            var _a, _b;
             this._component = module;
             this._component.id = `component-${this.elementId}`;
             this._component.rootParent = this.closest('ide-row');
             this._component.parent = this.contentStack;
-            const builderTarget = ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) ? this._component.getConfigurators().find((conf) => conf.target === 'Builders') : null;
-            if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setRootParent)
+            const builderTarget = this._component?.getConfigurators ? this._component.getConfigurators().find((conf) => conf.target === 'Builders') : null;
+            if (builderTarget?.setRootParent)
                 builderTarget.setRootParent(this.closest('#pnlRowContainer'));
-            if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setElementId)
+            if (builderTarget?.setElementId)
                 builderTarget.setElementId(this.elementId);
             // this.contentStack.append(this._component);
-            if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setRootDir)
+            if (builderTarget?.setRootDir)
                 builderTarget.setRootDir((0, index_55.getRootDir)());
             if (this._component.ready)
                 await this._component.ready();
             this._component.maxWidth = '100%';
             this._component.maxHeight = '100%';
             // this._component.overflow = 'hidden';
-            if (((_b = this.module) === null || _b === void 0 ? void 0 : _b.nodeName) === 'I-SCOM-IMAGE')
+            if (this.module?.nodeName === 'I-SCOM-IMAGE')
                 this._component.overflow = 'hidden';
             this._component.style.display = 'block';
-            this.backdropStack.visible = data === null || data === void 0 ? void 0 : data.shownBackdrop;
+            this.backdropStack.visible = data?.shownBackdrop;
             this._component.addEventListener('click', (event) => {
                 const target = event.target;
                 if (target && target.tagName === 'INPUT' && ['time', 'date', 'datetime-local'].includes(target.getAttribute('type')))
                     return;
-                if (data === null || data === void 0 ? void 0 : data.disableClicked)
+                if (data?.disableClicked)
                     event.stopImmediatePropagation();
                 event.preventDefault();
                 this.showToolList();
@@ -7281,7 +7230,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this.toolList = this.getActions(data.category) || [];
             this.checkToolbar();
             this.showToolbars();
-            if (this.isTexbox(data) && (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setOnConfirm))
+            if (this.isTexbox(data) && builderTarget?.setOnConfirm)
                 builderTarget.setOnConfirm(index_57.commandHistory, this);
         }
         showToolList() {
@@ -7302,13 +7251,13 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                 }
                 else {
                     if (isContentBlockProps) {
-                        index_55.pageObject.setElement(this.rowId, this.data.id, { properties: Object.assign(Object.assign({}, this.data.properties), properties), module });
+                        index_55.pageObject.setElement(this.rowId, this.data.id, { properties: { ...this.data.properties, ...properties }, module });
                     }
                     else {
                         const element = this.data.properties[this._currentSingleContentBlockId];
                         if (element)
                             element.properties = properties;
-                        index_55.pageObject.setElement(this.rowId, this.data.id, { properties: Object.assign(Object.assign({}, this.data.properties), { [this._currentSingleContentBlockId]: element }), module });
+                        index_55.pageObject.setElement(this.rowId, this.data.id, { properties: { ...this.data.properties, [this._currentSingleContentBlockId]: element }, module });
                     }
                 }
             }
@@ -7317,33 +7266,31 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             }
         }
         async setTag(tag, init) {
-            var _a;
             if (!this._component)
                 return;
             // if (tag.width === '100%') tag.width = Number(this.width);
             if (tag.height === '100%')
                 tag.height = Number(this.height);
-            if ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) {
+            if (this._component?.getConfigurators) {
                 this.updateComponent();
                 const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
-                if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setTag) {
-                    await builderTarget.setTag(init ? Object.assign(Object.assign({}, tag), { width: '100%' }) : Object.assign({}, tag));
+                if (builderTarget?.setTag) {
+                    await builderTarget.setTag(init ? { ...tag, width: '100%' } : { ...tag });
                 }
             }
             if (this.data && !init)
                 index_55.pageObject.setElement(this.rowId, this.data.id, { tag });
         }
         async setProperties(data) {
-            var _a;
             if (this.pnlLoading)
                 this.pnlLoading.visible = true;
-            if (!this._component || !((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators))
+            if (!this._component || !this._component?.getConfigurators)
                 return;
             const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
-            if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setData) {
+            if (builderTarget?.setData) {
                 await builderTarget.setData(data);
             }
-            if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setRootDir)
+            if (builderTarget?.setRootDir)
                 builderTarget.setRootDir((0, index_55.getRootDir)());
             if (this.pnlLoading)
                 this.pnlLoading.visible = false;
@@ -7390,20 +7337,19 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             }
         }
         updateComponent(data) {
-            var _a, _b, _c;
-            if (!((_a = this._component) === null || _a === void 0 ? void 0 : _a.closest('ide-row'))) {
+            if (!this._component?.closest('ide-row')) {
                 const componentId = this._component.id;
                 const rootParent = this._component.rootParent;
                 if (componentId && rootParent) {
-                    this._component = (_b = rootParent.querySelector(`#${componentId}`)) !== null && _b !== void 0 ? _b : this._component;
+                    this._component = rootParent.querySelector(`#${componentId}`) ?? this._component;
                     if (data) {
                         this.setProperties(data);
                     }
                 }
             }
-            else if (((_c = this._component) === null || _c === void 0 ? void 0 : _c.getConfigurators) && data) {
+            else if (this._component?.getConfigurators && data) {
                 const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
-                if (JSON.stringify(builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getData()) !== JSON.stringify(data)) {
+                if (JSON.stringify(builderTarget?.getData()) !== JSON.stringify(data)) {
                     this.setProperties(data);
                 }
             }
@@ -7418,22 +7364,20 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
         initEventListener() {
             let self = this;
             this.contentStack.addEventListener('mouseover', function (event) {
-                var _a, _b;
                 let pageRow = self.closest('ide-row');
                 let sectionSelected = pageRow.selectedElement ? true : false;
                 let compositeSection = self.closest('ide-section').data &&
-                    ((_b = (_a = self.closest('ide-section').data) === null || _a === void 0 ? void 0 : _a.elements) === null || _b === void 0 ? void 0 : _b.length);
+                    self.closest('ide-section').data?.elements?.length;
                 if (!compositeSection || sectionSelected) {
                     // add section border
                     this.classList.add('hover-border');
                 }
             });
             this.contentStack.addEventListener('mouseleave', function (event) {
-                var _a, _b;
                 let pageRow = self.closest('ide-row');
                 let sectionSelected = pageRow.selectedElement ? true : false;
                 let compositeSection = self.closest('ide-section').data &&
-                    ((_b = (_a = self.closest('ide-section').data) === null || _a === void 0 ? void 0 : _a.elements) === null || _b === void 0 ? void 0 : _b.length);
+                    self.closest('ide-section').data?.elements?.length;
                 if (!compositeSection || sectionSelected) {
                     // remove section border
                     this.classList.remove('hover-border');
@@ -7444,7 +7388,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this.events.push(components_28.application.EventBus.register(this, index_53.EVENT.ON_SET_ACTION_BLOCK, (data) => {
                 const { id, element, elementId } = data;
                 if (elementId && elementId === this.elementId) {
-                    this.setData(Object.assign(Object.assign({}, this.data.properties), { [id]: element }));
+                    this.setData({ ...this.data.properties, [id]: element });
                     this._currentSingleContentBlockId = id;
                 }
             }));
@@ -7456,12 +7400,11 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             });
         }
         async updateUI(data) {
-            var _a;
-            if ((_a = this._component) === null || _a === void 0 ? void 0 : _a.getConfigurators) {
+            if (this._component?.getConfigurators) {
                 const builderTarget = this._component.getConfigurators().find((conf) => conf.target === 'Builders');
-                if (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.setTag) {
+                if (builderTarget?.setTag) {
                     const { customBackground, backgroundColor, customTextColor, textColor, customTextSize, textSize, customWidgetsBackground, widgetsBackground, customWidgetsColor, widgetsColor } = data;
-                    const oldTag = (builderTarget === null || builderTarget === void 0 ? void 0 : builderTarget.getTag) ? await builderTarget.getTag() : {};
+                    const oldTag = builderTarget?.getTag ? await builderTarget.getTag() : {};
                     const newData = {};
                     if (customBackground)
                         newData.customBackground = customBackground;
@@ -7479,7 +7422,7 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
                     newData.widgetsBackground = widgetsBackground;
                     newData.customWidgetsColor = customWidgetsColor;
                     newData.widgetsColor = widgetsColor;
-                    await builderTarget.setTag(Object.assign(Object.assign({}, oldTag), newData), true);
+                    await builderTarget.setTag({ ...oldTag, ...newData }, true);
                 }
             }
         }
@@ -7487,18 +7430,16 @@ define("@scom/scom-page-builder/common/toolbar.tsx", ["require", "exports", "@ij
             this.initEventBus();
         }
         onHide() {
-            var _a;
-            if ((_a = this._component) === null || _a === void 0 ? void 0 : _a.onHide)
+            if (this._component?.onHide)
                 this._component.onHide();
             this.unRegisterEvents();
         }
         unRegisterEvents() {
-            var _a;
             for (let event of this.events) {
                 event.unregister();
             }
             this.events = [];
-            if (this.isTexbox((_a = this.data) === null || _a === void 0 ? void 0 : _a.module) && this.module) {
+            if (this.isTexbox(this.data?.module) && this.module) {
                 this.module.onHide();
             }
         }
@@ -7661,8 +7602,7 @@ define("@scom/scom-page-builder/common/collapse.tsx", ["require", "exports", "@i
             this.expanded = !this.expanded;
         }
         onShowSearch() {
-            var _a;
-            const category = ((_a = (0, index_61.getCategories)().find(item => item.title === this.title)) === null || _a === void 0 ? void 0 : _a.id) || '';
+            const category = (0, index_61.getCategories)().find(item => item.title === this.title)?.id || '';
             components_30.application.EventBus.dispatch(index_60.EVENT.ON_FETCH_COMPONENTS, { category, pageNumber: 1, pageSize: index_62.PAGE_SIZE });
             components_30.application.EventBus.dispatch(index_60.EVENT.ON_TOGGLE_SEARCH_MODAL, true);
         }
@@ -7721,7 +7661,7 @@ define("@scom/scom-page-builder/page/pageSection.tsx", ["require", "exports", "@
                             };
                         }
                         if (pageElement.tag || widgetsTag) {
-                            entry.target.setTag(Object.assign(Object.assign({}, pageElement.tag), widgetsTag), true);
+                            entry.target.setTag({ ...pageElement.tag, ...widgetsTag }, true);
                         }
                         entry.target.setTheme((0, index_64.getTheme)());
                         observer.unobserve(entry.target);
@@ -7760,7 +7700,7 @@ define("@scom/scom-page-builder/page/pageSection.tsx", ["require", "exports", "@
         }
         async clearData() {
             const children = this.pnlMain.querySelectorAll('ide-toolbar');
-            if (children === null || children === void 0 ? void 0 : children.length) {
+            if (children?.length) {
                 children.forEach((item) => {
                     item.remove();
                     item.onHide();
@@ -7768,11 +7708,10 @@ define("@scom/scom-page-builder/page/pageSection.tsx", ["require", "exports", "@
             }
         }
         async setData(rowId, value) {
-            var _a;
             this.clearData();
             this.id = value.id;
             this.rowId = rowId;
-            if ((_a = value === null || value === void 0 ? void 0 : value.elements) === null || _a === void 0 ? void 0 : _a.length) {
+            if (value?.elements?.length) {
                 for (let element of value.elements) {
                     await this.createToolbar(element);
                 }
@@ -7783,7 +7722,7 @@ define("@scom/scom-page-builder/page/pageSection.tsx", ["require", "exports", "@
         }
         onHide() {
             const children = this.pnlMain.querySelectorAll('ide-toolbar');
-            if (children === null || children === void 0 ? void 0 : children.length) {
+            if (children?.length) {
                 children.forEach((item) => {
                     item.onHide();
                 });
@@ -7931,7 +7870,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
             if (!this.pnlRows)
                 return;
             const rows = Array.from(this.pnlRows.querySelectorAll('ide-row'));
-            if (!(rows === null || rows === void 0 ? void 0 : rows.length))
+            if (!rows?.length)
                 return;
             rows.forEach((row, rowid) => {
                 this.initDragEvent(row);
@@ -8050,7 +7989,6 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
             await this.renderRows();
         }
         async renderRows() {
-            var _a;
             this.clearRows();
             for (let i = 0; i < index_70.pageObject.sections.length; i++) {
                 const rowData = index_70.pageObject.sections[i];
@@ -8061,7 +7999,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
                     this.initDragEvent(pageRow);
                 }
                 const isInit = i == 0 && index_70.pageObject.sections.length == 1;
-                pageRow.visible = isInit ? true : !!((_a = rowData === null || rowData === void 0 ? void 0 : rowData.elements) === null || _a === void 0 ? void 0 : _a.length);
+                pageRow.visible = isInit ? true : !!rowData?.elements?.length;
                 pageRow.parent = this.pnlRows;
                 if (customBackground && backgroundColor)
                     pageRow.style.setProperty('--custom-background-color', backgroundColor);
@@ -8098,7 +8036,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
                 el.id = (0, index_68.generateUUID)();
                 return el;
             });
-            await this.appendRow(Object.assign(Object.assign({}, clonedData), { elements: newElements, id: newId, row: this.getRows().length }), id);
+            await this.appendRow({ ...clonedData, elements: newElements, id: newId, row: this.getRows().length }, id);
         }
         async onCreateSection(params) {
             const { prependId = '', appendId = '', elements = [] } = params || {};
@@ -8118,8 +8056,7 @@ define("@scom/scom-page-builder/page/pageRows.tsx", ["require", "exports", "@ijs
             return pageRow;
         }
         clearRows() {
-            var _a;
-            (_a = this.pnlRows) === null || _a === void 0 ? void 0 : _a.clearInnerHTML();
+            this.pnlRows?.clearInnerHTML();
         }
         set footerVisible(value) {
             this.pageFooter.visible = value;
@@ -8592,10 +8529,9 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
         constructor() {
             super(...arguments);
             this.pnlWidgetsDragStartEvent = (event) => {
-                var _a;
                 event.stopPropagation();
                 const eventTarget = event.target;
-                if (eventTarget.nodeName === 'IMG' || ((eventTarget === null || eventTarget === void 0 ? void 0 : eventTarget.closest) && !eventTarget.closest('.' + pageSidebar_css_1.widgetStyle)))
+                if (eventTarget.nodeName === 'IMG' || (eventTarget?.closest && !eventTarget.closest('.' + pageSidebar_css_1.widgetStyle)))
                     event.preventDefault();
                 if (eventTarget.id === 'sectionStack') {
                     const layout = eventTarget.getAttribute("layout");
@@ -8605,7 +8541,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                     eventTarget.classList.add('is-dragging');
                     this.mdWidget.visible = false;
                 }
-                else if ((_a = eventTarget === null || eventTarget === void 0 ? void 0 : eventTarget.dataset) === null || _a === void 0 ? void 0 : _a.name) {
+                else if (eventTarget?.dataset?.name) {
                     const currentName = eventTarget.dataset.name;
                     const module = this.pageBlocks.find(block => block.name === currentName);
                     if (module) {
@@ -8786,11 +8722,10 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
             return clonedData;
         }
         onSavePageSettings(data) {
-            var _a;
-            const containerEl = (_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.querySelector('.pnl-editor-wrapper');
+            const containerEl = this.parentElement?.querySelector('.pnl-editor-wrapper');
             if (!containerEl)
                 return;
-            const updateCmd = new index_74.UpdatePageSettingsCommand(containerEl, Object.assign({}, data));
+            const updateCmd = new index_74.UpdatePageSettingsCommand(containerEl, { ...data });
             index_74.commandHistory.execute(updateCmd);
         }
         render() {
@@ -9008,7 +8943,7 @@ define("@scom/scom-page-builder/builder/builderHeader.tsx", ["require", "exports
             if (this._isUpdatingBg) {
                 const image = file ? await this.uploader.toBase64(file) : '';
                 this.pnlHeader.background = { image };
-                index_79.pageObject.header = Object.assign(Object.assign({}, index_79.pageObject.header), { image });
+                index_79.pageObject.header = { ...index_79.pageObject.header, image };
                 this._isUpdatingBg = false;
             }
             else {
@@ -9035,7 +8970,7 @@ define("@scom/scom-page-builder/builder/builderHeader.tsx", ["require", "exports
             });
             source.classList.add('active');
             const header = index_79.pageObject.header;
-            this.setData(Object.assign(Object.assign({}, header), { headerType: type.type }));
+            this.setData({ ...header, headerType: type.type });
             this.updateHeaderType();
         }
         updateHeaderType() {
@@ -9194,17 +9129,14 @@ define("@scom/scom-page-builder/builder/builderFooter.tsx", ["require", "exports
             await this.updateFooter();
         }
         get _elements() {
-            var _a;
-            return ((_a = index_85.pageObject.footer) === null || _a === void 0 ? void 0 : _a.elements) || [];
+            return index_85.pageObject.footer?.elements || [];
         }
         get _image() {
-            var _a;
-            return ((_a = index_85.pageObject.footer) === null || _a === void 0 ? void 0 : _a.image) || '';
+            return index_85.pageObject.footer?.image || '';
         }
         async updateFooter() {
-            var _a;
             this.pnlFooterMain.clearInnerHTML();
-            this.showAddStack = ((_a = this._elements) === null || _a === void 0 ? void 0 : _a.length) === 0 && !this._image;
+            this.showAddStack = this._elements?.length === 0 && !this._image;
             this.pnlFooter.background = this.showAddStack ? { color: 'var(--custom-background-color, var(background-main))', image: '' } : { image: this._image };
             this.pnlEditOverlay.visible = !this.showAddStack;
             this.pnlEditOverlay.classList.remove('flex');
@@ -9278,7 +9210,7 @@ define("@scom/scom-page-builder/builder/builderFooter.tsx", ["require", "exports
             const file = fileList[0];
             const image = file ? await this.uploader.toBase64(file) : '';
             this.pnlFooter.background = { image };
-            index_85.pageObject.footer = Object.assign(Object.assign({}, index_85.pageObject.footer), { image });
+            index_85.pageObject.footer = { ...index_85.pageObject.footer, image };
             this.mdUpload.visible = false;
         }
         init() {
@@ -9435,18 +9367,17 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.pageSidebar.renderWidgetCategories();
         }
         get theme() {
-            var _a;
-            return (_a = this._theme) !== null && _a !== void 0 ? _a : 'light';
+            return this._theme ?? 'light';
         }
         set theme(value) {
-            this._theme = value !== null && value !== void 0 ? value : 'light';
+            this._theme = value ?? 'light';
             (0, index_89.setTheme)(this.theme);
         }
         get commandHistoryIndex() {
             return index_91.commandHistory.commandIndex;
         }
         isChanged(index) {
-            return index_91.commandHistory.commandIndex !== (index !== null && index !== void 0 ? index : -1);
+            return index_91.commandHistory.commandIndex !== (index ?? -1);
         }
         async reset() {
             index_89.pageObject.sections = [];
@@ -9472,7 +9403,6 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             const scrollThreshold = 100;
             const self = this;
             containerElement.addEventListener("dragover", (event) => {
-                var _a;
                 event.preventDefault();
                 if (!this.currentElement && !(0, index_89.getDragData)())
                     return;
@@ -9487,7 +9417,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 const pageRowsRect = this.pageRows.getBoundingClientRect();
                 const pnlEditorRect = this.pnlEditor.getBoundingClientRect();
                 const elementConfig = (0, index_89.getDragData)();
-                if (((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack') {
+                if (elementConfig?.module?.name === 'sectionStack') {
                     const rows = self.getElementsByTagName('ide-row');
                     const rowsArray = Array.from(rows);
                     const targetRow = rowsArray.find(row => {
@@ -9537,11 +9467,10 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         initDragDropEvent(containerElement) {
             const self = this;
             containerElement.addEventListener('drop', (event) => {
-                var _a;
                 const contentWrapperRect = this.contentWrapper.getBoundingClientRect();
                 const pageRowsRect = this.pageRows.getBoundingClientRect();
                 const elementConfig = (0, index_89.getDragData)();
-                const isLayout = ((_a = elementConfig === null || elementConfig === void 0 ? void 0 : elementConfig.module) === null || _a === void 0 ? void 0 : _a.name) === 'sectionStack';
+                const isLayout = elementConfig?.module?.name === 'sectionStack';
                 const rows = self.getElementsByTagName('ide-row');
                 const rowsArray = Array.from(rows);
                 const targetRow = rowsArray.find(row => {
@@ -9628,14 +9557,14 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         async setData(value) {
             // pageObject.header = value.header;
             document.addEventListener('keyup', this.boundHandleKeyUp);
-            index_89.pageObject.sections = (value === null || value === void 0 ? void 0 : value.sections) || [];
-            index_89.pageObject.footer = value === null || value === void 0 ? void 0 : value.footer;
-            index_89.pageObject.config = value === null || value === void 0 ? void 0 : value.config;
-            (0, index_89.setDefaultPageConfig)(value === null || value === void 0 ? void 0 : value.config);
+            index_89.pageObject.sections = value?.sections || [];
+            index_89.pageObject.footer = value?.footer;
+            index_89.pageObject.config = value?.config;
+            (0, index_89.setDefaultPageConfig)(value?.config);
             try {
                 // await this.builderHeader.setData(value.header);
-                await this.pageRows.setRows((value === null || value === void 0 ? void 0 : value.sections) || []);
-                await this.builderFooter.setData(value === null || value === void 0 ? void 0 : value.footer);
+                await this.pageRows.setRows(value?.sections || []);
+                await this.builderFooter.setData(value?.footer);
                 this.updatePageConfig();
             }
             catch (error) {
@@ -9646,7 +9575,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
         updatePageConfig() {
             const config = (0, index_89.getDefaultPageConfig)();
             const { backgroundColor, margin, textColor, textSize, customTextSize, customBackground, customTextColor, backgroundImage, ptb, plr, sectionWidth } = config;
-            components_43.application.EventBus.dispatch(index_88.EVENT.ON_UPDATE_PAGE_BG, Object.assign({}, config));
+            components_43.application.EventBus.dispatch(index_88.EVENT.ON_UPDATE_PAGE_BG, { ...config });
             if (this.pnlEditor) {
                 this.pnlEditor.padding = {
                     left: plr,
@@ -9723,7 +9652,7 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
                 this.mdComponentsSearch.hide();
         }
         async onSearch(options) {
-            const params = Object.assign({}, options) || {
+            const params = { ...options } || {
                 category: undefined,
                 pageNumber: undefined,
                 pageSize: undefined
@@ -9734,11 +9663,10 @@ define("@scom/scom-page-builder", ["require", "exports", "@ijstech/components", 
             this.mdComponentsSearch.renderUI();
         }
         async initData() {
-            var _a;
             if (this.isFirstLoad)
                 return;
             await this.onSearch();
-            this.components = ((_a = (0, index_89.getSearchData)()) === null || _a === void 0 ? void 0 : _a.items) || [];
+            this.components = (0, index_89.getSearchData)()?.items || [];
             this.isFirstLoad = true;
         }
         render() {
