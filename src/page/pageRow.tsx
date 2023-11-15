@@ -9,6 +9,7 @@ import {
     GridLayout,
     Styles,
     Panel,
+    Modal,
 } from '@ijstech/components';
 import {PageSection} from './pageSection';
 import {PageMenu} from './pageMenu'
@@ -965,6 +966,10 @@ export class PageRow extends Module {
         this.addEventListener('drop', async function (event) {
             self.pnlRow.minHeight = 'auto';
             const elementConfig = getDragData();
+            if (elementConfig?.module) {
+                const widgetModal = parentWrapper.querySelector('#mdWidget') as Modal;
+                if (widgetModal) widgetModal.visible = false;
+            }
             const eventTarget = event.target as Control;
             const pageRow = eventTarget.closest('ide-row') as PageRow;
             event.preventDefault();

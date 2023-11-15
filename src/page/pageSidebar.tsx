@@ -174,7 +174,7 @@ export class PageSidebar extends Module {
                                     width="100%"
                                     background={{ color: '#f9f6f3' }}
                                     border={{ width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }}
-                                    tooltip={{ content: '✊ Drag to insert', placement: 'top' }}
+                                    tooltip={{ content: `<span>&#9994;</span> Drag to insert`, placement: 'top' }}
                                     templateColumns={["80px", "1fr"]}
                                     overflow="hidden"
                                 >
@@ -204,6 +204,7 @@ export class PageSidebar extends Module {
                 const lblDesc = module.description ? (
                     <i-label caption={module.description} font={{ size: '0.813rem', color: '#8b8585' }}></i-label>
                 ) : [];
+
                 const moduleCard = (
                     <i-grid-layout
                         class={widgetStyle}
@@ -211,7 +212,7 @@ export class PageSidebar extends Module {
                         width="100%"
                         background={{ color: '#f9f6f3' }}
                         border={{ width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }}
-                        tooltip={{ content: '✊ Drag to insert', placement: 'top' }}
+                        tooltip={{ content: `<span>&#9994;</span> Drag to insert`, placement: 'top' }}
                         templateColumns={["56px", "1fr"]}
                         overflow="hidden"
                     >
@@ -295,7 +296,7 @@ export class PageSidebar extends Module {
             const elements = this.getDefaultElements(layoutCat, layout);
             setDragData({ module: { name: 'sectionStack', path: '' }, elements: elements });
             eventTarget.classList.add('is-dragging');
-            this.mdWidget.visible = false;
+            // this.mdWidget.visible = false;
         }
         else if (eventTarget?.dataset?.name) {
             const currentName = eventTarget.dataset.name;
@@ -305,7 +306,7 @@ export class PageSidebar extends Module {
                 setDragData({ module });
                 eventTarget.classList.add('is-dragging');
             }
-            this.mdWidget.visible = false;
+            // this.mdWidget.visible = false;
         } else {
             event.preventDefault();
         }
