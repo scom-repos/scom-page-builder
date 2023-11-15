@@ -1,27 +1,27 @@
 {
-  "name": "@scom/scom-page-builder",
-  "version": "0.1.28",
-  "main": "dist/index.js",
-  "plugin": "dist",
-  "pluginTypes": "pluginTypes/index.d.ts",
-  "types": "pluginTypes/index.d.ts",
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "dependencies": {
-    "@ijstech/components": "^0.1.75",
-    "@ijstech/eth-contract": "^0.1.13",
-    "@ijstech/eth-wallet": "^0.1.35"
-  },
-  "devDependencies": {
-    "@ijstech/cli": "^0.1.28",
-    "@ijstech/compiler": "^0.1.23"
-  },
-  "scripts": {
-    "build": "rm -rf dist && npx @ijstech/compiler",
-    "build:dev": "rm -rf dist && npx @ijstech/compiler && npm run cp:pageblocksdev",
-    "cp:pageblocksdev": "cp -r modules/pageblocks dist/modules/pageblocks",
-    "serve": "cd test && npm run serve && cd ..",
-    "test": "cd test && npm run test && cd .."
-  }
+    "name": "@scom/scom-page-builder",
+    "version": "0.1.29",
+    "main": "dist/index.js",
+    "plugin": "dist",
+    "pluginTypes": "pluginTypes/index.d.ts",
+    "types": "pluginTypes/index.d.ts",
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "dependencies": {
+        "@ijstech/components": "^0.1.75",
+        "@ijstech/eth-contract": "^0.1.13",
+        "@ijstech/eth-wallet": "^0.1.35"
+    },
+    "devDependencies": {
+        "@ijstech/cli": "^0.1.28",
+        "@ijstech/compiler": "^0.1.23"
+    },
+    "scripts": {
+        "build": "rm -rf dist && npx @ijstech/compiler",
+        "build:dev": "rm -rf dist && npx @ijstech/compiler && npm run cp:pageblocksdev",
+        "cp:pageblocksdev": "cp -r modules/pageblocks dist/modules/pageblocks",
+        "serve": "cd test && npm run serve && cd ..",
+        "test": "cd test && npm run test && cd .."
+    }
 }
