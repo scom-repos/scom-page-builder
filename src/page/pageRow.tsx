@@ -676,7 +676,7 @@ export class PageRow extends Module {
                 ghostImage.style.zIndex = '-1';
                 ghostImage.style.pointerEvents = 'none';
                 event.dataTransfer.setDragImage(ghostImage, startX, startY);
-                dragElm.style.opacity = '0';
+                // dragElm.style.opacity = '0';
                 ghostImage = null;
             }
         });

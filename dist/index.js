@@ -5916,7 +5916,7 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
                     ghostImage.style.zIndex = '-1';
                     ghostImage.style.pointerEvents = 'none';
                     event.dataTransfer.setDragImage(ghostImage, startX, startY);
-                    dragElm.style.opacity = '0';
+                    // dragElm.style.opacity = '0';
                     ghostImage = null;
                 }
             });

@@ -8,5 +8,5 @@ mkdir dist/libs/@scom/scom-gem-token && cp -r node_modules/@scom/scom-gem-token/
 mkdir dist/libs/@scom/scom-randomizer && cp -r node_modules/@scom/scom-randomizer/dist/* dist/libs/@scom/scom-randomizer && 
 mkdir dist/libs/@scom/scom-video && cp -r node_modules/@scom/scom-video/dist/* dist/libs/@scom/scom-video &&
 mkdir dist/libs/@scom/scom-map && cp -r node_modules/@scom/scom-map/dist/* dist/libs/@scom/scom-map &&
-mkdir dist/libs/@scom/scom-content-block && cp -r node_modules/@scom/scom-content-block/dist/* dist/libs/@scom/scom-content-block &&
-mkdir dist/libs/@scom/scom-counter && cp -r node_modules/@scom/scom-counter/dist/* dist/libs/@scom/scom-counter
+mkdir dist/libs/@scom/scom-content-block && cp -r node_modules/@scom/scom-content-block/dist/* dist/libs/@scom/scom-content-block
+# mkdir dist/libs/@scom/scom-counter && cp -r node_modules/@scom/scom-counter/dist/* dist/libs/@scom/scom-counter
