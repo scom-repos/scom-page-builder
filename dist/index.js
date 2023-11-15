@@ -6185,6 +6185,11 @@ define("@scom/scom-page-builder/page/pageRow.tsx", ["require", "exports", "@ijst
             this.addEventListener('drop', async function (event) {
                 self.pnlRow.minHeight = 'auto';
                 const elementConfig = (0, index_49.getDragData)();
+                if (elementConfig?.module) {
+                    const widgetModal = parentWrapper.querySelector('#mdWidget');
+                    if (widgetModal)
+                        widgetModal.visible = false;
+                }
                 const eventTarget = event.target;
                 const pageRow = eventTarget.closest('ide-row');
                 event.preventDefault();
@@ -8539,7 +8544,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                     const elements = this.getDefaultElements(layoutCat, layout);
                     (0, index_72.setDragData)({ module: { name: 'sectionStack', path: '' }, elements: elements });
                     eventTarget.classList.add('is-dragging');
-                    this.mdWidget.visible = false;
+                    // this.mdWidget.visible = false;
                 }
                 else if (eventTarget?.dataset?.name) {
                     const currentName = eventTarget.dataset.name;
@@ -8549,7 +8554,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                         (0, index_72.setDragData)({ module });
                         eventTarget.classList.add('is-dragging');
                     }
-                    this.mdWidget.visible = false;
+                    // this.mdWidget.visible = false;
                 }
                 else {
                     event.preventDefault();
@@ -8649,7 +8654,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                         // loop layout
                         for (const key1 in layouts_json_1.layouts[key]) {
                             if (Object.prototype.hasOwnProperty.call(layouts_json_1.layouts[key], key1)) {
-                                const moduleCard = (this.$render("i-grid-layout", { id: "sectionStack", class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", width: "100%", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, tooltip: { content: '✊ Drag to insert', placement: 'top' }, templateColumns: ["80px", "1fr"], overflow: "hidden" },
+                                const moduleCard = (this.$render("i-grid-layout", { id: "sectionStack", class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", width: "100%", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, tooltip: { content: `<span>&#9994;</span> Drag to insert`, placement: 'top' }, templateColumns: ["80px", "1fr"], overflow: "hidden" },
                                     this.$render("i-image", { url: this.getLayoutIcon(key1) || assets_4.default.icons.logo, padding: { top: 8, bottom: 8, left: 8, right: 8 } }),
                                     this.$render("i-label", { caption: this.convertCamelCaseToString(key1), font: { size: '0.813rem', color: '#3b3838', weight: 600 }, padding: { top: 8, bottom: 8, left: 8, right: 8 }, maxHeight: 34, overflow: "hidden" })));
                                 moduleCard.setAttribute('draggable', 'true');
@@ -8667,7 +8672,7 @@ define("@scom/scom-page-builder/page/pageSidebar.tsx", ["require", "exports", "@
                 let matchedModules = components;
                 for (const module of matchedModules) {
                     const lblDesc = module.description ? (this.$render("i-label", { caption: module.description, font: { size: '0.813rem', color: '#8b8585' } })) : [];
-                    const moduleCard = (this.$render("i-grid-layout", { class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", width: "100%", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, tooltip: { content: '✊ Drag to insert', placement: 'top' }, templateColumns: ["56px", "1fr"], overflow: "hidden" },
+                    const moduleCard = (this.$render("i-grid-layout", { class: pageSidebar_css_1.widgetStyle, verticalAlignment: "center", width: "100%", background: { color: '#f9f6f3' }, border: { width: 1, style: 'solid', color: '#ebe5e5', radius: 5 }, tooltip: { content: `<span>&#9994;</span> Drag to insert`, placement: 'top' }, templateColumns: ["56px", "1fr"], overflow: "hidden" },
                         this.$render("i-image", { url: module.imgUrl || assets_4.default.icons.logo, padding: { top: 8, bottom: 8, left: 8, right: 8 } }),
                         this.$render("i-vstack", { gap: "0.25rem", padding: { top: 8, bottom: 8, left: 8, right: 8 }, overflow: "hidden" },
                             this.$render("i-label", { caption: module.name, font: { size: '0.813rem', color: '#3b3838', weight: 600 } }),
